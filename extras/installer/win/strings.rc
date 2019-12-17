@@ -1,0 +1,118 @@
+#include <windows.h>
+#include <wingdi.h> // for _CHARSET definitions
+#include "resource.h"
+
+// This file is parsed by both 'lupdate' and the resource compiler.
+//
+// The installer doesn't use Qt itself, so it can't use Qt runtime support to
+// localize these strings.  Instead, translated RC files are generated ahead of
+// time using scripts/winstaller_localize.js.
+//
+// We can still use 'lupdate' to read the translatable strings and send them off
+// to be translated though.  We just wrap them in QT_TRANSLATE_NOOP() here,
+// which we have to define manually so the resource compiler still sees the
+// source strings for en_US.
+#define QT_TRANSLATE_NOOP(ctx, src) (src)
+
+// This tells the installer what character set to use to render the strings in
+// this language.  See Installer::loadResources().
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+IDR_UICHARSET RCDATA
+BEGIN
+    ANSI_CHARSET
+END
+
+// Whether the language is mirrored.  The comment tag is used by
+// winstaller_localize.js to find this line, since 'FALSE' isn't readily
+// identifiable (and it uses a simple line-by-line parsing model)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+IDR_UIMIRROR RCDATA
+BEGIN
+    0 // ui_mirror_localize
+END
+
+STRINGTABLE
+  LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+BEGIN
+IDS_WINDOW_TITLE                    QT_TRANSLATE_NOOP("winstaller", "Private Internet Access Installer")
+IDS_SECONDSREMAINING                QT_TRANSLATE_NOOP("winstaller", "%.0f SECONDS REMAINING")
+
+IDS_OK_BUTTON_INSTALL               QT_TRANSLATE_NOOP("winstaller", "INSTALL")
+IDS_OK_BUTTON_UNINSTALL             QT_TRANSLATE_NOOP("winstaller", "UNINSTALL")
+IDS_OK_BUTTON_FINISH                QT_TRANSLATE_NOOP("winstaller", "FINISH")
+
+IDS_CAPTION_PREPARING               QT_TRANSLATE_NOOP("winstaller", "PREPARING")
+IDS_CAPTION_READYTOINSTALL          QT_TRANSLATE_NOOP("winstaller", "READY TO INSTALL")
+IDS_CAPTION_INSTALLING              QT_TRANSLATE_NOOP("winstaller", "INSTALLING")
+IDS_CAPTION_ABORTING                QT_TRANSLATE_NOOP("winstaller", "ABORTING")
+IDS_CAPTION_FINISHINGUP             QT_TRANSLATE_NOOP("winstaller", "FINISHING UP")
+IDS_CAPTION_CLEANINGUP              QT_TRANSLATE_NOOP("winstaller", "CLEANING UP")
+IDS_CAPTION_ROLLINGBACK             QT_TRANSLATE_NOOP("winstaller", "ROLLING BACK CHANGES")
+IDS_CAPTION_FINISHED                QT_TRANSLATE_NOOP("winstaller", "FINISHED")
+IDS_CAPTION_ABORTED                 QT_TRANSLATE_NOOP("winstaller", "ABORTED")
+IDS_CAPTION_UNPACKING               QT_TRANSLATE_NOOP("winstaller", "UNPACKING")
+IDS_CAPTION_COPYINGFILES            QT_TRANSLATE_NOOP("winstaller", "COPYING FILES")
+IDS_CAPTION_SHUTTINGDOWNCLIENT      QT_TRANSLATE_NOOP("winstaller", "SHUTTING DOWN CLIENT")
+IDS_CAPTION_STOPPINGSERVICE         QT_TRANSLATE_NOOP("winstaller", "STOPPING SERVICE")
+IDS_CAPTION_UNREGISTERINGSERVICE    QT_TRANSLATE_NOOP("winstaller", "UNREGISTERING SERVICE")
+IDS_CAPTION_REGISTERINGSERVICE      QT_TRANSLATE_NOOP("winstaller", "REGISTERING SERVICE")
+IDS_CAPTION_STARTINGSERVICE         QT_TRANSLATE_NOOP("winstaller", "STARTING SERVICE")
+IDS_CAPTION_REMOVINGADAPTER         QT_TRANSLATE_NOOP("winstaller", "REMOVING NETWORK ADAPTER")
+IDS_CAPTION_INSTALLINGADAPTER       QT_TRANSLATE_NOOP("winstaller", "INSTALLING NETWORK ADAPTER")
+IDS_CAPTION_BACKINGUPFILES          QT_TRANSLATE_NOOP("winstaller", "BACKING UP FILES")
+IDS_CAPTION_REMOVINGPREVIOUSVERSION QT_TRANSLATE_NOOP("winstaller", "REMOVING PREVIOUS VERSION")
+IDS_CAPTION_REMOVINGFILES           QT_TRANSLATE_NOOP("winstaller", "REMOVING FILES")
+IDS_CAPTION_REMOVINGCALLOUT         QT_TRANSLATE_NOOP("winstaller", "REMOVING CALLOUT DRIVER")
+IDS_CAPTION_UPDATINGCALLOUT         QT_TRANSLATE_NOOP("winstaller", "UPDATING CALLOUT DRIVER")
+
+IDS_MB_CORRUPTINSTALLATION          QT_TRANSLATE_NOOP("winstaller", "Unable to recognize the existing installation. Would you like to delete the entire directory?")
+IDS_MB_CAP_CORRUPTINSTALLATION      QT_TRANSLATE_NOOP("winstaller", "Corrupt installation detected")
+IDS_MB_FILESREMAINING               QT_TRANSLATE_NOOP("winstaller", "There are stray files in the installation directory. Would you like to delete them?")
+IDS_MB_CAP_FILESREMAINING           QT_TRANSLATE_NOOP("winstaller", "Files remaining")
+IDS_MB_ABORTINSTALLATION            QT_TRANSLATE_NOOP("winstaller", "Do you want to abort the installation?")
+IDS_MB_CAP_ABORTINSTALLATION        QT_TRANSLATE_NOOP("winstaller", "Abort installation?")
+IDS_MB_CAP_ERROR                    QT_TRANSLATE_NOOP("winstaller", "Error")
+IDS_MB_REPLACEINSTALLATION          QT_TRANSLATE_NOOP("winstaller", "This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?")
+IDS_MB_CAP_REPLACEINSTALLATION      QT_TRANSLATE_NOOP("winstaller", "Replace existing version?")
+IDS_MB_UNABLETOREMOVEDIR            QT_TRANSLATE_NOOP("winstaller", "Unable to remove directory: %s")
+IDS_MB_PLEASEEXIT                   QT_TRANSLATE_NOOP("winstaller", "Please exit the existing Private Internet Access before proceeding.")
+IDS_MB_PROBLEMUNINSTALLING          QT_TRANSLATE_NOOP("winstaller", "There was a problem uninstalling the existing version.")
+IDS_MB_STILLCLIENTSRUNNING          QT_TRANSLATE_NOOP("winstaller", "There are still clients running.")
+IDS_MB_FAILEDTOSTOPSERVICE          QT_TRANSLATE_NOOP("winstaller", "Failed to stop the service.")
+IDS_MB_SERVICEREBOOTNEEDED          QT_TRANSLATE_NOOP("winstaller", "A reboot is needed before installation can proceed.")
+IDS_MB_SERVICEMISSING               QT_TRANSLATE_NOOP("winstaller", "Service executable missing.")
+IDS_MB_SERVICEUNINSTALLFAILED       QT_TRANSLATE_NOOP("winstaller", "Service uninstallation failed.")
+IDS_MB_SERVICEINSTALLFAILED         QT_TRANSLATE_NOOP("winstaller", "The service installation failed.")
+IDS_MB_SERVICEFAILEDTOSTART         QT_TRANSLATE_NOOP("winstaller", "The service failed to start.")
+IDS_MB_ERRORUNINSTALLINGTAPDRIVER   QT_TRANSLATE_NOOP("winstaller", "Error uninstalling TAP driver.")
+IDS_MB_TAPDRIVERDECLINED            QT_TRANSLATE_NOOP("winstaller", "The TAP driver was not approved for installation.")
+IDS_MB_TAPDRIVERFAILED              QT_TRANSLATE_NOOP("winstaller", "The TAP driver installation failed.")
+IDS_MB_REQUIRESWIN7                 QT_TRANSLATE_NOOP("winstaller", "Private Internet Access requires at least Windows 7 to run.")
+IDS_MB_32BITON64BIT                 QT_TRANSLATE_NOOP("winstaller", "The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.")
+IDS_MB_FAILEDTOGETSHELLFOLDER       QT_TRANSLATE_NOOP("winstaller", "Failed to retrieve shell folder %s.")
+IDS_MB_OUTOFMEMORY                  QT_TRANSLATE_NOOP("winstaller", "Out of memory.")
+IDS_MB_PAYLOADDECOMPRESSIONERROR    QT_TRANSLATE_NOOP("winstaller", "Payload decompression error.")
+IDS_MB_CORRUPTPAYLOADCRC            QT_TRANSLATE_NOOP("winstaller", "Corrupted payload (CRC error).")
+IDS_MB_UNABLETOCREATEFILE           QT_TRANSLATE_NOOP("winstaller", "Unable to create file: %s")
+IDS_MB_UNABLETOWRITEFILE            QT_TRANSLATE_NOOP("winstaller", "Unable to write file: %s")
+IDS_MB_UNABLETOWRITEENTIREFILE      QT_TRANSLATE_NOOP("winstaller", "Unable to write entire file: %s")
+IDS_MB_DECOMPRESSORINITERROR        QT_TRANSLATE_NOOP("winstaller", "Unable to initialize decompressor.")
+IDS_MB_CORRUPTPAYLOADPARAMS         QT_TRANSLATE_NOOP("winstaller", "Corrupted payload (invalid parameters).")
+IDS_MB_UNABLETOMOVEPATH             QT_TRANSLATE_NOOP("winstaller", "Unable to move %s")
+IDS_MB_UNABLETOCREATEROLLBACKDIR    QT_TRANSLATE_NOOP("winstaller", "Unable to create rollback directory. If you proceed, the installation can't undo any changes if there's an error.")
+IDS_MB_UNABLETOCREATEDIRECTORY      QT_TRANSLATE_NOOP("winstaller", "Unable to create directory: %s")
+IDS_MB_MISSINGPAYLOAD               QT_TRANSLATE_NOOP("winstaller", "The installer does not contain a recognizable payload.")
+IDS_MB_CAP_MISSINGPAYLOAD           QT_TRANSLATE_NOOP("winstaller", "Missing payload")
+IDS_MB_ERRORUNINSTALLINGCALLOUT     QT_TRANSLATE_NOOP("winstaller", "Error uninstalling callout driver.")
+IDS_MB_CALLOUTDRIVERFAILED          QT_TRANSLATE_NOOP("winstaller", "Callout driver installation failed.")
+
+IDS_MB_SUFFIX_INSTALL_ABORT         QT_TRANSLATE_NOOP("winstaller", "The installation will now abort.")
+IDS_MB_SUFFIX_INSTALL_RETRY         QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")
+IDS_MB_SUFFIX_INSTALL_IGNORE        QT_TRANSLATE_NOOP("winstaller", "Do you wish to continue the installation anyway?")
+IDS_MB_SUFFIX_INSTALL_RETRYIGNORE   QT_TRANSLATE_NOOP("winstaller", "You can retry or attempt to continue the installation anyway.")
+IDS_MB_SUFFIX_UNINSTALL_ABORT       QT_TRANSLATE_NOOP("winstaller", "The uninstallation will now abort.")
+IDS_MB_SUFFIX_UNINSTALL_RETRY       QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")
+IDS_MB_SUFFIX_UNINSTALL_IGNORE      QT_TRANSLATE_NOOP("winstaller", "Do you wish to continue the uninstallation anyway?")
+IDS_MB_SUFFIX_UNINSTALL_RETRYIGNORE QT_TRANSLATE_NOOP("winstaller", "You can retry or attempt to continue the uninstallation anyway.")
+
+END

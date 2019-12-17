@@ -1,0 +1,4 @@
+#include "../../extras/installer/win/resource.h"
+
+IDI_APPICON ICON "./icons/win_installer.ico"
+IDB_LOGO BITMAP "./installer/win/logo.bmp"

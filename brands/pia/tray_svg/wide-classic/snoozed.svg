@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="40"
+   height="30"
+   viewBox="0 0 40 30"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="snoozed.svg">
+  <metadata
+     id="metadata31">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>snoozed</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1865"
+     inkscape:window-height="1027"
+     id="namedview29"
+     showgrid="false"
+     inkscape:zoom="20"
+     inkscape:cx="23.840302"
+     inkscape:cy="8.6424511"
+     inkscape:window-x="106"
+     inkscape:window-y="126"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="snoozed" />
+  <!-- Generator: Sketch 54 (76480) - https://sketchapp.com -->
+  <title
+     id="title4">snoozed</title>
+  <desc
+     id="desc6">Created with Sketch.</desc>
+  <defs
+     id="defs8">
+    <polygon
+       id="path-1"
+       points="6.15,0.86 6.15,2.1 2.32,6.68 6.25,6.68 6.25,8 0.23,8 0.23,6.76 4.06,2.18 0.53,2.18 0.53,0.86 " />
+  </defs>
+  <g
+     id="Page-1"
+     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1"
+     transform="translate(0,-1)">
+    <g
+       id="snoozed"
+       transform="translate(0,-1)">
+      <g
+         id="g4279"
+         transform="translate(-42.837843,-39.867789)">
+        <g
+           transform="translate(0,-270)"
+           id="Layer_2_1_" />
+        <g
+           transform="matrix(0.14443909,0,0,0.14443909,-1.1752525,-7.6119403)"
+           id="g19">
+          <path
+             style="fill:none"
+             inkscape:connector-curvature="0"
+             id="path5"
+             d="m 481.38401,402.66467 c 0,-20.9 -17.2,-37.8 -38.1,-37.8 -20.9,0 -38.1,16.9 -38.1,37.8 l 0,11.7 76.1,0 0,-11.7 z"
+             class="st0" />
+          <path
+             style="fill:#000000;fill-opacity:0.42352941"
+             inkscape:connector-curvature="0"
+             id="path7"
+             d="m 512.28401,410.46467 -7.6,0 0,-6.8 c 0,-33.8 -27.4,-61.1 -61.4,-61.1 -33.9,0 -61.4,27.4 -61.4,61.1 l 0,6.8 -7.8,0 c -8,0 -14.2,6.4 -14.2,14.3 l 0,56.2 c 0,3.7 0.1,6.5 1.6,8.4 0.7,1 1.7,1.7 3,2.1 l 0,3.5 c 0,6.6 5.2,11.9 11.7,11.9 l 6.2,0 0.9,14.9 0,0.2 c 0,0.8 0.1,2.5 1.1,4.3 1,1.7 3,3.3 6.3,3.2 l 31.1,0 16.1,-17.1 21.49452,0 0,-46.24109 67.10548,0 0,-41.25891 c 0,-7.9 -6.5,-14.4 -14.2,-14.4 z m -57.4,64.6 -25.2,0 0,-18.7 25.2,0 z m -24.3,-20.7 c 1.2,-5.8 6,-9.8 11.9,-9.8 5.8,0 10.7,4 11.9,9.8 l -3,0 c -1.1,-3.9 -4.7,-6.9 -8.9,-6.9 -4.2,0 -7.7,3 -8.9,6.9 z m 50.9,-40 -76.2,0 0,-11.7 c 0,-20.9 17.2,-37.8 38.1,-37.8 20.9,0 38.1,16.9 38.1,37.8 z"
+             class="st1"
+             sodipodi:nodetypes="scssscsssccssccscccccccssccccccsccsccccsssc" />
+          <g
+             id="g15"
+             transform="translate(303.28401,289.96467)">
+            <rect
+               style="fill:#000000;fill-opacity:0.42352941"
+               id="rect9"
+               height="3.9000001"
+               width="33.700001"
+               class="st1"
+               y="112.4"
+               x="122.6" />
+            <circle
+               style="fill:#000000;fill-opacity:0.42352941"
+               id="circle11"
+               r="7"
+               cy="95.800003"
+               cx="127.2"
+               class="st1" />
+            <circle
+               style="fill:#000000;fill-opacity:0.42352941"
+               id="circle13"
+               r="7"
+               cy="95.800003"
+               cx="152.10001"
+               class="st1" />
+          </g>
+        </g>
+      </g>
+      <path
+         style="fill:#ffffff;fill-rule:nonzero;fill-opacity:1"
+         d="M 19.5 14 L 19.5 30 L 34.5 30 L 34.5 14 L 19.5 14 z M 24.029297 18.859375 L 29.650391 18.859375 L 29.650391 20.099609 L 25.820312 24.679688 L 29.75 24.679688 L 29.75 26 L 23.730469 26 L 23.730469 24.759766 L 27.560547 20.179688 L 24.029297 20.179688 L 24.029297 18.859375 z "
+         transform="translate(0,2)"
+         id="Rectangle" />
+    </g>
+  </g>
+  <style
+     id="style2"
+     type="text/css">
+	.st0{fill:none;}
+	.st1{fill:#ADADAD;}
+</style>
+</svg>

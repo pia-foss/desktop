@@ -1,0 +1,9 @@
+#!/sbin/openrc-run
+
+depend() {
+    need net
+}
+
+command="/opt/{{BRAND_CODE}}vpn/bin/{{BRAND_CODE}}-daemon"
+pidfile="/run/${SVCNAME}.pid"
+command_background=true

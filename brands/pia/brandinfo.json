@@ -1,0 +1,25 @@
+{
+    "brandName": "Private Internet Access",
+    "shortName": "PIA",
+    "brandIdentifier": "com.privateinternetaccess.vpn",
+    "brandHasClassicTray": true,
+    "brandReleaseChannelGA": "release",
+    "brandReleaseChannelBeta": "beta",
+    "brandReleaseUpdateUris": ["https://www.privateinternetaccess.com/clients/desktop", "https://piaproxy.net/clients/desktop"],
+    "forgotPasswordLink": "https://www.privateinternetaccess.com/pages/reset-password",
+    "manageAccountLink":"https://www.privateinternetaccess.com/pages/client-sign-in",
+    "buyAccountLink": "https://www.privateinternetaccess.com/pages/buy-vpn/",
+    "blogLink":"https://www.privateinternetaccess.com/blog/",
+    "helpDeskLink":"https://www.privateinternetaccess.com/helpdesk/",
+    "encryptionSettingsLink":"https://www.privateinternetaccess.com/pages/vpn-encryption",
+    "appExclusionsHelpLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/split-tunnel-app-examples",
+    "windowsProductGuid": "{33023371-7761-4F81-BBB1-0E0D0D175ACF}",
+    "windowsServiceName": "PrivateInternetAccessService",
+    "windowsWfpProvider": "{ 0x8de3850, 0xa416, 0x4c47, { 0xb3, 0xad, 0x65, 0x7c, 0x5e, 0xf1, 0x40, 0xfb } }",
+    "windowsWfpProviderGuid": "{08de3850-a416-4c47-b3ad-657c5ef140fb}",
+    "windowsWfpSublayer": "{ 0xf31e288d, 0xde5a, 0x4522, { 0x94, 0x58, 0xde, 0x14, 0xeb, 0xd0, 0xa3, 0xf8 } }",
+    "windowsWfpSublayerGuid": "{f31e288d-de5a-4522-9458-de14ebd0a3f8}",
+    "linuxAppName": "privateinternetaccess",
+    "updateJsonKeyName": "latest_version_piax"
+}
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-light-color-mace</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons---Light" transform="translate(-347.000000, -534.000000)">
+            <g id="icon-light-color-mace" transform="translate(347.000000, 534.000000)">
+                <circle id="Oval-Copy-26" fill="#4CB649" cx="50" cy="50" r="50"></circle>
+                <path d="M59.835664,74.3359994 L40.502656,74.3359994 L34.9675878,68.8009317 L68.8009317,34.9675878 L74.336,40.502656 L74.336,59.835664 L59.835664,74.3359994 Z M31.5350683,65.3684122 L26,59.833344 L26,40.500336 L40.500336,26 L59.833344,26 L65.3684122,31.5350683 L31.5350683,65.3684122 Z" id="Fill-1" fill="#FFFFFF"></path>
+            </g>
+        </g>
+    </g>
+</svg>

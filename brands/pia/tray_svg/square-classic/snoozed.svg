@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="30"
+   height="30"
+   viewBox="0 0 30 30"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="snoozed.svg">
+  <metadata
+     id="metadata47">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>down</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1431"
+     inkscape:window-height="871"
+     id="namedview45"
+     showgrid="true"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     inkscape:zoom="10"
+     inkscape:cx="14.1"
+     inkscape:cy="12.3"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="down">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4175" />
+  </sodipodi:namedview>
+  <!-- Generator: Sketch 54 (76480) - https://sketchapp.com -->
+  <title
+     id="title4">down</title>
+  <desc
+     id="desc6">Created with Sketch.</desc>
+  <defs
+     id="defs8">
+    <radialGradient
+       cx="1.2960317"
+       cy="9.0110712"
+       fx="1.2960317"
+       fy="9.0110712"
+       r="8.9298792"
+       gradientTransform="scale(2.2062633,0.45325507)"
+       id="radialGradient-1"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#000000"
+         offset="0%"
+         id="stop11" />
+      <stop
+         stop-color="#030303"
+         offset="19.01%"
+         id="stop13" />
+      <stop
+         stop-color="#0C0C0C"
+         offset="32.36%"
+         id="stop15" />
+      <stop
+         stop-color="#1C1C1C"
+         offset="43.97%"
+         id="stop17" />
+      <stop
+         stop-color="#323232"
+         offset="54.61%"
+         id="stop19" />
+      <stop
+         stop-color="#4E4E4E"
+         offset="64.56%"
+         id="stop21" />
+      <stop
+         stop-color="#717171"
+         offset="74.02%"
+         id="stop23" />
+      <stop
+         stop-color="#9A9A9A"
+         offset="83.09%"
+         id="stop25" />
+      <stop
+         stop-color="#C9C9C9"
+         offset="91.61%"
+         id="stop27" />
+      <stop
+         stop-color="#FEFEFE"
+         offset="99.85%"
+         id="stop29" />
+      <stop
+         stop-color="#FFFFFF"
+         offset="100%"
+         id="stop31" />
+    </radialGradient>
+  </defs>
+  <g
+     id="Page-1"
+     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1"
+     transform="translate(2,1.6600001e-7)">
+    <g
+       id="down">
+      <g
+         id="g4465"
+         transform="translate(-2,0)">
+        <g
+           transform="translate(0,-270)"
+           id="Layer_2_1_" />
+        <g
+           transform="matrix(0.14443909,0,0,0.14443909,-7.6196434,31.401058)"
+           id="g878">
+          <path
+             class="st0"
+             d="m 213.4,-147.4 -7,0 0,-6.3 c 0,-31.2 -25.3,-56.3 -56.6,-56.3 -31.3,0 -56.6,25.3 -56.6,56.3 l 0,6.3 -7.2,0 c -7.4,0 -13.1,5.9 -13.1,13.2 l 0,51.7 c 0,3.4 0.1,6 1.5,7.7 0.6,0.9 1.6,1.6 2.8,1.9 l 0,3.2 c 0,6.1 4.8,11 10.8,11 l 5.8,0 0.8,13.7 c 0,0.1 0,0.1 0,0.2 0,0.7 0.1,2.3 1,4 0.9,1.6 2.8,3 5.8,3 l 28.7,0 14.8,-15.8 11.2,0 2.4,2.8 c -0.1,-1.4 -0.2,-2.7 -0.2,-4.1 0,-28 22.7,-50.7 50.7,-50.7 6.2,0 12.1,1.1 17.5,3.1 l 0,-31.7 c 0,-7.2 -6,-13.2 -13.1,-13.2 z"
+             id="path5"
+             inkscape:connector-curvature="0"
+             style="fill:#ffffff" />
+          <path
+             class="st1"
+             d="m 188.1,-157.3 c 0,-20.9 -17.2,-37.8 -38.1,-37.8 -20.9,0 -38.1,16.9 -38.1,37.8 l 0,11.7 76.1,0 0,-11.7 z"
+             id="path7"
+             inkscape:connector-curvature="0"
+             style="fill:none" />
+          <path
+             class="st2"
+             d="m 219,-149.5 -7.6,0 0,-6.8 c 0,-33.8 -27.4,-61.1 -61.4,-61.1 -33.9,0 -61.4,27.4 -61.4,61.1 l 0,6.8 -7.8,0 c -8,0 -14.2,6.4 -14.2,14.3 l 0,56.2 c 0,3.7 0.1,6.5 1.6,8.4 0.7,1 1.7,1.7 3,2.1 l 0,3.5 c 0,6.6 5.2,11.9 11.7,11.9 l 6.2,0 0.9,14.9 c 0,0.1 0,0.1 0,0.2 0,0.8 0.1,2.5 1.1,4.3 1,1.7 3,3.3 6.3,3.2 l 31.1,0 16.1,-17.1 12.1,0 13.6,15.8 17.1,-17.2 -20.1,-20.1 27.6,-27.6 20.1,20.1 18.2,-18.2 0,-40.3 c 0,-7.9 -6.5,-14.4 -14.2,-14.4 z m -57.4,64.6 -25.2,0 0,-18.7 25.2,0 z m -24.3,-20.7 c 1.2,-5.8 6,-9.8 11.9,-9.8 5.8,0 10.7,4 11.9,9.8 l -3,0 c -1.1,-3.9 -4.7,-6.9 -8.9,-6.9 -4.2,0 -7.7,3 -8.9,6.9 z m 50.9,-40 -76.2,0 0,-11.7 c 0,-20.9 17.2,-37.8 38.1,-37.8 20.9,0 38.1,16.9 38.1,37.8 z"
+             id="path9"
+             inkscape:connector-curvature="0"
+             style="fill:#ed3324" />
+          <g
+             id="g40"
+             transform="translate(0,-270)">
+            <radialGradient
+               id="SVGID_1_"
+               cx="149.79649"
+               cy="-7101.584"
+               r="15.7853"
+               gradientTransform="matrix(1,0,0,-1,0,-6987)"
+               gradientUnits="userSpaceOnUse">
+              <stop
+                 offset="0"
+                 style="stop-color:#000000"
+                 id="stop11-3" />
+              <stop
+                 offset="0.1901"
+                 style="stop-color:#030303"
+                 id="stop13-6" />
+              <stop
+                 offset="0.3236"
+                 style="stop-color:#0C0C0C"
+                 id="stop15-8" />
+              <stop
+                 offset="0.4397"
+                 style="stop-color:#1C1C1C"
+                 id="stop17-3" />
+              <stop
+                 offset="0.5461"
+                 style="stop-color:#323232"
+                 id="stop19-7" />
+              <stop
+                 offset="0.6456"
+                 style="stop-color:#4E4E4E"
+                 id="stop21-9" />
+              <stop
+                 offset="0.7402"
+                 style="stop-color:#717171"
+                 id="stop23-7" />
+              <stop
+                 offset="0.8309"
+                 style="stop-color:#9A9A9A"
+                 id="stop25-3" />
+              <stop
+                 offset="0.9161"
+                 style="stop-color:#C9C9C9"
+                 id="stop27-7" />
+              <stop
+                 offset="0.9985"
+                 style="stop-color:#FEFEFE"
+                 id="stop29-7" />
+              <stop
+                 offset="1"
+                 style="stop-color:#FFFFFF"
+                 id="stop31-5" />
+            </radialGradient>
+            <rect
+               x="132.60001"
+               y="112.4"
+               class="st3"
+               width="33.700001"
+               height="3.9000001"
+               id="rect34"
+               style="fill:url(#SVGID_1_)" />
+            <circle
+               cx="137.2"
+               cy="95.800003"
+               r="7"
+               id="circle36"
+               style="fill:#000000;fill-opacity:1" />
+            <circle
+               cx="162.10001"
+               cy="95.800003"
+               r="7"
+               id="circle38"
+               style="fill:#000000;fill-opacity:1" />
+          </g>
+        </g>
+      </g>
+      <polygon
+         id="polygon42"
+         points="23.586903,24.323543 26.475685,27.226768 24.337987,29.364467 21.434761,26.475685 18.531535,29.364467 16.393837,27.226768 19.282619,24.323543 16.393837,21.420317 18.531535,19.282618 21.434761,22.1714 24.337987,19.282618 26.475685,21.420317 "
+         style="fill:#ed3324;fill-rule:nonzero"
+         transform="translate(-0.58209121,-1.2142532)" />
+      <rect
+         id="Rectangle"
+         x="14.722917"
+         y="16.722916"
+         width="12.777083"
+         height="12.777083"
+         style="fill:#ffffff;stroke:#ed3324" />
+      <polygon
+         id="Z"
+         points="18.804768,26.559709 22.480527,22.164154 19.092686,22.164154 19.092686,20.897313 24.486359,20.897313 24.486359,22.087376 20.8106,26.482931 24.582331,26.482931 24.582331,27.749772 18.804768,27.749772 "
+         style="fill:#ed3324;fill-rule:nonzero"
+         transform="translate(-0.58209121,-1.2142532)" />
+    </g>
+  </g>
+  <style
+     id="style2"
+     type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:none;}
+	.st2{fill:#ED3324;}
+	.st3{fill:url(#SVGID_1_);}
+</style>
+</svg>

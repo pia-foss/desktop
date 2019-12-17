@@ -1,0 +1,33 @@
+#### LONDON TRUST MEDIA INCORPORATED LICENSES THIS BETA SOFTWARE PRODUCT OR SERVICE TO YOU SUBJECT TO THE TERMS CONTAINED IN THIS END USER LICENSE AGREEMENT (THIS "AGREEMENT" OR "BETA EULA"). READ THE TERMS AND CONDITIONS OF THIS AGREEMENT CAREFULLY BEFORE INSTALLING, COPYING AND USING THIS COMPUTER SOFTWARE OR SERVICE AND THE ACCOMPANYING DOCUMENTATION. THE SOFTWARE OR SERVICE IS COPYRIGHTED AND IT IS LICENSED TO YOU UNDER THIS EULA, NOT SOLD TO YOU. BY INSTALLING, COPYING OR OTHERWISE USING THE SOFTWARE OR SERVICE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS BETA EULA. IF YOU ARE NOT WILLING TO BE BOUND BY THE TERMS OF THIS BETA EULA, DO NOT INSTALL, COPY OR USE THE SOFTWARE OR SERVICE.
+
+#### THIS BETA EULA IS A LEGAL AGREEMENT CONCERNING THE SOFTWARE OR SERVICE BETWEEN YOU, AS EITHER AN INDIVIDUAL OR A SINGLE BUSINESS ENTITY AND LONDON TRUST MEDIA INCORPORATED. THIS AGREEMENT SUPERSEDES AND REPLACES ANY PRIOR PROPOSAL, REPRESENTATION, OR PREVIOUS UNDERSTANDING YOU MAY HAVE HAD WITH LONDON TRUST MEDIA INCORPORATED RELATING TO THE SOFTWARE OR SERVICE.
+
+#### ASSENT TO BE BOUND
+
+By clicking the "I accept" checkbox on the beta page, or by installing, copying or otherwise using this Software or Service, you agree to be bound by the terms of this Agreement. If you do not agree with any term or condition, you understand that your remedy herein is that you may not download, order, open, install or use the Software or Service.
+
+#### GRANT OF LICENSE
+
+Subject to the terms and conditions of this Agreement, London Trust Media Incorporated hereby grants to you a non-exclusive, non-transferable license (without the right to sublicense) (i) to use the Software or Service in accordance with the Documentation solely for purposes of internal testing and evaluation, and (ii) provided that you do not (and do not permit anyone else to) copy, modify, create a derivative work of, reverse engineer, decompile, or otherwise attempt to discover the source code, sell, lease, sublicense, assign, grant a security interest in or otherwise transfer any right in the Software.
+
+#### CONFIDENTIALITY
+
+You agree that, unless otherwise specifically provided herein or agreed by London Trust Media Incorporated in writing, any Software and the Documentation, including the specific design and structure of individual programs and the Software, provided to you by London Trust Media Incorporated constitutes the confidential proprietary information of London Trust Media Incorporated. You shall permit only authorized users, who possess rightfully, obtained license keys, to use the Software or to view the Documentation. You agree not to transfer, copy, disclose, provide or otherwise make available such confidential information in any form to any third party without the prior written consent of London Trust Media Incorporated. You agree to implement reasonable security measures to protect such confidential information, but without limitation to the foregoing, shall use best efforts to maintain the security of the Software provided to you by London Trust Media Incorporated. You will use your best efforts to cooperate with and assist London Trust Media Incorporated in identifying and preventing any unauthorized use, copying, or disclosure of the Software, Documentation, or any portion thereof.
+
+#### BETA DISCLAIMER
+
+THE BETA SOFTWARE OR SERVICE LICENSED HEREUNDER IS BELIEVED TO CONTAIN DEFECTS AND IS AVAILABLE ON AN “AS IS” AND “AS AVAILABLE” BASIS FOR THE SOLE PURPOSE OF PROVIDING LONDON TRUST MEDIA INCORPORATED WITH FEEDBACK ON QUALITY, USABILITY, PERFORMANCE AND THE IDENTIFICATION OF DEFECTS. LICENSEE IS ADVISED TO SAFEGUARD IMPORTANT DATA, TO USE CAUTION AND NOT TO RELY IN ANY WAY ON THE CORRECT FUNCTIONING OR PERFORMANCE OF THE SOFTWARE AND/OR ACCOMPANYING MATERIALS. THE POSSIBILITY OF THE CORRUPTION OF DATA AND/OR THE LOSS OF DATA EXISTS IF YOU CHOOSE TO USE THIS BETA SOFTWARE. LONDON TRUST MEDIA INCORPORATED STRONGLY ENCOURAGES YOU TO BACK UP AND PROTECT ALL OF YOUR DATA AND INFORMATION. YOU AGREE THAT YOU ASSUME ALL RISKS AND ALL COSTS ASSOCIATED WITH THE USE OF THE SOFTWARE OR SERVICE.
+
+#### BETA SOFTWARE AND/OR PRODUCT SERVICE SUPPORT
+
+You understand and agree that London Trust Media Incorporated is under no obligation to provide technical support under the terms of this license, and provides no assurance that any specific errors or discrepancies in the Software or Service will be corrected.
+
+#### OWNERSHIP AND COPYRIGHT OF SOFTWARE
+
+You acknowledge and agree that London Trust Media Incorporated owns all legal right, title and interest in and to the Software or Service. Title to the Software or Service and all copies thereof remain with London Trust Media Incorporated. Licensee will not remove copyright notices from the Software or Service. Licensee agrees to prevent any unauthorized copying of the Software. Except as expressly provided herein, London Trust Media Incorporated does not grant any express or implied right to you under London Trust Media Incorporated patents, copyrights, trademarks, or trade secret information.
+
+#### DISCLAIMER OF WARRANTY
+
+THE SOFTWARE OR SERVICE AND DOCUMENTATION ARE LICENSED "AS IS", AND LONDON TRUST MEDIA INCORPORATED DISCLAIMS ANY AND ALL OTHER WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, TO THE EXTENT AUTHORIZED BY LAW. WITHOUT LIMITATION OF THE FOREGOING, LONDON TRUST MEDIA INCORPORATED EXPRESSLY DOES NOT WARRANT THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR FREE.
+
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SERVICE IS AT YOUR SOLE RISK AND THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. LONDON TRUST MEDIA INCORPORATED AND ITS AFFILIATES, SUBSIDIARIES, OFFICERS, DIRECTORS, AND EMPLOYEES EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN PARTICULAR, LONDON TRUST MEDIA INCORPORATED AND ITS AFFILIATES, SUBSIDIARIES, OFFICERS, DIRECTORS, AND EMPLOYEES MAKE NO WARRANTY THAT (I) THE SERVICE WILL MEET YOUR REQUIREMENTS; (II) YOUR USE OF THE SERVICE WILL BE TIMELY, UNINTERRUPTED, SECURE OR ERROR-FREE; (III) ANY INFORMATION OBTAINED BY YOU AS A RESULT OF THE SERVICE WILL BE ACCURATE OR RELIABLE; AND (IV) ANY DEFECTS OR ERRORS IN THE SOFTWARE PROVIDED TO YOU AS PART OF THE SERVICE WILL BE CORRECTED.

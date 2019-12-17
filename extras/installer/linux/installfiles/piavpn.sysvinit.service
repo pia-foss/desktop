@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# How to use:
+# Add this content into the file /etc/init.d/piavpn (you will need to be root to do this)
+# Ensure it is set: chmod 755
+# Then type: sudo update-rc.d piavpn defaults
+# Reboot, it should now start the pia daemon on boot
+#
+### BEGIN INIT INFO
+# Provides:          {{BRAND_CODE}}vpn
+# Required-Start:    $network $local_fs $remote_fs
+# Required-Stop:     $network $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: {{BRAND_NAME}} service
+# Description: This script starts the {{BRAND_NAME}} Daemon
+### END INIT INFO
+
+# Source function library.
+[ -f /lib/lsb/init-functions ] && . /lib/lsb/init-functions
+
+DAEMON=/opt/{{BRAND_CODE}}vpn/bin/{{BRAND_CODE}}-daemon
+NAME={{BRAND_CODE}}vpn
+STOP_SIGNAL=INT
+PIDFILE="/var/run/$NAME.pid"
+COMMON_OPTS="--quiet --pidfile $PIDFILE"
+export LD_LIBRARY_PATH=/opt/{{BRAND_CODE}}vpn/lib
+
+do_start()  {
+    start-stop-daemon --start $COMMON_OPTS --oknodo \
+        --exec $DAEMON --make-pidfile --background
+ }
+
+do_stop()  {
+    start-stop-daemon --stop $COMMON_OPTS --signal $STOP_SIGNAL --oknodo --remove-pidfile
+}
+
+do_status(){
+    start-stop-daemon --status $COMMON_OPTS
+    local exit_status=$?
+    case "$exit_status" in
+    0)
+        echo "Program '$NAME' is running."
+        ;;
+    1)
+        echo "Program '$NAME' is not running and the pid file exists."
+        ;;
+    3)
+        echo "Program '$NAME' is not running."
+        ;;
+    4)
+        echo "Unable to determine program '$NAME' status."
+        ;;
+    esac
+}
+
+case "$1" in
+start)
+    do_start
+    ;;
+
+stop)
+    do_stop
+    ;;
+
+status)
+    do_status
+    ;;
+*)
+    echo "Usage: $0 {start|stop|status}"
+    exit 5
+esac
+
+exit 0

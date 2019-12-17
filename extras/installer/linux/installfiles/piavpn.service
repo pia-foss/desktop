@@ -1,0 +1,14 @@
+[Unit]
+Description={{BRAND_NAME}} daemon
+# Ensure we have network before starting daemon
+Wants=network-online.target
+After=syslog.target network.target network-online.target
+
+[Service]
+Environment="LD_LIBRARY_PATH=/opt/{{BRAND_CODE}}vpn/lib"
+ExecStart=/opt/{{BRAND_CODE}}vpn/bin/{{BRAND_CODE}}-daemon
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

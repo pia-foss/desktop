@@ -1,0 +1,18 @@
+Qt doesn't work with system openssl, and it's a bit tricky to force Qt to open a specific lib. This means we bundle our own version of openssl and should update it when a new verison with security fixes are released.
+
+These are the steps:
+
+Download 1.0.0p from website
+
+Compile openssl with the following command:
+
+./config -fPIC -Wl,-rpath='$ORIGIN/' shared
+make
+make install
+
+Optionally you can specify a `--prefix` to install to. By default it compiles to /usr/lib/ssl
+
+Go to /usr/lib/ssl/lib/ to run `patchelf --print-rpath libssl.so.1.0.0` to ensure the rpath is set for both the libs
+
+Copy this as libssl.so and libcrypto.so into this folder, which is included in the installer
+

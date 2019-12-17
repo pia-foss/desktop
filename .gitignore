@@ -1,0 +1,9 @@
+/qbs/
+/out/
+build-*/
+*.qbs.user*
+.DS_Store
+*.qm
+node_modules
+releases
+*.qmlc

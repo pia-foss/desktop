@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ca/default.crt</file>
+        <file>ca/ecdsa_256k1.crt</file>
+        <file>ca/ecdsa_256r1.crt</file>
+        <file>ca/ecdsa_521.crt</file>
+        <file>ca/rsa_2048.crt</file>
+        <file>ca/rsa_3072.crt</file>
+        <file>ca/rsa_4096.crt</file>
+    </qresource>
+</RCC>

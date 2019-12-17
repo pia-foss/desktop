@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>{{BRAND_IDENTIFIER}}.installhelper</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>{{PIA_PRODUCT_NAME}} Install Helper</string>
+    <key>CFBundleVersion</key>
+    <string>{{PIA_PRODUCT_VERSION}}</string>
+    <key>{{BRAND_IDENTIFIER}}.version</key>
+    <string>{{PIA_SEMANTIC_VERSION}}</string>
+    <key>SMAuthorizedClients</key>
+    <array>
+        <string>identifier {{BRAND_IDENTIFIER}} and certificate leaf[subject.CN] = &quot;{{PIA_CODESIGN_CERT}}&quot; and info [{{BRAND_IDENTIFIER}}.version] = &quot;{{PIA_SEMANTIC_VERSION}}&quot;</string>
+    </array>
+</dict>
+</plist>

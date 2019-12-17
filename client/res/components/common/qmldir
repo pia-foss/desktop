@@ -1,0 +1,4 @@
+module PIA.Common
+singleton ClientNotifications ClientNotifications.qml
+singleton Messages Messages.qml
+singleton TrayIcon TrayIcon.qml

@@ -1,0 +1,68 @@
+#include <winver.h>
+#include "../../client/src/win/win_resources.h"
+#include "version.h"
+
+IDI_APP ICON "./icons/win_app.ico"
+
+IDI_LIGHT_ALERT                   ICON "./gen_tray_ico/square-light-no-outline-alert.ico"
+IDI_LIGHT_CONNECTED               ICON "./gen_tray_ico/square-light-no-outline-connected.ico"
+IDI_LIGHT_CONNECTING              ICON "./gen_tray_ico/square-light-no-outline-connecting.ico"
+IDI_LIGHT_DISCONNECTING           ICON "./gen_tray_ico/square-light-no-outline-disconnecting.ico"
+IDI_LIGHT_SNOOZED                 ICON "./gen_tray_ico/square-light-no-outline-snoozed.ico"
+IDI_LIGHT_DOWN                    ICON "./gen_tray_ico/square-light-no-outline-down.ico"
+IDI_LIGHT_OUTLINE_ALERT           ICON "./gen_tray_ico/square-light-with-dark-outline-alert.ico"
+IDI_LIGHT_OUTLINE_CONNECTED       ICON "./gen_tray_ico/square-light-with-dark-outline-connected.ico"
+IDI_LIGHT_OUTLINE_CONNECTING      ICON "./gen_tray_ico/square-light-with-dark-outline-connecting.ico"
+IDI_LIGHT_OUTLINE_DISCONNECTING   ICON "./gen_tray_ico/square-light-with-dark-outline-disconnecting.ico"
+IDI_LIGHT_OUTLINE_SNOOZED         ICON "./gen_tray_ico/square-light-with-dark-outline-snoozed.ico"
+IDI_LIGHT_OUTLINE_DOWN            ICON "./gen_tray_ico/square-light-with-dark-outline-down.ico"
+IDI_COLORED_ALERT                 ICON "./gen_tray_ico/square-colored-no-outline-alert.ico"
+IDI_COLORED_CONNECTED             ICON "./gen_tray_ico/square-colored-no-outline-connected.ico"
+IDI_COLORED_CONNECTING            ICON "./gen_tray_ico/square-colored-no-outline-connecting.ico"
+IDI_COLORED_DISCONNECTING         ICON "./gen_tray_ico/square-colored-no-outline-disconnecting.ico"
+IDI_COLORED_SNOOZED               ICON "./gen_tray_ico/square-colored-no-outline-snoozed.ico"
+IDI_COLORED_DOWN                  ICON "./gen_tray_ico/square-colored-no-outline-down.ico"
+IDI_COLORED_OUTLINE_ALERT         ICON "./gen_tray_ico/square-colored-with-dark-outline-alert.ico"
+IDI_COLORED_OUTLINE_CONNECTED     ICON "./gen_tray_ico/square-colored-with-dark-outline-connected.ico"
+IDI_COLORED_OUTLINE_CONNECTING    ICON "./gen_tray_ico/square-colored-with-dark-outline-connecting.ico"
+IDI_COLORED_OUTLINE_DISCONNECTING ICON "./gen_tray_ico/square-colored-with-dark-outline-disconnecting.ico"
+IDI_COLORED_OUTLINE_SNOOZED       ICON "./gen_tray_ico/square-colored-with-dark-outline-snoozed.ico"
+IDI_COLORED_OUTLINE_DOWN          ICON "./gen_tray_ico/square-colored-with-dark-outline-down.ico"
+IDI_CLASSIC_ALERT                 ICON "./gen_tray_ico/square-classic-alert.ico"
+IDI_CLASSIC_CONNECTED             ICON "./gen_tray_ico/square-classic-connected.ico"
+IDI_CLASSIC_CONNECTING            ICON "./gen_tray_ico/square-classic-connecting.ico"
+IDI_CLASSIC_DISCONNECTING         ICON "./gen_tray_ico/square-classic-disconnecting.ico"
+IDI_CLASSIC_DOWN                  ICON "./gen_tray_ico/square-classic-down.ico"
+IDI_CLASSIC_SNOOZED               ICON "./gen_tray_ico/square-classic-snoozed.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION PIA_WIN_VERSION
+PRODUCTVERSION PIA_WIN_VERSION
+FILEFLAGSMASK 0
+FILEFLAGS 0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"    // US English, Unicode
+        BEGIN
+            VALUE "CompanyName",      "Private Internet Access Incorporated"
+            VALUE "FileDescription",  "Private Internet Access"
+            VALUE "FileVersion",      PIA_WIN_VERSION_STR
+            VALUE "InternalName",     "pia-client.exe"
+            VALUE "LegalCopyright",   ""
+            VALUE "LegalTrademarks1", ""
+            VALUE "LegalTrademarks2", ""
+            VALUE "OriginalFilename", "pia-client.exe"
+            VALUE "ProductName",      "Private Internet Access"
+            VALUE "ProductVersion",   PIA_WIN_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409,1200    // US English, Unicode
+    END
+END

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>components/crashreport-main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>components/CrashReport2.qml</file>
+    </qresource>
+</RCC>

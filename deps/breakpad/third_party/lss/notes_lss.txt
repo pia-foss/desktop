@@ -1,0 +1,5 @@
+This file was loaded from https://chromium.googlesource.com/linux-syscall-support
+
+Required for our older version of breakpad to work.
+
+

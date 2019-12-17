@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+  <asmv3:application>
+    <asmv3:windowsSettings xmlns:ws2005="http://schemas.microsoft.com/SMI/2005/WindowsSettings" xmlns:ws2016="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+      <!-- 7/8: system-DPI aware, 8.1:per-monitor DPI aware -->
+      <ws2005:dpiAware>true/pm</ws2005:dpiAware>
+      <!-- 10+: per-monitor DPI aware V2 -->
+      <ws2016:dpiAwareness>PerMonitorV2</ws2016:dpiAwareness>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+</assembly>

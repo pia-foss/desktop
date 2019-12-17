@@ -1,0 +1,65 @@
+;
+; PiaWFPCallout.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=PiaWfpCallout
+ClassGUID={AB9BCE52-5D36-4605-B6B6-90AE20256345}
+Provider=%ManufacturerName%
+CatalogFile=PiaWFPCallout.cat
+DriverVer = 09/06/2019,14.11.54.82
+
+[DestinationDirs]
+DefaultDestDir = 12
+PiaWFPCallout_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+[ClassInstall32.ntx86]
+AddReg=PiaWfpCalloutClassReg
+
+[PiaWfpCalloutClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames.x86]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles.x86]
+PiaWFPCallout.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[DefaultInstall.ntx86]
+CopyFiles=Drivers_Dir
+
+[DefaultUninstall.ntx86]
+LegacyUninstall=1
+DelFiles = Drivers_Dir
+
+[Drivers_Dir]
+PiaWFPCallout.sys
+
+;-------------- Service installation
+[DefaultInstall.ntx86.Services]
+AddService = PiaWFPCallout,0, PiaWFPCallout_Service_Inst
+
+[DefaultUninstall.ntx86.Services]
+LegacyUninstall=1
+DelService = PiaWFPCallout,0
+
+; -------------- PiaWFPCallout driver install sections
+[PiaWFPCallout_Service_Inst]
+DisplayName    = %PiaWFPCallout.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\PiaWFPCallout.sys
+
+[Strings]
+ManufacturerName="Private Internet Access"
+ClassName="PiaWFPCallout Class" ; TODO: edit ClassName
+DiskName = "PiaWFPCallout Installation Disk"
+PiaWFPCallout.SVCDESC = "Private Internet Access WFP Callout"

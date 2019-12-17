@@ -1,0 +1,2 @@
+module PIA.VpnConnection
+singleton VpnConnection VpnConnection.qml

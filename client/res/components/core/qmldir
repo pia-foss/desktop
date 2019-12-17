@@ -1,0 +1,28 @@
+# === "core" directory ===
+#
+# This directory contains types that override various core types from QtQuick
+# modules, such as QtQuick, Controls, Layouts, etc.
+#
+# These types provide tweaks and fixups that should be used throughout the
+# application.  Tweaks contained here should be applicable in _virtually all_
+# cases - if a particular tweak only applies "most of the time" or "some of the
+# time", it probably belongs in "common" instead as a specifically named type.
+#
+# == Arabic / RTL ==
+#
+# These tweaks mainly pertain to layout fixups for Arabic (text alignment and
+# RTL mirroring).  The intent is that most LTR/English layouts should mirror
+# properly for Arabic by default, rather than resulting in a hodgepodge mess as
+# is the normal default behavior for QtQuick.
+#
+# This means that for LTR/English, the tweaks applied generally should have no
+# effect, so these are a drop-in replacement for the existing Qt types.
+#
+# = Text alignment =
+#
+# The "Text" type defaults to Left alignment instead of an alignment based on
+# the text content.  (See Text.qml.)  The default behavior is unusable even
+# without layout mirroring, because Text objects become a hodgepodged mess by
+# default, since the effect of the automatic alignment depends on how the Text
+# bounds are specified.  Layout mirroring mirrors this for RTL (if/when RTL is
+# actually supported).

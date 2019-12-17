@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-light-inactive-help</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons---Light" transform="translate(-1267.000000, -250.000000)">
+            <g id="icon-light-inactive-help" transform="translate(1267.000000, 250.000000)">
+                <circle id="Oval-Copy-45" fill="#D7D8D9" cx="50" cy="50" r="50"></circle>
+                <g id="Group-15" transform="translate(34.000000, 24.000000)" fill="#889099">
+                    <path d="M11.8549596,13.9417308 C12.4923093,12.2713389 14.1407448,10.6031012 16.6382713,10.7650995 C19.2956666,10.9796826 21.3675846,13.3506094 21.3157123,16.0434001 C21.2617353,18.5741924 19.6154044,20.6211442 17.275621,21.0524215 C13.821007,21.6435968 11.4293512,24.6056665 11.4293512,28.3229563 L11.4293512,35 L22.0589326,35 L22.0589326,30.8535332 C27.7994381,28.5920199 31.8370846,22.8823343 31.9970598,16.3124637 C32.1569181,7.85763959 25.7792861,0.694277891 17.4871496,0.0485466915 C10.7894504,-0.49001144 4.57167669,3.49445704 2.02004566,9.90469905 L0,14.9137205 L9.83448876,18.9508061 L11.8549596,13.9417308 Z" id="Fill-1"></path>
+                    <polygon id="Fill-2" points="12 50 23 50 23 39 12 39"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

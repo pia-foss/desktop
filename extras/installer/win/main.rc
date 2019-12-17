@@ -1,0 +1,7 @@
+#include <windows.h>
+#include "resource.h"
+
+IDB_MINIMIZE BITMAP "minimize.bmp"
+IDB_CLOSE BITMAP "close.bmp"
+
+IDF_FONT FONT "../../../common/res/font/Roboto-Regular.ttf"

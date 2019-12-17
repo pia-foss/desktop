@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name={{BRAND_NAME}}
+Comment={{BRAND_NAME}} VPN client
+Path=/opt/{{BRAND_CODE}}vpn/bin/
+Exec=/opt/{{BRAND_CODE}}vpn/bin/{{BRAND_CODE}}-client
+Icon={{BRAND_CODE}}
+Terminal=false
+Categories=Network
+StartupWMClass={{BRAND_CODE}}-client
