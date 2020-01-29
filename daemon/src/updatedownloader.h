@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -278,8 +278,6 @@ private:
     UpdateChannel _gaChannel, _betaChannel;
     // Whether the beta channel is enabled
     bool _enableBeta;
-    // Network manager used to download the installer
-    QNetworkAccessManager _networkManager;
     // Network reply for the download in progress (prevents us from starting
     // another download)
     QPointer<QNetworkReply> _pDownloadReply;

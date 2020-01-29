@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -27,15 +27,15 @@
 #include <unistd.h>
 #include <chrono>
 #include <thread>
+#include <deque>
 #include <QSocketNotifier>
 #include <QPointer>
 #include <QTimer>
 #include "daemon.h"
 #include "posix/posix_firewall_pf.h"
+#include "processrunner.h"
 #include "settings.h"
 #include "vpn.h"
-
-struct ProcQuery;
 
 struct WhitelistPort
 {
@@ -75,6 +75,47 @@ class KextClient : public QObject
     CLASS_LOGGING_CATEGORY("KextClient")
 
 public:
+    // These enums and structs match the corresponding types in the kernel
+    // extension
+    enum CommandType
+    {
+        VerifyApp         // check whether the app should be excluded from VPN
+    };
+    Q_ENUM(CommandType)
+
+    enum RuleType
+    {
+        BypassVPN,
+        OnlyVPN
+    };
+    Q_ENUM(RuleType)
+
+    struct ProcQuery
+    {
+        CommandType command;
+        char needs_reply;
+        char app_path[PATH_MAX];
+        int pid;
+        int accept;
+        enum RuleType rule_type;
+        uint32_t id;
+        uint32_t source_ip;
+        uint32_t source_port;
+        uint32_t dest_ip;
+        uint32_t dest_port;
+        uint32_t bind_ip;
+
+        // SOCK_STREAM or SOCK_DGRAM (tcp or udp)
+        int socket_type;
+    };
+
+    struct TracedResponse
+    {
+        int count;
+        ProcQuery response;
+    };
+
+public:
     KextClient(QObject *pParent)
         : QObject{pParent},
           _state{State::Disconnected},
@@ -90,33 +131,37 @@ public:
     }
 
 public slots:
-    void initiateConnection(const OriginalNetworkScan &netScan, const FirewallParams &params);
-    void updateExcludedApps(QVector<QString> excludedApps);
-    void updateNetwork(const OriginalNetworkScan &netScan, const FirewallParams &params);
+    void initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
+                            QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
     void shutdownConnection();
+    void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
+    enum class AddressType
+    {
+        Source,
+        Destination
+    };
+
     void readFromSocket(int socket);
     void showError(QString funcName);
     void verifyApp(const ProcQuery &proc_query, ProcQuery &proc_response);
     void processCommand(const ProcQuery &proc_query,  ProcQuery &proc_response);
     void removeApps(const QVector<QString> removedApps);
-    int connectToKext(const OriginalNetworkScan &netScan, const FirewallParams &params);
-    void removeCurrentBoundRoute();
-    void createBoundRoute(const OriginalNetworkScan &netScan);
+    void removeCurrentBoundRoute(const QString &ipAddress, const QString &interfaceName);
+    void createBoundRoute(const QString &ipAddress, const QString &interfaceName);
     void updateFirewall(QString ipAddress);
     void teardownFirewall();
     void updateIp(QString ipAddress);
     void sendExistingPids(const QVector<QString> &excludedApps);
-    void updateKextFirewall(const FirewallParams &params);
-    void manageWebKitExclusions(QVector<QString> &excludedApps);
-
-public:
-    enum CommandType
-    {
-        VerifyApp         // check whether the app should be excluded from VPN
-    };
-    Q_ENUM(CommandType)
+    void updateKextFirewall(const FirewallParams &params, bool isConnected);
+    void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
+                       QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
+    void manageWebKitApps(QVector<QString> &apps);
+    QVector<QString> findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps);
+    void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
     enum class State
@@ -132,21 +177,42 @@ private:
 
         // Permit LAN, broadcast, multicast, link-local, etc
         bool allowLAN;
+
+        // Does the VPN have the default route?
+        bool defaultRoute;
+
+        // Is the VPN connected ?
+        bool isConnected;
     };
 
 private:
     QVector<QString> _excludedApps;
+    QVector<QString> _vpnOnlyApps;
     QPointer<QSocketNotifier> _readNotifier;
     OriginalNetworkScan _previousNetScan;
+    QString _tunnelDeviceName;
+    QString _tunnelDeviceLocalAddress;
     State _state;
     FirewallState _firewallState;
     int _sockFd;
+    // Tracing responses is really important for supportability of this feature
+    // (if the daemon is checking PIDs incorrectly, taking too long to respond,
+    // etc.), but these responses occur a _lot_, so we can't trace them all.
+    // Keep track of the last few processes traced, so we can trace some of
+    // these without completely overwhelming the log.
+    std::deque<TracedResponse> _tracedResponses;
 };
 
 class KextMonitor : public QObject
 {
     Q_OBJECT
     CLASS_LOGGING_CATEGORY("KextMonitor")
+private:
+    static const QStringList _kextLogStreamParams;
+    enum
+    {
+        LogChunkSize = 128*1024,
+    };
 public:
     using NetExtensionState = DaemonState::NetExtensionState;
 
@@ -154,7 +220,12 @@ public:
     KextMonitor();
 
 private:
-    int runProc(const QString &cmd, const QStringList &args);
+    // Run a command (used for kext[util|load|unload]).
+    // Logs the result, stdout, and stderr of the command.
+    // If pStdErr is non-nullptr, the standard error output will be returned
+    // there.
+    int runProc(const QString &cmd, const QStringList &args,
+                QString *pStdErr = nullptr);
     void updateState(int exitCode);
 
 public:
@@ -164,11 +235,23 @@ public:
     bool loadKext();
     bool unloadKext();
 
+    QString getKextLog() const;
+
 signals:
     void kextStateChanged(NetExtensionState newState);
 
 private:
     NetExtensionState _lastState;
+    bool _loaded;
+    // If debug logging is enabled, KextMonitor runs 'log stream' to capture
+    // kext logging.  This is crucial for debug reports.  Running 'log show' at
+    // report time did not work well, it often times out.
+    ProcessRunner _kextLogStream;
+    // Kext logs are stored in 128KB chunks.  When we reach 128KB, the current
+    // chunk is moved to the old chunk (the old chunk is dropped).  This way, we
+    // always have about 128KB - 256KB of logging.
+    QByteArray _kextLog;
+    QByteArray _oldKextLog;
 };
 
 #endif

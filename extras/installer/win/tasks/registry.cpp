@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -126,7 +126,7 @@ void WriteUninstallRegistryTask::execute()
         writeRegistry(hkey, L"DisplayName", REG_SZ, L"" PIA_PRODUCT_NAME);
         writeRegistry(hkey, L"InstallLocation", REG_EXPAND_SZ, g_installPath);
         writeRegistry(hkey, L"UninstallString", REG_EXPAND_SZ, g_installPath + L"\\uninstall.exe");
-        writeRegistry(hkey, L"Publisher", REG_SZ, L"London Trust Media Incorporated");
+        writeRegistry(hkey, L"Publisher", REG_SZ, L"Private Internet Access, Inc.");
         writeRegistry(hkey, L"DisplayVersion", REG_SZ, L"" PIA_VERSION);
         writeRegistry(hkey, L"DisplayIcon", REG_EXPAND_SZ, g_installPath + L"\\" BRAND_CODE "-client.exe");
         writeRegistry(hkey, L"URLInfoAbout", REG_SZ, L"https://www.privateinternetaccess.com/");

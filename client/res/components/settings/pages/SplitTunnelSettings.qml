@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -59,7 +59,7 @@ Rectangle {
   // keyboard row.  (There's always a keyboard cell, but there's only a
   // highlighted cell when focus cues are shown.)
   property int highlightColumn: focusCue.show ? keyboardColumn : -1
-  readonly property int keyboardColumnCount: 2
+  readonly property int keyboardColumnCount: 3
 
   function mouseFocusCell(row, column) {
     keyboardRow = row
@@ -109,6 +109,7 @@ Rectangle {
             Layout.fillWidth: true
             showAppIcons: Qt.platform.os !== 'linux'
             appPath: modelData.path
+            appMode: modelData.mode
             appName: SplitTunnelManager.getNameFromPath(appPath)
 
             highlightColumn: {
@@ -122,6 +123,18 @@ Rectangle {
             }
             onFocusCell: mouseFocusCell({type: 'app', path: appPath}, column)
           }
+        }
+
+        SplitTunnelDefaultRow {
+          id: defaultBehaviourRow
+          Layout.fillWidth: true
+          showAppIcons: Qt.platform.os !== 'linux'
+          highlightColumn: {
+            if(splitTunnelSettings.keyboardRow.type === 'other')
+              return splitTunnelSettings.highlightColumn
+            return -1
+          }
+          onFocusCell: mouseFocusCell({type: 'other', path: ''}, column)
         }
       }
     }
@@ -152,6 +165,10 @@ Rectangle {
       table.push({type: 'app', path: appRowItem.appPath,
                   name: appRowItem.appName, item: appRowItem})
     }
+
+    // 'Other apps' row
+    table.push({type: 'other', path: '', name: defaultBehaviourRow.displayName,
+                item: defaultBehaviourRow})
 
     return table
   }
@@ -199,6 +216,8 @@ Rectangle {
     lastAccTable = accTable
   }
 
+  property var inKeyPress: null
+
   Keys.onPressed: {
     // Find the index of the current keyboard row (-1 if none)
     var keyboardIdx = findAccKeyboardIndex(accTable)
@@ -206,12 +225,9 @@ Rectangle {
     var nextIdx = -1
     // Check for an 'accept' key
     if(KeyUtil.handleButtonKeyEvent(event)) {
-      var currentRow = accTable[keyboardIdx]
+      inKeyPress = event.key
       // Row might not change, but still reveal it
       nextIdx = keyboardIdx
-      if(currentRow && currentRow.item) {
-        currentRow.item.keyboardSelect(keyboardColumn)
-      }
     }
     // Left and Right just move columns - other navigation keys navigate rows
     else if(event.key === Qt.Key_Left) {
@@ -247,6 +263,24 @@ Rectangle {
                                      bound.y, bound.height)
   }
 
+  Keys.onReleased: {
+    if(inKeyPress && inKeyPress === event.key) {
+      event.accepted = true
+      inKeyPress = null
+      // Activate the current cell
+      var keyboardIdx = findAccKeyboardIndex(accTable)
+      var currentRow = accTable[keyboardIdx]
+      if(currentRow && currentRow.item) {
+        currentRow.item.keyboardSelect(keyboardColumn)
+      }
+    }
+  }
+
+  onActiveFocusChanged: {
+    if(!activeFocus)
+      inKeyPress = null
+  }
+
   OutlineFocusCue {
     id: focusCue
     anchors.fill: parent
@@ -272,6 +306,13 @@ Rectangle {
     item: splitTunnelSettings
   }
 
+  property NativeAcc.TableColumn modeColumn: NativeAcc.TableColumn {
+    //: Screen reader annotation for the column in the split tunnel app list
+    //: that displays the behavior selected for a specific app.
+    name: uiTr("Behavior")
+    item: splitTunnelSettings
+  }
+
   property NativeAcc.TableColumn removeColumn: NativeAcc.TableColumn {
     //: Screen reader annotation for the column in the split tunnel app list
     //: that removes a selected app.
@@ -282,6 +323,7 @@ Rectangle {
   NativeAcc.Table.columns: [
     { property: "app", column: appColumn },
     { property: "path", column: pathColumn },
+    { property: "mode", column: modeColumn },
     { property: "remove", column: removeColumn }
   ]
 
@@ -295,6 +337,7 @@ Rectangle {
                     row: accRow.item.accRow,
                     app: accRow.item.accAppCell,
                     path: accRow.item.accPathCell,
+                    mode: accRow.item.accModeCell,
                     remove: accRow.item.accRemoveCell})
     }
 
@@ -307,6 +350,15 @@ Rectangle {
     var keyboardRow = accTable[keyboardIdx] // undefined if idx=-1
     if(!keyboardRow)
       return -1
-    return keyboardRow.item.effectiveColumnFor(keyboardColumn)
+    // Map keyboard columns to screen reader columns
+    var effectiveKeyCol = keyboardRow.item.effectiveColumnFor(keyboardColumn)
+    switch(effectiveKeyCol) {
+      case 0: // SplitTunnelAppRow.keyColumns.app
+        return 0
+      case 1: // SplitTunnelAppRow.keyColumns.mode
+      case 2: // SplitTunnelAppRow.keyColumns.remove
+        return effectiveKeyCol + 1 // Keyboard model skips 'path' acc column
+    }
+    return -1
   }
 }

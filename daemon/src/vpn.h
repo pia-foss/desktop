@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -295,10 +295,6 @@ public:
     ConnectionConfig(DaemonSettings &settings, DaemonState &state);
 
 public:
-    bool operator==(const ConnectionConfig &other) const;
-    bool operator!=(const ConnectionConfig &other) const {return !(*this == other);}
-
-public:
     // Check if the ConnectionConfig was able to load everything required for a
     // connection attempt.
     // If this returns true:
@@ -315,6 +311,9 @@ public:
 
     const QSharedPointer<ServerLocation> &vpnLocation() const {return _pVpnLocation;}
     bool vpnLocationAuto() const {return _vpnLocationAuto;}
+
+    bool defaultRoute() const {return _defaultRoute;}
+
     ProxyType proxyType() const {return _proxyType;}
     const QHostAddress &socksHost() const {return _socksHostAddress;}
     const CustomProxy &customProxy() const {return _customProxy;}
@@ -326,6 +325,15 @@ private:
     QSharedPointer<ServerLocation> _pVpnLocation;
     // Whether the VPN location was an automatic selection
     bool _vpnLocationAuto;
+
+    // Whether to use the VPN as the default route for this connection.  This
+    // isn't exactly the same as the defaultRoute value at the time of
+    // connection - it also depends on whether split tunnel is enabled.
+    // We don't store the split tunnel setting though - the user can still
+    // toggle that while connected, but if it changes the defaultRoute value,
+    // we will require a reconnect.
+    bool _defaultRoute;
+
     // The proxy type used for this connection
     ProxyType _proxyType;
     // The parsed address for the SOCKS proxy host - used to connect and to
@@ -443,7 +451,7 @@ signals:
     void hnsdSucceeded();
     void hnsdFailed(std::chrono::milliseconds failureDuration);
     void hnsdSyncFailure(bool failing);
-    void usingTunnelDevice(QString deviceName, QString deviceLocalAddress);
+    void usingTunnelDevice(QString deviceName, QString deviceLocalAddress, QString deviceRemoteAddress);
 
 private:
     void setState(State state);

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -25,38 +25,29 @@ import "../../theme"
 import "../../common"
 import "../../client"
 import "../../daemon"
+import "../inputs"
+import "../stores"
 import Qt.labs.platform 1.1
 import PIA.SplitTunnelManager 1.0
 import PIA.NativeHelpers 1.0
 import PIA.NativeAcc 1.0 as NativeAcc
 
-Item {
+SplitTunnelRowBase {
   id: appRow
 
   property bool showAppIcons: true
   property string appPath
+
+  // Mode [exclude/include]
+  property string appMode
   // App name displayed in the cell
   property string appName
 
+  // Index of app in the list
+  property string appIndex
+
   // Column index of cell to highlight within this row - -1 for none.
   property int highlightColumn: -1
-
-  // Indices of the keyboard navigation columns in this row.
-  // App rows are modeled with two columns: the app and the remove button.
-  // The 'app' and 'path' columns don't have any selectable action, but they're
-  // split up for a few reasons:
-  // - Describing the whole row with one accessibility annotation would require
-  //   far too much text (app name, path, remove action)
-  // - It would probably be surprising that selecting the entire row would
-  //   remove it.  This is a destructive action, we don't want users doing this
-  //   accidentally.
-  // - We expect to add more controls in the future (rule types, etc.).  This
-  //   model extends naturally to more columns.
-  readonly property var keyColumns: ({
-    app: 0,
-    path: 1,
-    remove: 2
-  })
 
   function removeFromSplitTunnelRules() {
     var updatedRules = Daemon.settings.splitTunnelRules.filter(function(rule) {
@@ -66,12 +57,28 @@ Item {
     Daemon.applySettings({splitTunnelRules: updatedRules});
   }
 
+  function changeSplitTunnelMode(newMode) {
+    var updatedRules = JSON.parse(JSON.stringify(Daemon.settings.splitTunnelRules));
+    var appRule = updatedRules.find(rule => rule.path === appPath);
+    appRule.mode = newMode;
+
+    console.log(JSON.stringify(updatedRules));
+
+    Daemon.applySettings({splitTunnelRules: updatedRules});
+  }
+
+  function keyboardShowModePopup() {
+    modeDropDown.showPopup()
+  }
+
   // Select a cell in this row with the keyboard.
   function keyboardSelect(keyboardColumn) {
     switch(keyboardColumn) {
       case keyColumns.app:
-      case keyColumns.path:
         break // Nothing to do for these columns
+      case keyColumns.mode:
+        keyboardShowModePopup()
+        break
       case keyColumns.remove:
         removeFromSplitTunnelRules();
         break
@@ -94,6 +101,15 @@ Item {
     outlineLevel: 0
   }
 
+  readonly property var modes: {
+    'exclude': 0,
+    'include': 1
+  }
+  readonly property var modesList: [
+    'exclude',
+    'include'
+  ]
+
   // Screen reader cell annotations
   readonly property NativeAcc.TableCellText accAppCell: NativeAcc.TableCellText {
     name: appName
@@ -106,6 +122,14 @@ Item {
   readonly property NativeAcc.TableCellText accPathCell: NativeAcc.TableCellText {
     name: appPath
     item: appPathText
+  }
+  readonly property NativeAcc.TableCellDropDownButton accModeCell: NativeAcc.TableCellDropDownButton {
+    name: modeDropDown.displayText
+    item: modeDropDown
+    onActivated: {
+      appRow.focusCell(keyColumns.mode)
+      keyboardShowModePopup()
+    }
   }
   readonly property NativeAcc.TableCellButton accRemoveCell: NativeAcc.TableCellButton {
     //: Screen reader annotation for the "remove" button ("X" icon) next to a
@@ -133,11 +157,15 @@ Item {
 
   Text {
     id: appNameText
-    x: showAppIcons ? 40 : 5
+    anchors.left: parent.left
+    anchors.leftMargin: showAppIcons ? 40 : 5
     y: 4
+    anchors.right: modeDropDown.left
+    anchors.rightMargin: 5
     text: appRow.appName
     color: Theme.settings.hbarTextColor
     font.pixelSize: 16
+    elide: Text.ElideRight
   }
 
   Text{
@@ -165,8 +193,8 @@ Item {
     }
     color: Theme.settings.inputDropdownTextDisabledColor
     elide: Text.ElideLeft
-    anchors.right: parent.right
-    anchors.rightMargin: 60
+    anchors.right: modeDropDown.left
+    anchors.rightMargin: 5
     anchors.left: appNameText.left
   }
 
@@ -179,6 +207,41 @@ Item {
     opacity: 0.5
   }
 
+  ThemedComboBox {
+    id: modeDropDown
+    width: 145
+    height: 24
+    model: appModeChoices
+    anchors.right: parent.right
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.rightMargin: 45
+
+    // Not a tabstop, navigation occurs in table
+    focusOnTab: false
+    focusOnDismissFunc: function() { appRow.focusCell(keyColumns.mode) }
+
+    currentIndex: {
+      // Hack in a dependency on 'model' - the dropdown forgets our bound value
+      // for the current index if the model changes (like retranslation), and
+      // this forces the binding to reapply
+      var dep = model
+      if(modes.hasOwnProperty(appMode)) {
+        return modes[appMode]
+      }
+      return -1;
+    }
+
+    onActivated: {
+      changeSplitTunnelMode(modesList[currentIndex]);
+    }
+  }
+
+  // Highlight cue for the mode drop-down
+  HighlightCue {
+    anchors.fill: modeDropDown
+    visible: highlightColumn === keyColumns.mode
+  }
+
   Image {
     id: removeApplicationButtonImg
     height: 16
@@ -187,22 +250,22 @@ Item {
     source: removeApplicationMouseArea.containsMouse ? Theme.settings.splitTunnelRemoveApplicationButtonHover : Theme.settings.splitTunnelRemoveApplicationButton
     anchors.verticalCenter: parent.verticalCenter
     anchors.right: parent.right
-    anchors.rightMargin: 25
+    anchors.rightMargin: 20
+  }
 
-    MouseArea {
-      id: removeApplicationMouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
+  MouseArea {
+    id: removeApplicationMouseArea
+    anchors.fill: removeApplicationButtonImg
+    hoverEnabled: true
+    cursorShape: Qt.PointingHandCursor
 
-      onClicked: appRow.removeClicked()
-    }
+    onClicked: appRow.removeClicked()
+  }
 
-    // Highlight cue for the remove button
-    HighlightCue {
-      anchors.fill: parent
-      visible: highlightColumn === keyColumns.remove
-    }
+  // Highlight cue for the remove button
+  HighlightCue {
+    anchors.fill: removeApplicationButtonImg
+    visible: highlightColumn === keyColumns.remove
   }
 
   // Highlight cue for the app row

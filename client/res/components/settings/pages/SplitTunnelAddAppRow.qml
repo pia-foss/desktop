@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -35,7 +35,7 @@ import "qrc:/javascript/util.js" as Util
 // This is the "add application" row of the split tunnel app list.
 // Some of the properties here correspond to properties of SplitTunnelAppRow for
 // keyboard nav and accessibility.
-Item {
+SplitTunnelRowBase {
   id: addApplicationRow
 
   // Shows the cell highlight (this row only has one cell)
@@ -48,7 +48,7 @@ Item {
 
   // Effective column (always 0, this row only has one cell)
   function effectiveColumnFor() {
-    return 0  // SplitTunnelAppRow.keyColumns.app
+    return keyColumns.app
   }
 
   signal focusCell(int column)
@@ -70,6 +70,7 @@ Item {
   }
   // There is no path or remove cell.
   readonly property NativeAcc.TableCellText accPathCell: null
+  readonly property NativeAcc.TableCellDropDownButton accModeCell: null
   readonly property NativeAcc.TableCellButton accRemoveCell: null
 
   // Localized display name (used in list's accessibility table)

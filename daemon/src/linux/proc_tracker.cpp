@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -30,6 +30,7 @@
 #include <QPointer>
 #include <QFile>
 #include <QDir>
+
 #include "daemon.h"
 #include "path.h"
 #include "posix/posix_firewall_iptables.h"
@@ -124,100 +125,152 @@ void ProcTracker::showError(QString funcName)
 
 void ProcTracker::writePidToCGroup(pid_t pid, const QString &cGroupPath)
 {
-    QFile cgroupFile{cGroupPath};
+    QFile cGroupFile{cGroupPath};
 
-    if(!cgroupFile.open(QFile::WriteOnly))
+    if(!cGroupFile.open(QFile::WriteOnly))
     {
-        qWarning() << "Cannot open" << cGroupPath << "for writing!" << cgroupFile.errorString();
+        qWarning() << "Cannot open" << cGroupPath << "for writing!" << cGroupFile.errorString();
         return;
     }
 
-    if(cgroupFile.write(QByteArray::number(pid)) < 0)
-        qWarning() << "Could not write to" << cGroupPath << cgroupFile.errorString();
+    if(cGroupFile.write(QByteArray::number(pid)) < 0)
+        qWarning() << "Could not write to" << cGroupPath << cGroupFile.errorString();
 }
 
-void ProcTracker::addPidToExclusions(pid_t pid)
+void ProcTracker::addPidToCgroup(pid_t pid, const Path &cGroupPath)
 {
-    writePidToCGroup(pid, Path::VpnExclusionsFile);
+    writePidToCGroup(pid, cGroupPath);
     // Add child processes (NOTE: we also recurse through child processes of child processes)
-    addChildPidsToExclusions(pid);
+    addChildPidsToCgroup(pid, cGroupPath);
 }
 
-void ProcTracker::addChildPidsToExclusions(pid_t parentPid)
+void ProcTracker::addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath)
 {
     for(pid_t pid : ProcFs::childPidsOf(parentPid))
     {
         qInfo() << "Adding child pid" << pid;
-        addPidToExclusions(pid);
+        addPidToCgroup(pid, cGroupPath);
     }
 }
 
-void ProcTracker::removeChildPidsFromExclusions(pid_t parentPid)
+void ProcTracker::removeChildPidsFromCgroup(pid_t parentPid, const Path &cGroupPath)
 {
     for(pid_t pid : ProcFs::childPidsOf(parentPid))
     {
-        qInfo() << "Removing child pid" << pid;
-        removePidFromExclusions(pid);
+        qInfo() << "Removing child pid" << pid << cGroupPath;
+        removePidFromCgroup(pid, cGroupPath);
     }
 }
 
-void ProcTracker::removePidFromExclusions(pid_t pid)
+void ProcTracker::removePidFromCgroup(pid_t pid, const Path &cGroupPath)
 {
     // We remove a PID from a cgroup by adding it to its parent cgroup
-    writePidToCGroup(pid, Path::ParentVpnExclusionsFile);
+    writePidToCGroup(pid, cGroupPath);
     // Remove child processes (NOTE: we also recurse through child processes of child processes)
-    removeChildPidsFromExclusions(pid);
+    removeChildPidsFromCgroup(pid, cGroupPath);
 }
 
 void ProcTracker::updateMasquerade(QString interfaceName)
 {
-    qInfo() << "Updating the masquerade rule for new interface name" << interfaceName;
-    IpTablesFirewall::replaceAnchor(
-        IpTablesFirewall::Both,
-        QStringLiteral("100.transIp"),
-        QStringLiteral("-o %1 -j MASQUERADE").arg(interfaceName),
-        IpTablesFirewall::kNatTable
-    );
+    if(interfaceName.isEmpty())
+    {
+        qInfo() << "Removing masquerade rule, not connected";
+        IpTablesFirewall::replaceAnchor(
+            IpTablesFirewall::Both,
+            QStringLiteral("100.transIp"),
+            {},
+            IpTablesFirewall::kNatTable
+        );
+    }
+    else
+    {
+        qInfo() << "Updating the masquerade rule for new interface name" << interfaceName;
+        IpTablesFirewall::replaceAnchor(
+            IpTablesFirewall::Both,
+            QStringLiteral("100.transIp"),
+            {
+                QStringLiteral("-o %1 -j MASQUERADE").arg(interfaceName),
+                QStringLiteral("-o tun+ -j MASQUERADE")
+            },
+            IpTablesFirewall::kNatTable
+        );
+    }
 }
 
-void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName)
+void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress)
 {
     const QString routingTableName = IpTablesFirewall::kRtableName;
+    const QString vpnOnlyRoutingTableName = IpTablesFirewall::kVpnOnlyRtableName;
 
     qInfo() << "Updating the default route in"
         << routingTableName
         << "for"
         << gatewayIp
         << "and"
-        << interfaceName;
+        << interfaceName
+        << "and"
+        << "tunnel interface"
+        << tunnelDeviceName;
 
-    auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(gatewayIp, interfaceName, routingTableName);
-    qInfo() << "Executing:" << cmd;
-    ::shellExecute(cmd);
+    // The bypass route can be left as-is if the configuration is not known,
+    // even though the route may be out of date - we don't put any processes in
+    // this cgroup when not connected.
+    if(gatewayIp.isEmpty() || interfaceName.isEmpty())
+    {
+        qInfo() << "Not updating bypass route - configuration not known - address:"
+            << gatewayIp << "- interface:" << interfaceName;
+    }
+    else
+    {
+        auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(gatewayIp, interfaceName, routingTableName);
+        qInfo() << "Executing:" << cmd;
+        ::shellExecute(cmd);
+    }
+
+    // The VPN-only route can be left as-is if we're not connected, VPN-only
+    // processes are expected to lose connectivity in that case.
+    if(tunnelDeviceRemoteAddress.isEmpty() || tunnelDeviceName.isEmpty())
+    {
+        qWarning() << "Tunnel configuration not known yet, can't configure VPN-only route yet - address:"
+            << tunnelDeviceRemoteAddress << "- interface:" << tunnelDeviceName;
+    }
+    else
+    {
+        auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(tunnelDeviceRemoteAddress, tunnelDeviceName, vpnOnlyRoutingTableName);
+        qInfo() << "Executing:" << cmd;
+        ::shellExecute(cmd);
+    }
+
     ::shellExecute(QStringLiteral("ip route flush cache"));
 }
 
-void ProcTracker::updateNetwork(const OriginalNetworkScan &updatedScan, const FirewallParams &params)
+void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
+                                QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
 {
-    qInfo() << "Updating network";
+    qInfo() << "previous gateway IP is" << _previousNetScan.gatewayIp();
+    qInfo() << "updated gateway IP is" << params.splitTunnelNetScan.gatewayIp();
+    qInfo() << "tunnel device is" << tunnelDeviceName;
 
-    qInfo() << "_previousNetScan.gatewayIp is" << _previousNetScan.gatewayIp();
-    qInfo() << "updatedScan.gatewayIp is" << updatedScan.gatewayIp();
+    if(_previousNetScan.interfaceName() != params.splitTunnelNetScan.interfaceName())
+        updateMasquerade(params.splitTunnelNetScan.interfaceName());
 
-    if(_previousNetScan.interfaceName() != updatedScan.interfaceName())
-        updateMasquerade(updatedScan.interfaceName());
-
-    if(_previousNetScan.gatewayIp() != updatedScan.gatewayIp() || _previousNetScan.interfaceName() != updatedScan.interfaceName())
+    // Only update the routing policy for source ip if we absolutely have to, as it's thornier to update
+    if(_previousNetScan.gatewayIp() != params.splitTunnelNetScan.gatewayIp())
     {
-        updateRoutes(updatedScan.gatewayIp(), updatedScan.interfaceName());
-        addRoutingPolicyForSourceIp(updatedScan.ipAddress());
+        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress());
     }
 
-    // Update our network info
-    _previousNetScan = updatedScan;
+    // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
+    updateRoutes(params.splitTunnelNetScan.gatewayIp(), params.splitTunnelNetScan.interfaceName(), tunnelDeviceName, tunnelDeviceRemoteAddress);
+
+    // If we just got a valid network scan (we're connecting) or we lost it
+    // (we're disconnected), the subsequent call to updateApps() will add/remove
+    // all excluded apps (which are only tracked when we have a network scan).
+    _previousNetScan = params.splitTunnelNetScan;
 }
 
-void ProcTracker::initiateConnection(const OriginalNetworkScan &netScan, const FirewallParams &params)
+void ProcTracker::initiateConnection(const FirewallParams &params,
+                                     QString tunnelDeviceName, QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
 {
     int sock;
     qInfo() << "Attempting to connect to Netlink";
@@ -261,59 +314,101 @@ void ProcTracker::initiateConnection(const OriginalNetworkScan &netScan, const F
     // Save the socket FD to an ivar
     _sockFd = sock;
     setupFirewall();
-    updateNetwork(netScan, params);
+    updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
+                      tunnelDeviceRemoteAddress, params.excludeApps,
+                      params.vpnOnlyApps);
+    setupReversePathFiltering();
     _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
     connect(_readNotifier, &QSocketNotifier::activated, this, &ProcTracker::readFromSocket);
 }
 
-void ProcTracker::updateExcludedApps(QVector<QString> excludedApps)
+void ProcTracker::setupReversePathFiltering()
 {
-    QVector<QString> removedApps;
+    int exitCode;
+    QString out, err;
+    std::tie(exitCode, out, err) = ::shellExecute("sysctl -n 'net.ipv4.conf.all.rp_filter'");
 
-    // Find which apps have been removed from the exclusions
-    for(const auto &app : _appMap.keys())
+    if(!exitCode)
     {
-        if(!excludedApps.contains(app))
-            removedApps.push_back(app);
-    }
-
-    // Add new entries
-    for(auto &app : excludedApps)
-    {
-        _appMap.insert(app, {});
-        for(pid_t pid : ProcFs::pidsForPath(app))
+        if(out.toInt() != 2)
         {
-            // Both these calls are no-ops if the PID is already excluded
-            addPidToExclusions(pid);
-            _appMap[app].insert(pid);
+            _previousRPFilter = out;
+            qInfo() << "Storing old net.ipv4.conf.all.rp_filter value:" << out;
+            qInfo() << "Setting rp_filter to loose";
+            ::shellExecute("sysctl -w 'net.ipv4.conf.all.rp_filter=2'");
         }
+        else
+            qInfo() << "rp_filter already 2 (loose mode); nothing to do!";
     }
+    else
+    {
+        qWarning() << "Unable to store old net.ipv4.conf.all.rp_filter value";
+        _previousRPFilter = "";
+        return;
+    }
+}
 
-    removeApps(removedApps);
+void ProcTracker::teardownReversePathFiltering()
+{
+    if(!_previousRPFilter.isEmpty())
+    {
+        qInfo() << "Restoring rp_filter to: " << _previousRPFilter;
+        ::shellExecute(QStringLiteral("sysctl -w 'net.ipv4.conf.all.rp_filter=%1'").arg(_previousRPFilter));
+    }
+}
+
+void ProcTracker::updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
+{
+    qInfo() << "Inside updateApps." << "excludedApps:" << excludedApps << "vpnOnlyApps:" << vpnOnlyApps;
+    // If we're not tracking excluded apps, remove everything
+    if(!_previousNetScan.isValid())
+        excludedApps = {};
+    // Update excluded apps
+    removeApps(excludedApps, _exclusionsMap);
+    addApps(excludedApps, _exclusionsMap, Path::VpnExclusionsFile);
+
+    // Update vpnOnly
+    removeApps(vpnOnlyApps, _vpnOnlyMap);
+    addApps(vpnOnlyApps, _vpnOnlyMap, Path::VpnOnlyFile);
 }
 
 void ProcTracker::removeAllApps()
 {
-    qInfo() << "Removing all apps from cgroup";
-    removeApps(QVector<QString>::fromList(_appMap.keys()));
-    _appMap.clear();
+    qInfo() << "Removing all apps from cgroups";
+    removeApps({}, _exclusionsMap);
+    removeApps({}, _vpnOnlyMap);
+
+    _exclusionsMap.clear();
+    _vpnOnlyMap.clear();
 }
 
-void ProcTracker::removeApps(const QVector<QString> &removedApps)
+void ProcTracker::addApps(const QVector<QString> &apps, AppMap &appMap, QString cGroupPath)
 {
-    // Remove existing entries
-    for(const auto &app : removedApps)
+    for(auto &app : apps)
     {
-        qInfo() << "Removing all pids for" << app << "from exclusions";
-        // Remove all PIDs for the app from the cgroup
-        for(pid_t pid : _appMap[app])
+        appMap.insert(app, {});
+        for(pid_t pid : ProcFs::pidsForPath(app))
         {
-            qInfo() << "Removing pid" << pid;
-            removePidFromExclusions(pid);
+            // Both these calls are no-ops if the PID is already excluded
+            addPidToCgroup(pid, cGroupPath);
+            appMap[app].insert(pid);
         }
+    }
+}
 
-        // Remove the app from our model
-        _appMap.remove(app);
+void ProcTracker::removeApps(const QVector<QString> &keepApps, AppMap &appMap)
+{
+    for(const auto &app : appMap.keys())
+    {
+        if(!keepApps.contains(app))
+        {
+            for(pid_t pid : appMap[app])
+            {
+                removePidFromCgroup(pid, Path::ParentVpnExclusionsFile);
+            }
+
+            appMap.remove(app);
+        }
     }
 }
 
@@ -360,14 +455,19 @@ void ProcTracker::teardownFirewall()
 
 void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress)
 {
-    ::shellExecute(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
-        .arg(ipAddress, IpTablesFirewall::kRtableName));
+    // Remove the old one (if it exists) before adding a new one
+    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress());
+
+    if(!ipAddress.isEmpty())
+        ::shellExecute(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
+            .arg(ipAddress, IpTablesFirewall::kRtableName));
 }
 
 void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress)
 {
-    ::shellExecute(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
-        .arg(ipAddress, IpTablesFirewall::kRtableName));
+    if(!ipAddress.isEmpty())
+        ::shellExecute(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
+            .arg(ipAddress, IpTablesFirewall::kRtableName));
 }
 
 void ProcTracker::shutdownConnection()
@@ -390,12 +490,74 @@ void ProcTracker::shutdownConnection()
     teardownFirewall();
     removeAllApps();
     removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress());
+    teardownReversePathFiltering();
 
     // Clear out our network info
     _previousNetScan = {};
     _sockFd = -1;
 
     qInfo() << "Successfully disconnected from Netlink";
+}
+
+void ProcTracker::updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                                    QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                                    QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
+{
+    // Update network first, then updateApps() can add/remove all excluded apps
+    // when we gain/lose a valid network scan
+    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress, tunnelDeviceRemoteAddress);
+    updateApps(excludedApps, vpnOnlyApps);
+}
+
+void ProcTracker::removeTerminatedApp(pid_t pid)
+{
+    // Remove from exclusions
+    for(AppMap::iterator i = _exclusionsMap.begin(); i != _exclusionsMap.end(); ++i)
+    {
+        auto &set = i.value();
+        set.remove(pid);
+    }
+
+    // Remove from vpnOnly
+    for(AppMap::iterator i = _vpnOnlyMap.begin(); i != _vpnOnlyMap.end(); ++i)
+    {
+        auto &set = i.value();
+        set.remove(pid);
+    }
+}
+
+void ProcTracker::addLaunchedApp(pid_t pid)
+{
+    // Get the launch path associated with the PID
+    QString appName = ProcFs::pathForPid(pid);
+
+    // May be empty if the process was so short-lived it exited before we had a chance to read its name
+    // In this case we just early-exit and ignore it
+    if(appName.isEmpty())
+        return;
+
+    if(_exclusionsMap.contains(appName))
+    {
+        // Add it if we're currently tracking excluded apps.
+        if(_previousNetScan.isValid())
+        {
+            _exclusionsMap[appName].insert(pid);
+            qInfo() << "Adding" << pid << "to VPN exclusions for app:" << appName;
+
+            // Add the PID to the cgroup so its network traffic goes out the
+            // physical uplink
+            addPidToCgroup(pid, Path::VpnExclusionsFile);
+        }
+    }
+    else if(_vpnOnlyMap.contains(appName))
+    {
+        _vpnOnlyMap[appName].insert(pid);
+        qInfo() << "Adding" << pid << "to VPN Only for app:" << appName;
+
+        // Add the PID to the cgroup so its network traffic is forced out the
+        // VPN
+        addPidToCgroup(pid, Path::VpnOnlyFile);
+    }
 }
 
 void ProcTracker::readFromSocket(int sock)
@@ -416,36 +578,16 @@ void ProcTracker::readFromSocket(int sock)
         break;
     case proc_event::PROC_EVENT_EXEC:
         pid = eventData.exec.process_pid;
-        // Get the launch path associated with the PID
-        appName = ProcFs::pathForPid(pid);
-        // If the path is an "excluded app" then exclude it
-        if(_appMap.contains(appName))
-        {
-            _appMap[appName].insert(pid);
-            qInfo() << "Adding" << pid << "to VPN exclusions for excluded app:" << appName;
-
-            // Add the PID to the cgroup so its network traffic goes out the
-            // physical uplink
-            addPidToExclusions(pid);
-        }
+        addLaunchedApp(pid);
 
         break;
     case proc_event::PROC_EVENT_EXIT:
         pid = eventData.exit.process_pid;
-
-        // Update our internal model to remove the pid from the associated app entry
-        // We do not need to explicitly remove the PID from the cgroup as
-        // an exiting process is removed automatically
-        for(AppMap::iterator i = _appMap.begin(); i != _appMap.end(); ++i)
-        {
-            auto &set = i.value();
-            set.remove(pid);
-        }
+        removeTerminatedApp(pid);
 
         break;
     default:
         // We're not interested in any other events
         break;
     }
-    _readNotifier->setEnabled(true);
 }

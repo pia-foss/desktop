@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -27,7 +27,6 @@
 #include "testshim.h"
 #include <QObject>
 #include <QJsonDocument>
-#include <QNetworkAccessManager>
 #include <QByteArray>
 #include <QSharedPointer>
 #include <QTimer>
@@ -116,7 +115,6 @@ public:
     QString _resource;
     std::chrono::milliseconds _initialInterval, _refreshInterval;
     QTimer _refreshTimer;
-    QSharedPointer<QNetworkAccessManager> _pNetworkManager;
     // If a fetch task is ongoing, it's held here.  Dropping this reference
     // abandons the task.
     Async<void> _pFetchTask;

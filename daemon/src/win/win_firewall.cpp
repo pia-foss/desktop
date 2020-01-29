@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -372,7 +372,9 @@ bool FirewallEngine::removeAll()
     if (!removeAll(FWPM_LAYER_ALE_AUTH_CONNECT_V6)) result = false;
     if (!removeAll(FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4)) result = false;
     if (!removeAll(FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6)) result = false;
+    // Prior versions of PIA had rules in the bind redirect layer
     if (!removeAll(FWPM_LAYER_ALE_BIND_REDIRECT_V4)) result = false;
+    if (!removeAll(FWPM_LAYER_ALE_CONNECT_REDIRECT_V4)) result = false;
     if (!removeProviderContexts()) result = false;
     return result;
 }
@@ -527,6 +529,7 @@ void FirewallEngine::checkLeakedObjects()
     checkLeakedLayerObjects(FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4);
     checkLeakedLayerObjects(FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6);
     checkLeakedLayerObjects(FWPM_LAYER_ALE_BIND_REDIRECT_V4);
+    checkLeakedLayerObjects(FWPM_LAYER_ALE_CONNECT_REDIRECT_V4);
     enumProviderContexts([&](const FWPM_PROVIDER_CONTEXT &providerContext)
     {
         qWarning() << "WFP provider context leaked:"

@@ -8,7 +8,7 @@ Class=PiaWfpCallout
 ClassGUID={AB9BCE52-5D36-4605-B6B6-90AE20256345}
 Provider=%ManufacturerName%
 CatalogFile=PiaWFPCallout.cat
-DriverVer = 09/06/2019,14.11.54.82
+DriverVer = 12/18/2019,17.46.55.109
 
 [DestinationDirs]
 DefaultDestDir = 12

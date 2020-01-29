@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -108,12 +108,6 @@ PiaProject {
             f.writeLine("#define PIA_VERSION " + Utilities.cStringQuote(project.semanticVersion));
             var cert = Environment.getEnv("PIA_CODESIGN_CERT") ? Environment.getEnv("PIA_CODESIGN_CERT") : "Unknown"
             f.writeLine("#define PIA_CODESIGN_CERT " + Utilities.cStringQuote(cert));
-            if (project.productPrerelease) {
-              f.writeLine("#define PIA_VERSION_PRERELEASE " + Utilities.cStringQuote(project.productPrerelease));
-              if (project.productPrerelease.split('.', 1)[0] === "beta") {
-                f.writeLine("#define PIA_VERSION_BETA");
-              }
-            }
             f.writeLine("#define RUBY_MIGRATION R\"(" + (Environment.getEnv("RUBY_MIGRATION") || "") + ")\"")
 
             // Windows-style four-part version number used in VERSIONINFO.

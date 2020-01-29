@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -206,11 +206,30 @@ Page {
       }
     }
 
+    // This info tip has bullets and non-breaking spaces, it's broken up to
+    // facilitate translation.
+    readonly property string splitTunnelInfo: {
+      var bullet = "\u2022\xA0\xA0"
+      var endl = "\n"
+
+      //: Description for the split tunnel setting.
+      return uiTr("Choose which applications use the VPN.") + endl +
+        //: Description for the "Bypass VPN" split tunnel mode that can be applied
+        //: to a specific app.  These apps do not use the VPN connection, they
+        //: connect directly to the Internet.
+        bullet + uiTr("Bypass VPN - App always connects directly to the Internet") + endl +
+        //: Description for the "Only VPN" split tunnel mode that can be applied
+        //: to a specific app.  These apps are only allowed to connect via the
+        //: VPN, they are blocked if the VPN is not connected (even if PIA is
+        //: not running).
+        bullet + uiTr("Only VPN - App can only connect when PIA is open and the VPN is connected")
+    }
+
     CheckboxInput {
       id: appExclusionCheckboxMac
       visible: Qt.platform.os === 'osx'
-      label: uiTr("App Exclusions")
-      info: uiTr("Excluded apps bypass the VPN and connect directly to the Internet.")
+      label: uiTr("Split Tunnel")
+      info: parent.splitTunnelInfo
       isBeta: true
       linkText: Messages.helpLabel
       linkTarget: BrandHelper.getBrandParam("appExclusionsHelpLink")
@@ -304,8 +323,8 @@ Page {
     CheckboxInput {
       id: appExclusionCheckbox
       visible: Qt.platform.os !== 'osx'
-      label: uiTr("App Exclusions")
-      info: uiTr("Excluded apps bypass the VPN and connect directly to the Internet.")
+      label: uiTr("Split Tunnel")
+      info: parent.splitTunnelInfo
       isBeta: true
       linkText: Messages.helpLabel
       linkTarget: BrandHelper.getBrandParam("appExclusionsHelpLink")

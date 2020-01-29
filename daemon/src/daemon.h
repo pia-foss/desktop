@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -28,6 +28,7 @@
 #include "jsonrpc.h"
 #include "latencytracker.h"
 #include "portforwarder.h"
+#include "socksserverthread.h"
 #include "updatedownloader.h"
 #include "vpn.h"
 #include "apiclient.h"
@@ -105,9 +106,8 @@ struct FirewallParams
 {
     QStringList dnsServers;
     QSharedPointer<NetworkAdapter> adapter;
-    QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
 
-    // The follow flags indicate which general rulesets are needed. Note that
+    // The following flags indicate which general rulesets are needed. Note that
     // this is after some sanity filtering, i.e. an allow rule may be listed
     // as not needed if there were no block rules preceding it. The rulesets
     // should be thought of as in last-match order.
@@ -121,7 +121,38 @@ struct FirewallParams
     bool allowPIA;      // Exempt PIA executables
     bool allowLoopback; // Exempt loopback traffic
     bool allowHnsd;     // Exempt Handshake DNS traffic
-    bool allowVpnExemptions; // Exempt specified traffic from the tunnel (route it over the physical uplink instead)
+
+    // Have we connected to the VPN since it was enabled?  (Some rules are only
+    // activated once we successfully connect, but remain active even if we lose
+    // the connection while reconnecting.)
+    bool hasConnected;
+    // When connected or connecting, whether the VPN is being used as the
+    // default route.  ('true' when not connected.)
+    bool defaultRoute;
+
+    // Whether to enable split tunnel.  Split tunnel is enabled whenever the
+    // setting is enabled, even if the PIA client is not logged in.  This is
+    // important to block Only VPN apps - otherwise, they may leak even after
+    // PIA is started/connected, because they could have existing connections
+    // that were permitted.
+    //
+    // Bypass VPN apps though are only affected when we connect (see
+    // splitTunnelNetScan) - persistent connections from those apps would be
+    // fine since they bypass the VPN anyway.
+    //
+    // On Mac, this causes the kext to be loaded, but on Windows the WFP callout
+    // is not loaded until we connect (app blocks can be implemented in WFP
+    // without loading the callout driver).
+    bool enableSplitTunnel;
+    // Original network information used to manage Bypass VPN apps for split
+    // tunnel.  This is only valid while connecting/connected (cleared when
+    // disconnected) with split tunnel enabled.
+    //
+    // This enables Bypass VPN app behavior for split tunnel (if
+    // enableSplitTunnel is also set).
+    OriginalNetworkScan splitTunnelNetScan;
+    QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
+    QVector<QString> vpnOnlyApps; // Apps to force on the VPN
 };
 Q_DECLARE_METATYPE(FirewallParams)
 
@@ -374,6 +405,7 @@ protected:
     LatencyTracker _latencyTracker;
     PortForwarder *_portForwarder;
     JsonRefresher _regionRefresher, _shadowsocksRefresher;
+    SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;
 

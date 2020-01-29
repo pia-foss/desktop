@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -59,6 +59,7 @@ public:
     operator Handle_t() const {return _handle;}
     Handle_t get() const {return _handle;}
     Handle_t *receive() {*this = {}; return &_handle;}
+    void swap(WinGenericHandle &other) {std::swap(_handle, other._handle);}
 
 private:
     Handle_t _handle;

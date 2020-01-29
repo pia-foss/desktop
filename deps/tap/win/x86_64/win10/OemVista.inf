@@ -55,7 +55,7 @@
 
 ; This version number should match the version
 ; number given in ..\version.m4.
-   DriverVer = 04/23/2019,9.23.3.601
+   DriverVer = 09/27/2019,9.24.2.601
 
 [Strings]
    DeviceDescription = "Private Internet Access Network Adapter"
@@ -88,10 +88,10 @@
    CopyFiles       = tap-pia-0901.driver, tap-pia-0901.files
    AddReg          = tap-pia-0901.reg
    AddReg          = tap-pia-0901.params.reg
-   Characteristics = 0x81
-   *IfType            = 0x6 ; IF_TYPE_ETHERNET_CSMACD
+   Characteristics = 0x1
+   *IfType            = 53  ; IF_TYPE_PROP_VIRTUAL
    *MediaType         = 0x0 ; NdisMedium802_3
-   *PhysicalMediaType = 14  ; NdisPhysicalMedium802_3
+   *PhysicalMediaType = 0   ; NdisPhysicalMediumUnspecified
 
 [tap-pia-0901.ndi.Services]
    AddService = tap-pia-0901,        2, tap-pia-0901.service

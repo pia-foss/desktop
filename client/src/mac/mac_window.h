@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -33,5 +33,10 @@ void disableShowInDock();
 
 // Create the NativeWindowMetrics implementation.
 std::unique_ptr<NativeWindowMetrics> macCreateWindowMetrics();
+
+// Check if no window is currently focused on Mac, and deactivate the app if so.
+// This is necessary to focus the next application if the last PIA window is
+// closed.
+void macCheckAppDeactivate();
 
 #endif //MAC_WINDOW_H

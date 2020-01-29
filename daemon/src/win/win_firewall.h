@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -459,6 +459,8 @@ public:
     explicit operator bool() const {return _pBlob;}
     bool operator!() const {return empty();}
 
+    void swap(AppIdKey &other) {std::swap(_pBlob, other._pBlob);}
+
     bool empty() const {return !_pBlob;}
     // data() returns a mutable FWP_BYTE_BLOB* since the corresponding member of
     // FWP_CONDITION_VALUE is not const
@@ -508,8 +510,8 @@ inline QDebug &operator<<(QDebug &dbg, const AppIdKey &appId)
     return dbg;
 }
 
-template<FWP_IP_VERSION ipVersion>
-struct AppIdFilter : public ConditionalFirewallFilter<1, FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, ipVersion>
+template<FWP_IP_VERSION ipVersion, FWP_ACTION_TYPE action=FWP_ACTION_PERMIT>
+struct AppIdFilter : public ConditionalFirewallFilter<1, action, FWP_DIRECTION_OUTBOUND, ipVersion>
 {
     // Create an AppIdFilter with a valid app ID (appId must not be empty)
     AppIdFilter(const AppIdKey &appId, uint8_t weight = 10) : ConditionalFirewallFilter(weight)
@@ -525,10 +527,10 @@ struct SplitFilter : public AppIdFilter<ipVersion>
     // The split filter rule causes the callout to be invoked for the specified
     // app.  Provide the GUID of the callout object that will be invoked.
     SplitFilter(const AppIdKey &appId, const GUID &calloutKey,
-                const GUID &provCtxt, uint8_t weight = 10)
+                const GUID &layerKey, const GUID &provCtxt, uint8_t weight = 10)
         : AppIdFilter(appId, weight)
     {
-        this->layerKey = FWPM_LAYER_ALE_BIND_REDIRECT_V4;
+        this->layerKey = layerKey;
         this->action.type = FWP_ACTION_CALLOUT_TERMINATING;
         this->action.calloutKey = calloutKey;
         this->subLayerKey = FWPM_SUBLAYER_UNIVERSAL; // should we introduce our own sublayer?

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -96,6 +96,19 @@ class TableCellButton : public TableCellButtonBase
 public:
     TableCellButton()
         : TableCellButtonBase{QAccessible::Role::Button,
+                              QAccessibleActionInterface::pressAction()}
+    {}
+};
+
+/*** Drop-down button ***/
+
+// Table drop-down button - just a generic button with the proper role
+class TableCellDropDownButton : public TableCellButtonBase
+{
+    Q_OBJECT
+public:
+    TableCellDropDownButton()
+        : TableCellButtonBase{QAccessible::Role::ComboBox,
                               QAccessibleActionInterface::pressAction()}
     {}
 };

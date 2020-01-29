@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -34,7 +34,6 @@ JsonRefresher::JsonRefresher(QString name, ApiBase &apiBaseUris,
       _resource{std::move(resource)},
       _initialInterval{std::move(initialInterval)},
       _refreshInterval{std::move(refreshInterval)},
-      _pNetworkManager{TestShim::create<QNetworkAccessManager>()},
       _signatureKey{std::move(signatureKey)}
 {
     connect(&_refreshTimer, &QTimer::timeout, this,
@@ -59,7 +58,7 @@ void JsonRefresher::refreshTimerElapsed()
                                         QNetworkAccessManager::GetOperation,
                                         _apiBaseUris, _resource,
                                         ApiRetries::counted(_apiBaseUris.getUriCount()),
-                                        {}, {}, _pNetworkManager}};
+                                        {}, {}}};
     // Use next() instead of notify() so we can abandon the task (if the
     // JsonRefresher is stopped) by dropping our reference to the outermost
     // task.

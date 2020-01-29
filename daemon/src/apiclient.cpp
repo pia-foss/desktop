@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -59,8 +59,7 @@ namespace
 }
 
 ApiClient::ApiClient()
-    : _pNetworkManager{TestShim::create<QNetworkAccessManager>()},
-      _nextApiBaseUrl{0}
+    : _nextApiBaseUrl{0}
 {
 }
 
@@ -88,8 +87,7 @@ Async<QByteArray> ApiClient::requestRetry(QNetworkAccessManager::Operation verb,
                                                apiResource,
                                                std::move(pRetryStrategy),
                                                data,
-                                               std::move(auth),
-                                               _pNetworkManager);
+                                               std::move(auth));
 }
 
 Async<QJsonDocument> ApiClient::get(QString resource, QByteArray auth)

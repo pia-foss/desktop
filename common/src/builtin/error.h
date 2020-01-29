@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -98,6 +98,7 @@ public:
         ApiRateLimitedError,
         ApiBadResponseError,
         ApiUnauthorizedError,
+        ApiInterfaceError,  // Need to use a specific interface for the API request, but the interface isn't ready
 
         VersionUnparseableError = 1300,
 

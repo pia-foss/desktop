@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -26,6 +26,7 @@
 #include "version.h"
 #include "path.h"
 #include "apiclient.h"
+#include "apinetwork.h"
 #include "openssl.h"
 #include "brand.h"
 #include <QNetworkReply>
@@ -453,7 +454,7 @@ Async<DownloadResult> UpdateDownloader::downloadUpdate()
     }
 
     QNetworkRequest downloadReq{availableUpdate.uri()};
-    _pDownloadReply = _networkManager.get(downloadReq);
+    _pDownloadReply = ApiNetwork::instance()->getAccessManager().get(downloadReq);
     _pDownloadReply->setParent(this);
     _pDownloadTask = Async<DownloadResult>::create();
     _downloadingVersion = availableUpdate.version();

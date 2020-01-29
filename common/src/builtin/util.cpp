@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -54,7 +54,7 @@
 # endif
 #endif
 
-std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command)
+std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command, bool showDebug)
 {
     QProcess p;
     p.start(QStringLiteral("/bin/bash"), { QStringLiteral("-c"), command });
@@ -67,6 +67,12 @@ std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command)
     if(exitCode != 0)
     {
         qWarning().noquote() << "Command:" << command << command << "failed with exit code:" << exitCode << "\n"
+            << "STDERR:" << err << "\n"
+            << "STDOUT:" << out;
+    }
+    else if(showDebug)
+    {
+        qInfo() << "Executed" << command << "\n"
             << "STDERR:" << err << "\n"
             << "STDOUT:" << out;
     }

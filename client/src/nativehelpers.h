@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -178,6 +178,8 @@ public:
     void requestDashboardReopen();
 
     Q_INVOKABLE void openSecurityPreferencesMac();
+
+    Q_INVOKABLE void checkAppDeactivate();
 
 signals:
     // Emitted when the application loses focus (no window in the application is

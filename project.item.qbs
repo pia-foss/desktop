@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -28,9 +28,10 @@ Project {
   minimumQbsVersion: "1.10"
 
   property string productName: brandName
-  property string productVersion: "1.7.0"
-  property string productPrerelease: ""
+  property string productVersion: "1.8.0"
+  property string productPrerelease: "beta.1"
   property string brandCode: "pia"
+  id: piaProject
 
   // Override this to 'true' to run macdeployqt on mac builds.  This only works
   // if the output directory is clean, because macdeployqt can't be re-run on
@@ -68,8 +69,8 @@ Project {
   Probe {
     id: brand
 
-    property string brandCode: project.brandCode
-    property string sourceDir: project.sourceDirectory
+    property string brandCode: piaProject.brandCode
+    property string sourceDir: piaProject.sourceDirectory
 
     property string brandName
     property string brandIdentifier

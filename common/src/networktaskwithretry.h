@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -55,8 +55,7 @@ public:
     NetworkTaskWithRetry(QNetworkAccessManager::Operation verb,
                          ApiBase &apiBaseUris, QString resource,
                          std::unique_ptr<ApiRetry> pRetryStrategy,
-                         const QJsonDocument &data, QByteArray authHeaderVal,
-                         QSharedPointer<QNetworkAccessManager> pNetworkManager);
+                         const QJsonDocument &data, QByteArray authHeaderVal);
     ~NetworkTaskWithRetry();
 
 private:
@@ -76,7 +75,6 @@ private:
     QString _resource;
     QByteArray _data;
     QByteArray _authHeaderVal;
-    QSharedPointer<QNetworkAccessManager> _pNetworkManager;
     Async<QByteArray> _pNetworkReply;
     // ApiRateLimitedError is retriable but causes us to return that instead of
     // the generic error if we don't encounter an auth error.

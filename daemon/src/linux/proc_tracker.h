@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -68,37 +68,52 @@ public:
     }
 
 public slots:
-    void initiateConnection(const OriginalNetworkScan &netScan, const FirewallParams &params);
+    void initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
+                            QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
     void readFromSocket(int socket);
-    void updateExcludedApps(QVector<QString> excludedApps);
     void shutdownConnection();
-    void updateNetwork(const OriginalNetworkScan &netScan, const FirewallParams &params);
+    void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
+    using AppMap = QHash<QString, QSet<pid_t>>;
+
     void showError(QString funcName);
 
     int subscribeToProcEvents(int sock, bool enable);
-    void addPidToExclusions(pid_t pid);
-    void removePidFromExclusions(pid_t pid);
-    void addChildPidsToExclusions(pid_t parentPid);
-    void removeChildPidsFromExclusions(pid_t parentPid);
-    void removeApps(const QVector<QString> &removedApps);
+    void addPidToCgroup(pid_t pid, const Path &cGroupPath);
+    void removePidFromCgroup(pid_t pid, const Path &cGroupPath);
+    void addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath);
+    void removeChildPidsFromCgroup(pid_t parentPid, const Path &cGroupPath);
+    // Remove apps that are no longer in this group - removes apps and PIDs from
+    // appMap that do not appear in keepApps
+    void removeApps(const QVector<QString> &keepApps, AppMap &appMap);
+    void addApps(const QVector<QString> &apps, AppMap &appMap, QString cGroupPath);
     void removeAllApps();
     void writePidToCGroup(pid_t pid, const QString &cGroupPath);
     QSet<pid_t> pidsForPath(const QString &path);
     QString pathForPid(pid_t pid);
+    void addLaunchedApp(pid_t pid);
+    void removeTerminatedApp(pid_t pid);
     void updateMasquerade(QString interfaceName);
-    void updateRoutes(QString gatewayIp, QString interfaceName);
+    void updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress);
+    void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
+                       QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
     void addRoutingPolicyForSourceIp(QString ipAddress);
     void removeRoutingPolicyForSourceIp(QString ipAddress);
     void setupFirewall();
     void teardownFirewall();
+    void setupReversePathFiltering();
+    void teardownReversePathFiltering();
+    void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
-    using AppMap = QHash<QString, QSet<pid_t>>;
     QPointer<QSocketNotifier> _readNotifier;
     OriginalNetworkScan _previousNetScan;
-    AppMap _appMap;
+    QString _previousRPFilter;
+    AppMap _exclusionsMap;
+    AppMap _vpnOnlyMap;
     int _sockFd;
 };
 

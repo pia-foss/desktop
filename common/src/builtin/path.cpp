@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -61,6 +61,7 @@ Path Path::SplitTunnelKextPath;
 #endif
 #ifdef Q_OS_LINUX
 Path Path::VpnExclusionsFile;
+Path Path::VpnOnlyFile;
 Path Path::ParentVpnExclusionsFile;
 #endif
 #ifdef PIA_CLIENT
@@ -274,6 +275,7 @@ void Path::initializePostApp()
 #ifdef Q_OS_LINUX
     // Currently only tested on Ubuntu
     VpnExclusionsFile = Path { "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/cgroup.procs" };
+    VpnOnlyFile = Path { "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnonly/cgroup.procs" };
     ParentVpnExclusionsFile = Path { "/sys/fs/cgroup/net_cls/cgroup.procs" };
 #endif
 

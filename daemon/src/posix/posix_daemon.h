@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -60,9 +60,14 @@ private:
         {
             auto pSplitTunnelHelper = new T(&_commThread.objectOwner());
             connect(this, &PosixDaemon::startSplitTunnel, pSplitTunnelHelper, &T::initiateConnection);
-            connect(this, &PosixDaemon::updateExcludedApps, pSplitTunnelHelper, &T::updateExcludedApps);
-            connect(this, &PosixDaemon::updateSplitTunnelNetwork, pSplitTunnelHelper, &T::updateNetwork);
-            connect(this, &PosixDaemon::shutdownSplitTunnel, pSplitTunnelHelper, &T::shutdownConnection);
+            connect(this, &PosixDaemon::updateSplitTunnel, pSplitTunnelHelper, &T::updateSplitTunnel);
+            // Block the caller for shutdown.  The slot invocation is still
+            // queued in the proper order with respect to the other changes, but
+            // the caller will wait for it.  This is necessary on Mac to ensure
+            // that the kext connection is closed before attempting to unload
+            // the kext.
+            connect(this, &PosixDaemon::shutdownSplitTunnel, pSplitTunnelHelper, &T::shutdownConnection,
+                    Qt::ConnectionType::BlockingQueuedConnection);
         });
     }
 
@@ -74,10 +79,9 @@ private:
     // Thread for communicating with split tunnel helpers (kexts, process managers, etc)
     RunningWorkerThread _commThread;
 
-    // The current network configuration applied to split tunnel.  Indicates
-    // whether it is currently active (whether we last emitted
-    // startSplitTunnel() / shutdownSplitTunnel()).  The actual value is only
-    // used for tracing.
+    // The current configuration applied to split tunnel - whether it is
+    // enabled, and the network info for bypass apps.
+    bool _enableSplitTunnel;
     OriginalNetworkScan _splitTunnelNetScan;
 
 #ifdef Q_OS_MAC
@@ -85,10 +89,13 @@ private:
 #endif
 
 signals:
-    void startSplitTunnel(const OriginalNetworkScan &netScan, const FirewallParams &params);
+    void startSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                          QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                          QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
     void shutdownSplitTunnel();
-    void updateSplitTunnelNetwork(const OriginalNetworkScan &netScan, const FirewallParams &params);
-    void updateExcludedApps(QVector<QString> excludedApps);
+    void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 };
 
 void setUidAndGid();

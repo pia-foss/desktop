@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -81,12 +81,13 @@ int WinConsole::installTapDriver(bool force)
 
 int WinConsole::uninstallTapDriver()
 {
-    return ::uninstallTapDriver(true);
+    return ::uninstallTapDriver(true, false);
 }
 
 int WinConsole::reinstallTapDriver()
 {
-    return ::uninstallTapDriver(false), ::installTapDriver(qUtf16Printable(getInfPath()), false, true, false);
+    ::uninstallTapDriver(false, false);
+    return ::installTapDriver(qUtf16Printable(getInfPath()), false, true, false);
 }
 
 int WinConsole::installCalloutDriver()

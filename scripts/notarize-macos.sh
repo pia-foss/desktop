@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -92,10 +92,14 @@ do
     then
         echo "Package has been approved"
         break;
-    else
-        echo "Notarization might have failed"
+    elif [[ $notarizationStatus == *"invalid"* ]];
+    then
+        echo "Notarization invalid"
         echo "$notarizationStatus"
         exit 3
+    else
+        echo "Unknown notarization status"
+        echo "$notarizationStatus"
     fi
 
     sleep 5

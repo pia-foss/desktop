@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -177,35 +177,20 @@ QVector<WhitelistPort> PidFinder::ports(const QSet<pid_t> &pids)
     return ports;
 }
 
-struct ProcQuery
-{
-    KextClient::CommandType command;
-    char needs_reply;
-    char app_path[PATH_MAX];
-    int pid;
-    int accept;
-    uint32_t id;
-    uint32_t source_ip;
-    uint32_t source_port;
-    uint32_t dest_ip;
-    uint32_t dest_port;
-
-    // SOCK_STREAM or SOCK_DGRAM (tcp or udp)
-    int socket_type;
-};
-
 void KextClient::showError(QString funcName)
 {
     qWarning() << QStringLiteral("%1 Error (code: %2) %3").arg(funcName).arg(errno).arg(qPrintable(qt_error_string(errno)));
 }
 
-int KextClient::connectToKext(const OriginalNetworkScan &netScan, const FirewallParams &params)
+void KextClient::initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
+                                    QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
 {
     qInfo() << "Attempting to connect to kext";
     if(_state == State::Connected)
     {
         qWarning() << "Already connected to kext, disconnecting before reconnecting.";
         shutdownConnection();
+        QThread::msleep(200);
     }
 
     qInfo() << "sizeof(ProcQuery) is: " << sizeof(ProcQuery);
@@ -216,7 +201,7 @@ int KextClient::connectToKext(const OriginalNetworkScan &netScan, const Firewall
     if(sock < 0)
     {
         showError("::socket");
-        return -1;
+        return;
     }
 
     // Set close on exec flag, to prevent socket being inherited by
@@ -232,7 +217,7 @@ int KextClient::connectToKext(const OriginalNetworkScan &netScan, const Firewall
     {
         showError("::ioctl");
         ::close(sock);
-        return -1;
+        return;
     }
 
     sockaddr_ctl sc = {};
@@ -247,25 +232,27 @@ int KextClient::connectToKext(const OriginalNetworkScan &netScan, const Firewall
     {
         showError("::connect");
         ::close(sock);
-        return -1;
+        return;
     }
 
     // We're successfully connected so save the socket fd to our ivar
     _sockFd = sock;
     _state = State::Connected;
 
-    updateNetwork(netScan, params);
-    sendExistingPids(params.excludeApps);
-    updateExcludedApps(params.excludeApps);
+    updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
+                      tunnelDeviceRemoteAddress, params.excludeApps,
+                      params.vpnOnlyApps);
 
     _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
     connect(_readNotifier, &QSocketNotifier::activated, this, &KextClient::readFromSocket);
 
     qInfo() << "Successfully connected to kext!";
-
-    return 0;
 }
 
+// NOTE: we do not need to send existing PIDs for "vpnOnly" apps - this is because:
+// vpnOnly apps are automatically whitelisted when routeDefault=true as they're on the VPN (which is allowed)
+// and when routeDefault=false the IP filter is disabled anyway (we don't need a kernel firewall as the killswitch cannot function when routeDefault=false)
+//
 // Send PIDs to Kext for the excluded apps running prior to enabling split tunnel.
 // This is necessary as existing connections must be excluded in a different way
 // We can't just attach to the socket as the sockets already exist and are connected,
@@ -291,33 +278,27 @@ void KextClient::sendExistingPids(const QVector<QString> &excludedApps)
                  ports.size() * sizeof(ports[0]));
 }
 
-void KextClient::removeCurrentBoundRoute()
+void KextClient::removeCurrentBoundRoute(const QString &ipAddress, const QString &interfaceName)
 {
-    // Nothing to do, so return - this will happen when we first start up the KextClient
-    if(_previousNetScan.gatewayIp().isEmpty() || _previousNetScan.interfaceName().isEmpty())
+
+    if(ipAddress.isEmpty() || interfaceName.isEmpty())
     {
-        qInfo() << "Did not find bound route, nothing to remove";
+        qInfo() << "No bound route to remove!";
         return;
     }
 
     qInfo() << "Removing bound route";
     QString routeCmd = QStringLiteral("route delete 0.0.0.0 %1 -ifscope %2")
-        .arg(_previousNetScan.gatewayIp()).arg(_previousNetScan.interfaceName());
+        .arg(ipAddress, interfaceName);
     qInfo() << "Executing" << routeCmd;
     ::shellExecute(routeCmd);
 }
 
-void KextClient::createBoundRoute(const OriginalNetworkScan &updatedScan)
+void KextClient::createBoundRoute(const QString &ipAddress, const QString &interfaceName)
 {
-    if(updatedScan.gatewayIp().isEmpty() || updatedScan.interfaceName().isEmpty())
-    {
-        qInfo() << "Not creating bound route rule - gatewayIp or interfaceName is empty!";
-        return;
-    }
-
     qInfo() << "Adding new bound route";
     QString routeCmd = QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2")
-        .arg(updatedScan.gatewayIp()).arg(updatedScan.interfaceName());
+        .arg(ipAddress, interfaceName);
     qInfo() << "Executing" << routeCmd;
     ::shellExecute(routeCmd);
 }
@@ -326,39 +307,46 @@ void KextClient::updateFirewall(QString ipAddress)
 {
     if(ipAddress.isEmpty())
     {
-        qInfo() << "Not updating firewall rule - ipAddress is empty!";
-        return;
+        qInfo() << "Removing firewall rule - empty split tunnel IP address";
+        PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName, false, {});
     }
-
-    qInfo() << "Updating the firewall rule for new ip" << ipAddress;
-    PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName,
-        true, { QStringLiteral("pass out from %1 no state").arg(ipAddress)});
+    else
+    {
+        qInfo() << "Updating the firewall rule for new ip" << ipAddress;
+        PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName,
+            true, { QStringLiteral("pass out from %1 no state").arg(ipAddress)});
+    }
 }
 
 void KextClient::updateIp(QString ipAddress)
 {
-    if(ipAddress.isEmpty())
-    {
-        qInfo() << "Not updating IP - ipAddress is empty!";
-        return;
-    }
-
     u_int32_t ip_address = 0;
-    ::inet_pton(AF_INET, qPrintable(ipAddress), &ip_address);
+    // If the IP address is empty, send 0 to the kernel extension.  This keeps
+    // the kext in sync with the firewall rule above - the purpose of this IP is
+    // to tell the kext what IP we have permitted through the firewall that it
+    // needs to apply the per-app filter to, and at this point we have disabled
+    // that rule.
+    if(!ipAddress.isEmpty())
+        ::inet_pton(AF_INET, qPrintable(ipAddress), &ip_address);
     qInfo() << "Sending ip address to kext:" << ipAddress;
     ::setsockopt(_sockFd, SYSPROTO_CONTROL, PIA_IP_SET, &ip_address, sizeof(ip_address));
 }
 
-void KextClient::updateKextFirewall(const FirewallParams &params)
+void KextClient::updateKextFirewall(const FirewallParams &params, bool isConnected)
 {
-    FirewallState updatedState { params.blockAll, params.allowLAN };
+    FirewallState updatedState { params.blockAll, params.allowLAN, params.defaultRoute, isConnected };
 
     qInfo() << "Updating Kext firewall, new state is: killswitchActive:"
             << updatedState.killswitchActive
             << "allowLAN:"
-            << updatedState.allowLAN;
+            << updatedState.allowLAN
+            << "routeDefault:"
+            << params.defaultRoute
+            << "isConnected:"
+            << isConnected;
 
-    if(updatedState.allowLAN != _firewallState.allowLAN || updatedState.killswitchActive != _firewallState.killswitchActive)
+    if(updatedState.allowLAN != _firewallState.allowLAN || updatedState.killswitchActive != _firewallState.killswitchActive
+        || updatedState.defaultRoute != _firewallState.defaultRoute || updatedState.isConnected != _firewallState.isConnected)
     {
         qInfo() << "Sending updated firewall state to kext";
         ::setsockopt(_sockFd, SYSPROTO_CONTROL, PIA_FIREWALL_STATE, &updatedState, sizeof(FirewallState));
@@ -366,46 +354,66 @@ void KextClient::updateKextFirewall(const FirewallParams &params)
     }
 }
 
-void KextClient::updateNetwork(const OriginalNetworkScan &updatedScan, const FirewallParams &params)
+void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
+                               QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
 {
     qInfo() << "Updating Network";
 
     // The kext maintains its own IP filter firewall and needs to be kept in sync with our pf firewall
-    updateKextFirewall(params);
+    updateKextFirewall(params, !tunnelDeviceName.isEmpty());
 
     // We *always* update the bound route as it's possible a user connected to another network
     // with the same gateway IP/interface/IP. In this case the system may wipe our bound route so we have to recreate it.
     // Note this does result in constantly deleting/recreating the bound route for every firewall change but it doesn't appear
     // to affect connectivity of apps, so it should be ok.
-    removeCurrentBoundRoute();
-    createBoundRoute(updatedScan);
+    if(_previousNetScan.isValid())
+        removeCurrentBoundRoute(_previousNetScan.gatewayIp(), _previousNetScan.interfaceName());
 
-    if(_previousNetScan.ipAddress() != updatedScan.ipAddress())
+    // If we're connected, create a bound route for the physical interface, so
+    // bound sockets for excluded apps will route correctly.
+    // Don't create this when we're not connected; the network info may not be
+    // up to date, and it would create a routing conflict.
+    if(params.splitTunnelNetScan.isValid())
     {
-        updateFirewall(updatedScan.ipAddress());
-        updateIp(updatedScan.ipAddress());
+        createBoundRoute(params.splitTunnelNetScan.gatewayIp(), params.splitTunnelNetScan.interfaceName());
+
+        // If we were ignoring excluded apps before (since we didn't have this
+        // info), enumerate them now to permit through the firewall
+        if(!_previousNetScan.isValid())
+            sendExistingPids(_excludedApps);
+    }
+
+    // If the VPN does not have the default route, create a bound route for the
+    // VPN interface, so sockets explicitly bound to that interface will work
+    // (they could be bound by our kext, bound by the daemon, or bound by an app
+    // that is configured to use the VPN interface).
+    if(!params.defaultRoute)
+    {
+        // We don't know the tunnel interface info right away; these are found
+        // later.  (Split tunnel is started immediately to avoid blips for apps
+        // that bypass the VPN.)
+        if(tunnelDeviceName.isEmpty() || tunnelDeviceRemoteAddress.isEmpty())
+        {
+            qInfo() << "Can't create bound route for VPN network yet - interface:"
+                << tunnelDeviceName << "- remote:" << tunnelDeviceRemoteAddress;
+        }
+        else
+        {
+            // We don't need to remove the previous bound route as if the IP changes that means the interface went down, which will destroy that route
+            createBoundRoute(tunnelDeviceRemoteAddress, tunnelDeviceName);
+        }
+    }
+
+    if(_previousNetScan.ipAddress() != params.splitTunnelNetScan.ipAddress())
+    {
+        updateFirewall(params.splitTunnelNetScan.ipAddress());
+        updateIp(params.splitTunnelNetScan.ipAddress());
     }
 
     // Update our network info
-    _previousNetScan = updatedScan;
-}
-
-void KextClient::initiateConnection(const OriginalNetworkScan &netScan, const FirewallParams &params)
-{
-    int retryCount = 5;
-    for(int i=1; i < retryCount+1; ++i)
-    {
-        int rv = connectToKext(netScan, params);
-
-        // Only retry if connectToKext failed with errno set to EBUSY (errno is thread-safe)
-        if(rv == 0 || errno != EBUSY)
-            return;
-
-        QThread::msleep(100);
-        qWarning() << "Failed to connect to Kext, trying again. " << i << "of" << retryCount;
-    }
-
-    qWarning() << "Giving up. Failed to connect to Kext";
+    _previousNetScan = params.splitTunnelNetScan;
+    _tunnelDeviceName = tunnelDeviceName;
+    _tunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
 }
 
 void KextClient::teardownFirewall()
@@ -437,9 +445,10 @@ void KextClient::shutdownConnection()
 
     // Remove all firewall rules
     teardownFirewall();
-    removeCurrentBoundRoute();
+    removeCurrentBoundRoute(_previousNetScan.ipAddress(), _previousNetScan.interfaceName());
 
      _excludedApps = {};
+     _vpnOnlyApps = {};
 
     _sockFd = -1;
 
@@ -448,23 +457,58 @@ void KextClient::shutdownConnection()
 
     // Ensure we reset our Kext firewall state
     _firewallState = {};
+    _tunnelDeviceName.clear();
+
+    // Discard the trace cache
+    qInfo() << "Discarding" << _tracedResponses.size() << "trace cache entries";
+    for(const auto &tracedResponse : _tracedResponses)
+    {
+        qInfo() << "Discarding trace cache for PID"
+            << tracedResponse.response.pid << "-"
+            << tracedResponse.response.app_path << "-"
+            << tracedResponse.count << "responses";
+    }
+    _tracedResponses.clear();
 
     _state = State::Disconnected;
     qInfo() << "Successfully disconnected from Kext";
 }
 
-void KextClient::manageWebKitExclusions(QVector<QString> &excludedApps)
+void KextClient::updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
+                                   QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                                   QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
-    // If the system WebKit framework is excluded, exclude this staged framework
-    // path too.  Newer versions of Safari use this.
-    if(excludedApps.contains(webkitFrameworkPath) &&
-        !excludedApps.contains(stagedWebkitFrameworkPath))
+    // Update apps first - updateNetwork() will enumerate the updated bypass
+    // apps if we start tracking bypass apps
+    updateApps(params.excludeApps, params.vpnOnlyApps);
+    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress, tunnelDeviceRemoteAddress);
+}
+
+void KextClient::manageWebKitApps(QVector<QString> &apps)
+{
+    // If the system WebKit framework is excluded/vpnOnly, add this staged framework
+    // path too. Newer versions of Safari use this.
+    if(apps.contains(webkitFrameworkPath) &&
+        !apps.contains(stagedWebkitFrameworkPath))
     {
-        excludedApps.push_back(stagedWebkitFrameworkPath);
+        apps.push_back(stagedWebkitFrameworkPath);
     }
 }
 
-void KextClient::updateExcludedApps(QVector<QString> excludedApps)
+QVector<QString> KextClient::findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps)
+{
+    QVector<QString> removedApps;
+
+    for(const auto &app : oldApps)
+    {
+        if(!newApps.contains(app))
+            removedApps.push_back(app);
+    }
+
+    return removedApps;
+}
+
+void KextClient::updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
     if(_state == State::Disconnected)
     {
@@ -472,33 +516,28 @@ void KextClient::updateExcludedApps(QVector<QString> excludedApps)
         return;
     }
 
-    // Possibly modify exclusions vector to handle webkit/safari apps
-    manageWebKitExclusions(excludedApps);
+    // Possibly modify vpnOnly/exclusions vector to handle webkit/safari apps
+    manageWebKitApps(excludedApps);
+    manageWebKitApps(vpnOnlyApps);
 
     // If nothing has changed, just return
-    if(_excludedApps == excludedApps)
-        return;
-
-    QVector<QString> removedApps;
-    for(const auto &app : _excludedApps)
+    if(_excludedApps != excludedApps)
     {
-        if(!excludedApps.contains(app))
-            removedApps.push_back(app);
+        removeApps(findRemovedApps(excludedApps, _excludedApps));
+        _excludedApps = std::move(excludedApps);
+        for(const auto &app : _excludedApps) qInfo() << "Excluded Apps:" << app;
     }
 
-    _excludedApps.swap(excludedApps);
-
-    for(const auto &app : _excludedApps)
+    if(_vpnOnlyApps != vpnOnlyApps)
     {
-        qInfo() << "Excluding:" << app;
+        removeApps(findRemovedApps(vpnOnlyApps, _vpnOnlyApps));
+        _vpnOnlyApps = std::move(vpnOnlyApps);
+        for(const auto &app : _vpnOnlyApps) qInfo() << "VPN Only Apps:" << app;
     }
 
-    removeApps(removedApps);
-    qInfo() << "Updated excluded apps";
+    qInfo() << "Updated apps";
 }
 
-// Function below temporarily out of commission
-// Need to implement it in a way that doesn't result in kernel panics
 void KextClient::removeApps(const QVector<QString> removedApps)
 {
     if(_state == State::Disconnected) return;
@@ -528,19 +567,58 @@ void KextClient::readFromSocket(int socket)
     processCommand(procQuery, procResponse);
 
     if(procQuery.needs_reply)
+    {
         // Send reply back to Kext using setsockopt()  - ::send() turned out to be unreliable
         setsockopt(socket, SYSPROTO_CONTROL, PIA_MSG_REPLY, &procResponse, sizeof(procResponse));
 
-    // Log the request/response for app verification (i.e should this process be excluded?)
-    if(procResponse.accept)
-    {
-        qInfo() << QStringLiteral("<KEXT REQUEST> .command %1 .pid %2 .message_id %3")
-            .arg(procQuery.command).arg(procQuery.pid).arg(procQuery.id);
+        // Log the request/response for app verification (i.e should this process be excluded?)
+        if(procResponse.accept)
+        {
+            // Have we recently traced for this PID?
+            // A linear search is OK since we limit the size of this container
+            auto itTracedResponse = std::find_if(_tracedResponses.begin(), _tracedResponses.end(),
+                [&](const auto &traced){return traced.response.pid == procResponse.pid;});
+            TracedResponse *pTracedResponse = nullptr;
+            if(itTracedResponse != _tracedResponses.end())
+            {
+                pTracedResponse = &*itTracedResponse;
+            }
+            else
+            {
+                // Have not recently traced this PID, add it
+                _tracedResponses.push_back({});
+                // If the container is over the limit, drop the oldest entry
+                if(_tracedResponses.size() > 20)
+                {
+                    qInfo() << "Discarding trace cache for PID"
+                        << _tracedResponses.front().response.pid << "-"
+                        << _tracedResponses.front().response.app_path << "-"
+                        << _tracedResponses.front().count << "responses";
+                    _tracedResponses.pop_front();
+                }
+                pTracedResponse = &_tracedResponses.back();
+            }
+            // Consequence of above
+            Q_ASSERT(pTracedResponse);
+            ++pTracedResponse->count;
 
-        if(procQuery.needs_reply)
-            qInfo() << QStringLiteral("<KEXT RESPONSE> .command %1 .pid %2 .message_id %3 .accept %4 .app_path %5")
-                .arg(procResponse.command).arg(procResponse.pid).arg(procResponse.id)
-                .arg(procResponse.accept).arg(procResponse.command == VerifyApp ? procResponse.app_path : "N/A");
+            // Trace if:
+            // - this is one of the first 3 responses
+            // - every hundredth response after that
+            // - accept, rule_type, or bind_ip have changed
+            if(pTracedResponse->count <= 3 || (pTracedResponse->count % 100) == 0 ||
+               pTracedResponse->response.accept != procResponse.accept ||
+               pTracedResponse->response.rule_type != procResponse.rule_type ||
+               pTracedResponse->response.bind_ip != procResponse.bind_ip)
+            {
+                qInfo() << QStringLiteral("<KEXT RESPONSE> command: %1 pid: %2 (#%3) message_id: %4 accept: %5 bind_ip: %6 app_path: %7")
+                    .arg(qEnumToString(procResponse.command)).arg(procResponse.pid)
+                    .arg(pTracedResponse->count).arg(procResponse.id)
+                    .arg(procResponse.accept).arg(QHostAddress{ntohl(procResponse.bind_ip)}.toString())
+                    .arg(procResponse.command == VerifyApp ? procResponse.app_path : "N/A");
+                pTracedResponse->response = procResponse;
+            }
+        }
     }
 }
 
@@ -563,6 +641,7 @@ void KextClient::verifyApp(const ProcQuery &procQuery, ProcQuery &procResponse)
     procResponse.id = procQuery.id;
     procResponse.command = procQuery.command;
     procResponse.pid = procQuery.pid;
+    procResponse.accept = false;
 
     // Convert the PID to an app path on disk
     proc_pidpath(procQuery.pid, procResponse.app_path, sizeof(procResponse.app_path));
@@ -571,23 +650,114 @@ void KextClient::verifyApp(const ProcQuery &procQuery, ProcQuery &procResponse)
     QString appPath{procResponse.app_path};
 
     // Check whether the app is one we want to exclude
-    bool result = std::any_of(_excludedApps.begin(), _excludedApps.end(),
+    auto matchesPath = [&appPath](const QVector<QString> &apps) {
+        return std::any_of(apps.begin(), apps.end(),
         [&appPath](const QString &prefix)
         {
             // On MacOS we exclude apps based on their ".app" bundle,
             // this means we don't match on entire paths, but just on prefixes
             return appPath.startsWith(prefix);
         });
+    };
 
-    procResponse.accept = result;
+    if(matchesPath(_excludedApps))
+    {
+        // Ignore excluded apps when not connected; we don't know the current IP
+        // address (but they'll route to the physical interface anyway).
+        if(_previousNetScan.isValid())
+        {
+            procResponse.accept = true;
+            procResponse.rule_type = RuleType::BypassVPN;
+            quint32 addr = QHostAddress{_previousNetScan.ipAddress()}.toIPv4Address();
+            procResponse.bind_ip = htonl(addr);
+            if(!procResponse.bind_ip)
+            {
+                qWarning() << "Unable to bind excluded app" << appPath
+                    << "- do not have interface IP address";
+                procResponse.accept = false;
+            }
+        }
+    }
+    else if(matchesPath(_vpnOnlyApps))
+    {
+        procResponse.accept = true;
+        procResponse.rule_type = RuleType::OnlyVPN;
+        quint32 addr = QHostAddress{_tunnelDeviceLocalAddress}.toIPv4Address();
+        procResponse.bind_ip = htonl(addr);
+        // Return 'true' for accept even if the bind_ip is null - this blocks
+        // Only VPN apps when we're not connected to the VPN.
+    }
 }
+
+const QStringList KextMonitor::_kextLogStreamParams{"stream", "--predicate", "senderImagePath CONTAINS \"PiaKext\""};
 
 KextMonitor::KextMonitor()
-  : _lastState {NetExtensionState::Unknown}
+  : _lastState{NetExtensionState::Unknown}, _loaded{false},
+    _kextLogStream{{std::chrono::milliseconds(0), std::chrono::seconds(5), std::chrono::seconds(5)}}
 {
+    _kextLogStream.setObjectName(QStringLiteral("kext log stream"));
+
+    // React to disk logging enable/disable
+    Q_ASSERT(Logger::instance());   // Created before PosixDaemon
+    connect(Logger::instance(), &Logger::configurationChanged, this,
+        [this](bool logToFile, const QStringList&)
+        {
+            if(logToFile)
+            {
+                if(_loaded)
+                {
+                    qInfo() << "Logging enabled while loaded, start streaming kext log";
+                    _kextLogStream.enable(QStringLiteral("log"), _kextLogStreamParams);
+                }
+            }
+            else
+            {
+                if(_kextLogStream.isEnabled())
+                {
+                    qInfo() << "Logging disabled while loaded, stop streaming kext log";
+                    _kextLogStream.disable();
+                }
+
+                // Discard trace logs
+                _kextLog.clear();
+                _oldKextLog.clear();
+            }
+        });
+
+    // Store log output
+    connect(&_kextLogStream, &ProcessRunner::stdoutLine, this,
+        [this](const QByteArray &line)
+        {
+            if(_kextLog.size() + line.size() + 1 > LogChunkSize)
+            {
+                // Bump the old log
+                _oldKextLog = std::move(_kextLog);
+                _kextLog.clear();
+            }
+
+            // If this is the first trace (since startup or since debug logging
+            // was enabled), or if the log was bumped, reserve the chunk size
+            if(_kextLog.isEmpty())
+                _kextLog.reserve(LogChunkSize);
+
+            _kextLog += line;
+            _kextLog += '\n';
+        });
+
+    // Ensure the kernel extension is not loaded from a prior run.
+    // Previous versions of PIA could errantly load the kext when trying to test
+    // it (the kextutil call was missing -no-load), and there was a rare race
+    // condition that could prevent the kernel extension from unloading at
+    // shutdown (if the daemon did not disconnect before exhausing all retries).
+    //
+    // As a result, if the user is upgrading to this build, the kernel extension
+    // might already be loaded.
+    qInfo() << "Unload kext if it was loaded by a prior run";
+    unloadKext();
 }
 
-int KextMonitor::runProc(const QString &cmd, const QStringList &args)
+int KextMonitor::runProc(const QString &cmd, const QStringList &args,
+                         QString *pStdErr)
 {
   QProcess proc;
   proc.setProgram(cmd);
@@ -596,11 +766,14 @@ int KextMonitor::runProc(const QString &cmd, const QStringList &args)
   proc.start();
   proc.waitForFinished();
 
-
   qDebug () << "Running proc: " << cmd << args;
   qDebug () << "Exit code: " << proc.exitCode();
   qDebug () << "Stdout: " << QString::fromLatin1(proc.readAllStandardOutput());
-  qDebug () << "Stderr: " << QString::fromLatin1(proc.readAllStandardError());
+  QString stdErr = QString::fromLatin1(proc.readAllStandardError());
+  qDebug () << "Stderr: " << stdErr;
+  // If the caller wants the stderr output, provide it
+  if(pStdErr)
+    *pStdErr = std::move(stdErr);
 
   return proc.exitCode();
 }
@@ -621,49 +794,128 @@ void KextMonitor::updateState(int exitCode)
 void KextMonitor::checkState()
 {
   qDebug () << "Checking kext load state";
+  // kextutil -print-diagnostics would still load the kext on its own (just with
+  // more diagnostics), -no-load is needed also to only test it without loading
   int exitCode = runProc(QStringLiteral("/usr/bin/kextutil"),
-                         QStringList() << QStringLiteral("-print-diagnostics")
-                                       << Path::SplitTunnelKextPath);
+                         {QStringLiteral("-no-load"),
+                          QStringLiteral("-print-diagnostics"),
+                          Path::SplitTunnelKextPath});
   updateState(exitCode);
 }
 
 bool KextMonitor::loadKext()
 {
-  int exitCode = runProc(QStringLiteral("/sbin/kextload"), QStringList() << Path::SplitTunnelKextPath);
-  // Update state.  If the setting is enabled without having tested the state,
-  // this may be the first time we learn the actual state of the extension.
-  updateState(exitCode);
+    if(_loaded)
+    {
+        qWarning() << "Already loaded kext - nothing to do";
+        return true;
+    }
 
-  // 0 indicates successful load
-  return exitCode == 0;
+    // Start streaming kext logs if enabled
+    // Do this before loading the kext to capture startup
+    Q_ASSERT(Logger::instance());   // Created before PosixDaemon
+    if(Logger::instance()->logToFile())
+    {
+        qInfo() << "Start streaming kext log";
+        _kextLogStream.enable(QStringLiteral("log"), _kextLogStreamParams);
+    }
+
+    int exitCode = runProc(QStringLiteral("/sbin/kextload"), QStringList() << Path::SplitTunnelKextPath);
+    // Update state.  If the setting is enabled without having tested the state,
+    // this may be the first time we learn the actual state of the extension.
+    updateState(exitCode);
+
+    // 0 indicates successful load
+    if(exitCode == 0)
+    {
+        _loaded = true;
+        return true;
+    }
+    else if(_kextLogStream.isEnabled())
+    {
+        // Stop streaming kext log; load failed.
+        qInfo() << "Stop streaming kext log";
+        _kextLogStream.disable();
+    }
+
+    return false;
 }
 
 bool KextMonitor::unloadKext()
 {
-  int exitCode = 0;
+    // For robustness, unloadKext() always tries to unload, even if we don't
+    // think we have loaded it.  (See KextMonitor::KextMonitor, in some cases
+    // prior versions of PIA may have left it loaded.)
+    qInfo() << "Unloading kext - currently loaded:" << _loaded;
 
-  // Unloading our kext may take a few attempts under normal conditions.
-  // If we have any sockets filters still attached inside the kext they need to first be unregistered. The first unload attempt does this.
-  // Assuming we successfully unregister the socket filters, our second (or shortly there after) attempt should succeed.
-  // If we still cannot unload the kext after our final attempt then we have a legitimate error, so return this to the caller.
-  int retryCount = 5;
-  for(int i = 0; i < retryCount; ++i)
-  {
-      exitCode = runProc(QStringLiteral("/sbin/kextunload"), QStringList() << Path::SplitTunnelKextPath);
+    int exitCode = 0;
 
-      // No error after first unload attempt, so early-exit
-      if(exitCode == 0)
-          break;
+    // Unloading our kext may take a few attempts under normal conditions.
+    // If we have any sockets filters still attached inside the kext they need to first be unregistered. The first unload attempt does this.
+    // Assuming we successfully unregister the socket filters, our second (or shortly there after) attempt should succeed.
+    // If we still cannot unload the kext after our final attempt then we have a legitimate error, so return this to the caller.
+    int retryCount = 5;
+    for(int i = 0; i < retryCount; ++i)
+    {
+        QString stderr;
+        exitCode = runProc(QStringLiteral("/sbin/kextunload"),
+                           {Path::SplitTunnelKextPath}, &stderr);
 
-      qWarning() << "Unable to unload Kext, exit code:" << exitCode << "Retrying" << i+1 << "of" << retryCount;
-      // Wait a little bit before we try to unload again
-      // (to give the socket filters time to unregister)
-      QThread::msleep(200);
-  }
+        if(exitCode == 0)
+            break;
 
-  // Don't update state; the unload result doesn't indicate the installation
-  // state of the kext
+        // If it's not loaded to begin with, treat this as success (don't keep
+        // trying).
+        // '3' is the return code for most errors, so we have to check the
+        // error text.
+        if(exitCode == 3 && stderr.contains(QStringLiteral("not found for unload request")))
+        {
+            qInfo() << "Kext was not loaded, done trying to unload";
+            exitCode = 0;
+        }
 
-  // 0 indicates successful load
-  return exitCode == 0;
+        // If we succeeded, we're done
+        if(exitCode == 0)
+            break;
+
+        if(i+1 < retryCount)
+        {
+            qWarning() << "Unable to unload Kext, exit code:" << exitCode << "Retrying" << i+1 << "of" << retryCount;
+            // Wait a little bit before we try to unload again
+            // (to give the socket filters time to unregister)
+            QThread::msleep(200);
+        }
+        else
+        {
+            qWarning() << "Unable to unload Kext, exit code:" << exitCode << "all" << i+1 << "attempts failed";
+        }
+    }
+
+    // Don't update state; the unload result doesn't indicate the installation
+    // state of the kext
+
+    // 0 indicates successful unload
+    if(exitCode == 0)
+    {
+        // Stop streaming the kext log.
+        // In theory we could leave log stream running all the time if debug logging
+        // is enabled, but it sometimes stops streaming when the kext is unloaded
+        // and reloaded, so for robustness we restart it when reloading the kext.
+        if(_kextLogStream.isEnabled())
+        {
+            qInfo() << "Stop streaming kext log";
+            _kextLogStream.disable();
+            // Don't discard the log though, keep it in case a report is submitted.
+        }
+
+        _loaded = false;
+        return true;
+    }
+
+    return false;
+}
+
+QString KextMonitor::getKextLog() const
+{
+    return QString::fromUtf8(_oldKextLog) + QString::fromUtf8(_kextLog);
 }

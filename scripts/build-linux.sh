@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -172,12 +172,8 @@ if [ -n "$QT_ROOT" ]; then
     QBS="$(cd "$QT_ROOT/../../Tools/QtCreator/bin" && pwd)/qbs"
   fi
   echo "Using qbs at $QBS"
-  echo "Using Qt at $QT_ROOT"
+  echo "Using Qt at $QT_ROOT [ specified via env variable ]"
 # Look for Qt installed in known locations
-elif [ -e /opt/Qt5.12.3/ ]; then
-  echo "Using Qt from system path"
-  QT_ROOT="/opt/Qt5.12.3/5.12.3/gcc_64/"
-  QBS="/opt/Qt5.12.3/Tools/QtCreator/bin/qbs"
 elif [ -e /opt/Qt/ ]; then
   # Use the latest Qt version available, 5.1*.*
   # (Intentional word-splitting)
@@ -208,7 +204,7 @@ fi
 # Check Qt version
 QTVER=$("$QT_ROOT/bin/qmake" --version | tail -n +2 | awk '{print $4}')
 
-SUPPORTED_VERS="5.11.1 5.11.2 5.11.3 5.12.0 5.12.1 5.12.2 5.12.3 5.12.4"
+SUPPORTED_VERS="5.12.2 5.12.3 5.12.4 5.12.5 5.12.6"
 
 echo "Detected Qt version $QTVER"
 
@@ -308,10 +304,6 @@ if [ $TASK_PACKAGE -eq 1 ]; then
   addQtLib "libQt5QuickTemplates2.so.5"
   addQtLib "libQt5Widgets.so.5"
   addQtLib "libQt5XcbQpa.so.5"
-
-  # Extra, we need to include a libssl that's compatible with Qt.
-  cp "$ROOT/extras/installer/linux/libssl.so" "$STAGE_ROOT/lib/libssl.so"
-  cp "$ROOT/extras/installer/linux/libcrypto.so" "$STAGE_ROOT/lib/libcrypto.so"
 
   addQtPlugin "platforms"
   addQtPlugin "egldeviceintegrations"

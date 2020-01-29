@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -87,11 +87,11 @@ static QLibrary* findOpenSSLLibrary()
         {
             wchar_t name[MAX_PATH];
             name[GetModuleFileNameExW(hProcess, hModules[i], name, MAX_PATH)] = 0;
-            if (*name && matchesLibrary(name, "libeay32.dll"))
+            if (*name && matchesLibrary(name, "libcrypto"))
                 return new QLibrary(QString::fromWCharArray(name));
         }
     }
-    qError() << "Unable to locate libeay32.dll";
+    qError() << "Unable to locate libcrypto.dll";
     return nullptr;
 }
 
@@ -155,8 +155,8 @@ static void (*BIO_free)(BIO* bp) = nullptr;
 
 static EVP_PKEY* (*PEM_read_bio_PUBKEY)(BIO* bp, EVP_PKEY** x, pem_password_cb* cb, void* u);
 
-static EVP_MD_CTX* (*EVP_MD_CTX_create)() = nullptr;
-static void (*EVP_MD_CTX_destroy)(EVP_MD_CTX* ctx) = nullptr;
+static EVP_MD_CTX* (*EVP_MD_CTX_new)() = nullptr;
+static void (*EVP_MD_CTX_free)(EVP_MD_CTX* ctx) = nullptr;
 
 static const EVP_MD* (*EVP_sha1)() = nullptr;
 static const EVP_MD* (*EVP_sha256)() = nullptr;
@@ -200,8 +200,8 @@ static bool checkOpenSSL()
 
         RESOLVE_OPENSSL_FUNCTION(PEM_read_bio_PUBKEY);
 
-        RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_create);
-        RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_destroy);
+        RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_new);
+        RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_free);
 
         RESOLVE_OPENSSL_FUNCTION(EVP_sha1);
         RESOLVE_OPENSSL_FUNCTION(EVP_sha256);
@@ -262,9 +262,9 @@ bool verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature
     if (!pkey) return false;
     AT_SCOPE_EXIT(EVP_PKEY_free(pkey));
 
-    auto ctx = EVP_MD_CTX_create();
+    auto ctx = EVP_MD_CTX_new();
     if (!ctx) return false;
-    AT_SCOPE_EXIT(EVP_MD_CTX_destroy(ctx));
+    AT_SCOPE_EXIT(EVP_MD_CTX_free(ctx));
 
     if (1 == EVP_DigestVerifyInit(ctx, nullptr, md, nullptr, pkey) &&
         1 == EVP_DigestUpdate(ctx, data.data(), static_cast<size_t>(data.size())) &&

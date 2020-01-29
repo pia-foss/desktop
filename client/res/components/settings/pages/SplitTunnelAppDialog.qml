@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -136,7 +136,6 @@ OverlayDialog {
 
   FileDialog {
     id: browseAppDialog
-    acceptLabel: uiTr("Add")
     fileMode: FileDialog.OpenFile
     nameFilters: {
       if(Qt.platform.os === 'osx')
@@ -172,10 +171,7 @@ OverlayDialog {
     }
   }
 
-  buttons: [
-    { text: uiTr("Exclude"), role: DialogButtonBox.AcceptRole },
-    { text: uiTr("Cancel"), role: DialogButtonBox.RejectRole },
-  ]
+  buttons: [ Dialog.Ok, Dialog.Cancel ]
   canAccept: browseAppSelectedIndex >= 0
   title: uiTr("Add Application")
   contentWidth: 300

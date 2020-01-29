@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -61,6 +61,13 @@ class WinAppTracker : public QObject
 public:
     using Pid_t = DWORD;
 
+    enum class SplitType
+    {
+        Excluded,
+        VpnOnly
+    };
+    Q_ENUM(SplitType);
+
 private:
     // This container is used to hold the current "exclude" app IDs, along with
     // all PIDs currently associated with those app IDs, and the signing subject
@@ -91,53 +98,123 @@ private:
         ExcludedApps_t::iterator _excludedAppPos;
     };
 
+    // This map contains data about the excluded processes, and also provides a
+    // way to look up processes by PID alone.
+    using ProcDataMap = std::unordered_map<Pid_t, ProcessData>;
+
 public:
-    // Get all the current known excluded app IDs - both the app IDs from rules
-    // and any that have been detected as descendants.
-    // The returned set is used by WinDaemon to compare against its current set
-    // of app rules.  The AppIdKeys are owned by WinAppMonitor and remain valid
-    // only as long as it isn't mutated.
-    std::set<const AppIdKey*, PtrValueLess> getAppIds() const;
+    explicit WinAppTracker(SplitType type);
+
+public:
+    // Get all the current known app IDs for this rule type.
+    std::set<const AppIdKey *, PtrValueLess> getAppIds() const;
 
     // Set the current split tunnel rules.  Returns true if we need to monitor
     // for process creation (returns false if there is no way processCreated()
     // would ever match a process, which allows WinAppMonitor to shut down the
     // monitor when not needed).
     bool setSplitTunnelRules(const QVector<SplitTunnelRule> &rules);
-    // A process has been created.
-    void processCreated(WinHandle procHandle, Pid_t pid,
-                        WinHandle parentHandle, Pid_t parentPid);
+
+    // Check if a newly created process matches one of our app rules (directly,
+    // not as a descendant).  If it does, this takes the process handle and app
+    // ID - there's no need to check any other trackers in that case.
+    void checkMatchingProcess(WinHandle &procHandle, AppIdKey &appId, Pid_t pid);
+
+    // Check if a newly created process is a descendant of one of the other
+    // processes we are tracking.  Like checkMatchingProcess(), this takes the
+    // process handle and app ID if it matches.
+    void checkMatchingChild(WinHandle &procHandle, AppIdKey &appId,
+                            const QString &imgPath, Pid_t pid, Pid_t parentPid);
+
+    // Check if a newly created process's parent matches one of our rules, and
+    // if so, check if the child should now be tracked as a descendant.
+    // - If the parent matches, this takes the parent handle and app ID.
+    // - If the child also matches, this takes the child process handle and app
+    //   ID
+    // In either case, there's no need to continue checking other trackers if
+    // any handle was taken, since the parent matched this tracker.
+    void checkNewParent(WinHandle &procHandle, AppIdKey &appId,
+                        const QString &imgPath, Pid_t pid,
+                        WinHandle &parentHandle, AppIdKey &parentAppId,
+                        Pid_t parentPid);
 
     // Dump the excluded app data to debug logs
     void dump() const;
 
 private:
-    void addExcludedProcess(ExcludedApps_t::iterator itExcludedApp,
-                            WinHandle procHandle, Pid_t pid, AppIdKey appId);
+    void addSplitProcess(ExcludedApps_t::iterator itMatchingApp,
+                         WinHandle procHandle, Pid_t pid, AppIdKey appId);
 
-    QString getProcImagePath(const WinHandle &procHandle) const;
-    // Get the app ID for a process (empty if it can't be retrieved).
-    AppIdKey getProcAppId(const WinHandle &procHandle) const;
     // Check if a new process is a descendant of an excluded app - provide the
     // parent process ID and the child process's image file path.
     //
-    // Returns the position in _excludedApps if it is, or the end() iterator if
-    // it isn't.
+    // Returns the position in _apps if it is, or the end() iterator if it
+    // isn't.
     ExcludedApps_t::iterator isAppDescendant(Pid_t parentPid, const QString &imgPath);
     // A process has exited - connected to the QWinEventNotifiers.
     void onProcessExited(HANDLE procHandle);
 
 signals:
-    // The set of excluded app IDs has changed.
-    void excludedAppIdsChanged();
+    // The set of app IDs has changed.
+    void appIdsChanged();
 
 private:
-    // These are the current "exclude" app IDs, along with all PIDs currently
-    // associated with those app IDs.
-    ExcludedApps_t _excludedApps;
-    // This map contains data about the excluded processes, and also provides a
-    // way to look up processes by PID alone.
+    SplitType _type;
+    // These are the current app IDs for this rule type, along with all PIDs
+    // currently associated with those app IDs.
+    ExcludedApps_t _apps;
     std::unordered_map<Pid_t, ProcessData> _procData;
+};
+
+// WinSplitTunnelTracker managers WinAppTracker objects for each type of split
+// tunnel rule.  It receives notifications from WinAppMonitor and propagates
+// them to each tracker.
+class WinSplitTunnelTracker : public QObject
+{
+    Q_OBJECT
+
+public:
+    using Pid_t = WinAppTracker::Pid_t;
+
+public:
+    WinSplitTunnelTracker();
+
+private:
+    QString getProcImagePath(const WinHandle &procHandle) const;
+    // Get the app ID for a process (empty if it can't be retrieved).
+    AppIdKey getProcAppId(const WinHandle &procHandle) const;
+
+public:
+    // Get all the current known excluded app IDs - both the app IDs from rules
+    // and any that have been detected as descendants.
+    // The returned set is used by WinDaemon to compare against its current set
+    // of app rules.  The AppIdKeys are owned by WinAppMonitor and remain valid
+    // only as long as it isn't mutated.
+    std::set<const AppIdKey*, PtrValueLess> getExcludedAppIds() const;
+    std::set<const AppIdKey*, PtrValueLess> getVpnOnlyAppIds() const;
+
+    // Set the current split tunnel rules.  Returns true if we need to monitor
+    // for process creation (if any rule type returned true).
+    bool setSplitTunnelRules(const QVector<SplitTunnelRule> &rules);
+
+    // A process has been created.
+    void processCreated(WinHandle procHandle, Pid_t pid,
+                        WinHandle parentHandle, Pid_t parentPid);
+
+    void dump() const;
+
+signals:
+    // The set of app IDs has changed.
+    void appIdsChanged();
+
+private:
+    // It is possible (though unlikely) that we could end up identifying the
+    // same executable path as both a VpnOnly app and an Excluded app (such as
+    // if the shortcut and exe path both appeared as rules with different
+    // types).  The VpnOnly tracker has the first chance for any given process
+    // to ensure that type takes precedence.
+    WinAppTracker _vpnOnly;
+    WinAppTracker _excluded;
 };
 
 // WinAppMonitor monitors for child app IDs of app IDs that are excluded from
@@ -166,7 +243,8 @@ private:
 
 public:
     // Get the current excluded app IDs; see WinAppTracker.
-    std::set<const AppIdKey*, PtrValueLess> getAppIds() const {return _tracker.getAppIds();}
+    std::set<const AppIdKey*, PtrValueLess> getExcludedAppIds() const {return _tracker.getExcludedAppIds();}
+    std::set<const AppIdKey*, PtrValueLess> getVpnOnlyAppIds() const {return _tracker.getVpnOnlyAppIds();}
 
     // Set the current split tunnel rules
     void setSplitTunnelRules(const QVector<SplitTunnelRule> &rules);
@@ -177,10 +255,10 @@ public:
 signals:
     // The current set of excluded app IDs has changed.  (Get the current list
     // with getExcludedAppIds().)
-    void excludedAppIdsChanged();
+    void appIdsChanged();
 
 private:
-    WinAppTracker _tracker;
+    WinSplitTunnelTracker _tracker;
     // IWbemServices is loaded at startup, this is always valid if we were able
     // to connect to WMI.
     WinComPtr<IWbemServices> _pSvcs;

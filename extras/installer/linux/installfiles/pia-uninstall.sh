@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -32,6 +32,7 @@ readonly serviceName="${brandCode}vpn"
 readonly groupName="${brandCode}vpn"
 readonly hnsdGroupName="${brandCode}hnsd"         # The group used by the Handshake DNS service
 readonly routingTableName="${serviceName}rt"
+readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
@@ -49,6 +50,7 @@ function echoFail() {
     echo "$(date +"[%Y-%m-%d %H:%M:%S]") [FAIL] $@" >> "$logFile" || true
 }
 function fail() {
+
     echoFail "$@"
     exit 1
 }
@@ -105,12 +107,13 @@ function removeGroups() {
     true
 }
 
-function removePiaRoutingTable() {
+function removeRoutingTable() {
     local routesLocation=/etc/iproute2/rt_tables
+    local routingTable="$1"
 
-    if [[ -f $routesLocation ]] && grep -q "$routingTableName" $routesLocation; then
-        grep -v "$routingTableName" $routesLocation | sudo tee $routesLocation > /dev/null
-        echoPass "Removed $routingTableName routing table"
+    if [[ -f $routesLocation ]] && grep -q "$routingTable" $routesLocation; then
+        grep -v "$routingTable" $routesLocation | sudo tee $routesLocation > /dev/null
+        echoPass "Removed $routingTable routing table"
     fi
 
     true
@@ -142,7 +145,8 @@ if [[ "$1" == "startuninstall" ]] ; then
     echoPass "Removed $appName System files"
     sudo rm -rf "/opt/${brandCode}vpn/"
     removeGroups $groupName $hnsdGroupName
-    removePiaRoutingTable
+    removeRoutingTable $routingTableName
+    removeRoutingTable $vpnOnlyroutingTableName
     echoPass "Uninstall finished"
     read -n 1 -s -r -p "Press any key to continue"
 else

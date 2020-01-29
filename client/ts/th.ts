@@ -2,222 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>NetworkPage</name>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="198"/>
-        <source>NetworkPage --- Choose which applications use the VPN.</source>
-        <extracomment>Description for the split tunnel setting.</extracomment>
-        <translation>เลือกแอพพลิเคชั่นที่จะใช้ VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
-        <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
-        <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
-        <translation>ไม่ต้องผ่าน VPN - แอพพลิเคชั่นเชื่อมต่อกับอินเทอร์เน็ตโดยตรงเสมอ</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="206"/>
-        <source>NetworkPage --- Only VPN - App can only connect when the VPN is connected</source>
-        <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected.</extracomment>
-        <translation>VPN เท่านั้น - แอพพลิเคชั่นจะสามารถเชื่อมต่อได้เมื่อเชื่อมต่อกับ VPN เท่านั้น</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="212"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="307"/>
-        <source>NetworkPage --- Split Tunnel</source>
-        <translation>แยกอุโมงค์</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="32"/>
-        <source>NetworkPage --- Name Servers</source>
-        <extracomment>Label for the setting that controls which DNS servers are used to look up domain names and translate them to IP addresses when browsing the internet. This setting is also present in OS network settings, so this string should preferably match whatever localized term the OS uses.</extracomment>
-        <translation>ตั้งชื่อเซิร์ฟเวอร์</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="69"/>
-        <source>NetworkPage --- Warning: Using a third party DNS could compromise your privacy.</source>
-        <translation>คำเตือน: การใช้ DNS ของบุคคลที่สามอาจส่งผลต่อความเป็นส่วนตัวของคุณ</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="75"/>
-        <source>NetworkPage --- Handshake is a decentralized naming protocol.  For more information, visit handshake.org.</source>
-        <extracomment>&quot;Handshake&quot; is a brand name and should not be translated.</extracomment>
-        <translation>Handshake เป็น​โปรโตคอลการ​ตั้ง​ชื่อ​แบบ​กระจาย​อำนาจ​ สำหรับ​ข้อมูล​เพิ่มเติม​โปรด​ไปที่​เว็บ​ไซต์ handshake.org</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="81"/>
-        <source>NetworkPage --- PIA DNS</source>
-        <translation>PIA DNS</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="84"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="136"/>
-        <source>NetworkPage --- Use Existing DNS</source>
-        <translation>ใช้ DNS ที่มีอยู่</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="85"/>
-        <source>NetworkPage --- Set Custom DNS...</source>
-        <translation>ตั้งค่า DNS ที่กำหนดเอง...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="97"/>
-        <source>NetworkPage --- Proceed</source>
-        <translation>ดำเนินการ</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="98"/>
-        <source>NetworkPage --- Cancel</source>
-        <translation>ยกเลิก</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="107"/>
-        <source>NetworkPage --- Primary DNS</source>
-        <translation>DNS หลัก</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="114"/>
-        <source>NetworkPage --- Secondary DNS (optional)</source>
-        <translation>DNS รอง (ถ้ามี)</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="122"/>
-        <source>NetworkPage --- &lt;b&gt;Warning:&lt;/b&gt; Using non-PIA DNS servers could expose your DNS traffic to third parties and compromise your privacy.</source>
-        <translation>&lt;b&gt;คำเตือน:&lt;/b&gt; การใช้เซิร์ฟเวอร์ DNS ที่ไม่ใช่ PIA อาจเปิดเผยการเข้าใช้ DNS ของคุณแก่บุคคลที่สามและทำลายความเป็นส่วนตัวของคุณ</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="127"/>
-        <source>NetworkPage --- Set Custom DNS</source>
-        <translation>ตั้งค่า DNS ที่กำหนดเอง</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="136"/>
-        <source>NetworkPage --- Use Custom DNS</source>
-        <translation>ใช้ DNS ที่กำหนดเอง</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="172"/>
-        <source>NetworkPage --- Request Port Forwarding</source>
-        <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
-        <translation>ส่งคำขอฟอร์เวิร์ดพอร์ต</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="179"/>
-        <source>NetworkPage --- Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
-        <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
-        <translation>ส่งต่อพอร์ตจาก VPN IP ไปยังคอมพิวเตอร์ ระบบจะเลือกพอร์ตสำหรับคุณ ตำแหน่งบางแห่งไม่รองรับการส่งต่อพอร์ต</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="184"/>
-        <source>NetworkPage --- Allow LAN Traffic</source>
-        <translation>อนุญาต LAN Traffic</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="185"/>
-        <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
-        <translation>อนุญาตให้มีการรับส่งข้อมูลระหว่างอุปกรณ์ต่างๆ ในเครือข่ายภายในของคุณเสมอแม้ขณะใช้ปุ่มตัดการทำงาน VPN ก็ตาม</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="440"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="445"/>
-        <source>NetworkPage --- App Exclusions</source>
-        <translation>การยกเว้นแอป</translation>
-    </message>
-    <message>
-    <source>NetworkPage --- Excluded apps bypass the VPN and connect directly to the Internet.</source>
-        <translation>แอปที่ยกเว้นไม่ต้องผ่าน VPN และเชื่อมต่อกับอินเทอร์เน็ตโดยตรง</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="238"/>
-        <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>อนุมัติส่วนขยายการแยกอุโมงค์เพื่อเปิดใช้งานคุณสมบัตินี้</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="249"/>
-        <source>NetworkPage --- Security Preferences</source>
-        <translation>การกำหนดด้านความปลอดภัย</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="363"/>
-        <source>NetworkPage --- Installing split tunnel filter...</source>
-        <translation>กำลังติดตั้งฟิลเตอร์การแยกอุโมงค์...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="372"/>
-        <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
-        <translation>การเปิดใช้งานคุณสมบัตินี้จะติดตั้งฟิลเตอร์การแยกอุโมงค์</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="379"/>
-        <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
-        <translation>ไม่ได้ติดตั้ง​ฟิลเตอร์​การ​แยก​อุโมงค์ คุณ​สามารถ​ติดตั้ง​ใหม่​ได้​จาก​หน้า​ความ​ช่วยเหลือ</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="486"/>
-        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
-        <translation>อาจต้องรีสตาร์ทแอปเพื่อให้การเปลี่ยนแปลงมีผล</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelDefaultRow</name>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelDefaultRow.qml" line="82"/>
-        <source>SplitTunnelDefaultRow --- All Other Apps</source>
-        <translation>แอพพลิเคชั่นอื่นทั้งหมด</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelRowBase</name>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="23"/>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="27"/>
-        <source>SplitTunnelRowBase --- Bypass VPN</source>
-        <translation>ไม่ต้องผ่าน VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="24"/>
-        <source>SplitTunnelRowBase --- Only VPN</source>
-        <translation>VPN เท่านั้น</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="28"/>
-        <source>SplitTunnelRowBase --- Use VPN</source>
-        <translation>ใช้ VPN</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelSettings</name>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="293"/>
-        <source>SplitTunnelSettings --- Behavior</source>
-        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays the behavior selected for a specific app.</extracomment>
-        <translation>พฤติกรรม</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="55"/>
-        <source>SplitTunnelSettings --- Applications</source>
-        <translation>แอปพลิเคชัน</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="278"/>
-        <source>SplitTunnelSettings --- App</source>
-        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app names.</extracomment>
-        <translation>แอป</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="286"/>
-        <source>SplitTunnelSettings --- Path</source>
-        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app file paths. (These are visually placed below the app names, but they&apos;re annotated as a separate column.)</extracomment>
-        <translation>เส้นทาง</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="300"/>
-        <source>SplitTunnelSettings --- Remove</source>
-        <extracomment>Screen reader annotation for the column in the split tunnel app list that removes a selected app.</extracomment>
-        <translation>ลบออก</translation>
-    </message>
-</context>
-<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -265,67 +49,67 @@
         <translation>ชื่อผู้ใช้</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="44"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="41"/>
         <source>AccountPage --- Subscription</source>
         <translation>สมาชิก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="54"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="48"/>
         <source>AccountPage --- Expired</source>
         <translation>หมดอายุแล้ว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="61"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="55"/>
         <source>AccountPage --- (expired on %1)</source>
         <translation>(หมดอายุแล้ววันที่ %1)</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="63"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="57"/>
         <source>AccountPage --- (renews on %1)</source>
         <translation>(ต่ออายุวันที่ %1)</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="65"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="59"/>
         <source>AccountPage --- (expires on %1)</source>
         <translation>(หมดอายุวันที่ %1)</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="80"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
         <source>AccountPage --- Renews in %1 days</source>
         <translation>ต่ออายุภายใน %1 วัน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="80"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
         <source>AccountPage --- Expires in %1 days</source>
         <translation>หมดอายุภายใน %1 วัน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="85"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
         <source>AccountPage --- Purchase Subscription</source>
         <translation>ซื้อสมาชิก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="85"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
         <source>AccountPage --- Manage Subscription</source>
         <translation>จัดการสมาชิก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="85"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
         <source>AccountPage --- Renew Subscription</source>
         <translation>ต่ออายุสมาชิก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="98"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="90"/>
         <source>AccountPage --- Manage My Account</source>
         <translation>จัดการบัญชีของฉัน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="103"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="95"/>
         <source>AccountPage --- Logout / Switch Account</source>
         <translation>ออกจากระบบ / สลับบัญชี</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="116"/>
+        <location filename="../../../../../client/res/components/settings/pages/AccountPage.qml" line="108"/>
         <source>AccountPage --- Not logged in</source>
         <translation>ไม่ได้เข้าสู่ระบบ</translation>
     </message>
@@ -386,9 +170,10 @@
     <message>
         <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
-        <comment>header-title</comment>
+        
         <extracomment>Header bar title used for all &quot;error&quot; statuses - serious installation problems, etc. This means that there is currently an error condition active now.</extracomment>
         <translation>ข้อผิดพลาด</translation>
+        <comment>header-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="51"/>
@@ -684,166 +469,163 @@
     <name>ConnectionPage</name>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="26"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="196"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="142"/>
         <source>ConnectionPage --- Default</source>
         <translation>ค่าเริ่มต้น</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="60"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="72"/>
         <source>ConnectionPage --- Connection Type</source>
         <translation>ชนิดการเชื่อมต่อ</translation>
     </message>
     <message>
-    <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="75"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
         <translation>การติดตั้งพร็อกซี Shadowsocks ต้องใช้ TCP</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="72"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="77"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="90"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
         <source>ConnectionPage --- Remote Port</source>
         <translation>พอร์ตทางไกล</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="83"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="101"/>
         <source>ConnectionPage --- Local Port</source>
         <translation>พอร์ตในเครื่อง</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="113"/>
         <source>ConnectionPage --- Auto</source>
         <translation>อัตโนมัติ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="292"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="117"/>
         <source>ConnectionPage --- Configuration Method</source>
         <translation>วิธีการกำหนดค่า</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="299"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="124"/>
         <source>ConnectionPage --- DHCP</source>
         <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
         <translation>DHCP</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="303"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="128"/>
         <source>ConnectionPage --- Static</source>
         <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
         <translation>สถิติ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="308"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
         <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
         <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
         <translation>กำหนดวิธีการกำหนด​ค่า​บน​อะ​แด​ปเตอร์ TAP หาก​คุณ​ประสบ​ปัญหา​การ​เชื่อม​ต่อ วิธีการ​อื่น​อาจ​เชื่อถือ​ได้​มาก​กว่า</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="244"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="142"/>
         <source>ConnectionPage --- Data Encryption</source>
         <translation>การเข้ารหัสข้อมูล</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="116"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="251"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="265"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="149"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="163"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="56"/>
         <source>ConnectionPage --- None</source>
         <translation>ไม่มี</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="253"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>คำเตือน: การเข้าชมของคุณจะถูกส่งโดยไม่เข้ารหัสและมีความเสี่ยงที่จะถูกดักฟัง</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="260"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="270"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="158"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
         <source>ConnectionPage --- Data Authentication</source>
         <translation>การยืนยันข้อมูล</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="267"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
         <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
         <translation>คำเตือน: การเข้าชมของคุณไม่ผ่านการตรวจสอบและมีความเสี่ยงที่จะถูกยักย้าย</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="279"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="177"/>
         <source>ConnectionPage --- Handshake</source>
         <translation>ความร่วมมือ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="289"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="187"/>
         <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
         <translation>การจับมือครั้งนี้อาศัย Elliptic Curve ที่ได้รับการรับรองโดยหน่วยงานมาตรฐานของสหรัฐฯ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="319"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="198"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>ใช้แพ็กเกตขนาดเล็ก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="323"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="202"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>ตั้งค่า MTU ที่เล็กลงสำหรับการเชื่อมต่อ VPN ซึ่งอาจส่งผลให้ความเร็วในการถ่ายโอนลดลง แต่เพิ่มความน่าเชื่อถือในการเชื่อมต่อที่ไม่เสถียร</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="327"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="206"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>ลองใช้การตั้งค่าสำรอง</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="336"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="215"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>หาก​ประเภท​การ​เชื่อม​ต่อ​และ​พอร์ต​ระยะ​ไกล​ด้าน​บน​ใช้งาน​ไม่​ได้ ให้​ลอง​การ​ตั้ง​ค่า​อื่น​โดย​อัตโนมัติ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="344"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="223"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>ไม่สามารถใช้การตั้งค่าอื่นได้เมื่อกำหนดค่าพร็อกซี</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="357"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="236"/>
         <source>ConnectionPage --- What do these settings mean?</source>
         <translation>การตั้งค่าเหล่านี้หมายถึงอะไร</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="99"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="19"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>พร็อกซี</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="119"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="45"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>พร็อกซี SOCKS5...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="150"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="104"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>พร็อกซี SOCKS5</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="174"/>
-        <source>ConnectionPage --- Server</source>
-        <translation>เซิร์ฟเวอร์</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="178"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="129"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>ไอพีแอดเดรสเซิร์ฟเวอร์</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="193"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
         <source>ConnectionPage --- Port</source>
         <translation>พอร์ต</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="148"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>ผู้ใช้ (ถ้ามี)</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="209"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="155"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>รหัสผ่าน (ถ้ามี)</translation>
     </message>
@@ -1327,36 +1109,41 @@
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Auto</source>
-        <comment>icon-theme</comment>
+        
         <translation>อัตโนมัติ</translation>
+        <comment>icon-theme</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Light</source>
-        <comment>icon-theme</comment>
+        
         <translation>สว่าง</translation>
+        <comment>icon-theme</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="88"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Dark</source>
-        <comment>icon-theme</comment>
+        
         <translation>มืด</translation>
+        <comment>icon-theme</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="89"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Colored</source>
-        <comment>icon-theme</comment>
+        
         <translation>สีสัน</translation>
+        <comment>icon-theme</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="90"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Classic</source>
-        <comment>icon-theme</comment>
+        
         <translation>คลาสสิก</translation>
+        <comment>icon-theme</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="107"/>
@@ -1395,13 +1182,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="10"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="11"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>อัลฟ่าก่อนวางจำหน่าย</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="13"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="14"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>เบต้าก่อนวางจำหน่าย</translation>
@@ -1625,17 +1412,7 @@
         <translation>ถอนการติดตั้ง Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="402"/>
-        <source>HelpPage --- Uninstall {{BRAND}}?</source>
-        <translation>ถอนการติดตั้ง {{BRAND}} หรือไม่</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="402"/>
-        <source>HelpPage --- Uninstall</source>
-        <translation>ถอนการติดตั้ง</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="444"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="427"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -1827,6 +1604,159 @@
     </message>
 </context>
 <context>
+    <name>NetworkPage</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="32"/>
+        <source>NetworkPage --- Name Servers</source>
+        <extracomment>Label for the setting that controls which DNS servers are used to look up domain names and translate them to IP addresses when browsing the internet. This setting is also present in OS network settings, so this string should preferably match whatever localized term the OS uses.</extracomment>
+        <translation>ตั้งชื่อเซิร์ฟเวอร์</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="69"/>
+        <source>NetworkPage --- Warning: Using a third party DNS could compromise your privacy.</source>
+        <translation>คำเตือน: การใช้ DNS ของบุคคลที่สามอาจส่งผลต่อความเป็นส่วนตัวของคุณ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="75"/>
+        <source>NetworkPage --- Handshake is a decentralized naming protocol.  For more information, visit handshake.org.</source>
+        <extracomment>&quot;Handshake&quot; is a brand name and should not be translated.</extracomment>
+        <translation>Handshake เป็น​โปรโตคอลการ​ตั้ง​ชื่อ​แบบ​กระจาย​อำนาจ​ สำหรับ​ข้อมูล​เพิ่มเติม​โปรด​ไปที่​เว็บ​ไซต์ handshake.org</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="81"/>
+        <source>NetworkPage --- PIA DNS</source>
+        <translation>PIA DNS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="84"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="136"/>
+        <source>NetworkPage --- Use Existing DNS</source>
+        <translation>ใช้ DNS ที่มีอยู่</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="85"/>
+        <source>NetworkPage --- Set Custom DNS...</source>
+        <translation>ตั้งค่า DNS ที่กำหนดเอง...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="97"/>
+        <source>NetworkPage --- Proceed</source>
+        <translation>ดำเนินการ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="98"/>
+        <source>NetworkPage --- Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="107"/>
+        <source>NetworkPage --- Primary DNS</source>
+        <translation>DNS หลัก</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="114"/>
+        <source>NetworkPage --- Secondary DNS (optional)</source>
+        <translation>DNS รอง (ถ้ามี)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="122"/>
+        <source>NetworkPage --- &lt;b&gt;Warning:&lt;/b&gt; Using non-PIA DNS servers could expose your DNS traffic to third parties and compromise your privacy.</source>
+        <translation>&lt;b&gt;คำเตือน:&lt;/b&gt; การใช้เซิร์ฟเวอร์ DNS ที่ไม่ใช่ PIA อาจเปิดเผยการเข้าใช้ DNS ของคุณแก่บุคคลที่สามและทำลายความเป็นส่วนตัวของคุณ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="127"/>
+        <source>NetworkPage --- Set Custom DNS</source>
+        <translation>ตั้งค่า DNS ที่กำหนดเอง</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="136"/>
+        <source>NetworkPage --- Use Custom DNS</source>
+        <translation>ใช้ DNS ที่กำหนดเอง</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="172"/>
+        <source>NetworkPage --- Request Port Forwarding</source>
+        <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
+        <translation>ส่งคำขอฟอร์เวิร์ดพอร์ต</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="179"/>
+        <source>NetworkPage --- Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
+        <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
+        <translation>ส่งต่อพอร์ตจาก VPN IP ไปยังคอมพิวเตอร์ ระบบจะเลือกพอร์ตสำหรับคุณ ตำแหน่งบางแห่งไม่รองรับการส่งต่อพอร์ต</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="184"/>
+        <source>NetworkPage --- Allow LAN Traffic</source>
+        <translation>อนุญาต LAN Traffic</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="185"/>
+        <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
+        <translation>อนุญาตให้มีการรับส่งข้อมูลระหว่างอุปกรณ์ต่างๆ ในเครือข่ายภายในของคุณเสมอแม้ขณะใช้ปุ่มตัดการทำงาน VPN ก็ตาม</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="198"/>
+        <source>NetworkPage --- Choose which applications use the VPN.</source>
+        <extracomment>Description for the split tunnel setting.</extracomment>
+        <translation>เลือกแอพพลิเคชั่นที่จะใช้ VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
+        <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
+        <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
+        <translation>ไม่ต้องผ่าน VPN - แอพพลิเคชั่นเชื่อมต่อกับอินเทอร์เน็ตโดยตรงเสมอ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="207"/>
+        <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
+        <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
+        <translation>เฉพาะ VPN เท่านั้น - แอปสามารถเชื่อมต่อได้เฉพาะเมื่อ PIA เปิดอยู่และเชื่อมต่อ VPN แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="213"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="308"/>
+        <source>NetworkPage --- Split Tunnel</source>
+        <translation>แยกอุโมงค์</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="239"/>
+        <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
+        <translation>อนุมัติส่วนขยายการแยกอุโมงค์เพื่อเปิดใช้งานคุณสมบัตินี้</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="250"/>
+        <source>NetworkPage --- Security Preferences</source>
+        <translation>การกำหนดด้านความปลอดภัย</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="364"/>
+        <source>NetworkPage --- Installing split tunnel filter...</source>
+        <translation>กำลังติดตั้งฟิลเตอร์การแยกอุโมงค์...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="373"/>
+        <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
+        <translation>การเปิดใช้งานคุณสมบัตินี้จะติดตั้งฟิลเตอร์การแยกอุโมงค์</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="380"/>
+        <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
+        <translation>ไม่ได้ติดตั้ง​ฟิลเตอร์​การ​แยก​อุโมงค์ คุณ​สามารถ​ติดตั้ง​ใหม่​ได้​จาก​หน้า​ความ​ช่วยเหลือ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="441"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="446"/>
+        <source>NetworkPage --- App Exclusions</source>
+        <translation>การยกเว้นแอป</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="487"/>
+        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
+        <translation>อาจต้องรีสตาร์ทแอปเพื่อให้การเปลี่ยนแปลงมีผล</translation>
+    </message>
+</context>
+<context>
     <name>Notification</name>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="26"/>
@@ -1879,121 +1809,138 @@
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="42"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- OK</source>
-        <comment>dialog button</comment>
+        
         <translation>ตกลง</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="43"/>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="45"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Cancel</source>
-        <comment>dialog button</comment>
+        
         <translation>ยกเลิก</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="44"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Save</source>
-        <comment>dialog button</comment>
+        
         <translation>บันทึก</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="46"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Close</source>
-        <comment>dialog button</comment>
+        
         <translation>ปิด</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="47"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Discard</source>
-        <comment>dialog button</comment>
+        
         <translation>ยกเลิก</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="48"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Apply</source>
-        <comment>dialog button</comment>
+        
         <translation>นำไปใช้</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="49"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Reset</source>
-        <comment>dialog button</comment>
+        
         <translation>รีเซ็ต</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="50"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Restore Defaults</source>
-        <comment>dialog button</comment>
+        
         <translation>เรียกคืนค่าเริ่มต้น</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="51"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Help</source>
-        <comment>dialog button</comment>
+        
         <translation>ช่วยเหลือ</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="52"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Save All</source>
-        <comment>dialog button</comment>
+        
         <translation>บันทึกทั้งหมด</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="53"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Yes</source>
-        <comment>dialog button</comment>
+        
         <translation>ตกลง</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="54"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Yes to All</source>
-        <comment>dialog button</comment>
+        
         <translation>ตกลงทั้งหมด</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="55"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- No</source>
-        <comment>dialog button</comment>
+        
         <translation>ไม่</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="56"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- No to All</source>
-        <comment>dialog button</comment>
+        
         <translation>ไม่ทั้งหมด</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="57"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Abort</source>
-        <comment>dialog button</comment>
+        
         <translation>ยกเลิก</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="58"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Retry</source>
-        <comment>dialog button</comment>
+        
         <translation>ลองอีกครั้ง</translation>
+        <comment>dialog button</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/common/OverlayDialog.qml" line="59"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Ignore</source>
-        <comment>dialog button</comment>
+        
         <translation>ไม่สนใจ</translation>
+        <comment>dialog button</comment>
     </message>
 </context>
 <context>
@@ -2197,30 +2144,34 @@
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/PerformanceModule.qml" line="425"/>
         <source>PerformanceModule -- short-time-part --- 0%1</source>
-        <comment>short-time-part</comment>
+        
         <extracomment>Render a time part (hours/minutes/seconds) for the connection duration that&apos;s less than 10. This can pad the value with a leading 0, such as &apos;0%1&apos;.</extracomment>
         <translation>0%1</translation>
+        <comment>short-time-part</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/PerformanceModule.qml" line="429"/>
         <source>PerformanceModule -- long-time-part --- %1</source>
-        <comment>long-time-part</comment>
+        
         <extracomment>Render a time part (hours/minutes/seconds) for the connection duration that&apos;s 10 or more.</extracomment>
         <translation>%1</translation>
+        <comment>long-time-part</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/PerformanceModule.qml" line="457"/>
         <source>PerformanceModule -- duration-hours-minutes --- %1:%2</source>
-        <comment>duration-hours-minutes</comment>
+        
         <extracomment>Connection duration template for 1 hour or more - %1 is hours, %2 is minutes Hours and minutes are rendered with the time-part or short-time-part strings</extracomment>
         <translation>%1:%2</translation>
+        <comment>duration-hours-minutes</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/PerformanceModule.qml" line="461"/>
         <source>PerformanceModule -- duration-minutes-seconds --- %1:%2</source>
-        <comment>duration-minutes-seconds</comment>
+        
         <extracomment>Connection duration template for less than 1 hour - %1 is minutes, %2 is seconds Minutes and seconds are rendered with the time-part or short-time-part strings</extracomment>
         <translation>%1:%2</translation>
+        <comment>duration-minutes-seconds</comment>
     </message>
 </context>
 <context>
@@ -2267,9 +2218,10 @@
     <message>
         <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
         <source>PrivacyPage -- privacy-killswitch --- Off</source>
-        <comment>privacy-killswitch</comment>
+        
         <extracomment>These values are used for the Killswitch setting.</extracomment>
         <translation>ปิด</translation>
+        <comment>privacy-killswitch</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
@@ -2299,9 +2251,10 @@
     <message>
         <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
-        <comment>privacy-mace</comment>
+        
         <extracomment>These values are used for the MACE setting.</extracomment>
         <translation>ปิด</translation>
+        <comment>privacy-mace</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
@@ -2312,21 +2265,26 @@
 <context>
     <name>ProxyPage</name>
     <message>
-    <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="23"/>
+        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
         <translation>เชื่อมต่อ VPN อีกครั้งผ่านตำแหน่งเสริม</translation>
     </message>
     <message>
-    <source>ProxyPage --- Shadowsocks - %1</source>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="40"/>
+        <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-    <source>ProxyPage --- SOCKS5 Proxy - %1</source>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="52"/>
+        <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>พร็อกซี SOCKS5 - %1</translation>
     </message>
     <message>
-    <source>ProxyPage --- Configure...</source>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="60"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="67"/>
+        <source>ProxyPage --- Configure...</source>
         <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
         <translation>กำหนดค่า...</translation>
     </message>
@@ -2371,7 +2329,7 @@
 <context>
     <name>RegionAuto</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionAuto.qml" line="16"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionAuto.qml" line="16"/>
         <source>RegionAuto --- Choose automatically</source>
         <translation>เลือกโดยอัตโนมัติ</translation>
     </message>
@@ -2379,12 +2337,12 @@
 <context>
     <name>RegionDelegate</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionDelegate.qml" line="44"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionDelegate.qml" line="40"/>
         <source>RegionDelegate --- Port forwarding is not available for this location.</source>
         <translation>ฟังก์ชั่นการส่งต่อพอร์ตไม่​สามารถ​ใช้งาน​ได้ในตำแหน่งนี้</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionDelegate.qml" line="45"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionDelegate.qml" line="41"/>
         <source>RegionDelegate --- Port forwarding is not available for this country.</source>
         <translation>ฟังก์ชั่นการส่งต่อพอร์ตไม่​สามารถ​ใช้งาน​ได้ในประเทศนี้</translation>
     </message>
@@ -2392,25 +2350,25 @@
 <context>
     <name>RegionListView</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionListView.qml" line="521"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionListView.qml" line="559"/>
         <source>RegionListView --- Region</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
         <translation>ภูมิภาค</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionListView.qml" line="527"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionListView.qml" line="565"/>
         <source>RegionListView --- Latency</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
         <translation>เวลาแฝง</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionListView.qml" line="533"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionListView.qml" line="571"/>
         <source>RegionListView --- Favorite</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
         <translation>รายการที่ชื่นชอบ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionListView.qml" line="73"/>
+        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="34"/>
         <source>RegionListView --- Region list</source>
         <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
         <translation>รายการภูมิภาค</translation>
@@ -2419,12 +2377,12 @@
 <context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="74"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="26"/>
         <source>RegionModule --- Auto</source>
         <translation>อัตโนมัติ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="72"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="28"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>อัตโนมัติ (%1)</translation>
     </message>
@@ -2440,21 +2398,23 @@
         <translation>เซิร์ฟเวอร์ VPN</translation>
     </message>
     <message>
-    <source>RegionModule --- VIA SOCKS5 PROXY</source>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="123"/>
+        <source>RegionModule --- VIA SOCKS5 PROXY</source>
         <translation>ผ่านพร็อกซี SOCKS5</translation>
     </message>
     <message>
-    <source>RegionModule --- VIA SHADOWSOCKS</source>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="125"/>
+        <source>RegionModule --- VIA SHADOWSOCKS</source>
         <translation>ผ่าน SHADOWSOCKS</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="102"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="168"/>
         <source>RegionModule --- Select region</source>
         <extracomment>Screen reader annotation for the button that makes up the Region tile, which users can click to go to the Region page and select a region. Should be a short description of the &quot;select region&quot; action.</extracomment>
         <translation>เลือกภูมิภาค</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="107"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="173"/>
         <source>RegionModule --- Select region, %1 is selected</source>
         <extracomment>Screen reader description for the Region tile button. Should begin with the &quot;Select region&quot; translation, since that&apos;s what the button does. This also includes the currently-selected region, which the button displays. %1 is a region name.</extracomment>
         <translation>เลือกภูมิภาค, %1 รายการถูกเลือก</translation>
@@ -2463,28 +2423,28 @@
 <context>
     <name>RegionPage</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="48"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionList.qml" line="68"/>
         <source>RegionPage --- Search...</source>
         <translation>ค้นหา...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="73"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionList.qml" line="91"/>
         <source>RegionPage --- Name</source>
         <translation>ชื่อ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="77"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionList.qml" line="95"/>
         <source>RegionPage --- Latency</source>
         <translation>เวลาแฝง</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="17"/>
+        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="19"/>
         <source>RegionPage --- Back to Connect page</source>
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>กลับไปยังหน้าเชื่อมต่อ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="66"/>
+        <location filename="../../../../../client/res/components/dashboard/region/RegionPage.qml" line="29"/>
         <source>RegionPage --- Region list sort</source>
         <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
         <translation>จัดเรียงรายการภูมิภาค</translation>
@@ -2493,19 +2453,19 @@
 <context>
     <name>RegionRowBase</name>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionRowBase.qml" line="130"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionRowBase.qml" line="130"/>
         <source>RegionRowBase --- %1, does not support port forwarding</source>
         <extracomment>Screen reader annotation used for a region that does not support port forwarding when the feature is enabled. Corresponds to the &quot;slashed-arrow&quot; indicator and &quot;Port forwarding is not supported by this region/country.&quot; tips. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
         <translation>%1 ไม่รองรับการฟอร์เวิร์ดพอร์ต</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionRowBase.qml" line="149"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionRowBase.qml" line="149"/>
         <source>RegionRowBase --- Favorite region</source>
         <extracomment>Screen reader annotation for the &quot;favorite&quot; button (heart icon) next to regions in the regions list. (The screen reader will indicate whether the button is &quot;on&quot; or &quot;off&quot;.)</extracomment>
         <translation>ภูมิภาคที่ชื่นชอบ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/region/RegionRowBase.qml" line="271"/>
+        <location filename="../../../../../client/res/components/common/regions/RegionRowBase.qml" line="271"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ms</translation>
     </message>
@@ -2521,10 +2481,6 @@
         <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
         <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
         <translation>ไม่สามารถ​ติดตั้ง​ฟิลเตอร์​การ​แยก​อุโมงค์ ลอง​รี​สตาร์ท​คอมพิวเตอร์​ของ​คุณ​หรือ​ติดต่อ​ฝ่าย​สนับสนุน​หาก​ยัง​พบ​ปัญหา​นี้​อยู่</translation>
-    </message>
-    <message>
-    <source>SettingsMessages --- This feature requires macOS 10.13 or later.</source>
-        <translation>คุณลักษณะนี้สามารถใช้ได้กับ macOS 10.13 หรือรุ่นที่ใหม่กว่า</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
@@ -2598,103 +2554,121 @@
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
-        <comment>setting-title</comment>
+        
         <translation>ทั่วไป</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
-        <comment>setting-title</comment>
+        
         <translation>บัญชี</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
-        <comment>setting-title</comment>
+        
         <translation>ความเป็นส่วนตัว</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
-        <comment>setting-title</comment>
+        
         <translation>เครือข่าย</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="54"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Connection</source>
-        <comment>setting-title</comment>
+        
         <translation>การเชื่อมต่อ</translation>
-    </message>
-    <message>
-    <source>SettingsWindow -- setting-title --- Proxy</source>
-        <extracomment>setting-title</extracomment>
-        <translation>พร็อกซี</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="55"/>
         <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
+<source>SettingsWindow -- setting-title --- Proxy</source>
+        
+        <translation>พร็อกซี</translation>
         <comment>setting-title</comment>
-        <translation>ช่วยเหลือ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        <comment>setting-heading</comment>
-        <translation>การกำหนดลักษณะทั่วไป</translation>
+        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>ช่วยเหลือ</translation>
+        <comment>setting-title</comment>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
         <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>การกำหนดลักษณะทั่วไป</translation>
         <comment>setting-heading</comment>
-        <translation>ข้อมูลบัญชี</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
         <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>ข้อมูลบัญชี</translation>
         <comment>setting-heading</comment>
-        <translation>การกำหนดลักษณะส่วนบุคคล</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
         <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>การกำหนดลักษณะส่วนบุคคล</translation>
         <comment>setting-heading</comment>
-        <translation>การกำหนดลักษณะเครือข่าย</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
         <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>การกำหนดลักษณะเครือข่าย</translation>
         <comment>setting-heading</comment>
-        <translation>การกำหนดลักษณะการเชื่อมต่อ</translation>
-    </message>
-    <message>
-    <source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        <extracomment>setting-heading</extracomment>
-        <translation>การกำหนดพร็อกซี</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
         <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>การกำหนดลักษณะการเชื่อมต่อ</translation>
         <comment>setting-heading</comment>
-        <translation>ช่วยเหลือ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="124"/>
+        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
+        
+        <translation>การกำหนดพร็อกซี</translation>
+        <comment>setting-heading</comment>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>ช่วยเหลือ</translation>
+        <comment>setting-heading</comment>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="130"/>
         <source>SettingsWindow --- Alert</source>
         <translation>แจ้งเตือน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="158"/>
+        <location filename="../../../../../client/res/components/settings/SettingsWindow.qml" line="164"/>
         <source>SettingsWindow --- Settings</source>
         <translation>การตั้งค่า</translation>
     </message>
@@ -2728,35 +2702,35 @@
         <translation>หยุด VPN ชั่วคราว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="182"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="179"/>
         <source>SnoozeModule --- Decrease snooze time</source>
         <extracomment>Screen reader name for the &quot;minus&quot; button that decreases snooze time</extracomment>
         <translation>ลดเวลาหยุดชั่วคราว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="205"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="202"/>
         <source>SnoozeModule --- Snooze time</source>
         <extracomment>Screen reader annotation for the snooze time display in the Snooze tile</extracomment>
         <translation>เวลาหยุดชั่วคราว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="254"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="252"/>
         <source>SnoozeModule --- Increase snooze time</source>
         <extracomment>Screen reader name for the &quot;plus&quot; button that increases snooze time</extracomment>
         <translation>เพิ่มเวลาหยุดชั่วคราว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="304"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="274"/>
         <source>SnoozeModule --- Snooze</source>
         <translation>หยุดชั่วคราว</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="311"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="274"/>
         <source>SnoozeModule --- Resume</source>
         <translation>ดำเนินการต่อ</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="332"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/SnoozeModule.qml" line="288"/>
         <source>SnoozeModule --- Snooze temporarily disconnects the VPN and automatically reconnects when the timer elapses.</source>
         <translation>การหยุดชั่วคราวจะยกเลิกการเชื่อมต่อ VPN และจะเชื่อมต่อใหม่โดยอัตโนมัติเมื่อเวลาผ่านไป</translation>
     </message>
@@ -2798,67 +2772,55 @@
 <context>
     <name>SplitTunnelAppDialog</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="75"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="84"/>
         <source>SplitTunnelAppDialog --- Only executable files can be excluded from VPN. Please select an executable program or shell script.</source>
         <translation>เฉพาะไฟล์​ปฏิบัติการ​เท่านั้น​ที่​สามารถ​แยก​ออก​จาก​ VPN ได้ โปรด​เลือก​โปรแกรม​เรียก​ใช้งาน​หรือ​เชลล์​สคริปต์</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="75"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="84"/>
         <source>SplitTunnelAppDialog --- Unable to exclude application</source>
         <translation>ไม่สามารถยกเว้นแอปพลิเคชัน</translation>
     </message>
     <message>
-    <source>SplitTunnelAppDialog --- Add</source>
-        <translation>เพิ่ม</translation>
-    </message>
-    <message>
-    <source>SplitTunnelAppDialog --- Exclude</source>
-        <translation>ยกเว้น</translation>
-    </message>
-    <message>
-    <source>SplitTunnelAppDialog --- Cancel</source>
-        <translation>ยกเลิก</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="137"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="158"/>
         <source>SplitTunnelAppDialog --- Add Application</source>
         <translation>เพิ่มแอปพลิเคชัน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="180"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="201"/>
         <source>SplitTunnelAppDialog --- Search</source>
         <translation>ค้นหา</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="193"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="214"/>
         <source>SplitTunnelAppDialog --- Browse</source>
         <translation>ค้นหา</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="245"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="266"/>
         <source>SplitTunnelAppDialog --- Applications</source>
         <translation>แอปพลิเคชัน</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="461"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="482"/>
         <source>SplitTunnelAppDialog --- App list, loading</source>
         <extracomment>Screen reader annotation for the &quot;application list&quot; from which a user can select an application to exclude. Screen reader annotation used for the split tunnel app list when the apps are still being loaded.</extracomment>
         <translation>รายการแอป กำลังโหลด</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="464"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="485"/>
         <source>SplitTunnelAppDialog --- App list</source>
         <extracomment>Screen reader annotation for the split tunnel app list.</extracomment>
         <translation>รายการแอป</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="470"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="491"/>
         <source>SplitTunnelAppDialog --- App</source>
         <extracomment>Screen reader annotation for the column listing the application in the existing application list (this table has only one column)</extracomment>
         <translation>แอป</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="496"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="517"/>
         <source>SplitTunnelAppDialog --- Refresh</source>
         <translation>รีเฟรช</translation>
     </message>
@@ -2872,9 +2834,73 @@
         <translation>ลบออก</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="157"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="161"/>
         <source>SplitTunnelAppRow --- Microsoft Store app</source>
         <translation>แอป Microsoft Store</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="170"/>
+        <source>SplitTunnelAppRow --- App Store, Mail, Safari and others</source>
+        <translation>App Store, Mail, Safari และอื่นๆ</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelDefaultRow</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelDefaultRow.qml" line="84"/>
+        <source>SplitTunnelDefaultRow --- All Other Apps</source>
+        <translation>แอพพลิเคชั่นอื่นทั้งหมด</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelRowBase</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="23"/>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="27"/>
+        <source>SplitTunnelRowBase --- Bypass VPN</source>
+        <translation>ไม่ต้องผ่าน VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="24"/>
+        <source>SplitTunnelRowBase --- Only VPN</source>
+        <translation>VPN เท่านั้น</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="28"/>
+        <source>SplitTunnelRowBase --- Use VPN</source>
+        <translation>ใช้ VPN</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelSettings</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="55"/>
+        <source>SplitTunnelSettings --- Applications</source>
+        <translation>แอปพลิเคชัน</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="279"/>
+        <source>SplitTunnelSettings --- App</source>
+        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app names.</extracomment>
+        <translation>แอป</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="287"/>
+        <source>SplitTunnelSettings --- Path</source>
+        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app file paths. (These are visually placed below the app names, but they&apos;re annotated as a separate column.)</extracomment>
+        <translation>เส้นทาง</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="294"/>
+        <source>SplitTunnelSettings --- Behavior</source>
+        <extracomment>Screen reader annotation for the column in the split tunnel app list that displays the behavior selected for a specific app.</extracomment>
+        <translation>พฤติกรรม</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="301"/>
+        <source>SplitTunnelSettings --- Remove</source>
+        <extracomment>Screen reader annotation for the column in the split tunnel app list that removes a selected app.</extracomment>
+        <translation>ลบออก</translation>
     </message>
 </context>
 <context>
@@ -3048,7 +3074,7 @@
 <context>
     <name>TrayMenuBuilder</name>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="16"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="17"/>
         <source>TrayMenuBuilder --- Help</source>
         <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
         <translation>ช่วยเหลือ</translation>

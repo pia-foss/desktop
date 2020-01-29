@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -162,6 +162,9 @@ public:
 #ifdef Q_OS_LINUX
     // The VFS net_cls cgroup file that contains PIDs for apps we wish to exclude from the VPN
     static Path VpnExclusionsFile;
+
+    // The VFS net_cls cgroup file that contains PIDs for apps we wish to force on the VPN only
+    static Path VpnOnlyFile;
 
     // The parent cgroup file of VpnExclusionsFile - adding a PID to this file removes it from exclusions.
     static Path ParentVpnExclusionsFile;

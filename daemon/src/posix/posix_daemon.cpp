@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -81,8 +81,13 @@ void setUidAndGid()
     if (!gr)
     {
         qFatal("Group '" VPN_GROUP "' does not exist.");
+        return;
     }
-    else if (setegid(gr->gr_gid) == -1 && setgid(gr->gr_gid) == -1)
+
+    // Set both real and effective GID.  They both must be set so the process
+    // doesn't look like a setgid process, which would prevent child processes
+    // from using $ORIGIN in their RPATH.
+    if (setegid(gr->gr_gid) == -1 || setgid(gr->gr_gid) == -1)
     {
         qFatal("Failed to set group id to %d (%d: %s)", gr->gr_gid, errno, qPrintable(qt_error_string(errno)));
     }
@@ -96,7 +101,7 @@ void setUidAndGid()
 }
 
 PosixDaemon::PosixDaemon(const QStringList& arguments)
-    : Daemon(arguments)
+    : Daemon(arguments), _enableSplitTunnel{false}
 {
     // Route signals through a local socket pair to let Qt safely handle them
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _signalFd))
@@ -206,34 +211,13 @@ void PosixDaemon::handleSignal(int sig) Q_DECL_NOEXCEPT
     }
 }
 
-// Determine whether to enable the 100.vpnTunOnly anchor based on whether we
-// have established a VPN connection since the VPN was enabled.
-static bool hasConnected(const VPNConnection::State &state)
-{
-    switch(state)
-    {
-    case VPNConnection::State::Connected:
-    case VPNConnection::State::Interrupted:
-    case VPNConnection::State::Reconnecting:
-    case VPNConnection::State::StillReconnecting:
-    // The DisconnectingToReconnect state doesn't _necessarily_ mean that we
-    // had established a VPN connection, but it usually does, and we can keep
-    // the anchor enabled in this state as long as we have the last tunnel
-    // device configuration.
-    case VPNConnection::State::DisconnectingToReconnect:
-        return true;
-    default:
-        return false;
-    }
-}
-
 #if defined(Q_OS_LINUX)
 // Update the 100.vpnTunOnly rule with the current tunnel device name and local
 // address.  If it's updated and the anchor should be enabled, returns true.
 // Otherwise, returns false - the anchor should be disabled.
-static bool updateVpnTunOnlyAnchor(const VPNConnection::State &connectionState, QString tunnelDeviceName, QString tunnelDeviceLocalAddress)
+static bool updateVpnTunOnlyAnchor(bool hasConnected, QString tunnelDeviceName, QString tunnelDeviceLocalAddress)
 {
-    if(hasConnected(connectionState))
+    if(hasConnected)
     {
         if(tunnelDeviceName.isEmpty() || tunnelDeviceLocalAddress.isEmpty())
         {
@@ -247,8 +231,10 @@ static bool updateVpnTunOnlyAnchor(const VPNConnection::State &connectionState, 
         IpTablesFirewall::replaceAnchor(
             IpTablesFirewall::IPv4,
             QStringLiteral("100.vpnTunOnly"),
-            QStringLiteral("! -i %1 -d %2 -m addrtype ! --src-type LOCAL -j DROP")
-            .arg(tunnelDeviceName, tunnelDeviceLocalAddress),
+            {
+                QStringLiteral("! -i %1 -d %2 -m addrtype ! --src-type LOCAL -j DROP")
+                .arg(tunnelDeviceName, tunnelDeviceLocalAddress),
+            },
             IpTablesFirewall::kRawTable
         );
         return true;
@@ -294,12 +280,16 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
     IpTablesFirewall::updateDNSServers(params.dnsServers);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), params.blockDNS);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowHnsd);
+
+    // block VpnOnly packets when the VPN is not connected
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowHnsd && params.defaultRoute);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowHnsd && !params.defaultRoute);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("400.allowPIA"), params.allowPIA);
 
     // Update and apply our rules to ensure VPN packets are only accepted on the
     // tun interface, mitigates CVE-2019-14899: https://seclists.org/oss-sec/2019/q4/122
-    bool enableVpnTunOnly = updateVpnTunOnlyAnchor(_connection->state(),
+    bool enableVpnTunOnly = updateVpnTunOnlyAnchor(params.hasConnected,
                                                    _state.tunnelDeviceName(),
                                                    _state.tunnelDeviceLocalAddress());
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4,
@@ -309,7 +299,6 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
 #endif
 
-    qInfo() << "Should be toggling split tunnel";
     toggleSplitTunnel(params);
 }
 
@@ -332,11 +321,6 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     QStringList emptyArgs;
 
 #if defined(Q_OS_MAC)
-    // Truncate the syslog to the last 256 KB
-    auto last256Kb = [](const QByteArray &input)
-    {
-        return input.right(262144);
-    };
     file.writeCommand("OS Version", "sw_vers", emptyArgs);
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});
@@ -344,7 +328,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (App anchors)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*"), QStringLiteral("-sr")});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
-    file.writeCommand("kext syslog", "log", QStringList{"show", "--last", "2h", "--predicate", "senderImagePath CONTAINS \"PiaKext\""}, last256Kb);
+    file.writeText("kext syslog", _kextMonitor.getKextLog());
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeCommand("Distro", "lsb_release", QStringList{QStringLiteral("-a")});
@@ -380,18 +364,14 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
 void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
 {
+    qInfo() << "Tunnel device is:" << _state.tunnelDeviceName();
     QVector<QString> excludedApps = params.excludeApps;
 
-    OriginalNetworkScan currentNetScan = { _state.originalGatewayIp(), _state.originalInterface(),  _state.originalInterfaceIp() };
-    // Activate split tunnel only when it's supposed to be active _and_ we have
-    // a valid network scan.  Deactivate it otherwise.
-    if(!params.allowVpnExemptions)
-        currentNetScan = {};
-
-    qInfo() <<  "Updated scan:" << currentNetScan;
+    qInfo() <<  "Updated split tunnel - enabled:" << params.enableSplitTunnel
+        << "-" << params.splitTunnelNetScan;
 
     // Activate split tunnel if it's supposed to be active and currently isn't
-    if(currentNetScan.isValid() && !_splitTunnelNetScan.isValid())
+    if(params.enableSplitTunnel && !_enableSplitTunnel)
     {
         qInfo() << "Starting Split Tunnel";
 #ifdef Q_OS_MAC
@@ -401,10 +381,13 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
           qInfo() << "Successfully loaded Kext";
 #endif
 
-        startSplitTunnel(currentNetScan, params);
+        startSplitTunnel(params, _state.tunnelDeviceName(),
+                         _state.tunnelDeviceLocalAddress(),
+                         _state.tunnelDeviceRemoteAddress(),
+                         params.excludeApps, params.vpnOnlyApps);
     }
     // Deactivate if it's supposed to be inactive but is currently active
-    else if(!currentNetScan.isValid() && _splitTunnelNetScan.isValid())
+    else if(!params.enableSplitTunnel && _enableSplitTunnel)
     {
         qInfo() << "Shutting down Split Tunnel";
         shutdownSplitTunnel();
@@ -417,21 +400,25 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     }
     // Otherwise, the current active state is correct, but if we are currently
     // active, update the configuration
-    else if(currentNetScan.isValid())
+    else if(params.enableSplitTunnel)
     {
         // Split tunnel is already running, but network has changed
-        qInfo() << "Split tunnel Network has changed from"
-            <<  _splitTunnelNetScan
-            << "to:"
-            << currentNetScan;
-
-        // Update our excluded apps if connected
-        updateExcludedApps(excludedApps);
+        if(_splitTunnelNetScan != params.splitTunnelNetScan)
+        {
+            qInfo() << "Split tunnel Network has changed from"
+                <<  _splitTunnelNetScan
+                << "to:"
+                << params.splitTunnelNetScan;
+        }
 
         // Inform of Network changes
-        // Note we do not check first for _splitTunnelNetScan != currentNetScan as
+        // Note we do not check first for _splitTunnelNetScan != params.splitTunnelNetScan as
         // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
-        updateSplitTunnelNetwork(currentNetScan, params);
+        updateSplitTunnel(params, _state.tunnelDeviceName(),
+                          _state.tunnelDeviceLocalAddress(),
+                          _state.tunnelDeviceRemoteAddress(),
+                          params.excludeApps, params.vpnOnlyApps);
     }
-    _splitTunnelNetScan = currentNetScan;
+    _splitTunnelNetScan = params.splitTunnelNetScan;
+    _enableSplitTunnel = params.enableSplitTunnel;
 }

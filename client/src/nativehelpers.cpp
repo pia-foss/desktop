@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -597,6 +597,13 @@ void NativeHelpers::openSecurityPreferencesMac()
 {
 #ifdef Q_OS_MAC
   QProcess::execute(QStringLiteral("/usr/bin/open"), QStringList() << QStringLiteral("x-apple.systempreferences:com.apple.preference.security?General"));
+#endif
+}
+
+void NativeHelpers::checkAppDeactivate()
+{
+#ifdef Q_OS_MAC
+    macCheckAppDeactivate();
 #endif
 }
 

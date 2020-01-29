@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -117,7 +117,7 @@ esac
 # Add matching directories to PATH
 for dir in $BUILD_ROOT/$BUILD_BIN_PATH; do
     if [ ! -d "$dir" ]; then
-        echo "Unable to find binary directory matching $dir">2
+        echo "Unable to find binary directory matching $dir" >&2
         exit 1
     fi
     # With --path, instead just print paths

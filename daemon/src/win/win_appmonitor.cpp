@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -83,10 +83,15 @@ private:
     const FILETIME &_tm;
 };
 
+WinAppTracker::WinAppTracker(SplitType type)
+    : _type{type}
+{
+}
+
 std::set<const AppIdKey*, PtrValueLess> WinAppTracker::getAppIds() const
 {
     std::set<const AppIdKey*, PtrValueLess> ids;
-    for(const auto &excludedApp : _excludedApps)
+    for(const auto &excludedApp : _apps)
         ids.insert(&excludedApp.first);
     for(const auto &proc : _procData)
         ids.insert(&proc.second._procAppId);
@@ -107,11 +112,23 @@ bool WinAppTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
         // Eat error and continue
     }
 
+    QString ruleMode;
+
+    switch(_type)
+    {
+    case SplitType::Excluded:
+        ruleMode = QStringLiteral("exclude");
+        break;
+    case SplitType::VpnOnly:
+        ruleMode = QStringLiteral("include");
+        break;
+    }
+
     ExcludedApps_t addedApps;
     for(const auto &rule : rules)
     {
         // Ignore any future rule types
-        if(rule.mode() != QStringLiteral("exclude"))
+        if(rule.mode() != ruleMode)
             continue;
 
         // UWP apps can have more than one target
@@ -159,7 +176,7 @@ bool WinAppTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
         }
     }
 
-    for(auto itExistingApp = _excludedApps.begin(); itExistingApp != _excludedApps.end(); )
+    for(auto itExistingApp = _apps.begin(); itExistingApp != _apps.end(); )
     {
         // Is the app still excluded?
         auto itAddedApp = addedApps.find(itExistingApp->first);
@@ -168,7 +185,7 @@ bool WinAppTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
             // No - remove it.  Remove all processes first
             for(const auto &pid : itExistingApp->second._runningProcesses)
                 _procData.erase(pid);
-            itExistingApp = _excludedApps.erase(itExistingApp);
+            itExistingApp = _apps.erase(itExistingApp);
         }
         else
         {
@@ -184,7 +201,7 @@ bool WinAppTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
         // Move node from addedApps to _excludedApps (AppIdKey is move only,
         // also preserve _targetPath).
         auto appNode = addedApps.extract(addedApps.begin());
-        auto insertResult = _excludedApps.insert(std::move(appNode));
+        auto insertResult = _apps.insert(std::move(appNode));
         // It's possible that the insert could fail if the same app ID was found
         // more than once from the split tunnel rules, and it was already in the
         // existing app IDs.  Ignore it in this case since it's a duplicate.
@@ -207,35 +224,100 @@ bool WinAppTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
     // firewall implementation will compare the new app IDs to the current
     // rules).
     dump();
-    emit excludedAppIdsChanged();
+    emit appIdsChanged();
 
     // It's only possible to match a child process if we have at least one
     // excluded app with at least one signer name.  If we have no apps (or they
     // are all unsigned), there's no need to monitor for child processes.
-    for(const auto &excludedApp : _excludedApps)
+    for(const auto &app : _apps)
     {
-        if(!excludedApp.second._signerNames.empty())
+        if(!app.second._signerNames.empty())
             return true;
     }
 
-    qInfo() << "No signed apps in exclusion list, do not need to monitor processes";
+    qInfo() << "No signed apps in" << traceEnum(_type)
+        << "list, do not need to monitor processes";
     return false;
 }
 
-void WinAppTracker::processCreated(WinHandle procHandle, Pid_t pid,
-                                   WinHandle parentHandle, Pid_t parentPid)
+void WinAppTracker::checkMatchingProcess(WinHandle &procHandle, AppIdKey &appId,
+                                         Pid_t pid)
 {
-    // If we are already excluding this process, there's nothing to do.  This
-    // can happen if a process is created just as we start to scan for a new app
-    // rule; we might observe the process just before receiving the "create"
-    // event.
+    // If we already have this process, there's nothing to do.  Just take the
+    // process handle to indicate that this was ours.
+    // This can happen if a process is created just as we start to scan for a
+    // new app rule; we might observe the process just before receiving the
+    // "create" event.
     if(_procData.count(pid))
     {
-        qInfo() << "Already excluding PID" << pid << "(from parent"
-            << parentPid << "), nothing to do";
+        qInfo() << "Already have" << traceEnum(_type) << "PID" << pid
+            << "-" << appId << "- nothing to do";
+        procHandle = {};
+        appId = {};
         return;
     }
 
+    // Check if it's a matching app itself.  Do this before checking if it's a
+    // descendant - it's possible it could be both if one excluded app launches
+    // another.
+    auto itMatchingApp = _apps.find(appId);
+    if(itMatchingApp != _apps.end())
+    {
+        // It matches one of our apps - take the process handle and app ID; this
+        // indicates that the other trackers don't need to be checked.  (Do this
+        // even if we do not actually add this process entry.)
+        WinHandle takenProcHandle;
+        AppIdKey takenAppId;
+        procHandle.swap(takenProcHandle);
+        appId.swap(takenAppId);
+
+        // Add it only if there are signer names for this app - if there aren't,
+        // we'd never match any descendants, skip it.
+        if(!itMatchingApp->second._signerNames.empty())
+        {
+            qInfo() << "PID" << pid << "is" << traceEnum(_type) << "app"
+                << itMatchingApp->first;
+            addSplitProcess(itMatchingApp, std::move(takenProcHandle), pid,
+                               std::move(takenAppId));
+            dump();
+            // This does not cause excluded app IDs to change (it's an explicit app
+            // ID we already knew about)
+        }
+        // Otherwise, there's no need to add it, since it can't match any
+        // descendants, but we still took the process handle and app ID so we
+        // won't check any other trackers or descendants of other rules in this
+        // tracker.
+    }
+}
+
+void WinAppTracker::checkMatchingChild(WinHandle &procHandle, AppIdKey &appId,
+                                       const QString &imgPath, Pid_t pid, Pid_t parentPid)
+{
+    auto itMatchingApp = isAppDescendant(parentPid, imgPath);
+    if(itMatchingApp != _apps.end())
+    {
+        qInfo() << "PID" << pid << "(parent" << parentPid
+            << ") is descendant of excluded app" << itMatchingApp->first;
+        WinHandle takenProcHandle;
+        AppIdKey takenAppId;
+        // As above, ensure the incoming handle and app ID are cleared
+        takenProcHandle.swap(procHandle);
+        takenAppId.swap(appId);
+        addSplitProcess(itMatchingApp, std::move(takenProcHandle), pid,
+                           std::move(takenAppId));
+        dump();
+        // App IDs have most likely changed.  It's possible they didn't if the new
+        // app ID was already known, but it's not worth the tracking to try to
+        // determine that here, let the firewall implementation handle it.
+        emit appIdsChanged();
+    }
+}
+
+void WinAppTracker::checkNewParent(WinHandle &procHandle, AppIdKey &appId,
+                                   const QString &imgPath, Pid_t pid,
+                                   WinHandle &parentHandle, AppIdKey &parentAppId,
+                                   Pid_t parentPid)
+{
     // If the parent process isn't known, check if it is an excluded app itself.
     // This sometimes happens if the process starts and exits within the 1-ms
     // polling interval of WMI - we're never notified about it at all.  It could
@@ -248,94 +330,50 @@ void WinAppTracker::processCreated(WinHandle procHandle, Pid_t pid,
     // This means that apps whose "launcher" processes are very short-lived
     // should work, but if an intermediate process is very short-lived we might
     // not be able to identify their descendants.
-    if(_procData.count(parentPid) == 0)
+    auto itParentApp = _apps.find(parentAppId);
+    // If the parent is an excluded app, it's ours - take parentHandle and
+    // parentAppId to indicate this to the caller, and add it if it has any
+    // signer names.
+    if(itParentApp != _apps.end())
     {
-        AppIdKey parentAppId{getProcAppId(parentHandle)};
-        auto itParentApp = _excludedApps.end();
-        if(parentAppId)
-            itParentApp = _excludedApps.find(parentAppId);
-        // If the parent is an excluded app, and it has at least one signer
-        // name, track it.  (Skip if there are no signer names, we would never
-        // match any descendants, no need to track it.)
-        if(itParentApp != _excludedApps.end() &&
-            !itParentApp->second._signerNames.empty())
+        WinHandle takenProcHandle;
+        AppIdKey takenAppId;
+        parentHandle.swap(takenProcHandle);
+        parentAppId.swap(takenAppId);
+
+        qInfo() << "Parent" << parentPid << "matches" << traceEnum(_type)
+            << "rule for" << takenAppId;
+        if(!itParentApp->second._signerNames.empty())
         {
-            qInfo() << "Parent" << parentPid
-                << "was not known but is excluded, add it to" << parentAppId;
-            // The parent wasn't known and is an excluded app.  Add it and then
-            // continue on below.  (We expect the child process to also match
-            // as a descendant, but it's theoretically possible that it could
-            // itself be a _different_ excluded app, so let the normal logic
-            // handle that.
+            qInfo() << "Parent" << parentPid << "was not known but is"
+                << traceEnum(_type) << "- add it to" << takenAppId;
+            // The parent wasn't known and is a matching app.  Add it, and then
+            // check the new child process.  (The child process may or may not
+            // match; it might not have a matching signature.)
             //
             // It's possible this process has exited; if that's the case then
             // we'll immediately be notified and remove it after we finish
             // processing notifications.
-            addExcludedProcess(itParentApp, std::move(parentHandle), parentPid,
-                               std::move(parentAppId));
+            addSplitProcess(itParentApp, std::move(takenProcHandle), parentPid,
+                            std::move(takenAppId));
             dump();
-        }
-    }
-    // Might have moved from parentHandle, can't use it after this.
-    parentHandle = {};
 
-    QString imgPath{getProcImagePath(procHandle)};
-    AppIdKey appId;
-    if(!imgPath.isEmpty())
-    {
-        // As in getProcAppId(), definitely not a link, no need to load a link
-        // reader
-        appId.reset(nullptr, imgPath);
-    }
-    // Can't do anything if we couldn't get this process's app ID.
-    if(!appId)
-    {
-        qWarning() << "Couldn't get app ID for PID" << pid << "(from parent"
-            << parentPid << ")";
-        return;
-    }
-
-    // Check if it's an excluded app itself.  Do this before checking if it's a
-    // descendant - it's possible it could be both if one excluded app launches
-    // another.
-    auto itExcludedApp = _excludedApps.find(appId);
-    if(itExcludedApp != _excludedApps.end())
-    {
-        // Add it only if there are signer names for this app - if there aren't,
-        // we'd never match any descendants, skip it.
-        if(!itExcludedApp->second._signerNames.empty())
-        {
-            qInfo() << "PID" << pid << "is excluded app" << itExcludedApp->first;
-            addExcludedProcess(itExcludedApp, std::move(procHandle), pid,
-                               std::move(appId));
-            dump();
-            // This does not cause excluded app IDs to change (it's an explicit app
-            // ID we already knew about)
+            // Added a new parent, so check if this child matches that parent.
+            checkMatchingChild(procHandle, appId, imgPath, pid, parentPid);
         }
-        // Otherwise, it's skipped, do _not_ check if it's a descendant of
-        // another excluded app too.
-    }
-    // If it isn't, check if it's a descendant.
-    else if((itExcludedApp = isAppDescendant(parentPid, imgPath)) != _excludedApps.end())
-    {
-        qInfo() << "PID" << pid << "(parent" << parentPid
-            << ") is descendant of excluded app" << itExcludedApp->first;
-        addExcludedProcess(itExcludedApp, std::move(procHandle), pid,
-                           std::move(appId));
-        dump();
-        // App IDs have most likely changed.  It's possible they didn't if the new
-        // app ID was already known, but it's not worth the tracking to try to
-        // determine that here, let the firewall implementation handle it.
-        emit excludedAppIdsChanged();
+        // Otherwise, we took the parent handle and app ID since this was our
+        // parent (no need to check if it matches any other tracker), but we
+        // don't need to check the child since the parent had no signer names
+        // (it can't possibly match).
     }
 }
 
 void WinAppTracker::dump() const
 {
     std::size_t processes{0};
-    qInfo() << "===App tracker dump===";
-    qInfo() << _excludedApps.size() << "excluded apps";
-    for(auto itExclApp = _excludedApps.begin(); itExclApp != _excludedApps.end(); ++itExclApp)
+    qInfo() << "===" << traceEnum(_type) << "app tracker dump ===";
+    qInfo() << _apps.size() << "apps";
+    for(auto itExclApp = _apps.begin(); itExclApp != _apps.end(); ++itExclApp)
     {
         const auto &app = *itExclApp;
 
@@ -367,27 +405,142 @@ void WinAppTracker::dump() const
     }
 }
 
-void WinAppTracker::addExcludedProcess(ExcludedApps_t::iterator itExcludedApp,
-                                       WinHandle procHandle, Pid_t pid,
-                                       AppIdKey appId)
+void WinAppTracker::addSplitProcess(ExcludedApps_t::iterator itMatchingApp,
+                                    WinHandle procHandle, Pid_t pid,
+                                    AppIdKey appId)
 {
-    Q_ASSERT(itExcludedApp != _excludedApps.end()); // Ensured by caller
+    Q_ASSERT(itMatchingApp != _apps.end()); // Ensured by caller
     Q_ASSERT(_procData.count(pid) == 0);    // Ensured by caller
-    Q_ASSERT(itExcludedApp->second._runningProcesses.count(pid) == 0);    // Class invariant
+    Q_ASSERT(itMatchingApp->second._runningProcesses.count(pid) == 0);    // Class invariant
 
-    itExcludedApp->second._runningProcesses.emplace(pid);
+    itMatchingApp->second._runningProcesses.emplace(pid);
     ProcessData &data = _procData[pid];
     data._procHandle = std::move(procHandle);
     data._pNotifier.reset(new QWinEventNotifier{data._procHandle.get()});
     data._procAppId = std::move(appId);
-    data._excludedAppPos = itExcludedApp;
+    data._excludedAppPos = itMatchingApp;
 
     connect(data._pNotifier.get(), &QWinEventNotifier::activated, this,
             &WinAppTracker::onProcessExited);
 }
 
-QString WinAppTracker::getProcImagePath(const WinHandle &procHandle) const
+auto WinAppTracker::isAppDescendant(Pid_t parentPid, const QString &imgPath)
+    -> ExcludedApps_t::iterator
 {
+    // Note that the parent PID given does not in general refer to the actual
+    // process that created this one - the PID could have been reused if the
+    // parent has already exited.
+    //
+    // However, if the PID is found in _procData, then we _know_ it hasn't been
+    // reused, because we have kept a handle open to that process since it was
+    // first observed.
+    auto itProcData = _procData.find(parentPid);
+    if(itProcData == _procData.end())
+        return _apps.end(); // Not a descendant of anything we care about
+
+    // The process was started (potentially indirectly) by an excluded app.
+    // However, we only consider it a valid descendant if shares at least one
+    // signer name with the excluded app.
+    //
+    // This correctly differentiates most "launcher" and "helper" apps from
+    // unrelated apps launching each other, such as web browsers opening
+    // downloaded programs, etc.
+    //
+    // This might not be perfect, but it's better to err on the side of caution;
+    // a user can always manually add an executable that we fail to detect, but
+    // right now there's no way to prevent us from excluding something that we
+    // do detect as a descendant.
+
+    // If the excluded app has no signatures, never match any descendants for it
+    // (skips checking the signatures on the new child).
+    if(itProcData->second._excludedAppPos->second._signerNames.empty())
+        return _apps.end();
+
+    std::set<std::wstring> signerNames{winGetExecutableSigners(imgPath)};
+
+    for(const auto &expectedSignerName : itProcData->second._excludedAppPos->second._signerNames)
+    {
+        // If a signer name matches, this is a valid descendant.
+        if(signerNames.count(expectedSignerName) > 0)
+            return itProcData->second._excludedAppPos;
+    }
+
+    // No signer name matched; not a valid descendant.
+    return _apps.end();
+}
+
+void WinAppTracker::onProcessExited(HANDLE procHandle)
+{
+    Pid_t pid = ::GetProcessId(procHandle);
+
+    // If this PID isn't known, there's nothing to do.  It might be possible for
+    // this to happen if a process exit races with an app removal, although this
+    // depends on whether it's possible for a queued QWinEventNotifier signal to
+    // be received after it has been destroyed.
+    auto itProcData = _procData.find(pid);
+    if(itProcData == _procData.end())
+    {
+        qInfo() << "Already removed PID" << pid;
+        return;
+    }
+
+    qInfo() << "PID" << pid << "exited -" << traceEnum(_type) << "app"
+        << itProcData->second._procAppId << "- group"
+        << itProcData->second._excludedAppPos->first;
+
+    // Remove everything about this process.  We don't remember extra app IDs
+    // that we have found once the process exits.  In principle, we could try to
+    // remember them so there's no exclusion race if the helper process starts
+    // again, but there are a number of trade-offs here:
+    //
+    // - There's no way to reliably know the extra app IDs the first time an app
+    //   is added.  If we try to remember them here, the behavior would change
+    //   between the first app launch and subsequent launches.  Consistent
+    //   behavior is preferred even if it is imprecise.
+    //
+    // - This is more robust if an app is excluded unexpectedly.  For example,
+    //   if an excluded app occasionally runs "tracert.exe", it'll exclude it
+    //   while it's being run by that app (probably desirable), but then it goes
+    //   back to normal as soon as it exits (it won't affect a tracert from the
+    //   shell, etc.).  The only potential problem is if tracert.exe is run in
+    //   both excluded and non-excluded contexts simultaneously.
+    //
+    // - This approach minimizes the possibility of leaking state if there is an
+    //   error in the state tracking of WinAppTracker.
+
+    // Remove the PID from the excluded app group.
+    Q_ASSERT(itProcData->second._excludedAppPos != _apps.end());    // Class invariant
+    itProcData->second._excludedAppPos->second._runningProcesses.erase(pid);
+
+    // Remove the process data.  Note that this closes procHandle, which is a
+    // copy of the handle owned by the process data.
+    _procData.erase(itProcData);
+
+    // App IDs have most likely changed.  It's possible they didn't if there is
+    // still a PID tracked with this same app ID, but again, let the firewall
+    // handle that.
+    dump();
+    emit appIdsChanged();
+}
+
+WinSplitTunnelTracker::WinSplitTunnelTracker()
+    : _vpnOnly{WinAppTracker::SplitType::VpnOnly},
+      _excluded{WinAppTracker::SplitType::Excluded}
+{
+    connect(&_vpnOnly, &WinAppTracker::appIdsChanged, this,
+            &WinSplitTunnelTracker::appIdsChanged);
+    connect(&_excluded, &WinAppTracker::appIdsChanged, this,
+            &WinSplitTunnelTracker::appIdsChanged);
+}
+
+QString WinSplitTunnelTracker::getProcImagePath(const WinHandle &procHandle) const
+{
+    if(!procHandle)
+    {
+        qWarning() << "Can't get image path for null process handle";
+        return {};
+    }
+
     // First try QueryFullProcessImageNameW().  This returns a Win32 path but
     // tends not to work if the process has exited.
     std::array<wchar_t, 2048> procImage{};
@@ -421,7 +574,7 @@ QString WinAppTracker::getProcImagePath(const WinHandle &procHandle) const
     return QStringLiteral("\\\\?\\GLOBALROOT") + QString::fromWCharArray(procImage.data(), static_cast<qsizetype>(len));
 }
 
-AppIdKey WinAppTracker::getProcAppId(const WinHandle &procHandle) const
+AppIdKey WinSplitTunnelTracker::getProcAppId(const WinHandle &procHandle) const
 {
     QString imgPath{getProcImagePath(procHandle)};
     if(imgPath.isEmpty())
@@ -431,102 +584,92 @@ AppIdKey WinAppTracker::getProcAppId(const WinHandle &procHandle) const
     return AppIdKey{nullptr, imgPath};
 }
 
-auto WinAppTracker::isAppDescendant(Pid_t parentPid, const QString &imgPath)
-    -> ExcludedApps_t::iterator
+std::set<const AppIdKey*, PtrValueLess> WinSplitTunnelTracker::getExcludedAppIds() const
 {
-    // Note that the parent PID given does not in general refer to the actual
-    // process that created this one - the PID could have been reused if the
-    // parent has already exited.
-    //
-    // However, if the PID is found in _procData, then we _know_ it hasn't been
-    // reused, because we have kept a handle open to that process since it was
-    // first observed.
-    auto itProcData = _procData.find(parentPid);
-    if(itProcData == _procData.end())
-        return _excludedApps.end(); // Not a descendant of anything we care about
-
-    // The process was started (potentially indirectly) by an excluded app.
-    // However, we only consider it a valid descendant if shares at least one
-    // signer name with the excluded app.
-    //
-    // This correctly differentiates most "launcher" and "helper" apps from
-    // unrelated apps launching each other, such as web browsers opening
-    // downloaded programs, etc.
-    //
-    // This might not be perfect, but it's better to err on the side of caution;
-    // a user can always manually add an executable that we fail to detect, but
-    // right now there's no way to prevent us from excluding something that we
-    // do detect as a descendant.
-
-    // If the excluded app has no signatures, never match any descendants for it
-    // (skips checking the signatures on the new child).
-    if(itProcData->second._excludedAppPos->second._signerNames.empty())
-        return _excludedApps.end();
-
-    std::set<std::wstring> signerNames{winGetExecutableSigners(imgPath)};
-
-    for(const auto &expectedSignerName : itProcData->second._excludedAppPos->second._signerNames)
-    {
-        // If a signer name matches, this is a valid descendant.
-        if(signerNames.count(expectedSignerName) > 0)
-            return itProcData->second._excludedAppPos;
-    }
-
-    // No signer name matched; not a valid descendant.
-    return _excludedApps.end();
+    return _excluded.getAppIds();
 }
 
-void WinAppTracker::onProcessExited(HANDLE procHandle)
+std::set<const AppIdKey*, PtrValueLess> WinSplitTunnelTracker::getVpnOnlyAppIds() const
 {
-    Pid_t pid = ::GetProcessId(procHandle);
+    return _vpnOnly.getAppIds();
+}
 
-    // If this PID isn't known, there's nothing to do.  It might be possible for
-    // this to happen if a process exit races with an app removal, although this
-    // depends on whether it's possible for a queued QWinEventNotifier signal to
-    // be received after it has been destroyed.
-    auto itProcData = _procData.find(pid);
-    if(itProcData == _procData.end())
+bool WinSplitTunnelTracker::setSplitTunnelRules(const QVector<SplitTunnelRule> &rules)
+{
+    bool vpnOnlyRules = _vpnOnly.setSplitTunnelRules(rules);
+    bool exclusionRules = _excluded.setSplitTunnelRules(rules);
+    return vpnOnlyRules || exclusionRules;
+}
+
+void WinSplitTunnelTracker::processCreated(WinHandle procHandle, Pid_t pid,
+                                           WinHandle parentHandle, Pid_t parentPid)
+{
+    QString imgPath{getProcImagePath(procHandle)};
+    AppIdKey appId;
+    if(!imgPath.isEmpty())
     {
-        qInfo() << "Already removed PID" << pid;
+        // As in getProcAppId(), definitely not a link, no need to load a link
+        // reader
+        appId.reset(nullptr, imgPath);
+    }
+    // Can't do anything if we couldn't get this process's app ID.
+    if(!appId)
+    {
+        qWarning() << "Couldn't get app ID for PID" << pid << "(from parent"
+            << parentPid << ")";
         return;
     }
 
-    qInfo() << "PID" << pid << "exited - app" << itProcData->second._procAppId
-        << "- group" << itProcData->second._excludedAppPos->first;
-
-    // Remove everything about this process.  We don't remember extra app IDs
-    // that we have found once the process exits.  In principle, we could try to
-    // remember them so there's no exclusion race if the helper process starts
-    // again, but there are a number of trade-offs here:
+    // First, check if the process is a direct match to any tracker's rules.
+    // Check direct matches for all trackers before checking descendants, in
+    // case a process matching one rule invokes another matching process of a
+    // different rule type.
     //
-    // - There's no way to reliably know the extra app IDs the first time an app
-    //   is added.  If we try to remember them here, the behavior would change
-    //   between the first app launch and subsequent launches.  Consistent
-    //   behavior is preferred even if it is imprecise.
-    //
-    // - This is more robust if an app is excluded unexpectedly.  For example,
-    //   if an excluded app occasionally runs "tracert.exe", it'll exclude it
-    //   while it's being run by that app (probably desirable), but then it goes
-    //   back to normal as soon as it exits (it won't affect a tracert from the
-    //   shell, etc.).  The only potential problem is if tracert.exe is run in
-    //   both excluded and non-excluded contexts simultaneously.
-    //
-    // - This approach minimizes the possibility of leaking state if there is an
-    //   error in the state tracking of WinAppTracker.
+    // The app trackers take the process handle if it's matched, so we're done
+    // as soon as the process handle is taken.  (The WinAppTracker traces for
+    // this.)
+    _vpnOnly.checkMatchingProcess(procHandle, appId, pid);
+    if(!procHandle)
+        return;
+    _excluded.checkMatchingProcess(procHandle, appId, pid);
+    if(!procHandle)
+        return;
 
-    // Remove the PID from the excluded app group.
-    Q_ASSERT(itProcData->second._excludedAppPos != _excludedApps.end());    // Class invariant
-    itProcData->second._excludedAppPos->second._runningProcesses.erase(pid);
+    // Check if the process is a descendant of a known parent process.  If one
+    // of the trackers matches it this way, then we don't need to find the
+    // parent's AppIdKey.
+    _vpnOnly.checkMatchingChild(procHandle, appId, imgPath, pid, parentPid);
+    if(!procHandle)
+        return;
+    _excluded.checkMatchingChild(procHandle, appId, imgPath, pid, parentPid);
+    if(!procHandle)
+        return;
 
-    // Remove the process data.  Note that this closes procHandle, which is a
-    // copy of the handle owned by the process data.
-    _procData.erase(itProcData);
+    // As discussed in checkNewParent(), it's possible to observe a new child
+    // from WMI without having observed the creation of the parent process.
+    // Since nothing has matched yet, find the AppIdKey for the parent process,
+    // and check if the parent matches any rule.  (If it does, the matching
+    // WinAppTracker also checks if the new child should be considered a
+    // descendant.)
+    AppIdKey parentAppId{getProcAppId(parentHandle)};
+    if(!parentAppId)
+    {
+        qWarning() << "Couldn't get app ID for parent" << parentPid
+            << "of new process" << pid << "-" << imgPath;
+        return;
+    }
+    _vpnOnly.checkNewParent(procHandle, appId, imgPath, pid, parentHandle,
+                            parentAppId, parentPid);
+    if(!procHandle || !parentHandle)
+        return;
+    _excluded.checkNewParent(procHandle, appId, imgPath, pid, parentHandle,
+                             parentAppId, parentPid);
+}
 
-    // App IDs have most likely changed.  It's possible they didn't if there is
-    // still a PID tracked with this same app ID, but again, let the firewall
-    // handle that.
-    dump();
-    emit excludedAppIdsChanged();
+void WinSplitTunnelTracker::dump() const
+{
+    _vpnOnly.dump();
+    _excluded.dump();
 }
 
 // This WBEM event sink is used to implement WinAppMonitor.
@@ -850,8 +993,8 @@ void WinAppMonitor::WbemEventSink::readNewProcess(IWbemClassObject &obj)
 
 WinAppMonitor::WinAppMonitor()
 {
-    connect(&_tracker, &WinAppTracker::excludedAppIdsChanged, this,
-            &WinAppMonitor::excludedAppIdsChanged);
+    connect(&_tracker, &WinSplitTunnelTracker::appIdsChanged, this,
+            &WinAppMonitor::appIdsChanged);
 
     // Create the WMI locator
     auto pLocator = WinComPtr<IWbemLocator>::createInprocInst(CLSID_WbemLocator, IID_IWbemLocator);

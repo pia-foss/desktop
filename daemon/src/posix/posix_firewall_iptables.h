@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -34,7 +34,7 @@ class IpTablesFirewall
 public:
     enum IPVersion { IPv4, IPv6, Both };
     // Table names
-    static QString kFilterTable, kNatTable, kMangleTable, kRtableName, kRawTable;
+    static QString kFilterTable, kNatTable, kMangleTable, kRtableName, kVpnOnlyRtableName, kRawTable;
 public:
     using FilterCallbackFunc = std::function<void()>;
 private:
@@ -47,6 +47,8 @@ private:
     static QStringList getDNSRules(const QStringList& servers);
     static void setupTrafficSplitting();
     static void teardownTrafficSplitting();
+    static void setupCgroup(const Path &cGroupDir, QString cGroupId, QString packetTag, QString routingTableName);
+    static void teardownCgroup(QString packetTag, QString routingTableName);
     static int execute(const QString& command, bool ignoreErrors = false);
 private:
     // Chain names
@@ -61,7 +63,7 @@ public:
     static void disableAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static bool isAnchorEnabled(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
-    static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString &newRule, const QString& tableName);
+    static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName);
     static void updateDNSServers(const QStringList& servers);
 };
 

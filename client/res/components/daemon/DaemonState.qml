@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -37,7 +37,6 @@ QtObject {
   readonly property var connectedConfig: NativeDaemon.state.connectedConfig
   readonly property var groupedLocations: NativeDaemon.state.groupedLocations
   readonly property var intervalMeasurements: NativeDaemon.state.intervalMeasurements
-  readonly property var splitTunnelSupportErrors: NativeDaemon.state.splitTunnelSupportErrors
   readonly property double connectionTimestamp: NativeDaemon.state.connectionTimestamp
   readonly property double openVpnAuthFailed: NativeDaemon.state.openVpnAuthFailed
   readonly property double connectionLost: NativeDaemon.state.connectionLost
@@ -58,6 +57,10 @@ QtObject {
   readonly property string originalInterfaceIp: NativeDaemon.state.originalInterfaceIp
   readonly property string originalInterface: NativeDaemon.state.originalInterface
   readonly property double snoozeEndTime: NativeDaemon.state.snoozeEndTime
+  readonly property var splitTunnelSupportErrors: NativeDaemon.state.splitTunnelSupportErrors
+  readonly property string tunnelDeviceName: NativeDaemon.state.tunnelDeviceName
+  readonly property string tunnelDeviceLocalAddress: NativeDaemon.state.tunnelDeviceLocalAddress
+  readonly property string tunnelDeviceRemoteAddress: NativeDaemon.state.tunnelDeviceRemoteAddress
 
   // Constants for special values of forwardedPort (see PortForwarder::Special)
   readonly property var portForward: {

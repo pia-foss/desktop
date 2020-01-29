@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -129,7 +129,7 @@ for CONFIG in $MODE; do
 
     APP="$(first ./*.app)"
 
-    if [ -z "$PIA_BRANCH_BUILD" ] || [ "$PIA_BRANCH_BUILD" == "master" ]; then
+    if [ -z "$PIA_BRANCH_BUILD" ] || [ "$PIA_BRANCH_BUILD" == "master" ] || [ -n "$PIA_ALWAYS_NOTARIZE" ]; then
         # Zip the app with the original name to notarize it, notarize-macos.sh
         # will build the installer zip after notarizing
         "$ZIP" -y -q -r "$ARTIFACTS/$PACKAGENAME.zip" "$APP"

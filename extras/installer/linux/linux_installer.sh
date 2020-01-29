@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -38,8 +38,9 @@ readonly sysvinitServiceLocation="/etc/init.d/${brandCode}vpn"
 readonly openrcServiceLocation="/etc/init.d/${brandCode}vpn"
 readonly serviceName="${brandCode}vpn"
 readonly groupName="${brandCode}vpn"
-readonly hnsdGroupName="${brandCode}hnsd"         # The group used by the Handshake DNS service
-readonly routingTableName="${serviceName}rt"
+readonly hnsdGroupName="${brandCode}hnsd"                # The group used by the Handshake DNS service
+readonly routingTableName="${serviceName}rt"             # for split tunnel
+readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"  # for inverse split tunnel
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
@@ -213,6 +214,20 @@ function addGroups() {
     true
 }
 
+function addRoutingTable() {
+    local highestIndex=$(awk '/^[0-9]/{print $1}' /etc/iproute2/rt_tables | sort -n | tail -1)
+    local newIndex=$(($highestIndex + 1))
+    local routingTable="$1"
+
+    local routesLocation=/etc/iproute2/rt_tables
+    if [[ -f $routesLocation ]] && ! grep -q "$routingTable" $routesLocation; then
+        echo -e "$newIndex\t$routingTable" | sudo tee -a $routesLocation > /dev/null
+        echoPass "Added $routingTable routing table"
+    fi
+
+    true
+}
+
 function installPia() {
     addGroups $groupName $hnsdGroupName
 
@@ -261,14 +276,17 @@ function installPia() {
     sudo cp "$root/installfiles/piavpn.desktop" "/usr/share/applications/${brandCode}vpn.desktop"
     echoPass "Created desktop entry"
 
-    # Create PIA routing table for split-tunneling
-    local highestIndex=$(awk '/^[0-9]/{print $1}' /etc/iproute2/rt_tables | sort -n | tail -1)
-    local newIndex=$(($highestIndex + 1))
+    # Create routing tables for split-tunneling
+    addRoutingTable $routingTableName
+    addRoutingTable $vpnOnlyroutingTableName
 
-    local routesLocation=/etc/iproute2/rt_tables
-    if [[ -f $routesLocation ]] && ! grep -q "$routingTableName" $routesLocation; then
-        echo -e "$newIndex\t$routingTableName" | sudo tee -a $routesLocation > /dev/null
-        echoPass "Added $routingTableName routing table"
+    # Link piactl into /usr/local/bin if it's not already there.  If it's there,
+    # either it's ours and doesn't need to be updated, or it's something else
+    # and we shouldn't touch it.?
+    if [ ! -L "${ctlSymlinkPath}" ] && [ ! -e "${ctlSymlinkPath}" ]; then
+        # This is allowed to fail if /usr/bin doesn't exist for some reason,
+        # etc. - just ignore it
+        sudo ln -s "${ctlExecutablePath}" "${ctlSymlinkPath}" || true
     fi
 
     # Link piactl into /usr/local/bin if it's not already there.  If it's there,

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -470,7 +470,14 @@ public:
     JsonField(QString, location, QStringLiteral("auto"))
     JsonField(QString, protocol, QStringLiteral("udp"), { "udp", "tcp" })
     JsonField(QString, killswitch, QStringLiteral("auto"), { "on", "off", "auto" })
-    JsonField(bool, routeDefault, true) // add default route into the tunnel
+    // Whether to use the VPN as the default route.  This is a split tunnel
+    // setting (due to the non-default route being applied as part of the split
+    // tunnel implementation on Mac); it is only used when splitTunnelEnabled is
+    // true.
+    // Prior versions of the PIA client had a "routeDefault" setting; the
+    // setting was renamed when it was implemented properly to avoid unexpected
+    // behavior on downgrades.
+    JsonField(bool, defaultRoute, true)
     JsonField(bool, blockIPv6, true) // block IPv6 traffic
     JsonField(DNSSetting, overrideDNS, QStringLiteral("pia"), validateDNSSetting) // use PIA DNS servers (symbolic name, array with 1-2 IPs, or empty string to use existing DNS)
     JsonField(bool, allowLAN, true) // permits LAN traffic when connected/killswitched
@@ -677,6 +684,11 @@ public:
     JsonField(QSharedPointer<ServerLocation>, vpnLocation, {})
     // Whether the VPN location was an automatic selection
     JsonField(bool, vpnLocationAuto, false)
+
+    // Whether the VPN is being used as the default route for this connection.
+    // (Not precisely equivalent to DaemonSettings::defaultRoute; the setting is
+    // only used when split tunnel is enabled.)
+    JsonField(bool, defaultRoute, true)
     // The proxy type used for this connection - same values as
     // DaemonSettings::proxy (when set)
     JsonField(QString, proxy, {})
@@ -778,8 +790,8 @@ public:
     // connection.  Includes VPN locations and proxy configuration.
     //
     // The validity of these data depends on the current state.  ('Valid' means
-    // the ConnectionInfo has a valid VPN location, proxy type, and the relevant
-    // proxy information.)
+    // the ConnectionInfo has a valid VPN location, and that the other setting
+    // information is meaningful.)
     //
     // (X = valid, - = not valid, ? = possibly valid)
     // State                    | connectingConfig | connectedConfig
@@ -924,13 +936,14 @@ public:
 
     JsonField(QJsonArray, splitTunnelSupportErrors, {})
 
-    // On Mac/Linux, the name and local IP address of the tunnel device being
-    // used.  Set during the [Still](Connecting|Reconnecting) states when known,
-    // remains set while connected.  Cleared in the Disconnected state.  In
-    // other states, the value depends on whether we had reached this phase of
-    // the last connection attempt.
+    // On Mac/Linux, the name of the tunnel device being used.  Set during the
+    // [Still](Connecting|Reconnecting) states when known, remains set while
+    // connected.  Cleared in the Disconnected state.  In other states, the
+    // value depends on whether we had reached this phase of the last connection
+    // attempt.
     JsonField(QString, tunnelDeviceName, {})
     JsonField(QString, tunnelDeviceLocalAddress, {})
+    JsonField(QString, tunnelDeviceRemoteAddress, {})
 
 public:
     QSharedPointer<ServerLocation> getClosestServerLocation();

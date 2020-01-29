@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -35,7 +35,7 @@ void UninstallTapDriverTask::execute()
     _listener->setCaption(IDS_CAPTION_REMOVINGADAPTER);
 
 retry:
-    DriverStatus status = uninstallTapDriver(false);
+    DriverStatus status = uninstallTapDriver(false, false);
     switch (status)
     {
     case DriverUninstalled:
@@ -58,7 +58,7 @@ void UninstallTapDriverTask::rollback()
 {
     if (_rollbackNeedsUninstall)
     {
-        int result = uninstallTapDriver(true);
+        int result = uninstallTapDriver(true, false);
         LOG("Rollback TAP uninstall returned %d", result);
     }
     else if (_rollbackNeedsReinstall)
@@ -74,6 +74,30 @@ void InstallTapDriverTask::execute()
 {
     LOG("Installing TAP driver");
     _listener->setCaption(IDS_CAPTION_INSTALLINGADAPTER);
+    
+retry_uninstall:
+    // If a different version of the TAP adapter is installed, uninstall it
+    // before installing the new one.
+    //
+    // Historically, there have been rare cases where the new driver could not
+    // update the old one, but a clean install works.  (Updating from 9.23.3 to
+    // 9.24.2 on Windows 10 1507 / LTSB 2015 had this issue.)
+    DriverStatus uninstallStatus = uninstallTapDriver(true, true);
+    switch(uninstallStatus)
+    {
+    case DriverUninstalled:
+        _rollbackNeedsReinstall = true;
+        break;
+    case DriverNothingToUninstall:
+        break;
+    default:
+    case DriverUninstallFailed:
+        if (Retry == InstallerError::raise(Abort | Retry | Ignore, IDS_MB_ERRORUNINSTALLINGTAPDRIVER))
+            goto retry_uninstall;
+        // If this failure is ignored, we'll still try to update the TAP adapter
+        break;
+    }
+    
 retry:
     DriverStatus status = installTapDriver(getInfPath().c_str(), false, false);
     switch (status)
@@ -82,7 +106,10 @@ retry:
         g_rebootAfterInstall = true;
         // fallthrough
     case DriverInstalled:
-        _rollbackNeedsUninstall = true;
+        // We might have already set the reinstall flag for rollback flag if we
+        // successfully uninstalled an older driver above.
+        if(!_rollbackNeedsReinstall)
+            _rollbackNeedsUninstall = true;
         return;
     case DriverUpdatedReboot:
         g_rebootAfterInstall = true;
@@ -99,8 +126,20 @@ retry:
     default:
     case DriverUpdateFailed:
     case DriverInstallFailed:
-        InstallerError::raise(Abort | Retry, IDS_MB_TAPDRIVERFAILED);
-        goto retry;
+        // The user can ignore a TAP installation error - the client handles
+        // this gracefully since the TAP adapter is known to sometimes disappear
+        // during Windows updates anyway.  Historically, there have been rare
+        // cases where the TAP adapter would not install during installation,
+        // but reinstalling from the client after installation would work, so
+        // permit that as a possible workaround.
+        if(Retry == InstallerError::raise(Abort | Retry | Ignore, IDS_MB_TAPDRIVERFAILED))
+            goto retry;
+        // Ignored
+        if(status == DriverUpdateFailed)
+            _rollbackNeedsReinstall = true;
+        else if(!_rollbackNeedsReinstall)
+            _rollbackNeedsUninstall = true;
+        break;
     }
 }
 

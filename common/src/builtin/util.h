@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -45,7 +45,7 @@
 #define TEMPLATE_AUTO_DECLTYPE(name) CONCAT(TYPE_,name)
 #endif
 
-COMMON_EXPORT std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command);
+COMMON_EXPORT std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command, bool showDebug=false);
 
 class Error;
 

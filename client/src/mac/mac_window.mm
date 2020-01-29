@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -105,4 +105,27 @@ QMarginsF MacWindowMetrics::calcDecorationSize(const QWindow &window,
     decMargins.setRight(nsRectRight(frameRect) - nsRectRight(contentRect));
     decMargins.setBottom(contentRect.origin.y - frameRect.origin.y);
     return decMargins;
+}
+
+void macCheckAppDeactivate()
+{
+    NSApplication *pApp = [NSApplication sharedApplication];
+    if(!pApp)
+        return;
+
+    // We just hid one of the PIA client windows.  If no other window became
+    // focused, hide the app to focus the next app.  (Otherwise, AppKit seems to
+    // leave our app as active, but with no focused window, which is odd.)
+    //
+    // Normally, this means there are no visible windows, so NSApplication.hide
+    // just focuses the next app (there's nothing to hide).
+    NSWindow *pKeyWindow = pApp.keyWindow;
+    if(!pKeyWindow && pApp.active)
+    {
+        qInfo() << "No window focused - deactivating app";
+        [pApp hide:pApp];
+        return;
+    }
+
+    qInfo() << "Focused window:" << QString::fromNSString(pKeyWindow.title);
 }

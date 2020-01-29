@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -27,7 +27,10 @@
 #include "win.h"
 #include "../../extras/installer/win/tap.inl"
 
-GUID PIA_WFP_CALLOUT_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
+// The 'bind' callout GUID is the GUID used in 1.7 and earlier; the WFP callout
+// only handled the bind layer in those releases.
+GUID PIA_WFP_CALLOUT_BIND_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
+GUID PIA_WFP_CALLOUT_CONNECT_V4 = { 0xb80ca14a, 0xa807, 0x4ef2, { 0x87, 0x2d, 0x4b, 0x1a, 0x51, 0x82, 0x54, 0x2 } };
 
 void WinNetworkAdapter::setMetricToLowest()
  {
@@ -182,6 +185,8 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
     : Daemon(arguments, parent)
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
+    , _hnsdAppId{nullptr, Path::HnsdExecutable}
+    , _lastConnected{false}
     , _ipNotificationHandle(nullptr)
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
 {
@@ -217,7 +222,7 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
 
     connect(this, &Daemon::aboutToConnect, this, &WinDaemon::onAboutToConnect);
 
-    connect(&_appMonitor, &WinAppMonitor::excludedAppIdsChanged, this,
+    connect(&_appMonitor, &WinAppMonitor::appIdsChanged, this,
             &WinDaemon::queueApplyFirewallRules);
 
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this,
@@ -322,6 +327,7 @@ QList<QSharedPointer<WinNetworkAdapter>> WinDaemon::getAllNetworkAdapters()
         {
             auto adapter = QSharedPointer<WinNetworkAdapter>::create(address->AdapterName);
             adapter->luid = address->Luid.Value;
+            adapter->ifIndex = address->IfIndex;
             adapter->adapterName = QString::fromWCharArray(address->Description);
             adapter->connectionName = QString::fromWCharArray(address->FriendlyName);
             adapter->isCustomTap = true;
@@ -616,86 +622,247 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
 
     // Get the current set of excluded app IDs.  If they've changed we recreate
     // all app rules, but if they stay the same we don't recreate them.
-    std::set<const AppIdKey*, PtrValueLess> newExcludedApps;
-    if(params.allowVpnExemptions)
-        newExcludedApps = _appMonitor.getAppIds();
-    QString newSplitTunnelIp = _state.originalInterfaceIp();
-
-    // Are all the app IDs the same?  This test is valid because both containers
-    // are sorted lexically.
-    bool sameExcludedApps = std::equal(excludedApps.begin(), excludedApps.end(),
-        newExcludedApps.begin(), newExcludedApps.end(),
-        [](const auto &existingApp, const AppIdKey *pNewApp)
-        {
-            return *pNewApp == existingApp.first;
-        });
-
-    // If the apps or local IP address have changed, delete all the filters and
-    // create new ones.
-    if(sameExcludedApps && _lastSplitTunnelIp == newSplitTunnelIp)
+    std::set<const AppIdKey*, PtrValueLess> newExcludedApps, newVpnOnlyApps;
+    if(params.enableSplitTunnel)
     {
-        qInfo() << "Still have same" << excludedApps.size() << "excluded apps";
+        newExcludedApps = _appMonitor.getExcludedAppIds();
+        newVpnOnlyApps = _appMonitor.getVpnOnlyAppIds();
+
+        if(!params.defaultRoute)
+        {
+            // Put hnsd in the VPN since we did not use the VPN as the default
+            // route
+            newVpnOnlyApps.insert(&_hnsdAppId);
+        }
+    }
+
+    qInfo() << "Number of excluded apps" << newExcludedApps.size();
+    qInfo() << "Number of vpnOnly apps" << newVpnOnlyApps.size();
+
+    reapplySplitTunnelFirewall(params.splitTunnelNetScan.ipAddress(),
+                               _state.tunnelDeviceLocalAddress(),
+                               newExcludedApps, newVpnOnlyApps, params.hasConnected);
+
+    tx.commit();
+}
+
+void WinDaemon::removeSplitTunnelAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
+                                            const QString &traceType)
+{
+    for(auto &oldApp : apps)
+    {
+        qInfo() << "remove" << traceType << "app filters:"
+            << QStringView{reinterpret_cast<const wchar_t*>(oldApp.first.data()),
+                           static_cast<qsizetype>(oldApp.first.size() / sizeof(wchar_t))};
+        deactivateFilter(oldApp.second.splitAppBind, true);
+        deactivateFilter(oldApp.second.splitAppConnect, true);
+        deactivateFilter(oldApp.second.permitApp, true);
+        deactivateFilter(oldApp.second.blockAppIpv4, true);
+        deactivateFilter(oldApp.second.blockAppIpv6, true);
+    }
+    apps.clear();
+}
+
+void WinDaemon::createBypassAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
+                                       const WfpProviderContextObject &context,
+                                       const AppIdKey &appId)
+{
+    qInfo() << "add bypass app filters:" << appId;
+    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
+    if(empResult.second)
+    {
+        auto &appFilters = empResult.first->second;
+        activateFilter(appFilters.permitApp, true, AppIdFilter<FWP_IP_VERSION_V4>{appId, 15});
+        activateFilter(appFilters.splitAppBind, true,
+                        SplitFilter<FWP_IP_VERSION_V4>{appId,
+                            PIA_WFP_CALLOUT_BIND_V4,
+                            FWPM_LAYER_ALE_BIND_REDIRECT_V4,
+                            context,
+                            15});
+        activateFilter(appFilters.splitAppConnect, true,
+                        SplitFilter<FWP_IP_VERSION_V4>{appId,
+                            PIA_WFP_CALLOUT_CONNECT_V4,
+                            FWPM_LAYER_ALE_CONNECT_REDIRECT_V4,
+                            context,
+                            15});
+    }
+}
+
+void WinDaemon::createOnlyVPNAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
+                                        const WfpProviderContextObject &context,
+                                        const AppIdKey &appId)
+{
+    qInfo() << "add only-VPN app filters:" << appId;
+    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
+    if(empResult.second)
+    {
+        auto &appFilters = empResult.first->second;
+        // While connected, the normal IPv6 firewall rule should still take care
+        // of this, but keep this per-app rule around for robustness.
+        activateFilter(appFilters.blockAppIpv6, true,
+                       AppIdFilter<FWP_IP_VERSION_V6, FWP_ACTION_BLOCK>{appId, 14});
+        activateFilter(appFilters.splitAppBind, true,
+                        SplitFilter<FWP_IP_VERSION_V4>{appId,
+                            PIA_WFP_CALLOUT_BIND_V4,
+                            FWPM_LAYER_ALE_BIND_REDIRECT_V4,
+                            context,
+                            15});
+        activateFilter(appFilters.splitAppConnect, true,
+                        SplitFilter<FWP_IP_VERSION_V4>{appId,
+                            PIA_WFP_CALLOUT_CONNECT_V4,
+                            FWPM_LAYER_ALE_CONNECT_REDIRECT_V4,
+                            context,
+                            15});
+    }
+}
+
+void WinDaemon::createBlockAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
+                                      const AppIdKey &appId)
+{
+    qInfo() << "add block app filters:" << appId;
+    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
+    if(empResult.second)
+    {
+        auto &appFilters = empResult.first->second;
+        // Block IPv4, because we can't bind this app to the tunnel (the VPN is
+        // not connected).
+        activateFilter(appFilters.blockAppIpv4, true,
+                       AppIdFilter<FWP_IP_VERSION_V4, FWP_ACTION_BLOCK>{appId, 14});
+        // Block IPv6, because the normal IPv6 firewall rule is not active when
+        // disconnected (unless the killswitch is set to Always).
+        activateFilter(appFilters.blockAppIpv6, true,
+                       AppIdFilter<FWP_IP_VERSION_V6, FWP_ACTION_BLOCK>{appId, 14});
+    }
+}
+
+void WinDaemon::reapplySplitTunnelFirewall(const QString &newSplitTunnelIp,
+                                           const QString &newTunnelIp,
+                                           const std::set<const AppIdKey*, PtrValueLess> &newExcludedApps,
+                                           const std::set<const AppIdKey*, PtrValueLess> &newVpnOnlyApps,
+                                           bool hasConnected)
+{
+    bool sameExcludedApps = areAppsUnchanged(newExcludedApps, excludedApps);
+    bool sameVpnOnlyApps = areAppsUnchanged(newVpnOnlyApps, vpnOnlyApps);
+
+    // If anything changes, we have to delete all filters and recreate
+    // everything.  WFP has been known to throw spurious errors if we try to
+    // reuse callout or context objects, so we delete everything in order to
+    // tear those down and recreate them.
+    if(sameExcludedApps && sameVpnOnlyApps && _lastSplitTunnelIp == newSplitTunnelIp &&
+        _lastTunnelIp == newTunnelIp && _lastConnected == hasConnected)
+    {
+        qInfo() << "Split tunnel rules have not changed - excluded:"
+            << excludedApps.size() << "- VPN-only:" << vpnOnlyApps.size()
+            << "split tunnel IP known:" << !_lastSplitTunnelIp.isEmpty()
+            << "tunnel IP known:" << !_lastTunnelIp.isEmpty()
+            << "and have connected:" << _lastConnected;
+        return;
+    }
+
+    // Remove all app filters
+    removeSplitTunnelAppFilters(excludedApps, QStringLiteral("excluded"));
+    removeSplitTunnelAppFilters(vpnOnlyApps, QStringLiteral("VPN-only"));
+
+    // Delete the old callout and provider context.  WFP does not seem to like
+    // reusing the provider context (attempting to reuse it generates an error
+    // saying that it does not exist, despite the fact that deleting it
+    // succeeds), so out of paranoia we never reuse either object.
+    if(_filters.splitCalloutBind != zeroGuid)
+    {
+        qInfo() << "deactivate bind callout object";
+        deactivateFilter(_filters.splitCalloutBind, true);
+    }
+    if(_filters.splitCalloutConnect != zeroGuid)
+    {
+        qInfo() << "deactivate connect callout object";
+        deactivateFilter(_filters.splitCalloutConnect, true);
+    }
+    if(_filters.vpnOnlyProviderContextKey != zeroGuid)
+    {
+        qInfo() << "deactivate provider context object";
+        deactivateFilter(_filters.vpnOnlyProviderContextKey, true);
+    }
+
+    // Keep track of the state we used to apply these rules, so we know when to
+    // recreate them
+    _lastSplitTunnelIp = newSplitTunnelIp;
+    _lastTunnelIp = newTunnelIp;
+    _lastConnected = hasConnected;
+    qInfo() << "Creating split tunnel rules with state - split tunnel IP known:"
+        << !_lastSplitTunnelIp.isEmpty() << "- tunnel IP known:"
+        << !_lastTunnelIp.isEmpty() << "- have connected:" << _lastConnected;
+
+    // We can only create exclude rules when the appropriate bind IP address is known
+    bool createExcludedRules = !_lastSplitTunnelIp.isEmpty() && !newExcludedApps.empty();
+    // VPN-only rules are applied even if the last tunnel IP is not known
+    // though; we still apply the block rule ("per-app killswitch") until the IP
+    // is known.
+    bool createVpnOnlyRules = !newVpnOnlyApps.empty();
+    // We create bind rules for VPN-only apps when connected and the IP is
+    // known; otherwise we just create a block rule (which does not require the
+    // callout/context objects).
+    bool createVpnOnlyBindRules = _lastConnected && !_lastTunnelIp.isEmpty();
+
+    // Create the new callout and context objects if any rules are needed
+    if(createExcludedRules || (createVpnOnlyRules && createVpnOnlyBindRules))
+    {
+        UINT32 splitIpAddress = QHostAddress{_lastSplitTunnelIp}.toIPv4Address();
+        if(splitIpAddress)
+        {
+            ProviderContext splitProviderContext{&splitIpAddress, sizeof(UINT32)};
+            qInfo() << "activate exclusion provider context object";
+            activateFilter(_filters.providerContextKey, true, splitProviderContext);
+        }
+        else
+            qInfo() << "Not activating exclusion provider context object, IP not known";
+
+        UINT32 vpnIpAddress = QHostAddress{_lastTunnelIp}.toIPv4Address();
+        if(vpnIpAddress)
+        {
+            ProviderContext vpnProviderContext{&vpnIpAddress, sizeof(UINT32)};
+            qInfo() << "activate VPN-only provider context object";
+            activateFilter(_filters.vpnOnlyProviderContextKey, true, vpnProviderContext);
+        }
+        else
+            qInfo() << "Not activating VPN-only provider context object, IP not known";
+
+        qInfo() << "activate callout objects";
+        activateFilter(_filters.splitCalloutBind, true, Callout{FWPM_LAYER_ALE_BIND_REDIRECT_V4, PIA_WFP_CALLOUT_BIND_V4});
+        activateFilter(_filters.splitCalloutConnect, true, Callout{FWPM_LAYER_ALE_CONNECT_REDIRECT_V4, PIA_WFP_CALLOUT_CONNECT_V4});
     }
     else
     {
-        for(auto &oldApp : excludedApps)
-        {
-            qInfo() << "remove app filters:"
-                << QStringView{reinterpret_cast<const wchar_t*>(oldApp.first.data()),
-                               static_cast<qsizetype>(oldApp.first.size() / sizeof(wchar_t))};
-            deactivateFilter(oldApp.second.splitApp, true);
-            deactivateFilter(oldApp.second.permitApp, true);
-        }
-        excludedApps.clear();
+        qInfo() << "Not creating callout objects; not needed: exclude:"
+            << createExcludedRules << "- VPN-only:" << createVpnOnlyRules
+            << "- VPN-only bind:" << createVpnOnlyBindRules;
+    }
 
-        // Delete the old callout and provider context.  WFP does not seem to like
-        // reusing the provider context (attempting to reuse it generates an error
-        // saying that it does not exist, despite the fact that deleting it
-        // succeeds), so out of paranoia we never reuse either object.
-        if(_filters.splitCallout != zeroGuid)
+    if(createExcludedRules)
+    {
+        qInfo() << "Creating exclude rules for" << newExcludedApps.size() << "apps";
+        for(auto &pAppId : newExcludedApps)
         {
-            qInfo() << "deactivate callout object";
-            deactivateFilter(_filters.splitCallout, true);
-        }
-        if(_filters.providerContextKey != zeroGuid)
-        {
-            qInfo() << "deactivate provider context object";
-            deactivateFilter(_filters.providerContextKey, true);
-        }
-
-        _lastSplitTunnelIp = newSplitTunnelIp;
-
-        // We can only create the split tunnel rules once we know the local
-        // IP address
-        if(!_lastSplitTunnelIp.isEmpty())
-        {
-            // Create new context / callout objects if we have any apps to exclude
-            if(!newExcludedApps.empty())
-            {
-                UINT32 ipAddress = QHostAddress{_lastSplitTunnelIp}.toIPv4Address();
-                ProviderContext providerContext{&ipAddress, sizeof(UINT32)};
-                qInfo() << "activate provider context object";
-                activateFilter(_filters.providerContextKey, true, providerContext);
-                qInfo() << "activate callout object";
-                activateFilter(_filters.splitCallout, true, Callout{FWPM_LAYER_ALE_BIND_REDIRECT_V4, PIA_WFP_CALLOUT_V4});
-            }
-
-            for(auto &pAppId : newExcludedApps)
-            {
-                qInfo() << "add app filters:" << *pAppId;
-                auto empResult = excludedApps.emplace(pAppId->copyData(), ExcludeAppFilters{});
-                if(empResult.second)
-                {
-                    auto &appFilters = empResult.first->second;
-                    activateFilter(appFilters.permitApp, true, AppIdFilter<FWP_IP_VERSION_V4>{*pAppId, 15});
-                    activateFilter(appFilters.splitApp, true, SplitFilter<FWP_IP_VERSION_V4>{*pAppId, PIA_WFP_CALLOUT_V4, _filters.providerContextKey, 15});
-                }
-            }
+            createBypassAppFilters(excludedApps, _filters.providerContextKey,
+                                   *pAppId);
         }
     }
 
-
-    tx.commit();
+    if(createVpnOnlyRules)
+    {
+        qInfo() << "Creating VPN-only rules for" << newExcludedApps.size() << "apps";
+        for(auto &pAppId : newVpnOnlyApps)
+        {
+            if(createVpnOnlyBindRules)
+            {
+                createOnlyVPNAppFilters(vpnOnlyApps, _filters.vpnOnlyProviderContextKey,
+                                        *pAppId);
+            }
+            else
+            {
+                createBlockAppFilters(vpnOnlyApps, *pAppId);
+            }
+        }
+    }
 }
 
 QJsonValue WinDaemon::RPC_inspectUwpApps(const QJsonArray &familyIds)
@@ -763,7 +930,7 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     // WFP events dumps for each excluded app.  Can diagnose issues with split
     // tunnel app rules.
     _appMonitor.dump();
-    const auto &excludedApps = _appMonitor.getAppIds();
+    const auto &excludedApps = _appMonitor.getExcludedAppIds();
     int i=0;
     for(const auto &pAppId : excludedApps)
     {

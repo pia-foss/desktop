@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -20,6 +20,7 @@
 #line SOURCE_FILE("networktaskwithretry.cpp")
 
 #include "networktaskwithretry.h"
+#include "apinetwork.h"
 #include <QTimer>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -43,16 +44,13 @@ NetworkTaskWithRetry::NetworkTaskWithRetry(QNetworkAccessManager::Operation verb
                                            QString resource,
                                            std::unique_ptr<ApiRetry> pRetryStrategy,
                                            const QJsonDocument &data,
-                                           QByteArray authHeaderVal,
-                                           QSharedPointer<QNetworkAccessManager> pNetworkManager)
+                                           QByteArray authHeaderVal)
     : _verb{std::move(verb)}, _baseUriSequence{apiBaseUris.beginAttempt()},
       _pRetryStrategy{std::move(pRetryStrategy)}, _resource{std::move(resource)},
       _data{(data.isNull() ? QByteArray() : data.toJson())},
       _authHeaderVal{std::move(authHeaderVal)},
-      _pNetworkManager{std::move(pNetworkManager)},
       _worstRetriableError{Error::Code::ApiNetworkError}
 {
-    Q_ASSERT(_pNetworkManager);
     Q_ASSERT(_pRetryStrategy);
     // Only GET and HEAD are supported right now
     Q_ASSERT(_verb == QNetworkAccessManager::Operation::GetOperation ||
@@ -70,7 +68,6 @@ NetworkTaskWithRetry::~NetworkTaskWithRetry()
 void NetworkTaskWithRetry::scheduleNextAttempt()
 {
     Q_ASSERT(_pRetryStrategy);  // Class invariant
-    Q_ASSERT(_pNetworkManager); // Class invariant
 
     nullable_t<std::chrono::milliseconds> nextDelay = _pRetryStrategy->beginNextAttempt(_resource);
     if(!nextDelay)
@@ -86,26 +83,6 @@ void NetworkTaskWithRetry::scheduleNextAttempt()
 
 void NetworkTaskWithRetry::executeNextAttempt()
 {
-    // Clear the connection cache for every request.
-    //
-    // QNetworkManager caches connections for reuse, but if we connect or
-    // disconnect from the VPN, these connections break.  If QNetworkManager
-    // uses a cached connection that's broken, we end up waiting the full
-    // 10 seconds before the request is aborted.
-    //
-    // The cost of waiting for a bad cached connection to time out is a lot
-    // higher than the cost of establishing a new connection, so clear them
-    // every time.  (There is no way to disable connection caching in
-    // QNetworkAccessManager.)
-    //
-    // In principle, we could try to do this only when the connection state
-    // changes, but it would have to be cleared any time the OpenVPNProcess
-    // state changes, which doesn't always cause a state transition in
-    // VPNConnection.  The cost of failing to clear the cache is pretty high,
-    // but the cost of clearing it an extra time is pretty small, so such an
-    // optimization probably would be too complex to make sense.
-    _pNetworkManager->clearConnectionCache();
-
     // Handle the request
     sendRequest()
             ->notify(this, [this](const Error& error, const QByteArray& body) {
@@ -147,6 +124,31 @@ void NetworkTaskWithRetry::executeNextAttempt()
 
 Async<QByteArray> NetworkTaskWithRetry::sendRequest()
 {
+    // Use ApiNetwork's QNetworkAccessManager, this binds us to the VPN
+    // interface when connected (important when we do not route the default
+    // gateway into the VPN).
+    QNetworkAccessManager &networkManager = ApiNetwork::instance()->getAccessManager();
+
+    // Clear the connection cache for every request.
+    //
+    // QNetworkManager caches connections for reuse, but if we connect or
+    // disconnect from the VPN, these connections break.  If QNetworkManager
+    // uses a cached connection that's broken, we end up waiting the full
+    // 10 seconds before the request is aborted.
+    //
+    // The cost of waiting for a bad cached connection to time out is a lot
+    // higher than the cost of establishing a new connection, so clear them
+    // every time.  (There is no way to disable connection caching in
+    // QNetworkAccessManager.)
+    //
+    // In principle, we could try to do this only when the connection state
+    // changes, but it would have to be cleared any time the OpenVPNProcess
+    // state changes, which doesn't always cause a state transition in
+    // VPNConnection.  The cost of failing to clear the cache is pretty high,
+    // but the cost of clearing it an extra time is pretty small, so such an
+    // optimization probably would be too complex to make sense.
+    networkManager.clearConnectionCache();
+
     QNetworkRequest request(_baseUriSequence.getNextUri() + _resource);
     if (!_authHeaderVal.isEmpty())
         setAuth(request, _authHeaderVal);
@@ -156,7 +158,6 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // query parameters, so this won't contain anything identifiable.
     qDebug() << "requesting:" << request.url().toString();
 
-    Q_ASSERT(_pNetworkManager);
     // Seems like QNetworkAccessManager could provide this, but the closest
     // thing it has is sendCustomRequest().  It looks like that would produce a
     // QNetworkReply that says its operation was "custom" even if the method
@@ -167,14 +168,14 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     {
         default:
         case QNetworkAccessManager::GetOperation:
-            replyPtr = _pNetworkManager->get(request);
+            replyPtr = networkManager.get(request);
             break;
         case QNetworkAccessManager::PostOperation:
             request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
-            replyPtr = _pNetworkManager->post(request, _data);
+            replyPtr = networkManager.post(request, _data);
             break;
         case QNetworkAccessManager::HeadOperation:
-            replyPtr = _pNetworkManager->head(request);
+            replyPtr = networkManager.head(request);
             break;
     }
     // Wrap the reply in a shared pointer. Use deleteLater as the deleter

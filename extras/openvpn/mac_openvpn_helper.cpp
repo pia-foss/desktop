@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -541,7 +541,8 @@ int main(int argc, char* argv[])
             }
 
             qInfo().noquote().nospace() << "Using device:" << env.value(QStringLiteral("dev"))
-                << " address:" << env.value(QStringLiteral("ifconfig_local"));
+                << " local_address:" << env.value(QStringLiteral("ifconfig_local"))
+                << " remote_address:" << env.value(QStringLiteral("ifconfig_remote"));
 
             // Parse all foreign_option_{i} variables
             for (int i = 1; ; i++)

@@ -5,6 +5,13 @@
 #ifndef TAP_HARDWARE_ID
 #define TAP_HARDWARE_ID "tap-pia-0901"
 #endif
+#ifndef TAP_DRIVER_VERSION
+// Version of the TAP driver build shipped with this build of PIA - used to
+// detect whether to uninstall the driver before an update.  Must match the
+// DriverVersion field in OemVista.inf.  (Used as initializer for a
+// WinDriverVersion)
+#define TAP_DRIVER_VERSION 9, 24, 2, 601
+#endif
 #ifndef TAP_DESCRIPTION
 #define TAP_DESCRIPTION NULL
 #endif
@@ -64,6 +71,38 @@ private:
     bool _enable;
 };
 #define NonInteractiveScope(enable) ScopedNonInteractive nonInteractiveBlock(nonInteractive); (void)nonInteractiveBlock
+
+class WinDriverVersion
+{
+public:
+    WinDriverVersion(WORD v0, WORD v1, WORD v2, WORD v3) : _v0{v0}, _v1{v1}, _v2{v2}, _v3{v3} {}
+    WinDriverVersion(DWORDLONG version)
+    {
+        ULARGE_INTEGER versionUli;
+        versionUli.QuadPart = version;
+        _v0 = HIWORD(versionUli.HighPart);
+        _v1 = LOWORD(versionUli.HighPart);
+        _v2 = HIWORD(versionUli.LowPart);
+        _v3 = LOWORD(versionUli.LowPart);
+    }
+    
+public:
+    bool operator==(const WinDriverVersion &other) const
+    {
+        return _v0 == other._v0 && _v1 == other._v1 && _v2 == other._v2 && _v3 == other._v3;
+    }
+    bool operator!=(const WinDriverVersion &other) const {return !(*this == other);}
+    
+    std::string printable() const
+    {
+        char buf[24];
+        _snprintf(buf, sizeof(buf), "%hu.%hu.%hu.%hu", _v0, _v1, _v2, _v3);
+        return {buf};
+    }
+    
+private:
+    WORD _v0, _v1, _v2, _v3;
+};
 
 static DriverStatus updateTapDriver(LPCWSTR inf, bool forceUpdate, bool nonInteractive = false)
 {
@@ -230,9 +269,18 @@ static bool uninstallTapDriverInf()
     return !infFailures;
 }
 
-static DriverStatus uninstallTapDriver(bool removeInf, bool nonInteractive = false)
+// Uninstall the TAP driver
+// - removeInf - whether to also remove the INF file from C:\Windows\INF\oem*.inf
+// - onlyDifferentVersion - only uninstall if any version other than the version
+//   shipped with this build of PIA is installed.  Should be used with
+//   removeInf=true so the old INF files are removed.  (If only the shipped
+//   version is installed, nothing happens and DriverNothingToUninstall is
+//   returned)
+static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion)
 {
     FUNCTION_LOGGING_CATEGORY("win.tap");
+    
+    const WinDriverVersion shippedVersion{TAP_DRIVER_VERSION};
 
     // Get all devices in the class "Net"
     bool devicesExisted = false, deviceFailures = false;
@@ -251,7 +299,48 @@ static DriverStatus uninstallTapDriver(bool removeInf, bool nonInteractive = fal
                 continue;
             if (dataType != REG_MULTI_SZ || actualSize != sizeof(g_hardwareIdList) || memcmp(buffer, g_hardwareIdList, sizeof(g_hardwareIdList)))
                 continue;
-
+                
+            SP_DRVINFO_DATA_W drvInfo{};
+            drvInfo.cbSize = sizeof(drvInfo);
+            
+            // Enumerate the drivers for this device.  There could be more than
+            // one version installed.  Skip uninstall only if exactly 1 version
+            // is installed, and it is the shipped version.
+            if(::SetupDiBuildDriverInfoList(devInfoSet, &devInfoData, SPDIT_COMPATDRIVER))
+            {
+                WinDriverVersion installedVersion{0, 0, 0, 0};
+                DWORD idx = 0;
+                while(::SetupDiEnumDriverInfoW(devInfoSet, &devInfoData, SPDIT_COMPATDRIVER, idx, &drvInfo))
+                {
+                    installedVersion = {drvInfo.DriverVersion};
+                    TAP_LOG("Driver %d - version %s", idx, installedVersion.printable().c_str());
+                    ++idx;
+                }
+                
+                DWORD err = ::GetLastError();
+                if(err == ERROR_NO_MORE_ITEMS)
+                {
+                    TAP_LOG("Enumerated %d items", idx);
+                    // The driver matches if there was exactly 1 version, and it
+                    // is the version shipped with this build
+                    if(idx == 1 && installedVersion == shippedVersion && onlyDifferentVersion)
+                    {
+                        TAP_LOG("Not uninstalling this driver, only the shipped version %s is installed",
+                                shippedVersion.printable().c_str());
+                        // Since we're skipping the uninstall, do not remove INF
+                        // files
+                        removeInf = false;
+                        continue;
+                    }
+                }
+                else
+                    TAP_LOG("Failed after %d items - %d", idx, err);
+            }
+            else
+            {
+                TAP_LOG("Failed to build driver list - %d", ::GetLastError());
+            }
+            
             // Read out the InfPath key from the device's associated registry key
             HKEY key = SetupDiOpenDevRegKey(devInfoSet, &devInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, GENERIC_READ);
             if (key != INVALID_HANDLE_VALUE)

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -25,7 +25,7 @@ import PIA.NativeHelpers 1.0
 // Functionality common to all windows in the client that have window
 // decorations (all secondary modeless dialogs as well as the windowed
 // dashboard).
-Window {
+PiaWindow {
   id: decoratedWindow
 
   // Replacement for show() that additionally positions the window and raises it,

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -83,17 +83,17 @@ PiaApplication {
       platformDir += qbs.architecture + "/*";
       return PiaUtil.pathCombine(depPaths, platformDir)
     }
-    fileTags: "dep_bins"
+    fileTags: "dep_files"
   }
   Rule {
-    inputs: ["dep_bins"]
-    Artifact {
-      filePath: {
-        var brandedName = input.fileName.replace("pia", project.brandCode)
-        return product.destinationDirectory + "/" + brandedName
-      }
-      fileTags: "dep_bins_branded"
+    inputs: ["dep_files"]
+    outputArtifacts: {
+      var brandedName = input.fileName.replace("pia", project.brandCode)
+      // On Linux, we need to install .so files to lib/
+      var tag = input.fileName.contains(".so") ? "dep_libs_branded" : "dep_bins_branded"
+      return [{filePath: product.destinationDirectory + "/" + brandedName, fileTags: [tag]}]
     }
+    outputFileTags: ["dep_bins_branded", "dep_libs_branded"]
     prepare: {
       return [PiaUtil.makeCopyCommand(input.filePath, output.filePath)]
     }
@@ -102,7 +102,26 @@ PiaApplication {
     name: "dep_bins_branded"
     fileTagsFilter: "dep_bins_branded"
     qbs.install: true
-    qbs.installDir: qbs.targetOS.contains("windows") ? "" : qbs.targetOS.contains("macos") ? project.productName + ".app/Contents/MacOS/" : "bin/";
+    qbs.installDir: {
+      if(qbs.targetOS.contains("macos"))
+        return project.productName + ".app/Contents/MacOS/"
+      if(qbs.targetOS.contains("linux"))
+        return "bin/"
+      return ""
+    }
+    qbs.installPrefix: ""
+  }
+  Group {
+    name: "dep_libs_branded"
+    fileTagsFilter: "dep_libs_branded"
+    qbs.install: true
+    qbs.installDir: {
+      if(qbs.targetOS.contains("macos"))
+        return project.productName + ".app/Contents/MacOS/"
+      if(qbs.targetOS.contains("linux"))
+        return "lib/"
+      return ""
+    }
     qbs.installPrefix: ""
   }
   Group {

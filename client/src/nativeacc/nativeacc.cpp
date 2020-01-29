@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -76,6 +76,7 @@ void init()
     // Cell definitions for Table
     qmlRegisterType<TableCellText>("PIA.NativeAcc", 1, 0, "TableCellText");
     qmlRegisterType<TableCellButton>("PIA.NativeAcc", 1, 0, "TableCellButton");
+    qmlRegisterType<TableCellDropDownButton>("PIA.NativeAcc", 1, 0, "TableCellDropDownButton");
     qmlRegisterType<TableCellCheckButton>("PIA.NativeAcc", 1, 0, "TableCellCheckButton");
     qmlRegisterType<TableColumn>("PIA.NativeAcc", 1, 0, "TableColumn");
     qmlRegisterType<TableRow>("PIA.NativeAcc", 1, 0, "TableRow");

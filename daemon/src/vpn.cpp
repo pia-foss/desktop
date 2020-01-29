@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -53,7 +53,7 @@ static std::initializer_list<const char*> g_connectionSettingNames = {
     "auth",
     "serverCertificate",
     "overrideDNS",
-    "routeDefault",
+    "defaultRoute",
     "blockIPv6",
     "mtu",
     "enableMACE",
@@ -77,10 +77,10 @@ namespace
     // This seed is run by HNScan.
     const QString hnscanSeed = QStringLiteral("ak2hy7feae2o5pfzsdzw3cxkxsu3lxypykcl6iphnup4adf2ply6a@138.68.61.31");
 
-    // Arguments for hnsd
-    const QStringList &hnsdArgs{"-n", hnsdLocalAddress + ":1053",
-                                "-r", hnsdLocalAddress + ":53",
-                                "--seeds", hnsdSeed + "," + hnscanSeed};
+    // Fixed arguments for hnsd (some args are also added dynamically)
+    const QStringList &hnsdFixedArgs{"-n", hnsdLocalAddress + ":1053",
+                                     "-r", hnsdLocalAddress + ":53",
+                                     "--seeds", hnsdSeed + "," + hnscanSeed};
 
     // Restart strategy for hnsd
     const RestartStrategy::Params hnsdRestart{std::chrono::milliseconds(100), // Min restart delay
@@ -465,8 +465,7 @@ OriginalNetworkScan TransportSelector::scanNetwork(const ServerLocation *pLocati
 // to sockets and so using the findLocalAddress() approach can sometimes return the incorrect IP. Using findInterfaceIp() we can query the interface for
 // its IP address which should always give us the correct result (assuming we ask the correct interface). The assumption behind using findInterfaceIp() is that
 // the interface associated with the "first" default route after changing networks is added by the system and is always correct.
-// TODO: extend this change to Linux as well?
-#ifdef Q_OS_MACOS
+#ifdef Q_OS_UNIX
     netScan.ipAddress(findInterfaceIp(netScan.interfaceName()).toString());
 #else
     if(pLocation)
@@ -619,8 +618,8 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 }
 
 ConnectionConfig::ConnectionConfig()
-    : _vpnLocationAuto{false}, _proxyType{ProxyType::None},
-      _shadowsocksLocationAuto{false}
+    : _vpnLocationAuto{false}, _defaultRoute{true},
+      _proxyType{ProxyType::None}, _shadowsocksLocationAuto{false}
 {}
 
 ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state)
@@ -631,6 +630,12 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state)
     if(state.vpnLocations().nextLocation())
         _pVpnLocation.reset(new ServerLocation{*state.vpnLocations().nextLocation()});
     _vpnLocationAuto = !state.vpnLocations().chosenLocation();
+
+    // If split tunnel is not enabled, we always use the VPN for the default
+    // route - only apply the defaultRoute() setting if splitTunnelEnabled() is
+    // set
+    if(settings.splitTunnelEnabled())
+        _defaultRoute = settings.defaultRoute();
 
     if(settings.proxy() == QStringLiteral("custom"))
     {
@@ -696,7 +701,8 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
     QString otherVpnLocationId = other.vpnLocation() ? other.vpnLocation()->id() : QString{};
     QString otherSsLocationId = other.shadowsocksLocation() ? other.shadowsocksLocation()->id() : QString{};
 
-    return proxyType() != other.proxyType() ||
+    return defaultRoute() != other.defaultRoute() ||
+        proxyType() != other.proxyType() ||
         socksHost() != other.socksHost() ||
         customProxy() != other.customProxy() ||
         vpnLocationId != otherVpnLocationId ||
@@ -811,7 +817,40 @@ bool VPNConnection::needsReconnect()
         if (storedValue != currentValue)
             return _needsReconnect = true;
     }
-    return false;
+    ConnectionConfig newConfig{g_settings, g_state};
+    switch(_state)
+    {
+    default:
+    case State::Disconnected:
+    case State::Disconnecting:
+    case State::DisconnectingToReconnect:
+        // Not possible; checked for these states above
+        Q_ASSERT(false);
+        break;
+    case State::Connecting:
+    case State::StillConnecting:
+    case State::Reconnecting:
+    case State::StillReconnecting:
+    case State::Interrupted:
+        // Compare the current settings to the settings we are currently trying to use
+        if(newConfig.hasChanged(_connectingConfig))
+        {
+            qInfo() << "Reconnect needed in" << traceEnum(_state)
+                << "state due to change in connection configuration";
+            _needsReconnect = true;
+        }
+        break;
+    case State::Connected:
+        // Compare the current settings to the settings we are connected with
+        if(newConfig.hasChanged(_connectedConfig))
+        {
+            qInfo() << "Reconnect needed in" << traceEnum(_state)
+                << "state due to change in connection configuration";
+            _needsReconnect = true;
+        }
+        break;
+    }
+    return _needsReconnect;
 }
 
 void VPNConnection::scanNetwork(const ServerLocation *pLocation, const QString &protocol)
@@ -1171,9 +1210,12 @@ void VPNConnection::doConnect()
             updownCmd += " --dns ";
             updownCmd += dnsServers.join(':');
         }
+
         // Terminate PIA args with '--' (OpenVPN passes several subsequent
         // arguments)
         updownCmd += " --";
+
+        qInfo() << "updownCmd is: " << updownCmd;
 
 #ifdef Q_OS_WIN
         if(g_settings.windowsIpMethod() == QStringLiteral("static"))
@@ -1304,10 +1346,10 @@ void VPNConnection::openvpnStderrLine(const QString& line)
 
 void VPNConnection::checkForMagicStrings(const QString& line)
 {
-    QRegExp tunDeviceNameRegex{R"(Using device:([^ ]+) address:([^ ]+))"};
+    QRegExp tunDeviceNameRegex{R"(Using device:([^ ]+) local_address:([^ ]+) remote_address:([^ ]+))"};
     if(line.contains(tunDeviceNameRegex))
     {
-        emit usingTunnelDevice(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2));
+        emit usingTunnelDevice(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2), tunDeviceNameRegex.cap(3));
     }
 
     // TODO: extract this out into a more general error mechanism, where the "!!!" prefix
@@ -1399,6 +1441,28 @@ void VPNConnection::openvpnStateChanged()
 
     switch (openvpnState)
     {
+    case OpenVPNProcess::AssignIP:
+#if defined(Q_OS_WIN)
+        // On Windows, we can't easily get environment variables from the
+        // updown script like other platforms - stdout/stderr are not forwarded
+        // through OpenVPN - so we can't capture the tunnel configuration that
+        // way.
+        //
+        // Right now we only need the local tunnel interface IP on Windows (we
+        // don't need the remote or interface name), so we can get that from
+        // the AssignIP state information.  Only do this on Windows so the other
+        // platforms still report all configuration components together.
+        if(!_openvpn || _openvpn->tunnelIP().isEmpty())
+        {
+            qWarning() << "Tunnel interface IP address not known in AssignIP state";
+        }
+        else
+        {
+            qInfo() << "Tunnel device is assigned IP address" << _openvpn->tunnelIP();
+            emit usingTunnelDevice({}, _openvpn->tunnelIP(), {});
+        }
+#endif
+        break;
     case OpenVPNProcess::Connected:
         switch (_state)
         {
@@ -1424,7 +1488,24 @@ void VPNConnection::openvpnStateChanged()
 
             // If DNS is set to Handshake, start it now, since we've connected
             if(isDNSHandshake(_dnsServers))
+            {
+                auto hnsdArgs = hnsdFixedArgs;
+                // Tell hnsd to use the VPN interface for outgoing DNS queries.
+                //
+                // This matters when defaultRoute is off - split tunnel has
+                // issues with UDP that are being addressed separately, so for
+                // now hnsd is patched to handle this.  (We still need to treat
+                // hnsd as a VPN-only app to handle its TCP connections to
+                // Handshake nodes.)
+                //
+                // Also provide 127.0.0.1 as an outgoing interface since the
+                // authoritative root server (part of hnsd itself) is on
+                // localhost - this relies on patches applied to libunbound to
+                // use loopback interfaces for loopback queries only.
+                hnsdArgs.push_back(QStringLiteral("--outgoing-dns-if"));
+                hnsdArgs.push_back(QStringLiteral("127.0.0.1,") + g_state.tunnelDeviceLocalAddress());
                 _hnsdRunner.enable(Path::HnsdExecutable, hnsdArgs);
+            }
 
             newState = State::Connected;
             break;
@@ -1827,7 +1908,7 @@ bool VPNConnection::writeOpenVPNConfig(QFile& outFile)
     out << "sndbuf 262144" << endl;
     out << "rcvbuf 262144" << endl;
 
-    if (g_settings.routeDefault())
+    if (_connectingConfig.defaultRoute())
     {
         out << "redirect-gateway def1 bypass-dhcp";
         if (!g_settings.blockIPv6())
@@ -1912,9 +1993,29 @@ bool VPNConnection::writeOpenVPNConfig(QFile& outFile)
     }
     else
     {
+        QStringList dnsServers = getDNSServers(_dnsServers);
+
+        QString specialPiaAddress = QStringLiteral("209.222.18.222");
+        // Always route this special address through the VPN even when not using
+        // PIA DNS; it's also used for MACE and port forwarding
+        out << "route " << specialPiaAddress << " 255.255.255.255 vpn_gateway 0" << endl;
+        // Route DNS servers into the VPN (DNS is always sent through the VPN)
+        for(const auto &dnsServer : dnsServers)
+        {
+            if(dnsServer != specialPiaAddress)
+                out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
+        }
+
+// Only create a default route if we're NOT on mac (since openvpn routes seem to be broken on mac)
+#ifndef Q_OS_MAC
         // Add a default route with much a worse metric, so traffic can still
         // be routed on the tunnel opt-in by binding to the tunnel interface.
+
+        // REMOVING this on macos/linux as it's very broken - the inverse operation ends up deleting the default route with the REAL IP
+        // and when creating the route it needs to be a bound route on macos anyway AND for some weird reason it ends up being a /32 route
+        // rather than a default route - a bug in openvpn? either way, we should probably just create this route ourselves
         out << "route 0.0.0.0 0.0.0.0 vpn_gateway 1000" << endl;
+#endif
 
         // Ignore pushed settings to add default route
         out << "pull-filter ignore \"redirect-gateway \"" << endl;

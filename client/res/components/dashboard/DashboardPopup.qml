@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,7 +32,7 @@ import "../common"
 import "../core"
 import "qrc:/javascript/util.js" as Util
 
-Window {
+PiaWindow {
   id: dashWindow
   // The window's position is in screen coordinates, so scale dashPlacement's
   // logical coordinates

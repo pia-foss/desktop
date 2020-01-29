@@ -1,5 +1,16 @@
 # Changelog
 
+### v1.8
+* Split tunnel apps can be configured to use the VPN only or to bypass the VPN
+* The default behavior can be set to "Bypass VPN" to use the VPN only for specific apps
+* Fixed TCP localhost connections for split tunnel apps on Windows
+* Fixed split tunnel for Mac apps that bind to specific ports
+* Fixed focus behavior on Mac when closing windows with the keyboard
+* Updated Qt to 5.12.6
+* Updated OpenVPN to 2.4.8
+* Updated OpenSSL to 1.1.1d
+* Updated TAP adapter to 9.24.2 on Windows
+
 ### v1.7
 * The Shadowsocks proxy setting can be used to redirect the VPN connection through a Shadowsocks region
 * Added the '{{BRAND_CODE}}ctl monitor' command

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -28,9 +28,11 @@
 #include "version.h"
 #include "brand.h"
 #include "util.h"
+#include "apinetwork.h"
 
 #include <QFile>
 #include <QNetworkReply>
+#include <QNetworkProxy>
 #include <QJsonDocument>
 #include <chrono>
 #include <QFileInfo>
@@ -41,6 +43,13 @@
 #if defined(Q_OS_WIN)
 #include <Windows.h>
 #include <VersionHelpers.h>
+#include "win/win_util.h"
+#include <AclAPI.h>
+#include <AccCtrl.h>
+#pragma comment(lib, "advapi32.lib")
+#endif
+
+#ifdef Q_OS_WIN
 #include "win/win_util.h"
 #include <AclAPI.h>
 #include <AccCtrl.h>
@@ -339,10 +348,12 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     connect(_connection, &VPNConnection::byteCountsChanged, this, &Daemon::vpnByteCountsChanged);
     connect(_connection, &VPNConnection::scannedOriginalNetwork, this, &Daemon::vpnScannedOriginalNetwork);
     connect(_connection, &VPNConnection::usingTunnelDevice, this,
-        [this](QString deviceName, QString deviceLocalAddress)
+        [this](QString deviceName, QString deviceLocalAddress, QString deviceRemoteAddress)
         {
             _state.tunnelDeviceName(deviceName);
             _state.tunnelDeviceLocalAddress(deviceLocalAddress);
+            _state.tunnelDeviceRemoteAddress(deviceRemoteAddress);
+            queueApplyFirewallRules();
         });
     connect(_connection, &VPNConnection::hnsdSucceeded, this,
             [this](){_state.hnsdFailing(0);});
@@ -1103,6 +1114,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     {
         info.vpnLocation(config.vpnLocation());
         info.vpnLocationAuto(config.vpnLocationAuto());
+        info.defaultRoute(config.defaultRoute());
         switch(config.proxyType())
         {
             default:
@@ -1153,8 +1165,39 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     else
         _latencyTracker.stop();
 
+    // Update ApiNetwork and PortForwarder.
     if(state == VPNConnection::State::Connected)
     {
+        // Use the VPN interface for all API requests
+        QHostAddress tunnelLocalAddr{_state.tunnelDeviceLocalAddress()};
+        if(tunnelLocalAddr.protocol() != QAbstractSocket::NetworkLayerProtocol::IPv4Protocol)
+        {
+            qWarning() << "Could not start SOCKS server for invalid local address"
+                << _state.tunnelDeviceLocalAddress();
+            ApiNetwork::instance()->setProxy({});
+        }
+        else
+        {
+            _socksServer.start(tunnelLocalAddr, _state.tunnelDeviceName());
+            if(!_socksServer.port())
+            {
+                qWarning() << "SOCKS proxy failed to start";
+                ApiNetwork::instance()->setProxy({});
+            }
+            else
+            {
+                QNetworkProxy localProxy{QNetworkProxy::ProxyType::Socks5Proxy,
+                                         QStringLiteral("127.0.0.1"),
+                                         _socksServer.port()};
+                // This proxy does not support hostname lookup, UDP, or
+                // listening
+                localProxy.setCapabilities(QNetworkProxy::TunnelingCapability);
+                localProxy.setUser(QString::fromLatin1(SocksConnection::username));
+                localProxy.setPassword(QString::fromLatin1(_socksServer.password()));
+                ApiNetwork::instance()->setProxy(localProxy);
+            }
+        }
+
         // Figure out if the connected location supports PF
         Q_ASSERT(connectedConfig.vpnLocation());    // Guarantee by VPNConnection, valid in this state
         if(connectedConfig.vpnLocation()->portForward())
@@ -1167,7 +1210,11 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _shadowsocksRefresher.refresh();
     }
     else
+    {
+        ApiNetwork::instance()->setProxy({});
+        _socksServer.stop();
         _portForwarder->updateConnectionState(PortForwarder::State::Disconnected);
+    }
 
     if(state == VPNConnection::State::Connected && _settings.enableMACE())
     {
@@ -1219,6 +1266,14 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _state.externalIp({});
         _state.tunnelDeviceName({});
         _state.tunnelDeviceLocalAddress({});
+        _state.tunnelDeviceRemoteAddress({});
+        // The original network configuration is not meaningful when not
+        // connected; we don't have any way to know if it changes.  (When
+        // connected, we rely on the VPN connection breaking to know when it
+        // changes.)
+        _state.originalGatewayIp({});
+        _state.originalInterface({});
+        _state.originalInterfaceIp({});
     }
 
     // Clear fatal errors when we successfully establish a connection.  (Don't
@@ -1250,6 +1305,8 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     // we disconnect occasionally.
     if(state == VPNConnection::State::Connected)
         queueNotification(&Daemon::logRoutingTable);
+
+    queueApplyFirewallRules();
 }
 
 void Daemon::vpnConnectingStatus(TransportSelector::Status connectingStatus)
@@ -1510,27 +1567,31 @@ void Daemon::reapplyFirewallRules()
 {
     FirewallParams params {};
 
-    bool hasConnected;
-    switch (_connection->state())
+    const ConnectionInfo *pConnSettings = nullptr;
+    // If we are currently attempting to connect, use those settings to update
+    // the firewall.
+    if(_state.connectingConfig().vpnLocation())
+        pConnSettings = &_state.connectingConfig();
+    // If the VPN is enabled, have we connected since it was enabled?
+    if(_state.vpnEnabled() && _state.connectedConfig().vpnLocation())
     {
-    case VPNConnection::State::Connected:
-    case VPNConnection::State::Interrupted:
-    case VPNConnection::State::Reconnecting:
-    case VPNConnection::State::StillReconnecting:
-    case VPNConnection::State::DisconnectingToReconnect:
-        hasConnected = true;
-        break;
-    default:
-        hasConnected = false;
-        break;
+        // Yes, we have connected
+        params.hasConnected = true;
+        // If we aren't currently attempting another connection, use the current
+        // connection to update the firewall
+        if(!pConnSettings)
+            pConnSettings = &_state.connectedConfig();
     }
+
     bool killswitchEnabled = false;
+    // If the daemon is not active (no client is connected) or the user is not
+    // logged in to an account, we do not apply the KS.
     if (!isActive() || !_account.loggedIn())
         killswitchEnabled = false;
     else if (_settings.killswitch() == QLatin1String("on"))
         killswitchEnabled = true;
     else if (_settings.killswitch() == QLatin1String("auto") && _state.vpnEnabled())
-        killswitchEnabled = hasConnected;
+        killswitchEnabled = params.hasConnected;
 
     const bool vpnActive = _state.vpnEnabled();
 
@@ -1538,22 +1599,46 @@ void Daemon::reapplyFirewallRules()
     params.dnsServers = getDNSServers(_connection->state() == VPNConnection::State::Connected ? _connection->dnsServers() : _settings.overrideDNS());
     params.adapter = _connection->networkAdapter();
 
+    if(_settings.splitTunnelEnabled())
+    {
+        params.enableSplitTunnel = true;
+        params.splitTunnelNetScan = { _state.originalGatewayIp(), _state.originalInterface(),  _state.originalInterfaceIp() };
+    }
+
     params.excludeApps.reserve(_settings.splitTunnelRules().size());
+    params.vpnOnlyApps.reserve(_settings.splitTunnelRules().size());
+
     for(const auto &rule : _settings.splitTunnelRules())
     {
+        qInfo() << "split tunnel rule:" << rule.path() << rule.mode();
         // Ignore anything with a rule type we don't recognize
         if(rule.mode() == QStringLiteral("exclude"))
             params.excludeApps.push_back(rule.path());
+        else if(rule.mode() == QStringLiteral("include"))
+            params.vpnOnlyApps.push_back(rule.path());
     }
 
-    params.blockAll = killswitchEnabled;
+    // Though split tunnel in general can be toggled while connected,
+    // defaultRoute can't.  The user can toggle split tunnel as long as the
+    // effective value for defaultRoute doesn't change.  If it does, we'll still
+    // update split tunnel, but the default route change will require a
+    // reconnect.
+    params.defaultRoute = pConnSettings ? pConnSettings->defaultRoute() : true;
+
+    // When not using the VPN as the default route, force Handshake into the
+    // VPN with an "include" rule.  (Just routing the Handshake seeds into the
+    // VPN is not sufficient; hnsd uses a local recursive DNS resolver that will
+    // query authoritative DNS servers, and we want that to go through the VPN.)
+    if(!params.defaultRoute)
+        params.vpnOnlyApps.push_back(Path::HnsdExecutable);
+
+    params.blockAll = killswitchEnabled && params.defaultRoute;
     params.allowVPN = params.allowDHCP = params.blockAll;
     params.blockIPv6 = (vpnActive || killswitchEnabled) && _settings.blockIPv6();
     params.allowLAN = _settings.allowLAN() && (params.blockAll || params.blockIPv6);
-    params.blockDNS = !params.dnsServers.isEmpty() && vpnActive && hasConnected;
-    params.allowPIA = params.allowLoopback = params.blockAll || params.blockIPv6 || params.blockDNS;
+    params.blockDNS = !params.dnsServers.isEmpty() && vpnActive && params.hasConnected;
+    params.allowPIA = params.allowLoopback = (params.blockAll || params.blockIPv6 || params.blockDNS);
     params.allowHnsd = params.blockDNS && isDNSHandshake(_connection->dnsServers());
-    params.allowVpnExemptions = vpnActive && _settings.splitTunnelEnabled();
 
     qInfo() << "Reapplying firewall rules;"
             << "state:" << qEnumToString(_connection->state())
@@ -1672,20 +1757,22 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     // Always write the current version for any future settings upgrades.
     _settings.lastUsedVersion(QStringLiteral(PIA_VERSION));
 
-#ifdef PIA_VERSION_BETA
     // If the user has manually installed a beta release, typically by opting
     // into the beta via the web site, enable beta updates.  This occurs when
-    // installing over a GA release or if there was no prior installation.
+    // installing over any non-beta release (including alphas, etc.) or if there
+    // was no prior installation.
     //
     // We don't do any other change though (such as switching back) - users that
     // have opted into beta may receive GA releases when there isn't an active
     // beta, and they should continue to receive betas.
-    if (!_settings.offerBetaUpdates() && (!previous.isPrerelease() || !existingSettingsFile))
+    auto daemonVersion = SemVersion::tryParse(u"" PIA_VERSION);
+    if (daemonVersion && daemonVersion->isPrereleaseType(u"beta") &&
+        !_settings.offerBetaUpdates() &&
+        (!previous.isPrereleaseType(u"beta") || !existingSettingsFile))
     {
         qInfo() << "Enabling beta updates due to installing" << PIA_VERSION;
         _settings.offerBetaUpdates(true);
     }
-#endif
 
     // Migrate any settings from any previous legacy version, which the
     // installer leaves for us as a 'legacy' settings value.

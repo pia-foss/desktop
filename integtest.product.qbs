@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -68,14 +68,17 @@ PiaProject {
     // Windows OpenSSL dependencies
     Group {
       condition: qbs.targetOS.contains("windows")
-      files: "deps/openvpn/win/" + qbs.architecture + "/*eay32.dll"
+      files: [
+        "deps/openvpn/win/" + qbs.architecture + "/libcrypto*.dll",
+        "deps/openvpn/win/" + qbs.architecture + "/libssl*.dll"
+      ]
       fileTags: ["integtest-stage", "dynamiclibrary"]
     }
 
     // Linux OpenSSL dependencies
     Group {
       condition: qbs.targetOS.contains("linux")
-      files: "extras/installer/linux/lib*.so"
+      files: "deps/openvpn/linux/" + qbs.architecture + "/lib*"
       fileTags: ["integtest-stage", "dynamiclibrary"]
     }
 

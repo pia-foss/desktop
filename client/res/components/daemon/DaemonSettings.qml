@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -28,7 +28,7 @@ QtObject {
   readonly property string location: NativeDaemon.settings.location
   readonly property string protocol: NativeDaemon.settings.protocol
   readonly property string killswitch: NativeDaemon.settings.killswitch
-  readonly property bool routeDefault: NativeDaemon.settings.routeDefault
+  readonly property bool defaultRoute: NativeDaemon.settings.defaultRoute
   readonly property bool blockIPv6: NativeDaemon.settings.blockIPv6
   readonly property var overrideDNS: NativeDaemon.settings.overrideDNS
   readonly property bool allowLAN: NativeDaemon.settings.allowLAN

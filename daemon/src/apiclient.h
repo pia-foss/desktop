@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -26,7 +26,6 @@
 #include "apibase.h"
 #include "apiretry.h"
 #include <QJsonDocument>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>
 #include <QSharedPointer>
@@ -107,7 +106,6 @@ public:
     static QByteArray autoAuth(const QString& username, const QString& password, const QString& token);
 
 private:
-    QSharedPointer<QNetworkAccessManager> _pNetworkManager;
     // Index of the last API base URL that was successful (used to start from
     // that base next time).
     unsigned _nextApiBaseUrl;

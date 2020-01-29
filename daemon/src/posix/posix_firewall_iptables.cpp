@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -31,7 +31,9 @@ namespace
 {
     const QString kAnchorName{BRAND_CODE "vpn"};
     const QString kPacketTag{"0x3211"};
+    const QString kVpnOnlyPacketTag{"0x3212"};
     const QString kCGroupId{"0x567"};
+    const QString kVpnOnlyCGroupId{"0x568"};
     const QString enabledKeyTemplate = "enabled:%1:%2";
     const QString disabledKeyTemplate = "disabled:%1:%2";
     const QString kVpnGroupName = BRAND_CODE "vpn";
@@ -41,6 +43,7 @@ namespace
 }
 
 QString IpTablesFirewall::kRtableName = QStringLiteral("%1rt").arg(kAnchorName);
+QString IpTablesFirewall::kVpnOnlyRtableName = QStringLiteral("%1Onlyrt").arg(kAnchorName);
 QString IpTablesFirewall::kOutputChain = QStringLiteral("OUTPUT");
 QString IpTablesFirewall::kPostRoutingChain = QStringLiteral("POSTROUTING");
 QString IpTablesFirewall::kPreRoutingChain = QStringLiteral("PREROUTING");
@@ -155,7 +158,7 @@ void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QStri
     // placeholder anchor when needed.
     createChain(ip, actualChain, tableName);
     for (const QString& rule : rules)
-    execute(QStringLiteral("%1 -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
+        execute(QStringLiteral("%1 -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
 }
 
 void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QString& tableName)
@@ -217,6 +220,18 @@ void IpTablesFirewall::install()
         QStringLiteral("-m owner --gid-owner %1 -o tun+ -p udp --match multiport --dports 53,13038 -j ACCEPT").arg(kHnsdGroupName),
         QStringLiteral("-m owner --gid-owner %1 -j REJECT").arg(kHnsdGroupName),
     });
+    installAnchor(Both, QStringLiteral("350.cgAllowHnsd"), {
+        // Port 13038 is the handshake control port
+        QStringLiteral("-m owner --gid-owner %1 -m cgroup --cgroup %2 -p tcp --match multiport --dports 53,13038 -j ACCEPT").arg(kHnsdGroupName, kVpnOnlyCGroupId),
+        QStringLiteral("-m owner --gid-owner %1 -m cgroup --cgroup %2 -p udp --match multiport --dports 53,13038 -j ACCEPT").arg(kHnsdGroupName, kVpnOnlyCGroupId),
+        QStringLiteral("-m owner --gid-owner %1 -j REJECT").arg(kHnsdGroupName),
+    });
+
+    // block vpnOnly packets (these are only blocked when VPN is disconnected)
+    installAnchor(Both, QStringLiteral("340.blockVpnOnly"), {
+        QStringLiteral("-m cgroup --cgroup %1 -j REJECT").arg(kVpnOnlyCGroupId),
+    });
+
     installAnchor(IPv4, QStringLiteral("320.allowDNS"), {});
     installAnchor(Both, QStringLiteral("310.blockDNS"), {
         QStringLiteral("-p udp --dport 53 -j REJECT"),
@@ -255,19 +270,21 @@ void IpTablesFirewall::install()
 
     // NAT rules
     installAnchor(Both, QStringLiteral("100.transIp"), {
-
         // Only need the original interface, not the IP.
         // The interface should remain much more stable/unchangeable than the IP
         // (IP can change when changing networks, but interface only changes if adding/removing NICs)
-        // this is just a stub rule - the real rule is set at run-time
-        // and updates dynamically (via replaceAnchor) when our interface changes
+        // This anchor is empty until we connect, it's updated when the
+        // interface name is found as we connect (with replaceAnchor()).
         // it'll take this form: "-o <interface name> -j MASQUERADE"
-        QStringLiteral("-j MASQUERADE")
     }, kNatTable);
 
     // Mangle rules
     installAnchor(Both, QStringLiteral("100.tagPkts"), {
-        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kCGroupId, kPacketTag)
+        // Split tunnel
+        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kCGroupId, kPacketTag),
+
+        // Inverse split tunnel
+        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kVpnOnlyCGroupId, kVpnOnlyPacketTag)
     }, kMangleTable, setupTrafficSplitting, teardownTrafficSplitting);
 
     // A rule to mitigate CVE-2019-14899 - drop packets addressed to the local
@@ -350,18 +367,24 @@ void IpTablesFirewall::enableAnchor(IpTablesFirewall::IPVersion ip, const QStrin
     execute(QStringLiteral("if %1 -C %5.a.%2 -j %5.%2 -t %4 2> /dev/null ; then echo '%2%3: ON' ; else echo '%2%3: OFF -> ON' ; %1 -A %5.a.%2 -j %5.%2 -t %4; fi").arg(cmd, anchor, ipStr, tableName, kAnchorName));
 }
 
-void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString &newRule, const QString& tableName)
+void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName)
 {
     if (ip == Both)
     {
-        replaceAnchor(IPv4, anchor, newRule, tableName);
-        replaceAnchor(IPv6, anchor, newRule, tableName);
+        replaceAnchor(IPv4, anchor, newRules, tableName);
+        replaceAnchor(IPv6, anchor, newRules, tableName);
         return;
     }
     const QString cmd = getCommand(ip);
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
 
-    execute(QStringLiteral("%1 -R %7.%2 1 %3 -t %4 ; echo 'Replaced rule %7.%2 %5 with %6'").arg(cmd, anchor, newRule, tableName, ipStr, newRule, kAnchorName));
+    execute(QStringLiteral("%1 -F %2.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
+    for(const auto &rule : newRules)
+    {
+        execute(QStringLiteral("%1 -A %2.%3 %4 -t %5").arg(cmd, kAnchorName, anchor, rule, tableName));
+    }
+
+    //execute(QStringLiteral("%1 -R %7.%2 1 %3 -t %4 ; echo 'Replaced rule %7.%2 %5 with %6'").arg(cmd, anchor, newRule, tableName, ipStr, newRule, kAnchorName));
 }
 
 void IpTablesFirewall::disableAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString& tableName)
@@ -432,21 +455,38 @@ int IpTablesFirewall::execute(const QString &command, bool ignoreErrors)
     return exitCode;
 }
 
+void IpTablesFirewall::setupCgroup(const Path &cGroupDir, QString cGroupId, QString packetTag, QString routingTableName)
+{
+    qInfo() << "Should be setting up cgroups in" << cGroupDir << "for traffic splitting";
+    execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(cGroupId));
+    // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
+    execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi").arg(packetTag, routingTableName));
+}
+
+void IpTablesFirewall::teardownCgroup(QString packetTag, QString routingTableName)
+{
+    qInfo() << "Tearing down cgroup and routing rules";
+    execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(packetTag, routingTableName));
+    execute(QStringLiteral("ip route flush table %1").arg(routingTableName));
+    execute(QStringLiteral("ip route flush cache"));
+}
+
 void IpTablesFirewall::setupTrafficSplitting()
 {
-    auto cGroupDir = Path::VpnExclusionsFile.parent();
-    qInfo() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
-    execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
-    // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
-    execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi").arg(kPacketTag, kRtableName));
+    auto cGroupExclusionsDir = Path::VpnExclusionsFile.parent();
+    auto cGroupVpnOnlyDir = Path::VpnOnlyFile.parent();
+
+    // Split tunnel (exclusions)
+    setupCgroup(cGroupExclusionsDir, kCGroupId, kPacketTag, kRtableName);
+
+    // Inverse split tunnel (vpn only)
+    setupCgroup(cGroupVpnOnlyDir, kVpnOnlyCGroupId, kVpnOnlyPacketTag, kVpnOnlyRtableName);
 }
 
 void IpTablesFirewall::teardownTrafficSplitting()
 {
-    qInfo() << "Tearing down cgroup and routing rules";
-    execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(kPacketTag, kRtableName));
-    execute(QStringLiteral("ip route flush table %1").arg(kRtableName));
-    execute(QStringLiteral("ip route flush cache"));
+    teardownCgroup(kPacketTag, kRtableName);
+    teardownCgroup(kVpnOnlyPacketTag, kVpnOnlyRtableName);
 }
 
 #endif

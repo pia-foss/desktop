@@ -1,4 +1,4 @@
-// Copyright (c) 2019 London Trust Media Incorporated
+// Copyright (c) 2020 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -75,6 +75,13 @@ QtObject {
     onDashboardOpenRequested: dashboard.window.showDashboard(trayManager.getIconMetrics())
   }
 
+  property Component macMenuBarComponent: Component {
+    MacMenuBar{}
+  }
+  property Loader macMenuBarLoader: Loader {
+    active: Qt.platform.os === 'osx'
+    sourceComponent: macMenuBarComponent
+  }
 
   // We have to do the initial show after a slight delay so the icon bounds
   // will be set up correctly.

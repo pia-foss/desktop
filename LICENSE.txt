@@ -5,7 +5,7 @@ This product contains multiple components, some of which are covered
 under different licenses. Unless otherwise noted, all original source
 code and other content is licensed under the GPLv3:
 
-  Copyright (c) 2017-2019 London Trust Media Incorporated
+  Copyright (c) 2017-2020 Private Internet Access, Inc.
 
   This file is part of the Private Internet Access Desktop Client.
 
@@ -48,7 +48,7 @@ OpenVPN (https://github.com/OpenVPN/openvpn) is licensed under GPLv2.
 OpenVPN modifications (https://github.com/pia-foss/desktop-openvpn) are
 licensed under GPLv2.
 
-  Copyright (c) 2019 London Trust Media Incorporated
+  Copyright (c) 2020 Private Internet Access, Inc.
 
 LZO (http://www.oberhumer.com/opensource/lzo/) is licensed under GPLv2.
 
@@ -76,7 +76,7 @@ licensed under GPLv2.
 TAP adapter modifications (https://github.com/pia-foss/desktop-tap) are
 licensed under GPLv2.
 
-  Copyright (c) 2019 London Trust Media Incorporated
+  Copyright (c) 2020 Private Internet Access, Inc.
 
 OpenSSL (https://github.com/openssl/openssl) is licensed under both the
 OpenSSL License and the original SSLeay license.

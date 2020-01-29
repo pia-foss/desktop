@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright (c) 2019 London Trust Media Incorporated
+# Copyright (c) 2020 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -72,6 +72,8 @@ function resolvconf_apply() {
 dns_servers=""
 domain=""
 pia_args_done=""
+no_defaultroute=""
+original_interface=""
 
 while [ "$#" -gt 0 ] && [ -z "$pia_args_done" ]; do
   case "$1" in
@@ -109,14 +111,14 @@ resolvconf_link_path=/run/resolvconf/resolv.conf
 
 case "$script_type" in
   up)
-    echo "Using device:$dev address:$ifconfig_local" >&2 # Used in vpn.cpp to know the tunnel device
+    echo "Using device:$dev local_address:$ifconfig_local remote_address:$ifconfig_remote" >&2 # Used in vpn.cpp to know the tunnel device
 
     if [ -n "$dns_servers" ] ; then
       echo "Requested nameservers: $dns_servers"
 
       # If the symlink target has "systemd" in the path then assume systemd-resolve is in control
       if [[ $(realpath /etc/resolv.conf) =~ systemd ]]; then
-        systemd_apply
+        systemd_apply "$original_interface"
 
       # There's many possible ways resolvconf can be used, but we only support it when there's a symlink to /run/resolvconf
       # All other possibilites fall back to a manual overwrite of /etc/resolv.conf
