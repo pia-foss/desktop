@@ -481,12 +481,19 @@ void IpTablesFirewall::setupTrafficSplitting()
 
     // Inverse split tunnel (vpn only)
     setupCgroup(cGroupVpnOnlyDir, kVpnOnlyCGroupId, kVpnOnlyPacketTag, kVpnOnlyRtableName);
+
+    // Ensure LAN traffic gets managed by the 'main' table. Without this even LAN traffic
+    // will get routed out the default gateway. Set priority to 99 so it takes precedence over
+    // split tunnel rules (which are in the 100-101 range).
+    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio 99"));
 }
 
 void IpTablesFirewall::teardownTrafficSplitting()
 {
     teardownCgroup(kPacketTag, kRtableName);
     teardownCgroup(kVpnOnlyPacketTag, kVpnOnlyRtableName);
+
+    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio 99"));
 }
 
 #endif

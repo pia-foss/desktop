@@ -102,4 +102,9 @@ namespace ApiBases
     {{
         BRAND_UPDATE_APIS
     }};
+
+    ApiBase piaPortForwardApi
+    {{
+        QStringLiteral("http://209.222.18.222:2000/")
+    }};
 }

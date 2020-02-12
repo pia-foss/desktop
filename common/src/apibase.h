@@ -93,6 +93,9 @@ namespace ApiBases
     // This is part of the PIA web API for the PIA brand, but for other brands
     // it is provided by that brand.
     extern COMMON_EXPORT ApiBase piaUpdateApi;
+
+    // Base URI for port forward requests
+    extern COMMON_EXPORT ApiBase piaPortForwardApi;
 }
 
 #endif

@@ -21,6 +21,24 @@
 
 #include "apiretry.h"
 #include <QElapsedTimer>
+#include <QRegularExpression>
+
+void ApiResource::trace(QDebug &dbg) const
+{
+    // If this resource doesn't contain a query string, just trace it as-is
+    if(!contains('?'))
+    {
+        const QString &thisStr{*this};
+        dbg << thisStr;
+        return;
+    }
+
+    // Otherwise, replace parameter sequences to hide their values.  This is
+    // very crude but is good enough for the URIs used by PIA.
+    QString redacted{*this};
+    redacted.replace(QRegularExpression{"=[^&]*"}, QStringLiteral("=..."));
+    dbg << redacted;
+}
 
 // Counted retry strategy.  Just retries immediately up to a maximum number of
 // attempts.
@@ -30,7 +48,7 @@ public:
     CountedApiRetry(unsigned maxAttempts);
 
 public:
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const QString &resource) override;
+    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) override;
 
 private:
     unsigned _maxAttempts, _attemptCount;
@@ -41,7 +59,7 @@ CountedApiRetry::CountedApiRetry(unsigned maxAttempts)
 {
 }
 
-auto CountedApiRetry::beginNextAttempt(const QString &resource)
+auto CountedApiRetry::beginNextAttempt(const ApiResource &resource)
     -> nullable_t<std::chrono::milliseconds>
 {
     if(_attemptCount >= _maxAttempts)
@@ -68,10 +86,10 @@ auto CountedApiRetry::beginNextAttempt(const QString &resource)
 class COMMON_EXPORT TimedApiRetry : public ApiRetry
 {
 public:
-    TimedApiRetry();
+    TimedApiRetry(const std::chrono::seconds &maxAttemptTime);
 
 public:
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const QString &resource) override;
+    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) override;
 
 private:
     // Time since the first attempt began; used for the overall timeout
@@ -85,14 +103,14 @@ private:
     // interval between the beginning of the prior request and the beginning of
     // the next request.
     std::chrono::milliseconds _nextRequestInterval;
+    // Maximum attempt time; after this long no more attempts will begin.
+    std::chrono::seconds _maxAttemptTime;
     // Count of attempts.  Used for tracing.
     unsigned _attemptCount;
 };
 
 namespace
 {
-    // Maximum attempt time; after this long no more attempts will begin.
-    const std::chrono::minutes _maxAttemptTime{10};
     // Minimum interval between the first and second attempt.  (Compounded with
     // backoffFactor to determine subsequent intervals.)
     const std::chrono::seconds _initialInterval{1};
@@ -103,12 +121,13 @@ namespace
     const std::chrono::seconds _maxInterval{30};
 }
 
-TimedApiRetry::TimedApiRetry()
-    : _priorRequestDelay{0}, _nextRequestInterval{_initialInterval}, _attemptCount{0}
+TimedApiRetry::TimedApiRetry(const std::chrono::seconds &maxAttemptTime)
+    : _priorRequestDelay{0}, _nextRequestInterval{_initialInterval},
+      _maxAttemptTime{maxAttemptTime}, _attemptCount{0}
 {
 }
 
-auto TimedApiRetry::beginNextAttempt(const QString &resource)
+auto TimedApiRetry::beginNextAttempt(const ApiResource &resource)
     -> nullable_t<std::chrono::milliseconds>
 {
     // First attempt - just start the timers and proceed
@@ -174,7 +193,7 @@ std::unique_ptr<ApiRetry> ApiRetries::counted(unsigned maxAttempts)
     return std::make_unique<CountedApiRetry>(maxAttempts);
 }
 
-std::unique_ptr<ApiRetry> ApiRetries::vpnIpTimed()
+std::unique_ptr<ApiRetry> ApiRetries::timed(std::chrono::seconds maxAttemptTime)
 {
-    return std::make_unique<TimedApiRetry>();
+    return std::make_unique<TimedApiRetry>(maxAttemptTime);
 }

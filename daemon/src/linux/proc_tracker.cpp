@@ -254,10 +254,20 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     if(_previousNetScan.interfaceName() != params.splitTunnelNetScan.interfaceName())
         updateMasquerade(params.splitTunnelNetScan.interfaceName());
 
-    // Only update the routing policy for source ip if we absolutely have to, as it's thornier to update
-    if(_previousNetScan.gatewayIp() != params.splitTunnelNetScan.gatewayIp())
+    // Ensure that packets with the source IP of the physical interface go out the physical interface
+    if(_previousNetScan.ipAddress() != params.splitTunnelNetScan.ipAddress())
     {
-        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress());
+        // Remove the old one (if it exists) before adding a new one
+        removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), IpTablesFirewall::kRtableName);
+        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress(), IpTablesFirewall::kRtableName);
+    }
+
+    // Ensure that packets with source IP of the tunnel go out the tunnel interface
+    if(_previousTunnelDeviceLocalAddress !=  tunnelDeviceLocalAddress)
+    {
+        // Remove the old one (if it exists) before adding a new one
+        removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
+        addRoutingPolicyForSourceIp(tunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
     }
 
     // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
@@ -267,6 +277,7 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     // (we're disconnected), the subsequent call to updateApps() will add/remove
     // all excluded apps (which are only tracked when we have a network scan).
     _previousNetScan = params.splitTunnelNetScan;
+    _previousTunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
 }
 
 void ProcTracker::initiateConnection(const FirewallParams &params,
@@ -453,21 +464,18 @@ void ProcTracker::teardownFirewall()
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), false, IpTablesFirewall::kMangleTable);
 }
 
-void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress)
+void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
-    // Remove the old one (if it exists) before adding a new one
-    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress());
-
     if(!ipAddress.isEmpty())
         ::shellExecute(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
-            .arg(ipAddress, IpTablesFirewall::kRtableName));
+            .arg(ipAddress, routingTableName));
 }
 
-void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress)
+void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
     if(!ipAddress.isEmpty())
         ::shellExecute(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
-            .arg(ipAddress, IpTablesFirewall::kRtableName));
+            .arg(ipAddress, routingTableName));
 }
 
 void ProcTracker::shutdownConnection()
@@ -489,7 +497,8 @@ void ProcTracker::shutdownConnection()
 
     teardownFirewall();
     removeAllApps();
-    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress());
+    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), IpTablesFirewall::kRtableName);
+    removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
     teardownReversePathFiltering();
 
     // Clear out our network info

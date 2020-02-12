@@ -65,22 +65,22 @@ ApiClient::ApiClient()
 
 // Create tasks to issue a request with retries and return its body.
 Async<QByteArray> ApiClient::requestRetry(QNetworkAccessManager::Operation verb,
-                                          ApiBase &apiBaseUris,
+                                          ApiBase &apiBaseUris, const QString &apiPath,
                                           QString resource, unsigned maxAttempts,
                                           const QJsonDocument &data, QByteArray auth)
 {
-    return requestRetry(verb, apiBaseUris, std::move(resource),
+    return requestRetry(verb, apiBaseUris, apiPath, std::move(resource),
                         ApiRetries::counted(maxAttempts), data,
                         std::move(auth));
 }
 
 Async<QByteArray> ApiClient::requestRetry(QNetworkAccessManager::Operation verb,
-                                          ApiBase &apiBaseUris,
+                                          ApiBase &apiBaseUris, const QString &apiPath,
                                           QString resource,
                                           std::unique_ptr<ApiRetry> pRetryStrategy,
                                           const QJsonDocument &data, QByteArray auth)
 {
-    QString apiResource = apiBasePath + resource;
+    QString apiResource = apiPath + resource;
 
     // Create a retriable task to fetch the response body
     return Async<NetworkTaskWithRetry>::create(verb, apiBaseUris,
@@ -94,7 +94,7 @@ Async<QJsonDocument> ApiClient::get(QString resource, QByteArray auth)
 {
     // Just use a max attempt count of 1 to do a GET with no retries.
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        ApiBases::piaApi, std::move(resource), 1,
+                        ApiBases::piaApi, apiBasePath, std::move(resource), 1,
                         {}, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -102,7 +102,7 @@ Async<QJsonDocument> ApiClient::get(QString resource, QByteArray auth)
 Async<QJsonDocument> ApiClient::getRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        ApiBases::piaApi, std::move(resource),
+                        ApiBases::piaApi, apiBasePath, std::move(resource),
                         apiAttempts, {}, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -111,7 +111,7 @@ Async<QJsonDocument> ApiClient::getIp(QString resource, QByteArray auth)
 {
     // Like get(), max of 1 attempt
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        ApiBases::piaIpAddrApi,
+                        ApiBases::piaIpAddrApi, apiBasePath,
                         std::move(resource), 1,
                         {}, std::move(auth))
             ->then(parseJsonBody);
@@ -120,7 +120,7 @@ Async<QJsonDocument> ApiClient::getIp(QString resource, QByteArray auth)
 Async<QJsonDocument> ApiClient::getIpRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        ApiBases::piaIpAddrApi,
+                        ApiBases::piaIpAddrApi, apiBasePath,
                         std::move(resource), apiAttempts,
                         {}, std::move(auth))
             ->then(parseJsonBody);
@@ -129,8 +129,8 @@ Async<QJsonDocument> ApiClient::getIpRetry(QString resource, QByteArray auth)
 Async<QJsonDocument> ApiClient::getVpnIpRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        ApiBases::piaIpAddrApi,
-                        std::move(resource), ApiRetries::vpnIpTimed(),
+                        ApiBases::piaIpAddrApi, apiBasePath,
+                        std::move(resource), ApiRetries::timed(std::chrono::minutes{10}),
                         {}, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -138,7 +138,7 @@ Async<QJsonDocument> ApiClient::getVpnIpRetry(QString resource, QByteArray auth)
 Async<QJsonDocument> ApiClient::post(QString resource, const QJsonDocument &data, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::PostOperation,
-                        ApiBases::piaApi,
+                        ApiBases::piaApi, apiBasePath,
                         std::move(resource), 1,
                         data, std::move(auth))
             ->then(parseJsonBody);
@@ -147,7 +147,7 @@ Async<QJsonDocument> ApiClient::post(QString resource, const QJsonDocument &data
 Async<QJsonDocument> ApiClient::postRetry(QString resource, const QJsonDocument &data, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::PostOperation,
-                        ApiBases::piaApi,
+                        ApiBases::piaApi, apiBasePath,
                         std::move(resource), apiAttempts,
                         data, std::move(auth))
             ->then(parseJsonBody);
@@ -157,16 +157,29 @@ Async<void> ApiClient::head(QString resource, QByteArray auth)
 {
     // Like get(), just use a max attempt count of 1.
     return requestRetry(QNetworkAccessManager::Operation::HeadOperation,
-                        ApiBases::piaApi, std::move(resource), 1,
+                        ApiBases::piaApi, apiBasePath, std::move(resource), 1,
                         {}, std::move(auth));
 }
 
 Async<void> ApiClient::headRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::HeadOperation,
-                        ApiBases::piaApi, std::move(resource),
+                        ApiBases::piaApi, apiBasePath, std::move(resource),
                         apiAttempts, {}, std::move(auth));
 }
+
+Async<QJsonDocument> ApiClient::getForwardedPort(QString resource, QByteArray auth)
+{
+    // The port forward request doesn't go to the normal web API, it uses a
+    // special ApiBase and no API path.  The "resource" from PortForwarder is
+    // the query string.
+    return requestRetry(QNetworkAccessManager::Operation::GetOperation,
+                        ApiBases::piaPortForwardApi, QString{},
+                        std::move(resource), ApiRetries::timed(std::chrono::minutes{3}),
+                        {}, std::move(auth))
+            ->then(parseJsonBody);
+}
+
 
 // Qt doesn't provide any help encoding Authentication headers, so we have
 // to do it manually.  As mentioned in the ApiClient definition,

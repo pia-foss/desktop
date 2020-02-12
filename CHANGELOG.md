@@ -6,6 +6,8 @@
 * Fixed TCP localhost connections for split tunnel apps on Windows
 * Fixed split tunnel for Mac apps that bind to specific ports
 * Fixed focus behavior on Mac when closing windows with the keyboard
+* Fixed LAN routing problems when split tunnel is enabled on Linux
+* Improved reliability of the port forwarding feature
 * Updated Qt to 5.12.6
 * Updated OpenVPN to 2.4.8
 * Updated OpenSSL to 1.1.1d

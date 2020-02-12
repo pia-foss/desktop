@@ -72,7 +72,7 @@ private:
     QNetworkAccessManager::Operation _verb;
     ApiBaseSequence _baseUriSequence;
     std::unique_ptr<ApiRetry> _pRetryStrategy;
-    QString _resource;
+    ApiResource _resource;
     QByteArray _data;
     QByteArray _authHeaderVal;
     Async<QByteArray> _pNetworkReply;

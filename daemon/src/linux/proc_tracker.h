@@ -100,8 +100,8 @@ private:
     void updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress);
     void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
                        QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
-    void addRoutingPolicyForSourceIp(QString ipAddress);
-    void removeRoutingPolicyForSourceIp(QString ipAddress);
+    void addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
+    void removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
     void setupFirewall();
     void teardownFirewall();
     void setupReversePathFiltering();
@@ -114,6 +114,7 @@ private:
     QString _previousRPFilter;
     AppMap _exclusionsMap;
     AppMap _vpnOnlyMap;
+    QString _previousTunnelDeviceLocalAddress;
     int _sockFd;
 };
 

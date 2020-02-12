@@ -21,158 +21,19 @@
 
 #include "portforwarder.h"
 #include "testshim.h"
+#include "apiclient.h"
 #include <QJsonDocument>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QRandomGenerator>
 #include <chrono>
 
-namespace
-{
-    // Number of times we will attempt the port forward request.
-    // This is the same as the existing client (which retries 3 times; 4 total
-    // attempts)
-    const int forwardAttempts{4};
-    // Timeout for the first attempt.  The existing client uses a 5-second
-    // initial timeout, and increases it by 5 seconds for each retry.
-    const std::chrono::seconds initialTimeout{5};
-    // Amount to increase the timeout for each retry
-    const std::chrono::seconds timeoutBackoff{5};
-
-    // Partial URL used to request a port forward.  (PortForwarder adds on the
-    // client ID.)
-    // Note that this is not secure, we rely on it being sent through the VPN
-    // interface
-    const QString requestUrlPrefix{QStringLiteral("http://209.222.18.222:2000/?client_id=")};
-}
-
-PortRequester::PortRequester(const QUrl &requestUrl)
-    : _attemptCount{0},
-      _forwardRequest{requestUrl},
-      _pNetworkManager{TestShim::create<QNetworkAccessManager>()}
-{
-    _requestTimeout.setSingleShot(true);
-    beginNextAttempt();
-}
-
-void PortRequester::beginNextAttempt()
-{
-    // If we've already reached the maximum attempts, emit failure and be done.
-    if(_attemptCount >= forwardAttempts)
-    {
-        qWarning() << "Port forward request failed" << _attemptCount << "attempts, giving up";
-        emit portForwardComplete(0);
-        return;
-    }
-
-    auto attemptTimeout = initialTimeout + timeoutBackoff * _attemptCount;
-    ++_attemptCount;
-
-    QPointer<QNetworkReply> pForwardReply{_pNetworkManager->get(_forwardRequest)};
-    pForwardReply->setParent(this);
-    // Capture pForwardReply by value, so this lambda will always use the reply
-    // associated with the request that was started here, even if another
-    // request is started before the signal is handled
-    //
-    // It's not possible for the QNetworkReply to be destroyed before this
-    // signal is handled, since it's deleted by this signal handler.
-    connect(pForwardReply, &QNetworkReply::finished, this,
-            [=](){
-                Q_ASSERT(pForwardReply);
-                pForwardReply->deleteLater();
-                forwardReplyFinished(*pForwardReply);
-            });
-
-    // Set a timeout for this attempt
-    Q_ASSERT(!_requestTimeout.isActive());
-    _requestTimeout.setInterval(std::chrono::milliseconds(attemptTimeout).count());
-    // It's possible for the timeout signal to be handled after the reply was
-    // already deleted, if the reply completes just as the timeout is elapsing.
-    // The captured pForwardReply will be nullptr if this happens.
-    connect(&_requestTimeout, &QTimer::timeout, this,
-            [=](){
-                if(!pForwardReply)
-                    return; // Already destroyed, nothing to do
-                qWarning() << "Request" << _attemptCount
-                    << "for port forward timed out after"
-                    << attemptTimeout.count() << "seconds";
-                // Request timed out - abort it.  This emits the finished()
-                // signal, which will take care of cleaning up the reply and
-                // trying again
-                pForwardReply->abort();
-            });
-    _requestTimeout.start();
-}
-
-int PortRequester::readForwardReply(QNetworkReply &reply)
-{
-    auto requestError = reply.error();
-    if(requestError != QNetworkReply::NetworkError::NoError)
-    {
-        qWarning() << "Couldn't request port forward due to error:" << requestError;
-        return 0;
-    }
-
-    auto replyPayload = reply.readAll();
-    // Read the JSON response
-    QJsonParseError replyParseError;
-    const auto &replyJson = QJsonDocument::fromJson(replyPayload, &replyParseError);
-
-    if(replyJson.isNull())
-    {
-        qWarning() << "Couldn't read port forward reply due to error:"
-            << replyParseError.error << "at position" << replyParseError.offset;
-        qWarning() << "Retrieved JSON:" << replyPayload;
-        return 0;
-    }
-
-    // If the server returned an error, log it and fail
-    const auto &replyErr = replyJson[QStringLiteral("error")];
-    // If the document had a value for 'error', that's a failure
-    if(!replyErr.isUndefined() && !replyErr.isNull())
-    {
-        qWarning() << "Port could not be forwarded due to error:"
-            << replyErr;
-        return 0;
-    }
-
-    // Get the actual port value.  (toInt() returns 0 if the value isn't
-    // actually an integer - 0 isn't a valid port number.)
-    const auto &replyPort = replyJson[QStringLiteral("port")].toInt();
-    if(replyPort <= 0 || replyPort > std::numeric_limits<quint16>::max())
-    {
-        qError() << "Invalid port value from port forward request:" << replyPort;
-        qError() << "Received JSON:" << replyPayload;
-        return 0;
-    }
-
-    return replyPort;
-}
-
-void PortRequester::forwardReplyFinished(QNetworkReply &reply)
-{
-    // Stop the timer if it's running since the reply finished.
-    _requestTimeout.stop();
-
-    int forwardedPort = readForwardReply(reply);
-    if(forwardedPort)
-    {
-        // The request succeeded; emit the port number.  We're done.
-        emit portForwardComplete(forwardedPort);
-    }
-    else
-    {
-        // The request failed.  Try again if there are attempts left.
-        beginNextAttempt();
-    }
-}
-
 PortForwarder::PortForwarder(QObject *pParent, const QString &clientId)
     : QObject{pParent},
-      _requestUrl{requestUrlPrefix + clientId},
+      _clientId{clientId},
       _connectionState{State::Disconnected},
       _forwardingEnabled{false},
-      _pCurrentRequest{}
+      _pPortForwardRequest{}
 {
 }
 
@@ -184,7 +45,7 @@ void PortForwarder::updateConnectionState(State connectionState)
     if(connectionState == State::ConnectedSupported)
     {
         // Invariant - cleared in any state other than ConnectedSupported
-        Q_ASSERT(!_pCurrentRequest);
+        Q_ASSERT(!_pPortForwardRequest);
         _connectionState = State::ConnectedSupported;
         // The connection is established, so request a port if forwarding is enabled
         if(_forwardingEnabled)
@@ -197,7 +58,8 @@ void PortForwarder::updateConnectionState(State connectionState)
         _connectionState = connectionState;
         // If a request is in progress, abort it.  If the request had completed,
         // the forwarded port has been lost.
-        _pCurrentRequest.reset();
+        _pPortForwardRequest.abandon();
+
         // If a port had been forwarded, it's gone now
         if(!_forwardingEnabled || connectionState == State::Disconnected)
             emit portForwardUpdated(PortForwardState::Inactive);
@@ -224,7 +86,7 @@ void PortForwarder::enablePortForwarding(bool enabled)
         // (_pCurrentRequest could be set
         // already if port forwarding was toggled off and on again while already
         // connected.)
-        if(_forwardingEnabled && !_pCurrentRequest)
+        if(_forwardingEnabled && !_pPortForwardRequest)
             emit portForwardUpdated(PortForwardState::Inactive, true);
         break;
     case State::ConnectedUnsupported:
@@ -236,7 +98,7 @@ void PortForwarder::enablePortForwarding(bool enabled)
 
         // Class invariant - can only be set in ConnectedSupported state.
         // (Guarantees that we're not about to overwrite a valid port forward.)
-        Q_ASSERT(!_pCurrentRequest);
+        Q_ASSERT(!_pPortForwardRequest);
         emit portForwardUpdated(_forwardingEnabled ? PortForwardState::Unavailable : PortForwardState::Inactive);
         break;
     }
@@ -244,13 +106,18 @@ void PortForwarder::enablePortForwarding(bool enabled)
 
 void PortForwarder::requestPort()
 {
-    _pCurrentRequest.reset(new PortRequester{_requestUrl});
-    connect(_pCurrentRequest.data(), &PortRequester::portForwardComplete, this,
-            [this](int port)
-            {
-                emit portForwardUpdated(port ? port : PortForwardState::Failed);
-            });
-    emit portForwardUpdated(PortForwardState::Attempting);
+   _pPortForwardRequest = ApiClient::instance()
+                ->getForwardedPort(QStringLiteral("?client_id=%1").arg(_clientId))
+                ->then(this, [this](const QJsonDocument& json) {
+                    const auto &port = json[QStringLiteral("port")].toInt();
+                    emit portForwardUpdated(port ? port : PortForwardState::Failed);
+                })
+                ->except(this, [this](const Error& err) {
+                    qWarning() << "Couldn't request port forward due to error:" << err;
+                    emit portForwardUpdated(PortForwardState::Failed);
+                });
+
+   emit portForwardUpdated(PortForwardState::Attempting);
 }
 
 // The existing client uses lowercase characters for this encoding

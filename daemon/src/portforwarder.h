@@ -27,54 +27,8 @@
 #include <QPointer>
 #include <QScopedPointer>
 #include <array>
+#include "async.h"
 #include "settings.h"
-
-// PortRequester manages one attempt to request a port forward through the VPN.
-// PortRequester is created by PortForwarder when the VPN is connected and port
-// forwarding is enabled.
-//
-// PortRequester implements the API request to forward a port, and it retries
-// the request a few times if it fails.
-class PortRequester : public QObject
-{
-    Q_OBJECT
-    CLASS_LOGGING_CATEGORY("portforwarder");
-
-public:
-    // PortRequester initiates the request to forward a port when it's created.
-    // The portForwardComplete signal will be emitted when the request completes
-    // (either successfully or unsuccessfully).
-    PortRequester(const QUrl &requestUrl);
-
-signals:
-    // When the request completes, this event is emitted.  If the request was
-    // successful, the forwarded port is provided.  If all retries failed, the
-    // signal is emitted with port == 0.
-    void portForwardComplete(int port);
-
-private:
-    // Begin another request if another attempt can be made, or signal failure
-    // if all attempts have failed.
-    void beginNextAttempt();
-
-    // Read the forwarded port from the reply body.  If the request failed, this
-    // returns 0, otherwise it returns the port number.
-    int readForwardReply(QNetworkReply &reply);
-
-    // Handle a reply to the forward request.
-    void forwardReplyFinished(QNetworkReply &reply);
-
-private:
-    // Number of attempts that have occurred
-    int _attemptCount;
-    // Definition of the request for a port forward
-    QNetworkRequest _forwardRequest;
-    // Timeout for each attempt
-    QTimer _requestTimeout;
-    // Manager for network requests.  Dynamically allocated so it can be mocked
-    // in unit tests.
-    QScopedPointer<QNetworkAccessManager> _pNetworkManager;
-};
 
 // PortForwarder forwards a port through the VPN connection when the VPN is
 // connected and the option is enabled.
@@ -132,21 +86,21 @@ private:
     void requestPort();
 
 private:
-    // URL we request to create a port forward
-    QUrl _requestUrl;
+    // The client Id (used to make a PF request)
+    QString _clientId;
     // Whether the VPN is connected
     State _connectionState;
     // Whether port forwarding is currently enabled
     bool _forwardingEnabled;
-    // If we've started a port forwarding request, this is the PortRequester
-    // managing that request.  After this request completes, this remains set
-    // until the connection goes down (to indicate that we don't need to request
-    // a port again).
+    // If we've started a port forwarding request, this is the asynchronous
+    // request.  After this request completes, this remains set until the
+    // connection goes down (to indicate that we don't need to request a port
+    // again).
     //
     // This is never set when _connectionState is not State::ConnectedSupported.
     // (It can be set with _forwardingEnabled is false if the setting was
     // toggled while connected.)
-    QScopedPointer<PortRequester> _pCurrentRequest;
+    Async<void> _pPortForwardRequest;
 };
 
 // The client ID we use for requests - a 256-bit number encoded in Base-36

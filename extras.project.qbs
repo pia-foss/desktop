@@ -1082,7 +1082,10 @@ PiaProject {
           //   unsigned Qt libs
           // - Don't do this when not notarizing, so devs can still sign with
           //   a self-signed cert (hardened runtime requires a team ID)
-          if(Environment.getEnv("PIA_APPLE_NOTARIZE") === "1") {
+          var env = Environment.currentEnv();
+          if(!env.hasOwnProperty("PIA_BRANCH_BUILD")
+              || (env.hasOwnProperty("PIA_BRANCH_BUILD") && env["PIA_BRANCH_BUILD"] === "master")
+              || (env.hasOwnProperty("PIA_ALWAYS_NOTARIZE") && env["PIA_ALWAYS_NOTARIZE"] === "1")){
             if(project.macdeployqt)
               codesignOptArgs = ["--options=runtime"]
             else

@@ -46,14 +46,14 @@ private:
     // Create tasks to issue a request with retries and return its body (with
     // a counted retry strategy)
     Async<QByteArray> requestRetry(QNetworkAccessManager::Operation verb,
-                                   ApiBase &apiBaseUris,
+                                   ApiBase &apiBaseUris, const QString &apiPath,
                                    QString resource, unsigned maxAttempts,
                                    const QJsonDocument &data, QByteArray auth);
 
     // Create tasks to issue a request with retries and return its body (with
     // any retry strategy)
     Async<QByteArray> requestRetry(QNetworkAccessManager::Operation verb,
-                                   ApiBase &apiBaseUris,
+                                   ApiBase &apiBaseUris, const QString &apiPath,
                                    QString resource,
                                    std::unique_ptr<ApiRetry> pRetryStrategy,
                                    const QJsonDocument &data, QByteArray auth);
@@ -96,6 +96,9 @@ public:
     Async<void> head(QString resource, QByteArray auth = {});
     // HEAD with retry.
     Async<void> headRetry(QString resource, QByteArray auth = {});
+
+    // Get for the forwarded port
+    Async<QJsonDocument> getForwardedPort(QString resource, QByteArray auth = {});
 
     // Generate an authentication header from a username and a password.
     static QByteArray passwordAuth(const QString& username, const QString& password);

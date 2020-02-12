@@ -2010,11 +2010,14 @@ bool VPNConnection::writeOpenVPNConfig(QFile& outFile)
 #ifndef Q_OS_MAC
         // Add a default route with much a worse metric, so traffic can still
         // be routed on the tunnel opt-in by binding to the tunnel interface.
+        // On Linux, metrics have been observed as high as 20600 on wireless
+        // interfaces.  OpenVPN is still using `route` though, which interprets
+        // the metric as 16-bit signed, so 32000 is about as high as we can go.
 
         // REMOVING this on macos/linux as it's very broken - the inverse operation ends up deleting the default route with the REAL IP
         // and when creating the route it needs to be a bound route on macos anyway AND for some weird reason it ends up being a /32 route
         // rather than a default route - a bug in openvpn? either way, we should probably just create this route ourselves
-        out << "route 0.0.0.0 0.0.0.0 vpn_gateway 1000" << endl;
+        out << "route 0.0.0.0 0.0.0.0 vpn_gateway 32000" << endl;
 #endif
 
         // Ignore pushed settings to add default route

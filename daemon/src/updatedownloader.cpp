@@ -31,6 +31,16 @@
 #include "brand.h"
 #include <QNetworkReply>
 #include <QDir>
+#include <QProcess>
+
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#include <VersionHelpers.h>
+#endif
+
+#ifdef Q_OS_MAC
+#include "mac/mac_version.h"
+#endif
 
 // Platform name for the supported platforms
 const QString UpdateChannel::platformName =
@@ -106,6 +116,7 @@ void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
     const auto &platformObj = platformVal.toObject();
     const QString &latestVersion = platformObj[QStringLiteral("version")].toString();
     const QString &downloadUrl = platformObj[QStringLiteral("download")].toString();
+    const QString &osVersionRequirement = platformObj[QStringLiteral("required")].toString();
 
     // If something is missing from the server data, log a warning just for
     // diagnostic purposes.
@@ -114,6 +125,13 @@ void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
         qWarning() << "Incomplete latest-version info in server info for platform"
             << platformName << "- version:" << latestVersion << "- url:"
             << downloadUrl;
+    }
+
+    if(!osVersionRequirement.isEmpty()) {
+      if(!validateOSRequirements(osVersionRequirement)) {
+        qWarning () << "This OS version does not support the requirement for update";
+        return;
+      }
     }
 
     // Store the update.  (Update ignores partial data if the server returned
@@ -573,4 +591,47 @@ void UpdateDownloader::onDownloadFinished()
     }
     // Resolve the existing task
     pFinishedTask->resolve(std::move(taskResult));
+}
+
+bool UpdateChannel::validateOSRequirements(const QString &requirement)
+{
+#ifdef Q_OS_MAC
+  nullable_t<SemVersion> reqVer = SemVersion::tryParse(requirement);
+  SemVersion curVer = getMacOSVersion();
+  qDebug () << "Validate OS version against " << requirement;
+
+  if(reqVer.isNull()) {
+    qWarning() << "Failed to parse reqVer ";
+    return true;
+  }
+  if(curVer.compare(reqVer.get()) >= 0) {
+    qDebug () << "Requirement satisfied";
+    return true;
+  } else {
+    qDebug () << "Requirement was not satisfied";
+    return false;
+  }
+#endif
+
+#ifdef Q_OS_WIN
+  bool intParseSuccess = false;
+  int reqVerNum = requirement.toInt(&intParseSuccess);
+  if(intParseSuccess) {
+    qDebug () << "Found required version num: " << reqVerNum;
+    OSVERSIONINFOEXW versEx{};
+        versEx.dwOSVersionInfoSize = sizeof(versEx);
+        ::GetVersionExW(reinterpret_cast<OSVERSIONINFO*>(&versEx));
+    qDebug () << "OS Build version num: " << versEx.dwBuildNumber;
+    if(versEx.dwBuildNumber >= reqVerNum) {
+      qDebug () << "Requirement satisfied";
+      return true;
+    } else {
+      qDebug () << "Requirement was not satisfied";
+      return false;
+    }
+  }
+#endif
+
+  // Always return true for linux
+  return true;
 }

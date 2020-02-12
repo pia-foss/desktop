@@ -156,7 +156,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // The URL for each request is logged to indicate if there is trouble with
     // specific API URLs, etc.  The resources we request don't contain any
     // query parameters, so this won't contain anything identifiable.
-    qDebug() << "requesting:" << request.url().toString();
+    qDebug() << "requesting:" << ApiResource{request.url().toString()};
 
     // Seems like QNetworkAccessManager could provide this, but the closest
     // thing it has is sendCustomRequest().  It looks like that would produce a
@@ -189,7 +189,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
 
     // Create a network task that resolves to the result of the request
     auto networkTask = Async<QByteArray>::create();
-    QString resource = _resource;
+    ApiResource resource = _resource;
     connect(reply.get(), &QNetworkReply::finished, networkTask.get(), [networkTask = networkTask.get(), reply, resource]
     {
         auto keepAlive = networkTask->sharedFromThis();

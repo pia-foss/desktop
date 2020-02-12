@@ -167,6 +167,8 @@ private:
     // The update available on this channel (even if it's not newer than the
     // current daemon version).
     Update _update;
+
+    bool validateOSRequirements (const QString &requirement);
 };
 
 // UpdateDownloader tracks what updates are available and manages requests

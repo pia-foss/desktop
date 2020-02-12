@@ -74,14 +74,6 @@ public:
     {}
 };
 
-class TestPortRequester : public PortRequester
-{
-public:
-    TestPortRequester()
-        : PortRequester{QStringLiteral("http://209.222.18.222:2000/?client_id=00000000000000000000000000000000000000000000000000")}
-    {}
-};
-
 class tst_portforwarder : public QObject
 {
     Q_OBJECT
@@ -94,33 +86,6 @@ private:
         ClientId id{idNum};
         qInfo() << name << "-" << id.id();
         QCOMPARE(id.id(), expected);
-    }
-
-    // Test that a particular type of error fails and retries as expected
-    void testErrorRetry(const QByteArray &errorJson)
-    {
-        auto pErrReply = MockNetworkManager::enqueueReply(errorJson);
-        TestPortRequester requester;
-        QCOMPARE(MockNetworkManager::hasNextReply(), false);
-
-        auto pSuccessReply = MockNetworkManager::enqueueReply(Responses::success);
-
-        QSignalSpy resultSpy{&requester, &PortRequester::portForwardComplete};
-
-        pErrReply->queueFinished();
-        // This wait *should* time out, we do not expect a response yet
-        QVERIFY(!resultSpy.wait(1000));
-
-        // The error reply should have been destroyed
-        QCOMPARE(pErrReply, nullptr);
-        // It should have taken the success reply by now
-        QCOMPARE(MockNetworkManager::hasNextReply(), false);
-
-        pSuccessReply->queueFinished();
-        QVERIFY(resultSpy.wait());
-
-        QVERIFY(resultSpy.size() == 1);
-        QCOMPARE(resultSpy[0][0].value<int>(), Responses::successPort);
     }
 
 private slots:
@@ -155,156 +120,6 @@ private slots:
                 "6dp5qcb22im238nr3wvp0ic7q99w035jmy2iw7i6n43d37jtof");
     }
 
-    // Test a successful port forward with PortRequester.
-    void testSuccessfulForward()
-    {
-        auto pReply = MockNetworkManager::enqueueReply(Responses::success);
-        TestPortRequester requester;
-        QCOMPARE(MockNetworkManager::hasNextReply(), false);
-
-        QSignalSpy resultSpy{&requester, &PortRequester::portForwardComplete};
-
-        pReply->queueFinished();
-        QVERIFY(resultSpy.wait());
-
-        QVERIFY(resultSpy.size() == 1);
-        QCOMPARE(resultSpy[0][0].value<int>(), Responses::successPort);
-    }
-
-    // Test an error returned in the reply JSON
-    void testReplyError()
-    {
-        QTest::ignoreMessage(QtWarningMsg, "Port could not be forwarded due to error: QJsonValue(string, \"Mock unit test error\")");
-        testErrorRetry(Responses::error);
-    }
-
-    // Test invalid JSON
-    void testInvalidJson()
-    {
-        QTest::ignoreMessage(QtWarningMsg, "Couldn't read port forward reply due to error: 5 at position 1");
-        QTest::ignoreMessage(QtWarningMsg, "Retrieved JSON: \"fhqwgads\"");
-        testErrorRetry(Responses::invalidJson);
-    }
-
-    // Test a missing port value in the reply
-    void testMissingPort()
-    {
-        QTest::ignoreMessage(QtCriticalMsg, "Invalid port value from port forward request: 0");
-        QTest::ignoreMessage(QtCriticalMsg, "Received JSON: \"{}\"");
-        testErrorRetry(Responses::missingPort);
-    }
-
-    // Test a zero port value in the reply
-    void testZeroPort()
-    {
-        QTest::ignoreMessage(QtCriticalMsg, "Invalid port value from port forward request: 0");
-        QTest::ignoreMessage(QtCriticalMsg, "Received JSON: \"\\n{\\n    \\\"port\\\": 0\\n}\\n\"");
-        testErrorRetry(Responses::zeroPort);
-    }
-
-    // Test an invalid value for port
-    void testInvalidPort()
-    {
-        QTest::ignoreMessage(QtCriticalMsg, "Invalid port value from port forward request: 0");
-        QTest::ignoreMessage(QtCriticalMsg, "Received JSON: \"\\n{\\n    \\\"port\\\": \\\"harbor\\\"\\n}\\n\"");
-        testErrorRetry(Responses::invalidPort);
-    }
-
-    // Test repeated failures to exhaust all retries
-    void testFailAllRetries()
-    {
-        QTest::ignoreMessage(QtWarningMsg, "Port could not be forwarded due to error: QJsonValue(string, \"Mock unit test error\")");
-        QTest::ignoreMessage(QtWarningMsg, "Port could not be forwarded due to error: QJsonValue(string, \"Mock unit test error\")");
-        QTest::ignoreMessage(QtWarningMsg, "Port could not be forwarded due to error: QJsonValue(string, \"Mock unit test error\")");
-        QTest::ignoreMessage(QtWarningMsg, "Port could not be forwarded due to error: QJsonValue(string, \"Mock unit test error\")");
-        QTest::ignoreMessage(QtWarningMsg, "Port forward request failed 4 attempts, giving up");
-        auto pErr1 = MockNetworkManager::enqueueReply(Responses::error);
-        TestPortRequester requester;
-
-        QSignalSpy resultSpy{&requester, &PortRequester::portForwardComplete};
-
-        auto pErr2 = MockNetworkManager::enqueueReply(Responses::error);
-        pErr1->finished();
-        auto pErr3 = MockNetworkManager::enqueueReply(Responses::error);
-        pErr2->finished();
-        auto pErr4 = MockNetworkManager::enqueueReply(Responses::error);
-        pErr3->finished();
-        // At this point there should not have been any signals yet, we're still
-        // retrying
-        QVERIFY(!resultSpy.wait(1000));
-        QVERIFY(resultSpy.empty());
-
-        pErr4->queueFinished();
-        QVERIFY(resultSpy.wait());
-        QVERIFY(resultSpy.size() == 1);
-        QCOMPARE(resultSpy[0][0].value<int>(), 0);
-    }
-
-    // Test that timeouts back off correctly for each request
-    void testTimeoutBackoff()
-    {
-        // Enums are traced differently in Qt 5.11 / 5.12, so use a regex for
-        // those traces.
-        QTest::ignoreMessage(QtWarningMsg, "Request 1 for port forward timed out after 5 seconds");
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression{"Couldn't request port forward due to error: .*OperationCanceledError.*"});
-        QTest::ignoreMessage(QtWarningMsg, "Request 2 for port forward timed out after 10 seconds");
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression{"Couldn't request port forward due to error: .*OperationCanceledError.*"});
-        QTest::ignoreMessage(QtWarningMsg, "Request 3 for port forward timed out after 15 seconds");
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression{"Couldn't request port forward due to error: .*OperationCanceledError.*"});
-        QTest::ignoreMessage(QtWarningMsg, "Request 4 for port forward timed out after 20 seconds");
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression{"Couldn't request port forward due to error: .*OperationCanceledError.*"});
-        QTest::ignoreMessage(QtWarningMsg, "Port forward request failed 4 attempts, giving up");
-        auto pErr1 = MockNetworkManager::enqueueReply();
-        TestPortRequester requester;
-
-        QSignalSpy resultSpy{&requester, &PortRequester::portForwardComplete};
-        QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
-
-        // Note that due to the way QVERIFY is implemented, a failed QVERIFY
-        // inside this lambda will only abort the lambda, not the entire test
-        // case.
-        auto checkTimeout = [&](int timeoutMsec,
-                                const auto &pPriorReply)
-        {
-            consumeSpy.clear();
-            // Not consumed yet
-            QVERIFY(!consumeSpy.wait(timeoutMsec-1000));
-            // The next reply should be consumed when the timeout elapses
-            QVERIFY(consumeSpy.wait(2000));
-            // The reply should be destroyed after that.
-            // This happens with deleteLater(), so it occurs after the signal
-            // is emitted
-            QSignalSpy destroySpy{pPriorReply, &QObject::destroyed};
-            QVERIFY(destroySpy.wait(1));
-            // No signal yet
-            QVERIFY(resultSpy.empty());
-        };
-
-        // The first timeout should be 5 seconds.
-        auto pErr2 = MockNetworkManager::enqueueReply();
-        checkTimeout(5000, pErr1);
-
-        // The next timeout should be 10 seconds.
-        auto pErr3 = MockNetworkManager::enqueueReply();
-        checkTimeout(10000, pErr2);
-
-        // Then, 15 seconds
-        auto pErr4 = MockNetworkManager::enqueueReply();
-        checkTimeout(15000, pErr3);
-
-        // Then, 20 seconds, but in this case the signal should be emitted since
-        // this is the last attempt, and we don't queue up a new reply.
-        QSignalSpy lastDestroy{pErr4, &QObject::destroyed};
-        QVERIFY(!lastDestroy.wait(19000));
-        QVERIFY(resultSpy.empty()); // No signals yet
-        // Next, the result should be signaled after ~1000 ms
-        QVERIFY(resultSpy.wait(2000));
-        // The last result should be destroyed
-        QVERIFY(lastDestroy.wait());
-
-        QCOMPARE(resultSpy[0][0].value<int>(), 0);
-    }
-
     // Verify that PortForwarder requests a port when the feature is enabled,
     // then the VPN is connected
     void testEnabledConnect()
@@ -321,6 +136,9 @@ private slots:
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         // 'Attempting' is emitted synchronously
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+        // The response is consumed asynchronously
+        QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
+        QVERIFY(consumeSpy.wait(1000));
         QVERIFY(!MockNetworkManager::hasNextReply());
         pReply->queueFinished();
         QVERIFY(resultSpy.wait());

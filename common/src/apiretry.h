@@ -25,6 +25,29 @@
 #include <memory>
 #include <chrono>
 
+// ApiResource is just a string that may contain sensitive query parameters.
+// When traced, any query parameters are redacted.
+// It may be a complete URI, just a query string, etc.; tracing just looks for
+// ?val=<....>&foo=<....>.
+class COMMON_EXPORT ApiResource : public QString
+{
+public:
+    using QString::QString;
+    ApiResource(const ApiResource &) = default;
+    ApiResource(ApiResource &&) = default;
+    ApiResource(const QString &val) : QString{val} {}
+    ApiResource(QString &&val) : QString{std::move(val)} {}
+
+public:
+    void trace(QDebug &dbg) const;
+};
+
+inline COMMON_EXPORT QDebug &operator<<(QDebug &dbg, const ApiResource &val)
+{
+    val.trace(dbg);
+    return dbg;
+}
+
 // ApiRetry - interface to a particular retry strategy.
 //
 // Retry strategies can choose when to stop retrying and/or delay successive
@@ -52,7 +75,7 @@ public:
     //
     // The resource path is provided just for tracing, it shouldn't affect the
     // attempt behavior.
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const QString &resource) = 0;
+    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) = 0;
 };
 
 namespace ApiRetries
@@ -63,7 +86,7 @@ namespace ApiRetries
 
     // Create a timed retry strategy with timing factors tuned for the VPN IP
     // address request.
-    std::unique_ptr<ApiRetry> COMMON_EXPORT vpnIpTimed();
+    std::unique_ptr<ApiRetry> COMMON_EXPORT timed(std::chrono::seconds maxAttemptTime);
 };
 
 #endif
