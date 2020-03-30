@@ -22,7 +22,7 @@ import PIA.NativeDaemon 1.0
 QtObject {
   readonly property bool vpnEnabled: NativeDaemon.state.vpnEnabled
   readonly property string connectionState: NativeDaemon.state.connectionState
-  readonly property string connectingStatus: NativeDaemon.state.connectingStatus
+  readonly property int usingSlowInterval: NativeDaemon.state.usingSlowInterval
   readonly property bool needsReconnect: NativeDaemon.state.needsReconnect
   readonly property double bytesReceived: NativeDaemon.state.bytesReceived
   readonly property double bytesSent: NativeDaemon.state.bytesSent
@@ -49,6 +49,7 @@ QtObject {
   readonly property string updateVersion: NativeDaemon.state.updateVersion
   readonly property double dnsConfigFailed: NativeDaemon.state.dnsConfigFailed
   readonly property bool tapAdapterMissing: NativeDaemon.state.tapAdapterMissing
+  readonly property bool wintunMissing: NativeDaemon.state.wintunMissing
   readonly property string netExtensionState: NativeDaemon.state.netExtensionState
   readonly property bool invalidClientExit: NativeDaemon.state.invalidClientExit
   readonly property double hnsdFailing: NativeDaemon.state.hnsdFailing
@@ -61,6 +62,8 @@ QtObject {
   readonly property string tunnelDeviceName: NativeDaemon.state.tunnelDeviceName
   readonly property string tunnelDeviceLocalAddress: NativeDaemon.state.tunnelDeviceLocalAddress
   readonly property string tunnelDeviceRemoteAddress: NativeDaemon.state.tunnelDeviceRemoteAddress
+  readonly property bool wireguardAvailable: NativeDaemon.state.wireguardAvailable
+  readonly property bool wireguardKernelSupport: NativeDaemon.state.wireguardKernelSupport
 
   // Constants for special values of forwardedPort (see PortForwarder::Special)
   readonly property var portForward: {

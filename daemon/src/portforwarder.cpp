@@ -81,13 +81,10 @@ void PortForwarder::enablePortForwarding(bool enabled)
     case State::Disconnected:
         break;
     case State::ConnectedSupported:
-        // If we're connected, forwarding is enabled, and no port has been
-        // requested yet, then inform the user they must reconnect to request a port.
-        // (_pCurrentRequest could be set
-        // already if port forwarding was toggled off and on again while already
-        // connected.)
-        if(_forwardingEnabled && !_pPortForwardRequest)
-            emit portForwardUpdated(PortForwardState::Inactive, true);
+        // Nothing happens, stay in the Inactive state.  We have to reconnect to
+        // request a port now that the setting is enabled.  (It's also possible
+        // that we have already requested a port if the setting was toggled off
+        // and back on while connected, keep the port in that case.)
         break;
     case State::ConnectedUnsupported:
         // If we're connected to a region that doesn't support port forwarding,

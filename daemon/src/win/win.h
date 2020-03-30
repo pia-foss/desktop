@@ -23,9 +23,19 @@
 #define WIN_H
 #pragma once
 
+// Avoid including Windows and Winsock headers directly from other headers -
+// they're sensitive to the exact order in which they're referenced, and they're
+// sensitive to the NO* macros defined by builtin/common.h.  Instead, include
+// win.h to get these headers in the exact order that works throughout the
+// client.
+//
+// If you need APIs that are currently excluded by a NO* macro in
+// builtin/common.h, just remove that macro there.  (Don't try to undefine it in
+// your file and re-include Windows.h, etc.)
+
 #undef _WINSOCKAPI_
-#include <winsock2.h>
-#include <windows.h>
+#include <WinSock2.h>
+#include <Windows.h>
 #include <objbase.h>
 #include <ws2ipdef.h>
 #include <iphlpapi.h>

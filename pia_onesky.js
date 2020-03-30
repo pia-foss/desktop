@@ -100,9 +100,9 @@ function getStringKeySource(contextName, message) {
 
 // Keep the original comment (for export)
 function commentIdentity(contextName, message) {
-  var commentMatch = message.match(/<comment[^]*<\/comment>/)
+  var commentMatch = message.match(/<comment>([^]*)<\/comment>/)
   if(commentMatch)
-    return commentMatch[0]
+    return commentMatch[1]
   return  // The message doesn't have a comment
 }
 

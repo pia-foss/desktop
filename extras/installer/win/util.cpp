@@ -126,6 +126,24 @@ static bool format_check(LPCWSTR fmt, size_t count)
     return true;
 }
 
+std::string vstrprintf(LPCSTR fmt, va_list ap)
+{
+    std::string result;
+    int len = _vscprintf(fmt, ap);
+    result.resize(len + 1);
+    result.resize(_vsnprintf(&result[0], result.size(), fmt, ap));
+    return result;
+}
+
+std::wstring vwstrprintf(LPCWSTR fmt, va_list ap)
+{
+    std::wstring result;
+    int len = _vscwprintf(fmt, ap);
+    result.resize(len + 1);
+    result.resize(_vsnwprintf(&result[0], result.size(), fmt, ap));
+    return result;
+}
+
 std::string strprintf_impl(LPCSTR fmt, size_t count, ...)
 {
     if (!printf_check(fmt, count))
@@ -152,52 +170,6 @@ std::wstring wstrprintf_impl(LPCWSTR fmt, size_t count, ...)
     std::wstring result = vwstrprintf(fmt, ap);
     va_end(ap);
     return result;
-}
-
-std::wstring format_impl(LPCWSTR fmt, size_t count, ...)
-{
-    if (!format_check(fmt, count))
-    {
-        LOG("Bad format string: %s", fmt);
-        return std::wstring();
-    }
-    va_list ap;
-    va_start(ap, count);
-    std::wstring result = vformat(fmt, ap);
-    va_end(ap);
-    return result;
-}
-
-std::string vstrprintf(LPCSTR fmt, va_list ap)
-{
-    std::string result;
-    int len = _vscprintf(fmt, ap);
-    result.resize(len + 1);
-    result.resize(_vsnprintf(&result[0], result.size(), fmt, ap));
-    return result;
-}
-
-std::wstring vwstrprintf(LPCWSTR fmt, va_list ap)
-{
-    std::wstring result;
-    int len = _vscwprintf(fmt, ap);
-    result.resize(len + 1);
-    result.resize(_vsnwprintf(&result[0], result.size(), fmt, ap));
-    return result;
-}
-
-std::wstring vformat(LPCWSTR fmt, va_list ap)
-{
-    LPWSTR ptr = NULL;
-    // Note: intentional pointer cast below for FORMAT_MESSAGE_ALLOCATE_BUFFER
-    DWORD len = FormatMessageW(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_MAX_WIDTH_MASK | FORMAT_MESSAGE_ALLOCATE_BUFFER, fmt, 0, 0, reinterpret_cast<LPWSTR>(&ptr), 0, &ap);
-    if (ptr && len)
-    {
-        std::wstring result(ptr, len);
-        LocalFree(ptr);
-        return result;
-    }
-    return std::wstring();
 }
 
 bool stringStartsWithCaseInsensitive(const std::wstring& str, const std::wstring& prefix)

@@ -26,6 +26,9 @@ set -e
 # PIA_APPLE_ID_PROVIDER - (optional) If the Apple ID is a member of multiple
 #                         teams, specify the provider ID to use (see
 #                         `xcrun altool --help`; `--asc-provider` option)
+# PIA_APPLE_NOTARIZE_TIMEOUT - (optional) Override the time to wait for the
+#                              package to be approved (time in seconds, default
+#                              600 = 10 minutes)
 
 # Zip file for upload to apple
 RELEASE_ZIP=$1
@@ -69,8 +72,8 @@ fi
 echo "Waiting 20 seconds"
 sleep 20
 
-# Wait up to 10 minutes
-deadline=$(($(date "+%s") + 600))
+# Wait up to 10 minutes (or PIA_APPLE_NOTARIZE_TIMEOUT)
+deadline=$(($(date "+%s") + ${PIA_APPLE_NOTARIZE_TIMEOUT:-600}))
 
 while :
 do

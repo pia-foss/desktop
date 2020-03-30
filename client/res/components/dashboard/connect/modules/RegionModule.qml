@@ -93,6 +93,10 @@ MovableModule {
   }
 
   function displayConnectionProxy(config) {
+    // Proxy is only supported for OpenVPN currently
+    if(config.method !== "openvpn")
+      return {type: 'none', dest: ''}
+
     switch(config.proxy) {
       case 'custom':
         return {type: 'custom', dest: config.proxyCustom}
@@ -114,6 +118,10 @@ MovableModule {
       return displayConnectionProxy(Daemon.state.connectingConfig)
 
     // Otherwise, display the configured proxy
+    // Only supported for OpenVPN currently
+    if(Daemon.settings.method !== "openvpn")
+      return {type: 'none', dest: ''}
+
     switch(Daemon.settings.proxy) {
       case 'custom':
         var host = Daemon.settings.proxyCustom.host

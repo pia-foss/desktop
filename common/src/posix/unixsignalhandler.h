@@ -23,18 +23,20 @@
 
 #include <QObject>
 #include <QSocketNotifier>
+#include <signal.h>
+#include <cstddef>
 
-
-class COMMON_EXPORT UnixSignalHandler: public QObject
+class COMMON_EXPORT UnixSignalHandler: public QObject, public Singleton<UnixSignalHandler>
 {
     Q_OBJECT
 
 public:
   explicit UnixSignalHandler(QObject *parent = nullptr);
+  ~UnixSignalHandler();
 
 private:
   // called by the system when a signal is received
-  static void _signalHandler(int signal);
+  static void _signalHandler(int signal, siginfo_t *info, void *uap);
 
   static void setAction(int signal, const struct sigaction &action);
 
@@ -46,6 +48,7 @@ public:
   static int sendSignalUsr1(qint64 pid);
 
 signals:
+  void signal(int sig);
   void sigUsr1();
   void sigInt();
   void sigTerm();
@@ -56,7 +59,11 @@ public slots:
 
 private:
   QSocketNotifier *_snUsr1;
-  static int sigUsr1Fd[2];
+  // Buffer used to receive a siginfo_t over the internal socket.
+  siginfo_t _rxInfo;
+  // Number of bytes received so far in _rxInfo
+  std::size_t _rxBytes;
+  int _sigFd[2];
 };
 
 #endif // UNIXSIGNALHANDLER_H

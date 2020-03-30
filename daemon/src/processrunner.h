@@ -167,7 +167,8 @@ public:
 public:
     ProcessRunner(RestartStrategy::Params restartParams);
     // The destructor waits for the process to exit.  (If ProcessRunner was
-    // enabled, it also signals the process to exit.)
+    // enabled, it also signals the process to exit.)  It does not emit signals
+    // from its destructor.
     ~ProcessRunner();
 
 private:
@@ -196,9 +197,9 @@ private:
     void postExitTimerElapsed();
 
 public:
-    // Enable or disable the process.  Specify the command and arguments when
-    // enabling the process - if it is already running and the command/arguments
-    // change, it will restart the process.
+    // Enable the process.  Specify the command and arguments - if it is already
+    // running and the command/arguments change, it will restart the process.
+    // (The process is killed with disable().)
     //
     // The return value indicates whether the process is being started or
     // restarted as a result of this call - false indicates that the program/
@@ -210,15 +211,39 @@ public:
     // anything else.  If enable() returns false, the caller may not receive
     // started() and initial program output (but it still could if the process
     // crashes or exits).
+    //
+    // The first time the ProcessRunner is enabled, started() is emitted
+    // synchronously during this call.  This is not necessarily the case for
+    // later calls to enable() (ProcessRunner could be waiting on a prior
+    // process to exit, etc.)
     virtual bool enable(QString program, QStringList arguments);
+    // Disable the process.  If it was running, the process is killed with
+    // kill().
     virtual void disable();
 
     bool isEnabled() const {return _enabled;}
+
+    // Terminate the process if it is running - if the ProcessRunner is enabled,
+    // the process will be restarted (the process exit will be unexpected).
+    //
+    // Returns true if the process was running and a signal was sent.  This does
+    // not necessarily guarantee that the process will exit, but if it does,
+    // ProcessRunner will emit failed().
+    //
+    // Used to allow the process to shut down cleanly; the caller can implement
+    // a clean shutdown by disabling the ProcessRunner when the process stops.
+    //
+    // This uses QProcess::terminate(), which sends WM_CLOSE on Windows or
+    // SIGTERM on Unix.
+    bool terminate();
 
     // Kill the process if it is running - if ProcessRunner is enabled, the
     // process will be restarted (this is treated as an unexpected failure).
     // Usually used when an error is detected that may not cause the process to
     // exit.
+    //
+    // This uses QProcess::kill(), which uses TerminateProcess() on Windows or
+    // SIGKILL on Unix.
     void kill();
 
     // Override to do additional initialization of the process before it's
@@ -231,7 +256,9 @@ signals:
 
     // The process has been started.  This will eventually be followed by
     // succeeded() or failed(), unless ProcessRunner is disabled.
-    void started();
+    // The PID given is provided by QProcess::processId() (int on Unix, DWORD on
+    // Windows).
+    void started(qint64 pid);
 
     // The process succeeded - it has run continuously for the success time set
     // in the RestartStrategy.

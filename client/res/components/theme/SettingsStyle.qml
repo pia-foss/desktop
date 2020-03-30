@@ -23,7 +23,7 @@ QtObject {
     readonly property bool horizontal: Qt.platform.os !== 'windows'
 
     readonly property int contentWidth: 430
-    readonly property int contentHeight: 340
+    readonly property int contentHeight: Theme.settings.horizontal ? 340 : 400
 
     readonly property color backgroundColor: Theme.dark ? "#323642" : "#eeeeee"
 
@@ -74,7 +74,7 @@ QtObject {
     readonly property int narrowPageLeftMargin: horizontal ? 60 : 0
 
     readonly property int headingHeight: 100
-    readonly property color headingLineColor: Theme.dark ? "#22252e" : "#d7d8d9"
+    readonly property color headingLineColor: Theme.dark ? "#484a55" : "#d7d8d9"
     readonly property color headingTextColor: Theme.dark ? "#ffffff" : "#22252e"
     readonly property int headingTextPx: 24
 
@@ -135,6 +135,7 @@ QtObject {
     readonly property string tipWarningImg: Theme.imagePathCommon + "/settings/warning.png"
 
     readonly property string inputBetaFeature: Theme.imagePathCommon + "/settings/beta-feature.png"
+    readonly property string inputPreviewFeature: Theme.imagePathCommon + "/settings/preview-feature.png"
 
     readonly property color inputDescLinkColor: Theme.dark ? '#5ddf5a' : '#4cb649'
     readonly property color inputDescLinkHoverColor: Theme.dark ? '#7afa78' : '#5ddf5a'
@@ -152,4 +153,6 @@ QtObject {
     readonly property color splitTunnelItemSeparatorColor: Theme.dark ? hbarBottomBorderColor : "#999da6"
 
     readonly property string spinnerImage: Theme.imagePath + "/settings/spinner.png"
+
+    readonly property color connectionPageSeparatorColor: "#889099"
 }

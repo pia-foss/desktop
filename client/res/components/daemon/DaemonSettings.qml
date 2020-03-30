@@ -52,6 +52,8 @@ QtObject {
   readonly property bool offerBetaUpdates: NativeDaemon.settings.offerBetaUpdates
   readonly property bool splitTunnelEnabled: NativeDaemon.settings.splitTunnelEnabled
   readonly property var splitTunnelRules: NativeDaemon.settings.splitTunnelRules
+  readonly property string method: NativeDaemon.settings.method
+  readonly property bool wireguardUseKernel: NativeDaemon.settings.wireguardUseKernel
 
   // Deprecated settings aren't passed through to QML, they're migrated by
   // ClientInterface

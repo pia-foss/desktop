@@ -52,7 +52,7 @@ std::vector<std::wstring> loadAllUserRegistryHives()
             DWORD len = path.size() * 2, type;
             if (LSTATUS err = RegGetValueW(key, name.c_str(), L"ProfileImagePath", RRF_RT_ANY, &type, &path[0], &len))
             {
-                LOG("Failed to get profile path for %s (%d)", name, err);
+                LOG("Failed to get profile path for %ls (%d)", name, err);
                 continue;
             }
             path.resize(len / 2 - 1, 0);
@@ -61,7 +61,7 @@ std::vector<std::wstring> loadAllUserRegistryHives()
                 continue;
             if (LSTATUS err = RegLoadKeyW(HKEY_USERS, name.c_str(), path.c_str()))
             {
-                LOG("Unable to load registry hive for %s (%d)", name, err);
+                LOG("Unable to load registry hive for %ls (%d)", name, err);
                 continue;
             }
         }
@@ -85,7 +85,7 @@ void recordInstallationSize(size_t size)
 static void writeRegistry(HKEY hkey, utf16ptr name, DWORD type, const void* data, size_t size)
 {
     if (LSTATUS err = RegSetValueExW(hkey, name, 0, type, (LPCBYTE)data, size))
-        LOG("Unable to write registry value %s (%d)", name, err);
+        LOG("Unable to write registry value %ls (%d)", name, err);
 }
 static void writeRegistry(HKEY hkey, utf16ptr name, DWORD type, utf16ptr value)
 {

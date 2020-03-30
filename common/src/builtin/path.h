@@ -26,6 +26,11 @@
 #include <QString>
 #include <QDebug>
 
+namespace Files
+{
+    extern const QString wireguardGoBasename;
+}
+
 class COMMON_EXPORT Path
 {
 public:
@@ -48,6 +53,9 @@ public:
     // macOS: <BaseDir>/Contents/MacOS
     // Linux: <BaseDir>/bin
     static Path ExecutableDir;
+
+    // Path to shipped libraries
+    static Path LibraryDir;
 
     // Read-only resource directory
     // Windows: <BaseDir>
@@ -150,6 +158,12 @@ public:
     // macOS & Linux: <ExecutableDir>/pia-ss-local
     static Path SsLocalExecutable;
 
+    // wireguard-go executable (Userspace Wireguard implementation - Mac/Linux)
+    static Path WireguardGoExecutable;
+
+    // Interface name file written by wireguard-go (Mac only)
+    static Path WireguardGoInterfaceFile;
+
 #ifdef Q_OS_WIN
     // Directory of TAP drivers
     // Windows: <BaseDir>/tap
@@ -157,6 +171,10 @@ public:
     // Directory of WFP Callout drivers
     // Windows: <BaseDir>/wfp_callout
     static Path WfpCalloutDriverDir;
+    // wgservice executable (Userspace Wireguard implementation - Windows)
+    static Path WireguardServiceExecutable;
+    // Wireguard config file (Userspace Wireguard implementation - Windows)
+    static Path WireguardConfigFile;
 #endif
 
 #ifdef Q_OS_LINUX
@@ -242,6 +260,11 @@ public:
     static void initializePostApp();
 
     Path& operator=(const QString& path) { _path = path; return *this; }
+
+    bool operator==(const Path &other) const {return _path == other._path;}
+    bool operator==(const QString &path) const {return _path == path;}
+    bool operator!=(const Path &other) const {return !(*this == other);}
+    bool operator!=(const QString &path) const {return !(*this == path);}
 
     operator const QString&() const { return _path; }
     const QString &str() const {return _path; }

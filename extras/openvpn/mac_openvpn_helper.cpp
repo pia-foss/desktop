@@ -261,7 +261,7 @@ void restoreIPv6()
     g_servicesWithDisabledIPv6.clear();
 }
 
-void applyConfiguration(bool shouldDisableIPv6, QStringList dnsServers, QString domain, QStringList winsServers)
+void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServers, QString domain, QStringList winsServers)
 {
     // If needed, disable IPv6 on all services where it's set to Automatic
     if (shouldDisableIPv6)
@@ -295,7 +295,7 @@ void applyConfiguration(bool shouldDisableIPv6, QStringList dnsServers, QString 
 
     // Store general PIA properties for the down script to use
     commands << QStringLiteral("d.init");
-    commands << QStringLiteral("d.add PID %1").arg(getParentPID());
+    commands << QStringLiteral("d.add PID %1").arg(killPid);
     commands << QStringLiteral("d.add Service %1").arg(primaryService);
     commands << QStringLiteral("d.add Addresses * %1").arg(originalAddresses.join(' '));
     if (!g_servicesWithDisabledIPv6.isEmpty())
@@ -518,6 +518,17 @@ int main(int argc, char* argv[])
 
             bool shouldDisableIPv6 = env.value(QStringLiteral("ifconfig_ipv6_remote")) == QLatin1String("::1");
 
+            // If the local network connection goes down, we kill a process to
+            // cause a reconnect.  The default is the parent of this script,
+            // which is OpenVPN itself for OpenVPN.  The kill_pid variable
+            // overrides this, and 0 prevents us from killing anything.
+            int killPid{0};
+            QString killPidEnvVal{env.value(QStringLiteral("kill_pid"))};
+            if(!killPidEnvVal.isEmpty())
+                killPid = killPidEnvVal.toUInt();   // 0 if the value is invalid
+            else
+                killPid = getParentPID();
+
             // Parse command-line arguments
             for(int i=1; i<argc; ++i)
             {
@@ -562,7 +573,7 @@ int main(int argc, char* argv[])
 
             try
             {
-                applyConfiguration(shouldDisableIPv6, dnsServers, domain, winsServers);
+                applyConfiguration(shouldDisableIPv6, killPid, dnsServers, domain, winsServers);
             }
             catch (int exitCode)
             {

@@ -64,18 +64,31 @@ public:
     virtual ~ApiRetry() = default;
 
 public:
-    // Begin the next attempt, if possible.  (Called immediately after
-    // construction for the first attempt).  If another attempt is allowed,
-    // return the amount of time to wait before making the request - 0 for no
-    // delay.  If no more attempts are allowed, return an empty nullable.
+    // Begin an attempt.  Called immediately after construction for the first
+    // attempt, or following a call to attemptFailed() (with a successful
+    // result) for subsequent attempts.
     //
-    // The immplementation should normally log for attempts after the first to
-    // indicate that a retry is allowed or that all attempts have been
-    // exhausted and the request will fail (and in either case, why).
+    // Return the timeout for this attempt - how long we are able to wait for a
+    // response.
     //
     // The resource path is provided just for tracing, it shouldn't affect the
     // attempt behavior.
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) = 0;
+    virtual std::chrono::milliseconds beginAttempt(const ApiResource &resource) = 0;
+
+    // An attempt failed.  This can be called before or after the timeout
+    // returned by beginAttempt() (the request could fail faster, or there could
+    // be a delay handling an elapsed timeout interval).
+    //
+    // If another attempt is allowed, return the delay time before we should
+    // start that attempt (which can be 0 to start immediately).  beginAttempt()
+    // will be called after this interval elapses.
+    //
+    // If all attempts have been exhausted, return an empty nullable_t to
+    // terminate the retry sequence.
+    //
+    // The resource path is provided just for tracing, it shouldn't affect the
+    // attempt behavior.
+    virtual nullable_t<std::chrono::milliseconds> attemptFailed(const ApiResource &resource) = 0;
 };
 
 namespace ApiRetries
@@ -86,7 +99,8 @@ namespace ApiRetries
 
     // Create a timed retry strategy with timing factors tuned for the VPN IP
     // address request.
-    std::unique_ptr<ApiRetry> COMMON_EXPORT timed(std::chrono::seconds maxAttemptTime);
+    std::unique_ptr<ApiRetry> COMMON_EXPORT timed(std::chrono::seconds fastRequestTime,
+                                                  std::chrono::seconds maxAttemptTime);
 };
 
 #endif

@@ -24,9 +24,13 @@
 #pragma once
 
 #include "daemon.h"
+#include "posix/unixsignalhandler.h"
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC)
 #include "mac/kext_client.h"
+#elif defined(Q_OS_LINUX)
+#include "posix/posix_firewall_iptables.h"
+#include "linux/linux_modsupport.h"
 #endif
 
 class QSocketNotifier;
@@ -41,7 +45,7 @@ public:
 
     static PosixDaemon* instance() { return static_cast<PosixDaemon*>(Daemon::instance()); }
 
-    virtual QSharedPointer<NetworkAdapter> getNetworkAdapter() override;
+    virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() override;
 
 protected slots:
     void handleSignal(int sig) Q_DECL_NOEXCEPT;
@@ -71,10 +75,12 @@ private:
         });
     }
 
+#ifdef Q_OS_LINUX
+    void checkLinuxModules();
+#endif
+
 private:
-    // Workaround to safely receive signals in Qt; route them via a dummy local socket
-    int _signalFd[2];
-    QSocketNotifier *_signalNotifier;
+    UnixSignalHandler _signalHandler;
 
     // Thread for communicating with split tunnel helpers (kexts, process managers, etc)
     RunningWorkerThread _commThread;
@@ -83,6 +89,11 @@ private:
     // enabled, and the network info for bypass apps.
     bool _enableSplitTunnel;
     OriginalNetworkScan _splitTunnelNetScan;
+
+#ifdef Q_OS_LINUX
+    IpTablesFirewall _firewall;
+    LinuxModSupport _linuxModSupport;
+#endif
 
 #ifdef Q_OS_MAC
     KextMonitor _kextMonitor;

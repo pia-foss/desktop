@@ -28,18 +28,24 @@ class ServiceTask : public Task
 protected:
     using Task::Task;
     static bool _rollbackNeedsReinstall;
+
+public:
+    static void reinstallOnRollback();
 };
 
 // Task to stop the service.
 class StopExistingServiceTask : public ServiceTask
 {
 public:
-    using ServiceTask::ServiceTask;
+    StopExistingServiceTask(LPCWSTR pSvcName, bool restartOnRollback);
+
     virtual void execute() override;
     virtual void rollback() override;
     virtual double getEstimatedExecutionTime() const override { return 0.5; }
 private:
-    bool _rollbackNeedsStart = false;
+    LPCWSTR _pSvcName;
+    bool _restartOnRollback;
+    bool _rollbackNeedsStart;
 };
 
 // Task to uninstall the service. Forms a pair with InstallServiceTask.

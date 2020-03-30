@@ -24,48 +24,80 @@ import "../client"
 import "../daemon"
 
 Item {
+  id: tool
+
+  // Populate the diagnostic output with a JSON representation of some object.
+  // - obj - the object to display
+  // - except - if specified, array of property names to exclude (the object is
+  //   cloned, and the properties are deleted from the clone)
+  // - only - if specified, array of property names to include (otherwise all
+  //   properties are included)
+  function populate(obj, except, only) {
+    // If only some properties are desired, just take those properties
+    if(only) {
+      let orig = obj
+      obj = {}
+      for(let i=0; i<only.length; ++i)
+        obj[only[i]] = orig[only[i]]
+    }
+    // If excluded properties were given, clone the object and remove those
+    // properties
+    if(except) {
+      obj = Object.assign({}, obj)
+      for(let i=0; i<except.length; ++i)
+        delete obj[except[i]]
+    }
+    output.text = JSON.stringify(obj, null, 2)
+  }
 
   ToolBar {
     id: stateToolbar
     anchors.top: parent.top
     width: parent.width
+
     RowLayout {
       ToolButton {
         id: locationButton
         text: "Locations"
-        onClicked: {
-          output.text = JSON.stringify(Daemon.data.locations, null, 2);
-        }
+        onClicked: tool.populate(Daemon.data.locations)
       }
       ToolButton {
         text: "Settings"
-        onClicked: {
-          output.text = JSON.stringify(Daemon.settings, null, 2);
-        }
+        onClicked: tool.populate(Daemon.settings)
       }
       ToolButton {
         text: "ClientSettings"
-        onClicked: {
-          output.text = JSON.stringify(Client.settings, null, 2);
-        }
+        onClicked: tool.populate(Client.settings)
       }
       ToolButton {
         text: "State"
-        onClicked: {
-          output.text = JSON.stringify(Daemon.state, null, 2);
-        }
+        // Grouped locations and the service locations are shown separately,
+        // they're huge and usually not important when viewing state.
+        onClicked: tool.populate(Daemon.state,
+                                 ["groupedLocations", "vpnLocations",
+                                  "shadowsocksLocations"])
       }
       ToolButton {
         text: "ClientState"
-        onClicked: {
-          output.text = JSON.stringify(Client.state, null, 2);
-        }
+        onClicked: tool.populate(Client.state)
       }
       ToolButton {
         text: "Data"
-        onClicked: {
-          output.text = JSON.stringify(Daemon.data, null, 2);
-        }
+        // Locations are shown separately, they're huge and uninteresting like
+        // the grouped locations.
+        // CAs and location metadata are mostly static.
+        onClicked: tool.populate(Daemon.data,
+                                 ["locations", "certificateAuthorities",
+                                  "locationMetadata"])
+      }
+      ToolButton {
+        text: "Grouped Locations"
+        onClicked: tool.populate(Daemon.state.groupedLocations)
+      }
+      ToolButton {
+        text: "Service Locations"
+        onClicked: tool.populate(Daemon.state, [],
+                                 ["vpnLocations", "shadowsocksLocations"])
       }
     }
   }

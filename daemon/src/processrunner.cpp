@@ -146,12 +146,16 @@ ProcessRunner::ProcessRunner(RestartStrategy::Params restartParams)
 
 ProcessRunner::~ProcessRunner()
 {
-    // QProcess already kills the process and waits for it to exit in its
-    // destructor.
-    // Since it can emit signals from its destructor though, we have to
-    // explicitly disconnect from it.
+    // QProcess kills the process and waits for it to exit in its destructor,
+    // but do it ourselves to avoid a spurious warning.
+    disable();
     if(_process)
+    {
+        // Disconnect the QProcess before waiting for it to finish, so
+        // ProcessRunner doesn't emit signals from its own destructor.
         _process->disconnect(this);
+        _process->waitForFinished();
+    }
 }
 
 void ProcessRunner::startProcess()
@@ -183,7 +187,7 @@ void ProcessRunner::startProcess()
 
     _restartStrategy.processStarting();
 
-    emit started();
+    emit started(_process->processId());
 }
 
 void ProcessRunner::stdoutReadyRead()
@@ -391,6 +395,22 @@ void ProcessRunner::disable()
         // next run will be a fresh start.
         _restartStrategy.resetFailures();
         break;
+    }
+}
+
+bool ProcessRunner::terminate()
+{
+    if(_process)
+    {
+        qInfo() << objectName() << "- terminating process";
+        // Just tell it to exit, the resulting state change will be unexpected.
+        _process->terminate();
+        return true;
+    }
+    else
+    {
+        qInfo() << objectName() << "- process not running, nothing to terminate";
+        return false;
     }
 }
 

@@ -100,13 +100,16 @@ BUILD_BIN_PATH=""
 
 case $OSTYPE in
     darwin*)
-        BUILD_BIN_PATH="/install-root/*.app/Contents/MacOS/"
+        BUILD_BIN_PATH="install-root/*.app/Contents/MacOS/"
+        BUILD_LIB_PATH="install-root/*.app/Contents/MacOS/"
         ;;
     msys*)
-        BUILD_BIN_PATH="/install-root/"
+        BUILD_BIN_PATH="install-root/"
+        BUILD_LIB_PATH="install-root/"
         ;;
     linux*)
-        BUILD_BIN_PATH="/install-root/bin/"
+        BUILD_BIN_PATH="install-root/bin/"
+        BUILD_LIB_PATH="install-root/lib/"
         ;;
     *)
         echo "OS type not known: $OSTYPE"
@@ -132,5 +135,14 @@ done
 
 # Run the command with the new PATH (if not just printing paths)
 if [ -z "$print_path_only" ]; then
+    for dir in $BUILD_ROOT/$BUILD_LIB_PATH; do
+        case "$OSTYPE" in
+            linux*)
+                export LD_LIBRARY_PATH=$dir:$LD_LIBRARY_PATH
+                ;;
+            *)
+                ;;
+        esac
+    done
     "$@"
 fi

@@ -17,8 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "callout.h"
-#define TAP_LOG LOG
-#include "tap.inl"
+#include "tap_inl.h"
 
 std::wstring CalloutDriverTask::getInfPath()
 {

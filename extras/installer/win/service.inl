@@ -2,26 +2,6 @@
 #define SERVICE_INL
 #pragma once
 
-#ifndef SERVICE_NAME
-#define SERVICE_NAME BRAND_WINDOWS_SERVICE_NAME
-#endif
-#ifndef SERVICE_DISPLAY_NAME
-#define SERVICE_DISPLAY_NAME PIA_PRODUCT_NAME " Service"
-#endif
-#ifndef SERVICE_START_TYPE
-#define SERVICE_START_TYPE   SERVICE_AUTO_START
-#endif
-#ifndef SERVICE_DEPENDENCIES
-#define SERVICE_DEPENDENCIES "\0" // null-separated list
-#endif
-#ifndef SERVICE_ACCOUNT
-#define SERVICE_ACCOUNT      NULL // LocalSystem
-//#define SERVICE_ACCOUNT      L"NT AUTHORITY\\LocalService"
-//#define SERVICE_ACCOUNT      L"NT AUTHORITY\\NetworkService"
-#endif
-#ifndef SERVICE_PASSWORD
-#define SERVICE_PASSWORD     NULL
-#endif
 #ifndef SERVICE_TIMEOUT
 #define SERVICE_TIMEOUT      30000
 #endif
@@ -33,7 +13,10 @@
 #endif
 
 #include <windows.h>
+#include <VersionHelpers.h>
 #include "service_inl.h"
+#include "tap_inl.h"
+#include "brand.h"
 
 #pragma comment(lib, "advapi32.lib")
 
@@ -67,8 +50,8 @@ int ServiceTimeoutScope::_timeRemaining = INT_MAX;
         SERVICE_LOG("Unable to open Service Control Manager (%d)", GetLastError()); \
         return errorStatus; \
     } else ((void)0)
-#define openService(flags, errorStatus) \
-    ServiceHandle service { OpenService(manager, L"" SERVICE_NAME, (flags)) }; \
+#define openService(svcName, flags, errorStatus) \
+    ServiceHandle service { OpenService(manager, svcName, (flags)) }; \
     if (service == NULL) \
     { \
         SERVICE_LOG("Unable to open service (%d)", GetLastError()); \
@@ -113,14 +96,14 @@ error:
     }
 }
 
-static ServiceStatus startService()
+ServiceStatus startService(LPCWSTR pSvcName)
 {
     SERVICE_ENTRY_POINT;
 
     openManager(SC_MANAGER_CONNECT, ServiceStartFailed);
-    openService(SERVICE_START | SERVICE_QUERY_STATUS, ServiceStartFailed);
+    openService(pSvcName, SERVICE_START | SERVICE_QUERY_STATUS, ServiceStartFailed);
 
-    SERVICE_LOG("Starting service");
+    SERVICE_LOG("Starting service %ls", pSvcName);
     return startService(service, SERVICE_TIMEOUT);
 }
 
@@ -189,14 +172,14 @@ ServiceStatus stopService(SC_HANDLE service)
     }
 }
 
-static ServiceStatus stopService()
+ServiceStatus stopService(LPCWSTR pSvcName)
 {
     SERVICE_ENTRY_POINT;
 
     openManager(SC_MANAGER_CONNECT, ServiceStopFailed);
 
     // Open the service manually to catch ServiceNotInstalled properly
-    ServiceHandle service { OpenService(manager, L"" SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS) };
+    ServiceHandle service { OpenService(manager, pSvcName, SERVICE_STOP | SERVICE_QUERY_STATUS) };
     if (service == NULL)
     {
         DWORD err = GetLastError();
@@ -211,127 +194,185 @@ static ServiceStatus stopService()
     return stopService(service);
 }
 
-static bool setupAutoRestart () {
+const ServiceParams g_daemonServiceParams
+{
+    PIA_SERVICE,
+    L"" PIA_PRODUCT_NAME " Service",
+    SERVICE_AUTO_START,
+    ServiceParams::Flags::AutoRestart
+};
+
+const ServiceParams g_wireguardServiceParams
+{
+    L"" BRAND_WINDOWS_WIREGUARD_SERVICE_NAME,
+    L"" PIA_PRODUCT_NAME " WireGuard Tunnel",
+    SERVICE_DEMAND_START,
+    ServiceParams::Flags::UnrestrictedSid
+};
+
+std::wstring quotePath(LPCWSTR path)
+{
+    std::wstring quoted;
+    quoted += '"';
+    quoted += path;
+    quoted += '"';
+    return quoted;
+}
+
+bool setExtraServiceConfig(const ServiceParams &params)
+{
     // We need full access for setting up the recovery options
     openManager(SC_MANAGER_ALL_ACCESS, false);
-    openService(SERVICE_ALL_ACCESS, false);
+    openService(params.pName, SERVICE_ALL_ACCESS, false);
 
-    _SERVICE_FAILURE_ACTIONSW autoRestart;
-    // Reset failures if no failures for 60 seconds
-    autoRestart.dwResetPeriod = (DWORD)60;
-    autoRestart.cActions = (DWORD)1;
-    autoRestart.lpCommand = L"";
-    autoRestart.lpRebootMsg = L"";
-    struct _SC_ACTION actions[1];
-    autoRestart.lpsaActions = actions;
-    autoRestart.lpsaActions[0].Delay = (DWORD)0;
-    autoRestart.lpsaActions[0].Type = SC_ACTION_RESTART;
+    if(params.flags & ServiceParams::Flags::AutoRestart)
+    {
+        _SERVICE_FAILURE_ACTIONSW autoRestart;
+        // Reset failures if no failures for 60 seconds
+        autoRestart.dwResetPeriod = (DWORD)60;
+        autoRestart.cActions = (DWORD)1;
+        autoRestart.lpCommand = L"";
+        autoRestart.lpRebootMsg = L"";
+        struct _SC_ACTION actions[1];
+        autoRestart.lpsaActions = actions;
+        autoRestart.lpsaActions[0].Delay = (DWORD)0;
+        autoRestart.lpsaActions[0].Type = SC_ACTION_RESTART;
 
-    if(!ChangeServiceConfig2W(service, SERVICE_CONFIG_FAILURE_ACTIONS, &autoRestart)) {
-        SERVICE_LOG("Failed to configure auto restart service (%d)", GetLastError());
-        return false;
+        if(!ChangeServiceConfig2W(service, SERVICE_CONFIG_FAILURE_ACTIONS, &autoRestart))
+        {
+            WinErrorEx error{::GetLastError()};
+            SERVICE_LOG("Failed to configure auto restart service %ls (0x%X) %s",
+                        params.pName, error.code(), error.message().c_str());
+            return false;
+        }
+    }
+
+    if(params.flags & ServiceParams::Flags::UnrestrictedSid)
+    {
+        SERVICE_SID_INFO unrestrictedSid;
+        unrestrictedSid.dwServiceSidType = SERVICE_SID_TYPE_UNRESTRICTED;
+        BOOL configChange = ChangeServiceConfig2(service, SERVICE_CONFIG_SERVICE_SID_INFO, &unrestrictedSid);
+
+        if(!configChange)
+        {
+            WinErrorEx err{::GetLastError()};
+            SERVICE_LOG("Failed to set SID type for service %ls - 0x%X %s", params.pName,
+                        err.code(), err.message().c_str());
+            return false;
+        }
     }
 
     return true;
 }
 
-static ServiceStatus installService(LPCWSTR path)
+ServiceStatus installService(LPCWSTR command, const ServiceParams &params)
 {
     SERVICE_ENTRY_POINT;
 
-    // Quote the path
-    std::wstring quotedPath;
-    quotedPath.push_back('"');
-    quotedPath.append(path);
-    quotedPath.push_back('"');
-
     openManager(SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE, ServiceInstallFailed);
 
+    // These parameters are the same for all services created by this function
+    // (used when calling both CreateServiceW() and ChangeServiceConfigW())
+    const DWORD serviceType = SERVICE_WIN32_OWN_PROCESS;
+    const DWORD errorCtlType = SERVICE_ERROR_NORMAL;
+    const LPCWSTR pSvcAccount = nullptr;    // nullptr = LocalSystem
+    const LPCWSTR pSvcPassword = nullptr;   // No password
+    const LPCWSTR pLoadOrderGroup = L"";     // No load order group (nullptr means "no change" for ChangeServiceConfigW())
+    const LPCWSTR pDependencies = L"\0";     // No dependencies
+
     // First try to create the service
-    SERVICE_LOG("Installing service");
+    SERVICE_LOG("Installing service %ls", params.pName);
     {
         ServiceHandle service {
             CreateServiceW(
                         manager,                   // SCManager database
-                        L"" SERVICE_NAME,          // Name of service
-                        L"" SERVICE_DISPLAY_NAME,  // Name to display
+                        params.pName,              // Name of service
+                        params.pDesc,              // Name to display
                         SERVICE_QUERY_STATUS,      // Desired access
-                        SERVICE_WIN32_OWN_PROCESS, // Service type
-                        SERVICE_START_TYPE,        // Service start type
-                        SERVICE_ERROR_NORMAL,      // Error control type
-                        quotedPath.c_str(),        // Service's binary
-                        NULL,                      // No load ordering group
+                        serviceType,               // Service type
+                        params.startType,          // Service start type
+                        errorCtlType,              // Error control type
+                        command,                   // Service's binary
+                        pLoadOrderGroup,           // No load ordering group
                         NULL,                      // No tag identifier
-                        L"" SERVICE_DEPENDENCIES,  // Dependencies
-                        SERVICE_ACCOUNT,           // Service running account
-                        SERVICE_PASSWORD           // Password of the account
+                        pDependencies,             // No dependencies
+                        pSvcAccount,               // Service running account - LocalSystem
+                        pSvcPassword               // Password of the account - none
                         )
         };
         if (service != NULL)
         {
-            SERVICE_LOG("Successfully created service");
+            SERVICE_LOG("Successfully created service %ls", params.pName);
 
-            setupAutoRestart();
+            if(!setExtraServiceConfig(params))
+                return ServiceInstallFailed;
+
+            SERVICE_LOG("Successfully configured service %ls", params.pName);
 
             return ServiceInstalled;
         }
     }
 
-    DWORD err = GetLastError();
-    if (err == ERROR_SERVICE_EXISTS)
+    WinErrorEx error{::GetLastError()};
+    if (error.code() == ERROR_SERVICE_EXISTS)
     {
         // Update existing service
-        SERVICE_LOG("Updating existing service");
+        SERVICE_LOG("Updating existing service %ls", params.pName);
 
-        openService(SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG, ServiceInstallFailed);
+        openService(params.pName, SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG, ServiceInstallFailed);
 
         if (!ChangeServiceConfigW(
                     service,
-                    SERVICE_WIN32_OWN_PROCESS,
-                    SERVICE_START_TYPE,
-                    SERVICE_ERROR_NORMAL,
-                    quotedPath.c_str(),
+                    serviceType,
+                    params.startType,
+                    errorCtlType,
+                    command,
+                    pLoadOrderGroup,
                     NULL,
-                    NULL,
-                    L"" SERVICE_DEPENDENCIES,
-                    SERVICE_ACCOUNT,
-                    SERVICE_PASSWORD,
-                    L"" SERVICE_DISPLAY_NAME))
+                    pDependencies,
+                    pSvcAccount,
+                    pSvcPassword,
+                    params.pDesc))
         {
-            SERVICE_LOG("Failed to update service (%d)", GetLastError());
+            WinErrorEx updateError{::GetLastError()};
+            SERVICE_LOG("Failed to update service %ls (0x%X) %s", params.pName,
+                        updateError.code(), updateError.message().c_str());
             return ServiceUpdateFailed;
         }
 
-        setupAutoRestart();
+        if(!setExtraServiceConfig(params))
+            return ServiceUpdateFailed;
 
-        SERVICE_LOG("Successfully updated service");
+        SERVICE_LOG("Successfully updated service %ls", params.pName);
         return ServiceUpdated;
     }
-    if (err == ERROR_SERVICE_MARKED_FOR_DELETE)
+    if (error.code() == ERROR_SERVICE_MARKED_FOR_DELETE)
     {
-        SERVICE_LOG("Service marked for deletion; reboot needed");
+        SERVICE_LOG("Service %ls marked for deletion; reboot needed", params.pName);
         return ServiceRebootNeeded;
     }
 
-    SERVICE_LOG("Failed to create service (%d)", err);
+    SERVICE_LOG("Failed to create service %ls (0x%X) %s", params.pName,
+                error.code(), error.message().c_str());
     return ServiceInstallFailed;
 }
 
-static ServiceStatus uninstallService()
+ServiceStatus uninstallService(LPCWSTR pSvcName)
 {
     SERVICE_ENTRY_POINT;
 
     openManager(SC_MANAGER_CONNECT, ServiceUninstallFailed);
-    ServiceHandle service { OpenService(manager, L"" SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE) };
+    ServiceHandle service { OpenService(manager, pSvcName, SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE) };
     if (service == NULL)
     {
-        DWORD err = GetLastError();
-        if (err == ERROR_SERVICE_DOES_NOT_EXIST)
+        WinErrorEx error{::GetLastError()};
+        if (error.code() == ERROR_SERVICE_DOES_NOT_EXIST)
         {
-            SERVICE_LOG("Service not installed");
+            SERVICE_LOG("Service %ls not installed", pSvcName);
             return ServiceNotInstalled;
         }
-        SERVICE_LOG("Unable to open service (%d)", err);
+        SERVICE_LOG("Unable to open service %ls (0x%X) %s", pSvcName,
+                    error.code(), error.message().c_str());
         return ServiceUninstallFailed;
     }
 
@@ -340,24 +381,44 @@ static ServiceStatus uninstallService()
     {
         return ServiceUninstallFailed;
     }
-    SERVICE_LOG("Uninstalling service");
+    SERVICE_LOG("Uninstalling service %ls", pSvcName);
     if (!DeleteService(service))
     {
-        DWORD err = GetLastError();
-        if (err == ERROR_SERVICE_MARKED_FOR_DELETE)
+        WinErrorEx error{::GetLastError()};
+        if (error.code() == ERROR_SERVICE_MARKED_FOR_DELETE)
         {
-            SERVICE_LOG("Service already marked for deletion");
+            SERVICE_LOG("Service %ls already marked for deletion (0x%X) %s",
+                        pSvcName, error.code(), error.message().c_str());
             return ServiceRebootNeeded;
         }
-        SERVICE_LOG("Failed to uninstall service (%d)", err);
+        SERVICE_LOG("Failed to uninstall service %ls (0x%X) %s", pSvcName,
+                    error.code(), error.message().c_str());
         return ServiceUninstallFailed;
     }
 
-    SERVICE_LOG("Successfully uninstalled service");
+    SERVICE_LOG("Successfully uninstalled service %ls", pSvcName);
     if (stopStatus == ServiceStopped)
         return ServiceStoppedAndUninstalled;
     else
         return ServiceUninstalled;
+}
+
+ServiceStatus installDaemonService(LPCWSTR daemonPath)
+{
+    return installService(quotePath(daemonPath).c_str(), g_daemonServiceParams);
+}
+
+ServiceStatus installWireguardService(LPCWSTR wireguardPath, LPCWSTR dataDirPath)
+{
+    // The startup command is:
+    // "...\pia-wgservice.exe" "...\data\wgpia0.conf"
+    std::wstring svcCommand;
+    svcCommand += '"';
+    svcCommand += wireguardPath;
+    svcCommand += L"\" \"";
+    svcCommand += dataDirPath;
+    svcCommand += L"\\wg" BRAND_CODE "0.conf\"";
+    return installService(svcCommand.c_str(), g_wireguardServiceParams);
 }
 
 #undef SERVICE_ENTRY_POINT

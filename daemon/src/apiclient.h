@@ -46,14 +46,14 @@ private:
     // Create tasks to issue a request with retries and return its body (with
     // a counted retry strategy)
     Async<QByteArray> requestRetry(QNetworkAccessManager::Operation verb,
-                                   ApiBase &apiBaseUris, const QString &apiPath,
+                                   ApiBase &apiBaseUris,
                                    QString resource, unsigned maxAttempts,
                                    const QJsonDocument &data, QByteArray auth);
 
     // Create tasks to issue a request with retries and return its body (with
     // any retry strategy)
     Async<QByteArray> requestRetry(QNetworkAccessManager::Operation verb,
-                                   ApiBase &apiBaseUris, const QString &apiPath,
+                                   ApiBase &apiBaseUris,
                                    QString resource,
                                    std::unique_ptr<ApiRetry> pRetryStrategy,
                                    const QJsonDocument &data, QByteArray auth);
@@ -74,6 +74,10 @@ public:
     Async<QJsonDocument> get(QString resource, QByteArray auth = {});
     // GET with retry.
     Async<QJsonDocument> getRetry(QString resource, QByteArray auth = {});
+    // GET with retry using arbitrary API base.  Usually used for requests that
+    // have to be made to a specific VPN server.
+    Async<QJsonDocument> getRetry(ApiBase &apiBaseUris, QString resource,
+                                  QByteArray auth = {});
 
     // Do a GET request for a particular API resource that returns the user's
     // IP address.  (Doesn't allow API proxies.)
@@ -97,7 +101,7 @@ public:
     // HEAD with retry.
     Async<void> headRetry(QString resource, QByteArray auth = {});
 
-    // Get for the forwarded port
+    // Get for the forwarded port - specific API base, and timed retry strategy
     Async<QJsonDocument> getForwardedPort(QString resource, QByteArray auth = {});
 
     // Generate an authentication header from a username and a password.

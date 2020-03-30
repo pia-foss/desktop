@@ -31,14 +31,14 @@ FileCreateResult createDirectory(utf16ptr path)
             return CreateNotNeeded;
         if (!DeleteFile(path))
         {
-            LOG("Unable to delete file in the way of directory %s (%d)", path, GetLastError());
+            LOG("Unable to delete file in the way of directory %ls (%d)", path, GetLastError());
             return CreateFailed;
         }
         if (CreateDirectory(path, NULL))
             return CreateSuccessful;
         // fallthrough
     default:
-        LOG("Unable to create directory %s (%d)", path, GetLastError());
+        LOG("Unable to create directory %ls (%d)", path, GetLastError());
         return CreateFailed;
     }
 }
@@ -122,7 +122,7 @@ std::wstring backupFileOrDirectory(utf16ptr path, bool keepDirectory)
     std::wstring backupPath;
     if (!g_rollbackPath.empty() && PathFileExists(g_rollbackPath.c_str()) && PathFileExists(path))
     {
-        LOG("Backing up %s", path);
+        LOG("Backing up %ls", path);
         if (PathIsDirectory(path))
         {
             if (keepDirectory)
@@ -143,7 +143,7 @@ std::wstring backupFileOrDirectory(utf16ptr path, bool keepDirectory)
         {
             while(!MoveFileEx(path, backupPath.c_str(), MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
             {
-                LOG("Unable to move %s (%d)", path, GetLastError());
+                LOG("Unable to move %ls (%d)", path, GetLastError());
                 if(Ignore == InstallerError::raise(Abort | Retry | Ignore, UIString{IDS_MB_UNABLETOMOVEPATH, path}))
                 {
                     // Proceed without backing up the file
@@ -174,13 +174,13 @@ void CreateFileTask::execute()
 void CreateFileTask::rollback()
 {
     if (!_backup.empty())
-        LOG("Rollback restore %s", _path);
+        LOG("Rollback restore %ls", _path);
     else
-        LOG("Rollback delete %s", _path);
+        LOG("Rollback delete %ls", _path);
     if (!DeleteFileW(_path.c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)
-        LOG("Rollback delete %s failed (%d)", _path, GetLastError());
+        LOG("Rollback delete %ls failed (%d)", _path, GetLastError());
     if (!_backup.empty() && !restoreBackup(_path, _backup))
-        LOG("Rollback restore of %s failed (%d)", _path, GetLastError());
+        LOG("Rollback restore of %ls failed (%d)", _path, GetLastError());
 }
 
 CreateDirectoryTask::CreateDirectoryTask(std::wstring path, bool skipBackup)
@@ -200,13 +200,13 @@ void CreateDirectoryTask::execute()
 void CreateDirectoryTask::rollback()
 {
     if (!_backup.empty())
-        LOG("Rollback restore %s", _path);
+        LOG("Rollback restore %ls", _path);
     else
-        LOG("Rollback delete %s", _path);
+        LOG("Rollback delete %ls", _path);
     if (_created && !RemoveDirectory(_path.c_str()))
-        LOG("Rollback delete %s failed (%d)", _path, GetLastError());
+        LOG("Rollback delete %ls failed (%d)", _path, GetLastError());
     if (!_backup.empty() && !restoreBackup(_path, _backup))
-        LOG("Rollback restore %s failed (%d)", _path, GetLastError());
+        LOG("Rollback restore %ls failed (%d)", _path, GetLastError());
 }
 
 RemoveDirectoryTask::RemoveDirectoryTask(std::wstring path, bool recursive)
@@ -233,7 +233,7 @@ void RemoveDirectoryTask::execute()
                 return;
         }
         else
-            LOG("Error removing directory %s (%d)", _path, GetLastError());
+            LOG("Error removing directory %ls (%d)", _path, GetLastError());
     } while (Retry == InstallerError::raise(Abort | Retry | Ignore, UIString{IDS_MB_UNABLETOREMOVEDIR, _path}));
 }
 

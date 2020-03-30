@@ -25,7 +25,7 @@ import "../common"
 SecondaryWindow {
   title: "DaemonTools"
 
-  windowLogicalWidth: 650
+  windowLogicalWidth: 850
   windowLogicalHeight: 650
   contentLogicalWidth: actualLogicalWidth
   contentLogicalHeight: actualLogicalHeight

@@ -41,9 +41,13 @@ readonly groupName="${brandCode}vpn"
 readonly hnsdGroupName="${brandCode}hnsd"                # The group used by the Handshake DNS service
 readonly routingTableName="${serviceName}rt"             # for split tunnel
 readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"  # for inverse split tunnel
+readonly wireguardRoutingTableName="${serviceName}Wgrt"
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
+readonly wgIfPrefix="wg${brandCode}"                                   # WireGuard interface prefix, e.g wgpia
+readonly nmConfigDir="/etc/NetworkManager/conf.d"
+readonly nmConfigPath="${nmConfigDir}/${wgIfPrefix}.conf"  # Our custom NetworkManager config
 
 echo ""
 echo "================================="
@@ -70,6 +74,27 @@ function fail() {
     exit 1
 }
 
+# This ensures that NetworkManager does not remove DNS settings from the wireguard interface when
+# the user changes network.
+function wireguardUnmanaged() {
+    if [ -d "$nmConfigDir" ] && [ ! -f "$nmConfigPath" ]; then
+       echo -e "[keyfile]\nunmanaged-devices=interface-name:wgpia*" | sudo tee "$nmConfigPath" > /dev/null
+       echoPass "Set wgpia interface to be unmanaged"
+    fi
+}
+
+function startClient() {
+    # Change directory before starting the client; don't start it from a
+    # directory that's about to be deleted.
+    # The PIA client doesn't really care, but some of the programs it starts
+    # might (in particular, Terminator does, and it might be the user's
+    # preferred terminal emulator for updates / installation)
+    pushd "$installDir/bin/"
+    "$installDir/bin/${brandCode}-client" > /dev/null 2>&1 & disown
+    popd
+    true
+}
+
 function configureSystemd() {
     # install the service
     sudo cp "$root/installfiles/piavpn.service" "$systemdServiceLocation"
@@ -81,9 +106,7 @@ function configureSystemd() {
     sudo systemctl restart "$serviceName"
     echoPass "Started $serviceName service"
 
-    # Start the client
-    "$installDir/bin/${brandCode}-client" > /dev/null 2>&1 & disown
-    true
+    startClient
 }
 
 function configureSysvinit() {
@@ -94,9 +117,7 @@ function configureSysvinit() {
 
     echoPass "Created $serviceName sysvinit service"
 
-    # Start the client
-    "$installDir/bin/${brandCode}-client" > /dev/null 2>&1 & disown
-    true
+    startClient
 }
 
 function configureOpenrc() {
@@ -107,9 +128,7 @@ function configureOpenrc() {
 
     echoPass "Created $serviceName openrc service"
 
-    # Start the client
-    "$installDir/bin/${brandCode}-client" > /dev/null 2>&1 & disown
-    true
+    startClient
 }
 
 function exemptFromApport() {
@@ -248,9 +267,8 @@ function installPia() {
 
     # Use /bin/cp and not 'cp' since 'cp' might be aliased
     sudo /bin/cp -rf "$root/piafiles/"* $installDir/
-    sudo cp "$root/installfiles/run-in-terminal.sh" $installDir/bin/
-    sudo cp "$root/installfiles/pia-uninstall.sh" "$installDir/bin/$brandCode-uninstall.sh"
-    sudo chmod +x "$installDir/bin/$brandCode-uninstall.sh" "$installDir/bin/run-in-terminal.sh"
+    sudo /bin/cp "$root/installfiles/"*.sh "$installDir/bin/"
+    sudo chmod +x "$installDir/bin/"*.sh
     echoPass "Copied $appName files"
 
     # Allow us to run handshake without root
@@ -279,6 +297,10 @@ function installPia() {
     # Create routing tables for split-tunneling
     addRoutingTable $routingTableName
     addRoutingTable $vpnOnlyroutingTableName
+    addRoutingTable $wireguardRoutingTableName
+
+    # Instruct NetworkManager not to interfere with DNS on the wireguard interface
+    wireguardUnmanaged
 
     # Link piactl into /usr/local/bin if it's not already there.  If it's there,
     # either it's ours and doesn't need to be updated, or it's something else

@@ -194,8 +194,15 @@ Page {
           //: support forwarding. The string contains embedded linebreaks to prevent
           //: it from being displayed too wide on the user's screen - such breaks
           //: should be preserved at roughly the same intervals.
-          info: uiTr("Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.")
-          setting: DaemonSetting { name: "portForward" }
+          info: enabled ? uiTr("Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.") : ""
+          warning: enabled ? "" : SettingsMessages.requiresOpenVpnMessage
+          setting: DaemonSetting {
+            override: Daemon.settings.method !== "openvpn"
+            overrideValue: false
+            name: "portForward"
+          }
+          enabled: Daemon.settings.method === "openvpn"
+
         }
 
         CheckboxInput {
@@ -230,12 +237,14 @@ Page {
       visible: Qt.platform.os === 'osx'
       label: uiTr("Split Tunnel")
       info: parent.splitTunnelInfo
-      isBeta: true
       linkText: Messages.helpLabel
       linkTarget: BrandHelper.getBrandParam("appExclusionsHelpLink")
 
       property bool inKextTest: false
       enabled: {
+        // Disable unless connection method is openvpn
+        if(Daemon.settings.method !== "openvpn")
+          return false;
         // Always disable during a kext test
         if(inKextTest)
           return false
@@ -248,10 +257,8 @@ Page {
         return Daemon.state.splitTunnelSupportErrors.length === 0
       }
       desc: {
-        var splitTunnelException = Daemon.state.splitTunnelSupportErrors
-        console.info('errors:', splitTunnelException)
-        if(splitTunnelException.length)
-          return SettingsMessages.getSplitTunnelErrorDesc(splitTunnelException)
+        if(Daemon.settings.method !== "openvpn")
+          return SettingsMessages.requiresOpenVpnMessage
 
         if(Daemon.state.netExtensionState === "NotInstalled")
           return uiTr("Approve the split tunnel extension to enable this feature.")
@@ -263,7 +270,7 @@ Page {
         return "";
       }
       descLinks: {
-        if(Daemon.state.netExtensionState === "NotInstalled") {
+        if(Daemon.settings.method == "openvpn" && Daemon.state.netExtensionState === "NotInstalled") {
           return [{
             text: uiTr("Security Preferences"),
             clicked: function(){NativeHelpers.openSecurityPreferencesMac()}
@@ -275,7 +282,11 @@ Page {
       setting: Setting {
         id: appExclusionSettingMac
 
-        readonly property DaemonSetting daemonSetting: DaemonSetting { name: "splitTunnelEnabled" }
+        readonly property DaemonSetting daemonSetting: DaemonSetting {
+          override: Daemon.settings.method !== "openvpn"
+          overrideValue: false
+          name: "splitTunnelEnabled"
+        }
 
         sourceValue: daemonSetting.sourceValue
 
@@ -325,7 +336,6 @@ Page {
       visible: Qt.platform.os !== 'osx'
       label: uiTr("Split Tunnel")
       info: parent.splitTunnelInfo
-      isBeta: true
       linkText: Messages.helpLabel
       linkTarget: BrandHelper.getBrandParam("appExclusionsHelpLink")
       // On Windows, if the driver isn't installed and the setting isn't
@@ -347,6 +357,9 @@ Page {
            NativeHelpers.reinstallWfpCalloutStatus === "denied"
       }
       enabled: {
+        if(Daemon.settings.method !== "openvpn")
+          return false;
+
         if(setting.currentValue) {
           // Disabling is always allowed - this might be the only way to clear
           // warnings if the driver has somehow been removed and can't be
@@ -362,6 +375,9 @@ Page {
         return false
       }
       desc: {
+        if(Daemon.settings.method !== "openvpn")
+          return SettingsMessages.requiresOpenVpnMessage
+
         // The status of an ongoing installation overrides anything else.
         // (If the user manually installs the extension on Win 7 RTM, and they
         // get the "reboot" state, show that rather than the OS version error.)
@@ -404,7 +420,11 @@ Page {
       }
       setting: Setting {
         id: appExclusionSetting
-        readonly property DaemonSetting daemonSetting: DaemonSetting { name: 'splitTunnelEnabled' }
+        readonly property DaemonSetting daemonSetting: DaemonSetting {
+          override: Daemon.settings.method !== "openvpn"
+          overrideValue: false
+          name: 'splitTunnelEnabled'
+        }
         sourceValue: daemonSetting.sourceValue
 
         // This is enabled whenever we trigger a driver install.  The help page
@@ -484,6 +504,9 @@ Page {
       Layout.topMargin: 1 // For check box's focus cue
       label: appExclusionCheckbox.label
       enabled: {
+        if(Daemon.settings.method !== "openvpn")
+          return false;
+
         // On any platform, disable if the split tunnel feature is not supported
         if(Daemon.state.splitTunnelSupportErrors.length)
           return false

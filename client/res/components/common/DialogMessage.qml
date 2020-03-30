@@ -32,6 +32,9 @@ RowLayout {
   property alias color: content.color
   property alias wrapMode: content.wrapMode
   property string icon: 'info'
+  // Amount the text is indented relative to the left edge of DialogMessage,
+  // used to align additional controls to the text
+  property alias textIndent: content.x
 
   implicitWidth: (source ? image.sourceSize.width / 2 + 10 : 0) + content.contentWidth
   implicitHeight: Math.max(source ? image.sourceSize.height / 2 : 0, content.contentHeight)

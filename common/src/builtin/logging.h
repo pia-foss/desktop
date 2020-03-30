@@ -30,6 +30,7 @@
 #include <QString>
 #include <iostream>
 #include <QDebug>
+#include <QElapsedTimer>
 
 struct COMMON_EXPORT CodeLocation
 {
@@ -222,6 +223,8 @@ template<typename... Args> static inline const QLoggingCategory& currentLoggingC
 
 #define FUNCTION_LOGGING_CATEGORY SCOPE_LOGGING_CATEGORY
 
+#define CURRENT_CATEGORY (currentLoggingCategory())
+
 class Path;
 class LoggerPrivate;
 
@@ -276,5 +279,42 @@ private:
 
 // Replace daemon.log with daemon.log.old
 extern COMMON_EXPORT const QString oldFileSuffix;
+
+// TraceStopwatch traces how long a function took to execute; useful here when
+// starting/stopping services, which is done synchronously but theoretically
+// could take a long time.
+//
+// TraceStopwatch traces the elapsed time in its destructor (if it is still
+// enabled).  It always traces the time from its construction, even if it was
+// disabled/enabled - this just controls whether it will trace at all.
+//
+// The context message should typically be a string literal; it must outlive the
+// TraceStopwatch.
+class COMMON_EXPORT TraceStopwatch
+{
+    CLASS_LOGGING_CATEGORY("stopwatch");
+
+public:
+    // Create an enabled TraceStopwatch with a context message.
+    // The context message can be 'nullptr' to create a disabled TraceStopwatch.
+    explicit TraceStopwatch(const char *pMsg);
+    ~TraceStopwatch();
+
+private:
+    TraceStopwatch(const TraceStopwatch &) = delete;
+    TraceStopwatch &operator=(const TraceStopwatch &) = delete;
+
+public:
+    // Disable TraceStopwatch, it will not trace anything on destruction.
+    void disable();
+    // Enable TraceStopwatch (if pMsg is non-nullptr).  If it was already
+    // enabled, the specified message replaces the old one.  If pMsg is nullptr,
+    // the TraceStopwatch is disabled.
+    void enable(const char *pMsg);
+
+public:
+    const char *_pMsg;
+    QElapsedTimer _elapsed;
+};
 
 #endif // BUILTIN_LOGGING_H

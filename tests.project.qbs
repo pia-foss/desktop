@@ -92,9 +92,8 @@ PiaProject {
       condition: qbs.targetOS.contains("macos")
       name: "Qt.macextras"
     }
-    sourceDirectories: base.concat(["clientlib/src", "client/src", "client/src/nativeacc", "daemon/src", "tests/src"])
+    sourceDirectories: base.concat(["clientlib/src", "client/src", "client/src/nativeacc", "daemon/src", "deps/embeddable-wg-library/src", "tests/src"])
     cpp.defines: base.concat(["PIA_CLIENT", "PIA_DAEMON", "UNIT_TEST"])
-    cpp.driverFlags: base.concat(["-fprofile-instr-generate", "-fcoverage-mapping"])
     Properties {
       condition: qbs.toolchain.contains('msvc')
       cpp.linkerFlags: outer.concat(["/IGNORE:4099"])
@@ -105,7 +104,7 @@ PiaProject {
     }
     Properties {
       condition: useLlvmProf
-      cpp.cxxFlags: outer.concat(["-fprofile-instr-generate", "-fcoverage-mapping"])
+      cpp.driverFlags: outer.concat(["-fprofile-instr-generate", "-fcoverage-mapping"])
     }
     Export {
       Depends {name: "cpp"}
@@ -134,6 +133,7 @@ PiaProject {
   Test { testName: "settings" }
   Test { testName: "tasks" }
   Test { testName: "updatedownloader" }
+  Test { testName: "wireguarduapi" }
 
   // Platform-specific tests - only built and run on relevant platforms.
   PiaProject {

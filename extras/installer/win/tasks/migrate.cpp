@@ -48,7 +48,7 @@ void MigrateTask::prepare()
 
     const char* drive = getenv("SystemDrive");
     if (!drive) drive = "C:";
-    auto oldDesktopPath = wstrprintf(L"%s\\Program Files\\pia_manager", drive);
+    auto oldDesktopPath = wstrprintf(L"%s\\Program Files\\pia_manager", utf16(drive));
     if (PathFileExistsW(oldDesktopPath.c_str()))
     {
         if (IDYES != messageBox(IDS_MB_REPLACEINSTALLATION, IDS_MB_CAP_REPLACEINSTALLATION, 0, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1, IDYES))

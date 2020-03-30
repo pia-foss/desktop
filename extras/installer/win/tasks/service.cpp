@@ -18,11 +18,20 @@
 
 #include "service.h"
 #include "brand.h"
+#include "service_inl.h"
 
 bool ServiceTask::_rollbackNeedsReinstall = false;
 
-#define SERVICE_LOG LOG
-#include "service.inl"
+void ServiceTask::reinstallOnRollback()
+{
+    _rollbackNeedsReinstall = true;
+}
+
+StopExistingServiceTask::StopExistingServiceTask(LPCWSTR pSvcName, bool restartOnRollback)
+    : _pSvcName{pSvcName}, _restartOnRollback{restartOnRollback},
+      _rollbackNeedsStart{false}
+{
+}
 
 void StopExistingServiceTask::execute()
 {
@@ -30,11 +39,12 @@ void StopExistingServiceTask::execute()
     _listener->setCaption(IDS_CAPTION_STOPPINGSERVICE);
 
 retry:
-    ServiceStatus status = stopService();
+    ServiceStatus status = stopService(_pSvcName);
     switch (status)
     {
     case ServiceStopped:
-        _rollbackNeedsStart = true;
+        if(_restartOnRollback)
+            _rollbackNeedsStart = true;
         // fallthrough
     case ServiceAlreadyStopped:
     case ServiceNotInstalled:
@@ -69,7 +79,7 @@ void UninstallExistingServiceTask::execute()
     _listener->setCaption(IDS_CAPTION_UNREGISTERINGSERVICE);
 
 retry:
-    ServiceStatus status = uninstallService();
+    ServiceStatus status = uninstallService(g_daemonServiceParams.pName);
     if (status != ServiceNotInstalled && status != ServiceRebootNeeded)
         _rollbackNeedsReinstall = true;
     if (status == ServiceRebootNeeded)
@@ -108,10 +118,16 @@ retry:
     if (!PathFileExists(g_servicePath.c_str()))
         InstallerError::abort(IDS_MB_SERVICEMISSING);
 
-    ServiceStatus status = installService(g_servicePath.c_str());
+    ServiceStatus status = installDaemonService(g_servicePath.c_str());
     switch (status)
     {
     case ServiceUpdated:
+        // An existing service was updated.  If we roll this back, it occurs in
+        // two parts:
+        // - InstallServiceTask::rollback() removes the updated service
+        // - UninstallExistingServiceTask invokes the restored daemon's
+        //   "install" command to restore the old installation's services (which
+        //   may differ from this version)
         _rollbackNeedsReinstall = true;
         // fallthrough
     case ServiceInstalled:
@@ -128,7 +144,7 @@ retry:
 
 void InstallServiceTask::rollback()
 {
-    int result = uninstallService();
+    int result = uninstallService(g_daemonServiceParams.pName);
     LOG("Rollback service uninstall returned %d", result);
 }
 
@@ -138,7 +154,7 @@ void StartInstalledServiceTask::execute()
     _listener->setCaption(IDS_CAPTION_STARTINGSERVICE);
 
 retry:
-    ServiceStatus status = startService();
+    ServiceStatus status = startService(g_daemonServiceParams.pName);
     switch (status)
     {
     case ServiceStarted:
@@ -157,7 +173,7 @@ retry:
 
 void StartInstalledServiceTask::rollback()
 {
-    int result = stopService();
+    int result = stopService(g_daemonServiceParams.pName);
     LOG("Rollback service stop returned %d", result);
 }
 

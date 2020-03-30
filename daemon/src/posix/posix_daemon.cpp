@@ -44,22 +44,6 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 
-static void handleSignals(std::initializer_list<int> sigs, void(*handler)(int))
-{
-    sigset_t mask;
-    sigemptyset(&mask);
-    for (int sig : sigs)
-        sigaddset(&mask, sig);
-
-    struct sigaction sa;
-    sa.sa_handler = handler;
-    sa.sa_mask = mask;
-    sa.sa_flags = 0;
-
-    for (int sig : sigs)
-        ::sigaction(sig, &sa, NULL);
-}
-
 static void ignoreSignals(std::initializer_list<int> sigs)
 {
     for (int sig : sigs)
@@ -103,27 +87,7 @@ void setUidAndGid()
 PosixDaemon::PosixDaemon(const QStringList& arguments)
     : Daemon(arguments), _enableSplitTunnel{false}
 {
-    // Route signals through a local socket pair to let Qt safely handle them
-    if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _signalFd))
-        qFatal("Unable to create signal handler socket pair");
-
-    _signalNotifier = new QSocketNotifier(_signalFd[1], QSocketNotifier::Read, this);
-    connect(_signalNotifier, &QSocketNotifier::activated, [this](){
-        _signalNotifier->setEnabled(false);
-        char s;
-        ssize_t read = ::read(_signalFd[1], &s, 1); (void)read;
-        handleSignal(s);
-        _signalNotifier->setEnabled(true);
-    });
-
-    // TODO: handle SIGHUP with config reload instead? (with SA_RESTART)
-    handleSignals({ SIGINT, SIGTERM, SIGHUP }, [](int sig) {
-        if (auto daemon = PosixDaemon::instance())
-        {
-            char s = (char)sig;
-            ssize_t written = ::write(daemon->_signalFd[0], &s, 1); (void)written;
-        }
-    });
+    connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
     ignoreSignals({ SIGPIPE });
 
 #ifdef Q_OS_MACOS
@@ -137,6 +101,11 @@ PosixDaemon::PosixDaemon(const QStringList& arguments)
 
     // There's no installation required for split tunnel on Linux (!)
     _state.netExtensionState(qEnumToString(DaemonState::NetExtensionState::Installed));
+
+    // Check for the WireGuard kernel module
+    connect(&_linuxModSupport, &LinuxModSupport::modulesUpdated, this,
+            &PosixDaemon::checkLinuxModules);
+    checkLinuxModules();
 
     prepareSplitTunnel<ProcTracker>();
 #endif
@@ -164,6 +133,21 @@ PosixDaemon::PosixDaemon(const QStringList& arguments)
             });
     state().netExtensionState(qEnumToString(_kextMonitor.lastState()));
 #endif
+
+#ifdef Q_OS_LINUX
+    // Activate some routing components handled by IpTablesFirewall only when
+    // the daemon is active
+    connect(this, &PosixDaemon::firstClientConnected, this, []()
+        {
+            qInfo() << "Daemon is active, activate Linux routing rules";
+            IpTablesFirewall::activate();
+        });
+    connect(this, &PosixDaemon::lastClientDisconnected, this, []()
+        {
+            qInfo() << "Daemon is inactive, deactivate Linux routing rules";
+            IpTablesFirewall::deactivate();
+        });
+#endif
 }
 
 PosixDaemon::~PosixDaemon()
@@ -176,24 +160,13 @@ PosixDaemon::~PosixDaemon()
     IpTablesFirewall::uninstall();
 #endif
 
-    // Presumably guaranteed to exit if we reach this point..?
-    ignoreSignals({ SIGINT, SIGTERM, SIGHUP });
-    _signalNotifier->setEnabled(false);
-    ::close(_signalFd[0]);
-    ::close(_signalFd[1]);
-
     // Ensure split tunnel is shutdown
     toggleSplitTunnel({});
 }
 
-QSharedPointer<NetworkAdapter> PosixDaemon::getNetworkAdapter()
+std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
 {
-#ifdef Q_OS_MACOS
-    static QSharedPointer<NetworkAdapter> staticAdapter = QSharedPointer<NetworkAdapter>::create("utun");
-    return staticAdapter;
-#else
-    return nullptr;
-#endif
+    return {};
 }
 
 void PosixDaemon::handleSignal(int sig) Q_DECL_NOEXCEPT
@@ -260,13 +233,13 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     PFFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
     PFFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
     PFFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), params.blockDNS);
-    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), params.blockDNS, QStringLiteral("dnsaddr"), params.dnsServers);
+    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), params.blockDNS, QStringLiteral("dnsaddr"), params.effectiveDnsServers);
     PFFirewall::setAnchorEnabled(QStringLiteral("350.allowHnsd"), params.allowHnsd);
     PFFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), params.allowPIA);
 #elif defined(Q_OS_LINUX)
 
-     // double-check + ensure our firewall is installed and enabled
-    if (!IpTablesFirewall::isInstalled()) IpTablesFirewall::install();
+   // double-check + ensure our firewall is installed and enabled
+    if(!IpTablesFirewall::isInstalled()) IpTablesFirewall::install();
 
     // Note: rule precedence is handled inside IpTablesFirewall
     IpTablesFirewall::ensureRootAnchorPriority();
@@ -274,17 +247,25 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("000.allowLoopback"), params.allowLoopback);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("200.allowVPN"), params.allowVPN);
+
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("250.blockIPv6"), params.blockIPv6);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("290.allowDHCP"), params.allowDHCP);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("300.allowLAN"), params.allowLAN);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
-    IpTablesFirewall::updateDNSServers(params.dnsServers);
+
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), params.blockDNS);
 
     // block VpnOnly packets when the VPN is not connected
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowHnsd && params.defaultRoute);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowHnsd && !params.defaultRoute);
+
+    // Allow PIA Wireguard packets when PIA is allowed.  These come from the
+    // kernel when using the kernel module method, so they aren't covered by the
+    // allowPIA rule, which is based on GID.
+    // This isn't needed for OpenVPN or userspace WG, but it doesn't do any
+    // harm.
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("390.allowWg"), params.allowPIA);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("400.allowPIA"), params.allowPIA);
 
     // Update and apply our rules to ensure VPN packets are only accepted on the
@@ -296,6 +277,9 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
                                        QStringLiteral("100.vpnTunOnly"),
                                        enableVpnTunOnly,
                                        IpTablesFirewall::kRawTable);
+
+    // Update rules that depend on the adapter name and/or DNS servers.
+    _firewall.updateRules(params);
 
 #endif
 
@@ -359,6 +343,10 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("ls -l <net_cls>", "ls", QStringList{"-l", Path::ParentVpnExclusionsFile.parent()});
     file.writeCommand("ip rule list", "ip", QStringList{"rule", "list"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnrt"});
+    file.writeCommand("WireGuard Kernel Logs", "bash", QStringList{"-c", "dmesg | grep -i wireguard | tail -n 200"});
+    // Info about the wireguard kernel module (whether it is loaded and/or available)
+    file.writeCommand("ls -ld /sys/modules/wireguard", "ls", {"-ld", "/sys/modules/wireguard"});
+    file.writeCommand("modprobe --show-depends wireguard", "modprobe", {"--show-depends", "wireguard"});
 #endif
 }
 
@@ -422,3 +410,12 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     _splitTunnelNetScan = params.splitTunnelNetScan;
     _enableSplitTunnel = params.enableSplitTunnel;
 }
+
+#ifdef Q_OS_LINUX
+void PosixDaemon::checkLinuxModules()
+{
+    bool hasWg = _linuxModSupport.hasModule(QStringLiteral("wireguard"));
+    _state.wireguardKernelSupport(hasWg);
+    qInfo() << "Wireguard kernel module present:" << hasWg;
+}
+#endif

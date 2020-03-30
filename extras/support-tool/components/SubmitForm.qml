@@ -38,6 +38,13 @@ Item {
     return params.files.length > 0
   }
 
+  function trySendPayload () {
+      retryCount ++;
+      ReportHelper.sendPayload(PayloadBuilder.payloadZipContent(),
+                               comments.text)
+      formStatus = 1
+  }
+
   // 0 - Normal
   // 1 - Sending
   // 2 - Success
@@ -45,10 +52,18 @@ Item {
   property int formStatus: 0
   property string referenceId: ""
   property string networkErrorMessage: ""
+  property int retryCount: 0
 
   readonly property int page_start: 0
   readonly property int page_legal: 0
   readonly property int page_submitted: 0
+
+  // Number of times to retry submitting payload if
+  // upload fails
+  readonly property int retryLimit: 3
+
+  // Milliseconds to wait between retries to submit report
+  readonly property int retryDelay: 500
   StackLayout {
     id: wizardLayout
     currentIndex: 0
@@ -211,6 +226,8 @@ Item {
         }
       }
 
+
+
       RowLayout {
         Text {
           text: "< Back"
@@ -239,9 +256,8 @@ Item {
             onClicked: {
                 // create the payload and send if successful
                 if (makePayload()) {
-                    ReportHelper.sendPayload(PayloadBuilder.payloadZipContent(),
-                                             comments.text)
-                    formStatus = 1
+                    retryCount = 0;
+                    trySendPayload ();
                 } else {
                   formStatus = -1
                 }
@@ -320,10 +336,25 @@ Item {
           wizardLayout.currentIndex = 2
         }
         onUploadFail: function (msg) {
-          networkErrorMessage = msg
-          formStatus = -1
+          if(retryCount <= retryLimit) {
+              // Wait a little while and retry sending payload
+              console.log("Retrying on failure");
+              retryTimer.start();
+          } else {
+              networkErrorMessage = msg
+              formStatus = -1
+          }
         }
       }
+
+      Timer {
+          id: retryTimer
+          interval: retryDelay
+          onTriggered: {
+              trySendPayload();
+          }
+      }
+
       Item {
         // spacer
         Layout.fillHeight: true

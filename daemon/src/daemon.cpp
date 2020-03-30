@@ -22,6 +22,7 @@
 #include "daemon.h"
 
 #include "vpn.h"
+#include "vpnmethod.h"
 #include "ipc.h"
 #include "jsonrpc.h"
 #include "path.h"
@@ -63,7 +64,7 @@ void reportError(Error error)
     if (auto daemon = g_daemon)
         daemon->reportError(std::move(error));
     else
-        qCritical(error);
+        qCritical() << error;
 }
 #endif
 
@@ -339,20 +340,25 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     _methodRegistry->add(RPC_METHOD(startSnooze));
     _methodRegistry->add(RPC_METHOD(stopSnooze));
     _methodRegistry->add(RPC_METHOD(inspectUwpApps));
-    _methodRegistry->add(RPC_METHOD(checkCalloutState));
+    _methodRegistry->add(RPC_METHOD(checkDriverState));
     #undef RPC_METHOD
 
     connect(_connection, &VPNConnection::stateChanged, this, &Daemon::vpnStateChanged);
-    connect(_connection, &VPNConnection::connectingStatus, this, &Daemon::vpnConnectingStatus);
+    connect(_connection, &VPNConnection::firewallParamsChanged, this, &Daemon::queueApplyFirewallRules);
+    connect(_connection, &VPNConnection::slowIntervalChanged, this,
+        [this](bool usingSlowInterval){_state.usingSlowInterval(usingSlowInterval);});
     connect(_connection, &VPNConnection::error, this, &Daemon::vpnError);
     connect(_connection, &VPNConnection::byteCountsChanged, this, &Daemon::vpnByteCountsChanged);
     connect(_connection, &VPNConnection::scannedOriginalNetwork, this, &Daemon::vpnScannedOriginalNetwork);
-    connect(_connection, &VPNConnection::usingTunnelDevice, this,
-        [this](QString deviceName, QString deviceLocalAddress, QString deviceRemoteAddress)
+    connect(_connection, &VPNConnection::usingTunnelConfiguration, this,
+        [this](const QString &deviceName, const QString &deviceLocalAddress,
+               const QString &deviceRemoteAddress,
+               const QStringList &effectiveDnsServers)
         {
             _state.tunnelDeviceName(deviceName);
             _state.tunnelDeviceLocalAddress(deviceLocalAddress);
             _state.tunnelDeviceRemoteAddress(deviceRemoteAddress);
+            _state.effectiveDnsServers(effectiveDnsServers);
             queueApplyFirewallRules();
         });
     connect(_connection, &VPNConnection::hnsdSucceeded, this,
@@ -382,9 +388,8 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
             &Daemon::portForwardUpdated);
 
     connect(&_settings, &DaemonSettings::portForwardChanged, this,
-            [this]() { _portForwarder->enablePortForwarding(_settings.portForward()); });
-
-    _portForwarder->enablePortForwarding(_settings.portForward());
+            &Daemon::updatePortForwarder);
+    updatePortForwarder();
 
     connect(&_regionRefresher, &JsonRefresher::contentLoaded, this,
             &Daemon::regionsLoaded);
@@ -422,6 +427,8 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     connect(&_settings, &DaemonSettings::overrideDNSChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this, &Daemon::queueApplyFirewallRules);
+    // 'method' causes a firewall rule application because it can toggle split tunnel
+    connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::updateChannelChanged, this,
             [this](){_updateDownloader.setGaUpdateChannel(_settings.updateChannel());});
@@ -464,7 +471,7 @@ Daemon::~Daemon()
 void Daemon::reportError(Error error)
 {
     // TODO: Send error event to all clients
-    qCritical(error);
+    qCritical() << error;
     _rpc->post(QStringLiteral("error"), error.toJsonObject());
 }
 
@@ -534,23 +541,15 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
     bool success = _settings.assign(settings);
 
     // If the settings affect the location choices, recompute them.
-    if(settings.contains(QLatin1String("location")) || settings.contains(QLatin1String("proxyShadowsocksLocation")))
+    // Port forwarding and method affect the "best" location selection.
+    if(settings.contains(QLatin1String("location")) ||
+       settings.contains(QLatin1String("proxyShadowsocksLocation")) ||
+       settings.contains(QLatin1String("portForward")) ||
+       settings.contains(QLatin1String("method")))
     {
-        qInfo() << "Location setting changed. Location:"
-            << settings.value(QLatin1String("location"))
-            << "- Shadowsocks location:" << settings.value(QLatin1String("proxyShadowsocksLocation"));
-        updateChosenLocations();
-    }
+        qInfo() << "Settings affect location choices, rebuild locations";
 
-    if (settings.contains(QLatin1String("portForward")))
-    {
-        qInfo() << "portForward setting changed to: " << settings.value(QLatin1String("portForward"));
-
-        // Toggling port forwarding may impact the bestLocation
-        NearestLocations nearest{_data.locations()};
-        _state.vpnLocations().bestLocation(nearest.getNearestSafeVpnLocation(_settings.portForward()));
-        // Without this a reconnect may re-use the previous auto location, not the updated one above
-        updateChosenLocations();
+        rebuildLocations();
     }
 
     // If applying the settings failed, we won't reconnect (ensures that
@@ -877,7 +876,7 @@ QJsonValue Daemon::RPC_inspectUwpApps(const QJsonArray &)
     throw Error{HERE, Error::Code::Unknown};
 }
 
-void Daemon::RPC_checkCalloutState()
+void Daemon::RPC_checkDriverState()
 {
     // Not implemented; overridden on Windows with implementation
     throw Error{HERE, Error::Code::Unknown};
@@ -887,7 +886,7 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
 {
     return ApiClient::instance()
             ->postRetry(
-                QStringLiteral("v2/token"),
+                QStringLiteral("api/client/v2/token"),
                 QJsonDocument({
                     { QStringLiteral("username"), username },
                     { QStringLiteral("password"), password },
@@ -928,9 +927,28 @@ void Daemon::RPC_logout()
     RPC_disconnectVPN();
 
     // Reset account data along with relevant settings
+    QString tokenToExpire = _account.token();
+
     _account.reset();
     _settings.recentLocations({});
     _state.openVpnAuthFailed(0);
+
+    if(!tokenToExpire.isEmpty()) {
+        ApiClient::instance()
+                        ->postRetry(QStringLiteral("api/client/v2/expire_token"), QJsonDocument(), ApiClient::tokenAuth(tokenToExpire))
+                        ->notify(this, [this](const Error &error, const QJsonDocument &json) {
+            if(error) {
+                qWarning () << "Token expire failed with error code: " << error.code();
+            } else {
+                QString status = json[QLatin1String("status")].toString();
+                if (status != QStringLiteral("success"))
+                    qWarning () << "API Token expire: Bad result: " << json.toJson();
+                else
+                    qDebug () << "API Token expire: success";
+            }
+        });
+    }
+
 }
 
 void Daemon::RPC_refreshUpdate()
@@ -1114,6 +1132,33 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     {
         info.vpnLocation(config.vpnLocation());
         info.vpnLocationAuto(config.vpnLocationAuto());
+        switch(config.method())
+        {
+            default:
+            case ConnectionConfig::Method::OpenVPN:
+                info.method(QStringLiteral("openvpn"));
+                break;
+            case ConnectionConfig::Method::Wireguard:
+                info.method(QStringLiteral("wireguard"));
+                break;
+        }
+        info.methodForcedByAuth(config.methodForcedByAuth());
+        switch(config.dnsType())
+        {
+            default:
+            case ConnectionConfig::DnsType::Pia:
+                info.dnsType(QStringLiteral("pia"));
+                break;
+            case ConnectionConfig::DnsType::Handshake:
+                info.dnsType(QStringLiteral("handshake"));
+                break;
+            case ConnectionConfig::DnsType::Existing:
+                info.dnsType(QStringLiteral("existing"));
+                break;
+            case ConnectionConfig::DnsType::Custom:
+                info.dnsType(QStringLiteral("custom"));
+                break;
+        }
         info.defaultRoute(config.defaultRoute());
         switch(config.proxyType())
         {
@@ -1145,6 +1190,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
                 info.proxyShadowsocksLocationAuto(config.shadowsocksLocationAuto());
                 break;
         }
+        info.portForward(config.requestPortForward());
     };
     populateConnection(_state.connectingConfig(), connectingConfig);
     populateConnection(_state.connectedConfig(), connectedConfig);
@@ -1166,6 +1212,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _latencyTracker.stop();
 
     // Update ApiNetwork and PortForwarder.
+    updatePortForwarder();
     if(state == VPNConnection::State::Connected)
     {
         // Use the VPN interface for all API requests
@@ -1208,6 +1255,11 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         // Perform a refresh immediately after connect so we get a new IP on reconnect.
         _regionRefresher.refresh();
         _shadowsocksRefresher.refresh();
+
+        // If we haven't obtained a token yet, try to do that now that we're
+        // connected (the API is likely reachable through the tunnel).
+        if(_account.token().isEmpty())
+            refreshAccountInfo();
     }
     else
     {
@@ -1216,7 +1268,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _portForwarder->updateConnectionState(PortForwarder::State::Disconnected);
     }
 
-    if(state == VPNConnection::State::Connected && _settings.enableMACE())
+    if(state == VPNConnection::State::Connected && connectedConfig.requestMace())
     {
         _connection->activateMACE();
     }
@@ -1248,7 +1300,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
 
         // Get the user's VPN IP address now that we're connected
         _pVpnIpRequest = ApiClient::instance()
-                ->getVpnIpRetry(QStringLiteral("status"))
+                ->getVpnIpRetry(QStringLiteral("api/client/status"))
                 ->then(this, [this](const QJsonDocument& json) {
                     _state.externalVpnIp(json[QStringLiteral("ip")].toString());
                 })
@@ -1258,7 +1310,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     }
 
     // Clear the external IP address if we're completely disconnected.  Leave
-    // this set if we go to any state like Connecting, StillConnecting,
+    // this set if we go to any state like Connecting, Reconnecting,
     // Interrupted, etc., because we only find this address again when a
     // connection is initiated by an RPC.
     if (state == VPNConnection::State::Disconnected)
@@ -1267,6 +1319,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _state.tunnelDeviceName({});
         _state.tunnelDeviceLocalAddress({});
         _state.tunnelDeviceRemoteAddress({});
+        _state.effectiveDnsServers({});
         // The original network configuration is not meaningful when not
         // connected; we don't have any way to know if it changes.  (When
         // connected, we rely on the VPN connection breaking to know when it
@@ -1294,7 +1347,6 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
        state == VPNConnection::State::Disconnected ||
        state == VPNConnection::State::Disconnecting)
     {
-        _state.connectingStatus(qEnumToString(TransportSelector::Status::Connecting));
         _state.connectionLost(0);
         _state.proxyUnreachable(0);
         _state.dnsConfigFailed(0);
@@ -1307,11 +1359,6 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         queueNotification(&Daemon::logRoutingTable);
 
     queueApplyFirewallRules();
-}
-
-void Daemon::vpnConnectingStatus(TransportSelector::Status connectingStatus)
-{
-    _state.connectingStatus(qEnumToString(connectingStatus));
 }
 
 void Daemon::vpnError(const Error& error)
@@ -1404,11 +1451,8 @@ void Daemon::newLatencyMeasurements(const LatencyTracker::Latencies &measurement
     }
 }
 
-void Daemon::portForwardUpdated(int port, bool needsReconnect)
+void Daemon::portForwardUpdated(int port)
 {
-    if(needsReconnect)
-        _state.needsReconnect(true);
-
     qInfo() << "Forwarded port updated to" << port;
     _state.forwardedPort(port);
 }
@@ -1518,7 +1562,7 @@ void Daemon::refreshAccountInfo()
 //
 Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QString& password, const QString& token)
 {
-    const QString resource = token.isEmpty() ? QStringLiteral("account") : QStringLiteral("v2/account");
+    const QString resource = token.isEmpty() ? QStringLiteral("api/client/account") : QStringLiteral("api/client/v2/account");
 
     return ApiClient::instance()
             ->getRetry(resource, ApiClient::autoAuth(username, password, token))
@@ -1573,13 +1617,17 @@ void Daemon::reapplyFirewallRules()
     if(_state.connectingConfig().vpnLocation())
         pConnSettings = &_state.connectingConfig();
     // If the VPN is enabled, have we connected since it was enabled?
+    // Note that it is possible for vpnEnabled() to be true while in the
+    // "Disconnected" state - this happens when a fatal error causes the app to
+    // stop reconnecting after connection loss.  We _do_ want the "auto"
+    // killswitch to be engaged in this case.
     if(_state.vpnEnabled() && _state.connectedConfig().vpnLocation())
     {
         // Yes, we have connected
         params.hasConnected = true;
         // If we aren't currently attempting another connection, use the current
         // connection to update the firewall
-        if(!pConnSettings)
+        if(!pConnSettings && _state.connectionState() == QStringLiteral("Connected"))
             pConnSettings = &_state.connectedConfig();
     }
 
@@ -1595,11 +1643,25 @@ void Daemon::reapplyFirewallRules()
 
     const bool vpnActive = _state.vpnEnabled();
 
-    // only update our DNS firewall rules when not connected
-    params.dnsServers = getDNSServers(_connection->state() == VPNConnection::State::Connected ? _connection->dnsServers() : _settings.overrideDNS());
-    params.adapter = _connection->networkAdapter();
+    params.effectiveDnsServers = _state.effectiveDnsServers();
+    if(VPNMethod *pMethod = _connection->vpnMethod())
+    {
+        params.adapter = pMethod->getNetworkAdapter();
+    }
 
-    if(_settings.splitTunnelEnabled())
+    // For OpenVPN, split tunnel is available, and does not require a reconnect
+    // to toggle.  However, for WireGuard, split tunnel is not currently
+    // available at all.
+    //
+    // Check the connected/connecting method if we're currently connected or
+    // connecting; otherwise use the chosen method.
+    bool allowSplitTunnel = true;
+    if(pConnSettings)
+        allowSplitTunnel = pConnSettings->method() == QStringLiteral("openvpn");
+    else
+        allowSplitTunnel = _settings.method() == QStringLiteral("openvpn");
+
+    if(allowSplitTunnel && _settings.splitTunnelEnabled())
     {
         params.enableSplitTunnel = true;
         params.splitTunnelNetScan = { _state.originalGatewayIp(), _state.originalInterface(),  _state.originalInterfaceIp() };
@@ -1636,9 +1698,13 @@ void Daemon::reapplyFirewallRules()
     params.allowVPN = params.allowDHCP = params.blockAll;
     params.blockIPv6 = (vpnActive || killswitchEnabled) && _settings.blockIPv6();
     params.allowLAN = _settings.allowLAN() && (params.blockAll || params.blockIPv6);
-    params.blockDNS = !params.dnsServers.isEmpty() && vpnActive && params.hasConnected;
+    // Block DNS when:
+    // - not using Existing DNS
+    // - the VPN connection is enabled, and
+    // - we've connected at least once since the VPN was enabled
+    params.blockDNS = pConnSettings && pConnSettings->dnsType() != QStringLiteral("existing") && vpnActive && params.hasConnected;
     params.allowPIA = params.allowLoopback = (params.blockAll || params.blockIPv6 || params.blockDNS);
-    params.allowHnsd = params.blockDNS && isDNSHandshake(_connection->dnsServers());
+    params.allowHnsd = params.blockDNS && pConnSettings && pConnSettings->dnsType() == QStringLiteral("handshake");
 
     qInfo() << "Reapplying firewall rules;"
             << "state:" << qEnumToString(_connection->state())
@@ -1648,7 +1714,8 @@ void Daemon::reapplyFirewallRules()
             << "vpnEnabled:" << _state.vpnEnabled()
             << "blockIPv6:" << _settings.blockIPv6()
             << "allowLAN:" << _settings.allowLAN()
-            << "dnsServers:" << params.dnsServers;
+            << "dnsType:" << (pConnSettings ? pConnSettings->dnsType() : QStringLiteral("N/A"))
+            << "dnsServers:" << params.effectiveDnsServers;
 
     applyFirewallRules(params);
 
@@ -1702,6 +1769,29 @@ void Daemon::checkSplitTunnelSupport()
 
     if(!errors.isEmpty())
         _state.splitTunnelSupportErrors(errors);
+}
+
+void Daemon::updatePortForwarder()
+{
+    bool pfEnabled = false;
+    // If we're currently connected, and the connected region supports PF, keep
+    // the setting that we connected with.
+    //
+    // Enabling PF would require a reconnect to request a port.  Disabling PF
+    // has no effect until reconnecting either, we keep the forwarded port.
+    if(_connection->state() == VPNConnection::State::Connected &&
+       _state.connectedConfig().vpnLocation() &&
+       _state.connectedConfig().vpnLocation()->portForward())
+    {
+        pfEnabled = _state.connectedConfig().portForward();
+    }
+    // Otherwise, use the current setting.  If we're connected to a region that
+    // lacks PF, the setting _can_ be updated on the fly, because that just
+    // toggles between the Inactive/Unavailable states.
+    else
+        pfEnabled = _settings.portForward();
+
+    _portForwarder->enablePortForwarding(pfEnabled);
 }
 
 static QString decryptOldPassword(const QString& bytes)
@@ -1879,13 +1969,12 @@ void Daemon::rebuildLocations()
 
     // Pick the best location
     NearestLocations nearest{_data.locations()};
-    _state.vpnLocations().bestLocation(nearest.getNearestSafeVpnLocation(_settings.portForward()));
+    // PF currently requires OpenVPN.  This duplicates some logic from
+    // ConnectionConfig, but the hope is that over time we'll support all/most
+    // settings with WireGuard too, so these checks will just go away.
+    bool portForwardEnabled = _settings.method() == QStringLiteral("openvpn") ? _settings.portForward() : false;
+    _state.vpnLocations().bestLocation(nearest.getNearestSafeVpnLocation(portForwardEnabled));
 
-    updateChosenLocations();
-}
-
-void Daemon::updateChosenLocations()
-{
     // Find the user's chosen location (nullptr if it's 'auto' or doesn't exist)
     const auto &locationId = _settings.location();
     if(locationId == QLatin1String("auto"))
@@ -2016,6 +2105,11 @@ void Daemon::logRoutingTable()
     // iproute2 if it's always available
 #if defined(Q_OS_LINUX)
     logCommand(QStringLiteral("ip"), QStringList{QStringLiteral("route"), QStringLiteral("show")});
+#endif
+    // On Windows, also trace DNS configuration, this has had problems in the
+    // past
+#if defined(Q_OS_WIN)
+    logCommand(QStringLiteral("netsh"), {"interface", "ipv4", "show", "dnsservers"});
 #endif
 }
 

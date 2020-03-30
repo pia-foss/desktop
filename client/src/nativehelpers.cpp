@@ -25,6 +25,7 @@
 #include "path.h"
 #include "version.h"
 #include "brand.h"
+#include "exec.h"
 
 #include <QProcess>
 #include <QStringList>
@@ -274,7 +275,11 @@ void NativeHelpers::quitAndUninstall()
         QCoreApplication::quit();
     }
 #elif defined(Q_OS_LINUX)
-    runInTerminal(Path::ExecutableDir / BRAND_CODE "-uninstall.sh", true);
+    if(runInTerminal(Path::ExecutableDir / BRAND_CODE "-uninstall.sh"))
+    {
+        qInfo() << "Quit due to uninstall";
+        QCoreApplication::quit();
+    }
 #endif
 }
 
@@ -313,7 +318,7 @@ QString NativeHelpers::getProductName() const
 
 bool NativeHelpers::getLogToFile()
 {
-    return Logger::instance()->logToFile();
+  return Logger::instance()->logToFile();
 }
 
 void NativeHelpers::crashClient()
@@ -363,23 +368,22 @@ void NativeHelpers::wipeLogFile()
 }
 
 
-bool NativeHelpers::runInTerminal (const QString &command, bool quitAfterRun) {
+bool NativeHelpers::runInTerminal(const QString &command)
+{
     qDebug () << "Running command in terminal" << command;
-    QProcess helperScript;
-    helperScript.setProgram(Path::ExecutableDir / "run-in-terminal.sh");
-    helperScript.setArguments({"bash '" + command + "'"});
-    helperScript.start();
-    helperScript.waitForFinished();
-    qDebug () << "Process finished with exit code: " << helperScript.exitCode();
-    if(helperScript.exitCode() != 0 || helperScript.exitStatus() != QProcess::NormalExit)
+    // The command _cannot_ have arguments.  Many terminal emulators interpret
+    // the command as a program+arguments, but some do not (Terminator,
+    // deepin-terminal).
+    //
+    // None of our scripts need arguments right now, but if they did, we'd have
+    // to work around this by passing them through as environment variables
+    // instead.
+    int result = Exec::cmd(Path::ExecutableDir / "run-in-terminal.sh", {command});
+    qDebug () << "Process finished with exit code: " << result;
+    if(result != 0)
     {
         emit terminalStartFailed(command);
         return false;
-    }
-    else if(quitAfterRun)
-    {
-        qInfo() << "Quit due to executing" << command;
-        QCoreApplication::quit();
     }
 
     return true;
@@ -398,6 +402,22 @@ bool NativeHelpers::launchInstaller(const QString &installer)
 #endif
 }
 
+bool NativeHelpers::installWireguardKernelModule()
+{
+#if defined(Q_OS_LINUX)
+    // First, check if automatic installation is possible on this distribution
+    if(Exec::cmd(Path::ExecutableDir / "install-wireguard.sh", {"--detect"}) == 0)
+    {
+        // It is, start the actual installation in a terminal emulator.  This
+        // only fails if the terminal emulator can't be started; the normal
+        // terminalStartFailed() signal is emitted.
+        runInTerminal(Path::ExecutableDir / "install-wireguard.sh");
+        return true;
+    }
+#endif
+    return false;
+}
+
 qint64 NativeHelpers::getMonotonicTime()
 {
     // Although QElapsedTimer does not guarantee in general that it uses a
@@ -411,6 +431,11 @@ qint64 NativeHelpers::getMonotonicTime()
 void NativeHelpers::reinstallTap()
 {
     reinstallDriver(Driver::Tap, L"tap reinstall");
+}
+
+void NativeHelpers::reinstallTun()
+{
+    reinstallDriver(Driver::WinTun, L"tun reinstall");
 }
 
 void NativeHelpers::installWfpCallout()
@@ -620,6 +645,10 @@ void NativeHelpers::setDriverReinstallStatus(Driver type, const QString &status)
         case Driver::Tap:
             _reinstallTapStatus = status;
             emit reinstallTapStatusChanged();
+            break;
+        case Driver::WinTun:
+            _reinstallTunStatus = status;
+            emit reinstallTunStatusChanged();
             break;
         case Driver::WfpCallout:
             _reinstallWfpCalloutStatus = status;

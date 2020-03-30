@@ -23,6 +23,12 @@
 #include <QElapsedTimer>
 #include <QRegularExpression>
 
+namespace
+{
+    // Timeout for all API requests using the 'counted' retry strategy
+    const std::chrono::seconds countedRequestTimeout{5};
+}
+
 void ApiResource::trace(QDebug &dbg) const
 {
     // If this resource doesn't contain a query string, just trace it as-is
@@ -48,48 +54,67 @@ public:
     CountedApiRetry(unsigned maxAttempts);
 
 public:
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) override;
+    virtual std::chrono::milliseconds beginAttempt(const ApiResource &resource) override;
+    virtual nullable_t<std::chrono::milliseconds> attemptFailed(const ApiResource &resource) override;
 
 private:
-    unsigned _maxAttempts, _attemptCount;
+    unsigned _maxAttempts;
+    // Count of failed attempts (incremented by attemptFailed()).
+    unsigned _failureCount;
 };
 
 CountedApiRetry::CountedApiRetry(unsigned maxAttempts)
-    : _maxAttempts{maxAttempts}, _attemptCount{0}
+    : _maxAttempts{maxAttempts}, _failureCount{0}
 {
 }
 
-auto CountedApiRetry::beginNextAttempt(const ApiResource &resource)
+auto CountedApiRetry::beginAttempt(const ApiResource &resource)
+    -> std::chrono::milliseconds
+{
+    // Counted attempts always use a fixed retry interval
+    qInfo() << "Begin attempt" << (_failureCount+1) << "for resource" << resource;
+    return countedRequestTimeout;
+}
+
+auto CountedApiRetry::attemptFailed(const ApiResource &resource)
     -> nullable_t<std::chrono::milliseconds>
 {
-    if(_attemptCount >= _maxAttempts)
+    ++_failureCount;
+
+    if(_failureCount >= _maxAttempts)
     {
         qWarning() << "Request for resource" << resource
-            << "failed after" << _attemptCount << "attempts";
+            << "failed after" << _failureCount << "attempts";
         return {};
     }
 
-    if(_attemptCount > 0)
-        qInfo() << "Attempt" << _attemptCount << "for resource" << resource << "failed, retry";
+    qInfo() << "Attempt" << _failureCount << "for resource" << resource << "failed, retry";
 
-    ++_attemptCount;
+    // Counted retries always begin immediately
     return std::chrono::milliseconds{0};
 }
 
-// VPN IP-style timed retry strategy.
+// Timed retry strategy; used for the VPN IP and port forward requests.
 //
 // Uses a backing-off interval between requests (with an upper bound) and an
 // overall time limit to terminate retries.
 //
-// The timing parameters are fixed for the VPN IP request because that's the
-// only way this is used currently, but it could be generalized for other uses.
+// Most of the timing parmeters are fixed.  The parameters that can be
+// controlled are:
+// - "Fast request time" - How long to use the initial retry interval before
+//   starting to back off.  Can be 0 to back off for all failures from the
+//   beginning.
+// - "Max attempt time" - How long to keep trying to fetch the resource, after
+//   this time elapses (and any in-flight request completes) the request fails.
 class COMMON_EXPORT TimedApiRetry : public ApiRetry
 {
 public:
-    TimedApiRetry(const std::chrono::seconds &maxAttemptTime);
+    TimedApiRetry(std::chrono::seconds fastRequestTime,
+                  std::chrono::seconds maxAttemptTime);
 
 public:
-    virtual nullable_t<std::chrono::milliseconds> beginNextAttempt(const ApiResource &resource) override;
+    virtual std::chrono::milliseconds beginAttempt(const ApiResource &resource) override;
+    virtual nullable_t<std::chrono::milliseconds> attemptFailed(const ApiResource &resource) override;
 
 private:
     // Time since the first attempt began; used for the overall timeout
@@ -97,16 +122,17 @@ private:
     // Time since the most recent attempt began; used for the per-request
     // backoff delay.
     QElapsedTimer _thisAttemptTime;
-    // Actual delay that we returned for the prior request.
-    std::chrono::milliseconds _priorRequestDelay;
     // Interval to apply to the next request (if one occurs).  Ensures a minimum
     // interval between the beginning of the prior request and the beginning of
     // the next request.
     std::chrono::milliseconds _nextRequestInterval;
+    // How long to keep trying "fast" requests (using the initial interval)
+    // before slowing down (can be 0)
+    std::chrono::seconds _fastRequestTime;
     // Maximum attempt time; after this long no more attempts will begin.
     std::chrono::seconds _maxAttemptTime;
-    // Count of attempts.  Used for tracing.
-    unsigned _attemptCount;
+    // Count of failed attempts.  Used for tracing.
+    unsigned _failedAttempts;
 };
 
 namespace
@@ -118,26 +144,34 @@ namespace
     // by this factor for each attempt (up to _maxInterval).
     const int backoffFactor{2};
     // Maximum interval between attempts.
-    const std::chrono::seconds _maxInterval{30};
+    const std::chrono::seconds _maxInterval{10};
 }
 
-TimedApiRetry::TimedApiRetry(const std::chrono::seconds &maxAttemptTime)
-    : _priorRequestDelay{0}, _nextRequestInterval{_initialInterval},
-      _maxAttemptTime{maxAttemptTime}, _attemptCount{0}
+TimedApiRetry::TimedApiRetry(std::chrono::seconds fastRequestTime,
+                             std::chrono::seconds maxAttemptTime)
+    : _nextRequestInterval{_initialInterval}, _fastRequestTime{fastRequestTime},
+      _maxAttemptTime{maxAttemptTime}, _failedAttempts{0}
 {
 }
 
-auto TimedApiRetry::beginNextAttempt(const ApiResource &resource)
+auto TimedApiRetry::beginAttempt(const ApiResource &resource)
+    -> std::chrono::milliseconds
+{
+    // Keep track of the first attempt time to terminate retries after the total
+    // time elapses
+    if(!_firstAttemptTime.isValid())
+        _firstAttemptTime.start();
+    _thisAttemptTime.start();
+
+    qInfo() << "Starting request" << (_failedAttempts+1) << "for resource"
+        << resource << "with timeout" << traceMsec(_nextRequestInterval);
+    return _nextRequestInterval;
+}
+
+auto TimedApiRetry::attemptFailed(const ApiResource &resource)
     -> nullable_t<std::chrono::milliseconds>
 {
-    // First attempt - just start the timers and proceed
-    if(!_firstAttemptTime.isValid())
-    {
-        _firstAttemptTime.start();
-        _thisAttemptTime.start();
-        _attemptCount = 1;
-        return std::chrono::milliseconds{0};
-    }
+    ++_failedAttempts;
 
     // If the maximum attempt time has elapsed, we're done.
     qint64 firstAttemptElapsedMs = _firstAttemptTime.elapsed();
@@ -145,11 +179,9 @@ auto TimedApiRetry::beginNextAttempt(const ApiResource &resource)
     {
         qWarning() << "Request for resource" << resource << "failed after"
             << traceMsec(firstAttemptElapsedMs)
-            << "(" << _attemptCount << "attempts)";
+            << "(" << _failedAttempts << "attempts)";
         return {};
     }
-
-    ++_attemptCount;
 
     // Figure out the delay for this request.  Apply this delay from the
     // _beginning_ of the prior request - if the request took a long time to
@@ -158,34 +190,32 @@ auto TimedApiRetry::beginNextAttempt(const ApiResource &resource)
     // This method of applying the interval is a tad imprecise, but that's fine
     // for this purpose.
     std::chrono::milliseconds thisRequestDelay{0};
-    std::chrono::milliseconds priorElapsed{_thisAttemptTime.restart()};
-    // The elapsed time includes the delay before the request was actually
-    // started; subtract that to get the (approximate) time spent on this
-    // request.
-    priorElapsed -= _priorRequestDelay;
+    std::chrono::milliseconds priorElapsed{_thisAttemptTime.elapsed()};
     if(_nextRequestInterval > priorElapsed)
     {
         thisRequestDelay = _nextRequestInterval - priorElapsed;
-        qInfo() << "Wait" << traceMsec(msec(thisRequestDelay))
-            << "before attempt" << _attemptCount << "for" << resource
-            << "(" << traceMsec(msec(_nextRequestInterval)) << "total delay)";
+        qInfo() << "Wait" << traceMsec(thisRequestDelay)
+            << "before attempt" << (_failedAttempts+1) << "for" << resource
+            << "(" << traceMsec(_nextRequestInterval) << "total delay)";
     }
     else
     {
         // Otherwise, the remaining delay for this request is 0 because the
         // interval has already elapsed.
-        qInfo() << "Interval of" << traceMsec(msec(_nextRequestInterval))
-            << "has already elapsed for attempt" << _attemptCount << "for"
-            << resource << "(" << traceMsec(msec(priorElapsed)) << "elapsed)";
+        qInfo() << "Interval of" << traceMsec(_nextRequestInterval)
+            << "has already elapsed for attempt" << (_failedAttempts+1) << "for"
+            << resource << "(" << traceMsec(priorElapsed) << "elapsed)";
     }
 
     // Update the next interval
-    _nextRequestInterval *= backoffFactor;
-    if(_nextRequestInterval > _maxInterval)
-        _nextRequestInterval = _maxInterval;
+    if(firstAttemptElapsedMs >= msec(_fastRequestTime))
+    {
+        _nextRequestInterval *= backoffFactor;
+        if(_nextRequestInterval > _maxInterval)
+            _nextRequestInterval = _maxInterval;
+    }
 
-    _priorRequestDelay = thisRequestDelay;
-    return _priorRequestDelay;
+    return thisRequestDelay;
 }
 
 std::unique_ptr<ApiRetry> ApiRetries::counted(unsigned maxAttempts)
@@ -193,7 +223,8 @@ std::unique_ptr<ApiRetry> ApiRetries::counted(unsigned maxAttempts)
     return std::make_unique<CountedApiRetry>(maxAttempts);
 }
 
-std::unique_ptr<ApiRetry> ApiRetries::timed(std::chrono::seconds maxAttemptTime)
+std::unique_ptr<ApiRetry> ApiRetries::timed(std::chrono::seconds fastRequestTime,
+                                            std::chrono::seconds maxAttemptTime)
 {
-    return std::make_unique<TimedApiRetry>(maxAttemptTime);
+    return std::make_unique<TimedApiRetry>(fastRequestTime, maxAttemptTime);
 }

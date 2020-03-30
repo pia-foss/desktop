@@ -77,47 +77,27 @@ static inline const std::wstring& utf16(const std::wstring& str) { return str; }
 #define UTF16(str) ptr(utf16(str))
 
 
-// Some useful functions are defined, with some convenient extra features:
+// strprintf/wstrprintf:
 //
-// - strprintf/wstrprintf: Standard printf-style functions that return a
-//   std::string or std::wstring, but that can also take any string as an
-//   argument (use %s as the specifier; string arguments will be converted
-//   on the fly to the compatible type).
-//
-// - format: Similar to printf but uses FormatMessage and ordered %1..%n
-//   format specifiers. Returns std::wstring, mainly for localized strings.
-//
+// - Standard printf-style functions that return a std::string or std::wstring,
+//   but can also take std::string/std::wstring as arguments.
+// - std::string arguments become const char *, std::wstring arguments become
+//   const wchar_t *.  (Arguments are _not_ converted to matching width, because
+//   some uses of LOG() must also work with the Qt-based logger in the daemon,
+//   which does not do this conversion.)
+// - String formats follow Microsoft conventions - %s for like-typed strings,
+//   %S for opposite.  (%hs always means narrow strings, %ls always means wide.)
+//   Note that the Qt-based logger follows standard C conventions, which differ.
 
-// Step 1 acceptance/conversion of printf arguments for UTF8
-template<typename T> static inline std::enable_if_t<std::is_arithmetic<T>::value || std::is_enum<T>::value, T> utf8_printf_arg(T arg) { return arg; }
-static inline LPCSTR utf8_printf_arg(utf8ptr arg) { return arg; }
-static inline std::string utf8_printf_arg(utf16ptr arg) { return utf8(arg); }
-
-// Step 1 acceptance/conversion of printf arguments for UTF16
-template<typename T> static inline std::enable_if_t<std::is_arithmetic<T>::value || std::is_enum<T>::value, T> utf16_printf_arg(T arg) { return arg; }
-static inline LPCWSTR utf16_printf_arg(utf16ptr arg) { return arg; }
-static inline std::wstring utf16_printf_arg(utf8ptr arg) { return utf16(arg); }
-
-// Step 2 extraction of value to put on stack for vararg function
 template<typename T> static inline std::enable_if_t<std::is_arithmetic<T>::value || std::is_enum<T>::value, T> printf_value(T arg) { return arg; }
 static inline LPCSTR printf_value(utf8ptr arg) { return arg; }
 static inline LPCWSTR printf_value(utf16ptr arg) { return arg; }
 
 std::string strprintf_impl(LPCSTR fmt, size_t count, ...);
-template<typename... Args> static inline std::string strprintf(utf8ptr fmt, Args&&... args) { return strprintf_impl(fmt, sizeof...(args), printf_value(utf8_printf_arg(std::forward<Args>(args)))...); }
-#define UTF8PRINTF(fmt, ...) strprintf(fmt,##__VA_ARGS__)
+template<typename... Args> static inline std::string strprintf(utf8ptr fmt, Args&&... args) { return strprintf_impl(fmt, sizeof...(args), printf_value(std::forward<Args>(args))...); }
 
 std::wstring wstrprintf_impl(LPCWSTR fmt, size_t count, ...);
-template<typename... Args> static inline std::wstring wstrprintf(utf16ptr fmt, Args&&... args) { return wstrprintf_impl(fmt, sizeof...(args), printf_value(utf16_printf_arg(std::forward<Args>(args)))...); }
-#define UTF16PRINTF(fmt, ...) wstrprintf(L"" fmt,##__VA_ARGS__)
-
-std::wstring format_impl(LPCWSTR fmt, size_t count, ...);
-template<typename... Args> static inline std::wstring format(utf16ptr fmt, Args&&... args) { return format_impl(fmt, sizeof...(args), printf_value(utf16_printf_arg(std::forward<Args>(args)))...); }
-#define FORMAT(fmt, ...) format(L"" fmt,##__VA_ARGS__)
-
-std::string vstrprintf(LPCSTR fmt, va_list ap);
-std::wstring vwstrprintf(LPCWSTR fmt, va_list ap);
-std::wstring vformat(LPCWSTR fmt, va_list ap);
+template<typename... Args> static inline std::wstring wstrprintf(utf16ptr fmt, Args&&... args) { return wstrprintf_impl(fmt, sizeof...(args), printf_value(std::forward<Args>(args))...); }
 
 bool stringStartsWithCaseInsensitive(const std::wstring& str, const std::wstring& prefix);
 
@@ -133,7 +113,7 @@ private:
     HANDLE _logFile;
     CRITICAL_SECTION _logMutex;
 };
-#define LOG(fmt, ...) Logger::instance()->write(UTF8PRINTF(fmt,##__VA_ARGS__))
+#define LOG(fmt, ...) Logger::instance()->write(strprintf(fmt,##__VA_ARGS__))
 
 std::string getMessageName(UINT msg);
 

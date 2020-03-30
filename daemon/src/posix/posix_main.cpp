@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     }
     catch (const Error& error)
     {
-        qCritical(error);
+        qCritical() << error;
     }
 
     std::set_terminate(g_oldTerminateHandler);

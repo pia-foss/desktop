@@ -23,6 +23,7 @@ import "."
 import "../inputs"
 import "../stores"
 import "../../daemon"
+import "../../settings"
 import "../../theme"
 
 Page {
@@ -79,7 +80,12 @@ Page {
     PrivacyInput {
       Layout.preferredWidth: parent.width
       inputEnabled: Daemon.settings.overrideDNS === 'pia'
-      warning: Daemon.settings.overrideDNS !== 'pia' ? uiTr("PIA MACE requires using PIA DNS in order to function.") : ""
+      warning: {
+        if(Daemon.settings.overrideDNS !== 'pia')
+          return uiTr("PIA MACE requires using PIA DNS in order to function.")
+
+        return "";
+      }
       label: uiTr("PIA MACE")
       desc: uiTr("Block domains used for ads, trackers, and malware")
       // Can directly set to `enableMace` instead of inferring index,

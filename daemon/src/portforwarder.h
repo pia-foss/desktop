@@ -79,7 +79,7 @@ signals:
     // with a positive value when we have forwarded a port, or updated to a
     // special value if no port has been forwarded, the request is in progress,
     // etc.
-    void portForwardUpdated(int port, bool needsReconnect=false);
+    void portForwardUpdated(int port);
 
 private:
     // Request a port forward (create a new PortRequester)

@@ -37,7 +37,7 @@ PiaApplication {
   // Exclude all normal sources as these are pulled in from all-tests-lib
   sourceDirectories: []
   // Manually specify common include directories instead
-  cpp.includePaths: base.concat([ path, path + "/common/src", path + "/common/src/builtin" ])
+  cpp.includePaths: base.concat([ path, path + "/common/src", path + "/common/src/builtin", path + "/deps/embeddable-wg-library/src" ])
 
   cpp.defines: base.concat([ "UNIT_TEST", 'TEST_MOC="tst_' + testName + '.moc"' ])
   cpp.combineCxxSources: false

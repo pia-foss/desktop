@@ -36,8 +36,8 @@ const QString disconnectDescription =
     QStringLiteral("Disconnects from the VPN.");
 const QString resetSettingsDescription =
     QStringLiteral("Resets daemon settings to the defaults (ports/protocols/etc.)\nClient settings (themes/icons/layouts) can't be set with the CLI.");
-const QString checkCalloutDescription =
-    QStringLiteral("Hint to the daemon to re-check the WFP callout driver state.");
+const QString checkDriverDescription =
+    QStringLiteral("Hint to the daemon to re-check the driver installation states.");
 
 using CommandMap = std::map<QString, std::shared_ptr<CliCommand>>;
 const CommandMap stableCommands
@@ -54,10 +54,16 @@ const CommandMap unstableCommands
 {
     {"applysettings", std::make_shared<ApplySettingsCommand>()},
 #ifdef Q_OS_WIN
-    // Part of the workaround for Win 10 1507 to avoid using SCM notifications
-    // on this build of Windows; used by pia-service.exe when installing
-    // the callout driver.  Only relevant on Windows.
-    {"checkcallout", std::make_shared<TrivialRpcCommand>("checkCalloutState", checkCalloutDescription)},
+    // Windows only - used to hint to the daemon to re-check driver installation
+    // states that do not provide change notifications.
+    //
+    // WinTUN is checked this way, there does not appear to be any way to be
+    // notified when an MSI package or driver is installed.
+    //
+    // The WFP callout is checked this way on Win 10 1507, because using SCM
+    // notifications on this build of Windows for a driver service cause SCM to
+    // crash on shutdown.
+    {"checkdriver", std::make_shared<TrivialRpcCommand>("checkDriverState", checkDriverDescription)},
 #endif
     {"watch", std::make_shared<WatchCommand>()}
 };

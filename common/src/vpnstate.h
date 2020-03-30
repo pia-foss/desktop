@@ -39,15 +39,10 @@ public:
         Disconnected,
 
         // Connecting (OpenVPN process launched etc.)
-        // - Try connect up to 2 times
-        // - Minimum time between start of each attempt: 1 second
-        // - If still not connected, transition to StillConnecting
+        // - Try connect until we establish a connection, or the user disables
+        //   the VPN.  Delays between attempts depend on the number of attempts
+        //   made.
         Connecting,
-
-        // Still connecting (taking long or many attempts)
-        // - Infinite number of attempts
-        // - Minimum time between start of each attempt: 10 seconds
-        StillConnecting,
 
         // Successfully connected
         Connected,
@@ -57,15 +52,10 @@ public:
         // - Afterwards, go to Reconnecting
         Interrupted,
 
-        // Waiting for an OpenVPN connection attempt to recover connectivity
-        // - Try connect up to 2 times
-        // - Minimum time between start of each attempt: 1 second
+        // Waiting for an OpenVPN connection attempt to recover connectivity -
+        // behaves like Connecting state, difference is that we entered this
+        // state due to connection loss or a reconnect to apply settings.
         Reconnecting,
-
-        // Having trouble regaining connectivity (maybe internet is down)
-        // - Infinite number of attempts; just keep relaunching
-        // - Minimum time between start of attempts: 10 seconds
-        StillReconnecting,
 
         // Disconnecting in order to reconnect again
         // - Current OpenVPN process is discarded; wait for process exit
@@ -76,6 +66,15 @@ public:
         Disconnecting,
     };
     Q_ENUM(State)
+
+    enum Limits
+    {
+        // Maximum connection attempts until "slow connect" mode triggers
+        SlowConnectionAttemptLimit = 2,
+        // Minimum interval between subsequent connection attempts
+        ConnectionAttemptInterval = 1 * 1000,
+        SlowConnectionAttemptInterval = 10 * 1000,
+    };
 };
 
 #endif

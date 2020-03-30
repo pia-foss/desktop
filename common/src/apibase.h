@@ -22,8 +22,22 @@
 #ifndef APIBASE_H
 #define APIBASE_H
 
+#include "openssl.h"
 #include <QSharedPointer>
 #include <vector>
+
+struct COMMON_EXPORT BaseUri
+{
+    // The URI prefix to use in an API request (typically like
+    // "https://<host>/", may have a partial URI path)
+    QString uri;
+    // An optional PrivateCA that will be used to validate the certificate
+    // instead of the default.  If specified, peerVerifyName must also be set.
+    std::shared_ptr<PrivateCA> pCA;
+    // The peer verify name to use when checking the host's certificate.
+    // Requires pCA, and must be set if pCA is set.
+    QString peerVerifyName;
+};
 
 // Data used by both ApiBase and ApiBaseSequence - the actual base URIs and the
 // last successful one.
@@ -32,16 +46,25 @@
 class COMMON_EXPORT ApiBaseData
 {
 public:
-    ApiBaseData(std::vector<QString> baseUris);
+    // Create ApiBaseData with plain base URIs - no overridden peer names.
+    ApiBaseData(const std::vector<QString> &baseUris);
+    // Create ApiBaseData with one host, with an optional CA and peer name.
+    ApiBaseData(const QString &uri, std::shared_ptr<PrivateCA> pCA,
+                const QString &peerVerifyName);
+
+private:
+    // Append a base URI, and ensure that it ends with '/' - used by constructors
+    void addBaseUri(const QString &uri, std::shared_ptr<PrivateCA> pCA,
+                    const QString &peerVerifyName);
 
 public:
     unsigned getNextStartIndex() const {return _nextStartIndex;}
     unsigned getUriCount() const {return _baseUris.size();}
-    const QString &getUri(unsigned index);
+    const BaseUri &getUri(unsigned index);
     void attemptSucceeded(unsigned successIndex);
 
 private:
-    std::vector<QString> _baseUris;
+    std::vector<BaseUri> _baseUris;
     unsigned _nextStartIndex;
 };
 
@@ -54,7 +77,7 @@ public:
     ApiBaseSequence(QSharedPointer<ApiBaseData> pData);
 
 public:
-    const QString &getNextUri();
+    const BaseUri &getNextUri();
     void attemptSucceeded();
 
 private:
@@ -68,7 +91,8 @@ private:
 class COMMON_EXPORT ApiBase
 {
 public:
-    ApiBase(std::vector<QString> baseUris);
+    template<class... Arg>
+    ApiBase(Arg &&... args) : _pData{new ApiBaseData{std::forward<Arg>(args)...}} {}
 
 public:
     // Get an ApiBaseSequence for a new request attempt.  It will start with the

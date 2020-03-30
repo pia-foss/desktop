@@ -57,11 +57,11 @@ CppApplication {
   // Include paths derived from the source directories
   property stringList sourceIncludePaths: sourceDirectories.map(function (p) { return path + "/" + p; })
 
-  property stringList sources: PiaUtil.pathCombine(sourceDirectories, "/", ["*.cpp", "*.h"])
-  property stringList windowsSources: PiaUtil.pathCombine(sourceDirectories, "/win/", ["*.cpp", "*.h", "*.rc"]).concat("common/res/manifest.xml")
-  property stringList posixSources: PiaUtil.pathCombine(sourceDirectories, "/posix/", ["*.cpp", "*.h"])
-  property stringList macosSources: PiaUtil.pathCombine(sourceDirectories, "/mac/", ["*.cpp", "*.h", "*.mm"])
-  property stringList linuxSources: PiaUtil.pathCombine(sourceDirectories, "/linux/", ["*.cpp", "*.h"])
+  property stringList sources: PiaUtil.pathCombine(sourceDirectories, "/", ["*.cpp", "*.h", "*.c"])
+  property stringList windowsSources: PiaUtil.pathCombine(sourceDirectories, "/win/", ["*.cpp", "*.h", "*.rc", "*.c"]).concat("common/res/manifest.xml")
+  property stringList posixSources: PiaUtil.pathCombine(sourceDirectories, "/posix/", ["*.cpp", "*.h", "*.c"])
+  property stringList macosSources: PiaUtil.pathCombine(sourceDirectories, "/mac/", ["*.cpp", "*.h", "*.mm", "*.c"])
+  property stringList linuxSources: PiaUtil.pathCombine(sourceDirectories, "/linux/", ["*.cpp", "*.h", "*.c"])
 
   version: project.productVersion
 

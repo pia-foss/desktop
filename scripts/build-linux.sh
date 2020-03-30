@@ -361,6 +361,8 @@ if [ $TASK_PACKAGE -eq 1 ]; then
     # Also copy all the install files
     cp "$BUILD_PACKAGE/$CONFIG/version/version.txt" "$PKGROOT/package.txt"
     cp -r "$ROOT/extras/installer/linux/installfiles/" "$PKGROOT/installfiles/"
+    # Apply the brand code to the uninstall script
+    [ "$BRAND_CODE" = "pia" ] || mv "$PKGROOT/installfiles/pia-uninstall.sh" "$PKGROOT/installfiles/$BRAND_CODE-uninstall.sh"
     cp "$ROOT/brands/$BRAND_CODE/icons/app.png" "$PKGROOT/installfiles/app.png"
 
     BRAND_SUBSTITUTION="s/{{BRAND_CODE}}/${BRAND_CODE}/g; s/{{BRAND_NAME}}/${BRAND_NAME}/g"

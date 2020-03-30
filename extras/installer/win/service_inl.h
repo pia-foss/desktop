@@ -20,6 +20,10 @@
 #define SERVICE_INL_H
 
 #include <utility>
+#include <string>
+#include <Windows.h>
+
+#define PIA_SERVICE L"" BRAND_WINDOWS_SERVICE_NAME
 
 class ServiceHandle
 {
@@ -81,6 +85,35 @@ enum ServiceStatus
 };
 
 ServiceStatus startService(SC_HANDLE service, int timeoutMs);
+ServiceStatus startService(LPCWSTR pSvcName);
 ServiceStatus stopService(SC_HANDLE service);
+ServiceStatus stopService(LPCWSTR pSvcName);
+
+struct ServiceParams
+{
+    enum Flags : int
+    {
+        AutoRestart = 1<<0, // Configure the service to restart automatically
+        UnrestrictedSid = 1<<1, // Set the SID type to SERVICE_SID_TYPE_UNRESTRICTED
+    };
+    LPCWSTR pName;  // Internal name of service
+    LPCWSTR pDesc;  // Display name
+    DWORD startType;    // Start type - see dwStartType of CreateServiceW()
+    int flags;  // Extra flags - Flags above
+};
+
+extern const ServiceParams g_daemonServiceParams;
+extern const ServiceParams g_wireguardServiceParams;
+
+std::wstring quotePath(LPCWSTR path);
+ServiceStatus installService(LPCWSTR command, const ServiceParams &params);
+ServiceStatus uninstallService(LPCWSTR pSvcName);
+
+// Install the daemon service (uses the daemon executable path and the daemon
+// service params)
+ServiceStatus installDaemonService(LPCWSTR daemonPath);
+// Install the Wireguard service (uses the wireguard executable path, data
+// directory path (for the config file), and wireguard service params)
+ServiceStatus installWireguardService(LPCWSTR wireguardPath, LPCWSTR dataDirPath);
 
 #endif

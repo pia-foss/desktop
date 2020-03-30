@@ -23,7 +23,6 @@
 #define CONNECTION_H
 #pragma once
 
-#include "openvpn.h"
 #include "settings.h"
 #include "processrunner.h"
 #include "vpnstate.h"
@@ -38,6 +37,7 @@
 #include <QFile>
 #include <QTimer>
 
+class VPNMethod;
 
 // A descriptor for the desired network adapter (--dev-node) to use.
 // Only one subclass of this class (or the class itself) should ever
@@ -184,20 +184,6 @@ class TransportSelector
     Q_GADGET
 
 public:
-    // Status of the connection attempt.  Controls warnings shown in the client.
-    enum class Status
-    {
-        // Still in the first few connection attempts (~30 seconds), no warning
-        Connecting,
-        // Trying alternates - set after ~30 seconds if alternates are allowed
-        TryingAlternates,
-        // Trouble connecting - set after ~30 seconds when alternates are not
-        // allowed
-        TroubleConnecting,
-    };
-    Q_ENUM(Status);
-
-public:
     // Initially TransportSelector just has a default preferred setting, it's
     // intended to reset() it before the first connection attempt.
     TransportSelector();
@@ -234,8 +220,6 @@ public:
     // Get the transport that was most recently used
     const Transport &lastUsed() const {return _lastUsed;}
 
-    Status status() const {return _status;}
-
     // Do a network scan now; this is independent of any state tracked by
     // TransportSelector - it's a stopgap solution since the iptables firewall
     // currently requires the network interface and gateway at startup.
@@ -266,18 +250,40 @@ private:
     QHostAddress _lastLocalUdpAddress, _lastLocalTcpAddress;
     std::size_t _nextAlternate;
     QDeadlineTimer _startAlternates;
-    Status _status;
     bool _useAlternateNext;
 };
 
 // Holds the configuration details that we provide via DaemonState for the
 // last/current connection (connectedLocation, etc.) and the current attempting
-// connection (connectingLocation, etc.)
+// connection (connectingLocation, etc.).
+//
+// In general, this is _not_ specific to the VPN method being used - the intent
+// is that the majority of settings should work with any VPN method.
+//
+// This is not possible in all cases, so there is some method-specific logic in
+// this class, such as forcing some settings off for some methods, knowledge of
+// the credentials required for each method, etc.  The intent is that over time,
+// these differences should be reduced; we should support most settings with all
+// methods.
 class ConnectionConfig
 {
     Q_GADGET
 
 public:
+    enum class Method
+    {
+        OpenVPN,
+        Wireguard,
+    };
+    Q_ENUM(Method);
+    enum class DnsType
+    {
+        Pia,
+        Handshake,
+        Existing,
+        Custom
+    };
+    Q_ENUM(DnsType);
     enum class ProxyType
     {
         None,
@@ -292,7 +298,7 @@ public:
     ConnectionConfig();
     // Capture the current location and proxy settings from DaemonSettings and
     // DaemonState
-    ConnectionConfig(DaemonSettings &settings, DaemonState &state);
+    ConnectionConfig(DaemonSettings &settings, DaemonState &state, DaemonAccount &account);
 
 public:
     // Check if the ConnectionConfig was able to load everything required for a
@@ -309,22 +315,93 @@ public:
     // ID only - other location metadata changes are not considered a change.
     bool hasChanged(const ConnectionConfig &other) const;
 
+    // The effective VPN method.  Normally the method() setting; may be forced
+    // to OpenVPN if an auth token is not available for WireGuard.
+    Method method() const {return _method;}
+
+    // Enabled if the method was forced to OpenVPN due to lack of an auth token
+    // (causes an in-client notification).
+    bool methodForcedByAuth() const {return _methodForcedByAuth;}
+
+    // The effective VPN location, and whether that location was an 'auto'
+    // selection or an explicit selection from the user.
     const QSharedPointer<ServerLocation> &vpnLocation() const {return _pVpnLocation;}
     bool vpnLocationAuto() const {return _vpnLocationAuto;}
 
+    // Credentials for authenticating to the VPN.
+    //
+    // The VPN username and password are always available.  (These are the
+    // split token returned by the web API if a token exchange was possible, or
+    // the actual account credentials otherwise.)
+    //
+    // A token is only available if a token exchange had occurred.  (If this is
+    // not available, WireGuard will not be allowed as a method, OpenVPN will be
+    // used instead.)
+    const QString &vpnUsername() const {return _vpnUsername;}
+    const QString &vpnPassword() const {return _vpnPassword;}
+    const QString &vpnToken() const {return _vpnToken;}
+
+    // The type of DNS selected by the user.
+    DnsType dnsType() const {return _dnsType;}
+    // For DnsType::Custom, the DNS server addresses - guaranteed to have at
+    // least one entry for Custom.  Not provided for any other type.
+    const QStringList &customDns() const {return _customDns;}
+
+    // Get the effective DNS server addresses.  The PIA addresses must be
+    // provided, since they are returned by the server for newer methods.
+    QStringList getDnsServers(const QStringList &piaDns) const;
+
+    quint16 localPort() const {return _localPort;}
+    uint mtu() const {return _mtu;}
+
+    // Whether to use the VPN as the default route.  Turning off the default
+    // route requires split tunnel - if split tunnel was not enabled when
+    // connecting, this will be true.  Split tunnel is only permitted with
+    // OpenVPN.
     bool defaultRoute() const {return _defaultRoute;}
 
+    // Proxy information.  canConnect() checks requirements of these fields
+    // based on the selected proxy type.  Proxies are only permitted with
+    // OpenVPN.
     ProxyType proxyType() const {return _proxyType;}
     const QHostAddress &socksHost() const {return _socksHostAddress;}
     const CustomProxy &customProxy() const {return _customProxy;}
     const QSharedPointer<ServerLocation> &shadowsocksLocation() const {return _pShadowsocksLocation;}
     bool shadowsocksLocationAuto() const {return _shadowsocksLocationAuto;}
 
+    // Whether to try alternate transports.  Requires OpenVPN and no proxy.
+    bool automaticTransport() const {return _automaticTransport;}
+
+    // Whether port forwarding is enabled (even if the selected region does not
+    // support it).  Only permitted with OpenVPN.
+    bool requestPortForward() const {return _requestPortForward;}
+
+    // Whether MACE is enabled.  Only permitted with PIA DNS and OpenVPN.
+    bool requestMace() const {return _requestMace;}
+
+    // For the WireGuard method only, whether to use kernel support if available
+    bool wireguardUseKernel() const {return _wireguardUseKernel;}
+
 private:
+    // The method used to connect to the VPN
+    Method _method;
+    bool _methodForcedByAuth;
+
     // The VPN location used for this connection
     QSharedPointer<ServerLocation> _pVpnLocation;
     // Whether the VPN location was an automatic selection
     bool _vpnLocationAuto;
+
+    // The credentials to use for this connection.  Some methods use the split
+    // "OpenVPN username/password", others use the complete token.
+    QString _vpnUsername, _vpnPassword, _vpnToken;
+
+    // Selected DNS type and custom DNS servers
+    DnsType _dnsType;
+    QStringList _customDns;
+
+    quint16 _localPort;
+    uint _mtu;
 
     // Whether to use the VPN as the default route for this connection.  This
     // isn't exactly the same as the defaultRoute value at the time of
@@ -346,6 +423,11 @@ private:
     QSharedPointer<ServerLocation> _pShadowsocksLocation;
     // Whether the Shadowsocks location was an automatic selection
     bool _shadowsocksLocationAuto;
+
+    // Flags for additional features for this connection
+    bool _automaticTransport, _requestPortForward, _requestMace;
+
+    bool _wireguardUseKernel;
 };
 
 class VPNConnection : public QObject
@@ -376,17 +458,7 @@ public:
     };
     Q_ENUM(ConnectionStep)
 
-    enum Limits
-    {
-        // Maximum connection attempts until "slow connect" mode triggers
-        SlowConnectionAttemptLimit = 2,
-        SlowReconnectionAttemptLimit = 2,
-        // Minimum interval between subsequent connection attempts
-        ConnectionAttemptInterval = 1 * 1000,
-        ReconnectionAttemptInterval = 1 * 1000,
-        SlowConnectionAttemptInterval = 10 * 1000,
-        SlowReconnectionAttemptInterval = 10 * 1000,
-    };
+    using Limits = VpnState::Limits;
 
 public:
     explicit VPNConnection(QObject* parent = nullptr);
@@ -398,8 +470,11 @@ public:
     void activateMACE ();
 
     bool needsReconnect();
-    QSharedPointer<NetworkAdapter> networkAdapter() const { return _networkAdapter; }
-    const DaemonSettings::DNSSetting &dnsServers() const { return _dnsServers; }
+    // Get the current VPN method, if one exists - for updating firewall params
+    // specified by the VPN method.  If a valid method is returned, it remains
+    // valid at least until any mutating member of VPNConnection is called.
+    VPNMethod *vpnMethod() const {return _method;}
+    const QStringList &effectiveDnsServers() const {return _effectiveDnsServers;}
 
     // Do a network scan now - stopgap solution for the iptables firewall.
     // Emits scannedOriginalNetwork() with the result.
@@ -410,21 +485,23 @@ public slots:
     void disconnectVPN();
 
 private:
+    void scheduleMaceDnsCacheFlush();
     void beginConnection();
+    // Whether to use slow reconnect intervals based on the current attempt
+    // count
+    bool useSlowInterval() const;
     void doConnect();
-    void openvpnStdoutLine(const QString& line);
-    void checkStdoutErrors(const QString &line);
-    void openvpnStderrLine(const QString& line);
-    bool respondToMgmtAuth(const QString &line, const QString &user,
-                           const QString &password);
-    void openvpnManagementLine(const QString& line);
-    void openvpnStateChanged();
-    void openvpnExited(int exitCode);
-    void openvpnError(const Error& error);
+    void vpnMethodStateChanged();
     void raiseError(const Error& error);
 
 signals:
     void error(const Error& error);
+    // Indicates whether VPNConnection is using the "slow" attempt interval
+    // while attempting a connection.  Enabled when enough attempts have been
+    // made to trigger the slow intervals.  Resets to false when going to a
+    // non-connecting state, or when the settings change during a series of
+    // connection attempts.
+    void slowIntervalChanged(bool usingSlowInterval);
     // When VPNConnection's state changes, the new connecting/connected
     // configurations are provided.
     // Note that the ServerLocations in these configurations are mutable, but
@@ -437,10 +514,7 @@ signals:
                       const ConnectionConfig &connectedConfig,
                       const nullable_t<Transport> &chosenTransport,
                       const nullable_t<Transport> &actualTransport);
-    // While connecting (the [Still](Connecting|Reconnecting) states), the
-    // status of the connection attempt is updated by emitting
-    // connectingStatus().
-    void connectingStatus(TransportSelector::Status connectingStatus);
+    void firewallParamsChanged();
     // Just before each connection attempt, the original gateway/interface/IP
     // address are scanned and emitted.
     void scannedOriginalNetwork(const OriginalNetworkScan &netScan);
@@ -451,9 +525,13 @@ signals:
     void hnsdSucceeded();
     void hnsdFailed(std::chrono::milliseconds failureDuration);
     void hnsdSyncFailure(bool failing);
-    void usingTunnelDevice(QString deviceName, QString deviceLocalAddress, QString deviceRemoteAddress);
+    void usingTunnelConfiguration(const QString &deviceName,
+                                  const QString &deviceLocalAddress,
+                                  const QString &deviceRemoteAddress,
+                                  const QStringList &effectiveDnsServers);
 
 private:
+    void updateAttemptCount(int newCount);
     void setState(State state);
     void updateByteCounts(quint64 received, quint64 sent);
     void scheduleNextConnectionAttempt();
@@ -465,16 +543,14 @@ private:
     // not be found), it instead transitions to failureState and returns false.
     // _connectingConfig is cleared in this case.
     bool copySettings(State successState, State failureState);
-    bool writeOpenVPNConfig(QFile& outFile);
-    void checkForMagicStrings(const QString& line);
 
 private:
     State _state;
     ConnectionStep _connectionStep;
-    // The most recent OpenVPNProcess.  This can be set in any state, including
+    // The most recent VPNMethod.  This can be set in any state, including
     // Disconnected, where it may still refer to the process used for the last
     // connection.
-    OpenVPNProcess* _openvpn;
+    VPNMethod* _method;
     // Runner for hnsd process, enabled when we connect with Handshake DNS.
     HnsdRunner _hnsdRunner;
     // Runner for ss-local process, enabled when we connect with a Shadowsocks
@@ -484,12 +560,8 @@ private:
     // state, they are the settings that will be used for the next connection
     // (even in the Connected state; they'll be applied when a reconnect occurs)
     QJsonObject _connectionSettings;
-    QString _openvpnUsername;
-    QString _openvpnPassword;
-    // The network adapter used for the current connection
-    QSharedPointer<NetworkAdapter> _networkAdapter;
-    // The DNS servers for the current connection
-    DaemonSettings::DNSSetting _dnsServers;
+    // The effective DNS servers once they've been applied by the VPN method
+    QStringList _effectiveDnsServers;
     // The configuration we are currently attempting to connect with.
     ConnectionConfig _connectingConfig;
     // The configuration that we last connected with.

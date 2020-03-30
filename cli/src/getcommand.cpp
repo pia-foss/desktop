@@ -31,6 +31,7 @@ namespace GetSetType
     const QString connectionState{QStringLiteral("connectionstate")};
     const QString debugLogging{QStringLiteral("debuglogging")};
     const QString portForward{QStringLiteral("portforward")};
+    const QString protocol{QStringLiteral("protocol")};
     const QString region{QStringLiteral("region")};
     const QString regions{QStringLiteral("regions")};
     const QString vpnIp{QStringLiteral("vpnip")};
@@ -122,6 +123,7 @@ namespace
         {GetSetType::debugLogging, {QStringLiteral("State of debug logging setting"), {}}},
         {GetSetType::portForward, {QStringLiteral("Forwarded port number if available, or the status of the request to forward a port"),
             qEnumValues<DaemonState::PortForwardState>(QStringLiteral("[forwarded port]"))}},
+        {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
         {GetSetType::region, {QStringLiteral("Currently selected region (or \"auto\")"), {}}}
 
@@ -237,6 +239,10 @@ namespace
                 return name;
             return QString::number(forwardedPort);
         }
+        else if(type == GetSetType::protocol)
+        {
+            return client.connection().settings.method();
+        }
         else if(type == GetSetType::region)
         {
             // Print the chosen location from DaemonState; this includes the
@@ -278,6 +284,11 @@ namespace
         else if(_type  == GetSetType::portForward)
         {
             QObject::connect(&client.connection().state, &DaemonState::forwardedPortChanged,
+                             this, func);
+        }
+        else if(_type == GetSetType::protocol)
+        {
+            QObject::connect(&client.connection().settings, &DaemonSettings::methodChanged,
                              this, func);
         }
         else if(_type  == GetSetType::region)

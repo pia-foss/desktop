@@ -195,9 +195,6 @@ int clientMain(int argc, char *argv[])
     qInfo() << "Not initializing crash handler - built without crash reporting support.";
 #endif
 
-#ifdef Q_OS_UNIX
-    UnixSignalHandler::init();
-#endif
     Logger logSingleton{Path::ClientLogFile};
     QGuiApplication::setApplicationDisplayName(QStringLiteral(PIA_PRODUCT_NAME));
     QGuiApplication::setQuitOnLastWindowClosed(false);

@@ -32,7 +32,7 @@ MovableModule {
   id: ipModule
   moduleKey: 'ip'
 
-  implicitHeight: portForward.active ? (portForward.y + portForward.height + 20) : 80
+  implicitHeight: portForward.showPf ? (portForward.y + portForward.height + 20) : 80
 
   //: Screen reader annotation for the tile displaying the IP addresses.
   tileName: uiTr("IP tile")
@@ -157,15 +157,26 @@ MovableModule {
     anchors.leftMargin: 3
     y: 65
 
-    // Show the port field when the setting is enabled or if the port forward
-    // is active (it could be active, but not enabled, if it was turned off
-    // after a port was already forwarded).
-    readonly property bool active: Daemon.settings.portForward || Daemon.state.forwardedPort !== Daemon.state.portForward.inactive
+    readonly property string currentMethod: {
+      if(Daemon.state.connectionState === "Connected")
+        return Daemon.state.connectedConfig.method
+      else if(Daemon.state.connectingConfig.vpnLocation)
+        return Daemon.state.connectingConfig.method
+      return Daemon.settings.method
+    }
 
-    opacity: active ? vpnElementsOpacityTarget : 0.0
+    // PF is "active" when the setting is enabled or if the port forward
+    // is anything other than "inactive" (it could be active, but not enabled
+    // if it was turned off after a port was already forwarded).
+    readonly property bool pfActive: (Daemon.settings.portForward || Daemon.state.forwardedPort !== Daemon.state.portForward.inactive)
+    // Show PF only when using OpenVPN; it's not currently supported with
+    // WireGuard.
+    readonly property bool showPf: currentMethod === "openvpn" && pfActive
+
+    opacity: showPf ? vpnElementsOpacityTarget : 0.0
     visible: opacity > 0.0
     text: {
-      if(!active)
+      if(!showPf)
         return ""
 
       switch(Daemon.state.forwardedPort) {

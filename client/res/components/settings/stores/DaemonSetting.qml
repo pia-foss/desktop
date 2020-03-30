@@ -23,13 +23,29 @@ import "."
 Setting {
   // The name of a setting in Daemon.settings
   property string name
+  
+  // Override the apparent value of the setting.  When 'override' is true,
+  // 'sourceValue' becomes 'overrideValue' instead of the actual setting value.
+  //
+  // The control using the setting should be disabled when the override is
+  // active.  (Changes in currentValue in this state would still be applied, but
+  // would not cause sourceValue to change until the override is disabled.)
+  //
+  // This is usually used for settings that depend on other settings.  When a
+  // setting is unavailable, typically the setting is disabled, and an override
+  // value is enabled to display the effective value in the UI.
+  property bool override: false
+  property var overrideValue: null
 
-  sourceValue: Daemon.settings[name]
+  sourceValue: override ? overrideValue : Daemon.settings[name]
 
   // A signal that the daemon value has been updated
   signal applyFinished;
 
   onCurrentValueChanged: {
+    if(override)
+      return;
+
     if (name && currentValue !== undefined && currentValue !== Daemon.settings[name]) {
       var param = {};
       param[name] = currentValue;
@@ -43,9 +59,5 @@ Setting {
         }
       });
     }
-  }
-
-  Component.onCompleted: {
-
   }
 }

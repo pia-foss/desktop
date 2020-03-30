@@ -19,6 +19,7 @@
 #include "common.h"
 #line SOURCE_FILE("winrtsupport.cpp")
 
+#include <QStringList>
 #include "winrtsupport.h"
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Management.Deployment.h>
@@ -70,28 +71,104 @@ void initWinRt()
     });
 }
 
+// Iterate over all apps in a family
+template <class Func_t>
+void forEachApp(const QString &family, Func_t func)
+{
+    return convertExceptions([&]{
+        winrt::Windows::Management::Deployment::PackageManager packageMgr;
+
+        auto packages = packageMgr.FindPackagesForUser({}, qstrToHstr(family));
+
+        for(const auto &pkg : packages)
+        {
+            auto familyName = hstrToQstr(pkg.Id().FamilyName());
+            auto appsAsync = pkg.GetAppListEntriesAsync();
+            auto appEntries = appsAsync.get();
+            for(const auto &appEntry : appEntries)
+            func(appEntry);
+        }
+    });
+}
+
+// Return all apps for a family
+// This typically returns only one app per family
+// But we have one known exception in the case of winCommsApps which has a Mail and
+// a Calendar app.
+// All the apps for a family are ultimately coalesced into a single "app" (see getUwpApps()) for that family
+// with a name that's a combination of their names, e.g "Mail, Calendar"
+auto findAllApps(const QString &family) -> std::vector<winrt::Windows::ApplicationModel::Core::AppListEntry>
+{
+    std::vector<winrt::Windows::ApplicationModel::Core::AppListEntry> apps;
+
+    forEachApp(family, [&apps](const auto &appEntry)
+    {
+        apps.push_back(std::move(appEntry));
+    });
+
+    // The order of apps in a package typically doesn't matter
+    // However by reversing the order here we ensure that for the "windowscommunicationsapps" family
+    // the name of the coalesced app will be "Mail, Calendar" and the Mail app icon will be used.
+    std::reverse(apps.begin(), apps.end());
+
+    return apps;
+}
+
+// Load an app's display name - only locates apps for the current user; used by
+// client in user session.
+//
+// The display name is the concatenation of all app names in a family
+// though in most cases there's only one app per family.
+QString loadAppDisplayName(const QString &family)
+{
+    return convertExceptions([&]{
+        QStringList appNames;
+        auto apps = findAllApps(family);
+
+        // If a family has multiple apps - concatenate the names together
+        // e.g the winCommsApps family will be represented by a single
+        // app with the name "Mail, Calendar".
+        for(auto &app : apps)
+        {
+            auto appDisplayInfo = app.DisplayInfo();
+            appNames << hstrToQstr(appDisplayInfo.DisplayName());
+        }
+
+        return appNames.join(QStringLiteral(", "));
+    });
+}
+
+// Return all Uwp Apps for the current user.
+//
+// If an app family has multiple apps (e.g winCommsAppsFamily) we still treat it as one app
+// and we concatenate the names of each app together to form the name.
+//
+// We can get away with treating all apps in a family as a single app as there's one app manifest file
+// per family - and the split tunnel includes/excludes all the app executables in that manifest.
 std::vector<EnumeratedUwpApp> getUwpApps()
 {
-    return convertExceptions([]{
+   return convertExceptions([&]{
         winrt::Windows::Management::Deployment::PackageManager packageMgr;
 
         auto pkgEnumerable = packageMgr.FindPackagesForUser({});
 
         std::vector<EnumeratedUwpApp> apps;
-        for(auto &&pkg : pkgEnumerable)
+        for(const auto &pkg : pkgEnumerable)
         {
             auto pkgId = pkg.Id();
-            winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::ApplicationModel::Core::AppListEntry>> appsAsync = pkg.GetAppListEntriesAsync();
-            winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::ApplicationModel::Core::AppListEntry> appEntries = appsAsync.get();
+            auto appsAsync = pkg.GetAppListEntriesAsync();
+            auto appEntries = appsAsync.get();
             for(const auto &appEntry : appEntries)
             {
                 EnumeratedUwpApp app{};
                 auto appDisplayInfo = appEntry.DisplayInfo();
-                app.displayName = hstrToQstr(appDisplayInfo.DisplayName());
                 app.appPackageFamily = hstrToQstr(pkgId.FamilyName());
-                //app.installedLocation = hstrToQstr(pkg.InstalledLocation().Path());
+                app.displayName = loadAppDisplayName(app.appPackageFamily);
 
                 apps.push_back(std::move(app));
+
+                // Early-exit after finding the first app in a family
+                // We only need one app per-family as already explained
                 break;
             }
         }
@@ -105,38 +182,18 @@ std::vector<EnumeratedUwpApp> getUwpApps()
 // session.
 std::optional<winrt::Windows::ApplicationModel::Core::AppListEntry> findApp(const QString &family)
 {
-    winrt::Windows::Management::Deployment::PackageManager packageMgr;
-    // Get the first app for this family arbitrarily (by getting the packages,
-    // taking the first one, then getting the apps for that package).
-    auto packages = packageMgr.FindPackagesForUser({}, qstrToHstr(family));
-    // The for...break looks odd but it's a simple way to get the first item
-    // from a winrt collection or fall back to a default
-    for(const auto &pkg : packages)
-    {
-        auto appsAsync = pkg.GetAppListEntriesAsync();
-        auto appEntries = appsAsync.get();
-        for(const auto &appEntry : appEntries)
-            return {appEntry};
-        break;
-    }
+    auto apps = findAllApps(family);
 
-    return {};
-}
-
-// Load an app's display name - only locates apps for the current user; used by
-// client in user session.
-QString loadAppDisplayName(const QString &family)
-{
-    return convertExceptions([&]{
-        auto app = findApp(family);
-        if(app)
-        {
-            auto appDisplayInfo = app->DisplayInfo();
-            return hstrToQstr(appDisplayInfo.DisplayName());
-        }
-
-        return QString{};
-    });
+    if(!apps.empty())
+        // Only get the first app for a family.
+        // There's normally only one app per family.
+        // One exception is the winCommsApps family which has multiple apps
+        // But we still treat it as a single app here (the split tunnel will exclude/include
+        // all apps in a family as the executables appear in the same manifest file)
+        // The name of the app is a combination of all apps in the family, e.g "Mail, Calendar"
+        return {apps.front()};
+    else
+        return {};
 }
 
 // Load an app's icon - only locates apps for the current user; used by client

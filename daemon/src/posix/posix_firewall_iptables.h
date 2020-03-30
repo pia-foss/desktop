@@ -27,14 +27,26 @@
 
 #include <QString>
 #include <QStringList>
+#include <QHostAddress>
 
+struct FirewallParams;
+
+// Firewall implementation on Linux using iptables.  Note that this also handles
+// some aspects of routing that are closely related to firewall rules.
 class IpTablesFirewall
 {
     CLASS_LOGGING_CATEGORY("iptables")
 public:
     enum IPVersion { IPv4, IPv6, Both };
-    // Table names
-    static QString kFilterTable, kNatTable, kMangleTable, kRtableName, kVpnOnlyRtableName, kRawTable;
+    // Iptables Table names
+    static QString kFilterTable, kNatTable, kMangleTable, kRawTable;
+
+    // Handshake group name
+    static QString kHnsdGroupName;
+
+    // PIA process group names
+    static QString kVpnGroupName;
+
 public:
     using FilterCallbackFunc = std::function<void()>;
 private:
@@ -44,7 +56,7 @@ private:
     static int unlinkChain(IPVersion ip, const QString& chain, const QString& parent, const QString& tableName = kFilterTable);
     static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const FilterCallbackFunc& enableFunc = {}, const FilterCallbackFunc& disableFunc = {});
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
-    static QStringList getDNSRules(const QStringList& servers);
+    static QStringList getDNSRules(const QString &adapterName, const QStringList& servers);
     static void setupTrafficSplitting();
     static void teardownTrafficSplitting();
     static void setupCgroup(const Path &cGroupDir, QString cGroupId, QString packetTag, QString routingTableName);
@@ -55,16 +67,28 @@ private:
     static QString kOutputChain, kRootChain, kPostRoutingChain, kPreRoutingChain;
 
 public:
+    // Install/uninstall the firewall anchors
     static void install();
     static void uninstall();
+    // Activate/deactivate components that only become active when the daemon is
+    // active.  Currently, this is just a routing rule (the firewall proper is
+    // active even when the daemon is not active).
+    static void activate();
+    static void deactivate();
     static bool isInstalled();
     static void ensureRootAnchorPriority(IPVersion ip = Both);
     static void enableAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static void disableAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static bool isAnchorEnabled(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
-    static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName);
-    static void updateDNSServers(const QStringList& servers);
+    static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName = kFilterTable);
+    void updateRules(const FirewallParams &params);
+
+private:
+    // Last state used by updateRules(); allows us to detect when the rules must
+    // be updated
+    QString _adapterName;
+    QStringList _dnsServers;
 };
 
 #endif

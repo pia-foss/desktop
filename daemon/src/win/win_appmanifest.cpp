@@ -23,10 +23,17 @@
 #include "path.h"
 #include <QXmlStreamReader>
 #include <QFile>
+#include <QRegExp>
 
 namespace
 {
     const QString manifestNamespace = QStringLiteral("http://schemas.microsoft.com/appx/manifest/foundation/windows10");
+    const QString mailAppExe = QStringLiteral("HxOutlook.exe");
+
+    // We special-case "Windows Communications Apps" (i.e Mail, Calendar etc)
+    // It uses an extra binary HxTsr.exe for network communication
+    // which does not appear in the applications section of the manifest
+    const QRegExp winCommsApps{QStringLiteral("windowscommunicationsapps")};
 }
 
 bool findXmlStartNode(QXmlStreamReader &xmlReader, const QString &nodeNamespace,
@@ -86,7 +93,20 @@ bool inspectUwpAppManifest(const QString &installDir, AppExecutables &appExes)
 
         const auto &executable = attributes.value({}, QStringLiteral("Executable"));
         if(!executable.isEmpty())
+        {
             appExes.executables.insert(Path{installDir} / executable.toString());
+
+            // Special-case for "Windows Communications Apps" (i.e Calendar, Mail, etc)
+            if(installDir.contains(winCommsApps) &&
+               executable.toString() == mailAppExe)
+            {
+                // Add the HxTsr executable - this is the executable that actually
+                // makes the network requests for the Mail app
+                // HxTsr = Hidden eXecutable To Sync Remote servers.
+                appExes.executables.insert(Path{installDir} / "HxTsr.exe");
+            }
+
+        }
         if(attributes.hasAttribute({}, QStringLiteral("StartPage")))
             appExes.usesWwa = true;
         manifestXml.skipCurrentElement();

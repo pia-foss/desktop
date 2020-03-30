@@ -24,12 +24,11 @@
 #include "win.h"
 #include "version.h"
 #include "brand.h"
+#include "../../../extras/installer/win/service_inl.h"
+#include "../../../extras/installer/win/tun_inl.h"
 
 #include <QString>
 #include <QStringList>
-
-#define SERVICE_LOG qInfo
-#include "../../../extras/installer/win/service.inl"
 
 static SERVICE_STATUS_HANDLE g_statusHandle;
 
@@ -42,7 +41,7 @@ static void serviceMain(int argc, wchar_t** argv)
 {
     if (HRESULT error = ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))
         qFatal("CoInitializeEx failed with error 0x%08x.", error);
-    if (!(g_statusHandle = ::RegisterServiceCtrlHandlerExW(L"" SERVICE_NAME, serviceCtrlHandler, nullptr)))
+    if (!(g_statusHandle = ::RegisterServiceCtrlHandlerExW(PIA_SERVICE, serviceCtrlHandler, nullptr)))
         qFatal("Unable to register service control handler");
     reportStatus(SERVICE_START_PENDING);
 
@@ -139,7 +138,7 @@ WinService::RunResult WinService::tryRun()
 {
     static SERVICE_TABLE_ENTRYW table[] =
     {
-        { L"" SERVICE_NAME, [](DWORD argc, LPWSTR *argv) { serviceMain(argc, argv); } },
+        { PIA_SERVICE, [](DWORD argc, LPWSTR *argv) { serviceMain(argc, argv); } },
         { NULL, NULL }
     };
 
@@ -164,24 +163,73 @@ WinService::RunResult WinService::tryRun()
     }
 }
 
+int getSvcStatusExitCode(ServiceStatus status)
+{
+    switch(status)
+    {
+        case ServiceInstalled:
+        case ServiceUpdated:
+        case ServiceStarted:
+        case ServiceAlreadyStarted:
+        case ServiceStopped:
+        case ServiceAlreadyStopped:
+        case ServiceStoppedAndUninstalled:
+        case ServiceUninstalled:
+        case ServiceNotInstalled:
+            // Successful codes
+            return 0;
+        default:
+        case ServiceInstallFailed:
+        case ServiceUpdateFailed:
+        case ServiceStartFailed:
+        case ServiceStopFailed:
+        case ServiceUninstallFailed:
+        case ServiceTimeout:
+            // Failures
+            return 2;
+        case ServiceRebootNeeded:
+            // Reboot required to complete operation.  This rarely occurs; it's
+            // treated as a value between failure and success.
+            return 1;
+    }
+}
+
 int WinService::installService()
 {
-    return ::installService(qUtf16Printable(QCoreApplication::applicationFilePath()));
+    // Install both the daemon and Wireguard services.  This is used by the
+    // installer to roll back to a prior installation.  (It can also be used to
+    // repair an installation, but usually it's recommended to just re-run the
+    // installer.)
+    auto daemonStatus = ::installDaemonService(qUtf16Printable(QCoreApplication::applicationFilePath()));
+    ServiceStatus wireguardStatus{ServiceStatus::ServiceInstalled};
+    // Install the WireGuard service only if supported
+    if(isWintunSupported())
+    {
+        wireguardStatus = ::installWireguardService(qUtf16Printable(Path::WireguardServiceExecutable),
+                                                    qUtf16Printable(Path::DaemonDataDir));
+    }
+    return std::max(getSvcStatusExitCode(daemonStatus), getSvcStatusExitCode(wireguardStatus));
 }
 
 int WinService::uninstallService()
 {
-    return ::uninstallService();
+    // Uninstall both the daemon and Wireguard services.  This command isn't
+    // really used - the installer/uninstaller don't use it, and it's not often
+    // used for troubleshooting - but it's here in case something really goes
+    // wrong that requires manual repair.
+    auto daemonStatus = ::uninstallService(g_daemonServiceParams.pName);
+    auto wireguardStatus = ::uninstallService(g_wireguardServiceParams.pName);
+    return std::max(getSvcStatusExitCode(daemonStatus), getSvcStatusExitCode(wireguardStatus));
 }
 
 int WinService::startService()
 {
-    return ::startService();
+    return ::startService(g_daemonServiceParams.pName);
 }
 
 int WinService::stopService()
 {
-    return ::stopService();
+    return ::stopService(g_daemonServiceParams.pName);
 }
 
 

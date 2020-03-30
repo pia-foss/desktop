@@ -23,104 +23,16 @@
 #include "wfp_filters.h"
 #include "win_appmanifest.h"
 #include "win/win_winrtloader.h"
+#include "win_interfacemonitor.h"
 #include "path.h"
 #include "win.h"
-#include "../../extras/installer/win/tap.inl"
+#include "../../../extras/installer/win/tap_inl.h"
+#include "../../../extras/installer/win/tun_inl.h"
 
 // The 'bind' callout GUID is the GUID used in 1.7 and earlier; the WFP callout
 // only handled the bind layer in those releases.
 GUID PIA_WFP_CALLOUT_BIND_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
 GUID PIA_WFP_CALLOUT_CONNECT_V4 = { 0xb80ca14a, 0xa807, 0x4ef2, { 0x87, 0x2d, 0x4b, 0x1a, 0x51, 0x82, 0x54, 0x2 } };
-
-void WinNetworkAdapter::setMetricToLowest()
- {
-    if (!luid) return;
-
-    qDebug() << "Attempting to set metric to a low value!";
-    auto currentMetricIPv4 = getMetric(AF_INET);
-    auto currentMetricIPv6 = getMetric(AF_INET6);
-
-    if (currentMetricIPv4 != interfaceMetric && currentMetricIPv4 != -1) {
-       _savedMetricValueIPv4 = currentMetricIPv4;
-       setMetric(AF_INET, interfaceMetric);
-    }
-
-    if (currentMetricIPv6 != interfaceMetric && currentMetricIPv6 != -1) {
-        _savedMetricValueIPv6 = currentMetricIPv6;
-        setMetric(AF_INET6, interfaceMetric);
-    }
-}
-
-void WinNetworkAdapter::restoreOriginalMetric()
-{
-    if (!luid) return;
-
-    qDebug() << "Attempting to restore saved interface metric!";
-
-    if (_savedMetricValueIPv4 > -1) {
-        setMetric(AF_INET, _savedMetricValueIPv4);
-        _savedMetricValueIPv4 = -1;
-    }
-
-    if (_savedMetricValueIPv6 > -1) {
-        setMetric(AF_INET6, _savedMetricValueIPv6);
-        _savedMetricValueIPv6 = -1;
-    }
-}
-
-void WinNetworkAdapter::setMetric(const ADDRESS_FAMILY family, ULONG metric)
-{
-    DWORD err = 0;
-    MIB_IPINTERFACE_ROW ipiface;
-    InitializeIpInterfaceEntry(&ipiface);
-    ipiface.Family = family;
-    ipiface.InterfaceLuid.Value = luid;
-    err = GetIpInterfaceEntry(&ipiface);
-
-    if (err != NO_ERROR) {
-        qError() << "Error retrieving interface with GetIpInterfaceEntry: code:" << err;
-        return;
-    }
-
-    if (family == AF_INET) {
-        /* required for IPv4 as per MSDN */
-        ipiface.SitePrefixLength = 0;
-    }
-
-    ipiface.Metric = metric;
-
-    if (metric == 0) {
-       ipiface.UseAutomaticMetric = TRUE;
-    } else {
-       ipiface.UseAutomaticMetric = FALSE;
-    }
-
-    err = SetIpInterfaceEntry(&ipiface);
-
-    if (err != NO_ERROR) {
-        qError() << "Error setting interface metric with SetIpInterfaceEntry: code:" << err;
-        return;
-    }
-}
-
-int WinNetworkAdapter::getMetric(const ADDRESS_FAMILY family)
-{
-    DWORD err = 0;
-    MIB_IPINTERFACE_ROW ipiface;
-    InitializeIpInterfaceEntry(&ipiface);
-    ipiface.Family = family;
-    ipiface.InterfaceLuid.Value = luid;
-    err = GetIpInterfaceEntry(&ipiface);
-    if (err != NO_ERROR) {
-        qError() << "Error retrieving interface with GetIpInterfaceEntry: code:" << err;
-        return -1;
-    }
-    if (ipiface.UseAutomaticMetric) {
-        return 0;
-    } else {
-       return (int)ipiface.Metric;
-    }
-}
 
 WinUnbiasedDeadline::WinUnbiasedDeadline()
     : _expireTime{getUnbiasedTime()} // Initially expired
@@ -154,40 +66,12 @@ std::chrono::microseconds WinUnbiasedDeadline::remaining() const
     return std::chrono::microseconds{(_expireTime - now) / 10};
 }
 
-void WINAPI WinDaemon::ipChangeCallback(PVOID callerContext,
-                                        PMIB_IPINTERFACE_ROW pRow,
-                                        MIB_NOTIFICATION_TYPE notificationType)
-{
-    // Figure out if this change means that we should re-check whether the TAP
-    // adapter still exists.
-    // We re-check it for any add or delete notification.  In principle we could
-    // attempt to figure out whether it actually affects an adapter that we care
-    // about, but this is straightforward enough and adapter adds/deletes are
-    // not common.
-    // Note that pRow only has a few fields filled in; the doc explains how you
-    // would use it to actually get a full MIB_IPINTERFACE_ROW:
-    // https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-notifyipinterfacechange
-    Q_UNUSED(pRow);
-    if(notificationType == MibAddInstance ||
-        notificationType == MibDeleteInstance ||
-        notificationType == MibInitialNotification)
-    {
-        // This callback occurs on a worker thread specifically for this
-        // purpose.  Queue a call over to WinDaemon on the service thread.
-        WinDaemon *pThis = reinterpret_cast<WinDaemon*>(callerContext);
-        Q_ASSERT(pThis);    // Ensured by WinDaemon ctor
-        QMetaObject::invokeMethod(pThis, &WinDaemon::checkNetworkAdapter,
-                                  Qt::QueuedConnection);
-    }
-}
-
 WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
     : Daemon(arguments, parent)
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
     , _hnsdAppId{nullptr, Path::HnsdExecutable}
     , _lastConnected{false}
-    , _ipNotificationHandle(nullptr)
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
 {
     _filters = FirewallFilters{};
@@ -204,13 +88,10 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
         _firewall->removeAll();
     }
 
-    auto notifyResult = ::NotifyIpInterfaceChange(AF_UNSPEC, &ipChangeCallback,
-                                                  reinterpret_cast<void*>(this),
-                                                  TRUE, &_ipNotificationHandle);
-    if(notifyResult != NO_ERROR)
-    {
-        qWarning() << "Couldn't enable interface change notifications:" << notifyResult;
-    }
+    connect(&WinInterfaceMonitor::instance(), &WinInterfaceMonitor::changed,
+            this, &WinDaemon::checkNetworkAdapter);
+    // Check the initial state now
+    checkNetworkAdapter();
 
     connect(&_wfpCalloutMonitor, &ServiceMonitor::serviceStateChanged, this,
             [this](DaemonState::NetExtensionState extState)
@@ -219,6 +100,13 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
             });
     state().netExtensionState(qEnumToString(_wfpCalloutMonitor.lastState()));
     qInfo() << "Initial callout driver state:" << state().netExtensionState();
+
+    state().wireguardAvailable(isWintunSupported());
+    // There's no way to be notified when WinTUN is installed or uninstalled.
+    // pia-service.exe hints to us using the checkDriverState RPC if it performs
+    // a TUN installation, and WireguardServiceBackend hints to us to re-check
+    // in some cases.
+    checkWintunInstallation();
 
     connect(this, &Daemon::aboutToConnect, this, &WinDaemon::onAboutToConnect);
 
@@ -253,26 +141,16 @@ WinDaemon::~WinDaemon()
     else
         qInfo() << "Firewall was not initialized, nothing to clean up";
 
-    if(_ipNotificationHandle)
-    {
-        qInfo() << "Closing IP interface change callback";
-        // Cancel the IP interface change callback.  This ends the thread that
-        // is used to call the callback (and ensures we don't get a callback
-        // with a 'this' that's no longer valid).
-        ::CancelMibChangeNotify2(_ipNotificationHandle);
-    }
-    else
-        qInfo() << "IP interface change callback was not initialized, nothing to clean up";
-
     qInfo() << "WinDaemon shutdown complete";
 }
 
-QSharedPointer<NetworkAdapter> WinDaemon::getNetworkAdapter()
+std::shared_ptr<NetworkAdapter> WinDaemon::getNetworkAdapter()
 {
     // For robustness, when making a connection, we always re-query for the
     // network adapter, in case the change notifications aren't 100% reliable.
     // Also update the DaemonState accordingly to keep everything in sync.
-    auto adapters = getAllNetworkAdapters();
+    auto adapters = WinInterfaceMonitor::getAllNetworkAdapters(L"Private Internet Access Network Adapter",
+                                                               &IP_ADAPTER_ADDRESSES::Description);
     if (adapters.size() == 0)
     {
         auto remainingGracePeriod = _resumeGracePeriod.remaining().count();
@@ -291,51 +169,6 @@ QSharedPointer<NetworkAdapter> WinDaemon::getNetworkAdapter()
     // entering the grace period after the "suspend" notification).
     state().tapAdapterMissing(false);
     return adapters[0];
-}
-
-QList<QSharedPointer<WinNetworkAdapter>> WinDaemon::getAllNetworkAdapters()
-{
-    QList<QSharedPointer<WinNetworkAdapter>> adapters;
-
-    int iterations = 0;
-
-    ULONG error;
-    ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_INCLUDE_WINS_INFO | GAA_FLAG_INCLUDE_GATEWAYS;
-    ULONG size = 15000;
-
-    IP_ADAPTER_ADDRESSES* addresses = NULL;
-
-    do
-    {
-        if (NULL == (addresses = (IP_ADAPTER_ADDRESSES*)malloc(size)))
-            throw SystemError(HERE, ERROR_NOT_ENOUGH_MEMORY);
-
-        if ((error = GetAdaptersAddresses(AF_UNSPEC, flags, NULL, addresses, &size)) != ERROR_BUFFER_OVERFLOW)
-            break;
-
-        free(addresses);
-        addresses = NULL;
-
-    } while (++iterations < 3);
-
-    if (error != ERROR_SUCCESS)
-        throw SystemError(HERE, error);
-
-    for (auto address = addresses; address; address = address->Next)
-    {
-        if (address->Description && wcsstr(address->Description, L"Private Internet Access Network Adapter") != NULL)
-        {
-            auto adapter = QSharedPointer<WinNetworkAdapter>::create(address->AdapterName);
-            adapter->luid = address->Luid.Value;
-            adapter->ifIndex = address->IfIndex;
-            adapter->adapterName = QString::fromWCharArray(address->Description);
-            adapter->connectionName = QString::fromWCharArray(address->FriendlyName);
-            adapter->isCustomTap = true;
-            adapters.append(std::move(adapter));
-        }
-    }
-    free(addresses);
-    return adapters;
 }
 
 void WinDaemon::checkNetworkAdapter()
@@ -492,8 +325,8 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     if (!_firewall)
         return;
 
-    QString dnsServers[2] { params.dnsServers.value(0), params.dnsServers.value(1) }; // default-constructed if missing
-    auto networkAdapter = params.adapter.staticCast<WinNetworkAdapter>();
+    QString dnsServers[2] { params.effectiveDnsServers.value(0), params.effectiveDnsServers.value(1) }; // default-constructed if missing
+    auto networkAdapter = std::static_pointer_cast<WinNetworkAdapter>(params.adapter);
 
     FirewallTransaction tx(_firewall);
 
@@ -553,8 +386,9 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     logFilter("blockAll(IPv6)", _filters.blockAll[1], params.blockAll || params.blockIPv6);
     updateBooleanFilter(blockAll[1], params.blockAll || params.blockIPv6, EverythingFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(params.blockIPv6 ? 4 : 0));
 
-    // Exempt traffic going over the TAP adapter used by OpenVPN.
-    UINT64 luid = networkAdapter ? networkAdapter->luid : 0;
+    // Exempt traffic going over the VPN adapter.  This is the TAP adapter for
+    // OpenVPN, or the WinTUN adapter for Wireguard.
+    UINT64 luid = networkAdapter ? networkAdapter->luid() : 0;
     logFilter("allowVPN", _filters.permitAdapter, luid && params.allowVPN, luid != _filterAdapterLuid);
     updateBooleanInvalidateFilter(permitAdapter[0], luid && params.allowVPN, luid != _filterAdapterLuid, InterfaceFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(luid, 2));
     updateBooleanInvalidateFilter(permitAdapter[1], luid && params.allowVPN, luid != _filterAdapterLuid, InterfaceFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(luid, 2));
@@ -597,6 +431,10 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     updateBooleanFilter(permitPIA[2], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::OpenVPNExecutable, 15));
     updateBooleanFilter(permitPIA[3], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::SupportToolExecutable, 15));
     updateBooleanFilter(permitPIA[4], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::SsLocalExecutable, 15));
+    // Although the Wireguard service creates its own 'permit' rules, they're in
+    // a different sublayer, we need to permit it through our sublayer too.  See
+    // wireguardservicebackend.cpp
+    updateBooleanFilter(permitPIA[5], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::WireguardServiceExecutable, 15));
 
     // Handshake related filters
     // (1) First we block everything coming from the handshake process
@@ -902,9 +740,12 @@ QJsonValue WinDaemon::RPC_inspectUwpApps(const QJsonArray &familyIds)
     return result;
 }
 
-void WinDaemon::RPC_checkCalloutState()
+void WinDaemon::RPC_checkDriverState()
 {
+    // Re-check the WFP callout state, this is only relevant on Win 10 1507
     _wfpCalloutMonitor.doManualCheck();
+
+    checkWintunInstallation();
 }
 
 void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
@@ -912,6 +753,7 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("OS Version", "wmic", QStringLiteral("os get Caption,CSDVersion,BuildNumber,Version /value"));
     file.writeCommand("Interfaces (ipconfig)", "ipconfig", QStringLiteral("/all"));
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringLiteral("-nr"));
+    file.writeCommand("DNS configuration", "netsh", QStringLiteral("interface ipv4 show dnsservers"));
 
     // WFP (windows firewall) filter information. We need to process it as the raw data is XML.
     file.writeCommand("WFP filters", "netsh", QStringLiteral("wfp show filters dir = out file = -"),
@@ -942,4 +784,35 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         file.writeCommand(title, "netsh", cmdParams);
         ++i;
     }
+
+    // Wireguard logs
+    file.writeCommand("WireGuard Logs", Path::WireguardServiceExecutable,
+                      QStringList{QStringLiteral("/dumplog"), Path::ConfigLogFile});
+}
+
+void WinDaemon::checkWintunInstallation()
+{
+    const auto &installedProducts = findInstalledWintunProducts();
+    qInfo() << "WinTUN installed products:" << installedProducts.size();
+    for(const auto &product : installedProducts)
+        qInfo() << "-" << product;
+    _state.wintunMissing(installedProducts.empty());
+}
+
+void WinDaemon::wireguardServiceFailed()
+{
+    // If the connection failed after the WG service was started, check whether
+    // WinTUN is installed, it might be due to a lack of the driver.  We don't
+    // do this for other failures, there's no need to do it for every attempt if
+    // we can't reach the server at all to authenticate.
+    checkWintunInstallation();
+}
+
+void WinDaemon::wireguardConnectionSucceeded()
+{
+    // Only re-check WinTUN if we thought it was missing.  It is likely present
+    // now since the connection succeeded.  This avoids doing this
+    // potentially-expensive check in the normal case.
+    if(_state.wintunMissing())
+        checkWintunInstallation();
 }

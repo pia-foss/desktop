@@ -27,6 +27,23 @@
 #include "settings.h"
 #include <QObject>
 
+// SERVICE_NOTIFY_2W that also cleans up its pszServiceNames when destroyed.
+class WinServiceNotify : public SERVICE_NOTIFY_2W
+{
+public:
+    WinServiceNotify() : SERVICE_NOTIFY_2W{} {}
+    ~WinServiceNotify()
+    {
+        if(pszServiceNames)
+            ::LocalFree(pszServiceNames);
+    }
+
+private:
+    // Not copiable due to pszServiceNames ownership
+    WinServiceNotify(const WinServiceNotify &) = delete;
+    WinServiceNotify &operator=(const WinServiceNotify &) = delete;
+};
+
 // ServiceMonitor keeps track of whether a given service is installed.  It does
 // _not_ track whether the service is running - this is used to monitor kernel
 // driver services, and SCM cannot notify state changes for those.
@@ -42,24 +59,6 @@ class ServiceMonitor : public QObject
 {
     Q_OBJECT
     CLASS_LOGGING_CATEGORY("win.servicemonitor");
-
-private:
-    // SERVICE_NOTIFY_2W that also cleans up its pszServiceNames when destroyed.
-    class WinServiceNotify : public SERVICE_NOTIFY_2W
-    {
-    public:
-        WinServiceNotify() : SERVICE_NOTIFY_2W{} {}
-        ~WinServiceNotify()
-        {
-            if(pszServiceNames)
-                ::LocalFree(pszServiceNames);
-        }
-
-    private:
-        // Not copiable due to pszServiceNames ownership
-        WinServiceNotify(const WinServiceNotify &) = delete;
-        WinServiceNotify &operator=(const WinServiceNotify &) = delete;
-    };
 
 public:
     using NetExtensionState = DaemonState::NetExtensionState;

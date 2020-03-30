@@ -186,229 +186,250 @@
         <translation>버전 %1 다운로드 실패.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="71"/>
-        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
-        <translation>가상 네트워크 어댑터가 설치되지 않았습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="74"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="73"/>
         <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
         <translation>VPN 터널용 TAP 어댑터가 설치되지 않았습니다.  설정에서 다시 설치할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="78"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="135"/>
-        <source>ClientNotifications --- Reinstall</source>
-        <translation>다시 설치</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="111"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="85"/>
         <source>ClientNotifications --- Restart to complete installation.</source>
         <translation>설치를 완료하려면 다시 시작하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="112"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="86"/>
         <source>ClientNotifications --- The system must be restarted before you can connect.</source>
         <translation>연결하려면 먼저 시스템을 다시 시작해야 합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="123"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="99"/>
+        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
+        <translation>VPN 터널용 WinTUN 어댑터가 설치되지 않았습니다.  설정에서 다시 설치할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="112"/>
         <source>ClientNotifications --- The split tunnel filter is not installed.</source>
         <translation>분할 터널 필터가 설치되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="124"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="113"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
         <translation>앱 제외 기능은 분할 터널 필터를 필요로 합니다.  설정에서 다시 설치하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="149"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="124"/>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
+        <source>ClientNotifications --- Reinstall</source>
+        <translation>다시 설치</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="138"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
         <translation>앱 제외 기능은 분할 터널 필터를 필요로 합니다.  설치를 완료하려면 다시 시작하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="164"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="153"/>
         <source>ClientNotifications --- Connection refused.</source>
         <translation>연결이 거부되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="170"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="159"/>
         <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
         <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
         <translation>서버가 연결을 거부했습니다.  사용자 이름과 비밀번호를 확인하고, 계정이 만료되지 않았는지 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="179"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="168"/>
         <source>ClientNotifications --- Could not configure DNS.</source>
         <translation>DNS를 구성하지 못했습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="180"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="169"/>
         <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
         <translation>자세한 사항을 보려면 디버그 로깅을 활성화하고 데몬 로그를 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="183"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="172"/>
         <source>ClientNotifications --- Daemon Log</source>
         <translation>데몬 로그</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="185"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="217"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="276"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="331"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="174"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="206"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="265"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="333"/>
         <source>ClientNotifications --- Settings</source>
         <translation>설정</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="193"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="182"/>
         <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
         <translation>/usr/bin/xdg-open을 실행하지 못했습니다. 다음 위치에서 데몬 로그 파일을 여세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="210"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="199"/>
         <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
         <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>Handshake에 연결할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="214"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="203"/>
         <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
         <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>Handshake를 통해 이름 확인을 설정할 수 없습니다. 계속 기다리거나 다른 이름 서버 설정을 사용해 보세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="228"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="217"/>
         <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
         <translation>PIA를 관리자로 실행하는 것은 권장하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="229"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="218"/>
         <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
         <translation>PIA를 관리자로 실행하면 시스템 가동 시 자동 실행 작동을 차단하고 그 외에 다른 문제도 일으킬 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="241"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="230"/>
         <source>ClientNotifications --- KILLSWITCH ENABLED</source>
         <translation>킬 스위치가 활성화됨</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="242"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="231"/>
         <source>ClientNotifications --- Killswitch is enabled.</source>
         <translation>킬 스위치가 활성화되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="243"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="232"/>
         <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
         <translation>설정에서 킬 스위치 기능이 활성화되어서 인터넷 접속이 차단되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="235"/>
         <source>ClientNotifications --- Change</source>
         <translation>변경</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="259"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="248"/>
         <source>ClientNotifications --- RECONNECTING...</source>
         <translation>다시 연결 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="260"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="249"/>
         <source>ClientNotifications --- The connection to the VPN server was lost.</source>
         <translation>VPN 서버의 연결이 끊겼습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="269"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="287"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="258"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="276"/>
         <source>ClientNotifications --- CONNECTING...</source>
         <translation>연결 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="272"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="261"/>
         <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
         <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
         <translation>프록시에 연결할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="273"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="262"/>
         <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
         <translation>프록시에 연결할 수 없습니다. 프록시 설정을 확인하고, 프록시를 사용할 수 있는지 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="288"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="277"/>
         <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
         <translation>VPN 서버에 접속할 수 없습니다.  연결 상태를 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="286"/>
         <source>ClientNotifications --- RECONNECT NEEDED</source>
         <translation>재연결 필요</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="298"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="287"/>
         <source>ClientNotifications --- Reconnect to apply settings.</source>
         <translation>설정을 적용하려면 다시 연결하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="299"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="288"/>
         <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
         <translation>다시 연결할 때까지 설정 변경 사항의 일부는 적용되지 않습니다. 지금 다시 연결하려면 클릭하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="319"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+        <source>ClientNotifications --- Connected with OpenVPN.</source>
+        <translation>OpenVPN으로 연결됨.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="300"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
+        <translation>처음 로그인할 때 OpenVPN으로 연결됨. WireGuard를 사용해 다시 연결하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="302"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
+        <translation>처음 로그인할 때 OpenVPN으로 연결됨.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="321"/>
         <source>ClientNotifications --- Connected using %1 port %2.</source>
         <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
         <translation>%1 포트 %2을(를) 사용해 연결됨</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="326"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="328"/>
         <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
         <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
         <translation>다른 설정 시도가 활성화되었습니다. %1 포트 %2(으)로 서버에 연결할 수 없어서 %3 포트 %4이(가) 대신 사용되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="340"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="342"/>
         <source>ClientNotifications --- Subscription expires in %1 days.</source>
         <translation>%1일 후 구독이 만료됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="343"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="345"/>
         <source>ClientNotifications --- Renew</source>
         <translation>갱신</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="357"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="359"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
         <translation>로그인 서버에 접속할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="361"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="363"/>
         <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
         <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
         <translation>계정 정보를 사용할 수 없습니다. 하지만, VPN에는 여전히 연결할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="365"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="367"/>
         <source>ClientNotifications --- Retry</source>
         <translation>다시 시도</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="375"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Access가 업데이트되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="376"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="378"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>새로운 기능 보기</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="393"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="395"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>애플리케이션이 예기치 않게 종료되었습니다. VPN 연결은 보존되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
+        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
+        <translation>가상 네트워크 어댑터가 설치되지 않았습니다.</translation>
     </message>
 </context>
 <context>
@@ -468,164 +489,216 @@
 <context>
     <name>ConnectionPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="26"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="142"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>프로토콜: </translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>18년 이상의 오픈 소스 개발 경험과 신뢰할 수 있고 안정적인 보안 프로토콜.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>성능 향상이 가능한 더 새롭고 효율적인 프로토콜.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="93"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>OpenVPN® 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>WireGuard® 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="132"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>상표</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="146"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>이 설정이 의미하는 것은 무엇입니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="162"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>모든 제품 및 회사 이름은 각 소유자의 상표™ 또는 등록® 상표입니다. 이를 사용함이 해당 회사와의 제휴 또는 해당 회사의 승인이 있음을 의미하지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="164"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN®은 OpenVPN Technologies, Inc의 상표입니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard®는 개인인 Jason A. Donenfeld의 상표입니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="26"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
         <source>ConnectionPage --- Default</source>
         <translation>기본값</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="64"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="72"/>
         <source>ConnectionPage --- Connection Type</source>
         <translation>연결 유형</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="75"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="75"/>
         <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
         <translation>Shadowsocks 프록시 설정은 TCP를 필요로 합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="90"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="90"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="95"/>
         <source>ConnectionPage --- Remote Port</source>
         <translation>원격 포트</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="101"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="101"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
         <source>ConnectionPage --- Local Port</source>
         <translation>로컬 포트</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="113"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="113"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
         <source>ConnectionPage --- Auto</source>
         <translation>자동</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="117"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="117"/>
         <source>ConnectionPage --- Configuration Method</source>
         <translation>구성 방법</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="124"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="124"/>
         <source>ConnectionPage --- DHCP</source>
         <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
         <translation>DHCP</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="128"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="128"/>
         <source>ConnectionPage --- Static</source>
         <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
         <translation>고정 주소</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="133"/>
         <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
         <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
         <translation>TAP 어댑터에서 주소가 구성되는 방식을 결정합니다. 연결하는 데 문제가 있을 경우 다른 방법이 더 안정적일 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="142"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
         <source>ConnectionPage --- Data Encryption</source>
         <translation>데이터 암호화</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="149"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="163"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="56"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="149"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="163"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
         <source>ConnectionPage --- None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>경고: 트래픽이 암호화되지 않은 채 전송되어서 외부로부터의 공격에 취약합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="158"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="158"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
         <source>ConnectionPage --- Data Authentication</source>
         <translation>데이터 인증</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="165"/>
         <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
         <translation>경고: 트래픽이 인증되지 않아서 외부로부터의 조작에 취약합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="177"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="177"/>
         <source>ConnectionPage --- Handshake</source>
         <translation>핸드셰이크</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="187"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="187"/>
         <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
         <translation>이 핸드셰이크는 미국 표준 기관이 추천한 타원곡선을 사용합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="37"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>작은 패킷 사용</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="41"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>VPN 연결에 더 작은 MTU를 설정합니다. 이로 인하여 전송 속도가 느려질 수 있지만, 연결 상태가 불량한 경우 안정성이 개선됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="206"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="206"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>다른 설정 시도</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="215"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="215"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>위의 연결 유형 및 원격 포트를 사용할 수 없을 경우 다른 설정을 자동으로 시도합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="223"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="223"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>프록시가 설정된 경우 대체 설정을 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="236"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>이 설정이 의미하는 것은 무엇입니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="19"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>프록시</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="45"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>SOCKS5 프록시...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="104"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>SOCKS5 프록시</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="129"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>서버 IP 주소</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
         <source>ConnectionPage --- Port</source>
         <translation>포트</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="148"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>사용자 (선택 사항)</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="155"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>비밀번호 (선택 사항)</translation>
     </message>
@@ -1007,27 +1080,27 @@
 <context>
     <name>Error</name>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="36"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="40"/>
         <source>Error --- Unknown error</source>
         <translation>알 수 없는 오류</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="37"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
         <source>Error --- System error %1: %2</source>
         <translation>시스템 오류 %1: %2</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="37"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
         <source>Error --- System error %1 inside %3: %2</source>
         <translation>%3 내부 시스템 오류 %1: %2</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="38"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="42"/>
         <source>Error --- Unknown error code %1</source>
         <translation>알 수 없는 오류 코드 %1</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="46"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="50"/>
         <source>Error --- No additional information available.</source>
         <translation>이용 가능한 추가 정보가 없습니다.</translation>
     </message>
@@ -1341,80 +1414,90 @@
         <translation>유지 관리</translation>
     </message>
     <message>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="236"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>OpenVPN 네트워크 어댑터 다시 설치</translation>
+    </message>
+    <message>
         <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
-        <source>HelpPage --- Reinstalling Network Adapter...</source>
-        <translation>네트워크 어댑터를 다시 설치하는 중...</translation>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>OpenVPN 네트워크 어댑터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>연결 해제를 기다리는 중...</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="247"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>WireGuard 네트워크 어댑터 다시 설치</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Reinstall Network Adapter</source>
-        <translation>네트워크 어댑터 다시 설치</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="248"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>WireGuard 네트워크 어댑터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>연결된 동안은 네트워크 어댑터를 다시 설치할 수 없습니다. 지금 연결을 해제하고 다시 설치하시겠습니까?</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="271"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>분할 터널 필터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>연결 해제 필요</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="272"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>분할 터널 필터 다시 설치</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="284"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>네트워크 어댑터가 다시 설치되었습니다.</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="311"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>분할 터널 필터가 다시 설치되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>네트워크 어댑터가 다시 설치되었습니다. 시스템을 다시 부팅해야 합니다.</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="334"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>Private Internet Access 제거</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="290"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>네트워크 어댑터를 다시 설치하는 중 오류가 발생했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="375"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>터미널에서 명령을 실행하지 못했습니다. x-terminal-emulator와 호환되는 터미널을 설치하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="302"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="377"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>터미널을 열 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="331"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>분할 터널 필터를 다시 설치하는 중...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="332"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>분할 터널 필터 다시 설치</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="371"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>분할 터널 필터가 다시 설치되었습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="394"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>Private Internet Access 제거</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="427"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="386"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>연결 해제를 기다리는 중...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>연결된 동안은 네트워크 어댑터를 다시 설치할 수 없습니다. 지금 연결을 해제하고 다시 설치하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>연결 해제 필요</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>네트워크 어댑터가 다시 설치되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>네트워크 어댑터가 다시 설치되었습니다. 시스템을 다시 부팅해야 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>네트워크 어댑터를 다시 설치하는 중 오류가 발생했습니다.</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
@@ -1452,13 +1535,13 @@
         <translation>포트 전달</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="162"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="173"/>
         <source>IPModule --- Failed</source>
         <extracomment>Port forward - label used in IP widget when request fails</extracomment>
         <translation>실패</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="165"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="176"/>
         <source>IPModule --- Not Available</source>
         <extracomment>Port forward - label used in IP widget when not available for this region</extracomment>
         <translation>이용 불가</translation>
@@ -1686,72 +1769,72 @@
         <translation>VPN IP에서 사용자의 컴퓨터로 포트를 전달합니다. 사용자를 대신해서 포트가 선택됩니다. 모든 위치에서 포트 전달이 지원되는 것은 아닙니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="184"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="191"/>
         <source>NetworkPage --- Allow LAN Traffic</source>
         <translation>LAN 트래픽 허용</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="185"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="192"/>
         <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
         <translation>VPN 킬 스위치를 사용하는 때에도 로컬 네트워크에서 장치들 사이에 트래픽을 항시 허용합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="205"/>
         <source>NetworkPage --- Choose which applications use the VPN.</source>
         <extracomment>Description for the split tunnel setting.</extracomment>
         <translation>VPN을 사용할 애플리케이션을 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="209"/>
         <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
         <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
         <translation>VPN 우회 - 앱은 항상 인터넷에 직접 연결합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="207"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="214"/>
         <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
         <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
         <translation>VPN 전용 - PIA가 열려 있고 VPN이 연결되어 있을 때에만 앱이 연결할 수 있습니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="213"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="308"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="320"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>분할 터널</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="239"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="247"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>이 기능을 활성화하려면 분할 터널 확장을 승인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="250"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="258"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>보안 기본 설정</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="364"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="382"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>분할 터널 필터 설치 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="373"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="391"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>이 기능을 활성화하면 분할 터널 필터가 설치됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="380"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="398"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>분할 터널 필터가 설치되지 않았습니다.  도움말 페이지에서 다시 설치하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="441"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="446"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="463"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="468"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>앱 제외</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="487"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="512"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>변경 사항이 적용되려면 앱을 다시 시작해야 할 수 있습니다.</translation>
     </message>
@@ -2186,37 +2269,37 @@
 <context>
     <name>PrivacyPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="24"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="25"/>
         <source>PrivacyPage --- VPN Killswitch</source>
         <extracomment>Label for the setting that controls the VPN killswitch, a privacy feature that prevents network traffic from leaving the user&apos;s computer unless it is going through the VPN. The term &quot;killswitch&quot; is a recognizable term in the VPN industry that gets used in marketing and can be left unlocalized if there is no clear translation for the concept.</extracomment>
         <translation>VPN 킬 스위치</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="26"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="27"/>
         <source>PrivacyPage --- Prevent leaks by blocking traffic outside the VPN</source>
         <extracomment>Descriptive label for the VPN killswitch setting.</extracomment>
         <translation>VPN 외부의 트래픽을 차단하여 유출을 방지합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="34"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="35"/>
         <source>PrivacyPage --- Off: Don&apos;t block any traffic</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Off&quot;. No network traffic is blocked and the user&apos;s privacy can potentially be compromised if the VPN connection unexpectedly drops.</extracomment>
         <translation>끔: 트래픽을 차단하지 않습니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="39"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="40"/>
         <source>PrivacyPage --- Auto: Block outside traffic when the VPN is on</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Auto&quot;. Network traffic that tries to go outside the VPN is blocked as long as the user has turned on the VPN, including if the actual VPN connection itself unexpectedly drops.</extracomment>
         <translation>자동: VPN이 켜져 있을 때 외부 트래픽을 차단합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="44"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="45"/>
         <source>PrivacyPage --- Always: Also block all traffic when the VPN is off</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Always&quot;. Network traffic that tries to go outside the VPN is always blocked, even when the user has switched off the VPN. This effectively disables the user&apos;s internet connection whenever they are not connected to the VPN.</extracomment>
         <translation>항상: VPN이 꺼져 있을 때에도 모든 트래픽을 차단합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage -- privacy-killswitch --- Off</source>
         
         <extracomment>These values are used for the Killswitch setting.</extracomment>
@@ -2224,32 +2307,32 @@
         <comment>privacy-killswitch</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage --- Auto</source>
         <translation>자동</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage --- Always</source>
         <translation>항상</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="70"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>PIA MACE가 작동하려면 PIA DNS를 사용해야 합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="65"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="74"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>PIA MACE</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="66"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="75"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>광고, 트래커, 맬웨어가 사용된 도메인을 차단합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
@@ -2257,7 +2340,7 @@
         <comment>privacy-mace</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
         <source>PrivacyPage --- On</source>
         <translation>켬</translation>
     </message>
@@ -2265,25 +2348,25 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="23"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
         <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
         <translation>추가 위치를 통해 VPN 연결을 리디렉션합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="40"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="52"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 프록시 - %1</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="60"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="67"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
         <source>ProxyPage --- Configure...</source>
         <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
         <translation>설정...</translation>
@@ -2398,23 +2481,23 @@
         <translation>VPN 서버</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="123"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="131"/>
         <source>RegionModule --- VIA SOCKS5 PROXY</source>
         <translation>SOCKS5 프록시 경유</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="125"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="133"/>
         <source>RegionModule --- VIA SHADOWSOCKS</source>
         <translation>SHADOWSOCKS 경유</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="168"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="176"/>
         <source>RegionModule --- Select region</source>
         <extracomment>Screen reader annotation for the button that makes up the Region tile, which users can click to go to the Region page and select a region. Should be a short description of the &quot;select region&quot; action.</extracomment>
         <translation>지역 선택</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="173"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="181"/>
         <source>RegionModule --- Select region, %1 is selected</source>
         <extracomment>Screen reader description for the Region tile button. Should begin with the &quot;Select region&quot; translation, since that&apos;s what the button does. This also includes the currently-selected region, which the button displays. %1 is a region name.</extracomment>
         <translation>지역 선택, %1이(가) 선택됨</translation>
@@ -2498,6 +2581,16 @@
         <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
         <translation>이 기능은 %1에서 이용 가능한 net_cls를 필요로 합니다.</translation>
     </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="38"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>이 기능은 OpenVPN이 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="39"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard는 Windows 8 이상이 필요합니다.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsModule</name>
@@ -2528,22 +2621,22 @@
         <translation>포트 전달</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="74"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="75"/>
         <source>SettingsModule --- Allow LAN</source>
         <translation>LAN 허용</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="81"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="82"/>
         <source>SettingsModule --- Debug Logging</source>
         <translation>디버그 로깅</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="99"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="100"/>
         <source>SettingsModule --- Light Theme</source>
         <translation>라이트 테마</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="111"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>모든 설정 보기...</translation>
     </message>
@@ -3300,6 +3393,32 @@
     </message>
 </context>
 <context>
+    <name>WireguardConnection</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="52"/>
+        <source>WireguardConnection --- Use Kernel Module</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
+        <translation>커널 모듈 사용</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="66"/>
+        <source>WireguardConnection --- Install the WireGuard kernel module for the best performance.</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
+        <translation>최고의 성능을 확보하려면 WireGuard 커널 모듈을 설치하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="73"/>
+        <source>WireguardConnection --- Install</source>
+        <translation>설치</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="86"/>
+        <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
+        <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
+        <translation>배포용 설치판에 대한 설명:</translation>
+    </message>
+</context>
+<context>
     <name>winstaller</name>
     <message>
         <location filename="../../../../../extras/installer/win/strings.rc" line="37"/>
@@ -3642,38 +3761,58 @@
         <translation>콜아웃 드라이버 설치에 실패했습니다.</translation>
     </message>
     <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>WireGuard 설치 실패.</translation>
+    </message>
+    <message>
         <location filename="../../../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>WireGuard 제거 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>WinTUN 설치 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>WinTUN 제거 실패</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
         <source>winstaller --- The installation will now abort.</source>
         <translation>설치가 중단됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="110"/>
         <location filename="../../../../../extras/installer/win/strings.rc" line="114"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="118"/>
         <source>winstaller --- This is preventing the installation from proceeding.</source>
         <translation>이 작업은 설치가 계속 진행되는 것을 방해합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="111"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="115"/>
         <source>winstaller --- Do you wish to continue the installation anyway?</source>
         <translation>그래도 계속 설치하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="112"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
         <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
         <translation>다시 시도하거나 설치를 계속 진행해볼 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="117"/>
         <source>winstaller --- The uninstallation will now abort.</source>
         <translation>제거가 중단됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="115"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="119"/>
         <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
         <translation>그래도 계속 제거하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="120"/>
         <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
         <translation>다시 시도하거나 제거를 계속 진행해볼 수 있습니다.</translation>
     </message>

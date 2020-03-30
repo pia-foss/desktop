@@ -83,43 +83,17 @@ Item {
   // This is before auth failure - it's unlikely that both of these would appear
   // at once, but if they do, the auth failure can't be resolved until the TAP
   // adapter is back so we can connect again.
-  NotificationStatus {
+  DriverNotificationStatus {
     id: tapAdapterMissing
     title: errorHeaderTitle
-    message: uiTr("The virtual network adapter is not installed.")
     //: "TAP" is the type of virtual network adapter used on Windows and is not
     //: generally localized.
     tipText: uiTr("The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.")
-    severity: severities.error
-    dismissible: false
-    links: [{
-      text: uiTr("Reinstall"),
-      clicked: function() {reinstallTapAdapter()}
-    }]
 
-    // To avoid transient blips during the reinstall itself, we don't change
-    // state during while the reinstall status is 'working'.
-    property bool lastNonworkingMissing
-    function updateMissingState() {
-      if(NativeHelpers.reinstallTapStatus !== 'working')
-        lastNonworkingMissing = Daemon.state.tapAdapterMissing
-      // Otherwise, ignore the current state and keep the state from before the
-      // reinstall
-    }
-    property var nhConns: Connections {
-      target: NativeHelpers
-      onReinstallTapStatusChanged: tapAdapterMissing.updateMissingState()
-    }
-    property var stateConns: Connections {
-      target: Daemon.state
-      onTapAdapterMissingChanged: tapAdapterMissing.updateMissingState()
-    }
-
-    // When the reinstallation status is 'reboot', show the reboot notification
-    // instead.
-    active: lastNonworkingMissing && NativeHelpers.reinstallTapStatus !== 'reboot'
-
-    Component.onCompleted: tapAdapterMissing.updateMissingState()
+    method: "openvpn"
+    reinstallStatus: NativeHelpers.reinstallTapStatus
+    driverMissing: Daemon.state.tapAdapterMissing
+    reinstallAdapter: function() {reinstallTapAdapter()}
   }
 
   // A reboot is required to complete installation of the TAP adapter.
@@ -130,11 +104,26 @@ Item {
     tipText: uiTr("The system must be restarted before you can connect.")
     severity: severities.error
     dismissible: false
-    active: NativeHelpers.reinstallTapStatus === 'reboot'
+    active: Daemon.settings.method === "openvpn" && NativeHelpers.reinstallTapStatus === 'reboot'
+  }
+
+  // The WinTUN adapter is missing (Windows only)
+  //
+  // Similar to the TAP adapter error, but for WinTUN, which is used for WireGuard.
+  DriverNotificationStatus {
+    id: wintunMissing
+    title: errorHeaderTitle
+    //: "WinTUN" is name of the virtual network adapter and is not localized.
+    tipText: uiTr("The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.")
+
+    method: "wireguard"
+    reinstallStatus: NativeHelpers.reinstallTunStatus
+    driverMissing: Daemon.state.wintunMissing
+    reinstallAdapter: function() {reinstallWintun()}
   }
 
   // Warn if the split tunnel feature is enabled, but the driver is missing.
-  // This could happen if the driver was somehow uninsta..ed
+  // This could happen if the driver was somehow uninstalled
   NotificationStatus {
     id: splitTunnelUninstalled
     title: errorHeaderTitle
@@ -305,7 +294,7 @@ Item {
     title: uiTr("CONNECTING...")
     message: uiTr("Can't reach the VPN server.  Please check your connection.")
     severity: severities.warning
-    active: Daemon.state.connectingStatus !== "Connecting" &&
+    active: Daemon.state.usingSlowInterval &&
             Daemon.state.connectionLost === 0 &&
             Daemon.state.proxyUnreachable === 0
   }
@@ -319,6 +308,19 @@ Item {
     onClicked: { Daemon.connectVPN(); }
     severity: severities.info
     active: Daemon.state.needsReconnect
+  }
+
+  NotificationStatus {
+    id: forcedOpenVPN
+    message: uiTr("Connected with OpenVPN.")
+    tipText: {
+      if(Daemon.account.token)
+        return uiTr("Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.")
+      else
+        return uiTr("Connected with OpenVPN to log in for the first time.")
+    }
+    severity: severities.info
+    active: Daemon.state.connectionState === "Connected" && Daemon.state.connectedConfig.methodForcedByAuth
   }
 
   NotificationStatus {
@@ -452,6 +454,7 @@ Item {
     // functionality
     tapAdapterMissing,
     installationRestart,
+    wintunMissing,
     splitTunnelUninstalled,
     splitTunnelReboot,
     authFailure,
@@ -465,6 +468,7 @@ Item {
     connectionTrouble,
     // Informational
     reconnectNeeded,
+    forcedOpenVPN,
     alternateTransport,
     accountExpiring,
     accountTokenNotAvailable,
@@ -513,6 +517,8 @@ Item {
   signal showChangelog()
   // Show help page & trigger TAP reinstall (for the TAP adapter notification)
   signal reinstallTapAdapter()
+  // Show help page & trigger WinTUN reinstall
+  signal reinstallWintun()
   // Show help page & trigger split tunnel filter reinstall
   signal reinstallSplitTunnel()
   // Emitted when a notification needs to show an alert on the Settings Help

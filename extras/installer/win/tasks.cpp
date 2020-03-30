@@ -41,7 +41,7 @@ ErrorType InstallerError::raise(ErrorType type, UIString str)
     type |= ShouldIgnore;
 #endif
 
-    LOG("ERROR: %s", str.str());
+    LOG("ERROR: %ls", str.str());
     // Never display dialog boxes in silent mode
     if (g_silent || type & Silent)
     {

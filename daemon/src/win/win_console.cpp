@@ -25,6 +25,9 @@
 #include "win.h"
 #include "version.h"
 #include "brand.h"
+#include "exec.h"
+#include "../../../extras/installer/win/tap_inl.h"
+#include "../../../extras/installer/win/tun_inl.h"
 
 #include <QCoreApplication>
 #include <QDirIterator>
@@ -32,9 +35,8 @@
 #include <QStringList>
 #include <QProcess>
 
-#define TAP_LOG qInfo
-#include "../../../extras/installer/win/tap.inl"
-
+#define _SETUPAPI_VER _WIN32_WINNT_WIN7
+#include <setupapi.h>
 
 static BOOL WINAPI ctrlHandler(DWORD dwCtrlType)
 {
@@ -67,6 +69,11 @@ static QString getWfpCalloutInfPath()
     return QDir::toNativeSeparators(Path::WfpCalloutDriverDir / (IsWindows10OrGreater() ? "win10" : "win7") / "PiaWfpCallout.inf");
 }
 
+static QString getWintunMsiPath()
+{
+    return QDir::toNativeSeparators(Path::BaseDir / "wintun" / BRAND_CODE "-wintun.msi");
+}
+
 WinConsole::WinConsole(QObject* parent)
     : QObject(parent)
     , _arguments(QCoreApplication::arguments())
@@ -88,6 +95,41 @@ int WinConsole::reinstallTapDriver()
 {
     ::uninstallTapDriver(false, false);
     return ::installTapDriver(qUtf16Printable(getInfPath()), false, true, false);
+}
+
+int WinConsole::installWintunDriver()
+{
+    if(!isWintunSupported())
+    {
+        qWarning() << "WinTUN and WireGuard support requires Windows 8 or later.";
+        return DriverInstallFailed;
+    }
+
+    return ::installMsiPackage(qUtf16Printable(getWintunMsiPath())) ? DriverInstalled : DriverInstallFailed;
+}
+
+int WinConsole::uninstallWintunDriver()
+{
+    auto products = ::findInstalledWintunProducts();
+    qInfo() << "Found" << products.size() << "installed products";
+    int result = DriverUninstalled;
+    for(const auto &product : products)
+    {
+        if(!::uninstallMsiProduct(product.c_str()))
+        {
+            qWarning() << "Uninstall failed for product" << product;
+            result = DriverUninstallFailed;
+        }
+        else
+            qInfo() << "Uninstalled product" << product;
+    }
+    return result;
+}
+
+int WinConsole::reinstallWintunDriver()
+{
+    uninstallWintunDriver();
+    return installWintunDriver();
 }
 
 int WinConsole::installCalloutDriver()
@@ -123,6 +165,16 @@ int WinConsole::run()
         QTextStream(stdout)
                 << "Unrecognized command; type '" << QFileInfo(args.at(0)).baseName() << " help' for a list of available commands." << endl;
         return 1;
+    };
+
+    auto sendCheckDriverHint = []
+    {
+        // Signal to the daemon to recheck the callout driver state.  We
+        // have to send it an RPC to do this, but pia-service.exe does
+        // not link to the client library, so invoke piactl.exe.
+        Exec::cmd(Path::InstallationDir / BRAND_CODE "ctl.exe",
+                  {QStringLiteral("-u"), QStringLiteral("checkdriver")});
+        // Result traced by cmd(), nothing to do if it fails
     };
 
     if (args.count() > 1)
@@ -174,17 +226,23 @@ int WinConsole::run()
                 else
                     return unrecognizedCommand();
 
-                // Signal to the daemon to recheck the callout driver state.  We
-                // have to send it an RPC to do this, but pia-service.exe does
-                // not link to the client library, so invoke piactl.exe.
-                QProcess ctl;
-                ctl.start(Path::InstallationDir / BRAND_CODE "ctl.exe",
-                          {QStringLiteral("-u"), QStringLiteral("checkcallout")},
-                          QProcess::ReadOnly);
-                int checkResult = waitForExitCode(ctl);
-                // Nothing to do if this fails, just trace the result
-                qInfo() << "Result of sending checkcallout hint:" << checkResult;
+                sendCheckDriverHint();
+                return result;
+            }
+            else if (MATCH_ARG(1, "tun") && args.count() > 2)
+            {
+                initMsiLib(qstringWBuf(Path::DaemonDataDir));
+                int result = 0;
+                if (MATCH_ARG(2, "install"))
+                    result = WinConsole::installWintunDriver();
+                else if (MATCH_ARG(2, "uninstall"))
+                    result = WinConsole::uninstallWintunDriver();
+                else if (MATCH_ARG(2, "reinstall"))
+                    result = WinConsole::reinstallWintunDriver();
+                else
+                    return unrecognizedCommand();
 
+                sendCheckDriverHint();
                 return result;
             }
             else

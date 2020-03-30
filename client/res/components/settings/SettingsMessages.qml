@@ -52,4 +52,7 @@ QtObject {
     }
     return desc
   }
+
+  readonly property string requiresOpenVpnMessage: uiTr("This feature requires OpenVPN.")
+  readonly property string wgRequiresWindows8: uiTr("WireGuard requires Windows 8 or later.")
 }

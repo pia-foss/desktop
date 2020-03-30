@@ -19,18 +19,31 @@
 #include "apibase.h"
 #include "brand.h"
 
-ApiBaseData::ApiBaseData(std::vector<QString> baseUris)
-    : _baseUris{std::move(baseUris)}, _nextStartIndex{0}
+ApiBaseData::ApiBaseData(const std::vector<QString> &baseUris)
+    : _baseUris{}, _nextStartIndex{0}
 {
-    // Ensure each URI ends with a slash
-    for(auto &uri : _baseUris)
-    {
-        if(!uri.endsWith('/'))
-            uri.append('/');
-    }
+    _baseUris.reserve(baseUris.size());
+    for(auto &uri : baseUris)
+        addBaseUri(uri, {}, {});
 }
 
-const QString &ApiBaseData::getUri(unsigned index)
+ApiBaseData::ApiBaseData(const QString &uri, std::shared_ptr<PrivateCA> pCA,
+                         const QString &peerVerifyName)
+    : _baseUris{}, _nextStartIndex{0}
+{
+    addBaseUri(uri, std::move(pCA), peerVerifyName);
+}
+
+void ApiBaseData::addBaseUri(const QString &uri, std::shared_ptr<PrivateCA> pCA,
+                             const QString &peerVerifyName)
+{
+    if(!uri.endsWith('/'))
+        _baseUris.push_back({uri + '/', std::move(pCA), peerVerifyName});
+    else
+        _baseUris.push_back({uri, std::move(pCA), peerVerifyName});
+}
+
+const BaseUri &ApiBaseData::getUri(unsigned index)
 {
     Q_ASSERT(index < _baseUris.size());   // Guaranteed by caller
     return _baseUris[index];
@@ -40,11 +53,6 @@ void ApiBaseData::attemptSucceeded(unsigned successIndex)
 {
     Q_ASSERT(successIndex < _baseUris.size());  // Guaranteed by caller
     _nextStartIndex = successIndex;
-}
-
-ApiBase::ApiBase(std::vector<QString> baseUris)
-    : _pData{new ApiBaseData{std::move(baseUris)}}
-{
 }
 
 ApiBaseSequence ApiBase::beginAttempt()
@@ -70,7 +78,7 @@ ApiBaseSequence::ApiBaseSequence(QSharedPointer<ApiBaseData> pData)
     _currentBaseUri = startIndex ? startIndex-1 : _pData->getUriCount()-1;
 }
 
-const QString &ApiBaseSequence::getNextUri()
+const BaseUri &ApiBaseSequence::getNextUri()
 {
     Q_ASSERT(_pData);   // Class invariant
     _currentBaseUri = (_currentBaseUri + 1) % _pData->getUriCount();
@@ -86,25 +94,25 @@ void ApiBaseSequence::attemptSucceeded()
 namespace ApiBases
 {
     ApiBase piaApi
-    {{
+    {std::vector<QString>{
         QStringLiteral("https://www.privateinternetaccess.com/"),
         QStringLiteral("https://piaproxy.net/")
     }};
 
     ApiBase piaIpAddrApi
-    {{
+    {std::vector<QString>{
         QStringLiteral("https://www.privateinternetaccess.com/")
     }};
 
     // Update endpoints are determined by branding info, since brands are
     // responsible for hosting their own updates
     ApiBase piaUpdateApi
-    {{
+    {std::vector<QString>{
         BRAND_UPDATE_APIS
     }};
 
     ApiBase piaPortForwardApi
-    {{
+    {std::vector<QString>{
         QStringLiteral("http://209.222.18.222:2000/")
     }};
 }

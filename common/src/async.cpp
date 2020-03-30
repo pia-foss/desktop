@@ -154,6 +154,9 @@ void BaseTask::reject(Error error)
     {
         _error = std::move(error);
         notifyRejected();
+        // We have to keep the task alive, in case slots connected to finished()
+        // drop their reference when the signal is emitted
+        auto keepAlive = sharedFromThis();
         emit finished();
         // This must be called last in the function
         disconnectDependents();
@@ -253,6 +256,9 @@ void Task<void>::resolve()
     if (setFinished(Resolved))
     {
         _error = Error(HERE, Error::Success);
+        // We have to keep the task alive, in case slots connected to finished()
+        // drop their reference when the signal is emitted
+        auto keepAlive = sharedFromThis();
         emit finished();
         // This must be called last in the function
         disconnectDependents();

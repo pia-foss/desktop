@@ -21,15 +21,14 @@
 
 #include "networktaskwithretry.h"
 #include "apinetwork.h"
+#include "openssl.h"
+#include "util.h"
 #include <QTimer>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 
 namespace
 {
-    // Timeout for all API requests
-    const std::chrono::seconds requestTimeout{5};
-
     const QByteArray authHeaderName{QByteArrayLiteral("Authorization")};
 
     // Set the authorization header on a QNetworkRequest
@@ -57,7 +56,7 @@ NetworkTaskWithRetry::NetworkTaskWithRetry(QNetworkAccessManager::Operation verb
              _verb == QNetworkAccessManager::Operation::PostOperation ||
              _verb == QNetworkAccessManager::Operation::HeadOperation);
 
-    scheduleNextAttempt();
+    scheduleNextAttempt(std::chrono::milliseconds{0});
 }
 
 NetworkTaskWithRetry::~NetworkTaskWithRetry()
@@ -65,20 +64,11 @@ NetworkTaskWithRetry::~NetworkTaskWithRetry()
 
 }
 
-void NetworkTaskWithRetry::scheduleNextAttempt()
+void NetworkTaskWithRetry::scheduleNextAttempt(std::chrono::milliseconds nextDelay)
 {
     Q_ASSERT(_pRetryStrategy);  // Class invariant
 
-    nullable_t<std::chrono::milliseconds> nextDelay = _pRetryStrategy->beginNextAttempt(_resource);
-    if(!nextDelay)
-    {
-        qWarning() << "Request for resource" << _resource
-            << "failed, returning error" << _worstRetriableError;
-        reject({HERE, _worstRetriableError});
-        return;
-    }
-
-    QTimer::singleShot(nextDelay->count(), this, &NetworkTaskWithRetry::executeNextAttempt);
+    QTimer::singleShot(msec(nextDelay), this, &NetworkTaskWithRetry::executeNextAttempt);
 }
 
 void NetworkTaskWithRetry::executeNextAttempt()
@@ -112,7 +102,17 @@ void NetworkTaskWithRetry::executeNextAttempt()
                         << "failed with error" << error;
 
                     // Retry if we still have attempts left.
-                    scheduleNextAttempt();
+                    Q_ASSERT(_pRetryStrategy);  // Class invariant
+                    auto nextDelay = _pRetryStrategy->attemptFailed(_resource);
+                    if(!nextDelay)
+                    {
+                        qWarning() << "Request for resource" << _resource
+                            << "failed, returning error" << _worstRetriableError;
+                        reject({HERE, _worstRetriableError});
+                        return;
+                    }
+                    else
+                        scheduleNextAttempt(*nextDelay);
                 }
                 else
                 {
@@ -149,14 +149,32 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // optimization probably would be too complex to make sense.
     networkManager.clearConnectionCache();
 
-    QNetworkRequest request(_baseUriSequence.getNextUri() + _resource);
+    const BaseUri &nextBase = _baseUriSequence.getNextUri();
+    QNetworkRequest request(nextBase.uri + _resource);
     if (!_authHeaderVal.isEmpty())
         setAuth(request, _authHeaderVal);
 
     // The URL for each request is logged to indicate if there is trouble with
     // specific API URLs, etc.  The resources we request don't contain any
     // query parameters, so this won't contain anything identifiable.
-    qDebug() << "requesting:" << ApiResource{request.url().toString()};
+    if(nextBase.pCA && !nextBase.peerVerifyName.isEmpty())
+    {
+        qDebug() << "requesting:" << ApiResource{request.url().toString()}
+            << "using peer name" << nextBase.peerVerifyName;
+        // Since we're using a custom CA and peer name, do not use the default
+        // CAs.  Copy the SSL configuration and explicitly set an empty CA list.
+        //
+        // We can't just apply the custom CA in the configuration.   Qt 5.12
+        // lacks QNetworkRequest::setPeerVerifyName(), so we have to validate
+        // the cert ourselves.
+        QSslConfiguration sslConfig{request.sslConfiguration()};
+        sslConfig.setCaCertificates({});
+        request.setSslConfiguration(sslConfig);
+    }
+    else
+    {
+        qDebug() << "requesting:" << ApiResource{request.url().toString()};
+    }
 
     // Seems like QNetworkAccessManager could provide this, but the closest
     // thing it has is sendCustomRequest().  It looks like that would produce a
@@ -178,6 +196,8 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
             replyPtr = networkManager.head(request);
             break;
     }
+    Q_ASSERT(replyPtr); // Postcondition of QNetworkAccessManager::get/post/head
+
     // Wrap the reply in a shared pointer. Use deleteLater as the deleter
     // since the finished signal is not always safe to destroy ourselves
     // in (e.g. abort->finished->delete is not currently safe). This way
@@ -185,7 +205,19 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     QSharedPointer<QNetworkReply> reply(replyPtr, &QObject::deleteLater);
 
     // Abort the request if it doesn't complete within a certain interval
-    QTimer::singleShot(std::chrono::milliseconds(requestTimeout).count(), reply.get(), &QNetworkReply::abort);
+    Q_ASSERT(_pRetryStrategy);  // Class invariant
+    QTimer::singleShot(msec(_pRetryStrategy->beginAttempt(_resource)), reply.get(), &QNetworkReply::abort);
+
+    // If a custom CA and peer name are specified, handle SSL errors by
+    // validating the cert manually
+    if(nextBase.pCA && !nextBase.peerVerifyName.isEmpty())
+    {
+        connect(reply.get(), &QNetworkReply::sslErrors, this,
+            [this, reply, nextBase](const QList<QSslError> &errors)
+            {
+                checkSslCertificate(*reply, nextBase, errors);
+            });
+    }
 
     // Create a network task that resolves to the result of the request
     auto networkTask = Async<QByteArray>::create();
@@ -237,4 +269,64 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     });
 
     return networkTask;
+}
+
+void NetworkTaskWithRetry::traceLeafCert(const QSslCertificate &leafCert) const
+{
+    // In general, there can be any number of each of these fields
+    const auto &commonNames = leafCert.subjectInfo(QSslCertificate::SubjectInfo::CommonName);
+    const auto &serialNumbers = leafCert.subjectInfo(QSslCertificate::SubjectInfo::SerialNumber);
+    const auto &altNames = leafCert.subjectAlternativeNames();
+    qInfo() << "Certificate for" << _resource << "has" << commonNames.size()
+        << "common names," << serialNumbers.size() << "serial numbers, and"
+        << altNames.size() << "subject alternative names";
+    for(const auto &cn : commonNames)
+    {
+        qInfo() << " - CN:" << cn;
+    }
+    for(const auto &serial : serialNumbers)
+    {
+        qInfo() << " - Serial:" << serial;
+    }
+    for(auto itSan = altNames.begin(); itSan != altNames.end(); ++itSan)
+    {
+        qInfo() << " - SAN:" << *itSan << "- type:" << itSan.key();
+    }
+}
+
+void NetworkTaskWithRetry::checkSslCertificate(QNetworkReply &reply,
+                                               const BaseUri &baseUri,
+                                               const QList<QSslError> &errors)
+{
+    // This shouldn't happen, we don't connect this slot if pCA or peerName are
+    // not set, but check for robustness - do not risk possibly accepting any
+    // peer name
+    if(!baseUri.pCA || baseUri.peerVerifyName.isEmpty())
+    {
+        qWarning() << "Not ignoring" << errors.size()
+            << "SSL errors in request for" << _resource
+            << "- CA or peer name is not known";
+        return;
+    }
+
+    const auto &certChain = reply.sslConfiguration().peerCertificateChain();
+    if(certChain.isEmpty())
+    {
+        qWarning() << "No certificate provided by server for"
+            << baseUri.peerVerifyName;
+        return;
+    }
+
+    if(baseUri.pCA->verifyHttpsCertificate(certChain,
+                                           baseUri.peerVerifyName))
+    {
+        qInfo() << "Accepted certificate for" << baseUri.peerVerifyName;
+        traceLeafCert(certChain.first());
+        reply.ignoreSslErrors();
+    }
+    else
+    {
+        qWarning() << "Rejected certificate for" << baseUri.peerVerifyName;
+        traceLeafCert(certChain.first());
+    }
 }

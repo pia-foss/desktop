@@ -30,7 +30,8 @@ namespace
     // 'set' supports fewer value types than 'get'.
     const std::map<QString, QString> _setSupportedTypes
     {
-        {GetSetType::debugLogging, QStringLiteral("Enable or disable debug logging.")},
+        {GetSetType::debugLogging, QStringLiteral("Enable or disable debug logging")},
+        {GetSetType::protocol, QStringLiteral("Select a VPN protocol")},
         {GetSetType::region, QStringLiteral("Select a region (or \"auto\")")}
     };
 
@@ -79,6 +80,12 @@ namespace
             newSettings.insert(QStringLiteral("location"), id);
             // `set region` reconnects if connected, pass `true` for reconnectIfNeeded
             return {newSettings, true};
+        }
+        else if(params[1] == GetSetType::protocol)
+        {
+            QJsonObject newSettings;
+            newSettings.insert(QStringLiteral("method"), params[2]);
+            return {newSettings};
         }
         else if(params[1] == GetSetType::debugLogging)
         {

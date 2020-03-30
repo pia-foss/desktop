@@ -21,7 +21,6 @@
 
 #include "win_util.h"
 #include <Windows.h>
-#include <QDebug>
 
 #pragma comment(lib, "User32.lib")
 
@@ -57,6 +56,19 @@ ProcAddress::~ProcAddress()
 {
     if(_moduleHandle)
         ::FreeLibrary(_moduleHandle);
+}
+
+QString WinErrTracer::message() const
+{
+    LPWSTR errMsg{nullptr};
+
+    auto len = ::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                                nullptr, code(), 0,
+                                reinterpret_cast<LPWSTR>(&errMsg), 0, nullptr);
+    QString msg = QString::fromWCharArray(errMsg, len);
+    ::LocalFree(errMsg);
+
+    return msg;
 }
 
 void broadcastMessage(const LPCWSTR &message)

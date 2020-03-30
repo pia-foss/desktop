@@ -33,6 +33,7 @@ Item {
   id: infoTip
 
   property string tipText
+  property string accessibleText: tipText
   // Might look into setting this automatically, but for the moment controls
   // near the top of the window can override it manually to put the popup below.
   property bool showBelow: false
@@ -62,7 +63,7 @@ Item {
   // We could consider using a platform-dependent type if other platforms do
   // support those more specific roles, but it'd have to show a significant
   // benefit to be worth the complexity.
-  NativeAcc.Text.name: accessible ? tipText : ''
+  NativeAcc.Text.name: accessible ? accessibleText : ''
 
   implicitHeight: infoImg.sourceSize.height / 2
   implicitWidth: infoImg.sourceSize.width / 2

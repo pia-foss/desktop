@@ -24,6 +24,7 @@ import "../inputs"
 import "../stores"
 import "../../client"
 import "../../daemon"
+import "../../settings"
 import "../../common"
 import "../../common/regions"
 import "../../theme"
@@ -33,9 +34,17 @@ Page {
     anchors.fill: parent
     spacing: 2
 
-    InputLabel {
-      text: uiTranslate("ConnectionPage", "Proxy")
+    RowLayout {
+      InputLabel {
+        text: uiTranslate("ConnectionPage", "Proxy")
+      }
+      InfoTip {
+        icon: icons.warning
+        tipText: SettingsMessages.requiresOpenVpnMessage
+        visible: Daemon.settings.method !== "openvpn"
+      }
     }
+
 
     InputDescription {
       text: uiTr("Redirect the VPN connection through an additional location")
@@ -44,6 +53,7 @@ Page {
     ThemedRadioGroup {
       id: proxyInput
       Layout.fillWidth: true
+      groupEnabled: Daemon.settings.method === "openvpn"
 
       model: {
         // Determine the name for the Shadowsocks item based on the selected

@@ -104,8 +104,13 @@ private:
 //
 struct FirewallParams
 {
-    QStringList dnsServers;
-    QSharedPointer<NetworkAdapter> adapter;
+    // These parameters are specified by VPNConnection (some are passed through
+    // from the VPNMethod)
+
+    // DNS servers to permit through firewall - set once DNS has been applied
+    QStringList effectiveDnsServers;
+    // VPN network interface - see VPNMethod::getNetworkAdapter()
+    std::shared_ptr<NetworkAdapter> adapter;
 
     // The following flags indicate which general rulesets are needed. Note that
     // this is after some sanity filtering, i.e. an allow rule may be listed
@@ -249,7 +254,7 @@ public:
 
     int exitCode() const { return _exitCode; }
 
-    virtual QSharedPointer<NetworkAdapter> getNetworkAdapter() = 0;
+    virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() = 0;
 
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
@@ -314,10 +319,10 @@ protected:
     //
     // Apps that can't be identified are omitted from the results.
     virtual QJsonValue RPC_inspectUwpApps(const QJsonArray &familyIds);
-    // Do a manual check of the WFP callout driver state if SCM notifications
-    // aren't being used.  (Used when pia-service.exe is invoked to install the
-    // callout driver, it signals the running service to re-check the state.)
-    virtual void RPC_checkCalloutState();
+    // Do a manual check of the driver states on Windows.
+    // (Used when pia-service.exe is invoked to install a relevant driver, it
+    // signals the running service to re-check the state.)
+    virtual void RPC_checkDriverState();
 
     // Write platform-specific diagnostics to implement RPC_writeDiagnostics()
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) = 0;
@@ -352,12 +357,11 @@ protected slots:
                          const ConnectionConfig &connectedConfig,
                          const nullable_t<Transport> &chosenTransport,
                          const nullable_t<Transport> &actualTransport);
-    void vpnConnectingStatus(TransportSelector::Status connectingStatus);
     void vpnError(const Error& error);
     void vpnByteCountsChanged();
     void vpnScannedOriginalNetwork(const OriginalNetworkScan &netScan);
     void newLatencyMeasurements(const LatencyTracker::Latencies &measurements);
-    void portForwardUpdated(int port, bool needsReconnect);
+    void portForwardUpdated(int port);
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
 
@@ -382,6 +386,10 @@ private:
     void updateSupportedVpnPorts(const QJsonObject &serversObj);
 
     void checkSplitTunnelSupport();
+
+    // Update the port forwarder's enabled state, based on the current setting
+    // or the setting value that we connected with
+    void updatePortForwarder();
 
     void logCommand(const QString &cmd, const QStringList &args);
     // Log the current routing table; used after connecting
@@ -427,6 +435,7 @@ protected:
     // Ongoing attempt to get the VPN IP address.  This can retry for a long
     // time, so we discard it if we leave the Connected state.
     Async<void> _pVpnIpRequest;
+
 };
 
 #define g_daemon (Daemon::instance())

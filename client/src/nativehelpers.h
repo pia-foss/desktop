@@ -44,6 +44,7 @@ private:
     enum class Driver
     {
         Tap,
+        WinTun,
         WfpCallout,
     };
 
@@ -129,12 +130,19 @@ public:
     // Launch an installer binary that was downloaded by the daemon.
     Q_INVOKABLE bool launchInstaller(const QString &installer);
 
+    // On Linux, start a script to install the WireGuard kernel module
+    Q_INVOKABLE bool installWireguardKernelModule();
+
     // Get a monotonic time reference - ms since the system booted
     Q_INVOKABLE qint64 getMonotonicTime();
 
     // Reinstall the TAP adapter (Windows only)
     Q_INVOKABLE void reinstallTap();
     Q_PROPERTY(QString reinstallTapStatus READ reinstallTapStatus NOTIFY reinstallTapStatusChanged FINAL)
+
+    // Reinstall the WinTUN adapter (Windows only)
+    Q_INVOKABLE void reinstallTun();
+    Q_PROPERTY(QString reinstallTunStatus READ reinstallTunStatus NOTIFY reinstallTunStatusChanged FINAL)
 
     // Reinstall the WFP callout driver (Windows only)
     Q_INVOKABLE void installWfpCallout();
@@ -187,6 +195,7 @@ signals:
     void appFocusLost();
     void logToFileChanged();
     void reinstallTapStatusChanged();
+    void reinstallTunStatusChanged();
     void reinstallWfpCalloutStatusChanged();
     void terminalStartFailed (const QString &command);
     void dashboardOpenRequested();
@@ -199,8 +208,9 @@ private:
     bool getSplitTunnelSupported() const;
     void onFocusWindowChanged(QWindow *pFocusWindow);
     QString reinstallTapStatus() const { return _reinstallTapStatus; }
+    QString reinstallTunStatus() const { return _reinstallTunStatus; }
     QString reinstallWfpCalloutStatus() const {return _reinstallWfpCalloutStatus;}
-    bool runInTerminal(const QString &command, bool quitAfterRun = false);
+    bool runInTerminal(const QString &command);
 
     // Reinstall a Windows driver
     void reinstallDriver(Driver type, const wchar_t *commandParams);
@@ -215,6 +225,8 @@ private:
 #endif
     // Status of TAP adapter reinstallation
     QString _reinstallTapStatus;
+    // Status of WinTUN adapter reinstallation
+    QString _reinstallTunStatus;
     // Status of WFP callout driver reinstallation (or installation if this is
     // the first time)
     QString _reinstallWfpCalloutStatus;

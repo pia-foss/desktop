@@ -26,28 +26,11 @@
 #include "daemon.h"
 #include "win_appmonitor.h"
 #include "win_firewall.h"
+#include "win_interfacemonitor.h"
 #include "win/win_messagewnd.h"
 #include "win/servicemonitor.h"
 
-class WinNetworkAdapter : public NetworkAdapter
-{
-public:
-    WinNetworkAdapter(const QString& guid) : NetworkAdapter(guid), _savedMetricValueIPv4(-1), _savedMetricValueIPv6(-1) {}
-
-    quint64 luid;
-    QString adapterName;
-    QString connectionName;
-    bool isCustomTap;
-    quint32 ifIndex;
-    virtual void setMetricToLowest() override;
-    virtual void restoreOriginalMetric() override;
-private:
-    // Any value less than 5 should work fine. 3 is chosen without any real reason.
-    enum { interfaceMetric = 3 };
-    int _savedMetricValueIPv4, _savedMetricValueIPv6;
-    void setMetric(const ADDRESS_FAMILY family, ULONG metric);
-    int getMetric(const ADDRESS_FAMILY);
-};
+inline const PMIB_IPINTERFACE_ROW foo{nullptr};
 
 // Deadline timer (like QDeadlineTimer) that does not count time when the system
 // is suspended.  (Both clock sources for QDeadlineTimer do count suspend time.)
@@ -77,13 +60,6 @@ class WinDaemon : public Daemon, private MessageWnd
     Q_OBJECT
     CLASS_LOGGING_CATEGORY("win.daemon")
 
-private:
-    // Callback passed to NotifyIpInterfaceChange() to be called when an adapter
-    // change occurs.
-    static void WINAPI ipChangeCallback(PVOID callerContext,
-                                        PMIB_IPINTERFACE_ROW pRow,
-                                        MIB_NOTIFICATION_TYPE notificationType);
-
 public:
     explicit WinDaemon(const QStringList& arguments, QObject* parent = nullptr);
     explicit WinDaemon(QObject* parent = nullptr);
@@ -91,9 +67,7 @@ public:
 
     static WinDaemon* instance() { return static_cast<WinDaemon*>(Daemon::instance()); }
 
-    virtual QSharedPointer<NetworkAdapter> getNetworkAdapter() override;
-
-    static QList<QSharedPointer<WinNetworkAdapter>> getAllNetworkAdapters();
+    virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() override;
 
 protected:
     struct SplitAppFilters
@@ -137,11 +111,9 @@ private:
 
     virtual LRESULT proc(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
+    // Firewall implementation and supporting methods
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) override;
-    virtual QJsonValue RPC_inspectUwpApps(const QJsonArray &familyIds) override;
-    virtual void RPC_checkCalloutState() override;
-    virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
 
 private:
     void removeSplitTunnelAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
@@ -160,11 +132,34 @@ private:
                                     const std::set<const AppIdKey*, PtrValueLess> &newVpnOnlyApps,
                                     bool hasConnected);
 
+    // Other Daemon overrides and supporting methods
+protected:
+    virtual QJsonValue RPC_inspectUwpApps(const QJsonArray &familyIds) override;
+    virtual void RPC_checkDriverState() override;
+    virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
+
+private:
+    // Check whether WinTUN is currently installed.  There's no way to be
+    // notified of this, so WireguardServiceBackend hints to us to check it in
+    // some circumstances.
+    void checkWintunInstallation();
+
+public:
+    // WireguardServiceBackend calls these methods to hint to us to consider
+    // re-checking the WinTUN installation state.
+
+    // Indicates that a WG connection failed after having started the service
+    // (not that it failed during the authentication stage, we only check
+    // WinTUN when the service fails to start).
+    void wireguardServiceFailed();
+    // Indicates that a WG connection succeeded.
+    void wireguardConnectionSucceeded();
+
 protected:
     FirewallEngine* _firewall;
     struct FirewallFilters
     {
-        WfpFilterObject permitPIA[5];
+        WfpFilterObject permitPIA[6];
         WfpFilterObject permitAdapter[2];
         WfpFilterObject permitLocalhost[2];
         WfpFilterObject permitDHCP[2];
@@ -209,7 +204,6 @@ protected:
     // the WFP filters.
     UINT64 _filterAdapterLuid;  // LUID of the TAP adapter used in some rules
     QString _dnsServers[2]; // Permitted DNS server addresses
-    HANDLE _ipNotificationHandle;
     // When Windows suspends, the TAP adapter disappears, and it won't be back
     // right away when we resume.  This just suppresses the "TAP adapter
     // missing" error briefly after a system resume.

@@ -20,9 +20,13 @@
 #line SOURCE_FILE("connection.cpp")
 
 #include "vpn.h"
+#include "vpnmethod.h"
 #include "daemon.h"
+#include "exec.h"
 #include "path.h"
 #include "brand.h"
+#include "openvpnmethod.h"
+#include "wireguardmethod.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -99,23 +103,6 @@ namespace
 
     // Timeout for preferred transport before starting to try alternate transports
     const std::chrono::seconds preferredTransportTimeout{30};
-
-    // All IPv4 LAN and loopback subnets
-    using SubnetPair = QPair<QHostAddress, int>;
-    std::array<SubnetPair, 5> ipv4LocalSubnets{
-        QHostAddress::parseSubnet(QStringLiteral("192.168.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("172.16.0.0/12")),
-        QHostAddress::parseSubnet(QStringLiteral("10.0.0.0/8")),
-        QHostAddress::parseSubnet(QStringLiteral("169.254.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("127.0.0.0/8"))
-    };
-
-    // Test if an address is an IPv4 LAN or loopback address
-    bool isIpv4Local(const QHostAddress &addr)
-    {
-        return std::any_of(ipv4LocalSubnets.begin(), ipv4LocalSubnets.end(),
-            [&](const SubnetPair &subnet) {return addr.isInSubnet(subnet);});
-    }
 }
 
 HnsdRunner::HnsdRunner(RestartStrategy::Params restartParams)
@@ -313,7 +300,7 @@ QDebug operator<<(QDebug debug, const OriginalNetworkScan& netScan) {
 
 TransportSelector::TransportSelector()
     : _preferred{QStringLiteral("udp"), 0}, _lastUsed{QStringLiteral("udp"), 0}, _alternates{},
-      _nextAlternate{0}, _startAlternates{-1}, _status{Status::Connecting}
+      _nextAlternate{0}, _startAlternates{-1}
 {
 }
 
@@ -421,7 +408,6 @@ void TransportSelector::reset(Transport preferred, bool useAlternates,
     _alternates.clear();
     _nextAlternate = 0;
     _startAlternates.setRemainingTime(msec(preferredTransportTimeout));
-    _status = Status::Connecting;
     _useAlternateNext = false;
     // Reset local addresses; doesn't really matter since we redetect them for
     // each beginAttempt()
@@ -530,35 +516,18 @@ bool TransportSelector::beginAttempt(const ServerLocation &location,
         _lastLocalTcpAddress = localTcpAddress;
         _nextAlternate = 0;
         _startAlternates.setRemainingTime(msec(preferredTransportTimeout));
-        _status = Status::Connecting;
         _useAlternateNext = false;
-    }
-
-    // Advance status when the alternate timer elapses
-    if(_status == Status::Connecting && _startAlternates.hasExpired())
-    {
-        if(_alternates.empty() || _lastLocalUdpAddress.isNull() ||
-           _lastLocalTcpAddress.isNull())
-        {
-            // Can't try alternates - they're not enabled, or we weren't able to
-            // detect a local address (we probably aren't connected right now).
-            _status = Status::TroubleConnecting;
-        }
-        else
-        {
-            _status = Status::TryingAlternates;
-        }
     }
 
     bool delayNext = true;
 
     // Always use the preferred transport if:
     // - there are no alternates
-    // - the preferred transport interval hasn't elapsed (still in Connecting)
+    // - the preferred transport interval hasn't elapsed
     // - we failed to detect a local IP address for the connection (this means
     //   we are not connected to a network right now, and we don't want to
     //   attempt an alternate transport with "any" local address)
-    if(_alternates.empty() || _status == Status::Connecting ||
+    if(_alternates.empty() || !_startAlternates.hasExpired() ||
         _lastLocalUdpAddress.isNull() || _lastLocalTcpAddress.isNull())
     {
         _lastUsed = _preferred;
@@ -618,11 +587,16 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 }
 
 ConnectionConfig::ConnectionConfig()
-    : _vpnLocationAuto{false}, _defaultRoute{true},
-      _proxyType{ProxyType::None}, _shadowsocksLocationAuto{false}
+    : _method{Method::OpenVPN}, _methodForcedByAuth{false},
+      _vpnLocationAuto{false}, _dnsType{DnsType::Pia}, _localPort{0}, _mtu{0},
+      _defaultRoute{true}, _proxyType{ProxyType::None},
+      _shadowsocksLocationAuto{false}, _automaticTransport{false},
+      _requestPortForward{false}, _requestMace{false},
+      _wireguardUseKernel{false}
 {}
 
-ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state)
+ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
+                                   DaemonAccount &account)
     : ConnectionConfig{}
 {
     // Grab the next VPN location.  Copy it in case the locations in DaemonState
@@ -631,30 +605,110 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state)
         _pVpnLocation.reset(new ServerLocation{*state.vpnLocations().nextLocation()});
     _vpnLocationAuto = !state.vpnLocations().chosenLocation();
 
-    // If split tunnel is not enabled, we always use the VPN for the default
-    // route - only apply the defaultRoute() setting if splitTunnelEnabled() is
-    // set
-    if(settings.splitTunnelEnabled())
-        _defaultRoute = settings.defaultRoute();
+    // Get the credentials that will be used to authenticate
+    _vpnUsername = account.openvpnUsername();
+    _vpnPassword = account.openvpnPassword();
+    _vpnToken = account.token();
 
-    if(settings.proxy() == QStringLiteral("custom"))
+    const auto &methodValue = settings.method();
+    if(methodValue == QStringLiteral("openvpn"))
+        _method = Method::OpenVPN;
+    else if(methodValue == QStringLiteral("wireguard"))
     {
-        _proxyType = ProxyType::Custom;
-        _customProxy = settings.proxyCustom();
-
-        // The proxy address must be a literal IPv4 address, we cannot resolve
-        // hostnames due DNS being blocked during reconnection.  For any
-        // failure, leave _socksHostAddress clear, which will be detected as a
-        // nonfatal error later.
-        _socksHostAddress = parseIpv4Host(_customProxy.host());
+        // WireGuard auth requires a token.  If we haven't been able to obtain a
+        // token, use OpenVPN.
+        if(_vpnToken.isEmpty())
+        {
+            qInfo() << "Using OpenVPN instead of WireGuard for this connection, auth token is not available";
+            _method = Method::OpenVPN;
+            _methodForcedByAuth = true;
+        }
+        else
+        {
+            _method = Method::Wireguard;
+            _wireguardUseKernel = settings.wireguardUseKernel();
+        }
     }
-    else if(settings.proxy() == QStringLiteral("shadowsocks"))
+    // Any other value is treated as "openvpn"; the setting values are validated
+    // by the daemon so invalid values should not occur.
+    else
     {
-        _proxyType = ProxyType::Shadowsocks;
-        _socksHostAddress = QHostAddress{0x7f000001}; // 127.0.0.1
-        if(state.shadowsocksLocations().nextLocation())
-            _pShadowsocksLocation.reset(new ServerLocation{*state.shadowsocksLocations().nextLocation()});
-        _shadowsocksLocationAuto = !state.shadowsocksLocations().chosenLocation();
+        _method = Method::OpenVPN;
+        qWarning() << "Unexpected method setting" << methodValue
+            << "- using OpenVPN";
+    }
+
+    // Read the DNS setting
+    const auto &dnsSetting = settings.overrideDNS();
+    if(dnsSetting == QStringLiteral("pia"))
+        _dnsType = DnsType::Pia;
+    else if(dnsSetting == QStringLiteral("handshake"))
+        _dnsType = DnsType::Handshake;
+    // Otherwise, check if it's a QStringList of server addresses
+    else if(dnsSetting.get(_customDns) && !_customDns.isEmpty())
+        _dnsType = DnsType::Custom;
+    else
+        _dnsType = DnsType::Existing;
+
+    _localPort = static_cast<quint16>(settings.localPort());
+    _mtu = settings.mtu();
+
+    _requestMace = settings.enableMACE();
+
+    // defaultRoute, proxy, automatic transport, and port forwarding all
+    // require OpenVPN.
+    if(_method == Method::OpenVPN)
+    {
+        // defaultRoute = false requires split tunnel and OpenVPN.  Otherwise, use
+        // the VPN as the default route.
+        if(settings.splitTunnelEnabled())
+            _defaultRoute = settings.defaultRoute();
+
+        if(settings.proxy() == QStringLiteral("custom"))
+        {
+            _proxyType = ProxyType::Custom;
+            _customProxy = settings.proxyCustom();
+
+            // The proxy address must be a literal IPv4 address, we cannot resolve
+            // hostnames due DNS being blocked during reconnection.  For any
+            // failure, leave _socksHostAddress clear, which will be detected as a
+            // nonfatal error later.
+            _socksHostAddress = parseIpv4Host(_customProxy.host());
+        }
+        else if(settings.proxy() == QStringLiteral("shadowsocks"))
+        {
+            _proxyType = ProxyType::Shadowsocks;
+            _socksHostAddress = QHostAddress{0x7f000001}; // 127.0.0.1
+            if(state.shadowsocksLocations().nextLocation())
+                _pShadowsocksLocation.reset(new ServerLocation{*state.shadowsocksLocations().nextLocation()});
+            _shadowsocksLocationAuto = !state.shadowsocksLocations().chosenLocation();
+        }
+
+        // Automatic transport - can't be used with a proxy (we could not be
+        // confident that a failure to connect is due to a port being
+        // unreachable)
+        if(_proxyType == ProxyType::None)
+            _automaticTransport = settings.automaticTransport();
+
+        // The port forwarding setting is more complex, because changes are
+        // applied on the fly in some cases, but require reconnects in others.
+        //
+        // When connected to a region that supports PF with OpenVPN, any change
+        // requires a reconnect.  We have to reconnect to start a new PF
+        // request, or when disabling PF, we keep the port that we got until
+        // we reconnect.
+        //
+        // When connected to a region that doesn't support it, changing the
+        // setting just toggles between Inactive and Unavailable.  This doesn't
+        // require a reconnect.
+        //
+        // As a result, the connection config only captures the PF setting when
+        // connecting to a region that has PF.  Otherwise, the connection config
+        // does not depend on PF (changes will not trigger a reconnect notice),
+        // and the daemon allows PortForwarder to track the real setting as it's
+        // updated to toggle between Inactive/Unavailable.
+        if(_pVpnLocation && _pVpnLocation->portForward())
+            _requestPortForward = settings.portForward();
     }
 }
 
@@ -701,19 +755,48 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
     QString otherVpnLocationId = other.vpnLocation() ? other.vpnLocation()->id() : QString{};
     QString otherSsLocationId = other.shadowsocksLocation() ? other.shadowsocksLocation()->id() : QString{};
 
-    return defaultRoute() != other.defaultRoute() ||
+    return method() != other.method() ||
+        methodForcedByAuth() != other.methodForcedByAuth() ||
+        vpnUsername() != other.vpnUsername() ||
+        vpnPassword() != other.vpnPassword() ||
+        vpnToken() != other.vpnToken() ||
+        dnsType() != other.dnsType() ||
+        customDns() != other.customDns() ||
+        localPort() != other.localPort() ||
+        mtu() != other.mtu() ||
+        defaultRoute() != other.defaultRoute() ||
         proxyType() != other.proxyType() ||
         socksHost() != other.socksHost() ||
         customProxy() != other.customProxy() ||
+        automaticTransport() != other.automaticTransport() ||
+        requestPortForward() != other.requestPortForward() ||
+        requestMace() != other.requestMace() ||
+        wireguardUseKernel() != other.wireguardUseKernel() ||
         vpnLocationId != otherVpnLocationId ||
         ssLocationId != otherSsLocationId;
+}
+
+QStringList ConnectionConfig::getDnsServers(const QStringList &piaDns) const
+{
+    switch(dnsType())
+    {
+        default:
+        case DnsType::Pia:
+            return piaDns;
+        case DnsType::Handshake:
+            return {hnsdLocalAddress};
+        case DnsType::Existing:
+            return {};
+        case DnsType::Custom:
+            return customDns();
+    }
 }
 
 VPNConnection::VPNConnection(QObject* parent)
     : QObject(parent)
     , _state(State::Disconnected)
     , _connectionStep{ConnectionStep::Initializing}
-    , _openvpn(nullptr)
+    , _method(nullptr)
     , _hnsdRunner{hnsdRestart}
     , _shadowsocksRunner{shadowsocksRestart}
     , _connectionAttemptCount(0)
@@ -746,8 +829,7 @@ VPNConnection::VPNConnection(QObject* parent)
         // We only need to invoke doConnect() if we were specifically waiting on
         // this port to be assigned, otherwise, let the connection drop and
         // retry normally.
-        if((_state == State::Connecting || _state == State::Reconnecting ||
-            _state == State::StillConnecting || _state == State::StillReconnecting) &&
+        if((_state == State::Connecting || _state == State::Reconnecting) &&
            _connectionStep == ConnectionStep::StartingProxy)
         {
             qInfo() << "Shadowsocks proxy assigned local port"
@@ -760,6 +842,29 @@ VPNConnection::VPNConnection(QObject* parent)
                 << _shadowsocksRunner.localPort()
                 << "but we were not waiting on it to connect";
         }
+    });
+
+    // Clean up all supported VPN methods (that have cleanup), to ensure nothing
+    // is left over in case the daemon had crashed
+    cleanupWireguard();
+}
+
+void VPNConnection::scheduleMaceDnsCacheFlush()
+{
+    QTimer::singleShot(1000, this, [this]()
+    {
+        qInfo() << "Flushing DNS cache due to activating MACE";
+#if defined(Q_OS_LINUX)
+        Exec::bash(QStringLiteral("if [[ $(realpath /etc/resolv.conf) =~ systemd ]]; then systemd-resolve --flush-caches; fi"));
+#elif defined(Q_OS_MAC)
+        Exec::cmd(QStringLiteral("dscacheutil"), {QStringLiteral("-flushcache")});
+        Exec::cmd(QStringLiteral("discoveryutil"), {QStringLiteral("udnsflushcaches")});
+        Exec::cmd(QStringLiteral("discoveryutil"), {QStringLiteral("mdnsflushcache")});
+        Exec::cmd(QStringLiteral("killall"), {QStringLiteral("-HUP"), QStringLiteral("mDNSResponder")});
+        Exec::cmd(QStringLiteral("killall"), {QStringLiteral("-HUP"), QStringLiteral("mDNSResponderHelper")});
+#elif defined(Q_OS_WIN)
+        Exec::cmd(QStringLiteral("ipconfig"), {QStringLiteral("/flushdns")});
+#endif
     });
 }
 
@@ -781,10 +886,11 @@ void VPNConnection::activateMACE()
         qError() << "Failed to activate MACE packet 1 " << socketError;
         maceActivate1->deleteLater();
     });
-    connect(maceActivate1, &QAbstractSocket::connected, this, [maceActivate1]() {
+    connect(maceActivate1, &QAbstractSocket::connected, this, [this, maceActivate1]() {
         qDebug () << "MACE Packet 1 connected succesfully";
         maceActivate1->close();
         maceActivate1->deleteLater();
+        scheduleMaceDnsCacheFlush();
     });
 
     QTimer::singleShot(std::chrono::milliseconds(5000).count(), this, [this]() {
@@ -796,17 +902,18 @@ void VPNConnection::activateMACE()
         qError() << "Failed to activate MACE packet 2 " << socketError;
         maceActivate2->deleteLater();
         });
-        connect(maceActivate2, &QAbstractSocket::connected, this, [maceActivate2]() {
+        connect(maceActivate2, &QAbstractSocket::connected, this, [this, maceActivate2]() {
         qDebug () << "MACE Packet 2 connected succesfully";
         maceActivate2->close();
         maceActivate2->deleteLater();
+        scheduleMaceDnsCacheFlush();
         });
     });
 }
 
 bool VPNConnection::needsReconnect()
 {
-    if (!_openvpn || _state == State::Disconnecting || _state == State::DisconnectingToReconnect || _state == State::Disconnected)
+    if (!_method || _state == State::Disconnecting || _state == State::DisconnectingToReconnect || _state == State::Disconnected)
         return _needsReconnect = false;
     if (_needsReconnect)
         return true;
@@ -817,7 +924,7 @@ bool VPNConnection::needsReconnect()
         if (storedValue != currentValue)
             return _needsReconnect = true;
     }
-    ConnectionConfig newConfig{g_settings, g_state};
+    ConnectionConfig newConfig{g_settings, g_state, g_account};
     switch(_state)
     {
     default:
@@ -828,9 +935,7 @@ bool VPNConnection::needsReconnect()
         Q_ASSERT(false);
         break;
     case State::Connecting:
-    case State::StillConnecting:
     case State::Reconnecting:
-    case State::StillReconnecting:
     case State::Interrupted:
         // Compare the current settings to the settings we are currently trying to use
         if(newConfig.hasChanged(_connectingConfig))
@@ -871,20 +976,18 @@ void VPNConnection::connectVPN(bool force)
         // Otherwise, change to DisconnectingToReconnect
         copySettings(State::DisconnectingToReconnect, State::Disconnecting);
 
-        Q_ASSERT(_openvpn); // Valid in this state
-        _openvpn->shutdown();
+        Q_ASSERT(_method); // Valid in this state
+        _method->shutdown();
         return;
     case State::Connecting:
-    case State::StillConnecting:
     case State::Reconnecting:
-    case State::StillReconnecting:
         // If settings haven't changed, there's nothing to do.
         if (!force && !needsReconnect())
             return;
         // fallthrough
-        if (_openvpn)
+        if (_method)
         {
-            _openvpn->shutdown();
+            _method->shutdown();
             copySettings(State::DisconnectingToReconnect, State::Disconnecting);
         }
         else
@@ -906,7 +1009,7 @@ void VPNConnection::connectVPN(bool force)
         qWarning() << "Connecting in unhandled state " << _state;
         // fallthrough
     case State::Disconnected:
-        _connectionAttemptCount = 0;
+        updateAttemptCount(0);
         _connectedConfig = {};
         if(copySettings(State::Connecting, State::Disconnected))
             queueConnectionAttempt();
@@ -920,9 +1023,9 @@ void VPNConnection::disconnectVPN()
     {
         _connectingConfig = {};
         setState(State::Disconnecting);
-        if (_openvpn && _openvpn->state() < OpenVPNProcess::Exiting)
-            _openvpn->shutdown();
-        if (!_openvpn || _openvpn->state() == OpenVPNProcess::Exited)
+        if (_method && _method->state() < VPNMethod::State::Exiting)
+            _method->shutdown();
+        if (!_method || _method->state() == VPNMethod::State::Exited)
         {
             setState(State::Disconnected);
         }
@@ -933,6 +1036,11 @@ void VPNConnection::beginConnection()
 {
     _connectionStep = ConnectionStep::Initializing;
     doConnect();
+}
+
+bool VPNConnection::useSlowInterval() const
+{
+    return _connectionAttemptCount > Limits::SlowConnectionAttemptLimit;
 }
 
 void VPNConnection::doConnect()
@@ -948,8 +1056,6 @@ void VPNConnection::doConnect()
         return;
     case State::Connecting:
     case State::Reconnecting:
-    case State::StillConnecting:
-    case State::StillReconnecting:
         break;
     case State::Connected:
         qInfo() << "Already connected; doConnect ignored";
@@ -967,9 +1073,9 @@ void VPNConnection::doConnect()
         return;
     }
 
-    if (_openvpn)
+    if (_method)
     {
-        qWarning() << "OpenVPN process already exists; doConnect ignored";
+        qWarning() << "VPN method already exists; doConnect ignored";
         return;
     }
 
@@ -994,13 +1100,12 @@ void VPNConnection::doConnect()
         // connection attempt (which resets if the network connection changes).
         // However, we can't do it at all if we're reconnecting, because the
         // killswitch blocks DNS resolution.
-        if(_connectionAttemptCount == 0 &&
-           (_state == State::Connecting || _state == State::StillConnecting))
+        if(_connectionAttemptCount == 0 && _state == State::Connecting)
         {
             // We're not retrying this request if it fails - we don't want to hold
             // up the connection attempt; this information isn't critical.
             ApiClient::instance()
-                    ->getIp(QStringLiteral("status"))
+                    ->getIp(QStringLiteral("api/client/status"))
                     ->notify(this, [this](const Error& error, const QJsonDocument& json) {
                         if (!error)
                         {
@@ -1060,7 +1165,6 @@ void VPNConnection::doConnect()
         // somehow.
         QString protocol;
         uint selectedPort;
-        bool automaticTransport;
         if(!json_cast(_connectionSettings.value("protocol"), protocol))
             protocol = QStringLiteral("udp");
         // Shadowsocks proxies require TCP; UDP relays aren't enabled on PIA
@@ -1083,17 +1187,9 @@ void VPNConnection::doConnect()
                 selectedPort = 0;
         }
 
-        if(!json_cast(_connectionSettings.value("automaticTransport"), automaticTransport))
-            automaticTransport = true;
-
-        // Automatic transport isn't supported when a SOCKS proxy is also
-        // configured.  (We can't be confident that a failure to connect is due
-        // to a port being blocked.)
-        if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-            automaticTransport = false;
-
         // Reset the transport selection sequence
-        _transportSelector.reset({protocol, selectedPort}, automaticTransport,
+        _transportSelector.reset({protocol, selectedPort},
+                                 _connectingConfig.automaticTransport(),
                                  *_connectingConfig.vpnLocation(),
                                  g_data.udpPorts(), g_data.tcpPorts());
     }
@@ -1124,355 +1220,62 @@ void VPNConnection::doConnect()
     // Set when the next earliest reconnect attempt is allowed
     if(delayNext)
     {
-        switch (_state)
-        {
-        case State::Connecting:
-            _timeUntilNextConnectionAttempt.setRemainingTime(ConnectionAttemptInterval);
-            break;
-        case State::StillConnecting:
-            _timeUntilNextConnectionAttempt.setRemainingTime(SlowConnectionAttemptInterval);
-            break;
-        case State::Reconnecting:
-            _timeUntilNextConnectionAttempt.setRemainingTime(ReconnectionAttemptInterval);
-            break;
-        case State::StillReconnecting:
-            _timeUntilNextConnectionAttempt.setRemainingTime(SlowReconnectionAttemptInterval);
-            break;
-        default:
-            break;
-        }
+        if(useSlowInterval())
+            _timeUntilNextConnectionAttempt.setRemainingTime(Limits::SlowConnectionAttemptInterval);
+        else
+            _timeUntilNextConnectionAttempt.setRemainingTime(Limits::ConnectionAttemptInterval);
     }
     else
         _timeUntilNextConnectionAttempt.setRemainingTime(0);
 
-    ++_connectionAttemptCount;
+    updateAttemptCount(_connectionAttemptCount+1);
 
-    if (_state == State::Connecting && _connectionAttemptCount > SlowConnectionAttemptLimit)
-        setState(State::StillConnecting);
-    else if (_state == State::Reconnecting && _connectionAttemptCount > SlowReconnectionAttemptLimit)
-        setState(State::StillReconnecting);
+    switch(_connectingConfig.method())
+    {
+        case ConnectionConfig::Method::OpenVPN:
+            _method = new OpenVPNMethod{this, netScan};
+            break;
+        case ConnectionConfig::Method::Wireguard:
+            _method = createWireguardMethod(this, netScan).release();
+            break;
+        default:
+            Q_ASSERT(false);
+            break;
+    }
+    connect(_method, &VPNMethod::stateChanged, this, &VPNConnection::vpnMethodStateChanged);
+    connect(_method, &VPNMethod::tunnelConfiguration, this,
+            &VPNConnection::usingTunnelConfiguration);
+    connect(_method, &VPNMethod::bytecount, this, &VPNConnection::updateByteCounts);
+    connect(_method, &VPNMethod::firewallParamsChanged, this, &VPNConnection::firewallParamsChanged);
+    connect(_method, &VPNMethod::error, this, &VPNConnection::raiseError);
 
-    emit connectingStatus(_transportSelector.status());
-
-    QStringList arguments;
     try
     {
-        arguments += QStringLiteral("--verb");
-        arguments += QStringLiteral("4");
-
-        _networkAdapter = g_daemon->getNetworkAdapter();
-        if (_networkAdapter)
-        {
-            QString devNode = _networkAdapter->devNode();
-            if (!devNode.isEmpty())
-            {
-                arguments += QStringLiteral("--dev-node");
-                arguments += devNode;
-            }
-        }
-
-        arguments += QStringLiteral("--script-security");
-        arguments += QStringLiteral("2");
-
-        auto escapeArg = [](QString arg)
-        {
-            // Escape backslashes and spaces in the command.  Note this is the
-            // same even on Windows, because OpenVPN parses this command line
-            // with its internal parser, then re-joins and re-quotes it on
-            // Windows with Windows quoting conventions.
-            arg.replace(QLatin1String(R"(\)"), QLatin1String(R"(\\)"));
-            arg.replace(QLatin1String(R"( )"), QLatin1String(R"(\ )"));
-            return arg;
-        };
-
-        QString updownCmd;
-
-#ifdef Q_OS_WIN
-        updownCmd += escapeArg(QString::fromLocal8Bit(qgetenv("WINDIR")) + "\\system32\\cmd.exe");
-        updownCmd += QStringLiteral(" /C call ");
-#endif
-        updownCmd += escapeArg(Path::OpenVPNUpDownScript);
-
-#ifdef Q_OS_WIN
-        // Only the Windows updown script supports logging right now.  Enable it
-        // if debug logging is turned on.
-        if(g_settings.debugLogging())
-        {
-            updownCmd += " --log ";
-            updownCmd += escapeArg(Path::UpdownLogFile);
-        }
-#endif
-
-        // Pass DNS server addresses
-        QStringList dnsServers = getDNSServers(_dnsServers);
-        if(!dnsServers.isEmpty())
-        {
-            updownCmd += " --dns ";
-            updownCmd += dnsServers.join(':');
-        }
-
-        // Terminate PIA args with '--' (OpenVPN passes several subsequent
-        // arguments)
-        updownCmd += " --";
-
-        qInfo() << "updownCmd is: " << updownCmd;
-
-#ifdef Q_OS_WIN
-        if(g_settings.windowsIpMethod() == QStringLiteral("static"))
-        {
-            // Static configuration on Windows - use OpenVPN's netsh method, use
-            // updown script to apply DNS with netsh
-            arguments += "--ip-win32";
-            arguments += "netsh";
-            // Use the same script for --up and --down
-            arguments += "--up";
-            arguments += updownCmd;
-            arguments += "--down";
-            arguments += updownCmd;
-        }
-        else
-        {
-            // DHCP configuration on Windows - use OpenVPN's default ip-win32
-            // method, pass DNS servers as DHCP options
-            for(const auto &dnsServer : dnsServers)
-            {
-                arguments += "--dhcp-option";
-                arguments += "DNS";
-                arguments += dnsServer;
-            }
-        }
-#else
-        // Mac and Linux - always use updown script for DNS
-        // Use the same script for --up and --down
-        arguments += "--up";
-        arguments += updownCmd;
-        arguments += "--down";
-        arguments += updownCmd;
-#endif
-
-        arguments += QStringLiteral("--config");
-
-        QFile configFile(Path::OpenVPNConfigFile);
-        if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text) ||
-            !writeOpenVPNConfig(configFile))
-        {
-            throw Error(HERE, Error::OpenVPNConfigFileWriteError);
-        }
-        configFile.close();
-
-        arguments += Path::OpenVPNConfigFile;
+        _method->run(_connectingConfig, _transportSelector.lastUsed(),
+                     _transportSelector.lastLocalAddress(),
+                     _shadowsocksRunner.localPort());
     }
-    catch (const Error& ex)
+    catch(const Error &ex)
     {
-        // Do _not_ call raiseError() here because it would immediately schedule
-        // another connection attempt for nonfatal errors (we haven't created
-        // _openvpn yet).  Schedule the next attempt so we back off the retry
-        // interval.  There are no fatal errors that can occur here (the only
-        // fatal error is an auth error, which is signaled by OpenVPN after it's
-        // started).
-        emit error(ex);
-        scheduleNextConnectionAttempt();
-        return;
-    }
-
-    if (_networkAdapter)
-    {
-        // Ensure our tunnel has priority over other interfaces. This is especially important for DNS.
-        _networkAdapter->setMetricToLowest();
-    }
-
-    _openvpn = new OpenVPNProcess(this);
-
-    // TODO: this can be hooked up to support in-process up/down script handling via scripts that print magic strings
-    connect(_openvpn, &OpenVPNProcess::stdoutLine, this, &VPNConnection::openvpnStdoutLine);
-    connect(_openvpn, &OpenVPNProcess::stderrLine, this, &VPNConnection::openvpnStderrLine);
-    connect(_openvpn, &OpenVPNProcess::managementLine, this, &VPNConnection::openvpnManagementLine);
-    connect(_openvpn, &OpenVPNProcess::stateChanged, this, &VPNConnection::openvpnStateChanged);
-    connect(_openvpn, &OpenVPNProcess::exited, this, &VPNConnection::openvpnExited);
-    connect(_openvpn, &OpenVPNProcess::error, this, &VPNConnection::openvpnError);
-
-    _openvpn->run(arguments);
-}
-
-void VPNConnection::openvpnStdoutLine(const QString& line)
-{
-    FUNCTION_LOGGING_CATEGORY("openvpn.stdout");
-    qDebug().noquote() << line;
-
-    checkStdoutErrors(line);
-}
-
-void VPNConnection::checkStdoutErrors(const QString &line)
-{
-    // Check for specific errors that we can detect from OpenVPN's output.
-
-    if(line.contains("socks_username_password_auth: server refused the authentication"))
-    {
-        raiseError({HERE, Error::Code::OpenVPNProxyAuthenticationError});
-        return;
-    }
-
-    // This error can be logged by socks_handshake and recv_socks_reply, others
-    // might be possible too.
-    if(line.contains(QRegExp("socks.*: TCP port read failed")))
-    {
-        raiseError({HERE, Error::Code::OpenVPNProxyError});
-        return;
-    }
-
-    // This error occurs if OpenVPN fails to open a TCP connection.  If it's
-    // reported for the SOCKS proxy, report it as a proxy error, otherwise let
-    // it be handled as a general failure.
-    QRegExp tcpFailRegex{R"(TCP: connect to \[AF_INET\]([\d\.]+):\d+ failed:)"};
-    if(line.contains(tcpFailRegex))
-    {
-        QHostAddress failedHost;
-        if(failedHost.setAddress(tcpFailRegex.cap(1)) &&
-            failedHost == _connectingConfig.socksHost())
-        {
-            raiseError({HERE, Error::Code::OpenVPNProxyError});
-            return;
-        }
+        raiseError(ex);
     }
 }
 
-void VPNConnection::openvpnStderrLine(const QString& line)
+void VPNConnection::vpnMethodStateChanged()
 {
-    FUNCTION_LOGGING_CATEGORY("openvpn.stderr");
-    qDebug().noquote() << line;
-
-    checkForMagicStrings(line);
-}
-
-void VPNConnection::checkForMagicStrings(const QString& line)
-{
-    QRegExp tunDeviceNameRegex{R"(Using device:([^ ]+) local_address:([^ ]+) remote_address:([^ ]+))"};
-    if(line.contains(tunDeviceNameRegex))
-    {
-        emit usingTunnelDevice(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2), tunDeviceNameRegex.cap(3));
-    }
-
-    // TODO: extract this out into a more general error mechanism, where the "!!!" prefix
-    // indicates an error condition followed by the code.
-    if (line.startsWith("!!!updown.sh!!!dnsConfigFailure")) {
-        raiseError(Error(HERE, Error::OpenVPNDNSConfigError));
-    }
-}
-
-bool VPNConnection::respondToMgmtAuth(const QString &line, const QString &user,
-                                      const QString &password)
-{
-    // Extract the auth type from the prompt - such as `Auth` or `SOCKS Proxy`.
-    // The line looks like:
-    // >PASSWORD:Need 'Auth' username/password
-    auto quotes = line.midRef(15).split('\'');
-    if (quotes.size() >= 3)
-    {
-        auto id = quotes[1].toString();
-        auto cmd = QStringLiteral("username \"%1\" \"%2\"\npassword \"%1\" \"%3\"")
-                .arg(id, user, password);
-        _openvpn->sendManagementCommand(QLatin1String(cmd.toLatin1()));
-        return true;
-    }
-
-    qError() << "Invalid password request";
-    return false;
-}
-
-void VPNConnection::openvpnManagementLine(const QString& line)
-{
-    FUNCTION_LOGGING_CATEGORY("openvpn.mgmt");
-    qDebug().noquote() << line;
-
-    if (!line.isEmpty() && line[0] == '>')
-    {
-        if (line.startsWith(QLatin1String(">PASSWORD:")))
-        {
-            // SOCKS proxy auth
-            if (line.startsWith(QLatin1String(">PASSWORD:Need 'SOCKS Proxy'")))
-            {
-                if(respondToMgmtAuth(line, _connectingConfig.customProxy().username(),
-                                     _connectingConfig.customProxy().password()))
-                {
-                    return;
-                }
-            }
-            // Normal password authentication
-            // The type is usually 'Auth', but use these creds by default to
-            // preserve existing behavior.
-            else if (line.startsWith(QLatin1String(">PASSWORD:Need ")))
-            {
-                if(respondToMgmtAuth(line, _openvpnUsername, _openvpnPassword))
-                    return;
-            }
-            else if (line.startsWith(QLatin1String(">PASSWORD:Auth-Token:")))
-            {
-                // TODO: PIA servers aren't set up to use this properly yet
-                return;
-            }
-            else if (line.startsWith(QLatin1String(">PASSWORD:Verification Failed: ")))
-            {
-                raiseError(Error(HERE, Error::OpenVPNAuthenticationError));
-                return;
-            }
-            // All unhandled cases
-            raiseError(Error(HERE, Error::OpenVPNAuthenticationError));
-        }
-        else if (line.startsWith(QLatin1String(">BYTECOUNT:")))
-        {
-            auto params = line.midRef(11).split(',');
-            if (params.size() >= 2)
-            {
-                bool ok = false;
-                quint64 up, down;
-                if (((down = params[0].toULongLong(&ok)), ok) && ((up = params[1].toULongLong(&ok)), ok))
-                {
-                    updateByteCounts(down, up);
-                }
-            }
-        }
-    }
-}
-
-void VPNConnection::openvpnStateChanged()
-{
-    OpenVPNProcess::State openvpnState = _openvpn ? _openvpn->state() : OpenVPNProcess::Exited;
+    VPNMethod::State methodState = _method ? _method->state() : VPNMethod::State::Exited;
     State newState = _state;
 
-    switch (openvpnState)
+    switch (methodState)
     {
-    case OpenVPNProcess::AssignIP:
-#if defined(Q_OS_WIN)
-        // On Windows, we can't easily get environment variables from the
-        // updown script like other platforms - stdout/stderr are not forwarded
-        // through OpenVPN - so we can't capture the tunnel configuration that
-        // way.
-        //
-        // Right now we only need the local tunnel interface IP on Windows (we
-        // don't need the remote or interface name), so we can get that from
-        // the AssignIP state information.  Only do this on Windows so the other
-        // platforms still report all configuration components together.
-        if(!_openvpn || _openvpn->tunnelIP().isEmpty())
-        {
-            qWarning() << "Tunnel interface IP address not known in AssignIP state";
-        }
-        else
-        {
-            qInfo() << "Tunnel device is assigned IP address" << _openvpn->tunnelIP();
-            emit usingTunnelDevice({}, _openvpn->tunnelIP(), {});
-        }
-#endif
-        break;
-    case OpenVPNProcess::Connected:
+    case VPNMethod::State::Connected:
         switch (_state)
         {
         default:
-            qWarning() << "OpenVPN connected in unexpected state" << qEnumToString(_state);
+            qWarning() << "VPN method connected in unexpected state" << qEnumToString(_state);
             Q_FALLTHROUGH();
         case State::Connecting:
-        case State::StillConnecting:
         case State::Reconnecting:
-        case State::StillReconnecting:
             // The connection was established, so the connecting location is now
             // the connected location.
             _connectedConfig = std::move(_connectingConfig);
@@ -1487,7 +1290,7 @@ void VPNConnection::openvpnStateChanged()
             scanNetwork(_connectedConfig.vpnLocation().get(), _transportSelector.lastUsed().protocol());
 
             // If DNS is set to Handshake, start it now, since we've connected
-            if(isDNSHandshake(_dnsServers))
+            if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Handshake)
             {
                 auto hnsdArgs = hnsdFixedArgs;
                 // Tell hnsd to use the VPN interface for outgoing DNS queries.
@@ -1516,21 +1319,12 @@ void VPNConnection::openvpnStateChanged()
             // the connection raced with the shutdown.  Just in case, tell it to
             // shutdown again; can't hurt anything and ensures that we don't get
             // stuck in this state.
-            if (_openvpn)
-                _openvpn->shutdown();
+            if (_method)
+                _method->shutdown();
             break;
         }
         break;
-
-    case OpenVPNProcess::Reconnecting:
-        // In some rare cases OpenVPN reconnects on its own (e.g. TAP adapter I/O failure),
-        // but we don't want it to try to reconnect on its own; send a SIGTERM instead.
-        qWarning() << "OpenVPN trying to reconnect internally, sending SIGTERM";
-        if (_openvpn)
-            _openvpn->shutdown();
-        break;
-
-    case OpenVPNProcess::Exiting:
+    case VPNMethod::State::Exiting:
         if (_state == State::Connected)
         {
             // Reconnect to the same location again
@@ -1539,8 +1333,12 @@ void VPNConnection::openvpnStateChanged()
             queueConnectionAttempt();
         }
         break;
-
-    case OpenVPNProcess::Exited:
+    case VPNMethod::State::Exited:
+        if(_method)
+        {
+            _method->deleteLater();
+            _method = nullptr;
+        }
         switch (_state)
         {
         case State::Connected:
@@ -1560,9 +1358,7 @@ void VPNConnection::openvpnStateChanged()
             scheduleNextConnectionAttempt();
             break;
         case State::Connecting:
-        case State::StillConnecting:
         case State::Reconnecting:
-        case State::StillReconnecting:
             scheduleNextConnectionAttempt();
             break;
         case State::Interrupted:
@@ -1573,7 +1369,7 @@ void VPNConnection::openvpnStateChanged()
             newState = State::Disconnected;
             break;
         default:
-            qWarning() << "OpenVPN exited in unexpected state" << qEnumToString(_state);
+            qWarning() << "VPN method exited in unexpected state" << qEnumToString(_state);
             break;
         }
         break;
@@ -1582,24 +1378,6 @@ void VPNConnection::openvpnStateChanged()
         break;
     }
     setState(newState);
-}
-
-void VPNConnection::openvpnExited(int exitCode)
-{
-    if (_networkAdapter)
-    {
-        // Ensure we return our tunnel metric to how it was before we lowered it.
-        _networkAdapter->restoreOriginalMetric();
-        _networkAdapter.clear();
-    }
-    _openvpn->deleteLater();
-    _openvpn = nullptr;
-    openvpnStateChanged();
-}
-
-void VPNConnection::openvpnError(const Error& err)
-{
-    raiseError(err);
 }
 
 void VPNConnection::raiseError(const Error& err)
@@ -1625,12 +1403,25 @@ void VPNConnection::raiseError(const Error& err)
 
     // All other errors should cancel current attempt and retry
     default:
-        if (_openvpn)
-            _openvpn->shutdown();
+        if (_method)
+            _method->shutdown();
         else
             queueConnectionAttempt();
     }
     emit error(err);
+}
+
+void VPNConnection::updateAttemptCount(int newCount)
+{
+    if(_connectionAttemptCount != newCount)
+    {
+        qInfo() << "Connection attempt count updated from"
+            << _connectionAttemptCount << "to" << newCount;
+        _connectionAttemptCount = newCount;
+        // The slow interval flag is based on the attempt count - we don't store
+        // this derived state, so it might have changed or might not.
+        emit slowIntervalChanged(useSlowInterval());
+    }
 }
 
 void VPNConnection::setState(State state)
@@ -1650,11 +1441,10 @@ void VPNConnection::setState(State state)
         // Several members are only valid in the [Still]Connecting and
         // [Still]Reconnecting states.  If we're going to any other state, clear
         // them.
-        if(state != State::Connecting && state != State::StillConnecting &&
-           state != State::Reconnecting && state != State::StillReconnecting)
+        if(state != State::Connecting && state != State::Reconnecting)
         {
             _connectionStep = ConnectionStep::Initializing;
-            _connectionAttemptCount = 0;
+            updateAttemptCount(0);
             _connectTimer.stop();
         }
 
@@ -1675,13 +1465,11 @@ void VPNConnection::setState(State state)
             Q_ASSERT(false);
             break;
         case State::Connecting:
-        case State::StillConnecting:
             Q_ASSERT(_connectingConfig.vpnLocation());
             Q_ASSERT(!_connectedConfig.vpnLocation());
             preferredTransport = _transportSelector.preferred();
             break;
         case State::Reconnecting:
-        case State::StillReconnecting:
             Q_ASSERT(_connectingConfig.vpnLocation());
             Q_ASSERT(_connectedConfig.vpnLocation());
             preferredTransport = _transportSelector.preferred();
@@ -1761,8 +1549,8 @@ void VPNConnection::queueConnectionAttempt()
 bool VPNConnection::copySettings(State successState, State failureState)
 {
     // successState must be a state where the connecting locations are valid
-    Q_ASSERT(successState == State::Connecting || successState == State::StillConnecting ||
-             successState == State::Reconnecting || successState == State::StillReconnecting ||
+    Q_ASSERT(successState == State::Connecting ||
+             successState == State::Reconnecting ||
              successState == State::DisconnectingToReconnect ||
              successState == State::Interrupted);
     // failureState must be a state where the connecting locations are clear
@@ -1775,26 +1563,19 @@ bool VPNConnection::copySettings(State successState, State failureState)
     {
         settings.insert(name, g_settings.get(name));
     }
-    QString username = g_account.openvpnUsername();
-    QString password = g_account.openvpnPassword();
-    DaemonSettings::DNSSetting dnsServers = g_settings.overrideDNS();
-    ConnectionConfig newConfig{g_settings, g_state};
+    ConnectionConfig newConfig{g_settings, g_state, g_account};
 
     bool changed = _connectionSettings != settings ||
-        _openvpnUsername != username || _openvpnPassword != password ||
-        dnsServers != _dnsServers || newConfig.hasChanged(_connectingConfig);
+        newConfig.hasChanged(_connectingConfig);
 
     _connectionSettings.swap(settings);
-    _openvpnUsername.swap(username);
-    _openvpnPassword.swap(password);
-    _dnsServers = std::move(dnsServers);
     _connectingConfig = std::move(newConfig);
 
     _needsReconnect = false;
 
     // Reset to the first attempt; settings have changed
     if(changed)
-        _connectionAttemptCount = 0;
+        updateAttemptCount(0);
 
     // If we failed to load any required data, fail
     if(!_connectingConfig.canConnect())
@@ -1815,285 +1596,5 @@ bool VPNConnection::copySettings(State successState, State failureState)
 
     // Locations were loaded
     setState(successState);
-    return true;
-}
-
-bool VPNConnection::writeOpenVPNConfig(QFile& outFile)
-{
-    QTextStream out{&outFile};
-    const char endl = '\n';
-
-    auto sanitize = [](const QString& s) {
-        QString result;
-        result.reserve(s.size());
-        for (auto& c : s)
-        {
-            switch (c.unicode())
-            {
-            case '\n':
-            case '\t':
-            case '\r':
-            case '\v':
-            case '"':
-            case '\'':
-                break;
-            default:
-                result.push_back(c);
-                break;
-            }
-        }
-        return result;
-    };
-
-    if (!_connectingConfig.vpnLocation())
-        return false;
-
-    out << "pia-signal-settings" << endl;
-    out << "client" << endl;
-    out << "dev tun" << endl;
-
-    QString remoteServer;
-    if (_transportSelector.lastUsed().protocol() == QStringLiteral("tcp"))
-    {
-        out << "proto tcp-client" << endl;
-        remoteServer = sanitize(_connectingConfig.vpnLocation()->tcpHost());
-    }
-    else
-    {
-        out << "proto udp" << endl;
-        out << "explicit-exit-notify" << endl;
-        remoteServer = sanitize(_connectingConfig.vpnLocation()->udpHost());
-    }
-    if (remoteServer.isEmpty())
-        return false;
-
-    out << "remote " << remoteServer << ' ' << _transportSelector.lastUsed().port() << endl;
-
-    if (!_connectingConfig.vpnLocation()->serial().isEmpty())
-        out << "verify-x509-name " << sanitize(_connectingConfig.vpnLocation()->serial()) << " name" << endl;
-
-    // OpenVPN's default setting is 'ping-restart 120'.  This means it takes up
-    // to 2 minutes to notice loss of connection.  (On some OSes/systems it may
-    // notice a change in local network connectivity more quickly, but this is
-    // not reliable and cannot detect connection loss due to an upstream
-    // change.)  This affects both TCP and UDP.
-    //
-    // 2 minutes is longer than most users seem to wait for the app to
-    // reconnect, based on feedback and reports they usually give up and try to
-    // reconnect manually before then.
-    //
-    // We've also seen examples where OpenVPN does not seem to actually exit
-    // following connection loss, though we have not been able to reproduce
-    // this.  It's possible that this has to do with the default 'ping-restart'
-    // vs. 'ping-exit'.
-    //
-    // Enable ping-exit 25 to attempt to detect connection loss more quickly and
-    // ensure OpenVPN exits on connection loss.
-    out << "ping 5" << endl;
-    out << "ping-exit 25" << endl;
-
-    out << "persist-remote-ip" << endl;
-    out << "resolv-retry 0" << endl;
-    out << "route-delay 0" << endl;
-    out << "reneg-sec 0" << endl;
-    out << "server-poll-timeout 10s" << endl;
-    out << "tls-client" << endl;
-    out << "tls-exit" << endl;
-    out << "remote-cert-tls server" << endl;
-    out << "auth-user-pass" << endl;
-    out << "pull-filter ignore \"auth-token\"" << endl;
-
-    // Increasing sndbuf/rcvbuf can boost throughput, which is what most users
-    // prioritize. For now, just copy the values used in the previous client.
-    out << "sndbuf 262144" << endl;
-    out << "rcvbuf 262144" << endl;
-
-    if (_connectingConfig.defaultRoute())
-    {
-        out << "redirect-gateway def1 bypass-dhcp";
-        if (!g_settings.blockIPv6())
-            out << " ipv6";
-        // When using a SOCKS proxy, handle the VPN endpoint route ourselves.
-        if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-            out << " local";
-        out << endl;
-
-        // When using a SOCKS proxy, if that proxy is on the Internet, we need
-        // to route it back to the default gateway (like we do with the VPN
-        // server).
-        if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-        {
-            QHostAddress remoteHost;
-            switch(_connectingConfig.proxyType())
-            {
-                default:
-                case ConnectionConfig::ProxyType::None:
-                    Q_ASSERT(false);
-                    break;
-                case ConnectionConfig::ProxyType::Custom:
-                    remoteHost = _connectingConfig.socksHost();
-                    break;
-                case ConnectionConfig::ProxyType::Shadowsocks:
-                {
-                    QSharedPointer<ShadowsocksServer> _pSsServer;
-                    if(_connectingConfig.shadowsocksLocation())
-                        _pSsServer = _connectingConfig.shadowsocksLocation()->shadowsocks();
-                    if(_pSsServer)
-                        remoteHost = ConnectionConfig::parseIpv4Host(_pSsServer->host());
-                    break;
-                }
-            }
-            // If the remote host address couldn't be parsed, fail now.
-            if(remoteHost.isNull())
-                throw Error{HERE, Error::Code::OpenVPNProxyResolveError};
-
-            // We do _not_ want this route if the SOCKS proxy is on LAN or
-            // localhost.  (It actually mostly works, but on Windows with a LAN
-            // proxy it does reroute the traffic through the gateway.)
-            //
-            // This may be incorrect with nested LANs - a SOCKS proxy on the outer
-            // LAN is detected as LAN, but we actually do want this route since it's
-            // not on _our_ LAN.  We don't fully support nested LANs right now, and
-            // the only fix for that is to actually read the entire routing table.
-            // Users can work around this by manually creating this route to the
-            // SOCKS proxy.
-            if(isIpv4Local(remoteHost))
-            {
-                qInfo() << "Not creating route for local proxy" << remoteHost;
-            }
-            else
-            {
-                qInfo() << "Creating gateway route for Internet proxy"
-                    << remoteHost;
-
-                // OpenVPN still creates a route to the remote endpoint when doing
-                // this, which might seem unnecessary but is still desirable if the
-                // proxy is running on localhost.  (Or even if the proxy is not
-                // actually on localhost but ends up communicating over this host,
-                // such as a proxy running in a VM on this host.)
-                out << "route " << remoteHost.toString()
-                    << " 255.255.255.255 net_gateway 0" << endl;
-            }
-
-            // We still want to route the VPN server back to the default gateway
-            // too.  If the proxy communicates via localhost, we need this
-            // route.  (Otherwise, traffic would be recursively routed back into
-            // the proxy.)  This is needed for proxies on localhost, on a VM
-            // running on this host, etc., and it doesn't hurt anything when
-            // it's not needed.  The killswitch still blocks these connections
-            // by default though, so this also requires turning killswitch off
-            // or manually creating firewall rules to exempt the proxy.
-            //
-            // We do this ourselves because OpenVPN inconsistently substitutes
-            // the SOCKS proxy address in the redirect-gateway route (it's not
-            // clear why it does that occasionally but not always).
-            out << "route " << remoteServer << " 255.255.255.255 net_gateway 0"
-                << endl;
-        }
-    }
-    else
-    {
-        QStringList dnsServers = getDNSServers(_dnsServers);
-
-        QString specialPiaAddress = QStringLiteral("209.222.18.222");
-        // Always route this special address through the VPN even when not using
-        // PIA DNS; it's also used for MACE and port forwarding
-        out << "route " << specialPiaAddress << " 255.255.255.255 vpn_gateway 0" << endl;
-        // Route DNS servers into the VPN (DNS is always sent through the VPN)
-        for(const auto &dnsServer : dnsServers)
-        {
-            if(dnsServer != specialPiaAddress)
-                out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
-        }
-
-// Only create a default route if we're NOT on mac (since openvpn routes seem to be broken on mac)
-#ifndef Q_OS_MAC
-        // Add a default route with much a worse metric, so traffic can still
-        // be routed on the tunnel opt-in by binding to the tunnel interface.
-        // On Linux, metrics have been observed as high as 20600 on wireless
-        // interfaces.  OpenVPN is still using `route` though, which interprets
-        // the metric as 16-bit signed, so 32000 is about as high as we can go.
-
-        // REMOVING this on macos/linux as it's very broken - the inverse operation ends up deleting the default route with the REAL IP
-        // and when creating the route it needs to be a bound route on macos anyway AND for some weird reason it ends up being a /32 route
-        // rather than a default route - a bug in openvpn? either way, we should probably just create this route ourselves
-        out << "route 0.0.0.0 0.0.0.0 vpn_gateway 32000" << endl;
-#endif
-
-        // Ignore pushed settings to add default route
-        out << "pull-filter ignore \"redirect-gateway \"" << endl;
-    }
-
-    // Set the local address only for alternate transports
-    const QHostAddress &localAddress = _transportSelector.lastLocalAddress();
-    if(!localAddress.isNull())
-    {
-        out << "local " << localAddress.toString() << endl;
-        // We can't use nobind with a specific local address.  We can set lport
-        // to 0 to let the network stack pick an ephemeral port though.
-        out << "lport " << g_settings.localPort() << endl;
-    }
-    else if (g_settings.localPort() == 0)
-        out << "nobind" << endl;
-    else
-        out << "lport " << g_settings.localPort() << endl;
-
-    out << "cipher " << sanitize(g_settings.cipher()) << endl;
-    if (!g_settings.cipher().endsWith("GCM"))
-        out << "auth " << sanitize(g_settings.auth()) << endl;
-
-    if (g_settings.mtu() > 0)
-    {
-        // TODO: For UDP it's also possible to use "fragment" to enable
-        // internal datagram fragmentation, allowing us to deal with whatever
-        // is sent into the tunnel. Unfortunately, this is a setting that
-        // needs to be matched on the server side; maybe in the future we can
-        // amend pia-signal-settings with it?
-
-        out << "mssfix " << g_settings.mtu() << endl;
-    }
-
-    if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-    {
-        // If the host resolve step failed, _socksRouteAddress is not set, fail.
-        if(_connectingConfig.socksHost().isNull())
-            throw Error{HERE, Error::Code::OpenVPNProxyResolveError};
-
-        uint port = 0;
-        // A Shadowsocks local proxy uses an ephemeral port
-        if(_connectingConfig.proxyType() == ConnectionConfig::ProxyType::Shadowsocks)
-            port = _shadowsocksRunner.localPort();
-        else
-            port = _connectingConfig.customProxy().port();
-
-        // Default to 1080 ourselves - OpenVPN doesn't like 0 here, and we can't
-        // leave the port blank if we also need to specify "stdin" for auth.
-        if(port == 0)
-            port = 1080;
-        out << "socks-proxy " << _connectingConfig.socksHost().toString() << " " << port;
-        // If we have a username / password, ask OpenVPN to prompt over the
-        // management interface.
-        if(!_connectingConfig.customProxy().username().isEmpty() ||
-           !_connectingConfig.customProxy().password().isEmpty())
-        {
-            out << " stdin";
-        }
-        out << endl;
-
-        // The default timeout is very long (2 minutes), use a shorter timeout.
-        // This applies to both the SOCKS and OpenVPN connections, we might
-        // apply this even when not using a proxy in the future.
-        out << "connect-timeout 30" << endl;
-    }
-
-    // Always ignore pushed DNS servers and use our own settings.
-    out << "pull-filter ignore \"dhcp-option DNS \"" << endl;
-    out << "pull-filter ignore \"dhcp-option DOMAIN local\"" << endl;
-
-    out << "<ca>" << endl;
-    for (const auto& line : g_data.getCertificateAuthority(g_settings.serverCertificate()))
-        out << line << endl;
-    out << "</ca>" << endl;
-
     return true;
 }

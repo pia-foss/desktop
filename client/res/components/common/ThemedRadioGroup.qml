@@ -31,18 +31,23 @@ import PIA.NativeAcc 1.0 as NativeAcc
 //
 // Each radio button can have an optional "action".  If specified, this creates
 // a pushbutton next to the radio button (for configuration, etc.)
-ColumnLayout {
+GridLayout {
+  property bool groupEnabled: true
   id: radioGroup
-  spacing: 0
+  rowSpacing: 0
+  flow: verticalOrientation ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
   // 'model' defines the choices in the ThemedRadioGroup.
   //
   // It is an array of objects with:
   // - name - the display string for the given choice
   // - value - the value used on setSelection() / selected()
+  // - preview - if true, adds a "preview" badge to this radio button
   // - actionName - (optional) specifies name of the action button
   // - action - (optional)
   property var model
+
+  property bool verticalOrientation: true
 
   // Set the current selection in the control.  -1 clears the selection (no
   // button is checked).
@@ -81,7 +86,8 @@ ColumnLayout {
       readonly property var radio: radioButton
 
       Layout.fillWidth: true
-      spacing: 12
+      Layout.rightMargin: 5
+      spacing: 5
 
       RadioButton {
         id: radioButton
@@ -95,7 +101,12 @@ ColumnLayout {
         NativeAcc.RadioButton.checked: radioButton.checked
         NativeAcc.RadioButton.onActivated: radioButton.keyboardSelect()
 
+        enabled: (!radioRow.choice.disabled) && groupEnabled
+
         function handleSelected() {
+          if(!enabled)
+            return;
+
           if (radioButton.checked) {
             radioGroup.selectedIndex = radioRow.choiceIndex
             radioGroup.indexSelected(radioRow.choiceIndex)
@@ -104,6 +115,9 @@ ColumnLayout {
         }
 
         function keyboardSelect() {
+          if(!enabled)
+            return;
+
           // Like CheckBox, RadioButton would normally toggle itself in the
           // key/mouse event handler.  toggle() manually here, but only if the
           // radio button is not checked (toggle() would uncheck the radio
@@ -113,7 +127,11 @@ ColumnLayout {
           radioButton.handleSelected()
         }
 
-        onClicked: handleSelected()
+        onClicked: {
+          if(!enabled)
+            return
+          handleSelected()
+        }
 
         indicator: Image {
           id: indicator
@@ -121,7 +139,13 @@ ColumnLayout {
           anchors.verticalCenter: parent.verticalCenter
           height: sourceSize.height/2
           width: sourceSize.height/2
-          source: radioButton.checked ? Theme.settings.inputRadioOnImage : Theme.settings.inputRadioOffImage
+          opacity: enabled ? 1 : 0.6
+          source: {
+            if(enabled)
+              return radioButton.checked ? Theme.settings.inputRadioOnImage : Theme.settings.inputRadioOffImage
+            else
+              return Theme.settings.inputRadioOffImage
+          }
         }
 
         contentItem: Text {
@@ -130,7 +154,7 @@ ColumnLayout {
           text: radioButton.text
           wrapMode: Text.WordWrap
           font: radioButton.font
-          color: Theme.settings.inputLabelColor
+          color: enabled ? Theme.settings.inputLabelColor : Theme.settings.inputLabelDisabledColor
           verticalAlignment: Text.AlignVCenter
         }
 
@@ -150,12 +174,22 @@ ColumnLayout {
         }
       }
 
+      StaticImage {
+        id: previewFeature
+        visible: !!radioRow.choice.preview
+        label: Messages.previewPrereleaseImg
+        source: Theme.settings.inputPreviewFeature
+        Layout.preferredWidth: sourceSize.width/2
+        Layout.preferredHeight: sourceSize.height/2
+      }
 
       PushButton {
         id: radioAction
 
         visible: !!radioRow.choice.actionName
         height: 28
+        enabled: groupEnabled
+        Layout.leftMargin: 7
 
         minWidth: 75
         labels: [(radioRow.choice.actionName || "")]

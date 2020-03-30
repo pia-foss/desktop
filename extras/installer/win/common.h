@@ -71,6 +71,7 @@ extern std::wstring g_systemTempPath;
 extern std::wstring g_startMenuPath;
 extern std::wstring g_clientPath;
 extern std::wstring g_servicePath;
+extern std::wstring g_wgServicePath;
 extern std::wstring g_clientDataPath;
 extern std::wstring g_daemonDataPath;
 extern std::wstring g_oldDaemonDataPath;

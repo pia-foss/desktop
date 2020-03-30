@@ -106,6 +106,7 @@ public:
         TaskStillPending,
         TaskDestroyedWhilePending,
         TaskRecipientDestroyed,
+        TaskTimedOut,
 
         // Errors returned by Daemon RPC calls
         DaemonRPCDiagnosticsFailed = 1500,
@@ -116,6 +117,21 @@ public:
 
         // Network adapter errors (can be thrown by Daemon implementations)
         NetworkAdapterNotFound = 1600,
+
+        // Wireguard connectivity errors
+        WireguardAddKeyFailed = 1700,
+        WireguardCreateDeviceFailed,
+        WireguardConfigDeviceFailed,
+        WireguardDeviceLost,
+        WireguardHandshakeTimeout,
+        WireguardProcessFailed,
+        WireguardNotResponding,
+        WireguardPingTimeout,
+
+        // Connectivity errors for multiple VPN methods
+        VPNConfigInvalid = 1800,
+
+        LocalSocketConnectionFailed = 1900,
     };
     Q_ENUM(Code)
 

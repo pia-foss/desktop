@@ -33,6 +33,7 @@
 
 #include "daemon.h"
 #include "path.h"
+#include "linux_routing.h"
 #include "posix/posix_firewall_iptables.h"
 #include "proc_tracker.h"
 
@@ -199,8 +200,8 @@ void ProcTracker::updateMasquerade(QString interfaceName)
 
 void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress)
 {
-    const QString routingTableName = IpTablesFirewall::kRtableName;
-    const QString vpnOnlyRoutingTableName = IpTablesFirewall::kVpnOnlyRtableName;
+    const QString routingTableName = Routing::bypassTable;
+    const QString vpnOnlyRoutingTableName = Routing::vpnOnlyTable;
 
     qInfo() << "Updating the default route in"
         << routingTableName
@@ -258,16 +259,16 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     if(_previousNetScan.ipAddress() != params.splitTunnelNetScan.ipAddress())
     {
         // Remove the old one (if it exists) before adding a new one
-        removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), IpTablesFirewall::kRtableName);
-        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress(), IpTablesFirewall::kRtableName);
+        removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), Routing::bypassTable);
+        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress(), Routing::bypassTable);
     }
 
     // Ensure that packets with source IP of the tunnel go out the tunnel interface
     if(_previousTunnelDeviceLocalAddress !=  tunnelDeviceLocalAddress)
     {
         // Remove the old one (if it exists) before adding a new one
-        removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
-        addRoutingPolicyForSourceIp(tunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
+        removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, Routing::vpnOnlyTable);
+        addRoutingPolicyForSourceIp(tunnelDeviceLocalAddress, Routing::vpnOnlyTable);
     }
 
     // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
@@ -497,8 +498,8 @@ void ProcTracker::shutdownConnection()
 
     teardownFirewall();
     removeAllApps();
-    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), IpTablesFirewall::kRtableName);
-    removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, IpTablesFirewall::kVpnOnlyRtableName);
+    removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), Routing::bypassTable);
+    removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, Routing::vpnOnlyTable);
     teardownReversePathFiltering();
 
     // Clear out our network info

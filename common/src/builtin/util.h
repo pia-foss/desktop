@@ -1077,6 +1077,12 @@ namespace std {
     {
         std::size_t operator()(const QString &str) const {return qHash(str);}
     };
+    // Also, for QLatin1String
+    template<>
+    struct hash<QLatin1String>
+    {
+        std::size_t operator()(const QLatin1String &str) const {return qHash(str);}
+    };
 }
 
 #endif // BUILTIN_UTIL_H

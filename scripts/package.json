@@ -8,7 +8,6 @@
   "dependencies": {
     "mkdirp": "^0.5.1",
     "recursive-readdir": "^2.2.2",
-    "xml2js": "^0.4.19",
-    "yargs": "^11.0.0"
+    "xml2js": "^0.4.19"
   }
 }

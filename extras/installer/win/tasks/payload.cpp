@@ -182,7 +182,7 @@ PayloadTask::ExtractTask::ExtractTask(std::wstring path, UInt32 fileIndex, size_
 
 void PayloadTask::ExtractTask::execute()
 {
-    LOG("Extracting file %s", _path);
+    LOG("Extracting file %ls", _path);
 
     _listener->setCaption(IDS_CAPTION_COPYINGFILES);
 

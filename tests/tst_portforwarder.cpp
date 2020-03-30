@@ -145,9 +145,8 @@ private slots:
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), Responses::successPort);
     }
 
-    // Verify that PortForwarder requests a port when the connection is
-    // established, then the feature is enabled but no port request takes place
-    // Instead, we signal port forwarding is Inative and a reconnection is required to request a port
+    // Verify that if PF is enabled after having connected, PortForwarder does
+    // _not_ begin a request.  A reconnect is required to start a PF request.
     void testConnectedEnable()
     {
         TestPortForwarder forwarder;
@@ -160,9 +159,9 @@ private slots:
         QVERIFY(MockNetworkManager::hasNextReply()); // Not requested yet
 
         forwarder.enablePortForwarding(true);
-        auto arguments { resultSpy.takeFirst() };
-        QCOMPARE(arguments[0].value<int>(), DaemonState::PortForwardState::Inactive);
-        QCOMPARE(arguments[1].value<bool>(), true);  // needsReconnect is set to true
+        // No change from this
+        QVERIFY(!resultSpy.wait(100));
+        QVERIFY(MockNetworkManager::hasNextReply()); // Not consumed
     }
 
     // Verify that nothing happens when toggling the feature while we're

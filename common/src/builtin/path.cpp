@@ -27,12 +27,18 @@
 #include <QDir>
 #include <QStandardPaths>
 
+namespace Files
+{
+    const QString wireguardGoBasename{QStringLiteral(BRAND_CODE "-wireguard-go")};
+}
+
 #ifdef _DEBUG
 Path Path::SourceRootDir;
 #endif
 Path Path::InstallationDir;
 Path Path::BaseDir;
 Path Path::ExecutableDir;
+Path Path::LibraryDir;
 Path Path::ResourceDir;
 Path Path::InstallationExecutableDir;
 Path Path::DaemonDataDir;
@@ -53,9 +59,13 @@ Path Path::OpenVPNConfigFile;
 Path Path::OpenVPNUpDownScript;
 Path Path::HnsdExecutable;
 Path Path::SsLocalExecutable;
+Path Path::WireguardGoExecutable;
+Path Path::WireguardGoInterfaceFile;
 #ifdef Q_OS_WIN
 Path Path::TapDriverDir;
 Path Path::WfpCalloutDriverDir;
+Path Path::WireguardServiceExecutable;
+Path Path::WireguardConfigFile;
 #elif defined(Q_OS_MAC)
 Path Path::SplitTunnelKextPath;
 #endif
@@ -176,6 +186,7 @@ void Path::initializePostApp()
     InstallationDir = getShellFolder(CSIDL_PROGRAM_FILES) / PIA_PRODUCT_NAME;
     BaseDir = getBaseDir();
     ExecutableDir = BaseDir;
+    LibraryDir = BaseDir;
     ResourceDir = BaseDir;
     InstallationExecutableDir = InstallationDir;
     DaemonSettingsDir = DaemonDataDir = BaseDir / "data";
@@ -185,6 +196,7 @@ void Path::initializePostApp()
     InstallationDir = QStringLiteral("/Applications/" PIA_PRODUCT_NAME ".app");
     BaseDir = getBaseDir();
     ExecutableDir = BaseDir / "Contents/MacOS";
+    LibraryDir = ExecutableDir;
     ResourceDir = BaseDir / "Contents/Resources";
     InstallationExecutableDir = InstallationDir / "Contents/MacOS";
     DaemonDataDir = QStringLiteral("/Library/Application Support/" BRAND_IDENTIFIER);
@@ -195,6 +207,7 @@ void Path::initializePostApp()
     InstallationDir = QStringLiteral("/opt/" BRAND_CODE "vpn");
     BaseDir = getBaseDir();
     ExecutableDir = BaseDir / "bin";
+    LibraryDir = BaseDir / "lib";
     ResourceDir = InstallationDir / "share";
     InstallationExecutableDir = InstallationDir / "bin";
     // TODO: Need to find a reliable daemon data dir
@@ -236,10 +249,12 @@ void Path::initializePostApp()
     OpenVPNExecutable = OpenVPNWorkingDir / BRAND_CODE "-openvpn";
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd";
     SsLocalExecutable = ExecutableDir / BRAND_CODE "-ss-local";
+    WireguardGoExecutable = ExecutableDir / Files::wireguardGoBasename;
 #ifdef Q_OS_LINUX
     SupportToolExecutable = ExecutableDir / "support-tool-launcher";
 #else
     SupportToolExecutable = ExecutableDir / BRAND_CODE "-support-tool";
+    WireguardGoInterfaceFile = DaemonDataDir / "wgpia0-tun";
 #endif
 
     DaemonLocalSocket = DaemonDataDir / "daemon.sock";
@@ -269,6 +284,8 @@ void Path::initializePostApp()
 #ifdef Q_OS_WIN
     TapDriverDir = BaseDir / "tap";
     WfpCalloutDriverDir = BaseDir / "wfp_callout";
+    WireguardServiceExecutable = BaseDir / BRAND_CODE "-wgservice.exe";
+    WireguardConfigFile = DaemonDataDir / "wg" BRAND_CODE "0.conf";
 #elif defined(Q_OS_MAC)
     SplitTunnelKextPath = ExecutableDir / "../Resources/PiaKext.kext";
 #endif

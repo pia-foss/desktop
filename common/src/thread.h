@@ -27,7 +27,8 @@
 
 // RunningWorkerThread is a thread with a Qt event loop that is started and
 // stopped automatically. The caller can invoke a functor on the thread
-// synchronously by calling invokeOnThread().
+// synchronously by calling invokeOnThread(), or asynchronously by calling
+// queueOnThread().
 class COMMON_EXPORT RunningWorkerThread : public QObject
 {
     Q_OBJECT

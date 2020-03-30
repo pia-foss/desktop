@@ -37,6 +37,9 @@ public:
     static int installTapDriver(bool force = false);
     static int uninstallTapDriver();
     static int reinstallTapDriver();
+    static int installWintunDriver();
+    static int uninstallWintunDriver();
+    static int reinstallWintunDriver();
     static int installCalloutDriver();
     static int uninstallCalloutDriver();
     static int reinstallCalloutDriver();

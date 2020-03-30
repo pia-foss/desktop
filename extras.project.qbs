@@ -213,13 +213,18 @@ PiaProject {
             writeStrDef("BRAND_RELEASE_CHANNEL_BETA", brandParams.brandReleaseChannelBeta)
             writeStrDef("BRAND_WINDOWS_PRODUCT_GUID", brandParams.windowsProductGuid)
             writeStrDef("BRAND_WINDOWS_SERVICE_NAME", brandParams.windowsServiceName)
+            writeStrDef("BRAND_WINDOWS_WIREGUARD_SERVICE_NAME", brandParams.windowsWireguardServiceName)
             f.writeLine("#define BRAND_WINDOWS_WFP_PROVIDER " + brandParams.windowsWfpProvider)
             writeStrDef("BRAND_WINDOWS_WFP_PROVIDER_GUID", brandParams.windowsWfpProviderGuid)
             f.writeLine("#define BRAND_WINDOWS_WFP_SUBLAYER " + brandParams.windowsWfpSublayer)
             writeStrDef("BRAND_WINDOWS_WFP_SUBLAYER_GUID", brandParams.windowsWfpSublayerGuid)
             writeStrDef("BRAND_UPDATE_JSON_KEY_NAME", brandParams.updateJsonKeyName)
             writeStrDef("BRAND_LINUX_APP_NAME", brandParams.linuxAppName)
+            f.writeLine("#define BRAND_LINUX_FWMARK_BASE " + brandParams.linuxFwmarkBase)
+            f.writeLine("#define BRAND_LINUX_CGROUP_BASE " + brandParams.linuxCgroupBase)
             writeStrDef("BRAND_PARAMS", JSON.stringify(brandParams))
+            writeStrDef("BRAND_WINTUN_AMD64_PRODUCT", brandParams.wintunAmd64Product)
+            writeStrDef("BRAND_WINTUN_X86_PRODUCT", brandParams.wintunX86Product)
 
             var updateApis = brandParams.brandReleaseUpdateUris
             // This was added to the brand kit, default to the old defaults

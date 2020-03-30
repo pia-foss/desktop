@@ -266,6 +266,17 @@ ServerLocations updateServerLocations(const ServerLocations &existingLocations,
             pLocation->ping(JsonCaster{serverObj.value(QStringLiteral("ping"))});
             pLocation->serial(serverObj.value(QStringLiteral("serial")).toString());
 
+            const auto &wireguardServer = serverObj.value(QStringLiteral("wireguard")).toObject();
+            if(!wireguardServer.isEmpty())
+            {
+                pLocation->wireguardUDP(JsonCaster{wireguardServer.value(QStringLiteral("host"))});
+                pLocation->wireguardSerial(JsonCaster{wireguardServer.value(QStringLiteral("serial"))});
+            }
+            else
+            {
+                qWarning() << "Region does not support WireGuard:" << pLocation->id();
+            }
+
             // If safeAutoRegions is empty then there's likely a bug with the server data
             // and we work around it by just allowing 'connect auto' access to all regions -
             // the alternative is disallowing 'connect auto' to all regions, which is not really acceptable.
@@ -479,24 +490,6 @@ QSharedPointer<ServerLocation> NearestLocations::getNearestSafeVpnLocation(bool 
     return _locations.front();
 }
 
-bool isDNSHandshake(const DaemonSettings::DNSSetting &setting)
-{
-    return setting == QStringLiteral("handshake");
-}
-
 const QString hnsdLocalAddress{QStringLiteral("127.80.73.65")};
-
-QStringList getDNSServers(const DaemonSettings::DNSSetting& setting)
-{
-    if (setting == QStringLiteral("pia"))
-        return { QStringLiteral("209.222.18.222"), QStringLiteral("209.222.18.218") };
-    if (isDNSHandshake(setting))
-        return { hnsdLocalAddress };
-    QStringList servers;
-    if (setting.get(servers))
-        return servers;
-    // Empty list (don't override DNS)
-    return {};
-}
 
 #endif

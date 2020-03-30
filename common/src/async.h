@@ -27,6 +27,7 @@
 #include <QSharedPointer>
 #include <QThread>
 #include <QPointer>
+#include <QTimer>
 
 #include <atomic>
 
@@ -574,6 +575,54 @@ protected:
     virtual const char* typeName() const override;
 };
 
+// Timeout task - wraps an inner task with a timeout.  If the timeout elapses,
+// the task is rejected with Error::Code::TaskTimedOut, and the inner task is
+// abandoned.
+//
+// Used to implement Async::timeout().
+//
+// Note that TimeoutTask<void> is explicitly specialized later.
+template<typename Result>
+class TimeoutTask : public Task<Result>
+{
+public:
+    explicit TimeoutTask(Async<Result> pInnerTask,
+                         std::chrono::milliseconds timeout)
+        : _pInnerTask{std::move(pInnerTask)}
+    {
+        Q_ASSERT(_pInnerTask);  // Ensured by caller
+        // Set the timer first - the inner task could already be resolved; this
+        // ensures the notify callback can stop the timer
+        QObject::connect(&_timer, &QTimer::timeout, this, [this]()
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                this->reject({HERE, Error::Code::TaskTimedOut});
+                _pInnerTask.abandon();
+            }
+        });
+
+        _timer.setSingleShot(true);
+        _timer.start(msec(timeout));
+        _pInnerTask->notify(this, [this](const Error &err, const Result &result)
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                _timer.stop();
+                if(err)
+                    this->reject(err);
+                else
+                    this->resolve(result);
+            }
+        });
+    }
+
+private:
+    Async<Result> _pInnerTask;
+    QTimer _timer;
+};
 
 // Helper to provide static functions for Async class.
 template<typename Result>
@@ -663,8 +712,56 @@ public:
 
     // Abandon the task and reset the handle.
     inline void abandon();
+
+    // Time out a task if it hasn't resolved by then.  The returned task
+    // resolves or rejects with the nested task's result if it occurs before the
+    // timeout, or rejects with Error::Code::TaskTimedOut when the timeout
+    // elapses.
+    Async<Result> timeout(std::chrono::milliseconds timeout) {return Async<TimeoutTask<Result>>::create(*this, timeout);}
 };
 
+// Specialization of TimeoutTask for void result
+template<>
+class TimeoutTask<void> : public Task<void>
+{
+public:
+    explicit TimeoutTask(Async<void> pInnerTask,
+                         std::chrono::milliseconds timeout)
+        : _pInnerTask{std::move(pInnerTask)}
+    {
+        Q_ASSERT(_pInnerTask);  // Ensured by caller
+        // Set the timer first - the inner task could already be resolved; this
+        // ensures the notify callback can stop the timer
+        QObject::connect(&_timer, &QTimer::timeout, this, [this]()
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                this->reject({HERE, Error::Code::TaskTimedOut});
+                _pInnerTask.abandon();
+            }
+        });
+
+        _timer.setSingleShot(true);
+        _timer.start(msec(timeout));
+        _pInnerTask->notify(this, [this](const Error &err)
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                _timer.stop();
+                if(err)
+                    this->reject(err);
+                else
+                    this->resolve();
+            }
+        });
+    }
+
+private:
+    Async<void> _pInnerTask;
+    QTimer _timer;
+};
 
 // Just a wrapper for some of Async's static functions to be able to
 // call them with deduced instead of explicit result types.
@@ -811,6 +908,9 @@ inline void Task<Result>::resolve(Args&&... args)
     {
         _error = Error(HERE, Error::Success);
         new(_result) Result(std::forward<Args>(args)...);
+        // We have to keep the task alive, in case slots connected to finished()
+        // drop their reference when the signal is emitted
+        auto keepAlive = sharedFromThis();
         emit finished();
         // This must be called last in the function
         disconnectDependents();

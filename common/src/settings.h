@@ -79,11 +79,13 @@ public:
         country(other.country());
         dns(other.dns());
         portForward(other.portForward());
+        ping(other.ping());
+        isSafeForAutoConnect(other.isSafeForAutoConnect());
         openvpnUDP(other.openvpnUDP());
         openvpnTCP(other.openvpnTCP());
-        ping(other.ping());
         serial(other.serial());
-        isSafeForAutoConnect(other.isSafeForAutoConnect());
+        wireguardUDP(other.wireguardUDP());
+        wireguardSerial(other.wireguardSerial());
         shadowsocks(other.shadowsocks());   // Share the object since it is not mutated
         latency(other.latency());
     }
@@ -107,10 +109,13 @@ public:
 
         return name() == other.name() && country() == other.country() &&
             dns() == other.dns() && portForward() == other.portForward() &&
-            openvpnUDP() == other.openvpnUDP() &&
-            openvpnTCP() == other.openvpnTCP() && ping() == other.ping() &&
-            serial() == other.serial() &&
+            ping() == other.ping() &&
             isSafeForAutoConnect() == other.isSafeForAutoConnect() &&
+            openvpnUDP() == other.openvpnUDP() &&
+            openvpnTCP() == other.openvpnTCP() &&
+            serial() == other.serial() &&
+            wireguardUDP() == other.wireguardUDP() &&
+            wireguardSerial() == other.wireguardSerial() &&
             latency() == other.latency();
     }
 
@@ -130,11 +135,17 @@ public:
     JsonField(QString, country, {})
     JsonField(QString, dns, {})
     JsonField(bool, portForward, {})
+    JsonField(QString, ping, {})
+    JsonField(bool, isSafeForAutoConnect, true)
+
+    // OpenVPN endpoint from the VPN servers list.
     JsonField(QString, openvpnUDP, {})
     JsonField(QString, openvpnTCP, {})
-    JsonField(QString, ping, {})
     JsonField(QString, serial, {})
-    JsonField(bool, isSafeForAutoConnect, true)
+
+    // WireGuard endpoint from the VPN servers list.
+    JsonField(QString, wireguardUDP, {})
+    JsonField(QString, wireguardSerial, {})
 
     // The remaining fields do not come from the VPN servers list.
 
@@ -152,6 +163,8 @@ public:
     QString tcpHost() const {return addressHost(openvpnTCP());}
     quint16 udpPort() const {return addressPort(openvpnUDP());}
     quint16 tcpPort() const {return addressPort(openvpnTCP());}
+    QString wireguardUdpHost() const {return addressHost(wireguardUDP());}
+    quint16 wireguardUdpPort() const {return addressPort(wireguardUDP());}
 };
 typedef QHash<QString, QSharedPointer<ServerLocation>> ServerLocations;
 
@@ -468,6 +481,8 @@ public:
     // values expressed in DaemonState.  (The client should only use this to set
     // a new choice.)
     JsonField(QString, location, QStringLiteral("auto"))
+    // The method used to connect to the VPN
+    JsonField(QString, method, QStringLiteral("openvpn"), { "openvpn", "wireguard" })
     JsonField(QString, protocol, QStringLiteral("udp"), { "udp", "tcp" })
     JsonField(QString, killswitch, QStringLiteral("auto"), { "on", "off", "auto" })
     // Whether to use the VPN as the default route.  This is a split tunnel
@@ -546,6 +561,11 @@ public:
     JsonField(bool, splitTunnelEnabled, false)
     // Rules for excluding/including apps from VPN
     JsonField(QVector<SplitTunnelRule>, splitTunnelRules, {})
+
+    // Whether to use the WireGuard kernel module on Linux, if it's available.
+    // If false, uses wireguard-go method instead, even if the kernel module is
+    // available.
+    JsonField(bool, wireguardUseKernel, true)
 
     // These settings are legacy and have been moved to client-side settings.
     // They're still present in DaemonSettings so the client can migrate them.
@@ -659,10 +679,14 @@ public:
     {
         vpnLocation(other.vpnLocation());
         vpnLocationAuto(other.vpnLocationAuto());
+        method(other.method());
+        methodForcedByAuth(other.methodForcedByAuth());
+        dnsType(other.dnsType());
         proxy(other.proxy());
         proxyCustom(other.proxyCustom());
         proxyShadowsocks(other.proxyShadowsocks());
         proxyShadowsocksLocationAuto(other.proxyShadowsocksLocationAuto());
+        portForward(other.portForward());
         return *this;
     }
 
@@ -671,9 +695,13 @@ public:
         // Compare the locations by value
         return compareLocationsValue(vpnLocation(), other.vpnLocation()) &&
             vpnLocationAuto() == other.vpnLocationAuto() &&
+            method() == other.method() &&
+            methodForcedByAuth() == other.methodForcedByAuth() &&
+            dnsType() == other.dnsType() &&
             proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
-            proxyShadowsocksLocationAuto() == other.proxyShadowsocksLocationAuto();
+            proxyShadowsocksLocationAuto() == other.proxyShadowsocksLocationAuto() &&
+            portForward() == other.portForward();
     }
 
     bool operator!=(const ConnectionInfo &other) const { return !(*this == other); }
@@ -684,6 +712,14 @@ public:
     JsonField(QSharedPointer<ServerLocation>, vpnLocation, {})
     // Whether the VPN location was an automatic selection
     JsonField(bool, vpnLocationAuto, false)
+
+    // The VPN method used for this connection
+    JsonField(QString, method, QStringLiteral("openvpn"), {"openvpn", "wireguard"})
+    // Whether the VPN method was forced to OpenVPN due to lack of an auth token
+    JsonField(bool, methodForcedByAuth, false)
+
+    // DNS type used for this connection
+    JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "existing", "custom"})
 
     // Whether the VPN is being used as the default route for this connection.
     // (Not precisely equivalent to DaemonSettings::defaultRoute; the setting is
@@ -698,6 +734,9 @@ public:
     JsonField(QSharedPointer<ServerLocation>, proxyShadowsocks, {})
     // Whether the Shadowsocks location was an automatic selection
     JsonField(bool, proxyShadowsocksLocationAuto, false)
+
+    // Whether port forwarding is enabled for this connection
+    JsonField(bool, portForward, false)
 };
 
 // Class encapsulating 'state' properties of the daemon; these describe
@@ -744,13 +783,22 @@ public:
     DaemonState();
 
     // Boolean indicating whether the user wants to be connected or not.
+    // This specifically tracks the user's intent - this should _only_ ever be
+    // changed due to a user request to connect or disconnect.
+    //
+    // In general, any connection state can occur for any value of vpnEnabled.
+    // It is even possible to be "Disconnected" while "vpnEnabled == true"; this
+    // happens if a fatal error causes a reconnection to abort.  In this case
+    // we correctly have vpnEnabled=true, because the user intended to be
+    // connected, but the app cannot try to connect due to the fatal error.
     JsonField(bool, vpnEnabled, false)
     // The current actual state of the VPN connection.
     JsonField(QString, connectionState, QStringLiteral("Disconnected"))
-    // In any of the connecting/reconnecting states, the status of the
-    // connection attempt - indicates whether there is connection trouble and/or
-    // we are trying alternate transports.
-    JsonField(QString, connectingStatus, QStringLiteral("Connecting"))
+    // When in a connecting state, enabled when enough attempts have been made
+    // to trigger the 'slow' attempt intervals.  Resets to false before going
+    // to a non-connecting state, or when settings change during a series of
+    // attempts.
+    JsonField(bool, usingSlowInterval, false)
     // Boolean indicating whether a reconnect is needed in order to apply settings changes.
     JsonField(bool, needsReconnect, false)
     // Total number of bytes received over the VPN.
@@ -797,10 +845,10 @@ public:
     // State                    | connectingConfig | connectedConfig
     // -------------------------+------------------+-----------------
     // Disconnected             | -                | ?
-    // [Still]Connecting        | X                | -
+    // Connecting               | X                | -
     // Connected                | -                | X
     // Interrupted              | X                | X
-    // [Still]Reconnecting      | X                | X
+    // Reconnecting             | X                | X
     // DisconnectingToReconnect | X                | ?
     // Disconnecting            | -                | ?
     //
@@ -893,6 +941,9 @@ public:
     // The TAP adapter is missing on Windows (the client offers to reinstall it)
     // Not dismissible, so this is just a boolean flag.
     JsonField(bool, tapAdapterMissing, false)
+    // The WinTUN driver is missing on Windows.  Like the TAP error, the client
+    // offers to reinstall it, and this is not dismissible.
+    JsonField(bool, wintunMissing, false)
     // State of the network extension - the WFP callout on Windows, the
     // network kernel extension on Mac.  See Daemon::NetExtensionState.
     // This extension is currently used for the split tunnel feature but may
@@ -944,6 +995,15 @@ public:
     JsonField(QString, tunnelDeviceName, {})
     JsonField(QString, tunnelDeviceLocalAddress, {})
     JsonField(QString, tunnelDeviceRemoteAddress, {})
+    // The addresses of the DNS servers that have been configured for this
+    // connection.
+    JsonField(QStringList, effectiveDnsServers, {})
+
+    // Whether WireGuard is available at all on this OS.  (False on Windows 7.)
+    JsonField(bool, wireguardAvailable, true)
+    // Whether a kernel implementation of Wireguard is available (only possible
+    // on Linux).
+    JsonField(bool, wireguardKernelSupport, false)
 
 public:
     QSharedPointer<ServerLocation> getClosestServerLocation();
@@ -1013,15 +1073,7 @@ private:
     QVector<QSharedPointer<ServerLocation>> _locations;
 };
 
-// Check if a DNSSetting value is Handshake (used by VpnConnection to determine
-// when to start hnsd).
-COMMON_EXPORT bool isDNSHandshake(const DaemonSettings::DNSSetting &setting);
-
 extern COMMON_EXPORT const QString hnsdLocalAddress;
-
-// Translate the DNS override setting into an actual list of DNS servers (empty
-// if DNS should not be overridden).
-COMMON_EXPORT QStringList getDNSServers(const DaemonSettings::DNSSetting& setting);
 
 #endif
 

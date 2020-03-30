@@ -25,6 +25,7 @@
 #include <QString>
 #include <Windows.h>
 #include <string>
+#include <QDebug>
 
 // On Windows, get a wchar_t pointer from a QString.
 COMMON_EXPORT const wchar_t *qstringWBuf(const QString &value);
@@ -103,6 +104,25 @@ private:
     HMODULE _moduleHandle;
     void *_procAddress;
 };
+
+class COMMON_EXPORT WinErrTracer
+{
+public:
+    WinErrTracer(DWORD code) : _code{code} {}
+
+public:
+    DWORD code() const {return _code;}
+    QString message() const;
+
+private:
+    DWORD _code;
+};
+
+inline QDebug &operator<<(QDebug &dbg, const WinErrTracer &err)
+{
+    dbg << err.code() << err.message();
+    return dbg;
+}
 
 // Broadcast a registered window message.  Since this registers the message each
 // time it's called, this should generally be used for messages that are only

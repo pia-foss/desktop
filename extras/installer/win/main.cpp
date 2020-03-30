@@ -170,6 +170,7 @@ std::wstring g_systemTempPath;
 std::wstring g_startMenuPath;
 std::wstring g_clientPath;
 std::wstring g_servicePath;
+std::wstring g_wgServicePath;
 std::wstring g_clientDataPath;
 std::wstring g_daemonDataPath;
 std::wstring g_oldDaemonDataPath;
@@ -306,7 +307,7 @@ int main()
 #ifdef UNINSTALLER
             if (!PathIsDirectory(g_installPath.c_str()))
             {
-                LOG("Non-existent path argument: %s", g_installPath);
+                LOG("Non-existent path argument: %ls", g_installPath);
                 return 2;
             }
 #endif
@@ -326,13 +327,13 @@ int main()
             pid = wcstoul(argv[i], &end, 10);
             if (*end != 0 || !pid)
             {
-                LOG("Unrecognized argument: %s", argv[i]);
+                LOG("Unrecognized argument: %ls", argv[i]);
                 return 2;
             }
         }
         else
         {
-            LOG("Unrecognized argument: %s", argv[i]);
+            LOG("Unrecognized argument: %ls", argv[i]);
             return 2;
         }
     }

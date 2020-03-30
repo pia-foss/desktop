@@ -19,58 +19,63 @@
 #include "common.h"
 #include "unixsignalhandler.h"
 #line SOURCE_FILE("unixsignalhandler.cpp")
-#include<signal.h>
-#include<sys/socket.h>
+#include <signal.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <QDebug>
-int UnixSignalHandler::sigUsr1Fd[2];
 
-UnixSignalHandler::UnixSignalHandler(QObject *parent) : QObject (parent)
+UnixSignalHandler::UnixSignalHandler(QObject *parent)
+    : QObject{parent}, _rxBytes{0}
 {
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigUsr1Fd)) {
-     qCritical() << "Couldn't create SIGUSR1 socketpair";
-     return;
-  }
-  _snUsr1 = new QSocketNotifier(sigUsr1Fd[1], QSocketNotifier::Read, this);
-  connect(_snUsr1, &QSocketNotifier::activated, this, &UnixSignalHandler::handleSignal);
+    if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sigFd)) {
+        qCritical() << "Couldn't create SIGUSR1 socketpair";
+        return;
+    }
+    _snUsr1 = new QSocketNotifier(_sigFd[1], QSocketNotifier::Read, this);
+    connect(_snUsr1, &QSocketNotifier::activated, this, &UnixSignalHandler::handleSignal);
+
+    struct sigaction action{};
+
+    action.sa_sigaction = &UnixSignalHandler::_signalHandler;
+    action.sa_flags = SA_RESTART | SA_SIGINFO;
+
+    setAction(SIGUSR1, action);
+    setAction(SIGTERM, action);
+    setAction(SIGINT, action);
+    // SIGHUP is ignored, but we still attach a handler to trace it
+    setAction(SIGHUP, action);
 }
 
-void UnixSignalHandler::_signalHandler(int signal)
+UnixSignalHandler::~UnixSignalHandler()
 {
-  Q_ASSERT(signal <= std::numeric_limits<unsigned char>::max());
+    ::signal(SIGUSR1, SIG_IGN);
+    ::signal(SIGTERM, SIG_IGN);
+    ::signal(SIGINT, SIG_IGN);
+    ::signal(SIGHUP, SIG_IGN);
+    ::close(_sigFd[0]);
+    ::close(_sigFd[1]);
+}
 
-  // Preserve errno; write() may overwrite it.
-  auto restoreErrno = raii_sentinel([savedErrno = errno](){errno = savedErrno;});
+void UnixSignalHandler::_signalHandler(int, siginfo_t *info, void *)
+{
+    Q_ASSERT(info);
 
-  unsigned char a = static_cast<unsigned char>(signal);
-  // ::write() could theoretically fail, but there's nothing we could do even if
-  // we checked it, we can't even log because the logger is not reentrant.
-  ::write(sigUsr1Fd[0], &a, sizeof(a));
+    // Preserve errno; write() may overwrite it.
+    auto restoreErrno = raii_sentinel([savedErrno = errno](){errno = savedErrno;});
+
+    // ::write() could theoretically fail, but there's nothing we could do even if
+    // we checked it, we can't even log because the logger is not reentrant.
+    auto pThis = instance();
+    if(pThis)
+        ::write(pThis->_sigFd[0], info, sizeof(siginfo_t));
 }
 
 void UnixSignalHandler::setAction(int signal, const struct sigaction &action)
 {
-  // The signal number is written over the socket as a byte; this is fine
-  // because all handled signal IDs fit in a byte.
-  Q_ASSERT(signal <= std::numeric_limits<unsigned char>::max());
-
-  if (sigaction(signal, &action, nullptr)) {
-    qDebug () << "Unable to init handler for" << signal;
-  }
-}
-
-void UnixSignalHandler::init()
-{
-  struct sigaction action{};
-
-  action.sa_handler = UnixSignalHandler::_signalHandler;
-  action.sa_flags = SA_RESTART;
-
-  setAction(SIGUSR1, action);
-  setAction(SIGTERM, action);
-  setAction(SIGINT, action);
-  // SIGHUP is ignored, but we still attach a handler to trace it
-  setAction(SIGHUP, action);
+    if (sigaction(signal, &action, nullptr))
+    {
+        qDebug () << "Unable to init handler for" << signal;
+    }
 }
 
 int UnixSignalHandler::sendSignalUsr1(qint64 pid)
@@ -81,33 +86,48 @@ int UnixSignalHandler::sendSignalUsr1(qint64 pid)
 
 void UnixSignalHandler::handleSignal(int socket)
 {
-  Q_UNUSED(socket);
+    Q_UNUSED(socket);
 
-  // There's no need to loop ::read() here because Qt polls the socket in its
-  // event loop; if there is another signal buffered already it will activate
-  // the socket again.
-  unsigned char signal;
-  ssize_t readResult = ::read(sigUsr1Fd[1], &signal, sizeof(signal));
-  if(readResult < static_cast<ssize_t>(sizeof(signal)))
-  {
-    qInfo() << "Signal socket woke up but returned" << readResult;
-    return;
-  }
+    unsigned char *pWritePos = reinterpret_cast<unsigned char*>(&_rxInfo);
+    pWritePos += _rxBytes;
+    // There's no need to loop ::read() here because Qt polls the socket in its
+    // event loop; if there is another signal buffered already it will activate
+    // the socket again.
+    ssize_t readResult = ::read(_sigFd[1], pWritePos, sizeof(_rxInfo)-_rxBytes);
+    if(readResult < 0)
+    {
+        qWarning() << "Signal socket read failed:" << readResult << "-" << errno;
+        return;
+    }
 
-  qInfo() << "Received signal" << signal;
-  switch(signal)
-  {
-  case SIGUSR1:
-    emit sigUsr1();
-    break;
-  case SIGINT:
-    emit sigInt();
-    break;
-  case SIGTERM:
-    emit sigTerm();
-    break;
-  case SIGHUP:
-    // Ignored
-    break;
-  }
+    _rxBytes += readResult;
+    if(_rxBytes < sizeof(_rxInfo))
+    {
+        qInfo() << "Received incomplete signal info -" << _rxBytes << "/"
+            << sizeof(_rxInfo) << "- waiting for complete signal info";
+        return;
+    }
+
+    // Reset _rxBytes so we start from the beginning of the siginfo next time
+    _rxBytes = 0;
+
+    qInfo() << "Received signal" << _rxInfo.si_signo << "from pid"
+        << _rxInfo.si_pid;
+
+    emit signal(_rxInfo.si_signo);
+    switch(_rxInfo.si_signo)
+    {
+    case SIGUSR1:
+        emit sigUsr1();
+        break;
+    case SIGINT:
+        emit sigInt();
+        break;
+    case SIGTERM:
+        emit sigTerm();
+        break;
+    case SIGHUP:
+        // Ignored
+        break;
+    }
 }

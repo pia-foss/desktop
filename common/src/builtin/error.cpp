@@ -25,6 +25,10 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+namespace
+{
+    RegisterMetaType<Error> errorMetaType;
+}
 
 Error::Error(const QJsonObject& errorObject)
 {

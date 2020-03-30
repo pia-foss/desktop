@@ -30,6 +30,12 @@ QtObject {
   //: Screen reader annotation for the "Beta" banner shown in beta prerelease
   //: builds
   readonly property string betaPrereleaseImg: uiTranslate("HeaderBar", "Beta pre-release")
+  // Screen reader annotation for the "Preview" badge shown on preview features.
+  // This label and the Preview badge itself are not translated due to the risk
+  // of a translation of "preview" being too different from the intended
+  // meaning.  (Features using this label are very carefully positioned as
+  // "preview" features.)
+  readonly property string previewPrereleaseImg: "Preview"
   //: Help label used for the Help tray menu as well as help links on some
   //: settings
   readonly property string helpLabel: uiTranslate("TrayMenuBuilder", "Help")

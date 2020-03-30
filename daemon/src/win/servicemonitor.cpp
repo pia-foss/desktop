@@ -20,41 +20,10 @@
 #line SOURCE_FILE("servicemonitor.cpp")
 
 #include "servicemonitor.h"
+#include "win/win_util.h"
 #include <QProcess>
 #include <QRegularExpression>
 #include <VersionHelpers.h>
-
-class WinErrTracer
-{
-public:
-    WinErrTracer(DWORD code) : _code{code} {}
-
-public:
-    DWORD code() const {return _code;}
-    QString message() const;
-
-private:
-    DWORD _code;
-};
-
-QString WinErrTracer::message() const
-{
-    LPWSTR errMsg{nullptr};
-
-    auto len = ::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                                nullptr, code(), 0,
-                                reinterpret_cast<LPWSTR>(&errMsg), 0, nullptr);
-    QString msg = QString::fromWCharArray(errMsg, len);
-    ::LocalFree(errMsg);
-
-    return msg;
-}
-
-QDebug &operator<<(QDebug &dbg, const WinErrTracer err)
-{
-    dbg << err.code() << err.message();
-    return dbg;
-}
 
 ServiceMonitor *ServiceMonitor::thisFromCallback(void *pNotify)
 {

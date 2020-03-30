@@ -247,90 +247,30 @@ Page {
       font.bold: true
     }
 
-    TextLink {
+    ReinstallLink {
       id: reinstallTap
       visible: Qt.platform.os === 'windows'
-      text: {
-        if (executing)
-          return uiTr("Reinstalling Network Adapter...")
-        else if (waitingForDisconnect)
-          return uiTr("Waiting for Disconnect...")
+
+      linkText: uiTr("Reinstall OpenVPN Network Adapter")
+      executingText: uiTr("Reinstalling OpenVPN Network Adapter...")
+
+      reinstallStatus: NativeHelpers.reinstallTapStatus
+      reinstallAction: function(){NativeHelpers.reinstallTap()}
+    }
+
+    ReinstallLink {
+      id: reinstallWinTun
+      visible: Qt.platform.os === 'windows'
+
+      linkText: uiTr("Reinstall WireGuard Network Adapter")
+      executingText: uiTr("Reinstalling WireGuard Network Adapter...")
+
+      reinstallStatus: NativeHelpers.reinstallTunStatus
+      reinstallAction: function(){
+        if(Daemon.state.wireguardAvailable)
+          NativeHelpers.reinstallTun()
         else
-          return uiTr("Reinstall Network Adapter")
-      }
-      underlined: enabled
-      enabled: !executing && !waitingForDisconnect
-      readonly property bool executing: NativeHelpers.reinstallTapStatus === 'working'
-      property bool waitingForDisconnect: false
-      function startReinstall() {
-        if(!enabled)
-          return
-        if (Daemon.state.connectionState !== 'Disconnected') {
-          wSettings.alert(uiTr("The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?"), uiTr("Disconnect needed"), [Dialog.Yes, Dialog.No], function(result) {
-            if (result.code == Dialog.Yes) { // enum comparison; intentional coercing ==
-              if (Daemon.state.connectionState !== 'Disconnected') {
-                waitingForDisconnect = true;
-                Daemon.disconnectVPN();
-              } else {
-                NativeHelpers.reinstallTap();
-              }
-            }
-          });
-        } else {
-          NativeHelpers.reinstallTap();
-        }
-      }
-      onClicked: startReinstall()
-
-      // Show a message box when the TAP reinstall status reaches a new state.
-      // Though NativeHelpers avoids emitting spurious changes, occasionally
-      // these changes seem to queue up and would otherwise cause duplicate
-      // message boxes.
-      property string lastReinstallStatus
-      Connections {
-        target: NativeHelpers
-        onReinstallTapStatusChanged: {
-          if(reinstallTap.lastReinstallStatus === NativeHelpers.reinstallTapStatus) {
-            console.info('Ignore duplicate state ' + reinstallTap.lastReinstallStatus)
-            return
-          }
-          // This is a new state being observed
-          reinstallTap.lastReinstallStatus = NativeHelpers.reinstallTapStatus
-          switch (NativeHelpers.reinstallTapStatus)
-          {
-          case 'success':
-            wSettings.alert(uiTr("The network adapter has been successfully reinstalled."), SettingsMessages.titleReinstallSuccessful, 'info');
-            break;
-          case 'reboot':
-            wSettings.alert(uiTr("The network adapter has been successfully reinstalled. You may need to reboot your system."), SettingsMessages.titleReinstallSuccessful, 'warning');
-            break;
-          case 'error':
-            wSettings.alert(uiTr("There was an error while attempting to reinstall the network adapter."), SettingsMessages.titleReinstallError, 'error');
-            break;
-          }
-        }
-
-        onTerminalStartFailed: function(cmd) {
-          wSettings.open();
-          //: "Terminal" refers to a terminal emulator in the Linux build, such
-          //: as xterm, GNOME Terminal, Konsole, etc.  This should use the
-          //: typical desktop terminology.
-          var msg = uiTr("Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.")
-          msg += "<br><pre>" + cmd + "</pre>"
-          wSettings.alert(msg, uiTr("Unable to open terminal"), 'error');
-        }
-
-        Component.onCompleted: reinstallTap.lastReinstallStatus = NativeHelpers.reinstallTapStatus
-      }
-      Connections {
-        target: Daemon.state
-        enabled: reinstallTap.waitingForDisconnect
-        onConnectionStateChanged: {
-          if (Daemon.state.connectionState === 'Disconnected') {
-            reinstallTap.waitingForDisconnect = false;
-            NativeHelpers.reinstallTap();
-          }
-        }
+          wSettings.alert(SettingsMessages.wgRequiresWindows8, "WireGuard", "info")
       }
     }
 
@@ -429,11 +369,30 @@ Page {
       settingsWindow.showSettings()
       reinstallTap.startReinstall()
     }
+    onReinstallWintun: {
+      var settingsWindow = helpPage.Window.window
+      settingsWindow.selectPage(settingsWindow.page.help)
+      settingsWindow.showSettings()
+      reinstallWinTun.startReinstall()
+    }
     onReinstallSplitTunnel: {
       var settingsWindow = helpPage.Window.window
       settingsWindow.selectPage(settingsWindow.page.help)
       settingsWindow.showSettings()
       reinstallWfpCallout.startReinstall()
+    }
+  }
+
+  Connections {
+    target: NativeHelpers
+    onTerminalStartFailed: function(cmd) {
+      wSettings.open();
+      //: "Terminal" refers to a terminal emulator in the Linux build, such
+      //: as xterm, GNOME Terminal, Konsole, etc.  This should use the
+      //: typical desktop terminology.
+      var msg = uiTr("Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.")
+      msg += "<br><pre>" + cmd + "</pre>"
+      wSettings.alert(msg, uiTr("Unable to open terminal"), 'error');
     }
   }
 

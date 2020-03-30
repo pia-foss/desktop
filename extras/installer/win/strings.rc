@@ -105,6 +105,10 @@ IDS_MB_MISSINGPAYLOAD               QT_TRANSLATE_NOOP("winstaller", "The install
 IDS_MB_CAP_MISSINGPAYLOAD           QT_TRANSLATE_NOOP("winstaller", "Missing payload")
 IDS_MB_ERRORUNINSTALLINGCALLOUT     QT_TRANSLATE_NOOP("winstaller", "Error uninstalling callout driver.")
 IDS_MB_CALLOUTDRIVERFAILED          QT_TRANSLATE_NOOP("winstaller", "Callout driver installation failed.")
+IDS_MB_WIREGUARDINSTALLFAILED       QT_TRANSLATE_NOOP("winstaller", "WireGuard installation failed.")
+IDS_MB_WIREGUARDUNINSTALLFAILED     QT_TRANSLATE_NOOP("winstaller", "WireGuard uninstallation failed.")
+IDS_MB_WINTUNINSTALLFAILED          QT_TRANSLATE_NOOP("winstaller", "WinTUN installation failed.")
+IDS_MB_WINTUNUNINSTALLFAILED        QT_TRANSLATE_NOOP("winstaller", "WinTUN uninstallation failed.")
 
 IDS_MB_SUFFIX_INSTALL_ABORT         QT_TRANSLATE_NOOP("winstaller", "The installation will now abort.")
 IDS_MB_SUFFIX_INSTALL_RETRY         QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")

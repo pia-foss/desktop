@@ -44,6 +44,31 @@
 #pragma comment(lib, "newdev.lib")
 #pragma comment(lib, "setupapi.lib")
 
+static std::string utf16to8(LPCWSTR str, int len = -1)
+{
+    if(!str)
+        return {};
+
+    std::string result;
+    result.resize(WideCharToMultiByte(CP_UTF8, 0, str, len, NULL, 0, NULL, NULL), 0);
+    if (result.size())
+        result.resize(WideCharToMultiByte(CP_UTF8, 0, str, len, &result[0], (int)result.size(), NULL, NULL), 0);
+    return result;
+}
+
+inline std::string WinErrorEx::message() const
+{
+    LPWSTR errMsg{nullptr};
+
+    auto len = ::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                                nullptr, code(), 0,
+                                reinterpret_cast<LPWSTR>(&errMsg), 0, nullptr);
+    std::string msgUtf8 = utf16to8(errMsg, len);
+    ::LocalFree(errMsg);
+
+    return msgUtf8;
+}
+
 struct DeviceClass
 {
     GUID guid;
@@ -71,38 +96,6 @@ private:
     bool _enable;
 };
 #define NonInteractiveScope(enable) ScopedNonInteractive nonInteractiveBlock(nonInteractive); (void)nonInteractiveBlock
-
-class WinDriverVersion
-{
-public:
-    WinDriverVersion(WORD v0, WORD v1, WORD v2, WORD v3) : _v0{v0}, _v1{v1}, _v2{v2}, _v3{v3} {}
-    WinDriverVersion(DWORDLONG version)
-    {
-        ULARGE_INTEGER versionUli;
-        versionUli.QuadPart = version;
-        _v0 = HIWORD(versionUli.HighPart);
-        _v1 = LOWORD(versionUli.HighPart);
-        _v2 = HIWORD(versionUli.LowPart);
-        _v3 = LOWORD(versionUli.LowPart);
-    }
-    
-public:
-    bool operator==(const WinDriverVersion &other) const
-    {
-        return _v0 == other._v0 && _v1 == other._v1 && _v2 == other._v2 && _v3 == other._v3;
-    }
-    bool operator!=(const WinDriverVersion &other) const {return !(*this == other);}
-    
-    std::string printable() const
-    {
-        char buf[24];
-        _snprintf(buf, sizeof(buf), "%hu.%hu.%hu.%hu", _v0, _v1, _v2, _v3);
-        return {buf};
-    }
-    
-private:
-    WORD _v0, _v1, _v2, _v3;
-};
 
 static DriverStatus updateTapDriver(LPCWSTR inf, bool forceUpdate, bool nonInteractive = false)
 {
@@ -138,7 +131,7 @@ static DriverStatus updateTapDriver(LPCWSTR inf, bool forceUpdate, bool nonInter
     }
 }
 
-static DriverStatus installTapDriver(LPCWSTR inf, bool alwaysCreateNew, bool forceUpdate, bool nonInteractive = false)
+DriverStatus installTapDriver(LPCWSTR inf, bool alwaysCreateNew, bool forceUpdate, bool nonInteractive)
 {
     FUNCTION_LOGGING_CATEGORY("win.tap");
 
@@ -276,10 +269,10 @@ static bool uninstallTapDriverInf()
 //   removeInf=true so the old INF files are removed.  (If only the shipped
 //   version is installed, nothing happens and DriverNothingToUninstall is
 //   returned)
-static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion)
+DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion)
 {
     FUNCTION_LOGGING_CATEGORY("win.tap");
-    
+
     const WinDriverVersion shippedVersion{TAP_DRIVER_VERSION};
 
     // Get all devices in the class "Net"
@@ -299,10 +292,10 @@ static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion
                 continue;
             if (dataType != REG_MULTI_SZ || actualSize != sizeof(g_hardwareIdList) || memcmp(buffer, g_hardwareIdList, sizeof(g_hardwareIdList)))
                 continue;
-                
+
             SP_DRVINFO_DATA_W drvInfo{};
             drvInfo.cbSize = sizeof(drvInfo);
-            
+
             // Enumerate the drivers for this device.  There could be more than
             // one version installed.  Skip uninstall only if exactly 1 version
             // is installed, and it is the shipped version.
@@ -316,7 +309,7 @@ static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion
                     TAP_LOG("Driver %d - version %s", idx, installedVersion.printable().c_str());
                     ++idx;
                 }
-                
+
                 DWORD err = ::GetLastError();
                 if(err == ERROR_NO_MORE_ITEMS)
                 {
@@ -340,7 +333,7 @@ static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion
             {
                 TAP_LOG("Failed to build driver list - %d", ::GetLastError());
             }
-            
+
             // Read out the InfPath key from the device's associated registry key
             HKEY key = SetupDiOpenDevRegKey(devInfoSet, &devInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, GENERIC_READ);
             if (key != INVALID_HANDLE_VALUE)
@@ -381,45 +374,6 @@ static DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion
 
 // WFP callout driver installation/uninstallation.  (Shares setupapi utilities
 // with the TAP installation code.)
-
-static std::string utf16to8(LPCWSTR str, int len = -1)
-{
-    if(!str)
-        return {};
-
-    std::string result;
-    result.resize(WideCharToMultiByte(CP_UTF8, 0, str, len, NULL, 0, NULL, NULL), 0);
-    if (result.size())
-        result.resize(WideCharToMultiByte(CP_UTF8, 0, str, len, &result[0], (int)result.size(), NULL, NULL), 0);
-    return result;
-}
-
-class WinErrorEx
-{
-public:
-    WinErrorEx(DWORD code) : _code{code} {}
-
-public:
-    DWORD code() const {return _code;}
-
-    std::string message() const;
-
-private:
-    DWORD _code;
-};
-
-inline std::string WinErrorEx::message() const
-{
-    LPWSTR errMsg{nullptr};
-
-    auto len = ::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                                nullptr, code(), 0,
-                                reinterpret_cast<LPWSTR>(&errMsg), 0, nullptr);
-    std::string msgUtf8 = utf16to8(errMsg, len);
-    ::LocalFree(errMsg);
-
-    return msgUtf8;
-}
 
 class WinInf
 {
@@ -563,7 +517,7 @@ static void logLastError(const char *msg)
     TAP_LOG("%s (0x%X): %s", msg, error.code(), error.message().c_str());
 }
 
-static ServiceStatus startCalloutDriver(int timeoutMs)
+ServiceStatus startCalloutDriver(int timeoutMs)
 {
     ServiceHandle manager{::OpenSCManagerW(nullptr, nullptr, SERVICE_START|SERVICE_QUERY_STATUS)};
     if(manager == nullptr)
@@ -632,7 +586,7 @@ static void throwLastError(const char *msg)
     throw error;
 }
 
-static DriverStatus installCalloutDriver(LPCWSTR inf, bool nonInteractive)
+DriverStatus installCalloutDriver(LPCWSTR inf, bool nonInteractive)
 {
     FUNCTION_LOGGING_CATEGORY("win.callout");
     NonInteractiveScope(nonInteractive);
@@ -726,7 +680,7 @@ static void applyLastError(const char *msg, WinErrorEx &error)
     }
 }
 
-static DriverStatus uninstallCalloutDriver(LPCWSTR inf, bool nonInteractive)
+DriverStatus uninstallCalloutDriver(LPCWSTR inf, bool nonInteractive)
 {
     FUNCTION_LOGGING_CATEGORY("win.callout");
     NonInteractiveScope(nonInteractive);

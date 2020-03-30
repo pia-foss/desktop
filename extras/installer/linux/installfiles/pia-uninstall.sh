@@ -33,9 +33,13 @@ readonly groupName="${brandCode}vpn"
 readonly hnsdGroupName="${brandCode}hnsd"         # The group used by the Handshake DNS service
 readonly routingTableName="${serviceName}rt"
 readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"
+readonly wireguardRoutingTableName="${serviceName}Wgrt"
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
+readonly wgIfPrefix="wg${brandCode}"                                   # WireGuard interface prefix, e.g wgpia
+readonly nmConfigDir="/etc/NetworkManager/conf.d"
+readonly nmConfigPath="${nmConfigDir}/${wgIfPrefix}.conf"  # Our custom NetworkManager config
 
 function enableLogging() {
     logFile="/tmp/pia_install.log"
@@ -119,6 +123,10 @@ function removeRoutingTable() {
     true
 }
 
+function removeWireguardUnmanaged() {
+    [ -f "$nmConfigPath" ] && sudo rm -f "$nmConfigPath"
+}
+
 if [[ "$1" == "startuninstall" ]] ; then
     echo "==================================="
     echo "$appName Uninstaller"
@@ -147,6 +155,8 @@ if [[ "$1" == "startuninstall" ]] ; then
     removeGroups $groupName $hnsdGroupName
     removeRoutingTable $routingTableName
     removeRoutingTable $vpnOnlyroutingTableName
+    removeRoutingTable $wireguardRoutingTableName
+    removeWireguardUnmanaged
     echoPass "Uninstall finished"
     read -n 1 -s -r -p "Press any key to continue"
 else

@@ -586,6 +586,11 @@ void UpdateDownloader::onDownloadFinished()
     else
     {
         // Otherwise, we're done, the download succeeded
+#ifdef Q_OS_LINUX
+        // Add the executable bit on Linux so the client can execute the
+        // downloaded installer.
+        Exec::cmd(QStringLiteral("chmod"), {"a+x", _installerFile.fileName()});
+#endif
         emit downloadFinished(finishedVersion, _installerFile.fileName());
         taskResult.succeeded(true);
     }

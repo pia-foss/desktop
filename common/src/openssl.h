@@ -25,7 +25,38 @@
 
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QList>
+#include <QSslCertificate>
 
 bool COMMON_EXPORT verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature, const QByteArray& data, QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Sha256);
+
+// PrivateCA can be used to validate a certificate chain issued from a private
+// CA certificate.
+class PrivateCA
+{
+private:
+    struct data;
+
+public:
+    // Create PrivateCA with the PEM content of the cert file
+    PrivateCA(const QByteArray &caCertPem);
+    ~PrivateCA();
+
+public:
+    // Verify that an HTTPS certificate is valid for the peer name given, and
+    // was issued by this CA.
+    bool verifyHttpsCertificate(const QList<QSslCertificate> &certChain,
+                                const QString &peerName);
+
+private:
+    std::unique_ptr<data> _pData;
+};
+
+enum
+{
+    // Required buffer size for public / private keys in genCurve25519KeyPair()
+    Curve25519KeySize = 32,
+};
+bool genCurve25519KeyPair(unsigned char *pPubkey, unsigned char *pPrivkey);
 
 #endif // OPENSSL_H

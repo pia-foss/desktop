@@ -25,7 +25,7 @@ PiaApplication {
   name: "daemon"
   targetName: qbs.targetOS.contains("windows") ? project.brandCode + "-service" : project.brandCode + "-daemon"
 
-  sourceDirectories: base.concat(["daemon/src"])
+  sourceDirectories: base.concat(["daemon/src", "deps/embeddable-wg-library/src"])
 
   files: base.uniqueConcat([ "daemon/res/daemon.qrc" ])
 
@@ -71,7 +71,7 @@ PiaApplication {
   Group {
     name: "dep_bins"
     files: {
-      var depPaths = ["deps/openvpn/", "deps/hnsd/", "deps/shadowsocks/"];
+      var depPaths = ["deps/openvpn/", "deps/hnsd/", "deps/shadowsocks/", "deps/wireguard-go/", "deps/wgservice/"];
       var platformDir
       if (qbs.targetOS.contains("windows")) {
         platformDir = "win/";
@@ -131,6 +131,14 @@ PiaApplication {
     files: "deps/tap/win/" + qbs.architecture + "/win*/**"
     qbs.installSourceBase: "deps/tap/win/" + qbs.architecture + "/"
     qbs.installDir: "tap/"
+  }
+  Group {
+    name: "wintun"
+    condition: qbs.targetOS.contains("windows")
+    qbs.install: true
+    files: "brands/" + project.brandCode + "/wintun/" + qbs.architecture + "/*.msi"
+    qbs.installSourceBase: "brands/" + project.brandCode + "/wintun/" + qbs.architecture + "/"
+    qbs.installDir: "wintun/"
   }
   Group {
     name: "wfp_callout"

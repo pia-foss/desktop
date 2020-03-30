@@ -186,229 +186,250 @@
         <translation>下載版本 %1 失敗。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="71"/>
-        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
-        <translation>未安裝虛擬網路介面卡。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="74"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="73"/>
         <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
         <translation>未安裝 VPN 隧道的 TAP 介面卡。您可以在設定中重新安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="78"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="135"/>
-        <source>ClientNotifications --- Reinstall</source>
-        <translation>重新安裝</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="111"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="85"/>
         <source>ClientNotifications --- Restart to complete installation.</source>
         <translation>重新啟動以完成安裝程序。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="112"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="86"/>
         <source>ClientNotifications --- The system must be restarted before you can connect.</source>
         <translation>系統必須重新啟動才能連線。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="123"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="99"/>
+        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
+        <translation>未安裝 VPN 隧道的 WinTUN 介面卡。您可以在設定中重新安裝。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="112"/>
         <source>ClientNotifications --- The split tunnel filter is not installed.</source>
         <translation>尚未安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="124"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="113"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
         <translation>「排除應用程式」功能需要使用通道分割篩選器。請在設定中重新安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="149"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="124"/>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
+        <source>ClientNotifications --- Reinstall</source>
+        <translation>重新安裝</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="138"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
         <translation>「排除應用程式」功能需要使用通道分割篩選器。請重新啟動以完成安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="164"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="153"/>
         <source>ClientNotifications --- Connection refused.</source>
         <translation>連線遭拒。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="170"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="159"/>
         <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
         <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
         <translation>伺服器拒絕連線。請檢查您的使用者名稱和密碼，並確認您的帳戶沒有過期。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="179"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="168"/>
         <source>ClientNotifications --- Could not configure DNS.</source>
         <translation>未能設置 DNS。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="180"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="169"/>
         <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
         <translation>啟用除錯記錄及查看 Daemon 記錄以取得詳情。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="183"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="172"/>
         <source>ClientNotifications --- Daemon Log</source>
         <translation>Daemon 記錄</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="185"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="217"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="276"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="331"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="174"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="206"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="265"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="333"/>
         <source>ClientNotifications --- Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="193"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="182"/>
         <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
         <translation>未能執行 /usr/bin/xdg-open。請從以下位置開啟 Daemon 記錄檔：</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="210"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="199"/>
         <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
         <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>無法連接 Handshake。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="214"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="203"/>
         <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
         <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>無法與 Handshake 設定解析網路。請繼續等待，或者嘗試另一個名稱伺服器設定。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="228"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="217"/>
         <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
         <translation>不建議以管理員權限運行 PIA。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="229"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="218"/>
         <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
         <translation>以管理員權限運行 PIA 或會阻礙「系統啟動」正常運作或產生其他問題。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="241"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="230"/>
         <source>ClientNotifications --- KILLSWITCH ENABLED</source>
         <translation>網路切斷開關已開啟</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="242"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="231"/>
         <source>ClientNotifications --- Killswitch is enabled.</source>
         <translation>網路切斷開關已開啟。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="243"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="232"/>
         <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
         <translation>由於設定中開啟了網路切斷開關，網路連線已被鎖封。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="235"/>
         <source>ClientNotifications --- Change</source>
         <translation>變更</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="259"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="248"/>
         <source>ClientNotifications --- RECONNECTING...</source>
         <translation>正在重新連線...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="260"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="249"/>
         <source>ClientNotifications --- The connection to the VPN server was lost.</source>
         <translation>與 VPN 伺服器的連線已中斷。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="269"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="287"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="258"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="276"/>
         <source>ClientNotifications --- CONNECTING...</source>
         <translation>正在連線…</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="272"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="261"/>
         <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
         <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
         <translation>無法連接代理伺服器。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="273"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="262"/>
         <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
         <translation>無法連接代理伺服器。請檢查代理伺服器設定，並查看代理伺服器是否可用。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="288"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="277"/>
         <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
         <translation>無法連接 VPN 伺服器。請檢查您的網路。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="286"/>
         <source>ClientNotifications --- RECONNECT NEEDED</source>
         <translation>需要重新連線</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="298"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="287"/>
         <source>ClientNotifications --- Reconnect to apply settings.</source>
         <translation>重新連線以套用設定。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="299"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="288"/>
         <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
         <translation>某些設定將於您下次連線時才生效。點擊以重新連線。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="319"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+        <source>ClientNotifications --- Connected with OpenVPN.</source>
+        <translation>連接 OpenVPN。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="300"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
+        <translation>第一次登入時請透過 OpenVPN 連接；再次連接時請用 WireGuard。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="302"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
+        <translation>第一次登入時請透過 OpenVPN 連接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="321"/>
         <source>ClientNotifications --- Connected using %1 port %2.</source>
         <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
         <translation>已透過 %1 連接埠 %2 連線</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="326"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="328"/>
         <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
         <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
         <translation>「嘗試交替設定」已啟用。由於伺服器無法連接 %1 連接埠 %2，目前已使用 %3 連接埠 %4。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="340"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="342"/>
         <source>ClientNotifications --- Subscription expires in %1 days.</source>
         <translation>訂閱計劃於 %1 日後到期</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="343"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="345"/>
         <source>ClientNotifications --- Renew</source>
         <translation>續約</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="357"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="359"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
         <translation>無法連結登入伺服器。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="361"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="363"/>
         <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
         <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
         <translation>無法存取您的帳戶資料，但您仍然可以連線到 VPN。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="365"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="367"/>
         <source>ClientNotifications --- Retry</source>
         <translation>重試</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="375"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Access 已更新。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="376"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="378"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>查看最新消息</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="393"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="395"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>應用程式無預警關閉。您的 VPN 連結得以保留。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
+        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
+        <translation>未安裝虛擬網路介面卡。</translation>
     </message>
 </context>
 <context>
@@ -468,164 +489,216 @@
 <context>
     <name>ConnectionPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="26"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="142"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>通訊協定﹕ </translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>歷經 18 年的開源研發，可靠穩定且安全的通訊協定。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>最新推出的高效通訊協定，讓你體驗更佳效能。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="93"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>OpenVPN® 設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>WireGuard® 設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="132"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>商標</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="146"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>這些設定代表甚麼？</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="162"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>所有產品及公司名稱均屬於其所有者的商標（™）或註冊商標（®）。使用這些商標並不代表與相關商標所有者有任何關係或獲他們認可。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="164"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN® 是 OpenVPN Technologies,Inc. 的商標。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard® 是 Jason A. Donenfeld 的個人擁有商標。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="26"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
         <source>ConnectionPage --- Default</source>
         <translation>預設</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="64"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="72"/>
         <source>ConnectionPage --- Connection Type</source>
         <translation>連線類型</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="75"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="75"/>
         <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
         <translation>Shadowsocks 的代理伺服器設定需要 TCP。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="90"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="90"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="95"/>
         <source>ConnectionPage --- Remote Port</source>
         <translation>遠端連接埠</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="101"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="101"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
         <source>ConnectionPage --- Local Port</source>
         <translation>本地連接埠</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="113"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="113"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
         <source>ConnectionPage --- Auto</source>
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="117"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="117"/>
         <source>ConnectionPage --- Configuration Method</source>
         <translation>設置方式</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="124"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="124"/>
         <source>ConnectionPage --- DHCP</source>
         <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
         <translation>DHCP</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="128"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="128"/>
         <source>ConnectionPage --- Static</source>
         <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
         <translation>靜態</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="133"/>
         <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
         <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
         <translation>決定在 TAP 適配器上如何設置地址。如果您遇到連線問題，另一種設置方式可能更可靠。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="142"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
         <source>ConnectionPage --- Data Encryption</source>
         <translation>資料加密</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="149"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="163"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="56"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="149"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="163"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
         <source>ConnectionPage --- None</source>
         <translation>無</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>警告：你的傳輸資料未經加密，可能有外洩風險。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="158"/>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="158"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
         <source>ConnectionPage --- Data Authentication</source>
         <translation>資料驗證</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="165"/>
         <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
         <translation>警告：你的傳輸資料未經驗證，可能有被篡改風險。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="177"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="177"/>
         <source>ConnectionPage --- Handshake</source>
         <translation>Handshake</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="187"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="187"/>
         <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
         <translation>Handshake 依賴由美國標準機構認可的 Elliptic Curve。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="37"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>使用小封包</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="41"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>為 VPN 連線設定較少 MTU 值。這樣會降低傳輸速度，但連線狀態不佳的情況會得到改善。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="206"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="206"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>嘗試交替設定</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="215"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="215"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>若上方的連線類型及遠端連接埠無法運作，將自動嘗試其他設定。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="223"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="223"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>當設定了代理伺服器時，無法使用替代設定。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="236"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>這些設定代表甚麼？</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="19"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="45"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>SOCKS5 代理伺服器……</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="104"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>SOCKS5 代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="129"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>伺服器 IP 位址</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
         <source>ConnectionPage --- Port</source>
         <translation>連接埠</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="148"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>使用者（非必填）</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="155"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>密碼（非必填）</translation>
     </message>
@@ -1007,27 +1080,27 @@
 <context>
     <name>Error</name>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="36"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="40"/>
         <source>Error --- Unknown error</source>
         <translation>未知錯誤</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="37"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
         <source>Error --- System error %1: %2</source>
         <translation>系統錯誤 %1：%2</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="37"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
         <source>Error --- System error %1 inside %3: %2</source>
         <translation>系統錯誤 %3：%2 內的 %1</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="38"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="42"/>
         <source>Error --- Unknown error code %1</source>
         <translation>未知錯誤代碼 %1</translation>
     </message>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="46"/>
+        <location filename="../../../../../common/src/builtin/error.cpp" line="50"/>
         <source>Error --- No additional information available.</source>
         <translation>無額外資訊可以提供。</translation>
     </message>
@@ -1341,80 +1414,90 @@
         <translation>維護</translation>
     </message>
     <message>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="236"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>重新安裝 OpenVPN 網路介面卡</translation>
+    </message>
+    <message>
         <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
-        <source>HelpPage --- Reinstalling Network Adapter...</source>
-        <translation>正在重新安裝網路介面卡...</translation>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>正在重新安裝 OpenVPN 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>正在等待解除連線...</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="247"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>重新安裝 WireGuard 網路介面卡</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Reinstall Network Adapter</source>
-        <translation>重新安裝網路介面卡</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="248"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>正在重新安裝 WireGuard 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>連線時無法安裝網路介面卡。現在解除連線然後重新安裝嗎？</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="271"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>正在重新安裝通道分割篩選器…</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>需要解除連線</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="272"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>重新安裝通道分割篩選器</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="284"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>網路介面卡已經成功重新安裝。</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="311"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>已重新安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>網路介面卡已經成功重新安裝。您需要重新啟動系統。</translation>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="334"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>移除 Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="290"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>嘗試重新安裝網路介面卡時發生錯誤。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="375"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>無法在虛擬終端機中執行指令。請安裝與 x-terminal-emulator 相容的虛擬終端機。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="302"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="377"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>無法開啟虛擬終端機</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="331"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>正在重新安裝通道分割篩選器…</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="332"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>重新安裝通道分割篩選器</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="371"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>已重新安裝通道分割篩選器。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="394"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>移除 Private Internet Access</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="427"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="386"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>正在等待解除連線...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>連線時無法安裝網路介面卡。現在解除連線然後重新安裝嗎？</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>需要解除連線</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>網路介面卡已經成功重新安裝。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>網路介面卡已經成功重新安裝。您需要重新啟動系統。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>嘗試重新安裝網路介面卡時發生錯誤。</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
@@ -1452,13 +1535,13 @@
         <translation>連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="162"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="173"/>
         <source>IPModule --- Failed</source>
         <extracomment>Port forward - label used in IP widget when request fails</extracomment>
         <translation>失敗</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="165"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="176"/>
         <source>IPModule --- Not Available</source>
         <extracomment>Port forward - label used in IP widget when not available for this region</extracomment>
         <translation>無法使用</translation>
@@ -1686,72 +1769,72 @@
         <translation>由 VPN IP 轉送連接埠至您的電腦。請選擇所需的連接埠。注意，並非所有地區都支援轉送連接埠。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="184"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="191"/>
         <source>NetworkPage --- Allow LAN Traffic</source>
         <translation>允許 LAN 傳輸</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="185"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="192"/>
         <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
         <translation>即使您正在使用 VPN 切斷開關，請始終允許本地網路內的裝置進行傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="198"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="205"/>
         <source>NetworkPage --- Choose which applications use the VPN.</source>
         <extracomment>Description for the split tunnel setting.</extracomment>
         <translation>選擇使用 VPN 的應用程式。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="209"/>
         <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
         <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
         <translation>略過 VPN：永遠能直接連接到網際網路的應用程式</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="207"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="214"/>
         <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
         <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
         <translation>僅限 VPN - 只有在 PIA 開啟並連線 VPN 時，應用程式才能連線</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="213"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="308"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="320"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>通道分割</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="239"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="247"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>核准通道分割擴充程式以啟用此功能。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="250"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="258"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>安全喜好設定</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="364"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="382"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>正在安裝通道分割篩選器…</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="373"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="391"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>若啟用此功能，系統將會安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="380"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="398"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>尚未安裝通道分割篩選器。請在「幫助」頁面中重新安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="441"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="446"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="463"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="468"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>排除應用程式</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="487"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="512"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>可能需要重新啟動應用程式才能套用變更。</translation>
     </message>
@@ -2186,37 +2269,37 @@
 <context>
     <name>PrivacyPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="24"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="25"/>
         <source>PrivacyPage --- VPN Killswitch</source>
         <extracomment>Label for the setting that controls the VPN killswitch, a privacy feature that prevents network traffic from leaving the user&apos;s computer unless it is going through the VPN. The term &quot;killswitch&quot; is a recognizable term in the VPN industry that gets used in marketing and can be left unlocalized if there is no clear translation for the concept.</extracomment>
         <translation>VPN 切斷開關</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="26"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="27"/>
         <source>PrivacyPage --- Prevent leaks by blocking traffic outside the VPN</source>
         <extracomment>Descriptive label for the VPN killswitch setting.</extracomment>
         <translation>封鎖 VPN 以外的傳輸以防止資料外洩。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="34"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="35"/>
         <source>PrivacyPage --- Off: Don&apos;t block any traffic</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Off&quot;. No network traffic is blocked and the user&apos;s privacy can potentially be compromised if the VPN connection unexpectedly drops.</extracomment>
         <translation>關閉：不要封鎖任何傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="39"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="40"/>
         <source>PrivacyPage --- Auto: Block outside traffic when the VPN is on</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Auto&quot;. Network traffic that tries to go outside the VPN is blocked as long as the user has turned on the VPN, including if the actual VPN connection itself unexpectedly drops.</extracomment>
         <translation>自動：當 VPN 啟用時封鎖外來傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="44"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="45"/>
         <source>PrivacyPage --- Always: Also block all traffic when the VPN is off</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Always&quot;. Network traffic that tries to go outside the VPN is always blocked, even when the user has switched off the VPN. This effectively disables the user&apos;s internet connection whenever they are not connected to the VPN.</extracomment>
         <translation>永遠：當 VPN 停用時封鎖所有傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage -- privacy-killswitch --- Off</source>
         
         <extracomment>These values are used for the Killswitch setting.</extracomment>
@@ -2224,32 +2307,32 @@
         <comment>privacy-killswitch</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage --- Auto</source>
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="47"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
         <source>PrivacyPage --- Always</source>
         <translation>永遠</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="70"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>PIA MACE 需要 PIA DNS 來運作。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="65"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="74"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>PIA MACE</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="66"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="75"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>鎖封用作廣告、追蹤器及惡意程式的域名。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
@@ -2257,7 +2340,7 @@
         <comment>privacy-mace</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
         <source>PrivacyPage --- On</source>
         <translation>啟用</translation>
     </message>
@@ -2265,25 +2348,25 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="23"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
         <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
         <translation>透過額外位置重新連線 VPN</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="40"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks：%1</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="52"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 代理伺服器：%1</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="60"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="67"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
         <source>ProxyPage --- Configure...</source>
         <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
         <translation>設定...</translation>
@@ -2398,23 +2481,23 @@
         <translation>VPN 伺服器</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="123"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="131"/>
         <source>RegionModule --- VIA SOCKS5 PROXY</source>
         <translation>經由 SOCKS5 代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="125"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="133"/>
         <source>RegionModule --- VIA SHADOWSOCKS</source>
         <translation>經由 SHADOWSOCKS</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="168"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="176"/>
         <source>RegionModule --- Select region</source>
         <extracomment>Screen reader annotation for the button that makes up the Region tile, which users can click to go to the Region page and select a region. Should be a short description of the &quot;select region&quot; action.</extracomment>
         <translation>選取區域</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="173"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="181"/>
         <source>RegionModule --- Select region, %1 is selected</source>
         <extracomment>Screen reader description for the Region tile button. Should begin with the &quot;Select region&quot; translation, since that&apos;s what the button does. This also includes the currently-selected region, which the button displays. %1 is a region name.</extracomment>
         <translation>選取區域，已選取%1</translation>
@@ -2498,6 +2581,16 @@
         <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
         <translation>此功能需要允許在 %1 使用 net_cls。</translation>
     </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="38"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>此功能必須使用 OpenVPN。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/SettingsMessages.qml" line="39"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard 必須使用 Windows 8 或更新版本。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsModule</name>
@@ -2528,22 +2621,22 @@
         <translation>連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="74"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="75"/>
         <source>SettingsModule --- Allow LAN</source>
         <translation>允許 LAN</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="81"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="82"/>
         <source>SettingsModule --- Debug Logging</source>
         <translation>正在記錄錯誤偵測</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="99"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="100"/>
         <source>SettingsModule --- Light Theme</source>
         <translation>明亮主題</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="111"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>檢閱所有設定...</translation>
     </message>
@@ -3300,6 +3393,32 @@
     </message>
 </context>
 <context>
+    <name>WireguardConnection</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="52"/>
+        <source>WireguardConnection --- Use Kernel Module</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
+        <translation>使用 WireGuard 核心模組</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="66"/>
+        <source>WireguardConnection --- Install the WireGuard kernel module for the best performance.</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
+        <translation>安裝 WireGuard 核心模組可獲取最佳效能。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="73"/>
+        <source>WireguardConnection --- Install</source>
+        <translation>安裝</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="86"/>
+        <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
+        <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
+        <translation>有關特定發行版本的安裝說明，請瀏覽：</translation>
+    </message>
+</context>
+<context>
     <name>winstaller</name>
     <message>
         <location filename="../../../../../extras/installer/win/strings.rc" line="37"/>
@@ -3642,38 +3761,58 @@
         <translation>標註驅動程式安裝失敗。</translation>
     </message>
     <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>WireGuard 安裝失敗。</translation>
+    </message>
+    <message>
         <location filename="../../../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>WireGuard 解除安裝失敗。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>WinTUN 安裝失敗。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>WinTUN 解除安裝失敗。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
         <source>winstaller --- The installation will now abort.</source>
         <translation>安裝程式將會中止。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="110"/>
         <location filename="../../../../../extras/installer/win/strings.rc" line="114"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="118"/>
         <source>winstaller --- This is preventing the installation from proceeding.</source>
         <translation>這會阻止安裝繼續進行。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="111"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="115"/>
         <source>winstaller --- Do you wish to continue the installation anyway?</source>
         <translation>您仍然想繼續安裝嗎？</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="112"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
         <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
         <translation>您仍可重新嘗試繼續安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="117"/>
         <source>winstaller --- The uninstallation will now abort.</source>
         <translation>現在中止解除安裝。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="115"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="119"/>
         <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
         <translation>您仍要繼續解除安裝嗎？</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="120"/>
         <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
         <translation>您仍可重新嘗試繼續安裝。</translation>
     </message>

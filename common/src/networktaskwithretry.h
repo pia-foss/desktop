@@ -60,13 +60,21 @@ public:
 
 private:
     // Schedule an attempt, or reject if all attempts have been used.
-    void scheduleNextAttempt();
+    void scheduleNextAttempt(std::chrono::milliseconds nextDelay);
 
     // Execute an attempt (used by scheduleNextAttempt())
     void executeNextAttempt();
 
     // Create task to issue a single request and return its body.
     Async<QByteArray> sendRequest();
+
+    // Trace a leaf certificate; used by checkSslErrorPeerName().
+    void traceLeafCert(const QSslCertificate &leafCert) const;
+
+    // Check the SSL certificate for a request using a custom CA and peer name.
+    // If the certificate is accepted, calls reply.ignoreSslErrors().
+    void checkSslCertificate(QNetworkReply &reply, const BaseUri &baseUri,
+                             const QList<QSslError> &errors);
 
 private:
     QNetworkAccessManager::Operation _verb;

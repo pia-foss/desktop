@@ -1,5 +1,15 @@
 # Changelog
 
+### v2.0
+* WireGuard is now supported as a connection method
+* WireGuard on Windows requires Windows 8 or later
+* Some settings are not yet supported with WireGuard - split tunnel, port forwarding, and proxy
+* Fixed the Mail app on Windows 10 with split tunnel (shares an app family with Calendar)
+* Fixed terminal emulator support for Terminator and other terminals on Linux
+* VPN IP and forwarded port appear more quickly than in 1.8
+* Improved reliability of support tool submissions
+* Security improvements
+
 ### v1.8
 * Split tunnel apps can be configured to use the VPN only or to bypass the VPN
 * The default behavior can be set to "Bypass VPN" to use the VPN only for specific apps

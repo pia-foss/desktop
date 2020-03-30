@@ -26,8 +26,7 @@ Item {
   // This is a simplified version of Daemon.state.connectionState.
   // The actual connectionState has a number of detailed values that are not
   // relevant to many client components (like the distinctions between
-  // Disconnecting/DisconnectingToReconnect, Reconnecting/StillReconnecting, and
-  // Connecting/StillConnecting).
+  // DisconnectingToReconnect/Reconnecting/Connecting).
   //
   // Currently, the actual states exposed here are fixed, but potentially they
   // could be configurable if some objects are interested in a few of the
@@ -50,9 +49,7 @@ Item {
       case 'Disconnected':
         return stateDisconnected
       case 'Connecting':
-      case 'StillConnecting':
       case 'Reconnecting':
-      case 'StillReconnecting':
       case 'DisconnectingToReconnect':
       case 'Interrupted':
         return stateConnecting

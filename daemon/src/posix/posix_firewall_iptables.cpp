@@ -22,28 +22,26 @@
 #ifdef Q_OS_LINUX
 
 #include "posix_firewall_iptables.h"
+#include "daemon.h" // FirewallParams
 #include "path.h"
 #include "brand.h"
+#include "exec.h"
+#include "linux/linux_fwmark.h"
+#include "linux/linux_routing.h"
 
 #include <QProcess>
 
 namespace
 {
     const QString kAnchorName{BRAND_CODE "vpn"};
-    const QString kPacketTag{"0x3211"};
-    const QString kVpnOnlyPacketTag{"0x3212"};
-    const QString kCGroupId{"0x567"};
-    const QString kVpnOnlyCGroupId{"0x568"};
+    const QString kCGroupId{hexNumberStr(BRAND_LINUX_CGROUP_BASE)};
+    const QString kVpnOnlyCGroupId{hexNumberStr(BRAND_LINUX_CGROUP_BASE+1)};
     const QString enabledKeyTemplate = "enabled:%1:%2";
     const QString disabledKeyTemplate = "disabled:%1:%2";
-    const QString kVpnGroupName = BRAND_CODE "vpn";
-    const QString kHnsdGroupName = BRAND_CODE "hnsd";
 
     QHash<QString, IpTablesFirewall::FilterCallbackFunc> anchorCallbacks;
 }
 
-QString IpTablesFirewall::kRtableName = QStringLiteral("%1rt").arg(kAnchorName);
-QString IpTablesFirewall::kVpnOnlyRtableName = QStringLiteral("%1Onlyrt").arg(kAnchorName);
 QString IpTablesFirewall::kOutputChain = QStringLiteral("OUTPUT");
 QString IpTablesFirewall::kPostRoutingChain = QStringLiteral("POSTROUTING");
 QString IpTablesFirewall::kPreRoutingChain = QStringLiteral("PREROUTING");
@@ -52,6 +50,9 @@ QString IpTablesFirewall::kFilterTable = QStringLiteral("filter");
 QString IpTablesFirewall::kNatTable = QStringLiteral("nat");
 QString IpTablesFirewall::kRawTable = QStringLiteral("raw");
 QString IpTablesFirewall::kMangleTable = QStringLiteral("mangle");
+QString IpTablesFirewall::kVpnGroupName = BRAND_CODE "vpn";
+QString IpTablesFirewall::kHnsdGroupName = BRAND_CODE "hnsd";
+
 
 static QString getCommand(IpTablesFirewall::IPVersion ip)
 {
@@ -179,13 +180,19 @@ void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QSt
     deleteChain(ip, actualChain, tableName);
 }
 
-QStringList IpTablesFirewall::getDNSRules(const QStringList& servers)
+QStringList IpTablesFirewall::getDNSRules(const QString &adapterName, const QStringList& servers)
 {
+    if(adapterName.isEmpty())
+    {
+        qInfo() << "Adapter name not set, not applying DNS firewall rules";
+        return {};
+    }
+
     QStringList result;
     for (const QString& server : servers)
     {
-        result << QStringLiteral("-o tun+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
+        result << QStringLiteral("-o %1 -d %2 -p udp --dport 53 -j ACCEPT").arg(adapterName, server);
+        result << QStringLiteral("-o %1 -d %2 -p tcp --dport 53 -j ACCEPT").arg(adapterName, server);
     }
     return result;
 }
@@ -214,11 +221,16 @@ void IpTablesFirewall::install()
     installAnchor(Both, QStringLiteral("400.allowPIA"), {
         QStringLiteral("-m owner --gid-owner %1 -j ACCEPT").arg(kVpnGroupName),
     });
+
+    // Allow all packets with the wireguard mark
+    // Though another process could also mark packets with this fwmark to permit
+    // them, it would have to have root privileges to do so, which means it
+    // could install its own firewall rules anyway.
+    installAnchor(Both, QStringLiteral("390.allowWg"), {
+        QStringLiteral("-m mark --mark %1 -j ACCEPT").arg(Fwmark::wireguardFwmark),
+    });
     installAnchor(Both, QStringLiteral("350.allowHnsd"), {
-        // Port 13038 is the handshake control port
-        QStringLiteral("-m owner --gid-owner %1 -o tun+ -p tcp --match multiport --dports 53,13038 -j ACCEPT").arg(kHnsdGroupName),
-        QStringLiteral("-m owner --gid-owner %1 -o tun+ -p udp --match multiport --dports 53,13038 -j ACCEPT").arg(kHnsdGroupName),
-        QStringLiteral("-m owner --gid-owner %1 -j REJECT").arg(kHnsdGroupName),
+        // Updated at run-time in updateRules()
     });
     installAnchor(Both, QStringLiteral("350.cgAllowHnsd"), {
         // Port 13038 is the handshake control port
@@ -261,7 +273,7 @@ void IpTablesFirewall::install()
     });
 
     installAnchor(Both, QStringLiteral("200.allowVPN"), {
-        QStringLiteral("-o tun+ -j ACCEPT"),
+        // To be added at runtime, dependent upon vpn method (i.e openvpn or wireguard)
     });
 
     installAnchor(Both, QStringLiteral("100.blockAll"), {
@@ -270,21 +282,16 @@ void IpTablesFirewall::install()
 
     // NAT rules
     installAnchor(Both, QStringLiteral("100.transIp"), {
-        // Only need the original interface, not the IP.
-        // The interface should remain much more stable/unchangeable than the IP
-        // (IP can change when changing networks, but interface only changes if adding/removing NICs)
-        // This anchor is empty until we connect, it's updated when the
-        // interface name is found as we connect (with replaceAnchor()).
-        // it'll take this form: "-o <interface name> -j MASQUERADE"
+        // This anchor is set at run-time by split-tunnel ProcTracker class
     }, kNatTable);
 
     // Mangle rules
     installAnchor(Both, QStringLiteral("100.tagPkts"), {
         // Split tunnel
-        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kCGroupId, kPacketTag),
+        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kCGroupId, Fwmark::excludePacketTag),
 
         // Inverse split tunnel
-        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kVpnOnlyCGroupId, kVpnOnlyPacketTag)
+        QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(kVpnOnlyCGroupId, Fwmark::vpnOnlyPacketTag)
     }, kMangleTable, setupTrafficSplitting, teardownTrafficSplitting);
 
     // A rule to mitigate CVE-2019-14899 - drop packets addressed to the local
@@ -330,6 +337,10 @@ void IpTablesFirewall::uninstall()
     // Remove filter anchors
     uninstallAnchor(Both, QStringLiteral("000.allowLoopback"));
     uninstallAnchor(Both, QStringLiteral("400.allowPIA"));
+    uninstallAnchor(Both, QStringLiteral("390.allowWg"));
+    uninstallAnchor(Both, QStringLiteral("350.allowHnsd"));
+    uninstallAnchor(Both, QStringLiteral("350.cgAllowHnsd"));
+    uninstallAnchor(Both, QStringLiteral("340.blockVpnOnly"));
     uninstallAnchor(IPv4, QStringLiteral("320.allowDNS"));
     uninstallAnchor(Both, QStringLiteral("310.blockDNS"));
     uninstallAnchor(Both, QStringLiteral("300.allowLAN"));
@@ -346,6 +357,28 @@ void IpTablesFirewall::uninstall()
 
     // Remove Raw anchors
     uninstallAnchor(Both, QStringLiteral("100.vpnTunOnly"), kRawTable);
+}
+
+void IpTablesFirewall::activate()
+{
+    // Ensure LAN traffic is always managed by the 'main' table.  This is needed
+    // to ensure LAN routing for:
+    // - Split tunnel.  Otherwise, split tunnel rules would send LAN traffic via
+    //   the default gateway.
+    // - Wireguard.  Otherwise, LAN traffic would be sent via the Wireguard
+    //   interface.
+    //
+    // This has no effect for OpenVPN without split tunnel, or when disconnected
+    // without split tunnel.
+    //
+    // Note that we use "suppress_prefixlength 1", not 0 as is typical, because
+    // we also suppress the /1 gateway override routes applied by OpenVPN.
+    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio 99"));
+}
+
+void IpTablesFirewall::deactivate()
+{
+    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio 99"));
 }
 
 bool IpTablesFirewall::isInstalled()
@@ -422,37 +455,52 @@ void IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPVersion ip, const QS
     }
 }
 
-void IpTablesFirewall::updateDNSServers(const QStringList& servers)
+void IpTablesFirewall::updateRules(const FirewallParams &params)
 {
-    static QStringList existingServers {};
-    if (servers == existingServers)
-        return;
-    existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
-    for (const QString& rule : getDNSRules(servers))
-        execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
+    const QString &adapterName = params.adapter ? params.adapter->devNode() : QString{};
+    qInfo() << "VPN interface:" << adapterName;
+
+    // DNS rules depend on both adapters and DNS servers, update if either has
+    // changed
+    if(params.effectiveDnsServers != _dnsServers || adapterName != _adapterName)
+    {
+        execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
+        // If the adapter name isn't set, getDNSRules() returns an empty list
+        for (const QString& rule : getDNSRules(adapterName, params.effectiveDnsServers))
+        {
+            execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
+        }
+    }
+
+    // These rules only depend on the adapter name
+    if(adapterName != _adapterName)
+    {
+        if(adapterName.isEmpty())
+        {
+            // Don't know the adapter name, wipe out the rules
+            qInfo() << "Clearing allowVPN and allowHnsd rules, adapter name is not known";
+            replaceAnchor(IpTablesFirewall::Both, QStringLiteral("200.allowVPN"), {});
+            replaceAnchor(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), {});
+        }
+        else
+        {
+            replaceAnchor(IpTablesFirewall::Both, QStringLiteral("200.allowVPN"), { QStringLiteral("-o %1 -j ACCEPT").arg(adapterName) });
+            replaceAnchor(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), {
+                QStringLiteral("-m owner --gid-owner %1 -o %2 -p tcp --match multiport --dports 53,13038 -j ACCEPT").arg(IpTablesFirewall::kHnsdGroupName, adapterName),
+                QStringLiteral("-m owner --gid-owner %1 -o %2 -p udp --match multiport --dports 53,13038 -j ACCEPT").arg(IpTablesFirewall::kHnsdGroupName, adapterName),
+                QStringLiteral("-m owner --gid-owner %1 -j REJECT").arg(IpTablesFirewall::kHnsdGroupName),
+            });
+        }
+    }
+
+    _dnsServers = params.effectiveDnsServers;
+    _adapterName = adapterName;
 }
 
 int IpTablesFirewall::execute(const QString &command, bool ignoreErrors)
 {
-    static QLoggingCategory stdoutCategory("iptables.stdout");
-    static QLoggingCategory stderrCategory("iptables.stderr");
-
-    QProcess p;
-    p.start(QStringLiteral("/bin/bash"), {QStringLiteral("-c"), command}, QProcess::ReadOnly);
-    p.closeWriteChannel();
-    int exitCode = waitForExitCode(p);
-    auto out = p.readAllStandardOutput().trimmed();
-    auto err = p.readAllStandardError().trimmed();
-    if ((exitCode != 0 || !err.isEmpty()) && !ignoreErrors)
-        qWarning().noquote().nospace() << "(" << exitCode << ") $ " << command;
-    else if (false)
-        qDebug().noquote().nospace() << "(" << exitCode << ") $ " << command;
-    if (!out.isEmpty())
-        qCInfo(stdoutCategory).noquote() << out;
-    if (!err.isEmpty())
-        qCWarning(stderrCategory).noquote() << err;
-    return exitCode;
+    static Executor iptablesExecutor{CURRENT_CATEGORY};
+    return iptablesExecutor.bash(command, ignoreErrors);
 }
 
 void IpTablesFirewall::setupCgroup(const Path &cGroupDir, QString cGroupId, QString packetTag, QString routingTableName)
@@ -477,23 +525,15 @@ void IpTablesFirewall::setupTrafficSplitting()
     auto cGroupVpnOnlyDir = Path::VpnOnlyFile.parent();
 
     // Split tunnel (exclusions)
-    setupCgroup(cGroupExclusionsDir, kCGroupId, kPacketTag, kRtableName);
+    setupCgroup(cGroupExclusionsDir, kCGroupId, Fwmark::excludePacketTag, Routing::bypassTable);
 
     // Inverse split tunnel (vpn only)
-    setupCgroup(cGroupVpnOnlyDir, kVpnOnlyCGroupId, kVpnOnlyPacketTag, kVpnOnlyRtableName);
-
-    // Ensure LAN traffic gets managed by the 'main' table. Without this even LAN traffic
-    // will get routed out the default gateway. Set priority to 99 so it takes precedence over
-    // split tunnel rules (which are in the 100-101 range).
-    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio 99"));
+    setupCgroup(cGroupVpnOnlyDir, kVpnOnlyCGroupId, Fwmark::vpnOnlyPacketTag, Routing::vpnOnlyTable);
 }
 
 void IpTablesFirewall::teardownTrafficSplitting()
 {
-    teardownCgroup(kPacketTag, kRtableName);
-    teardownCgroup(kVpnOnlyPacketTag, kVpnOnlyRtableName);
-
-    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio 99"));
+    teardownCgroup(Fwmark::excludePacketTag, Routing::bypassTable);
+    teardownCgroup(Fwmark::vpnOnlyPacketTag, Routing::vpnOnlyTable);
 }
-
 #endif

@@ -583,3 +583,27 @@ void QCustomMessageLogger::debug(const Error& e)
 #endif
 
 const QString oldFileSuffix = QStringLiteral(".old");
+
+TraceStopwatch::TraceStopwatch(const char *pMsg)
+    : _pMsg{pMsg}
+{
+    _elapsed.start();
+}
+
+TraceStopwatch::~TraceStopwatch()
+{
+    if(_pMsg)
+    {
+        qInfo() << _pMsg << "-" << traceMsec(_elapsed.elapsed());
+    }
+}
+
+void TraceStopwatch::disable()
+{
+    enable(nullptr);
+}
+
+void TraceStopwatch::enable(const char *pMsg)
+{
+    _pMsg = pMsg;
+}

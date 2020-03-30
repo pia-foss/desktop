@@ -18,6 +18,8 @@
 
 #include "installer.h"
 #include "brand.h"
+#include "service_inl.h"
+#include "tun_inl.h"
 #include "tasks.h"
 #include "tasks/callout.h"
 #include "tasks/file.h"
@@ -28,12 +30,16 @@
 #include "tasks/process.h"
 #include "tasks/registry.h"
 #include "tasks/service.h"
+#include "tasks/wgservice.h"
 #include "tasks/shortcut.h"
 #include "tasks/tap.h"
 #include "tasks/uninstall.h"
+#include "tasks/wintun.h"
 
 #include <shlobj_core.h>
 #include <shlwapi.h>
+
+#pragma comment(lib, "Msi.lib")
 
 #if defined(INSTALLER)
 #define WINDOW_CLASS_NAME _T("PIAInstaller")
@@ -454,7 +460,7 @@ void Installer::setCaption(UIString caption)
 
 void Installer::setError(UIString description)
 {
-    LOG("ERROR: %s", description.str());
+    LOG("ERROR: %ls", description.str());
     LockedScope(_drawMutex);
     _result = Error;
     _error = std::move(description);
@@ -593,10 +599,15 @@ DWORD Installer::workerThreadMain()
         // Determine path to installed executables
         g_clientPath = g_installPath + L"\\" BRAND_CODE "-client.exe";
         g_servicePath = g_installPath + L"\\" BRAND_CODE "-service.exe";
+        g_wgServicePath = g_installPath + L"\\" BRAND_CODE "-wgservice.exe";
 
         g_daemonDataPath = g_installPath + L"\\data";
         g_oldDaemonDataPath = getShellFolder(CSIDL_COMMON_APPDATA) + L"\\" PIA_PRODUCT_NAME;
         g_clientDataPath = getShellFolder(CSIDL_LOCAL_APPDATA) + L"\\" PIA_PRODUCT_NAME;
+
+        // Configure MSI UI and logging.  This is global state in the MSI
+        // library, so it applies to all tasks.
+        initMsiLib(g_userTempPath.c_str());
 
         bool clientExists = !!PathFileExists(g_clientPath.c_str());
         bool serviceExists = !!PathFileExists(g_servicePath.c_str());
@@ -632,19 +643,34 @@ DWORD Installer::workerThreadMain()
         // Kill any running clients
         tasks.addNew<KillExistingClientsTask>();
 
-        // Stop the existing service
-        tasks.addNew<StopExistingServiceTask>();
+        // Stop the existing daemon service; restart it if we roll back
+        tasks.addNew<StopExistingServiceTask>(g_daemonServiceParams.pName, true);
 
-        // Uninstall the existing service (noop in installer)
+        // Stopping the daemon should also stop the Wireguard service, but stop
+        // it explicitly for robustness.  Don't restart it if we roll back.
+        tasks.addNew<StopExistingServiceTask>(g_wireguardServiceParams.pName, false);
+
+        // Uninstall the existing service.  Execution is a no-op in installer,
+        // but rollback is needed even in installer - it restores the old
+        // services if they were replaced by install tasks (using the restored
+        // daemon's "install" command).
         tasks.addNew<UninstallExistingServiceTask>();
 
     #ifdef UNINSTALLER
         // Uninstall the callout driver
         tasks.addNew<UninstallCalloutDriverTask>();
+
+        // Uninstall the wireguard service
+        tasks.addNew<UninstallWgServiceTask>();
     #endif
 
-        // Uninstall existing TAP driver (noop in installer)
+        // Uninstall existing TAP driver (noop in installation, may perfom
+        // rollback during aborted installation)
         tasks.addNew<UninstallTapDriverTask>();
+
+        // Uninstall existing WinTUN driver (noop in installation, may perfom
+        // rollback during aborted installation)
+        tasks.addNew<UninstallWintunTask>();
 
     #ifdef INSTALLER
         // Remove any existing installation (listed in uninstall.dat)
@@ -677,8 +703,14 @@ DWORD Installer::workerThreadMain()
         // Install TAP driver
         tasks.addNew<InstallTapDriverTask>();
 
+        // Install WinTUN driver
+        tasks.addNew<InstallWintunTask>();
+
         // Update callout driver if installed
         tasks.addNew<UpdateCalloutDriverTask>();
+
+        // Install Wireguard service
+        tasks.addNew<InstallWgServiceTask>();
 
         // Install service
         tasks.addNew<InstallServiceTask>();
