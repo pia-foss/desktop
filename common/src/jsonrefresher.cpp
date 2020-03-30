@@ -210,7 +210,7 @@ void JsonRefresher::startOrOverride(const QString &overridePath,
     // just use the endpoint to fetch the regions
     else
     {
-        qInfo() << "Loading regions from endpoint";
+        qInfo() << "Loading" << _name << "from endpoint";
         start();
     }
 }

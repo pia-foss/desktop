@@ -62,8 +62,10 @@ function resolvconf_apply() {
 
   # using 169.254.12.97 is a dummy (link-local) address as ubuntu 16.04 resolvconf needs 3 ip addresses or it falls back to the original
   # user dns config as the 3rd ip, which could cause leaks
-  echo $dns_servers 169.254.12.97 169.254.12.98 | xargs -n1 echo nameserver | head -n 3 | resolvconf -a "${dev}.openvpn" \
-    || dns_error "Failed to reconfigure using resolvconf"
+  local final_dns_servers=$(echo $dns_servers 169.254.12.97 169.254.12.98 | xargs -n1 echo nameserver | head -n 3)
+  echo "Updating resolvconf with:"
+  echo $final_dns_servers
+  echo $final_dns_servers | resolvconf -a "${dev}.openvpn" || dns_error "Failed to reconfigure using resolvconf"
 }
 
 [ -n "$script_type" ] || dns_error "Missing script_type env var"
@@ -109,6 +111,7 @@ resolvconf_link_path=/run/resolvconf/resolv.conf
 
 case "$script_type" in
   up)
+    echo "Setting up DNS."
     echo "Using device:$dev local_address:$ifconfig_local remote_address:$ifconfig_remote" >&2 # Used in openvpnmethod.cpp to pass in tunnel info
 
     if [ -n "$dns_servers" ] ; then
@@ -127,6 +130,7 @@ case "$script_type" in
       elif lsattr /etc/resolv.conf 2> /dev/null | grep -q i; then
         dns_error "Failed to update DNS servers: /etc/resolv.conf was set +i (immutable)"
       else
+        echo "Applying nameservers by overwriting resolv.conf..."
         echo "Backing up /etc/resolv.conf to $resolv_conf_backup"
         # let's overwrite /etc/resolv.conf, but let's back it up first
         # also let's only back it up if we don't already have a backup, otherwise
@@ -143,6 +147,7 @@ case "$script_type" in
   ;;
 
   down)
+    echo "Tearing down DNS."
     if [[ $(realpath /etc/resolv.conf) =~ systemd ]]; then
       # Nothing to do
       true

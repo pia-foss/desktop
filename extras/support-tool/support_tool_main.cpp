@@ -31,6 +31,7 @@
 #include "common.h"
 #include "appsingleton.h"
 #include "path.h"
+#include "version.h"
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
@@ -140,6 +141,7 @@ int main(int argc, char *argv[])
         params->setProperty("files", ReportHelper::ensureFilesExist(parser.values(fileOption))); // A list of files
         params->setProperty("client_crash", parser.value(clientCrashesOption));
         params->setProperty("daemon_crash", parser.value(daemonCrashesOption));
+        params->setProperty("version", QStringLiteral(PIA_VERSION));
         params->setProperty("invoke_pipe", invokePipeArg);
 
         ReportHelper::setUIParams(params);

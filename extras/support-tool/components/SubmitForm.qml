@@ -77,6 +77,7 @@ Item {
         wrapMode: Text.Wrap
         Layout.fillWidth: true
       }
+
       CheckBox {
         Layout.topMargin: 3
         text: "Include technical debug logs."
@@ -226,8 +227,6 @@ Item {
         }
       }
 
-
-
       RowLayout {
         Text {
           text: "< Back"
@@ -294,6 +293,7 @@ Item {
       Text {
           text: "Your report has been submitted successfully. Thank you."
       }
+
       RowLayout {
         Layout.topMargin: 10
         visible: true
@@ -324,6 +324,53 @@ Item {
               reportId.copy()
               parent.text = "Copied"
             }
+          }
+        }
+      }
+
+      // Show a message after submitting report informing user
+      // to open a ticket too (so they can get a response)
+      Item {
+        Layout.fillWidth: true
+        visible: true
+        height: ticketText.contentHeight + 40
+
+        Text {
+          id: ticketText
+          property string betaEmail
+          property string subtext
+          // The 'dash' after the dotted version number indicates a prerelease
+          // build.
+          property var isPrerelease: params.version.match(/^[0-9]+\.[0-9]+\.[0-9]+-/i)
+          betaEmail: {
+            if(Qt.platform.os === 'win') {
+              return "beta-feedback-win@privateinternetaccess.com"
+             } else if(Qt.platform.os === 'linux') {
+                 return "beta-feedback-linux@privateinternetaccess.com"
+             } else {
+                 return "beta-feedback-mac@privateinternetaccess.com"
+             }
+          }
+          anchors.fill: parent
+          anchors.margins: 5
+          wrapMode: Text.WordWrap
+          subtext: {
+            if(!isPrerelease) {
+              return "contact support:<br><a href='https://www.privateinternetaccess.com/helpdesk/new-ticket?ticket[subject]=Debug%20log%20reference%20id%3A%20" + referenceId + "'>Support Helpdesk</a>"
+            } else {
+              return "email development:<br><a href='mailto:" + betaEmail
+                     + "?subject=Debug log reference id: "
+                     + referenceId + "'>"
+                     + betaEmail + "</a>"
+            }
+          }
+          text: "<b>If you'd like a response</b>, please " + subtext + ".<br>Please include the Reference ID above."
+          onLinkActivated: Qt.openUrlExternally(link)
+
+          MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
           }
         }
       }

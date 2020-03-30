@@ -103,7 +103,24 @@ QtObject {
     "us_silicon_valley": {lat: 37.593392, long: -122.04383, name: QT_TR_NOOP("US Silicon Valley")},
     "us_south_west": {lat: 33.623962, long: -109.654814, name: QT_TR_NOOP("US Texas")},
     "us_washington_dc": {lat: 38.907192, long: -77.036871, name: QT_TR_NOOP("US Washington DC")},
-    "za": {lat: -30.559482, long: 22.937506, name: QT_TR_NOOP("South Africa")}
+    "za": {lat: -30.559482, long: 22.937506, name: QT_TR_NOOP("South Africa")},
+
+    "al": {lat: 41.33165, long: 19.8318, name: QT_TR_NOOP("Albania")},
+    "lt": {lat: 54.687157, long: 25.279652, name: QT_TR_NOOP("Lithuania")},
+    "hr": {lat: 45.815399, long: 15.966568, name: QT_TR_NOOP("Croatia")},
+    "ee": {lat: 59.436962, long: 24.753574, name: QT_TR_NOOP("Estonia")},
+    "gr": {lat: 37.983810, long: 23.727539, name: QT_TR_NOOP("Greece")},
+    "lv": {lat: 56.946285, long: 24.105078, name: QT_TR_NOOP("Latvia")},
+    "my": {lat: 3.140853, long: 101.693207, name: QT_TR_NOOP("Malaysia")},
+    "pt": {lat: 38.736946, long: -9.142685, name: QT_TR_NOOP("Portugal")},
+    "sk": {lat: 48.148598, long: 17.107748, name: QT_TR_NOOP("Slovakia")},
+    "ba": {lat: 43.858181, long: 18.412340, name: QT_TR_NOOP("Bosnia and Herzegovina")},
+    "ar": {lat: -38.416096, long: -63.616673, name: QT_TR_NOOP("Argentina")},
+    "mk": {lat: 41.608635, long: 21.745275, name: QT_TR_NOOP("North Macedonia")},
+    "bg": {lat: 42.655033, long: 25.231817, name: QT_TR_NOOP("Bulgaria")},
+    "si": {lat: 46.075219, long: 14.882733, name: QT_TR_NOOP("Slovenia")},
+    "md": {lat: 47.265819, long: 28.598334, name: QT_TR_NOOP("Moldova")},
+    "is": {lat: 64.852829, long: -18.301501, name: QT_TR_NOOP("Iceland")}
   }
 
   // The regions list doesn't give us country names either.  We only need them

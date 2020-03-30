@@ -695,6 +695,15 @@ void DiagnosticsFile::writeCommand(const QString &commandName,
     execAndWriteOutput(cmd, commandName, processOutput);
 }
 
+void DiagnosticsFile::writeCommandIf(bool predicate,
+                                     const QString &commandName,
+                                     const QString &command,
+                                     const QStringList &args,
+                                     const ProcessOutputFunction &processOutput)
+{
+    if(predicate)
+        writeCommand(commandName, command, args, processOutput);
+}
 #ifdef Q_OS_WIN
 // On Windows, we have to be able to set the complete command line string in
 // some cases; QProcess::start() explains this in detail.
@@ -708,6 +717,16 @@ void DiagnosticsFile::writeCommand(const QString &commandName,
     cmd.setNativeArguments(nativeArgs);
     cmd.setProgram(command);
     execAndWriteOutput(cmd, commandName, processOutput);
+}
+
+void DiagnosticsFile::writeCommandIf(bool predicate,
+                                     const QString &commandName,
+                                     const QString &command,
+                                     const QString &nativeArgs,
+                                     const ProcessOutputFunction &processOutput)
+{
+    if(predicate)
+        writeCommand(commandName, command, nativeArgs, processOutput);
 }
 #endif
 

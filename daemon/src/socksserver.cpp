@@ -615,12 +615,21 @@ void SocksConnection::processSocksData()
 
 void SocksConnection::onSocksError(QAbstractSocket::SocketError socketError)
 {
+    // "RemoteHostClosedError" actually means that the remote host closed the
+    // connection normally.  disconnected() will be emitted, ignore the error.
+    if(socketError == QAbstractSocket::SocketError::RemoteHostClosedError)
+    {
+        qInfo() << "SOCKS connection closed in state" << traceEnum(_state);
+        return;
+    }
+
     qWarning() << "SOCKS connection error:" << traceEnum(socketError);
     abortConnection();
 }
 
 void SocksConnection::onSocksDisconnected()
 {
+    qInfo() << "SOCKS connection disconnected in state" << traceEnum(_state);
     switch(_state)
     {
         default:
@@ -708,6 +717,14 @@ void SocksConnection::onTargetConnected()
 
 void SocksConnection::onTargetError(QAbstractSocket::SocketError socketError)
 {
+    // "RemoteHostClosedError" actually means that the remote host closed the
+    // connection normally.  disconnected() will be emitted, ignore the error.
+    if(socketError == QAbstractSocket::SocketError::RemoteHostClosedError)
+    {
+        qInfo() << "Target closed the connection in state" << traceEnum(_state);
+        return;
+    }
+
     switch(_state)
     {
         default:
@@ -771,6 +788,8 @@ void SocksConnection::onTargetReadyRead()
         case State::ReceiveConnect:
         case State::Connecting:
             // Not ready to forward data, let the QTcpSocket buffer it
+            qInfo() << "Buffering data from target in state" << traceEnum(_state)
+                << "- have" << _targetSocket.bytesAvailable() << "bytes";
             break;
         case State::Connected:
             forwardData(_targetSocket, _socksSocket, QStringLiteral("inbound"));
@@ -778,6 +797,8 @@ void SocksConnection::onTargetReadyRead()
         case State::SocksDisconnecting:
         case State::TargetDisconnecting:
         case State::Closed:
+            qWarning() << "Discarding" << _targetSocket.bytesAvailable()
+                << "from target in state" << traceEnum(_state);
             // No data expected in these states, discard it
             _targetSocket.skip(_targetSocket.bytesAvailable());
             break;
@@ -786,6 +807,7 @@ void SocksConnection::onTargetReadyRead()
 
 void SocksConnection::onTargetDisconnected()
 {
+    qInfo() << "Target socket disconnected in state" << traceEnum(_state);
     switch(_state)
     {
         default:

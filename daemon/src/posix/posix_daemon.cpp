@@ -317,32 +317,56 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeCommand("Distro", "lsb_release", QStringList{QStringLiteral("-a")});
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
+    file.writeCommand("ip addr", "ip", QStringList{QStringLiteral("addr")});
     // Write iptables dumps for each table that PIA uses
     auto dumpIpTables = [&](const QString &table)
     {
-        file.writeCommand(QString("iptables -t %1 -S").arg(table), "iptables",
-                          {QStringLiteral("-t"), table, QStringLiteral("-S")});
-        file.writeCommand(QString("iptables -t %1 -n -L").arg(table), "iptables",
-                          {QStringLiteral("-t"), table, QStringLiteral("-n"),
-                           QStringLiteral("-L")});
+        for(const auto &cmd : QStringList{"iptables", "ip6tables"})
+        {
+            file.writeCommand(QString("%1 -t %2 -S").arg(cmd, table), cmd,
+                              {QStringLiteral("-t"), table, QStringLiteral("-S")});
+        }
     };
     dumpIpTables(QStringLiteral("filter"));
     dumpIpTables(QStringLiteral("nat"));
     dumpIpTables(QStringLiteral("raw"));
     dumpIpTables(QStringLiteral("mangle"));
+
     // iptables version - 1.6.1 is required for the split tunnel feature
     file.writeCommand("iptables --version", "iptables", QStringList{QStringLiteral("--version")});
     file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
-    // Grab the routing table from iproute2 also - we hope to change OpenVPN
+    // Grab the routing tables from iproute2 also - we hope to change OpenVPN
     // from ifconfig to iproute2 at some point as long as this is always present
     file.writeCommand("ip route show", "ip", QStringList{"route", "show"});
     file.writeCommand("resolv.conf", "cat", QStringList{QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("ls -l resolv.conf", "ls", QStringList{QStringLiteral("-l"), QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("systemd-resolve --status", "systemd-resolve", QStringList{QStringLiteral("--status")});
+
+    // Relevant only for `resolvconf` DNS (not systemd-resolve)
+    // Collect the interface-specific DNS for resolvconf and the order of interfaces.
+    // resolvconf works by selecting 3 nameserver lines ordered
+    // according to /etc/resolvconf/interface-order. This means if there's already interfaces with higher
+    // priority than tun0 wih > 3 nameservers, our own tun0 DNS servers may never be set.
+    // The tracing below should reveal if this is the case.
+    file.writeCommandIf(QFile::exists(QStringLiteral("/etc/resolvconf/interface-order")),
+                        "resolvconf interface-order", "cat",
+                        QStringList{QStringLiteral("/etc/resolvconf/interface-order")});
+
+    // Iterate through interfaces and log their DNS servers
+    QDir resolvConfInterfaceDir{"/run/resolvconf/interface"};
+    if(resolvConfInterfaceDir.exists())
+    {
+        for(const auto &fileName : resolvConfInterfaceDir.entryList(QDir::Files))
+            file.writeCommand(QStringLiteral("resolvconf interface DNS: %1").arg(fileName),
+                              "cat", QStringList{QStringLiteral("/run/resolvconf/interface/%1").arg(fileName)});
+    }
+
     // net_cls cgroup required for split tunnel
     file.writeCommand("ls -l <net_cls>", "ls", QStringList{"-l", Path::ParentVpnExclusionsFile.parent()});
     file.writeCommand("ip rule list", "ip", QStringList{"rule", "list"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnrt"});
+    file.writeCommand("ip route show table " BRAND_CODE "vpnWgrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnWgrt"});
+    file.writeCommand("ip route show table " BRAND_CODE "vpnOnlyrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnOnlyrt"});
     file.writeCommand("WireGuard Kernel Logs", "bash", QStringList{"-c", "dmesg | grep -i wireguard | tail -n 200"});
     // Info about the wireguard kernel module (whether it is loaded and/or available)
     file.writeCommand("ls -ld /sys/modules/wireguard", "ls", {"-ld", "/sys/modules/wireguard"});

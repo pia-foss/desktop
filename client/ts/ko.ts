@@ -2,6 +2,379 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>DaemonData</name>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="90"/>
+        <source>DaemonData --- Albania</source>
+        <translation>알바니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="91"/>
+        <source>DaemonData --- Lithuania</source>
+        <translation>리투아니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="92"/>
+        <source>DaemonData --- Croatia</source>
+        <translation>크로아티아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="93"/>
+        <source>DaemonData --- Estonia</source>
+        <translation>에스토니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="94"/>
+        <source>DaemonData --- Greece</source>
+        <translation>그리스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="95"/>
+        <source>DaemonData --- Latvia</source>
+        <translation>라트비아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="97"/>
+        <source>DaemonData --- Portugal</source>
+        <translation>포르투갈</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="96"/>
+        <source>DaemonData --- Malaysia</source>
+        <translation>말레이시아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="98"/>
+        <source>DaemonData --- Slovakia</source>
+        <translation>슬로바키아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="99"/>
+        <source>DaemonData --- Bosnia and Herzegovina</source>
+        <translation>보스니아 헤르초코비나</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="100"/>
+        <source>DaemonData --- Argentina</source>
+        <translation>아르헨티나</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="101"/>
+        <source>DaemonData --- North Macedonia</source>
+        <translation>북마케도니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="102"/>
+        <source>DaemonData --- Bulgaria</source>
+        <translation>불가리아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="103"/>
+        <source>DaemonData --- Slovenia</source>
+        <translation>슬로베니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="104"/>
+        <source>DaemonData --- Moldova</source>
+        <translation>몰도바</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="105"/>
+        <source>DaemonData --- Iceland</source>
+        <translation>아이슬란드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="36"/>
+        <source>DaemonData --- UAE</source>
+        <translation>아랍에미리트</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="37"/>
+        <source>DaemonData --- AU Sydney</source>
+        <translation>호주 시드니</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="38"/>
+        <source>DaemonData --- AU Melbourne</source>
+        <translation>호주 멜버른</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="39"/>
+        <source>DaemonData --- AU Perth</source>
+        <translation>호주 퍼스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="40"/>
+        <source>DaemonData --- Austria</source>
+        <translation>오스트리아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="41"/>
+        <source>DaemonData --- Belgium</source>
+        <translation>벨기에</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="42"/>
+        <source>DaemonData --- Brazil</source>
+        <translation>브라질</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="43"/>
+        <source>DaemonData --- CA Montreal</source>
+        <translation>캐나다 몬트리올</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="44"/>
+        <source>DaemonData --- CA Toronto</source>
+        <translation>캐나다 토론토</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="45"/>
+        <source>DaemonData --- CA Vancouver</source>
+        <translation>캐나다 밴쿠버</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="46"/>
+        <source>DaemonData --- Czech Republic</source>
+        <translation>체코 공화국</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="47"/>
+        <source>DaemonData --- DE Berlin</source>
+        <translation>독일 베를린</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="48"/>
+        <source>DaemonData --- Denmark</source>
+        <translation>덴마크</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="49"/>
+        <source>DaemonData --- Finland</source>
+        <translation>핀란드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="50"/>
+        <source>DaemonData --- France</source>
+        <translation>프랑스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="51"/>
+        <source>DaemonData --- DE Frankfurt</source>
+        <translation>독일 프랑크푸르트</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="52"/>
+        <source>DaemonData --- Hong Kong</source>
+        <translation>홍콩</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="53"/>
+        <source>DaemonData --- Hungary</source>
+        <translation>헝가리</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="54"/>
+        <source>DaemonData --- India</source>
+        <translation>인도</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="55"/>
+        <source>DaemonData --- Ireland</source>
+        <translation>아일랜드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="56"/>
+        <source>DaemonData --- Israel</source>
+        <translation>이스라엘</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="57"/>
+        <source>DaemonData --- Italy</source>
+        <translation>이탈리아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="58"/>
+        <source>DaemonData --- Japan</source>
+        <translation>일본</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="59"/>
+        <source>DaemonData --- Luxembourg</source>
+        <translation>룩셈부르크</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="60"/>
+        <source>DaemonData --- Mexico</source>
+        <translation>멕시코</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="61"/>
+        <source>DaemonData --- Netherlands</source>
+        <translation>네덜란드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="62"/>
+        <source>DaemonData --- Norway</source>
+        <translation>노르웨이</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="63"/>
+        <source>DaemonData --- New Zealand</source>
+        <translation>뉴질랜드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="64"/>
+        <source>DaemonData --- Poland</source>
+        <translation>폴란드</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="65"/>
+        <source>DaemonData --- Romania</source>
+        <translation>루마니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="66"/>
+        <source>DaemonData --- Singapore</source>
+        <translation>싱가포르</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="67"/>
+        <source>DaemonData --- Spain</source>
+        <translation>스페인</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="68"/>
+        <source>DaemonData --- Sweden</source>
+        <translation>스웨덴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="69"/>
+        <source>DaemonData --- Switzerland</source>
+        <translation>스위스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="70"/>
+        <source>DaemonData --- Turkey</source>
+        <translation>터키</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="71"/>
+        <source>DaemonData --- UK London</source>
+        <translation>영국 런던</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="72"/>
+        <source>DaemonData --- UK Manchester</source>
+        <translation>영국 맨체스터</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="73"/>
+        <source>DaemonData --- UK Southampton</source>
+        <translation>영국 사우샘프턴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="74"/>
+        <source>DaemonData --- US East</source>
+        <translation>미국 동부</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="75"/>
+        <source>DaemonData --- US West</source>
+        <translation>미국 서부</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="76"/>
+        <source>DaemonData --- US Atlanta</source>
+        <translation>미국 애틀랜타</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="77"/>
+        <source>DaemonData --- US California</source>
+        <translation>미국 캘리포니아</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="78"/>
+        <source>DaemonData --- US Chicago</source>
+        <translation>미국 시카고</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="79"/>
+        <source>DaemonData --- US Denver</source>
+        <translation>미국 덴버</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="80"/>
+        <source>DaemonData --- US Florida</source>
+        <translation>미국 플로리다</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="81"/>
+        <source>DaemonData --- US Houston</source>
+        <translation>미국 휴스턴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="82"/>
+        <source>DaemonData --- US Las Vegas</source>
+        <translation>미국 라스베가스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="83"/>
+        <source>DaemonData --- US New York City</source>
+        <translation>미국 뉴욕 시</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="84"/>
+        <source>DaemonData --- US Seattle</source>
+        <translation>미국 시애틀</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="85"/>
+        <source>DaemonData --- US Silicon Valley</source>
+        <translation>미국 실리콘 밸리</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="86"/>
+        <source>DaemonData --- US Texas</source>
+        <translation>미국 텍사스</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="87"/>
+        <source>DaemonData --- US Washington DC</source>
+        <translation>미국 워싱턴 시</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="88"/>
+        <source>DaemonData --- South Africa</source>
+        <translation>남아프리카</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="111"/>
+        <source>DaemonData --- Germany</source>
+        <translation>독일</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="112"/>
+        <source>DaemonData --- Canada</source>
+        <translation>캐나다</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="113"/>
+        <source>DaemonData --- United States</source>
+        <translation>미국</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="114"/>
+        <source>DaemonData --- Australia</source>
+        <translation>호주</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="115"/>
+        <source>DaemonData --- United Kingdom</source>
+        <translation>영국</translation>
+    </message>
+</context>
+<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -494,50 +867,50 @@
         <translation>프로토콜: </translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="58"/>
         <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
         <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
         <translation>18년 이상의 오픈 소스 개발 경험과 신뢰할 수 있고 안정적인 보안 프로토콜.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="60"/>
         <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
         <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
         <translation>성능 향상이 가능한 더 새롭고 효율적인 프로토콜.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="93"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
         <source>ConnectionPage --- OpenVPN® Settings</source>
         <translation>OpenVPN® 설정</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
         <source>ConnectionPage --- WireGuard® Settings</source>
         <translation>WireGuard® 설정</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="132"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
         <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
         <source>ConnectionPage --- Trademarks</source>
         <translation>상표</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="146"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="147"/>
         <source>ConnectionPage --- What do these settings mean?</source>
         <translation>이 설정이 의미하는 것은 무엇입니까?</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="162"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
         <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
         <translation>모든 제품 및 회사 이름은 각 소유자의 상표™ 또는 등록® 상표입니다. 이를 사용함이 해당 회사와의 제휴 또는 해당 회사의 승인이 있음을 의미하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="164"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="167"/>
         <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
         <translation>OpenVPN®은 OpenVPN Technologies, Inc의 상표입니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <location filename="../../../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
         <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
         <translation>WireGuard®는 개인인 Jason A. Donenfeld의 상표입니다.</translation>
     </message>
@@ -747,299 +1120,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonData</name>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="36"/>
-        <source>DaemonData --- UAE</source>
-        <translation>아랍에미리트</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="37"/>
-        <source>DaemonData --- AU Sydney</source>
-        <translation>호주 시드니</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="38"/>
-        <source>DaemonData --- AU Melbourne</source>
-        <translation>호주 멜버른</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="39"/>
-        <source>DaemonData --- AU Perth</source>
-        <translation>호주 퍼스</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="40"/>
-        <source>DaemonData --- Austria</source>
-        <translation>오스트리아</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="41"/>
-        <source>DaemonData --- Belgium</source>
-        <translation>벨기에</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="42"/>
-        <source>DaemonData --- Brazil</source>
-        <translation>브라질</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="43"/>
-        <source>DaemonData --- CA Montreal</source>
-        <translation>캐나다 몬트리올</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="44"/>
-        <source>DaemonData --- CA Toronto</source>
-        <translation>캐나다 토론토</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="45"/>
-        <source>DaemonData --- CA Vancouver</source>
-        <translation>캐나다 밴쿠버</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="46"/>
-        <source>DaemonData --- Czech Republic</source>
-        <translation>체코 공화국</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="47"/>
-        <source>DaemonData --- DE Berlin</source>
-        <translation>독일 베를린</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="48"/>
-        <source>DaemonData --- Denmark</source>
-        <translation>덴마크</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="49"/>
-        <source>DaemonData --- Finland</source>
-        <translation>핀란드</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="50"/>
-        <source>DaemonData --- France</source>
-        <translation>프랑스</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="51"/>
-        <source>DaemonData --- DE Frankfurt</source>
-        <translation>독일 프랑크푸르트</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="52"/>
-        <source>DaemonData --- Hong Kong</source>
-        <translation>홍콩</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="53"/>
-        <source>DaemonData --- Hungary</source>
-        <translation>헝가리</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="54"/>
-        <source>DaemonData --- India</source>
-        <translation>인도</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="55"/>
-        <source>DaemonData --- Ireland</source>
-        <translation>아일랜드</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="56"/>
-        <source>DaemonData --- Israel</source>
-        <translation>이스라엘</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="57"/>
-        <source>DaemonData --- Italy</source>
-        <translation>이탈리아</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="58"/>
-        <source>DaemonData --- Japan</source>
-        <translation>일본</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="59"/>
-        <source>DaemonData --- Luxembourg</source>
-        <translation>룩셈부르크</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="60"/>
-        <source>DaemonData --- Mexico</source>
-        <translation>멕시코</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="61"/>
-        <source>DaemonData --- Netherlands</source>
-        <translation>네덜란드</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="62"/>
-        <source>DaemonData --- Norway</source>
-        <translation>노르웨이</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="63"/>
-        <source>DaemonData --- New Zealand</source>
-        <translation>뉴질랜드</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="64"/>
-        <source>DaemonData --- Poland</source>
-        <translation>폴란드</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="65"/>
-        <source>DaemonData --- Romania</source>
-        <translation>루마니아</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="66"/>
-        <source>DaemonData --- Singapore</source>
-        <translation>싱가포르</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="67"/>
-        <source>DaemonData --- Spain</source>
-        <translation>스페인</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="68"/>
-        <source>DaemonData --- Sweden</source>
-        <translation>스웨덴</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="69"/>
-        <source>DaemonData --- Switzerland</source>
-        <translation>스위스</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="70"/>
-        <source>DaemonData --- Turkey</source>
-        <translation>터키</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="71"/>
-        <source>DaemonData --- UK London</source>
-        <translation>영국 런던</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="72"/>
-        <source>DaemonData --- UK Manchester</source>
-        <translation>영국 맨체스터</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="73"/>
-        <source>DaemonData --- UK Southampton</source>
-        <translation>영국 사우샘프턴</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="74"/>
-        <source>DaemonData --- US East</source>
-        <translation>미국 동부</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="75"/>
-        <source>DaemonData --- US West</source>
-        <translation>미국 서부</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="76"/>
-        <source>DaemonData --- US Atlanta</source>
-        <translation>미국 애틀랜타</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="77"/>
-        <source>DaemonData --- US California</source>
-        <translation>미국 캘리포니아</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="78"/>
-        <source>DaemonData --- US Chicago</source>
-        <translation>미국 시카고</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="79"/>
-        <source>DaemonData --- US Denver</source>
-        <translation>미국 덴버</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="80"/>
-        <source>DaemonData --- US Florida</source>
-        <translation>미국 플로리다</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="81"/>
-        <source>DaemonData --- US Houston</source>
-        <translation>미국 휴스턴</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="82"/>
-        <source>DaemonData --- US Las Vegas</source>
-        <translation>미국 라스베가스</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="83"/>
-        <source>DaemonData --- US New York City</source>
-        <translation>미국 뉴욕 시</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="84"/>
-        <source>DaemonData --- US Seattle</source>
-        <translation>미국 시애틀</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="85"/>
-        <source>DaemonData --- US Silicon Valley</source>
-        <translation>미국 실리콘 밸리</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="86"/>
-        <source>DaemonData --- US Texas</source>
-        <translation>미국 텍사스</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="87"/>
-        <source>DaemonData --- US Washington DC</source>
-        <translation>미국 워싱턴 시</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="88"/>
-        <source>DaemonData --- South Africa</source>
-        <translation>남아프리카</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="94"/>
-        <source>DaemonData --- Germany</source>
-        <translation>독일</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="95"/>
-        <source>DaemonData --- Canada</source>
-        <translation>캐나다</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="96"/>
-        <source>DaemonData --- United States</source>
-        <translation>미국</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="97"/>
-        <source>DaemonData --- Australia</source>
-        <translation>호주</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonData.qml" line="98"/>
-        <source>DaemonData --- United Kingdom</source>
-        <translation>영국</translation>
-    </message>
-</context>
-<context>
     <name>DashboardPopup</name>
     <message>
         <location filename="../../../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
@@ -1059,19 +1139,19 @@
 <context>
     <name>DialogMessage</name>
     <message>
-        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="28"/>
+        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="31"/>
         <source>DialogMessage --- Information</source>
         <extracomment>Screen reader annotation for the &quot;info&quot; icon in dialog messages</extracomment>
         <translation>정보</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="30"/>
+        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="33"/>
         <source>DialogMessage --- Warning</source>
         <extracomment>Screen reader annotation for the &quot;warning&quot; icon in dialog messages</extracomment>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="32"/>
+        <location filename="../../../../../client/res/components/common/DialogMessage.qml" line="35"/>
         <source>DialogMessage --- Error</source>
         <extracomment>Screen reader annotation for the &quot;error&quot; icon in dialog messages</extracomment>
         <translation>오류</translation>
@@ -1798,43 +1878,43 @@
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="320"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="319"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>분할 터널</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="247"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="246"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>이 기능을 활성화하려면 분할 터널 확장을 승인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="258"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="257"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>보안 기본 설정</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="382"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="380"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>분할 터널 필터 설치 중...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="391"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="389"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>이 기능을 활성화하면 분할 터널 필터가 설치됩니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="398"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="396"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>분할 터널 필터가 설치되지 않았습니다.  도움말 페이지에서 다시 설치하세요.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="463"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="468"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="461"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="466"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>앱 제외</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="512"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="510"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>변경 사항이 적용되려면 앱을 다시 시작해야 할 수 있습니다.</translation>
     </message>
@@ -2317,22 +2397,22 @@
         <translation>항상</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="70"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="67"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>PIA MACE가 작동하려면 PIA DNS를 사용해야 합니다.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="74"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="71"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>PIA MACE</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="75"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>광고, 트래커, 맬웨어가 사용된 도메인을 차단합니다</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
@@ -2340,7 +2420,7 @@
         <comment>privacy-mace</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
+        <location filename="../../../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
         <source>PrivacyPage --- On</source>
         <translation>켬</translation>
     </message>
@@ -2460,12 +2540,12 @@
 <context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="26"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="32"/>
         <source>RegionModule --- Auto</source>
         <translation>자동</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="28"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="34"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>자동 (%1)</translation>
     </message>
@@ -3167,7 +3247,7 @@
 <context>
     <name>TrayMenuBuilder</name>
     <message>
-        <location filename="../../../../../client/res/components/common/Messages.qml" line="17"/>
+        <location filename="../../../../../client/res/components/common/Messages.qml" line="23"/>
         <source>TrayMenuBuilder --- Help</source>
         <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
         <translation>도움말</translation>
@@ -3412,9 +3492,9 @@
         <translation>설치</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="86"/>
-        <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
+        <location filename="../../../../../client/res/components/settings/pages/WireguardConnection.qml" line="106"/>
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
+<source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>배포용 설치판에 대한 설명:</translation>
     </message>
 </context>

@@ -21,6 +21,7 @@
 
 #include "updatedownloader.h"
 #include "daemon.h"
+#include "exec.h"
 #include "semversion.h"
 #include "testshim.h"
 #include "version.h"
@@ -29,6 +30,7 @@
 #include "apinetwork.h"
 #include "openssl.h"
 #include "brand.h"
+#include "exec.h"
 #include <QNetworkReply>
 #include <QDir>
 #include <QProcess>

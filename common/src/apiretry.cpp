@@ -139,7 +139,9 @@ namespace
 {
     // Minimum interval between the first and second attempt.  (Compounded with
     // backoffFactor to determine subsequent intervals.)
-    const std::chrono::seconds _initialInterval{1};
+    // If this is too low, it may cause lots of initial requests to time out
+    // when connecting to high-latency regions.
+    const std::chrono::seconds _initialInterval{2};
     // Backoff factor for later retries.  The per-attempt interval is multiplied
     // by this factor for each attempt (up to _maxInterval).
     const int backoffFactor{2};

@@ -90,6 +90,7 @@ Window {
       return ReportHelper.findCrashFiles(daemon_crash)
     }
 
+    property string version: ""
     property bool include_logs: true
     property bool include_crash: true
     property string errorMessage: ""

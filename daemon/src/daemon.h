@@ -186,6 +186,13 @@ public:
     void writeCommand(const QString &commandName, const QString &command,
                       const QStringList &args,
                       const ProcessOutputFunction &processOutput = {});
+
+    // Write the result of a command as a file part if predicate is true
+    void writeCommandIf(bool predicate, const QString &commandName,
+                        const QString &command,
+                        const QStringList &args,
+                        const ProcessOutputFunction &processOutput = {});
+
 #ifdef Q_OS_WIN
     // On Windows, we have to be able to set the complete command line string in
     // some cases; QProcess::start() explains this in detail.
@@ -193,6 +200,12 @@ public:
     void writeCommand(const QString &commandName, const QString &command,
                       const QString &nativeArgs,
                       const ProcessOutputFunction &processOutput = {});
+
+    void writeCommandIf(bool predicate,
+                        const QString &commandName,
+                        const QString &command,
+                        const QString &nativeArgs,
+                        const ProcessOutputFunction &processOutput = {});
 #endif
 
     // Write a text blob as a file part
