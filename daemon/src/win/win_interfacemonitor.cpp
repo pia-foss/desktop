@@ -26,18 +26,19 @@ void WinNetworkAdapter::setMetricToLowest()
 {
     if (!luid()) return;
 
-    qDebug() << "Attempting to set metric to a low value!";
     auto currentMetricIPv4 = getMetric(AF_INET);
     auto currentMetricIPv6 = getMetric(AF_INET6);
+    qInfo() << "Update metrics from" << currentMetricIPv4 << "/"
+        << currentMetricIPv4 << "to" << interfaceMetric;
 
-    if (currentMetricIPv4 > interfaceMetric && currentMetricIPv4 != -1) {
+    if (currentMetricIPv4 != interfaceMetric && currentMetricIPv4 != -1) {
         _savedMetricValueIPv4 = currentMetricIPv4;
         setMetric(AF_INET, interfaceMetric);
         qInfo() << "Set interface IPv4 metric from" << _savedMetricValueIPv4
             << "to" << interfaceMetric;
     }
 
-    if (currentMetricIPv6 > interfaceMetric && currentMetricIPv6 != -1) {
+    if (currentMetricIPv6 != interfaceMetric && currentMetricIPv6 != -1) {
         _savedMetricValueIPv6 = currentMetricIPv6;
         setMetric(AF_INET6, interfaceMetric);
         qInfo() << "Set interface IPv6 metric from" << _savedMetricValueIPv6
@@ -49,7 +50,8 @@ void WinNetworkAdapter::restoreOriginalMetric()
 {
     if (!luid()) return;
 
-    qDebug() << "Attempting to restore saved interface metric!";
+    qInfo() << "Restore saved metrics:" << _savedMetricValueIPv4 << "/"
+        << _savedMetricValueIPv6;
 
     if (_savedMetricValueIPv4 > -1) {
         setMetric(AF_INET, _savedMetricValueIPv4);

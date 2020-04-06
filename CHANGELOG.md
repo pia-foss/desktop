@@ -1,5 +1,8 @@
 # Changelog
 
+### v2.0.1
+* Fixed long DNS resolution times on Windows on some systems
+
 ### v2.0
 * WireGuard is now supported as a connection method
 * WireGuard on Windows requires Windows 8 or later
