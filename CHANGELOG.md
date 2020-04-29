@@ -1,5 +1,17 @@
 # Changelog
 
+### v2.0.2
+* Improved handling of several Mac applications with split tunnel, such as Mail and Calendar
+* Split tunnel on Linux attempts to mount net_cls automatically if it's not mounted (as on Fedora)
+* The WireGuard connectivity timeout is customizable
+* Improved support for IPv6 networks when the Allow LAN setting is enabled
+* Fixed an issue that prevented Use Existing DNS from working on some Mac systems
+* Fixed an issue causing WireGuard to take a long time to connect on some Windows systems
+* Updated Qt to 5.12.8
+* Updated OpenVPN to 2.4.9
+* Updated OpenSSL to 1.1.1g
+* Security improvements
+
 ### v2.0.1
 * Fixed long DNS resolution times on Windows on some systems
 

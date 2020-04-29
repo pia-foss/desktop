@@ -30,7 +30,7 @@ QtObject {
   property ClientFeatures features: ClientFeatures {}
 
   // Valid recent locations (filters out any locations that no longer exist)
-  readonly property var validRecentLocations: settings.recentLocations.filter(function(f) { return Daemon.data.locations[f]; })
+  readonly property var validRecentLocations: settings.recentLocations.filter(function(f) { return Daemon.state.availableLocations[f]; })
 
   // Favorite locations sorted by alphabetically by display name
   // The user could control their order theoretically, but the interaction
@@ -39,7 +39,7 @@ QtObject {
   // giving a good re-order interaction, like drag-and-drop.
   readonly property var sortedFavorites: {
     // a location that starts with "auto/" is an "auto country" location, e.g "auto/us" - represents the server with lowest ping in the US.
-    var favorites = (settings.favoriteLocations || []).filter(function(f) {  return Daemon.data.locations[f] || isValidAutoCountry(f) })
+    var favorites = (settings.favoriteLocations || []).filter(function(f) {  return Daemon.state.availableLocations[f] || isValidAutoCountry(f) })
     favorites.sort(function (first, second) {
       return Util.compareNoCase(Daemon.getLocationIdName(first),
                                 Daemon.getLocationIdName(second))
@@ -86,7 +86,7 @@ QtObject {
       return countryFromAutoCountryLocation(location)
     }
 
-    var locationData = Daemon.data.locations[location]
+    var locationData = Daemon.state.availableLocations[location]
     if(locationData && locationData.country)
       return locationData.country
     // Didn't find this location.
@@ -107,12 +107,12 @@ QtObject {
 
         if(Daemon.settings.portForward) {
           // try most specific filter first (portForward support + safe, i.e respects auto_regions)
-          result = countryLocations.filter(function(loc) { return loc.portForward && loc.isSafeForAutoConnect })[0]
+          result = countryLocations.filter(function(loc) { return loc.portForward && loc.autoSafe })[0]
           if (result) { return result.id }
         }
 
         // if cannot find entries, loosen filter slightly (we can't find a region that supports port forwarding, so skip it)
-        result = countryLocations.filter(function(loc) { return loc.isSafeForAutoConnect })[0]
+        result = countryLocations.filter(function(loc) { return loc.autoSafe })[0]
         if(result) { return result.id }
 
         // failing that, fall back to just the region in this country with the lowest ping

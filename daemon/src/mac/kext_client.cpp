@@ -34,6 +34,7 @@
 #include <QProcess>
 #include <QThread>
 #include "posix/posix_firewall_pf.h"
+#include "exec.h"
 #include "mac/mac_constants.h"
 #include "kext_client.h"
 #include "daemon.h"
@@ -56,6 +57,8 @@ namespace
 
     const QString kSplitTunnelAnchorName = "150.allowExcludedApps";
 }
+
+Executor KextClient::_executor{CURRENT_CATEGORY};
 
 bool PidFinder::matchesPath(pid_t pid)
 {
@@ -291,7 +294,7 @@ void KextClient::removeCurrentBoundRoute(const QString &ipAddress, const QString
     QString routeCmd = QStringLiteral("route delete 0.0.0.0 %1 -ifscope %2")
         .arg(ipAddress, interfaceName);
     qInfo() << "Executing" << routeCmd;
-    ::shellExecute(routeCmd);
+    _executor.bash(routeCmd);
 }
 
 void KextClient::createBoundRoute(const QString &ipAddress, const QString &interfaceName)
@@ -300,7 +303,7 @@ void KextClient::createBoundRoute(const QString &ipAddress, const QString &inter
     QString routeCmd = QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2")
         .arg(ipAddress, interfaceName);
     qInfo() << "Executing" << routeCmd;
-    ::shellExecute(routeCmd);
+    _executor.bash(routeCmd);
 }
 
 void KextClient::updateFirewall(QString ipAddress)
@@ -366,20 +369,20 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
     // with the same gateway IP/interface/IP. In this case the system may wipe our bound route so we have to recreate it.
     // Note this does result in constantly deleting/recreating the bound route for every firewall change but it doesn't appear
     // to affect connectivity of apps, so it should be ok.
-    if(_previousNetScan.isValid())
+    if(_previousNetScan.ipv4Valid())
         removeCurrentBoundRoute(_previousNetScan.gatewayIp(), _previousNetScan.interfaceName());
 
     // If we're connected, create a bound route for the physical interface, so
     // bound sockets for excluded apps will route correctly.
     // Don't create this when we're not connected; the network info may not be
     // up to date, and it would create a routing conflict.
-    if(params.splitTunnelNetScan.isValid())
+    if(params.netScan.ipv4Valid())
     {
-        createBoundRoute(params.splitTunnelNetScan.gatewayIp(), params.splitTunnelNetScan.interfaceName());
+        createBoundRoute(params.netScan.gatewayIp(), params.netScan.interfaceName());
 
         // If we were ignoring excluded apps before (since we didn't have this
         // info), enumerate them now to permit through the firewall
-        if(!_previousNetScan.isValid())
+        if(!_previousNetScan.ipv4Valid())
             sendExistingPids(_excludedApps);
     }
 
@@ -404,14 +407,14 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
         }
     }
 
-    if(_previousNetScan.ipAddress() != params.splitTunnelNetScan.ipAddress())
+    if(_previousNetScan.ipAddress() != params.netScan.ipAddress())
     {
-        updateFirewall(params.splitTunnelNetScan.ipAddress());
-        updateIp(params.splitTunnelNetScan.ipAddress());
+        updateFirewall(params.netScan.ipAddress());
+        updateIp(params.netScan.ipAddress());
     }
 
     // Update our network info
-    _previousNetScan = params.splitTunnelNetScan;
+    _previousNetScan = params.netScan;
     _tunnelDeviceName = tunnelDeviceName;
     _tunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
 }
@@ -484,16 +487,34 @@ void KextClient::updateSplitTunnel(const FirewallParams &params, QString tunnelD
     updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress, tunnelDeviceRemoteAddress);
 }
 
-void KextClient::manageWebKitApps(QVector<QString> &apps)
+
+void applyExtraRules(QVector<QString> &paths)
 {
     // If the system WebKit framework is excluded/vpnOnly, add this staged framework
     // path too. Newer versions of Safari use this.
-    if(apps.contains(webkitFrameworkPath) &&
-        !apps.contains(stagedWebkitFrameworkPath))
+    if(paths.contains(webkitFrameworkPath) &&
+        !paths.contains(stagedWebkitFrameworkPath))
     {
-        apps.push_back(stagedWebkitFrameworkPath);
+        paths.push_back(stagedWebkitFrameworkPath);
+    }
+
+    for(const auto &path: paths)
+    {
+        if(path.contains(QStringLiteral("/App Store.app"), Qt::CaseInsensitive)) {
+            paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/AppStoreDaemon.framework/Support/appstoreagent"));
+        }
+        if(path.contains(QStringLiteral("/Calendar.app"), Qt::CaseInsensitive)) {
+            paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/CalendarAgent.framework/Executables/CalendarAgent"));
+        }
+        if(path.contains(QStringLiteral("/Safari.app"), Qt::CaseInsensitive)) {
+            paths.push_back(QStringLiteral("/System/Library/CoreServices/SafariSupport.bundle/Contents/MacOS/SafariBookmarksSyncAgent"));
+            paths.push_back(QStringLiteral("/System/Library/StagedFrameworks/Safari/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc"));
+            paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/SafariSafeBrowsing.framework/Versions/A/com.apple.Safari.SafeBrowsing.Service"));
+            paths.push_back(QStringLiteral("/System/Library/StagedFrameworks/Safari/SafariShared.framework/Versions/A/XPCServices/com.apple.Safari.SearchHelper.xpc"));
+        }
     }
 }
+
 
 QVector<QString> KextClient::findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps)
 {
@@ -517,8 +538,8 @@ void KextClient::updateApps(QVector<QString> excludedApps, QVector<QString> vpnO
     }
 
     // Possibly modify vpnOnly/exclusions vector to handle webkit/safari apps
-    manageWebKitApps(excludedApps);
-    manageWebKitApps(vpnOnlyApps);
+    applyExtraRules(excludedApps);
+    applyExtraRules(vpnOnlyApps);
 
     // If nothing has changed, just return
     if(_excludedApps != excludedApps)
@@ -664,7 +685,7 @@ void KextClient::verifyApp(const ProcQuery &procQuery, ProcQuery &procResponse)
     {
         // Ignore excluded apps when not connected; we don't know the current IP
         // address (but they'll route to the physical interface anyway).
-        if(_previousNetScan.isValid())
+        if(_previousNetScan.ipv4Valid())
         {
             procResponse.accept = true;
             procResponse.rule_type = RuleType::BypassVPN;

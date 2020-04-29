@@ -123,7 +123,7 @@ public:
 private:
     // Helper function to wrap the logic to unpack and cast the QJsonArray
     // elements and invoke the registered function. The resulting function
-    // can throw Errors or the special json_cast_exception exception.
+    // can throw Errors.
     template<typename Result, typename... Args, typename Func>
     inline void wrap(Func&& fn)
     {

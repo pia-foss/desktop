@@ -43,11 +43,20 @@ PiaProject {
     type: base.concat(useLlvmProf ? ["llvm_profdata_raw"] : [])
     Properties {
       condition: qbs.targetOS.contains("linux")
-      environment: outer.concat([ "LD_LIBRARY_PATH=" + Qt.core.libPath ])
+      environment: outer.concat([ "LD_LIBRARY_PATH=" + Qt.core.libPath + ":" +
+                                  project.buildDirectory + "/install-root/lib" ])
     }
     Properties {
       condition: qbs.targetOS.contains("windows")
-      environment: outer.concat([ "PATH=" + Qt.core.binPath + ";" + Environment.getEnv("PATH") ])
+      // Include in PATH:
+      // * Qt bins - needed to find Qt DLLs
+      // * OpenVPN dep directory - needed for OpenSSL DLLs.
+      // Don't load these from install-root - would create conflicts during
+      // code signing (unit tests might run concurrently, so files would be in
+      // use).
+      environment: outer.concat([ "PATH=" + Qt.core.binPath + ";" +
+                                  project.sourceDirectory + "/deps/openvpn/win/" + qbs.architecture + ";" +
+                                  Environment.getEnv("PATH") ])
     }
 
     // These artifacts are actually created by running the tests themselves, but
@@ -94,6 +103,34 @@ PiaProject {
     }
     sourceDirectories: base.concat(["clientlib/src", "client/src", "client/src/nativeacc", "daemon/src", "deps/embeddable-wg-library/src", "tests/src"])
     cpp.defines: base.concat(["PIA_CLIENT", "PIA_DAEMON", "UNIT_TEST"])
+
+    // Link daemon resources into unit tests (CA certificates).
+    // Client resources aren't currently needed
+    Group {
+      name: "daemonResources"
+      fileTags: ["qt.core.resource_data"]
+      files: [
+        "daemon/res/**/*"
+      ]
+      excludeFiles: [
+        "**/.DS_Store"
+      ]
+      Qt.core.resourceSourceBase: "daemon/res"
+    }
+
+    // Test-specific resources
+    Group {
+      name: "testResources"
+      fileTags: ["qt.core.resource_data"]
+      files: [
+        "tests/res/**/*"
+      ]
+      excludeFiles: [
+        "**/.DS_Store"
+      ]
+      Qt.core.resourceSourceBase: "tests/res"
+    }
+
     Properties {
       condition: qbs.toolchain.contains('msvc')
       cpp.linkerFlags: outer.concat(["/IGNORE:4099"])
@@ -106,6 +143,7 @@ PiaProject {
       condition: useLlvmProf
       cpp.driverFlags: outer.concat(["-fprofile-instr-generate", "-fcoverage-mapping"])
     }
+
     Export {
       Depends {name: "cpp"}
       Properties {
@@ -119,20 +157,28 @@ PiaProject {
 
   Test { testName: "apiclient" }
   Test { testName: "check" }
+  Test { testName: "connectionconfig" }
+  Test { testName: "exec" }
   Test { testName: "json" }
   Test { testName: "jsonrefresher" }
   Test { testName: "jsonrpc" }
   Test { testName: "latencytracker" }
+  Test { testName: "linebuffer" }
   Test { testName: "localsockets" }
+  Test { testName: "nearestlocations" }
   Test { testName: "nodelist" }
   Test { testName: "nullable_t" }
+  Test { testName: "originalnetworkscan" }
+  Test { testName: "openssl" }
   Test { testName: "path" }
   Test { testName: "portforwarder" }
   Test { testName: "raii" }
   Test { testName: "semversion" }
   Test { testName: "settings" }
   Test { testName: "tasks" }
+  Test { testName: "transportselector" }
   Test { testName: "updatedownloader" }
+  Test { testName: "vpnmethod" }
   Test { testName: "wireguarduapi" }
 
   // Platform-specific tests - only built and run on relevant platforms.
@@ -165,7 +211,7 @@ PiaProject {
 
     // Any single unit test binary - see the llvm-cov rule
     readonly property string anyTestBuildDir: "test--check"
-    readonly property string anyTestBinPath: qbs.targetOS.contains('macos') ? "test-check.app/Contents/MacOS/test-check" : "test-check"
+    readonly property string anyTestBinPath: "test-check"
 
     Probe {
       id: llvmToolPathProbe

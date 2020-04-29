@@ -59,8 +59,7 @@ private:
 };
 
 const std::unordered_set<QString> JsonChangePrinter::propertyBlacklist{
-    QStringLiteral("certificateAuthorities"),
-    QStringLiteral("locations"),
+    QStringLiteral("availableLocations"),
     QStringLiteral("groupedLocations")
 };
 

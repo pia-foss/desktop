@@ -141,12 +141,12 @@ void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
     _update = Update{downloadUrl, latestVersion};
 }
 
-void UpdateChannel::run(bool newRunning)
+void UpdateChannel::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi)
 {
     if(_pMetadataRefresher)
     {
         if(newRunning)
-            _pMetadataRefresher->start();
+            _pMetadataRefresher->start(pUpdateApi);
         else
             _pMetadataRefresher->stop();
     }
@@ -191,7 +191,8 @@ void UpdateChannel::refreshUpdate()
     // Otherwise, there is no effect, no update channel is set.
 }
 
-void UpdateChannel::setUpdateChannel(const QString &updateChannel, bool newRunning)
+void UpdateChannel::setUpdateChannel(const QString &updateChannel, bool newRunning,
+                                     const std::shared_ptr<ApiBase> &pUpdateApi)
 {
     _pMetadataRefresher.reset();
     qInfo() << "Switching to update channel" << updateChannel;
@@ -215,7 +216,6 @@ void UpdateChannel::setUpdateChannel(const QString &updateChannel, bool newRunni
         // - it switches to the short polling interval until a load for the new
         //   URI succeeds
         _pMetadataRefresher.reset(new JsonRefresher{QStringLiteral("version data"),
-                                                    ApiBases::piaUpdateApi,
                                                     updateChannel,
                                                     versionInitialInterval,
                                                     versionRefreshInterval});
@@ -229,7 +229,7 @@ void UpdateChannel::setUpdateChannel(const QString &updateChannel, bool newRunni
     // channel, which is pretty subtle.
     // We don't store the running state explicitly in UpdateChannel because
     // UpdateDownloader already knows it; we'd just be duplicating state.
-    run(newRunning);
+    run(newRunning, pUpdateApi);
 }
 
 /*
@@ -346,11 +346,11 @@ void UpdateDownloader::emitUpdateRefreshed()
                          _betaChannel.update());
 }
 
-void UpdateDownloader::run(bool newRunning)
+void UpdateDownloader::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi)
 {
     _running = newRunning;
-    _gaChannel.run(_running);
-    _betaChannel.run(_running && _enableBeta);
+    _gaChannel.run(_running, pUpdateApi);
+    _betaChannel.run(_running && _enableBeta, pUpdateApi);
 }
 
 void UpdateDownloader::reloadAvailableUpdates(const Update &gaUpdate,
@@ -383,24 +383,26 @@ void UpdateDownloader::refreshUpdate()
     }
 }
 
-void UpdateDownloader::setGaUpdateChannel(const QString &channel)
+void UpdateDownloader::setGaUpdateChannel(const QString &channel,
+                                          const std::shared_ptr<ApiBase> &pUpdateApi)
 {
-    _gaChannel.setUpdateChannel(channel, _running);
+    _gaChannel.setUpdateChannel(channel, _running, pUpdateApi);
 }
 
-void UpdateDownloader::setBetaUpdateChannel(const QString &channel)
+void UpdateDownloader::setBetaUpdateChannel(const QString &channel,
+                                            const std::shared_ptr<ApiBase> &pUpdateApi)
 {
-    _betaChannel.setUpdateChannel(channel, _running && _enableBeta);
+    _betaChannel.setUpdateChannel(channel, _running && _enableBeta, pUpdateApi);
 }
 
-void UpdateDownloader::enableBetaChannel(bool enable)
+void UpdateDownloader::enableBetaChannel(bool enable, const std::shared_ptr<ApiBase> &pUpdateApi)
 {
     if(_enableBeta == enable)
         return;
 
     _enableBeta = enable;
     // Call run() again to change the beta channel's state if necessary
-    run(_running);
+    run(_running, pUpdateApi);
 
     // If the beta is being turned off, wipe the cache after stopping it.  We
     // don't keep the old cache because we don't want to offer a stale beta if

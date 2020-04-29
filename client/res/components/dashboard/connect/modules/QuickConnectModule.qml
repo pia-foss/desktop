@@ -102,7 +102,7 @@ MovableModule {
         // Track the countries that have already been used by favorites/recents
         var usedCountries = {}
         buttonLocs.forEach(function (id) {
-          var loc = Daemon.data.locations[id]
+          var loc = Daemon.state.availableLocations[id]
           if(loc)
             usedCountries[loc.country] = true
         })

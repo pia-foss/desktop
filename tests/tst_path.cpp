@@ -20,8 +20,11 @@
 #include <QtTest>
 
 #include "path.h"
+#include "brand.h"
 
 #include <QDir>
+
+
 
 class tst_path : public QObject
 {
@@ -45,6 +48,38 @@ private slots:
         QCOMPARE(posixDir / "../../../..", QStringLiteral("/"));
     #endif
     }
+
+    void testDefaultPaths () {
+        Path::initializePreApp();
+        Path::initializePostApp();
+        QVERIFY(Path::ExecutableDir.str().contains(Path::BaseDir));
+#ifdef Q_OS_MAC
+        QVERIFY(Path::DaemonDataDir.str().contains(BRAND_IDENTIFIER));
+        QVERIFY(Path::DaemonSettingsDir.str().contains(BRAND_IDENTIFIER));
+#endif
+#ifdef Q_OS_LINUX
+        QVERIFY(Path::DaemonDataDir.str().contains(BRAND_CODE));
+#endif
+    }
+
+    void testCreatePaths () {
+        QTemporaryDir tempDir;
+        tempDir.setAutoRemove(true);
+
+        Path tmpPath{tempDir.path()};
+
+        QVERIFY(!QFile::exists(tempDir.filePath("test1")));
+        (tmpPath / QStringLiteral("test1")).touch();
+        QVERIFY(QFile::exists(tempDir.filePath("test1")));
+
+
+        QVERIFY(!QFile::exists(tempDir.filePath("dir1/dir2")));
+        (tmpPath / "dir1" / "dir2").mkpath();
+        QVERIFY(QFile::exists(tempDir.filePath("dir1/dir2")));
+
+        tempDir.remove();
+    }
+
 };
 
 QTEST_GUILESS_MAIN(tst_path)

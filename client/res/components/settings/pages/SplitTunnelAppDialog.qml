@@ -110,28 +110,24 @@ OverlayDialog {
       // If a rule listing for webkit apps is not already available, then add it
       if(rules.findIndex(item => {return item.path === SplitTunnelManager.macWebkitFrameworkPath}) === -1) {
         rules.push({path: SplitTunnelManager.macWebkitFrameworkPath, mode: "exclude", linkTarget: ""});
-        Daemon.applySettings({splitTunnelRules: rules});
-        return;
       }
-    } else {
-
-      // If the path already exists don't add duplicate apps
-      for(var i = 0; i < rules.length; i ++) {
-        if(rules[i].path === path) {
-          return;
-        }
-      }
-
-      var rule = {
-        path: path,
-        linkTarget: linkTarget || "",
-        mode: "exclude"
-      };
-
-      rules.push(rule);
-      Daemon.applySettings({splitTunnelRules: rules});
     }
 
+    // If the path already exists don't add duplicate apps
+    for(var i = 0; i < rules.length; i ++) {
+      if(rules[i].path === path) {
+        return;
+      }
+    }
+
+    var rule = {
+      path: path,
+      linkTarget: linkTarget || "",
+      mode: "exclude"
+    };
+
+    rules.push(rule);
+    Daemon.applySettings({splitTunnelRules: rules});
   }
 
   FileDialog {

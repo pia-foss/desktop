@@ -97,26 +97,26 @@ public:
     // - connectingConfig - The connection configuration, including the relevant
     //   settings, state, and auth details captured at the time the connection
     //   attempt was started by VPNConnection
+    // - vpnServer - A Server selected by VPNConnection for this attempt.
+    //   VPNConnection selects a server that has the appropriate service
+    //   required by this VPN method (OpenVpnTcp/OpenVpnUdp/WireGuard)
     // - transport - A Transport chosen by TransportSelector
     // - localAddress - A local address chosen by TransportSelector (or a null
     //   QHostAddress if any local address can be used)
     //
     // The following are also provided but should probably be refactored into
     // ConnectionConfig (or somewhere):
+    // - Shadowsocks server address (when SS is used, indicates the specific
+    //   server chosen from the Shadowsocks location)
     // - Shadowsocks proxy port (when SS is used)
     //
     // run() can also throw errors; these are handled as if raised with
     // raiseError().
-    //
-    // Add to ConnectionConfig:
-    // - localPort
-    // - cipher
-    // - auth
-    // - mtu
-    // - serverCertificate
     virtual void run(const ConnectionConfig &connectingConfig,
+                     const Server &vpnServer,
                      const Transport &transport,
                      const QHostAddress &localAddress,
+                     const QHostAddress &shadowsocksServerAddress,
                      quint16 shadowsocksProxyPort) = 0;
 
     // Shut down the connection.  VPNMethod should (eventually) transition to

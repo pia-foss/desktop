@@ -41,7 +41,9 @@ public:
     // for each attempt.
     //
     // An ApiBase is passed to specify the base URIs to use for this request.
-    // Each attempt uses the next base URI from the ApiBase.
+    // Each attempt uses the next base URI from the ApiBase.  (The ApiBase does
+    // not need to outlive NetworkTaskWithRetry, we just use it initially to
+    // create the ApiBaseSequence.)
     //
     // A retry strategy is passed to control the attempt count / duration /
     // delays for the request.  NetworkTaskWithRetry takes ownership of the

@@ -111,7 +111,6 @@ PiaApplication {
   // Additional import path used to resolve QML modules in Qt Creator's code model
   property pathList qmlImportPaths: []
 
-  Qt.core.resourceSourceBase: "client/res"
   windowsSources:base.concat("brands/" + project.brandCode + "/brand_client.rc")
 
   files: sources
@@ -120,9 +119,7 @@ PiaApplication {
     name: "resources"
     fileTags: ["qt.core.resource_data"]
     files: [
-      "client/res/**/*",
-      "brands/" + project.brandCode + "/img/**/*",
-      "brands/" + project.brandCode + "/gen_res/img/**/*"
+      "client/res/**/*"
     ]
     excludeFiles: [
       "**/.DS_Store",
@@ -137,6 +134,35 @@ PiaApplication {
       "**/Roboto-Medium.ttf",
       "**/Roboto-Thin.ttf",
     ]
+    Qt.core.resourceSourceBase: "client/res"
+  }
+
+  // Brand-specific resources - these are overlaid into the same resource file
+  // system as regular resources.
+  Group {
+    name: "brandResources"
+    fileTags: ["qt.core.resource_data"]
+    files: [
+      "brands/" + project.brandCode + "/img/**/*"
+    ]
+    excludeFiles: [
+      "**/.DS_Store"
+    ]
+    Qt.core.resourceSourceBase: "brands/" + project.brandCode
+  }
+
+  // Generated brand-specific resources - these are overlaid into the same
+  // resource file system as regular resources.
+  Group {
+    name: "brandGenResources"
+    fileTags: ["qt.core.resource_data"]
+    files: [
+      "brands/" + project.brandCode + "/gen_res/img/**/*"
+    ]
+    excludeFiles: [
+      "**/.DS_Store"
+    ]
+    Qt.core.resourceSourceBase: "brands/" + project.brandCode + "/gen_res"
   }
 
   Group {

@@ -37,7 +37,7 @@ namespace GetSetValue
     const QString &getBooleanText(bool value);
     bool parseBooleanParam(const QString &param);
     extern const QString locationAuto;
-    QString getRegionCliName(const QSharedPointer<ServerLocation> &pLocation);
+    QString getRegionCliName(const QSharedPointer<Location> &pLocation);
 }
 
 // Implements the "get" command - gets a value from daemon state/settings

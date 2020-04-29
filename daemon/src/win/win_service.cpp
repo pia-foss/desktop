@@ -65,7 +65,7 @@ static void serviceMain(int argc, wchar_t** argv)
         service.start();
         // start() completes when the service is stopped, due to the started()
         // signal being connected to QCoreApplication::exec()
-        exitCode = service.exitCode();
+        exitCode = 0;
     }
     catch (const Error& error)
     {

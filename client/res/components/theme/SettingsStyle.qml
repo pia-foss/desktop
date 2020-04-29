@@ -64,7 +64,7 @@ QtObject {
     readonly property color vbarHiglightBarColor: Theme.dark ? "#5ddf5a" : "#4cb649"
     readonly property color vbarTextColor: Theme.dark ? "#ffffff" : "#22252e"
     readonly property int vbarTextPx: 12
-    readonly property string vbarHeaderImage: Theme.brandImagePath + "/settings-logo.png"
+    readonly property string vbarHeaderImage: Theme.imagePath + "/settings-logo.png"
     readonly property int vbarContentTopMargin: 20
     readonly property int vbarContentLeftMargin: 60
     readonly property int vbarContentRightMargin: 60

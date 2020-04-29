@@ -33,8 +33,6 @@ rem  Detect Qbs
 where /Q qbs
 if %errorlevel% equ 0 (
   set QBS=qbs
-) else if exist "C:\Qt5.12\Tools\QtCreator\bin\qbs.exe" (
-  set "QBS=C:\Qt5.12\Tools\QtCreator\bin\qbs.exe"
 ) else if exist "C:\Qt\Tools\QtCreator\bin\qbs.exe" (
   set "QBS=C:\Qt\Tools\QtCreator\bin\qbs.exe"
 ) else (

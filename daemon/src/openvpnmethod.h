@@ -40,17 +40,21 @@ public:
 
 public:
     virtual void run(const ConnectionConfig &connectingConfig,
+                     const Server &vpnServer,
                      const Transport &transport,
                      const QHostAddress &localAddress,
+                     const QHostAddress &shadowsocksServerAddress,
                      quint16 shadowsocksProxyPort) override;
     virtual void shutdown() override;
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() const override {return _networkAdapter;}
 
 private:
     bool writeOpenVPNConfig(QFile& outFile,
+                            const Server &vpnServer,
                             const Transport &transport,
                             const QHostAddress &localAddress,
                             const QStringList &dnsServers,
+                            const QHostAddress &shadowsocksServerAddress,
                             quint16 shadowsocksProxyPort);
 
     void openvpnStateChanged();

@@ -84,8 +84,8 @@ void setUidAndGid()
     } (qUtf8Printable(Path::SupportToolExecutable), gr->gr_gid);
 }
 
-PosixDaemon::PosixDaemon(const QStringList& arguments)
-    : Daemon(arguments), _enableSplitTunnel{false}
+PosixDaemon::PosixDaemon()
+    : Daemon{}, _enableSplitTunnel{false}
 {
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
     ignoreSignals({ SIGPIPE });
@@ -219,6 +219,7 @@ static bool updateVpnTunOnlyAnchor(bool hasConnected, QString tunnelDeviceName, 
 
 void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 {
+    const auto &netScan{params.netScan};
     // TODO: Just one more tiny step of refactoring needed :)
 #if defined(Q_OS_MACOS)
     // double-check + ensure our firewall is installed and enabled. This is necessary as
@@ -231,6 +232,10 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     PFFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
     PFFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
     PFFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
+    PFFirewall::setAnchorEnabled(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
+    PFFirewall::setAnchorTable(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN, QStringLiteral("ipv6prefix"), {
+        // First 64 bits is the IPv6 Network Prefix
+        QStringLiteral("%1/64").arg(netScan.ipAddress6())});
     PFFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
     PFFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), params.blockDNS);
     PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), params.blockDNS, QStringLiteral("dnsaddr"), params.effectiveDnsServers);
@@ -250,6 +255,7 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("250.blockIPv6"), params.blockIPv6);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("290.allowDHCP"), params.allowDHCP);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("300.allowLAN"), params.allowLAN);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
 
@@ -280,7 +286,6 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     // Update rules that depend on the adapter name and/or DNS servers.
     _firewall.updateRules(params);
-
 #endif
 
     toggleSplitTunnel(params);
@@ -380,7 +385,7 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     QVector<QString> excludedApps = params.excludeApps;
 
     qInfo() <<  "Updated split tunnel - enabled:" << params.enableSplitTunnel
-        << "-" << params.splitTunnelNetScan;
+        << "-" << params.netScan;
 
     // Activate split tunnel if it's supposed to be active and currently isn't
     if(params.enableSplitTunnel && !_enableSplitTunnel)
@@ -415,23 +420,23 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     else if(params.enableSplitTunnel)
     {
         // Split tunnel is already running, but network has changed
-        if(_splitTunnelNetScan != params.splitTunnelNetScan)
+        if(_splitTunnelNetScan != params.netScan)
         {
             qInfo() << "Split tunnel Network has changed from"
                 <<  _splitTunnelNetScan
                 << "to:"
-                << params.splitTunnelNetScan;
+                << params.netScan;
         }
 
         // Inform of Network changes
-        // Note we do not check first for _splitTunnelNetScan != params.splitTunnelNetScan as
+        // Note we do not check first for _splitTunnelNetScan != params.netScan as
         // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
         updateSplitTunnel(params, _state.tunnelDeviceName(),
                           _state.tunnelDeviceLocalAddress(),
                           _state.tunnelDeviceRemoteAddress(),
                           params.excludeApps, params.vpnOnlyApps);
     }
-    _splitTunnelNetScan = params.splitTunnelNetScan;
+    _splitTunnelNetScan = params.netScan;
     _enableSplitTunnel = params.enableSplitTunnel;
 }
 

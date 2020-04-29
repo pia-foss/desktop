@@ -23,6 +23,7 @@
 #include "error.h"
 #include "path.h"
 #include "util.h"
+#include "exec.h"
 #include "version.h"
 
 #include <QCoreApplication>
@@ -550,6 +551,15 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
         if (d) d->logFile.close();
         // Abort - treat this as an unclean exit.  Also gives a chance to debug
         // in debug builds (this is how failed asserts are handled).
+
+#if defined(Q_OS_LINUX) && PIA_CLIENT
+        if(msg.contains(QStringLiteral("Failed to create OpenGL context"))) {
+#ifdef PIA_CRASH_REPORTING
+            stopCrashReporting();
+#endif // PIA_CRASH_REPORTING
+            Exec::bashDetached(Path::ExecutableDir / "error-notice.sh");
+        }
+#endif // defined(Q_OS_LINUX) && PIA_CLIENT
         std::abort();
     }
 }

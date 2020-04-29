@@ -288,6 +288,7 @@ void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServ
     QString staticWorkgroup = primarySetupSMB.value(QLatin1String("Workgroup")).toString();
 
     bool useDynamicWINS = !winsServers.isEmpty() && staticWINSAddresses.isEmpty();
+    bool overrideDNS = !dnsServers.isEmpty() || !domain.isEmpty();
 
     // Make all other configuration changes in a single scutil command
     QStringList commands;
@@ -300,7 +301,7 @@ void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServ
     commands << QStringLiteral("d.add Addresses * %1").arg(originalAddresses.join(' '));
     if (!g_servicesWithDisabledIPv6.isEmpty())
         commands << QStringLiteral("d.add ServicesWithDisabledIPv6 * %1").arg(g_servicesWithDisabledIPv6.join(' '));
-    if (!dnsServers.isEmpty() || !winsServers.isEmpty() || !domain.isEmpty())
+    if (overrideDNS)
         commands << QStringLiteral("d.add OverrideDNS ? TRUE");
     commands << QStringLiteral("set State:/Network/PrivateInternetAccess");
 
@@ -323,16 +324,19 @@ void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServ
     commands << QStringLiteral("set State:/Network/PrivateInternetAccess/OldStateSMB");
 
     // Overwrite the DNS state/setup
-    commands << QStringLiteral("d.init");
-    commands << QStringLiteral("get State:/Network/Service/%1/DNS").arg(primaryService);
-    commands << QStringLiteral("get Setup:/Network/Service/%1/DNS").arg(primaryService); // manual DNS settings, no-op if not present
-    if (!domain.isEmpty())
-        commands << QStringLiteral("d.add DomainName %1").arg(domain);
-    if (!dnsServers.isEmpty())
-        commands << QStringLiteral("d.add ServerAddresses * %1").arg(dnsServers.join(' '));
-    commands << QStringLiteral("set State:/Network/Service/%1/DNS").arg(primaryService);
-    commands << QStringLiteral("set Setup:/Network/Service/%1/DNS").arg(primaryService);
-    commands << QStringLiteral("set State:/Network/PrivateInternetAccess/DNS");
+    if(overrideDNS)
+    {
+        commands << QStringLiteral("d.init");
+        commands << QStringLiteral("get State:/Network/Service/%1/DNS").arg(primaryService);
+        commands << QStringLiteral("get Setup:/Network/Service/%1/DNS").arg(primaryService); // manual DNS settings, no-op if not present
+        if (!domain.isEmpty())
+            commands << QStringLiteral("d.add DomainName %1").arg(domain);
+        if (!dnsServers.isEmpty())
+            commands << QStringLiteral("d.add ServerAddresses * %1").arg(dnsServers.join(' '));
+        commands << QStringLiteral("set State:/Network/Service/%1/DNS").arg(primaryService);
+        commands << QStringLiteral("set Setup:/Network/Service/%1/DNS").arg(primaryService);
+        commands << QStringLiteral("set State:/Network/PrivateInternetAccess/DNS");
+    }
 
     // Overwrite SMB state
     commands << QStringLiteral("d.init");
@@ -568,7 +572,10 @@ int main(int argc, char* argv[])
                 else if (option.startsWith(QLatin1String("dhcp-option DOMAIN ")))
                     domain = option.mid(19);
             }
-            if (domain.isEmpty())
+            // If DNS is being overridden, and no domain was specified, use a
+            // default.  Don't touch the domain if we are keeping the existing
+            // DNS setting.
+            if (domain.isEmpty() && !dnsServers.isEmpty())
                 domain = QStringLiteral("openvpn");
 
             try

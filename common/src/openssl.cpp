@@ -79,7 +79,6 @@ static X509* (*PEM_read_bio_X509_AUX)(BIO*, X509**, pem_password_cb*, void*) = n
 static EVP_MD_CTX* (*EVP_MD_CTX_new)() = nullptr;
 static void (*EVP_MD_CTX_free)(EVP_MD_CTX* ctx) = nullptr;
 
-static const EVP_MD* (*EVP_sha1)() = nullptr;
 static const EVP_MD* (*EVP_sha256)() = nullptr;
 
 static void (*EVP_PKEY_free)(EVP_PKEY* pkey) = nullptr;
@@ -161,7 +160,6 @@ static bool checkOpenSSL()
     RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_new);
     RESOLVE_OPENSSL_FUNCTION(EVP_MD_CTX_free);
 
-    RESOLVE_OPENSSL_FUNCTION(EVP_sha1);
     RESOLVE_OPENSSL_FUNCTION(EVP_sha256);
 
     RESOLVE_OPENSSL_FUNCTION(EVP_PKEY_free);
@@ -208,21 +206,6 @@ static bool checkOpenSSL()
     return true;
 }
 
-static const EVP_MD* getMD(QCryptographicHash::Algorithm algorithm)
-{
-    switch (algorithm)
-    {
-    case QCryptographicHash::Sha1:
-        return EVP_sha1();
-    case QCryptographicHash::Sha256:
-        return EVP_sha256();
-    default:
-        // Note: See other EVP_*() functions for supporting other hash algorithms.
-        qError() << "Unsupported hash algorithm";
-        return nullptr;
-    }
-}
-
 static EVP_PKEY* createPublicKeyFromPem(const QByteArray& pem)
 {
     if (pem.isEmpty())
@@ -233,13 +216,13 @@ static EVP_PKEY* createPublicKeyFromPem(const QByteArray& pem)
     return result;
 }
 
-bool verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature, const QByteArray& data, QCryptographicHash::Algorithm hashAlgorithm)
+bool verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature, const QByteArray& data)
 {
     // For the time being, treat OpenSSL errors (e.g. unable to find the
     // library) as though the signature validated successfully.
     if (!checkOpenSSL()) return true;
 
-    auto md = getMD(hashAlgorithm);
+    auto md = EVP_sha256();
     if (!md) return false;
 
     EVP_PKEY* pkey = createPublicKeyFromPem(publicKeyPem);

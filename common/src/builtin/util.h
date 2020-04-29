@@ -45,8 +45,6 @@
 #define TEMPLATE_AUTO_DECLTYPE(name) CONCAT(TYPE_,name)
 #endif
 
-COMMON_EXPORT std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command, bool showDebug=false);
-
 class Error;
 
 class noncopyable;

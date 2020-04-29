@@ -31,6 +31,18 @@ namespace
         for(const auto &arg : args)
             dbg << ' ' << arg;
     };
+
+#ifdef Q_OS_UNIX
+    // Tracer for bash() and friends
+    const auto traceShellCmd = [](QDebug &dbg, const QString&, const QStringList &args)
+    {
+        // Just trace "$ <command>".
+        // Turn off quoting, don't need to bother saving state (this is tightly
+        // coupled to cmdImpl)
+        dbg.noquote();
+        dbg << "$ " << args[1];
+    };
+#endif
 }
 
 Executor::Executor(const QLoggingCategory &category)
@@ -119,19 +131,34 @@ int Executor::cmdImpl(const QString &program, const QStringList &args,
     return exitCode;
 }
 
+
+void Executor::cmdDetached(const QString &program, const QStringList &args)
+{
+    QProcess p;
+    p.setProgram(program);
+    p.setArguments(args);
+    p.startDetached();
+}
+
 #if defined(Q_OS_UNIX)
 int Executor::bash(const QString &command, bool ignoreErrors)
 {
-    auto traceShellCmd = [](QDebug &dbg, const QString&, const QStringList &args)
-    {
-        // Just trace "$ <command>".  This is
-        // Turn off quoting, don't need to bother saving state (this is tightly
-        // coupled to cmdImpl)
-        dbg.noquote();
-        dbg << "$ " << args[1];
-    };
     return cmdImpl(QStringLiteral("/bin/bash"), {QStringLiteral("-c"), command},
                    traceShellCmd, {}, nullptr, ignoreErrors);
+}
+
+void Executor::bashDetached(const QString &command)
+{
+    cmdDetached(QStringLiteral("/bin/bash"), {QStringLiteral("-c"), command});
+}
+
+QString Executor::bashWithOutput(const QString &command, bool ignoreErrors)
+{
+    QString output;
+    cmdImpl(QStringLiteral("/bin/bash"), {QStringLiteral("-c"), command},
+            traceShellCmd, {}, &output, ignoreErrors);
+
+    return output;
 }
 #endif
 
@@ -185,6 +212,20 @@ namespace Exec
     int bash(const QString &command, bool ignoreErrors)
     {
         return defaultExecutor().bash(command, ignoreErrors);
+    }
+
+    void bashDetached(const QString &command) {
+        defaultExecutor().bashDetached(command);
+    }
+
+    QString bashWithOutput(const QString &command, bool ignoreErrors)
+    {
+        return defaultExecutor().bashWithOutput(command, ignoreErrors);
+    }
+
+    QString cmdWithOutput(const QString &program, const QStringList &args)
+    {
+        return defaultExecutor().cmdWithOutput(program, args);
     }
 #endif
 

@@ -27,6 +27,7 @@
 #include <QDir>
 #include "daemon.h"
 #include "posix/posix_firewall_pf.h"
+#include "exec.h"
 #include "vpn.h"
 #include "daemon.h"
 
@@ -116,6 +117,8 @@ private:
     AppMap _vpnOnlyMap;
     QString _previousTunnelDeviceLocalAddress;
     int _sockFd;
+
+    static Executor _executor;
 };
 
 #endif

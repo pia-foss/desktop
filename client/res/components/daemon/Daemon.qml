@@ -134,11 +134,11 @@ QtObject {
   // Returns the location's localized name if possible, otherwise the name
   // provided by the server, or its ID as a last resort.
   function getLocationName(loc) {
-    var locMeta = data.locationMetadata[loc.id]
+    var locMeta = state.locationMetadata[loc.id]
     if(locMeta && loc.name && loc.name === locMeta.name) {
       // The translatable name is known and the server name still matches the
       // name that was translated.  Return a localized name.
-      return data.translateName(locMeta.name)
+      return state.translateName(locMeta.name)
     }
     // The location has no metadata, its name has changed, or the server did not
     // provide a name, etc.  Return the server name if it exists or the ID
@@ -148,15 +148,15 @@ QtObject {
 
   // Get the name of a location from a location ID.
   function getLocationIdName(locId) {
-    var loc = data.locations[locId]
+    var loc = state.availableLocations[locId]
     return loc ? getLocationName(loc) : locId
   }
 
   // Get the localized name of a country by country code.
   function getCountryName(countryCode) {
-    var countryName = data.countryNames[countryCode.toLowerCase()]
+    var countryName = state.countryNames[countryCode.toLowerCase()]
     if(countryName)
-      return data.translateName(countryName)
+      return state.translateName(countryName)
     // Fall back to displaying the capitalized country code if no country name
     // is known
     return countryCode.toUpperCase()

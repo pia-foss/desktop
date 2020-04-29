@@ -59,7 +59,20 @@ namespace
     const std::chrono::seconds statsInterval{5};
 
     // Creating the interface must complete within this timeout
+#ifndef Q_OS_WINDOWS
     const std::chrono::seconds createInterfaceTimeout{10};
+#else
+    // On Windows, creating the interface mainly consists of starting the
+    // WireGuard service.  On most systems it is pretty quick, but on some
+    // systems it has been observed to take about 10 seconds consistently.
+    //
+    // The main purpose of this timeout is to handle the possibility of the
+    // service getting stuck, so we can stop it and try again.  This doesn't
+    // seem to be a significant problem, and we don't want to abort attempts
+    // that are just taking a long time, so this timeout is higher than on
+    // Mac/Linux.
+    const std::chrono::seconds createInterfaceTimeout{25};
+#endif
     // Interval of checks for the first handshake - should be much faster than
     // the stat interval to detect the handshake promptly
     const std::chrono::milliseconds firstHandshakeInterval{200};
@@ -79,20 +92,6 @@ namespace
     const std::chrono::seconds handshakeTraceThreshold{15};
     const std::chrono::minutes handshakeWarnThreshold{3};
 
-    // If no data is received for this amount of time, fire off a ping.
-    // Should be a multiple of statsInterval.
-    const std::chrono::seconds pingThreshold{25};
-
-    // If no data is received for this amount of time after a ping is sent,
-    // the connection is abandoned.
-    // Should be a multiple of statsInterval.
-    const std::chrono::seconds pingTimeout{pingThreshold + std::chrono::seconds{25}};
-
-    // The ping threshold and timeout are measured in stat interval counts to
-    // avoid off-by-one errors due to clock skew.
-    unsigned pingThresholdIntervals = pingThreshold / statsInterval;
-    unsigned pingTimeoutIntervals = pingTimeout / statsInterval;
-
     // How long the backend gets to shut down.  This is pretty long - the
     // backend should not take this long, but aborting during a shutdown may
     // cause worse problems.  In particular, shutdown on Windows can take a long
@@ -102,19 +101,6 @@ namespace
     // After 1 minute though, if we haven't shut down, we time out to avoid
     // getting completely stuck.
     const std::chrono::minutes shutdownTimeout{1};
-
-    QByteArray readPiaRsa4096CAPem()
-    {
-        QFile caFile{QStringLiteral(":/ca/rsa_4096.crt")};
-        caFile.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text);
-        return caFile.readAll();
-    }
-
-    std::shared_ptr<PrivateCA> getPiaRsa4096CA()
-    {
-        static auto pCA{std::make_shared<PrivateCA>(readPiaRsa4096CAPem())};
-        return pCA;
-    }
 }
 
 class WireguardKeypair
@@ -220,8 +206,10 @@ private:
 
 public:
     virtual void run(const ConnectionConfig &connectingConfig,
+                     const Server &vpnServer,
                      const Transport &transport,
                      const QHostAddress &localAddress,
+                     const QHostAddress &shadowsocksServerAddress,
                      quint16 shadowsocksProxyPort) override;
     virtual void shutdown() override;
     // Linux: the network adapter refers to the fixed device name.
@@ -1036,8 +1024,11 @@ void WireguardMethod::checkPing(const quint64 &rx, const quint64 &tx)
     // Otherwise, this is an additional interval with no data
     ++_noRxIntervals;
 
+    std::chrono::seconds pingTimeout{g_settings.wireguardPingTimeout()};
+
+
     // If pingTimeout seconds have elapsed and we haven't yet received data, abort the connection
-    if(_noRxIntervals >= pingTimeoutIntervals)
+    if(_noRxIntervals >= pingTimeout / statsInterval)
     {
         qWarning() << "Abandoning connection due to ping timeout."
             << "No response after" << traceMsec(statsInterval * _noRxIntervals);
@@ -1048,7 +1039,7 @@ void WireguardMethod::checkPing(const quint64 &rx, const quint64 &tx)
 
     // Otherwise if only pingThreshold seconds have elapsed since we last received data - start pinging the endpoint
     // This ping will be repeated each time checkPing() is called, which should be every 5 seconds
-    if(_noRxIntervals >= pingThresholdIntervals)
+    if(_noRxIntervals >= (pingTimeout / 2) / statsInterval)
     {
         qWarning() << "No data received in" << traceMsec(statsInterval * _noRxIntervals)
             << "- pinging endpoint";
@@ -1072,8 +1063,10 @@ void WireguardMethod::pingEndpoint()
 }
 
 void WireguardMethod::run(const ConnectionConfig &connectingConfig,
+                          const Server &vpnServer,
                           const Transport &transport,
                           const QHostAddress &localAddress,
+                          const QHostAddress &shadowsocksServerAddress,
                           quint16 shadowsocksProxyPort)
 {
     advanceState(State::Connecting);
@@ -1091,18 +1084,22 @@ void WireguardMethod::run(const ConnectionConfig &connectingConfig,
         qWarning() << "No VPN location specified";
         throw Error{HERE, Error::Code::VPNConfigInvalid};
     }
-    QHostAddress wgHost{connectingConfig.vpnLocation()->wireguardUdpHost()};
-    quint16 wgPort{connectingConfig.vpnLocation()->wireguardUdpPort()};
+
+    QHostAddress wgHost{vpnServer.ip()};
+    // Just use default port, choices for WG ports are not provided currently
+    quint16 wgPort{vpnServer.defaultServicePort(Service::WireGuard)};
     if(wgHost.isNull() || !wgPort)
     {
-        qWarning() << "UDP host" << connectingConfig.vpnLocation()->wireguardUDP()
+        qWarning() << "WireGuard host" << vpnServer.ip() << ":" << wgPort
             << "not valid in location" << connectingConfig.vpnLocation()->id();
         throw Error{HERE, Error::Code::VPNConfigInvalid};
     }
-    const auto &certCommonName = connectingConfig.vpnLocation()->wireguardSerial();
+
+    const auto &certCommonName = vpnServer.commonName();
     if(certCommonName.isEmpty())
     {
-        qWarning() << "Certificate serial number not known for region"
+        qWarning() << "Certificate serial number not known for server"
+            << vpnServer.ip() << "in region"
             << connectingConfig.vpnLocation()->id();
         throw Error{HERE, Error::Code::VPNConfigInvalid};
     }
@@ -1119,9 +1116,9 @@ void WireguardMethod::run(const ConnectionConfig &connectingConfig,
     resource += QString::fromLatin1(QUrl::toPercentEncoding(clientKeypair.publicKeyStr()));
     // Don't do DNS resolution while connecting - specify the IP address in the
     // request, and use the host name to verify the certificate.
-    ApiBase hostAuthBase{authHost, getPiaRsa4096CA(), certCommonName};
+    ApiBase hostAuthBase{authHost, g_daemon->environment().getRsa4096CA(), certCommonName};
 
-    _pAuthRequest = ApiClient::instance()->getRetry(hostAuthBase, resource, {})
+    _pAuthRequest = g_daemon->apiClient().getRetry(hostAuthBase, resource, {})
         ->then(this, [this, clientKeypair=std::move(clientKeypair)](const QJsonDocument &result)
             {
                 handleAuthResult(clientKeypair, result);

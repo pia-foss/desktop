@@ -58,7 +58,7 @@ QtObject {
     readonly property int connectButtonSizePx: 156
     readonly property int connectButtonVMarginPx: 22
 
-    readonly property string headerLogoImage: Theme.brandImagePath + "/header-logo.png"
+    readonly property string headerLogoImage: Theme.imagePath + "/header-logo.png"
     readonly property string headerMenuLightImage: Theme.imagePathCommon + "/dashboard/header/menu1.png"
     readonly property string headerMenuDarkImage: Theme.imagePathCommon + "/dashboard/header/menu2.png"
     readonly property string headerMenuUpdateLightImage: Theme.imagePathCommon + "/dashboard/header/menu-update-light.png"

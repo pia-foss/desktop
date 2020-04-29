@@ -95,12 +95,12 @@ int main(int argc, char** argv)
     try
     {
         // Instantiate and synchronously run the posix version of the daemon
-        PosixDaemon daemon(app.arguments());
+        PosixDaemon daemon;
         QObject::connect(&daemon, &Daemon::started, &QCoreApplication::exec);
         QObject::connect(&daemon, &Daemon::stopped, &QCoreApplication::quit);
         daemon.start();
 
-        exitCode = daemon.exitCode();
+        exitCode = 0;
     }
     catch (const Error& error)
     {

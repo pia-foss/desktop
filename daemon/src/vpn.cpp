@@ -36,7 +36,7 @@
 #include <QRandomGenerator>
 
 // For use by findInterfaceIp on Mac/Linux
-#ifdef Q_OS_UNIX
+#if defined(Q_OS_UNIX)
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -183,8 +183,7 @@ void HnsdRunner::setupProcess(UidGidProcess &process)
 bool HnsdRunner::enable(QString program, QStringList arguments)
 {
 #ifdef Q_OS_MACOS
-    ::shellExecute(QStringLiteral("ifconfig lo0 alias %1 up").arg(::hnsdLocalAddress));
-
+    Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "alias", ::hnsdLocalAddress, "up"});
 #endif
     // Invoke the original
     return ProcessRunner::enable(std::move(program), std::move(arguments));
@@ -200,13 +199,12 @@ void HnsdRunner::disable()
     emit hnsdSyncFailure(false);
 
 #ifdef Q_OS_MACOS
-    QByteArray out;
-    std::tie(std::ignore, out, std::ignore) = ::shellExecute(QStringLiteral("ifconfig lo0"));
+    QString out = Exec::cmdWithOutput(QStringLiteral("ifconfig"), {QStringLiteral("lo0")});
 
     // Only try to remove the alias if it exists
     if(out.contains(::hnsdLocalAddress.toLatin1()))
     {
-        ::shellExecute(QStringLiteral("ifconfig lo0 -alias %1").arg(::hnsdLocalAddress));
+        Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "-alias", hnsdLocalAddress});
     }
 #endif
 }
@@ -215,10 +213,8 @@ void HnsdRunner::disable()
 bool HnsdRunner::hasNetBindServiceCapability()
 {
 #ifdef Q_OS_LINUX
-    int exitCode;
-    QByteArray out;
-    std::tie(exitCode, out, std::ignore) = ::shellExecute(QStringLiteral("getcap %1").arg(Path::HnsdExecutable));
-    if(exitCode != 0)
+    QString out = Exec::cmdWithOutput(QStringLiteral("getcap"), {Path::HnsdExecutable});
+    if(out.isEmpty())
         return false;
     else
         return out.contains("cap_net_bind_service");
@@ -292,33 +288,39 @@ void ShadowsocksRunner::setupProcess(UidGidProcess &process)
 // Custom logging for our OriginalNetworkScan struct
 QDebug operator<<(QDebug debug, const OriginalNetworkScan& netScan) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << QStringLiteral("Network(gatewayIp: %1, interfaceName: %2, ipAddress: %3)")
-        .arg(netScan.gatewayIp(), netScan.interfaceName(), netScan.ipAddress());
+    debug.nospace() << QStringLiteral("Network(gatewayIp: %1, interfaceName: %2, ipAddress: %3, ipAddress6: %4)")
+        .arg(netScan.gatewayIp(), netScan.interfaceName(), netScan.ipAddress(), netScan.ipAddress6());
 
     return debug;
 }
 
 TransportSelector::TransportSelector()
-    : _preferred{QStringLiteral("udp"), 0}, _lastUsed{QStringLiteral("udp"), 0}, _alternates{},
-      _nextAlternate{0}, _startAlternates{-1}
+    : TransportSelector{preferredTransportTimeout}
+{
+}
+
+TransportSelector::TransportSelector(const std::chrono::seconds &transportTimeout)
+    : _selected{QStringLiteral("udp"), 0},
+      _lastPreferred{QStringLiteral("udp"), 0},
+      _lastUsed{QStringLiteral("udp"), 0}, _alternates{},
+      _nextAlternate{0}, _startAlternates{-1}, _transportTimeout{transportTimeout}
 {
 }
 
 void TransportSelector::addAlternates(const QString &protocol,
-                                      const ServerLocation &location,
-                                      const QVector<uint> &ports)
+                                      const DescendingPortSet &ports)
 {
     Transport nextTransport{protocol, 0};
 
-    // Add the implicit default port if it's not in the list of ports
-    nextTransport.resolvePort(location);
-    if(_preferred != nextTransport && !ports.contains(nextTransport.port()))
+    // Add the implicit default port (although this may be the same as one of
+    // the listed ports)
+    if(_selected != nextTransport)
         _alternates.emplace_back(nextTransport);
 
-    for(unsigned port : ports)
+    for(quint16 port : ports)
     {
         nextTransport.port(port);
-        if(_preferred != nextTransport)
+        if(_selected != nextTransport)
             _alternates.emplace_back(nextTransport);
     }
 }
@@ -350,96 +352,82 @@ QHostAddress TransportSelector::findInterfaceIp(const QString &interfaceName)
 #endif
 }
 
-QHostAddress TransportSelector::findLocalAddress(const QString &remoteAddress)
+QHostAddress TransportSelector::findLocalAddress(const QHostAddress &testAddress)
 {
-    // Determine what local address we will use to make this connection.
+    // Determine what local address we will use to connect to the Internet.
     // A "UDP connect" doesn't actually send any packets, it just determines
     // the local address to use for a connection.
     QUdpSocket connTest;
-    connTest.connectToHost(remoteAddress, 8080);
+    connTest.connectToHost(testAddress, 8080);
     return connTest.localAddress();
 }
 
 void TransportSelector::scanNetworkRoutes(OriginalNetworkScan &netScan)
 {
-    QString out, err;
-    QStringList result;
-    int exitCode{-1};  // Default to -1 so it fails on windows for now
 
+#if defined(Q_OS_UNIX)
+    auto assignGatewayAndInterface = [](const QString &commandString, OriginalNetworkScan &netScan)
+    {
+        QString out = Exec::bashWithOutput(commandString);
+        if(!out.isEmpty())
+        {
+            QStringList result = out.split(' ');
+            netScan.gatewayIp(result.first());
+            netScan.interfaceName(result.last());
+        }
+    };
+#endif
     // TODO: use system APIs for this rather than relying on flaky and changeable system tools (in terms of their output format)
 #if defined(Q_OS_MACOS)
     // This awk script is necessary as the macOS 10.14 and 10.15 output of netstat has changed. As a result we need to actually locate the columns
     // we're interested in, we can't just hard-code a column number
     auto commandString = QStringLiteral("netstat -nr -f inet | sed '1,3 d' | awk 'NR==1 { for (i=1; i<=NF; i++) { f[$i] = i  } } NR>1 && $(f[\"Destination\"])==\"default\" { print $(f[\"Gateway\"]), $(f[\"Netif\"]) ; exit }'");
+    assignGatewayAndInterface(commandString, netScan);
 #elif defined(Q_OS_LINUX)
     auto commandString = QStringLiteral("netstat -nr | tee /dev/stderr | awk '$1==\"default\" || ($1==\"0.0.0.0\" && $3==\"0.0.0.0\") { print $2, $8; exit }'");
-
-#endif
-#ifdef Q_OS_UNIX
-    std::tie(exitCode, out, err) = ::shellExecute(commandString);
-    if(exitCode == 0)
-    {
-        result = out.split(' ');
-        netScan.gatewayIp(result.first());
-        netScan.interfaceName(result.last());
-    }
-#else
+    assignGatewayAndInterface(commandString, netScan);
+#elif defined(Q_OS_WIN)
     // Not needed for Windows
     netScan.gatewayIp(QStringLiteral("N/A"));
     netScan.interfaceName(QStringLiteral("N/A"));
 #endif
 }
 
-QHostAddress TransportSelector::validLastLocalAddress() const
-{
-    if(_lastUsed.protocol() == QStringLiteral("udp"))
-        return _lastLocalUdpAddress;
-    else
-        return _lastLocalTcpAddress;
-}
-
 void TransportSelector::reset(Transport preferred, bool useAlternates,
-                              const ServerLocation &location,
-                              const QVector<uint> &udpPorts,
-                              const QVector<uint> &tcpPorts)
+                              const DescendingPortSet &udpPorts,
+                              const DescendingPortSet &tcpPorts)
 {
-    _preferred = preferred;
-    _preferred.resolvePort(location);
+    _selected = preferred;
     _alternates.clear();
     _nextAlternate = 0;
-    _startAlternates.setRemainingTime(msec(preferredTransportTimeout));
+    _startAlternates.setRemainingTime(msec(_transportTimeout));
     _useAlternateNext = false;
-    // Reset local addresses; doesn't really matter since we redetect them for
+    // Reset the local address; doesn't really matter since we redetect it for
     // each beginAttempt()
-    _lastLocalUdpAddress.clear();
-    _lastLocalTcpAddress.clear();
+    _lastLocalAddress.clear();
 
     if(useAlternates)
     {
-        // The expected count is just udpPorts.size() + tcpPorts.size().
-        // There are two implicit "default" choices, but the UDP one is
-        // eliminated since 8080 appears in the list (all regions use 8080 by
-        // default currently).  The TCP default is 500, which is not in the
-        // list, but one other possibility will be eliminated because it's the
-        // preferred transport.
-        _alternates.reserve(udpPorts.size() + tcpPorts.size());
+        // The expected count is udpPorts.size() + tcpPorts.size() + 2 - there
+        // are two "default" choices in addition to the listed UDP and TCP
+        // ports.
+        _alternates.reserve(udpPorts.size() + tcpPorts.size() + 2);
 
-        // Prefer to stay on the user's preferred protocol; try those first.
-        if(_preferred.protocol() == QStringLiteral("udp"))
+        // Prefer to stay on the user's selected protocol; try those first.
+        if(_selected.protocol() == QStringLiteral("udp"))
         {
-            addAlternates(QStringLiteral("udp"), location, udpPorts);
-            addAlternates(QStringLiteral("tcp"), location, tcpPorts);
+            addAlternates(QStringLiteral("udp"), udpPorts);
+            addAlternates(QStringLiteral("tcp"), tcpPorts);
         }
         else
         {
-            addAlternates(QStringLiteral("tcp"), location, tcpPorts);
-            addAlternates(QStringLiteral("udp"), location, udpPorts);
+            addAlternates(QStringLiteral("tcp"), tcpPorts);
+            addAlternates(QStringLiteral("udp"), udpPorts);
         }
     }
 }
 
-OriginalNetworkScan TransportSelector::scanNetwork(const ServerLocation *pLocation,
-                                                   const QString &protocol)
+OriginalNetworkScan TransportSelector::scanNetwork()
 {
     OriginalNetworkScan netScan;
 
@@ -454,14 +442,16 @@ OriginalNetworkScan TransportSelector::scanNetwork(const ServerLocation *pLocati
 #ifdef Q_OS_UNIX
     netScan.ipAddress(findInterfaceIp(netScan.interfaceName()).toString());
 #else
-    if(pLocation)
-    {
-        if(protocol == QStringLiteral("udp"))
-            netScan.ipAddress(findLocalAddress(pLocation->udpHost()).toString());
-        else
-            netScan.ipAddress(findLocalAddress(pLocation->tcpHost()).toString());
-    }
+    // Use an IPv4 address reserved for documentation for this test (192.0.2.1)
+    netScan.ipAddress(findLocalAddress(QHostAddress{0xC0000201}).toString());
 #endif
+    // Find the (global) IPv6 IP
+    // 2001:db8::123 is just a random global IPv6 endpoint (in the range dedicated for "documentation") used to find the locally bound global IPv6 IP.
+    // If the host does not have IPv6 setup then this results in an empty string.
+    // TODO: This currently only finds the global IP for the default ipv6 interface -
+    // we may want to gather global IPs from all the IPv6-enabled interfaces in the future.
+    netScan.ipAddress6(findLocalAddress(QHostAddress{"2001:db8::123"}).toString());
+
     return netScan;
 }
 
@@ -473,18 +463,19 @@ QHostAddress TransportSelector::lastLocalAddress() const
     // This ensures that we behave the same as prior releases most of the time,
     // either when "Try Alternate Transports" is turned off or for connections
     // using the preferred transport setting when it is on.
-    if(_lastUsed == _preferred)
+    if(_lastUsed == _lastPreferred)
         return {};
 
     // When using an alternate transport, restrict to the last local address we
     // found.  If the network connection changes, we don't want an alternate
     // transport to succeed by chance, we want it to fail so we can try the
     // preferred transport again.
-    return validLastLocalAddress();
+    return _lastLocalAddress;
 }
 
-bool TransportSelector::beginAttempt(const ServerLocation &location,
-                                     OriginalNetworkScan &netScan)
+const Server *TransportSelector::beginAttempt(const Location &location,
+                                              OriginalNetworkScan &netScan,
+                                              bool &delayNext)
 {
     scanNetworkRoutes(netScan);
 
@@ -492,34 +483,30 @@ bool TransportSelector::beginAttempt(const ServerLocation &location,
     // TCP or UDP addresses for this location.  If they change, we reset and go
     // back to the preferred transport only.
 #ifdef Q_OS_MACOS
-    QHostAddress localUdpAddress = findInterfaceIp(netScan.interfaceName());
-    // Source IP is the same regardless of protocol
-    QHostAddress localTcpAddress = localUdpAddress;
+    QHostAddress localAddress = findInterfaceIp(netScan.interfaceName());
 #else
-    QHostAddress localUdpAddress = findLocalAddress(location.udpHost());
-    QHostAddress localTcpAddress = findLocalAddress(location.tcpHost());
+    // Use an IPv4 address reserved for documentation for this test (192.0.2.1)
+    QHostAddress localAddress = findLocalAddress(QHostAddress{0xC0000201});
 #endif
 
     netScan.ipAddress({});
 
-    // If either address has changed, a network connectivity change has
+    // If the address has changed, a network connectivity change has
     // occurred.  Reset and try the preferred transport only for a while.
     //
     // If Try Alternate Transports is turned off, this has no effect, because we
     // don't have any alternate transports to try in that case.
-    if(localUdpAddress != _lastLocalUdpAddress || localTcpAddress != _lastLocalTcpAddress)
+    if(localAddress != _lastLocalAddress)
     {
-        qInfo() << "UDP:" << localUdpAddress << "->" << location.udpHost();
-        qInfo() << "TCP:" << localTcpAddress << "->" << location.tcpHost();
+        qInfo() << "Would use:" << localAddress << "to reach default gateway";
         qInfo() << "Network connectivity has changed since last attempt, start over from preferred transport";
-        _lastLocalUdpAddress = localUdpAddress;
-        _lastLocalTcpAddress = localTcpAddress;
+        _lastLocalAddress = localAddress;
         _nextAlternate = 0;
-        _startAlternates.setRemainingTime(msec(preferredTransportTimeout));
+        _startAlternates.setRemainingTime(msec(_transportTimeout));
         _useAlternateNext = false;
     }
 
-    bool delayNext = true;
+    delayNext = true;
 
     // Always use the preferred transport if:
     // - there are no alternates
@@ -528,9 +515,9 @@ bool TransportSelector::beginAttempt(const ServerLocation &location,
     //   we are not connected to a network right now, and we don't want to
     //   attempt an alternate transport with "any" local address)
     if(_alternates.empty() || !_startAlternates.hasExpired() ||
-        _lastLocalUdpAddress.isNull() || _lastLocalTcpAddress.isNull())
+        _lastLocalAddress.isNull())
     {
-        _lastUsed = _preferred;
+        _lastUsed = _selected;
     }
     // After a few failures, start trying alternates.  After each retry delay,
     // we try the preferred settings, then immediately try one alternate if that
@@ -543,7 +530,7 @@ bool TransportSelector::beginAttempt(const ServerLocation &location,
     {
         // Try preferred settings.
         _useAlternateNext = true;
-        _lastUsed = _preferred;
+        _lastUsed = _selected;
         // No delay since we'll try an alternate next.
         delayNext = false;
     }
@@ -557,9 +544,13 @@ bool TransportSelector::beginAttempt(const ServerLocation &location,
         _useAlternateNext = false;
     }
 
-    netScan.ipAddress(validLastLocalAddress().toString());
+    _lastPreferred = _selected;
 
-    return delayNext;
+    netScan.ipAddress(_lastLocalAddress.toString());
+
+    const Server *pSelectedServer = _lastUsed.selectServerPort(location);
+    _lastPreferred.resolveDefaultPort(_lastUsed.protocol(), pSelectedServer);
+    return pSelectedServer;
 }
 
 QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
@@ -576,6 +567,7 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
             qWarning() << "Invalid SOCKS proxy network protocol"
                 << socksTestAddress.protocol() << "for address"
                 << socksTestAddress << "- parsed from" << host;
+            return {};
         }
     }
     else
@@ -602,7 +594,7 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     // Grab the next VPN location.  Copy it in case the locations in DaemonState
     // are updated.
     if(state.vpnLocations().nextLocation())
-        _pVpnLocation.reset(new ServerLocation{*state.vpnLocations().nextLocation()});
+        _pVpnLocation.reset(new Location{*state.vpnLocations().nextLocation()});
     _vpnLocationAuto = !state.vpnLocations().chosenLocation();
 
     // Get the credentials that will be used to authenticate
@@ -680,7 +672,7 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
             _proxyType = ProxyType::Shadowsocks;
             _socksHostAddress = QHostAddress{0x7f000001}; // 127.0.0.1
             if(state.shadowsocksLocations().nextLocation())
-                _pShadowsocksLocation.reset(new ServerLocation{*state.shadowsocksLocations().nextLocation()});
+                _pShadowsocksLocation.reset(new Location{*state.shadowsocksLocations().nextLocation()});
             _shadowsocksLocationAuto = !state.shadowsocksLocations().chosenLocation();
         }
 
@@ -726,7 +718,7 @@ bool ConnectionConfig::canConnect() const
         case ProxyType::None:
             break;
         case ProxyType::Shadowsocks:
-            if(!shadowsocksLocation() || !shadowsocksLocation()->shadowsocks())
+            if(!shadowsocksLocation() || !shadowsocksLocation()->hasService(Service::Shadowsocks))
             {
                 qWarning() << "No Shadowsocks location found when using Shadowsocks proxy, cannot connect";
                 return false;
@@ -958,9 +950,9 @@ bool VPNConnection::needsReconnect()
     return _needsReconnect;
 }
 
-void VPNConnection::scanNetwork(const ServerLocation *pLocation, const QString &protocol)
+void VPNConnection::scanNetwork()
 {
-    emit scannedOriginalNetwork(_transportSelector.scanNetwork(pLocation, protocol));
+    emit scannedOriginalNetwork(_transportSelector.scanNetwork());
 }
 
 void VPNConnection::connectVPN(bool force)
@@ -1104,8 +1096,7 @@ void VPNConnection::doConnect()
         {
             // We're not retrying this request if it fails - we don't want to hold
             // up the connection attempt; this information isn't critical.
-            ApiClient::instance()
-                    ->getIp(QStringLiteral("api/client/status"))
+            g_daemon->apiClient().getIp(QStringLiteral("api/client/status"))
                     ->notify(this, [this](const Error& error, const QJsonDocument& json) {
                         if (!error)
                         {
@@ -1126,16 +1117,44 @@ void VPNConnection::doConnect()
     if(_connectionStep == ConnectionStep::FetchingIP)
     {
         _connectionStep = ConnectionStep::StartingProxy;
-        if(_connectingConfig.shadowsocksLocation() && _connectingConfig.shadowsocksLocation()->shadowsocks())
+
+        // Select a Shadowsocks server and parse its IP address.  If Shadowsocks
+        // isn't selected, ConnectionConfig does not capture a Shadowsocks
+        // location (but this could also happen if Shadowsocks was selected and
+        // no locations are known).
+        _shadowsocksServerIp = {};
+        const Server *pSsServer{nullptr};
+        if(_connectingConfig.shadowsocksLocation())
+            pSsServer = _connectingConfig.shadowsocksLocation()->randomServerForService(Service::Shadowsocks);
+        // randomServerForService() ensures that a returned server has the
+        // Shadowsocks service and at least one port, but it does not verify
+        // that we have an SS key and cipher
+        if(pSsServer && !pSsServer->shadowsocksKey().isEmpty() && !pSsServer->shadowsocksCipher().isEmpty())
+            _shadowsocksServerIp = QHostAddress{pSsServer->ip()};
+
+        // Was Shadowsocks actually selected for a proxy?
+        if(_connectingConfig.proxyType() == ConnectionConfig::ProxyType::Shadowsocks)
         {
-            const auto &pSsServer = _connectingConfig.shadowsocksLocation()->shadowsocks();
+            // If we are not able to connect with Shadowsocks, raise an error
+            // and bail, user asked for Shadowsocks.
+            if(_shadowsocksServerIp.protocol() != QAbstractSocket::NetworkLayerProtocol::IPv4Protocol)
+            {
+                qWarning() << "Unable to connect - Shadowsocks was requested, but no server address is available in location"
+                    << (_connectingConfig.shadowsocksLocation() ? _connectingConfig.shadowsocksLocation()->id() : QStringLiteral("<none>"))
+                    << "- server:" << (pSsServer ? pSsServer->ip() : QStringLiteral("<none>"))
+                    << "- key:" << (pSsServer ? pSsServer->shadowsocksKey() : QStringLiteral("<none>"))
+                    << "- cipher:" << (pSsServer ? pSsServer->shadowsocksCipher() : QStringLiteral("<none>"));
+                raiseError({HERE, Error::Code::VPNConfigInvalid});
+                return;
+            }
+
             _shadowsocksRunner.enable(Path::SsLocalExecutable,
-                QStringList{QStringLiteral("-s"), pSsServer->host(),
-                            QStringLiteral("-p"), QString::number(pSsServer->port()),
-                            QStringLiteral("-k"), pSsServer->key(),
+                QStringList{QStringLiteral("-s"), pSsServer->ip(),
+                            QStringLiteral("-p"), QString::number(pSsServer->defaultServicePort(Service::Shadowsocks)),
+                            QStringLiteral("-k"), pSsServer->shadowsocksKey(),
                             QStringLiteral("-b"), QStringLiteral("127.0.0.1"),
                             QStringLiteral("-l"), QStringLiteral("0"),
-                            QStringLiteral("-m"), pSsServer->cipher()});
+                            QStringLiteral("-m"), pSsServer->shadowsocksCipher()});
 
             // If we don't already know a listening port, wait for it to tell
             // us (we could already know if the SS client was already running)
@@ -1150,7 +1169,7 @@ void VPNConnection::doConnect()
                     << _shadowsocksRunner.localPort();
             }
         }
-        else
+        else    // Not using Shadowsocks
             _shadowsocksRunner.disable();
     }
 
@@ -1187,11 +1206,27 @@ void VPNConnection::doConnect()
                 selectedPort = 0;
         }
 
-        // Reset the transport selection sequence
+        Q_ASSERT(_connectingConfig.vpnLocation());  // Postcondition of copySettings() above
+
+        // Reset the transport selection sequence.
+        //
+        // Try all ports that are available on any server in this region.  The
+        // available ports might vary by server.
+        //
+        // If the ports do vary, then when we try a port that's not available
+        // everywhere, we will specifically look for a server that supports that
+        // port (by using Location::randomServer() with a port).
+        //
+        // It's also possible that the user selected a port that is not
+        // available anywhere in this region.  In that case, we will use the
+        // default port instead (by using Transport::resolveActualPort()), and
+        // the UI will indicate that we used a different transport (since the
+        // preferred transport still indicates the user's selection, due to
+        // Transport::resolveDefaultPort()).
         _transportSelector.reset({protocol, selectedPort},
                                  _connectingConfig.automaticTransport(),
-                                 *_connectingConfig.vpnLocation(),
-                                 g_data.udpPorts(), g_data.tcpPorts());
+                                 _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnUdp),
+                                 _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnTcp));
     }
 
     // Reset traffic counters since we have a new process
@@ -1203,8 +1238,19 @@ void VPNConnection::doConnect()
     // Reset any running connect timer, just in case
     _connectTimer.stop();
 
+    Q_ASSERT(_connectingConfig.vpnLocation());  // Postcondition of copySettings()
     OriginalNetworkScan netScan;
-    bool delayNext = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), netScan);
+    bool delayNext = true;
+    const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), netScan, delayNext);
+    // When using WireGuard, the TransportSelector is vestigial, since
+    // WireGuard currently only supports one protocol and port.  It's still
+    // active right now so transports are reported, but it reports the selected
+    // OpenVPN transport (which is OK for the moment, it prevents any "alternate
+    // transport" notifications).  We still need to really find a WireGuard
+    // server.
+    if(_connectingConfig.method() == ConnectionConfig::Method::Wireguard)
+        pVpnServer = _connectingConfig.vpnLocation()->randomServerForService(Service::WireGuard);
+
     // Emit the current network configuration, so it can be used for split
     // tunnel if it's known.  If we did find it (and it doesn't change by the
     // time we connect), this avoids a blip for excluded apps where they might
@@ -1216,6 +1262,16 @@ void VPNConnection::doConnect()
     // differ, there may be a connectivity blip, but the network connections
     // changed so a blip is OK.)
     emit scannedOriginalNetwork(netScan);
+
+    if(!pVpnServer)
+    {
+        qWarning() << "Could not find a server in location"
+            << _connectingConfig.vpnLocation()->id() << "for method"
+            << traceEnum(_connectingConfig.method()) << "and transport"
+            << _transportSelector.lastUsed().protocol();
+        raiseError({HERE, Error::Code::VPNConfigInvalid});
+        return;
+    }
 
     // Set when the next earliest reconnect attempt is allowed
     if(delayNext)
@@ -1251,9 +1307,9 @@ void VPNConnection::doConnect()
 
     try
     {
-        _method->run(_connectingConfig, _transportSelector.lastUsed(),
+        _method->run(_connectingConfig, *pVpnServer, _transportSelector.lastUsed(),
                      _transportSelector.lastLocalAddress(),
-                     _shadowsocksRunner.localPort());
+                     _shadowsocksServerIp, _shadowsocksRunner.localPort());
     }
     catch(const Error &ex)
     {
@@ -1287,7 +1343,7 @@ void VPNConnection::vpnMethodStateChanged()
             // configuration changes at any point after this (or even if it had
             // already changed since the connection was established), we'll drop
             // the OpenVPN connection and re-scan when we connect again.
-            scanNetwork(_connectedConfig.vpnLocation().get(), _transportSelector.lastUsed().protocol());
+            scanNetwork();
 
             // If DNS is set to Handshake, start it now, since we've connected
             if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Handshake)
@@ -1467,12 +1523,10 @@ void VPNConnection::setState(State state)
         case State::Connecting:
             Q_ASSERT(_connectingConfig.vpnLocation());
             Q_ASSERT(!_connectedConfig.vpnLocation());
-            preferredTransport = _transportSelector.preferred();
             break;
         case State::Reconnecting:
             Q_ASSERT(_connectingConfig.vpnLocation());
             Q_ASSERT(_connectedConfig.vpnLocation());
-            preferredTransport = _transportSelector.preferred();
             break;
         case State::Interrupted:
             Q_ASSERT(_connectingConfig.vpnLocation());
@@ -1481,7 +1535,7 @@ void VPNConnection::setState(State state)
         case State::Connected:
             Q_ASSERT(!_connectingConfig.vpnLocation());
             Q_ASSERT(_connectedConfig.vpnLocation());
-            preferredTransport = _transportSelector.preferred();
+            preferredTransport = _transportSelector.lastPreferred();
             actualTransport = _transportSelector.lastUsed();
             break;
         case State::Disconnecting:
@@ -1493,15 +1547,6 @@ void VPNConnection::setState(State state)
             Q_ASSERT(_connectingConfig.vpnLocation());
             // _connectedConfig.vpnLocation() depends on whether we had a connection before
             break;
-        }
-
-        // Resolve '0' ports to actual effective ports
-        if(_connectedConfig.vpnLocation())
-        {
-            if(preferredTransport)
-                preferredTransport->resolvePort(*_connectedConfig.vpnLocation());
-            if(actualTransport)
-                actualTransport->resolvePort(*_connectedConfig.vpnLocation());
         }
 
         emit stateChanged(_state, _connectingConfig, _connectedConfig,

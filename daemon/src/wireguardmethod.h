@@ -23,6 +23,7 @@
 #define WIREGUARDMETHOD_H
 
 #include "vpnmethod.h"
+#include "openssl.h"
 
 // Clean any Wireguard leftovers that could exist if the daemon crashed while a
 // connection was up.  (Cleans for all WG backends supported on this platform.)

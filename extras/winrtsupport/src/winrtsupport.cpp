@@ -77,7 +77,6 @@ void forEachApp(const QString &family, Func_t func)
 {
     return convertExceptions([&]{
         winrt::Windows::Management::Deployment::PackageManager packageMgr;
-
         auto packages = packageMgr.FindPackagesForUser({}, qstrToHstr(family));
 
         for(const auto &pkg : packages)
@@ -86,14 +85,14 @@ void forEachApp(const QString &family, Func_t func)
             auto appsAsync = pkg.GetAppListEntriesAsync();
             auto appEntries = appsAsync.get();
             for(const auto &appEntry : appEntries)
-            func(appEntry);
+                func(appEntry);
         }
     });
 }
 
 // Return all apps for a family
 // This typically returns only one app per family
-// But we have one known exception in the case of winCommsApps which has a Mail and
+// But we have one known exception in the case of winCommsApps ("Windows Communications Apps") which has a Mail and
 // a Calendar app.
 // All the apps for a family are ultimately coalesced into a single "app" (see getUwpApps()) for that family
 // with a name that's a combination of their names, e.g "Mail, Calendar"
@@ -128,7 +127,7 @@ QString loadAppDisplayName(const QString &family)
         // If a family has multiple apps - concatenate the names together
         // e.g the winCommsApps family will be represented by a single
         // app with the name "Mail, Calendar".
-        for(auto &app : apps)
+        for(const auto &app : apps)
         {
             auto appDisplayInfo = app.DisplayInfo();
             appNames << hstrToQstr(appDisplayInfo.DisplayName());

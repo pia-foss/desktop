@@ -39,20 +39,18 @@ namespace
     // list.  Returns the location ID if a match is found (or "auto").
     //
     // If no match is found, returns an empty string.
-    QString matchSpecifiedLocation(const DaemonData &data, const QString &location)
+    QString matchSpecifiedLocation(const DaemonState &state, const QString &location)
     {
         if(location == GetSetValue::locationAuto)
             return GetSetValue::locationAuto;
 
-        const auto &serverLocations = data.locations();
-
         // This an O(N) lookup, but since we just run once there's no point to
         // building a better representation of the data just to use it once and
         // throw it away.
-        for(const auto &pServerLocation : serverLocations)
+        for(const auto &knownLocation : state.availableLocations())
         {
-            if(pServerLocation && location == GetSetValue::getRegionCliName(pServerLocation))
-                return pServerLocation->id();
+            if(knownLocation.second && location == GetSetValue::getRegionCliName(knownLocation.second))
+                return knownLocation.second->id();
         }
 
         qWarning() << "No match found for specified location:" << location;
@@ -66,7 +64,7 @@ namespace
         if(params[1] == GetSetType::region)
         {
             // Figure out the actual location ID
-            const auto &id = matchSpecifiedLocation(client.connection().data, params[2]);
+            const auto &id = matchSpecifiedLocation(client.connection().state, params[2]);
             if(id.isEmpty())
             {
                 errln() << "Unknown region:" << params[2];

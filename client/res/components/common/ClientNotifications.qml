@@ -73,6 +73,36 @@ Item {
     timestampValue: Daemon.state.updateDownloadFailure
   }
 
+  // One or more overrides are present but could not be loaded.  This is almost
+  // certainly not what was intended.
+  NotificationStatus {
+    id: overridesFailed
+    title: errorHeaderTitle
+    // Override notifications aren't translated since these are for testing
+    // purposes only
+    message: "Testing overrides could not be loaded"
+    severity: severities.error
+    tipText: "Testing overrides were present but couldn't be loaded for: " +
+             Daemon.state.overridesFailed.join(", ") +
+             ".  Check the log for details."
+    dismissible: false
+    active: Daemon.state.overridesFailed.length > 0
+  }
+
+  // One or more overrides are present but could not be loaded.  This is almost
+  // certainly not what was intended.
+  NotificationStatus {
+    id: overridesActive
+    // Override notifications aren't translated since these are for testing
+    // purposes only
+    message: "Testing overrides are active"
+    tipText: "Testing overrides are loaded for: " +
+             Daemon.state.overridesActive.join(", ") + "."
+    severity: severities.info
+    dismissible: false
+    active: Daemon.state.overridesActive.length > 0
+  }
+
   // TAP adapter isn't found (Windows only)
   //
   // This isn't dismissible - it's unlikely that we detect this incorrectly, and
@@ -338,6 +368,16 @@ Item {
     //: number.  For example: "UDP port 8080" or "TCP port 443".
     message: uiTr("Connected using %1 port %2.").arg(actualProtocol.toUpperCase()).arg(actualPort)
     tipText: {
+      //: Detailed message used when the client automatically uses an alternate
+      //: transport, and the user has selected the "default" port (the actual
+      //: value used for the default is not shown, since it could vary among
+      //: servers).  %1 is the chosen protocol ("UDP" or "TCP"), and "%2 port %3"
+      //: refers to the actual transport used, such as "TCP port 443" or
+      //: "UDP port 8080".
+      if(chosenPort === 0) {
+        return uiTr("Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.")
+          .arg(chosenProtocol.toUpperCase()).arg(chosenPort).arg(actualProtocol.toUpperCase()).arg(actualPort)
+      }
       //: Detailed message when the client automatically uses an alternate
       //: transport.  "%1 port %2" refers to the chosen transport, and
       //: "%3 port %4" refers to the actual transport; for example
@@ -450,6 +490,11 @@ Item {
     // Update - first because this could resolve a known issue
     updateAvailable,
     downloadFailed,
+    // Testing overrides - could cause virtually all of the following
+    // conditions, particularly if the overrides are out of date or refer to
+    // servers that no longer exist, etc.
+    overridesFailed,
+    overridesActive,
     // Showstopping errors - prevent all connections or seriously impact
     // functionality
     tapAdapterMissing,

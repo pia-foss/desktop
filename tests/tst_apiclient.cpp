@@ -181,6 +181,15 @@ private:
     QSignalSpy _spy;
 };
 
+// An ApiClient with its own Environment.
+class TestApiClient : public Environment, public ApiClient
+{
+public:
+    TestApiClient()
+        : Environment{}, ApiClient{static_cast<Environment&>(*this)}
+    {}
+};
+
 class tst_apiclient : public QObject
 {
     Q_OBJECT
@@ -196,7 +205,7 @@ private slots:
     void testGetIpRetryTimeout()
     {
         MockNetworkManager::enqueueReply();
-        ApiClient client;
+        TestApiClient client;
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         // Spy on completion of the request
@@ -230,7 +239,7 @@ private slots:
     void testRateLimiting()
     {
         auto pReply1 = MockNetworkManager::enqueueReply();
-        ApiClient client;
+        TestApiClient client;
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         // Spy on completion
@@ -265,7 +274,7 @@ private slots:
     void testAuthError()
     {
         auto pReply1 = MockNetworkManager::enqueueReply();
-        ApiClient client;
+        TestApiClient client;
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         // Spy on completion
@@ -299,7 +308,7 @@ private slots:
     // state with ApiClient.)
     void testApiBaseMemory()
     {
-        ApiClient client;
+        TestApiClient client;
 
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
@@ -317,7 +326,7 @@ private slots:
         // Host is unreachable
         pHeadReply1->finishNetError();
         QVERIFY(consumeSpy.wait(100));
-        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("piaproxy.net")));
+        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.piaproxy.net")));
         consumeSpy.clear();
 
         // Success on the alternate host
@@ -331,7 +340,7 @@ private slots:
         client.getRetry(TestData::status, TestData::passwordAuth())
             ->notify(&getSpy, getSpy.callback());
         QVERIFY(consumeSpy.wait(100));
-        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("piaproxy.net")));
+        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.piaproxy.net")));
         consumeSpy.clear();
 
         emit pGetReply->finished();

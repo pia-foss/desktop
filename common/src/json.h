@@ -26,6 +26,9 @@
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <vector>
+#include <unordered_map>
+#include <set>
 
 #include <QHash>
 #include <QJsonArray>
@@ -52,10 +55,6 @@ QT_WARNING_DISABLE_CLANG("-Wunused-lambda-capture")
 
 // Forward declaration
 class COMMON_EXPORT NativeJsonObject;
-
-// Native exception used by the single-argument json_cast<T> form; must not be propagated.
-class COMMON_EXPORT json_cast_exception : public std::exception { };
-
 
 // Implementations of json_value(from, to) for basic types
 
@@ -177,10 +176,33 @@ template<typename From, typename To> bool json_cast_array(const From& from, To& 
     {
         typename To::value_type converted;
         if (!json_cast(item, converted)) return false;
-        result += std::move(converted);
+        result.insert(result.end(), std::move(converted));
     }
     to = std::move(result);
     return true;
+}
+
+// Get the key and value from either an STL-style associative container
+// iterator, or a Qt-style associative container iterator
+template<class IteratorT>
+auto associativeIteratorKey(typename std::enable_if<std::is_member_function_pointer<decltype(&IteratorT::key)>::value, const IteratorT &>::type it)
+{
+    return it.key();
+}
+template<class IteratorT>
+auto associativeIteratorValue(typename std::enable_if<std::is_member_function_pointer<decltype(&IteratorT::value)>::value, const IteratorT &>::type it)
+{
+    return it.value();
+}
+template<class IteratorT>
+auto associativeIteratorKey(typename std::enable_if<std::is_pointer<decltype(&std::declval<IteratorT>()->first)>::value, const IteratorT &>::type it)
+{
+    return it->first;
+}
+template<class IteratorT>
+auto associativeIteratorValue(typename std::enable_if<std::is_pointer<decltype(&std::declval<IteratorT>()->second)>::value, const IteratorT &>::type it)
+{
+    return it->second;
 }
 
 // Helper to cast between standard API maps/hashmaps/objects
@@ -190,8 +212,9 @@ template<typename From, typename To> bool json_cast_map(const From& from, To& to
     for (auto it = from.begin(); it != from.end(); ++it)
     {
         typename To::mapped_type converted;
-        if (!json_cast(it.value(), converted)) return false;
-        result.insert(it.key(), std::move(converted));
+        if (!json_cast(associativeIteratorValue<typename From::const_iterator>(it), converted))
+            return false;
+        result[associativeIteratorKey<typename From::const_iterator>(it)] = std::move(converted);
     }
     to = std::move(result);
     return true;
@@ -228,10 +251,11 @@ template<typename From, typename To> bool json_cast_map(const From& from, To& to
 IMPLEMENT_JSON_CAST_ARRAY(QList<T>)
 IMPLEMENT_JSON_CAST_ARRAY(QLinkedList<T>)
 IMPLEMENT_JSON_CAST_ARRAY(QVector<T>)
-IMPLEMENT_JSON_CAST_ARRAY(QSet<T>)
+IMPLEMENT_JSON_CAST_ARRAY(std::vector<T>)
+IMPLEMENT_JSON_CAST_ARRAY(std::set<T>)
+IMPLEMENT_JSON_CAST_ARRAY(std::set<T, std::greater<T>>)
 
-IMPLEMENT_JSON_CAST_MAP(QMap<QString, T>)
-IMPLEMENT_JSON_CAST_MAP(QHash<QString, T>)
+IMPLEMENT_JSON_CAST_MAP(std::unordered_map<QString, T>)
 
 #undef IMPLEMENT_JSON_CAST_ARRAY
 #undef IMPLEMENT_JSON_CAST_MAP
@@ -248,11 +272,11 @@ COMMON_EXPORT bool json_cast(const NativeJsonObject& from, QJsonValue& to);
 // if the stored value is not a compatible type. Add additional conversions
 // for custom types with extra json_cast(from, to) function overloads.
 //
-template<typename To, typename From> static inline To json_cast(const From& from) throws(json_cast_exception)
+template<typename To, typename From> static inline To json_cast(const From& from)
 {
     To to;
     if (!json_cast(from, to))
-        throw json_cast_exception();
+        throw Error{HERE, Error::Code::JsonCastError};
     return to;
 }
 

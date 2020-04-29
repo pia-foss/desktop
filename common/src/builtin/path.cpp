@@ -133,23 +133,16 @@ Path::Path(const QString& path)
 static Path getBaseDir()
 {
     Path appPath = QCoreApplication::applicationDirPath();
-#if defined(PIA_DAEMON) && defined(PIA_CLIENT)
-    // For the combined client+daemon, support running inside a Qbs build directory
-    if (!QFile(appPath / PIA_DAEMON_FILENAME).exists())
-    {
-#ifdef Q_OS_MACOS
-        Path alternativePath = appPath / "../../../../install-root/" PIA_PRODUCT_NAME ".app/Contents/MacOS";
-#else
-        Path alternativePath = appPath / "../../install-root";
-#endif
-        if (QFile(alternativePath / PIA_DAEMON_FILENAME).exists())
-            appPath = alternativePath;
-    }
-#endif
-#ifdef Q_OS_MACOS
+#if defined(UNIT_TEST)
+    // For unit tests, use install-root - unit tests are outside this directory,
+    // but we need this to load OpenSSL dynamically.
+    appPath = appPath / "../install-root";
+    #if defined(Q_OS_MACOS)
+        appPath = appPath / BRAND_NAME ".app";
+    #endif
+#elif defined(Q_OS_MACOS)
     appPath = appPath / "../..";
-#endif
-#ifdef Q_OS_LINUX
+#elif defined(Q_OS_LINUX)
     appPath = appPath / "../";
 #endif
     return appPath;

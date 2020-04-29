@@ -156,12 +156,12 @@ CppApplication {
   Properties {
     condition: qbs.toolchain.contains('gcc') && !qbs.toolchain.contains("clang")
     cpp.commonCompilerFlags: outer.concat([ "-fvisibility=hidden" ])
-    cpp.cxxFlags: outer.concat([ "-Wno-unused-parameter", "-Wno-attributes", "-Werror=unused-result" ])
+    cpp.cxxFlags: outer.concat([ "-Wno-unused-parameter", "-Wno-attributes", "-Werror=unused-result", "-Werror=return-type" ])
   }
   Properties {
     condition: qbs.toolchain.contains('clang')
     cpp.commonCompilerFlags: outer.concat([ "-fvisibility=hidden" ])
-    cpp.cxxFlags: outer.concat([ "-Wno-unused-parameter", "-Wno-dangling-else", "-Werror=unused-result" ])
+    cpp.cxxFlags: outer.concat([ "-Wno-unused-parameter", "-Wno-dangling-else", "-Werror=unused-result", "-Werror=return-type" ])
   }
 
   Properties {

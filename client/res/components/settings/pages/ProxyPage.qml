@@ -227,7 +227,12 @@ Page {
         width: parent.width
         implicitHeight: 300
         regionFilter: function(serverLocation) {
-          return !!serverLocation.shadowsocks
+          // Show regions that have at least one shadowsocks server
+          for(var i=0; i<serverLocation.servers.length; ++i) {
+            if(serverLocation.servers[i].shadowsocksPorts.length > 0)
+              return true
+          }
+          return false
         }
         // Don't use shadowsocksLocations directly since the chosen location
         // isn't applied until the user clicks OK
@@ -241,7 +246,7 @@ Page {
         onRegionSelected: {
           // Update chosenLocation - null if 'auto' or an unknown region was
           // selected
-          shadowsocksRegionList.chosenLocation = Daemon.data.locations[locationId]
+          shadowsocksRegionList.chosenLocation = Daemon.state.availableLocations[locationId]
         }
       }
 

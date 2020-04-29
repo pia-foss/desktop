@@ -59,7 +59,10 @@ function archive_pdb_win() {
     mkdir -p "$SYMBOLS_DIR"
 
     echo "Archiving target symbols"
-    find "$1" -type f \( -name "*.exe" -o -name "*.pdb" -o -name "*.dll" \) -exec cp {} "$SYMBOLS_DIR" \;
+    find "$1" -type f \
+        \( -name "*.exe" -o -name "*.pdb" -o -name "*.dll" \) \
+        -and ! \( -name "test-*.exe" -o -name "test-*.pdb" -o -name "test-*.dll" \) \
+        -exec cp {} "$SYMBOLS_DIR" \;
 
     "$_7Z" a -mx=9 "$DEBUG_DIR/symbols-$2.zip" "$SYMBOLS_DIR"
 }

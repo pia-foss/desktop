@@ -64,11 +64,7 @@ BUILD=${BUILD:-"$OUTDIR/build"}
 ARTIFACTS=${ARTIFACTS:-"$OUTDIR/artifacts"}
 
 if [ -z "${QTROOT}" ]; then
-  if [ -d "$HOME/Qt/5.12.3" ]; then
-    QTROOT="$HOME/Qt/5.12.3"
-  elif [ -d "$HOME/Qt5.12/5.12.3" ]; then
-    QTROOT="$HOME/Qt5.12/5.12.3"
-  fi
+  die "Missing QTROOT env variable"
 fi
 
 # Optional paths to tools; can be overridden in environment

@@ -61,7 +61,7 @@ namespace GetSetValue
     const QString locationAuto{QStringLiteral("auto")};
     // Get the CLI name used to represent a region.  nullptr is interpreted as
     // "auto".
-    QString getRegionCliName(const QSharedPointer<ServerLocation> &pLocation)
+    QString getRegionCliName(const QSharedPointer<Location> &pLocation)
     {
         if(!pLocation)
             return locationAuto;
@@ -156,7 +156,7 @@ namespace
     class ValuePrinter : public QObject
     {
     public:
-        static QString renderLocation(const QSharedPointer<ServerLocation> &pLocation);
+        static QString renderLocation(const QSharedPointer<Location> &pLocation);
         static QString renderValue(CliClient &client, const QString &type);
 
     public:
@@ -210,7 +210,7 @@ namespace
 
     // Render a line representing a location, for either "get location" or
     // "get locations".  nullptr is interpreted as "auto".
-    QString ValuePrinter::renderLocation(const QSharedPointer<ServerLocation> &pLocation)
+    QString ValuePrinter::renderLocation(const QSharedPointer<Location> &pLocation)
     {
         return GetSetValue::getRegionCliName(pLocation);
     }

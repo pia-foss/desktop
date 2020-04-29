@@ -186,242 +186,242 @@
         <translation>[&#x130;&#x429;&#x30A2;___Dównlóád óf vérsíón %1 fáíléd.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="73"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="103"/>
         <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé TÁP ádáptér fór thé VPN túnnél ís nót ínstálléd.  Yóú cán réínstáll ít fróm Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="85"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="115"/>
         <source>ClientNotifications --- Restart to complete installation.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Réstárt tó cómplété ínstállátíón.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="86"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="116"/>
         <source>ClientNotifications --- The system must be restarted before you can connect.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Thé systém múst bé réstártéd béfóré yóú cán cónnéct.______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="99"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="129"/>
         <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;____________Thé WínTÚN ádáptér fór thé VPN túnnél ís nót ínstálléd.  Yóú cán réínstáll ít fróm Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="112"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="142"/>
         <source>ClientNotifications --- The split tunnel filter is not installed.</source>
         <translation>[&#x130;&#x429;&#x30A2;____Thé splít túnnél fíltér ís nót ínstálléd.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="113"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="143"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé Ápp Éxclúsíón féátúré réqúírés thé splít túnnél fíltér.  Réínstáll ít fróm Séttíngs.__________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="124"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="154"/>
         <location filename="../../../pia2_desktop/client/res/components/common/DriverNotificationStatus.qml" line="12"/>
         <source>ClientNotifications --- Reinstall</source>
         <translation>[&#x130;&#x429;_Réínstáll]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="138"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="168"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé Ápp Éxclúsíón féátúré réqúírés thé splít túnnél fíltér.  Réstárt tó fínísh ínstállátíón.__________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="153"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="183"/>
         <source>ClientNotifications --- Connection refused.</source>
         <translation>[&#x130;&#x429;&#x30A2;_Cónnéctíón réfúséd._]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="159"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="189"/>
         <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
         <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_________________Thé sérvér réfúséd thé cónnéctíón.  Pléásé chéck yóúr úsérnámé ánd pásswórd, ánd vérífy thát yóúr áccóúnt ís nót éxpíréd.________________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="168"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="198"/>
         <source>ClientNotifications --- Could not configure DNS.</source>
         <translation>[&#x130;&#x429;&#x30A2;__Cóúld nót cónfígúré DNS.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="169"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="199"/>
         <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Énáblé débúg lóggíng ánd chéck thé dáémón lóg fór spécífíc détáíls.________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="172"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="202"/>
         <source>ClientNotifications --- Daemon Log</source>
         <translation>[&#x130;&#x429;&#x30A2;Dáémón Lóg]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="174"/>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="206"/>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="265"/>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="333"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="204"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="236"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="295"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="363"/>
         <source>ClientNotifications --- Settings</source>
         <translation>[&#x130;&#x429;Séttíngs]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="182"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="212"/>
         <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
         <translation>[&#x130;&#x429;&#x30A2;_________Fáíléd tó rún /úsr/bín/xdg-ópén.  Pléásé ópén thé dáémón lóg fílé fróm:________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="199"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="229"/>
         <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
         <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cán&apos;t cónnéct tó Hándsháké.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="203"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="233"/>
         <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
         <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;______________Cán&apos;t sét úp námé résólútíón wíth Hándsháké.  Cóntínúé wáítíng, ór try á dífférént Námé Sérvér séttíng.______________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="217"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="247"/>
         <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Rúnníng PÍÁ ás ádmínístrátór ís nót récómméndéd._____]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="218"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="248"/>
         <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______________Rúnníng PÍÁ ás ádmínístrátór cán prévént Láúnch ón Systém Stártúp fróm wórkíng ánd máy cáúsé óthér próbléms._______________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="230"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="260"/>
         <source>ClientNotifications --- KILLSWITCH ENABLED</source>
         <translation>[&#x130;&#x429;&#x30A2;__KÍLLSWÍTCH ÉNÁBLÉD_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="231"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="261"/>
         <source>ClientNotifications --- Killswitch is enabled.</source>
         <translation>[&#x130;&#x429;&#x30A2;_Kíllswítch ís énábléd._]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="232"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="262"/>
         <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Áccéss tó thé Íntérnét ís blóckéd bécáúsé thé kíllswítch féátúré ís énábléd ín Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="235"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="265"/>
         <source>ClientNotifications --- Change</source>
         <translation>[&#x130;&#x429;Chángé]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="248"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="278"/>
         <source>ClientNotifications --- RECONNECTING...</source>
         <translation>[&#x130;&#x429;&#x30A2;_RÉCÓNNÉCTÍNG...]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="249"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="279"/>
         <source>ClientNotifications --- The connection to the VPN server was lost.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Thé cónnéctíón tó thé VPN sérvér wás lóst.____]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="258"/>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="276"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="288"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="306"/>
         <source>ClientNotifications --- CONNECTING...</source>
         <translation>[&#x130;&#x429;&#x30A2;_CÓNNÉCTÍNG...]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="261"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="291"/>
         <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
         <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cán&apos;t cónnéct tó thé próxy.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="262"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="292"/>
         <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____________Thé próxy cán&apos;t bé réáchéd.  Chéck yóúr próxy séttíngs, ánd chéck thát thé próxy ís áváíláblé.____________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="277"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="307"/>
         <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Cán&apos;t réách thé VPN sérvér.  Pléásé chéck yóúr cónnéctíón._______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="286"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="316"/>
         <source>ClientNotifications --- RECONNECT NEEDED</source>
         <translation>[&#x130;&#x429;&#x30A2;__RÉCÓNNÉCT NÉÉDÉD_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="287"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="317"/>
         <source>ClientNotifications --- Reconnect to apply settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Récónnéct tó ápply séttíngs.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="288"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="318"/>
         <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
         <translation>[&#x130;&#x429;&#x30A2;______________Sómé séttíngs chángés wón&apos;t táké éfféct úntíl thé néxt tímé yóú cónnéct. Clíck tó récónnéct nów._____________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="297"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="327"/>
         <source>ClientNotifications --- Connected with OpenVPN.</source>
         <translation>[&#x130;&#x429;&#x30A2;__Cónnéctéd wíth ÓpénVPN.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="300"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="330"/>
         <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
         <translation>[&#x130;&#x429;&#x30A2;__________Cónnéctéd wíth ÓpénVPN tó lóg ín fór thé fírst tímé. Récónnéct tó úsé WíréGúárd.__________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="302"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="332"/>
         <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Cónnéctéd wíth ÓpénVPN tó lóg ín fór thé fírst tímé._____]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="321"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="351"/>
         <source>ClientNotifications --- Connected using %1 port %2.</source>
         <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cónnéctéd úsíng %1 pórt %2.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="328"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="358"/>
         <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
         <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_______________Try Áltérnáté Séttíngs ís énábléd.  Thé sérvér cóúld nót bé réáchéd ón %1 pórt %2, só %3 pórt %4 wás úséd ínstéád._______________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="342"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="372"/>
         <source>ClientNotifications --- Subscription expires in %1 days.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Súbscríptíón éxpírés ín %1 dáys.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="345"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="375"/>
         <source>ClientNotifications --- Renew</source>
         <translation>[&#x130;&#x429;Rénéw]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="359"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="389"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Únáblé tó réách lógín sérvér.__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="363"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="393"/>
         <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
         <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___________Yóúr áccóúnt détáíls áré únáváíláblé, bút yóú máy stíll bé áblé tó cónnéct tó thé VPN.__________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="367"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="397"/>
         <source>ClientNotifications --- Retry</source>
         <translation>[&#x130;&#x429;Rétry]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="375"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="405"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>[&#x130;&#x429;&#x30A2;____Príváté Íntérnét Áccéss wás úpdátéd.___]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="378"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="408"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>[&#x130;&#x429;&#x30A2;__Séé whát&apos;s néw_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="395"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/ClientNotifications.qml" line="425"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_________Thé ápplícátíón qúít únéxpéctédly. Yóúr VPN cónnéctíón wás présérvéd.________]</translation>
@@ -494,60 +494,50 @@
         <translation>[&#x130;&#x429;_Prótócól: ]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="40"/>
-        <source>ConnectionPage --- OpenVPN®</source>
-        <translation>[&#x130;&#x429;_ÓpénVPN®]</translation>
-    </message>
-    <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="43"/>
-        <source>ConnectionPage --- WireGuard®</source>
-        <translation>[&#x130;&#x429;_WíréGúárd®]</translation>
-    </message>
-    <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="58"/>
         <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
         <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__________Rélíáblé, stáblé ánd sécúré prótócól wíth 18+ yéárs óf ópén sóúrcé dévélópmént.__________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="60"/>
         <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
         <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__________Néwér, móré éffícíént prótócól wíth thé póténtíál fór íncréáséd pérfórmáncé._________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="93"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
         <source>ConnectionPage --- OpenVPN® Settings</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÓpénVPN® Séttíngs_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
         <source>ConnectionPage --- WireGuard® Settings</source>
         <translation>[&#x130;&#x429;&#x30A2;_WíréGúárd® Séttíngs_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="132"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
         <source>ConnectionPage --- Trademarks</source>
         <translation>[&#x130;&#x429;&#x30A2;Trádémárks]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="146"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="147"/>
         <source>ConnectionPage --- What do these settings mean?</source>
         <translation>[&#x130;&#x429;&#x30A2;___Whát dó thésé séttíngs méán?__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="162"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
         <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
         <translation>[&#x130;&#x429;&#x30A2;________________________Áll pródúct ánd cómpány námés áré trádémárks™ ór régístéréd® trádémárks óf théír réspéctívé hóldérs. Úsé óf thém dóés nót ímply ány áffílíátíón wíth ór éndórsémént by thém.________________________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="164"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="167"/>
         <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______ÓpénVPN® ís á trádémárk óf ÓpénVPN Téchnólógíés, Ínc.______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
         <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
         <translation>[&#x130;&#x429;&#x30A2;________WíréGúárd® ís á trádémárk óf Jásón Á. Dónénféld, án índívídúál._______]</translation>
     </message>
@@ -582,6 +572,7 @@
     </message>
     <message>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/OpenVpnConnection.qml" line="113"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
         <source>ConnectionPage --- Auto</source>
         <translation>[&#x130;_Áútó]</translation>
     </message>
@@ -648,13 +639,13 @@
     </message>
     <message>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/OpenVpnConnection.qml" line="198"/>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="37"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>[&#x130;&#x429;&#x30A2;_Úsé Smáll Páckéts_]</translation>
     </message>
     <message>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/OpenVpnConnection.qml" line="202"/>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="41"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>[&#x130;&#x429;&#x30A2;_________________Sét á smállér MTÚ fór thé VPN cónnéctíón. Thís cán résúlt ín lówér tránsfér spééds bút ímpróvéd rélíábílíty ón póór cónnéctíóns._________________]</translation>
     </message>
@@ -758,292 +749,382 @@
 <context>
     <name>DaemonData</name>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="36"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="35"/>
         <source>DaemonData --- UAE</source>
         <translation>[&#x130;_ÚÁÉ]</translation>
     </message>
     <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="36"/>
+        <source>DaemonData --- Albania</source>
+        <translation>[&#x130;&#x429;Álbáníá]</translation>
+    </message>
+    <message>
         <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="37"/>
+        <source>DaemonData --- Argentina</source>
+        <translation>[&#x130;&#x429;_Árgéntíná]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="38"/>
         <source>DaemonData --- AU Sydney</source>
         <translation>[&#x130;&#x429;_ÁÚ Sydnéy]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="38"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="39"/>
         <source>DaemonData --- AU Melbourne</source>
         <translation>[&#x130;&#x429;&#x30A2;ÁÚ Mélbóúrné]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="39"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="40"/>
         <source>DaemonData --- AU Perth</source>
         <translation>[&#x130;&#x429;_ÁÚ Pérth]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="40"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="41"/>
         <source>DaemonData --- Austria</source>
         <translation>[&#x130;&#x429;Áústríá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="41"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="42"/>
+        <source>DaemonData --- Bosnia and Herzegovina</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Bósníá ánd Hérzégóvíná_]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="43"/>
         <source>DaemonData --- Belgium</source>
         <translation>[&#x130;&#x429;Bélgíúm]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="42"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="44"/>
+        <source>DaemonData --- Bulgaria</source>
+        <translation>[&#x130;&#x429;Búlgáríá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="45"/>
         <source>DaemonData --- Brazil</source>
         <translation>[&#x130;&#x429;Brázíl]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="43"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="46"/>
         <source>DaemonData --- CA Montreal</source>
         <translation>[&#x130;&#x429;&#x30A2;CÁ Móntréál]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="44"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="47"/>
         <source>DaemonData --- CA Toronto</source>
         <translation>[&#x130;&#x429;_CÁ Tóróntó]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="45"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="48"/>
         <source>DaemonData --- CA Vancouver</source>
         <translation>[&#x130;&#x429;&#x30A2;CÁ Váncóúvér]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="46"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="49"/>
         <source>DaemonData --- Czech Republic</source>
         <translation>[&#x130;&#x429;&#x30A2;_Czéch Répúblíc]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="47"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="50"/>
         <source>DaemonData --- DE Berlin</source>
         <translation>[&#x130;&#x429;_DÉ Bérlín]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="48"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="51"/>
         <source>DaemonData --- Denmark</source>
         <translation>[&#x130;&#x429;_Dénmárk]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="49"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="52"/>
+        <source>DaemonData --- Estonia</source>
+        <translation>[&#x130;&#x429;Éstóníá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="53"/>
         <source>DaemonData --- Finland</source>
         <translation>[&#x130;&#x429;Fínlánd]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="50"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="54"/>
         <source>DaemonData --- France</source>
         <translation>[&#x130;&#x429;Fráncé]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="51"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="55"/>
         <source>DaemonData --- DE Frankfurt</source>
         <translation>[&#x130;&#x429;&#x30A2;DÉ Fránkfúrt]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="52"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="56"/>
+        <source>DaemonData --- Greece</source>
+        <translation>[&#x130;&#x429;Gréécé]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="57"/>
         <source>DaemonData --- Hong Kong</source>
         <translation>[&#x130;&#x429;_Hóng Kóng]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="53"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="58"/>
+        <source>DaemonData --- Croatia</source>
+        <translation>[&#x130;&#x429;Cróátíá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="59"/>
         <source>DaemonData --- Hungary</source>
         <translation>[&#x130;&#x429;_Húngáry]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="54"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="60"/>
         <source>DaemonData --- India</source>
         <translation>[&#x130;_Índíá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="55"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="61"/>
         <source>DaemonData --- Ireland</source>
         <translation>[&#x130;&#x429;Írélánd]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="56"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="62"/>
+        <source>DaemonData --- Iceland</source>
+        <translation>[&#x130;&#x429;Ícélánd]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="63"/>
         <source>DaemonData --- Israel</source>
         <translation>[&#x130;&#x429;Ísráél]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="57"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="64"/>
         <source>DaemonData --- Italy</source>
         <translation>[&#x130;_Ítály]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="58"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="65"/>
         <source>DaemonData --- Japan</source>
         <translation>[&#x130;&#x429;Jápán]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="59"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="66"/>
+        <source>DaemonData --- Lithuania</source>
+        <translation>[&#x130;&#x429;_Líthúáníá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="67"/>
         <source>DaemonData --- Luxembourg</source>
         <translation>[&#x130;&#x429;&#x30A2;Lúxémbóúrg]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="60"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="68"/>
+        <source>DaemonData --- Latvia</source>
+        <translation>[&#x130;&#x429;Látvíá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="69"/>
+        <source>DaemonData --- Moldova</source>
+        <translation>[&#x130;&#x429;_Móldóvá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="70"/>
         <source>DaemonData --- Mexico</source>
         <translation>[&#x130;&#x429;Méxícó]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="61"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="71"/>
+        <source>DaemonData --- North Macedonia</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Nórth Mácédóníá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="72"/>
+        <source>DaemonData --- Malaysia</source>
+        <translation>[&#x130;&#x429;_Máláysíá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="73"/>
         <source>DaemonData --- Netherlands</source>
         <translation>[&#x130;&#x429;&#x30A2;Néthérlánds]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="62"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="74"/>
         <source>DaemonData --- Norway</source>
         <translation>[&#x130;&#x429;Nórwáy]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="63"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="75"/>
         <source>DaemonData --- New Zealand</source>
         <translation>[&#x130;&#x429;&#x30A2;Néw Zéálánd]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="64"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="76"/>
         <source>DaemonData --- Poland</source>
         <translation>[&#x130;&#x429;Pólánd]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="65"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="77"/>
+        <source>DaemonData --- Portugal</source>
+        <translation>[&#x130;&#x429;_Pórtúgál]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="78"/>
         <source>DaemonData --- Romania</source>
         <translation>[&#x130;&#x429;_Rómáníá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="66"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="79"/>
+        <source>DaemonData --- Serbia</source>
+        <translation>[&#x130;&#x429;Sérbíá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="80"/>
         <source>DaemonData --- Singapore</source>
         <translation>[&#x130;&#x429;_Síngápóré]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="67"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="81"/>
+        <source>DaemonData --- Slovenia</source>
+        <translation>[&#x130;&#x429;_Slóvéníá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="82"/>
+        <source>DaemonData --- Slovakia</source>
+        <translation>[&#x130;&#x429;_Slóvákíá]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="83"/>
         <source>DaemonData --- Spain</source>
         <translation>[&#x130;&#x429;Spáín]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="68"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="84"/>
         <source>DaemonData --- Sweden</source>
         <translation>[&#x130;&#x429;Swédén]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="69"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="85"/>
         <source>DaemonData --- Switzerland</source>
         <translation>[&#x130;&#x429;_Swítzérlánd]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="70"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="86"/>
         <source>DaemonData --- Turkey</source>
         <translation>[&#x130;&#x429;Túrkéy]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="71"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="87"/>
+        <source>DaemonData --- Ukraine</source>
+        <translation>[&#x130;&#x429;Úkráíné]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="88"/>
         <source>DaemonData --- UK London</source>
         <translation>[&#x130;&#x429;_ÚK Lóndón]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="72"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="89"/>
         <source>DaemonData --- UK Manchester</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÚK Mánchéstér]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="73"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="90"/>
         <source>DaemonData --- UK Southampton</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÚK Sóúthámptón]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="74"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="91"/>
         <source>DaemonData --- US East</source>
         <translation>[&#x130;&#x429;ÚS Éást]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="75"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="92"/>
         <source>DaemonData --- US West</source>
         <translation>[&#x130;&#x429;_ÚS Wést]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="76"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="93"/>
         <source>DaemonData --- US Atlanta</source>
         <translation>[&#x130;&#x429;_ÚS Átlántá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="77"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="94"/>
         <source>DaemonData --- US California</source>
         <translation>[&#x130;&#x429;&#x30A2;ÚS Cálífórníá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="78"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="95"/>
         <source>DaemonData --- US Chicago</source>
         <translation>[&#x130;&#x429;_ÚS Chícágó]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="79"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="96"/>
         <source>DaemonData --- US Denver</source>
         <translation>[&#x130;&#x429;_ÚS Dénvér]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="80"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="97"/>
         <source>DaemonData --- US Florida</source>
         <translation>[&#x130;&#x429;_ÚS Flórídá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="81"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="98"/>
         <source>DaemonData --- US Houston</source>
         <translation>[&#x130;&#x429;&#x30A2;ÚS Hóústón]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="82"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="99"/>
         <source>DaemonData --- US Las Vegas</source>
         <translation>[&#x130;&#x429;&#x30A2;ÚS Lás Végás]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="83"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="100"/>
         <source>DaemonData --- US New York City</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÚS Néw Yórk Cíty]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="84"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="101"/>
         <source>DaemonData --- US Seattle</source>
         <translation>[&#x130;&#x429;_ÚS Séáttlé]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="85"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="102"/>
         <source>DaemonData --- US Silicon Valley</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÚS Sílícón Válléy]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="86"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="103"/>
         <source>DaemonData --- US Texas</source>
         <translation>[&#x130;&#x429;_ÚS Téxás]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="87"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="104"/>
         <source>DaemonData --- US Washington DC</source>
         <translation>[&#x130;&#x429;&#x30A2;_ÚS Wáshíngtón DC_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="88"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="105"/>
         <source>DaemonData --- South Africa</source>
         <translation>[&#x130;&#x429;&#x30A2;Sóúth Áfrícá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="94"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="111"/>
         <source>DaemonData --- Germany</source>
         <translation>[&#x130;&#x429;_Gérmány]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="95"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="112"/>
         <source>DaemonData --- Canada</source>
         <translation>[&#x130;&#x429;Cánádá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="96"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="113"/>
         <source>DaemonData --- United States</source>
         <translation>[&#x130;&#x429;&#x30A2;Únítéd Státés]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="97"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="114"/>
         <source>DaemonData --- Australia</source>
         <translation>[&#x130;&#x429;_Áústrálíá]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="98"/>
+        <location filename="../../../pia2_desktop/client/res/components/daemon/DaemonData.qml" line="115"/>
         <source>DaemonData --- United Kingdom</source>
         <translation>[&#x130;&#x429;&#x30A2;_Únítéd Kíngdóm]</translation>
     </message>
@@ -1068,19 +1149,19 @@
 <context>
     <name>DialogMessage</name>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="28"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="31"/>
         <source>DialogMessage --- Information</source>
         <extracomment>Screen reader annotation for the &quot;info&quot; icon in dialog messages</extracomment>
         <translation>[&#x130;&#x429;_Ínfórmátíón]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="30"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="33"/>
         <source>DialogMessage --- Warning</source>
         <extracomment>Screen reader annotation for the &quot;warning&quot; icon in dialog messages</extracomment>
         <translation>[&#x130;&#x429;Wárníng]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="32"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/DialogMessage.qml" line="35"/>
         <source>DialogMessage --- Error</source>
         <extracomment>Screen reader annotation for the &quot;error&quot; icon in dialog messages</extracomment>
         <translation>[&#x130;_Érrór]</translation>
@@ -1484,6 +1565,11 @@
         <translation>[&#x130;&#x429;&#x30A2;____________Thé nétwórk ádáptér cánnót bé réínstálléd whílé cónnéctéd. Díscónnéct ánd réínstáll nów?___________]</translation>
     </message>
     <message>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Díscónnéct néédéd_]</translation>
+    </message>
+    <message>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
         <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Thé nétwórk ádáptér hás béén súccéssfúlly réínstálléd.______]</translation>
@@ -1797,43 +1883,43 @@
     </message>
     <message>
         <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="220"/>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="320"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="319"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>[&#x130;&#x429;&#x30A2;Splít Túnnél]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="247"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="246"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______Áppróvé thé splít túnnél éxténsíón tó énáblé thís féátúré.______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="258"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="257"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>[&#x130;&#x429;&#x30A2;_Sécúríty Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="382"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="380"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>[&#x130;&#x429;&#x30A2;__Ínstállíng splít túnnél fíltér...__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="391"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="389"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Énáblíng thís féátúré wíll ínstáll thé splít túnnél fíltér.______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="398"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="396"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Thé splít túnnél fíltér ís nót ínstálléd.  Réínstáll ít ón thé Hélp págé.________]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="463"/>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="468"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="461"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="466"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>[&#x130;&#x429;&#x30A2;_Ápp Éxclúsíóns]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="512"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/NetworkPage.qml" line="510"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______Ápps máy nééd tó bé réstártéd fór chángés tó bé ápplíéd.______]</translation>
     </message>
@@ -2299,22 +2385,22 @@
         <translation>[&#x130;&#x429;Álwáys]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="70"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="67"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>[&#x130;&#x429;&#x30A2;______PÍÁ MÁCÉ réqúírés úsíng PÍÁ DNS ín órdér tó fúnctíón.______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="74"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="71"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>[&#x130;&#x429;_PÍÁ MÁCÉ]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="75"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>[&#x130;&#x429;&#x30A2;______Blóck dómáíns úséd fór áds, tráckérs, ánd málwáré_____]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
@@ -2322,7 +2408,7 @@
         <comment>privacy-mace</comment>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="81"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
         <source>PrivacyPage --- On</source>
         <translation>[&#x130;_Ón]</translation>
     </message>
@@ -2442,12 +2528,12 @@
 <context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="26"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="32"/>
         <source>RegionModule --- Auto</source>
         <translation>[&#x130;_Áútó]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="28"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="34"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>[&#x130;&#x429;_Áútó (%1)]</translation>
     </message>
@@ -2533,14 +2619,6 @@
         <location filename="../../../pia2_desktop/client/res/components/common/regions/RegionRowBase.qml" line="271"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>[&#x130;&#x429;%1 ms]</translation>
-    </message>
-</context>
-<context>
-    <name>ReinstallLink</name>
-    <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>ReinstallLink --- Disconnect needed</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Díscónnéct néédéd_]</translation>
     </message>
 </context>
 <context>
@@ -2851,45 +2929,45 @@
         <translation>[&#x130;&#x429;&#x30A2;___Únáblé tó éxclúdé ápplícátíón__]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="158"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="154"/>
         <source>SplitTunnelAppDialog --- Add Application</source>
         <translation>[&#x130;&#x429;&#x30A2;_Ádd Ápplícátíón]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="201"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="197"/>
         <source>SplitTunnelAppDialog --- Search</source>
         <translation>[&#x130;&#x429;Séárch]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="214"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="210"/>
         <source>SplitTunnelAppDialog --- Browse</source>
         <translation>[&#x130;&#x429;Brówsé]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="266"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="262"/>
         <source>SplitTunnelAppDialog --- Applications</source>
         <translation>[&#x130;&#x429;&#x30A2;Ápplícátíóns]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="482"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="478"/>
         <source>SplitTunnelAppDialog --- App list, loading</source>
         <extracomment>Screen reader annotation for the &quot;application list&quot; from which a user can select an application to exclude. Screen reader annotation used for the split tunnel app list when the apps are still being loaded.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Ápp líst, lóádíng]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="485"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="481"/>
         <source>SplitTunnelAppDialog --- App list</source>
         <extracomment>Screen reader annotation for the split tunnel app list.</extracomment>
         <translation>[&#x130;&#x429;Ápp líst]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="491"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="487"/>
         <source>SplitTunnelAppDialog --- App</source>
         <extracomment>Screen reader annotation for the column listing the application in the existing application list (this table has only one column)</extracomment>
         <translation>[&#x130;_Ápp]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="517"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/SplitTunnelAppDialog.qml" line="513"/>
         <source>SplitTunnelAppDialog --- Refresh</source>
         <translation>[&#x130;&#x429;Réfrésh]</translation>
     </message>
@@ -3143,7 +3221,7 @@
 <context>
     <name>TrayMenuBuilder</name>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="17"/>
+        <location filename="../../../pia2_desktop/client/res/components/common/Messages.qml" line="23"/>
         <source>TrayMenuBuilder --- Help</source>
         <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
         <translation>[&#x130;_Hélp]</translation>
@@ -3371,27 +3449,44 @@
 <context>
     <name>WireguardConnection</name>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
-        <source>WireguardConnection --- Auto</source>
-        <translation>[&#x130;_Áútó]</translation>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="37"/>
+        <source>WireguardConnection --- Connection Timeout</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Cónnéctíón Tíméóút_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="49"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="40"/>
+        <source>WireguardConnection --- 30 seconds</source>
+        <translation>[&#x130;&#x429;_30 sécónds]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="41"/>
+        <source>WireguardConnection --- 1 minute</source>
+        <translation>[&#x130;&#x429;_1 mínúté]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="42"/>
+        <source>WireguardConnection --- 2 minutes</source>
+        <translation>[&#x130;&#x429;_2 mínútés]</translation>
+    </message>
+    <message>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="63"/>
         <source>WireguardConnection --- Use Kernel Module</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Úsé Kérnél Módúlé_]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="60"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="77"/>
         <source>WireguardConnection --- Install the WireGuard kernel module for the best performance.</source>
+        <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_______Ínstáll thé WíréGúárd kérnél módúlé fór thé bést pérfórmáncé._______]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="66"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="84"/>
         <source>WireguardConnection --- Install</source>
         <translation>[&#x130;&#x429;Ínstáll]</translation>
     </message>
     <message>
-        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="75"/>
+        <location filename="../../../pia2_desktop/client/res/components/settings/pages/WireguardConnection.qml" line="117"/>
         <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>[&#x130;&#x429;&#x30A2;______Fór dístríbútíón-spécífíc ínstállátíón ínstrúctíóns, vísít:______]</translation>
     </message>

@@ -25,6 +25,7 @@
 #include "vpnmethod.h"
 #include "ipc.h"
 #include "jsonrpc.h"
+#include "locations.h"
 #include "path.h"
 #include "version.h"
 #include "brand.h"
@@ -50,11 +51,8 @@
 #pragma comment(lib, "advapi32.lib")
 #endif
 
-#ifdef Q_OS_WIN
-#include "win/win_util.h"
-#include <AclAPI.h>
-#include <AccCtrl.h>
-#pragma comment(lib, "advapi32.lib")
+#ifdef Q_OS_LINUX
+#include "linux/linux_cgroup.h"
 #endif
 
 #ifndef UNIT_TEST
@@ -80,18 +78,6 @@ namespace
     const QString regionsResource{QStringLiteral("vpninfo/servers?version=1001&client=x-alpha")};
     const QString shadowsocksRegionsResource{QStringLiteral("vpninfo/shadowsocks_servers")};
 
-    const QByteArray serverListPublicKey = QByteArrayLiteral(
-        "-----BEGIN PUBLIC KEY-----\n"
-        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLYHwX5Ug/oUObZ5eH5P\n"
-        "rEwmfj4E/YEfSKLgFSsyRGGsVmmjiXBmSbX2s3xbj/ofuvYtkMkP/VPFHy9E/8ox\n"
-        "Y+cRjPzydxz46LPY7jpEw1NHZjOyTeUero5e1nkLhiQqO/cMVYmUnuVcuFfZyZvc\n"
-        "8Apx5fBrIp2oWpF/G9tpUZfUUJaaHiXDtuYP8o8VhYtyjuUu3h7rkQFoMxvuoOFH\n"
-        "6nkc0VQmBsHvCfq4T9v8gyiBtQRy543leapTBMT34mxVIQ4ReGLPVit/6sNLoGLb\n"
-        "gSnGe9Bk/a5V/5vlqeemWF0hgoRtUxMtU1hFbe7e8tSq1j+mu0SHMyKHiHd+OsmU\n"
-        "IQIDAQAB\n"
-        "-----END PUBLIC KEY-----"
-    );
-
     // Old default debug logging setting, 1.0 (and earlier) until 1.2-beta.2
     const QStringList debugLogging10{QStringLiteral("*.debug=true"),
                                      QStringLiteral("qt*.debug=false"),
@@ -104,37 +90,6 @@ namespace
                                        QStringLiteral("qt.*.debug=false"),
                                        QStringLiteral("qt.*.info=false"),
                                        QStringLiteral("qt.scenegraph.general*=true")};
-}
-
-static DaemonData::CertificateAuthorityMap createCertificateAuthorites()
-{
-    static const std::initializer_list<std::pair<const char*, const char*>> files = {
-        { "ECDSA-256k1", ":/ca/ecdsa_256k1.crt" },
-        { "ECDSA-256r1", ":/ca/ecdsa_256r1.crt" },
-        { "ECDSA-521", ":/ca/ecdsa_521.crt" },
-        { "RSA-2048", ":/ca/rsa_2048.crt" },
-        { "RSA-3072", ":/ca/rsa_3072.crt" },
-        { "RSA-4096", ":/ca/rsa_4096.crt" },
-        { "default", ":/ca/default.crt" },
-    };
-    DaemonData::CertificateAuthorityMap certificateAuthorities;
-    for (const auto& ca : files)
-    {
-        QFile file(ca.second);
-        if (file.open(QFile::ReadOnly | QIODevice::Text))
-        {
-            QList<QByteArray> lines = file.readAll().split('\n');
-            file.close();
-            QStringList result;
-            result.reserve(lines.size());
-            for (auto& line : lines)
-                result.append(QString::fromLatin1(line));
-            certificateAuthorities.insert(ca.first, result);
-        }
-        else
-            qWarning() << "Unable to load CA" << ca.first;
-    }
-    return certificateAuthorities;
 }
 
 void restrictAccountJson()
@@ -204,23 +159,21 @@ void restrictAccountJson()
     qInfo() << "Successfully applied permissions to account.json";
 }
 
-Daemon::Daemon(const QStringList& arguments, QObject* parent)
+Daemon::Daemon(QObject* parent)
     : QObject(parent)
-    , _arguments(arguments)
-    , _exitCode(0)
     , _started(false)
     , _stopping(false)
     , _server(nullptr)
     , _methodRegistry(new LocalMethodRegistry(this))
     , _rpc(new RemoteNotificationInterface(this))
     , _connection(new VPNConnection(this))
-    , _regionRefresher{QStringLiteral("regions list"), ApiBases::piaApi,
+    , _apiClient{_environment}
+    , _regionRefresher{QStringLiteral("regions list"),
                        regionsResource, regionsInitialLoadInterval,
-                       regionsRefreshInterval, serverListPublicKey}
+                       regionsRefreshInterval}
     , _shadowsocksRefresher{QStringLiteral("Shadowsocks regions"),
-                            ApiBases::piaApi, shadowsocksRegionsResource,
-                            regionsInitialLoadInterval, regionsRefreshInterval,
-                            serverListPublicKey}
+                            shadowsocksRegionsResource,
+                            regionsInitialLoadInterval, regionsRefreshInterval}
     , _snoozeTimer(this)
     , _pendingSerializations(0)
 {
@@ -302,13 +255,17 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     // Migrate/upgrade any settings to the current daemon version
     upgradeSettings(settingsFileRead);
 
-    // Build the sorted and grouped locations from the cached data
-    rebuildLocations();
-
-    // Check whether the host supports split tunnel and record errors
+    // Check whether the host supports split tunnel and record errors.
+    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist.
     checkSplitTunnelSupport();
 
-    g_data.certificateAuthorities(createCertificateAuthorites());
+    // Load locations from the cached data, if there is any.  Don't start
+    // fetching yet or check for region overrides / bundled region lists; that
+    // is done when the daemon activates.
+    //
+    // The daemon doesn't really need the built locations until it activates,
+    // but piactl exposes them and user scripts might be using this.
+    rebuildLegacyLocations(_data.cachedLegacyRegionsList(), _data.cachedLegacyShadowsocksList());
 
     // If the client ID hasn't been set (or is somehow invalid), generate one
     if(!ClientId::isValidId(_account.clientId()))
@@ -318,7 +275,7 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     }
 
     // We have a client ID, so create the PortForwarder
-    _portForwarder = new PortForwarder(this, _account.clientId());
+    _portForwarder = new PortForwarder(this, _apiClient, _account.clientId());
 
     #define RPC_METHOD(name, ...) LocalMethod(QStringLiteral(#name), this, &THIS_CLASS::RPC_##name)
     _methodRegistry->add(RPC_METHOD(handshake));
@@ -383,7 +340,7 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     connect(&_latencyTracker, &LatencyTracker::newMeasurements, this,
             &Daemon::newLatencyMeasurements);
     // Pass the locations loaded from the cached data to LatencyTracker
-    _latencyTracker.updateLocations(_data.locations());
+    _latencyTracker.updateLocations(_state.availableLocations());
     connect(_portForwarder, &PortForwarder::portForwardUpdated, this,
             &Daemon::portForwardUpdated);
 
@@ -391,31 +348,49 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
             &Daemon::updatePortForwarder);
     updatePortForwarder();
 
+    connect(&_environment, &Environment::overrideActive, this,
+            &Daemon::setOverrideActive);
+    connect(&_environment, &Environment::overrideFailed, this,
+            &Daemon::setOverrideFailed);
+
     connect(&_regionRefresher, &JsonRefresher::contentLoaded, this,
             &Daemon::regionsLoaded);
+    connect(&_regionRefresher, &JsonRefresher::overrideActive, this,
+            [this](){Daemon::setOverrideActive(QStringLiteral("regions list"));});
+    connect(&_regionRefresher, &JsonRefresher::overrideFailed, this,
+            [this](){Daemon::setOverrideFailed(QStringLiteral("regions list"));});
     connect(&_shadowsocksRefresher, &JsonRefresher::contentLoaded, this,
             &Daemon::shadowsocksRegionsLoaded);
+    connect(&_shadowsocksRefresher, &JsonRefresher::overrideActive, this,
+            [this](){Daemon::setOverrideActive(QStringLiteral("shadowsocks list"));});
+    connect(&_shadowsocksRefresher, &JsonRefresher::overrideFailed, this,
+            [this](){Daemon::setOverrideFailed(QStringLiteral("shadowsocks list"));});
 
     connect(this, &Daemon::firstClientConnected, this, [this]() {
+        // Reset override states since we are (re)activating
+        _state.overridesFailed({});
+        _state.overridesActive({});
+
+        _environment.reload();
+
         _latencyTracker.start();
-        _regionRefresher.startOrOverride(Path::DaemonSettingsDir / "region_override.json",
+        _regionRefresher.startOrOverride(environment().getRegionsListApi(),
+                                         Path::DaemonSettingsDir / "region_override.json",
                                          Path::ResourceDir / "servers.json",
-                                         !_data.locations().empty());
-        // Check if any Shadowsocks servers are known
-        bool haveSsCache = std::any_of(_data.locations().begin(), _data.locations().end(),
-            [](const auto &pServerLoc)
-            {
-                return pServerLoc && pServerLoc->shadowsocks();
-            });
-        _shadowsocksRefresher.startOrOverride(Path::DaemonSettingsDir / "shadowsocks_override.json",
+                                         _environment.getRegionsListPublicKey(),
+                                         _data.cachedLegacyRegionsList());
+        _shadowsocksRefresher.startOrOverride(environment().getRegionsListApi(),
+                                              Path::DaemonSettingsDir / "shadowsocks_override.json",
                                               Path::ResourceDir / "shadowsocks.json",
-                                              haveSsCache);
-        _updateDownloader.run(true);
+                                              _environment.getRegionsListPublicKey(),
+                                              _data.cachedLegacyShadowsocksList());
+        _updateDownloader.run(true, _environment.getUpdateApi());
+
         queueNotification(&Daemon::reapplyFirewallRules);
     });
 
     connect(this, &Daemon::lastClientDisconnected, this, [this]() {
-        _updateDownloader.run(false);
+        _updateDownloader.run(false, _environment.getUpdateApi());
         _regionRefresher.stop();
         _shadowsocksRefresher.stop();
         _latencyTracker.stop();
@@ -431,11 +406,20 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::updateChannelChanged, this,
-            [this](){_updateDownloader.setGaUpdateChannel(_settings.updateChannel());});
+            [this]()
+            {
+                _updateDownloader.setGaUpdateChannel(_settings.updateChannel(), _environment.getUpdateApi());
+            });
     connect(&_settings, &DaemonSettings::betaUpdateChannelChanged, this,
-            [this](){_updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel());});
+            [this]()
+            {
+                _updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel(), _environment.getUpdateApi());
+            });
     connect(&_settings, &DaemonSettings::offerBetaUpdatesChanged, this,
-            [this](){_updateDownloader.enableBetaChannel(_settings.offerBetaUpdates());});
+            [this]()
+            {
+                _updateDownloader.enableBetaChannel(_settings.offerBetaUpdates(), _environment.getUpdateApi());
+            });
     connect(&_updateDownloader, &UpdateDownloader::updateRefreshed, this,
             &Daemon::onUpdateRefreshed);
     connect(&_updateDownloader, &UpdateDownloader::downloadProgress, this,
@@ -444,9 +428,9 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
             &Daemon::onUpdateDownloadFinished);
     connect(&_updateDownloader, &UpdateDownloader::downloadFailed, this,
             &Daemon::onUpdateDownloadFailed);
-    _updateDownloader.setGaUpdateChannel(_settings.updateChannel());
-    _updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel());
-    _updateDownloader.enableBetaChannel(_settings.offerBetaUpdates());
+    _updateDownloader.setGaUpdateChannel(_settings.updateChannel(), _environment.getUpdateApi());
+    _updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel(), _environment.getUpdateApi());
+    _updateDownloader.enableBetaChannel(_settings.offerBetaUpdates(), _environment.getUpdateApi());
     _updateDownloader.reloadAvailableUpdates(Update{_data.gaChannelVersionUri(), _data.gaChannelVersion()},
                                              Update{_data.betaChannelVersionUri(), _data.betaChannelVersion()});
 
@@ -455,12 +439,6 @@ Daemon::Daemon(const QStringList& arguments, QObject* parent)
     connect(_connection, &VPNConnection::scannedOriginalNetwork, this, &Daemon::queueApplyFirewallRules);
 
     queueApplyFirewallRules();
-}
-
-Daemon::Daemon(QObject* parent)
-    : Daemon(QCoreApplication::arguments(), parent)
-{
-
 }
 
 Daemon::~Daemon()
@@ -547,9 +525,8 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
        settings.contains(QLatin1String("portForward")) ||
        settings.contains(QLatin1String("method")))
     {
-        qInfo() << "Settings affect location choices, rebuild locations";
-
-        rebuildLocations();
+        qInfo() << "Settings affect location choices, recalculate location preferences";
+        calculateLocationPreferences();
     }
 
     // If applying the settings failed, we won't reconnect (ensures that
@@ -777,7 +754,7 @@ QJsonValue Daemon::RPC_writeDiagnostics()
         file.writeText(title, QJsonDocument(object).toJson(QJsonDocument::Indented));
     };
 
-    writePrettyJson("DaemonState", _state.toJsonObject(), { "groupedLocations", "externalIp", "externalVpnIp", "forwardedPort" });
+    writePrettyJson("DaemonState", _state.toJsonObject(), { "availableLocations", "groupedLocations", "externalIp", "externalVpnIp", "forwardedPort" });
     // The custom proxy setting is removed because it may contain the proxy
     // credentials.
     writePrettyJson("DaemonSettings", _settings.toJsonObject(), { "proxyCustom" });
@@ -903,8 +880,7 @@ void Daemon::RPC_checkDriverState()
 
 Async<void> Daemon::RPC_login(const QString& username, const QString& password)
 {
-    return ApiClient::instance()
-            ->postRetry(
+    return _apiClient.postRetry(
                 QStringLiteral("api/client/v2/token"),
                 QJsonDocument({
                     { QStringLiteral("username"), username },
@@ -952,10 +928,12 @@ void Daemon::RPC_logout()
     _settings.recentLocations({});
     _state.openVpnAuthFailed(0);
 
-    if(!tokenToExpire.isEmpty()) {
-        ApiClient::instance()
-                        ->postRetry(QStringLiteral("api/client/v2/expire_token"), QJsonDocument(), ApiClient::tokenAuth(tokenToExpire))
-                        ->notify(this, [this](const Error &error, const QJsonDocument &json) {
+    if(!tokenToExpire.isEmpty())
+    {
+        _apiClient.postRetry(QStringLiteral("api/client/v2/expire_token"),
+                             QJsonDocument(), ApiClient::tokenAuth(tokenToExpire))
+            ->notify(this, [this](const Error &error, const QJsonDocument &json)
+        {
             if(error) {
                 qWarning () << "Token expire failed with error code: " << error.code();
             } else {
@@ -1318,8 +1296,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _state.connectionTimestamp(monotonicTimer.msecsSinceReference());
 
         // Get the user's VPN IP address now that we're connected
-        _pVpnIpRequest = ApiClient::instance()
-                ->getVpnIpRetry(QStringLiteral("api/client/status"))
+        _pVpnIpRequest = _apiClient.getVpnIpRetry(QStringLiteral("api/client/status"))
                 ->then(this, [this](const QJsonDocument& json) {
                     _state.externalVpnIp(json[QStringLiteral("ip")].toString());
                 })
@@ -1346,6 +1323,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _state.originalGatewayIp({});
         _state.originalInterface({});
         _state.originalInterfaceIp({});
+        _state.originalInterfaceIp6({});
     }
 
     // Clear fatal errors when we successfully establish a connection.  (Don't
@@ -1417,56 +1395,37 @@ void Daemon::vpnScannedOriginalNetwork(const OriginalNetworkScan &netScan)
     _state.originalGatewayIp(netScan.gatewayIp());
     _state.originalInterface(netScan.interfaceName());
     _state.originalInterfaceIp(netScan.ipAddress());
+    _state.originalInterfaceIp6(netScan.ipAddress6());
     qInfo() << QStringLiteral("originalGatewayIp = %1").arg(_state.originalGatewayIp());
     qInfo() << QStringLiteral("originalInterface = %1").arg(_state.originalInterface());
     qInfo() << QStringLiteral("originalInterfaceIp = %1").arg(_state.originalInterfaceIp());
+    qInfo() << QStringLiteral("originalInterfaceIp6 = %1").arg(_state.originalInterfaceIp6());
 }
 
 void Daemon::newLatencyMeasurements(const LatencyTracker::Latencies &measurements)
 {
     SCOPE_LOGGING_CATEGORY("daemon.latency");
 
-    bool locationsChanged = false;
+    bool locationsAffected = false;
+    auto newLatencies = _data.latencies();
 
     for(const auto &measurement : measurements)
     {
-        // Look for a ServerLocation with this ID, and set its latency.
-        // There can only be one location with this ID - the locations are sent
-        // as attributes of a JSON object, and the JSON parser won't load more
-        // than one value for the same attribute name.
-        auto itLocation = std::find_if(_data.locations().begin(),
-                                       _data.locations().end(),
-                                       [&](const auto &pLocation)
-                                       {
-                                           return pLocation->id() == measurement.first;
-                                       });
-        // If the location still exists, store the new latency.
-        if(itLocation != _data.locations().end())
-        {
-            // Get pointer from iterator-to-pointer
-            const auto &pLocation = *itLocation;
-            pLocation->latency(static_cast<double>(measurement.second.count()));
-
-            // We applied at least one measurement, rebuild the grouped
-            // locations and trigger updates
-            locationsChanged = true;
-        }
+        newLatencies[measurement.first] = static_cast<double>(msec(measurement.second));
+        // If this location is still present, rebuild the locations later with
+        // the new latencies
+        if(_state.availableLocations().find(measurement.first) != _state.availableLocations().end())
+            locationsAffected = true;
     }
 
-    if(locationsChanged)
-    {
-        // Rebuild the grouped locations, since the locations changed
-        rebuildLocations();
+    _data.latencies(newLatencies);
 
-        // At the moment, Daemon only detects changes in properties of
-        // DaemonData itself, not properties of nested objects.  As a
-        // workaround, emit the change notifications here so the latency change
-        // is detected and propagated to clients.
-        //
-        // Daemon doesn't actually listen to locationsChanged, but emit it too
-        // in case anything else does
-        emit _data.locationsChanged();
-        emit _data.propertyChanged(QStringLiteral("locations"));
+    if(locationsAffected)
+    {
+        // Rebuild the locations, including the grouped locations and location
+        // choices, since the latencies changed
+        rebuildLegacyLocations(_data.cachedLegacyRegionsList(),
+                               _data.cachedLegacyShadowsocksList());
     }
 }
 
@@ -1476,55 +1435,61 @@ void Daemon::portForwardUpdated(int port)
     _state.forwardedPort(port);
 }
 
-void Daemon::updateSupportedVpnPorts(const QJsonObject &serversObj)
+bool Daemon::rebuildLegacyLocations(const QJsonObject &serversObj,
+                                    const QJsonObject &shadowsocksObj)
 {
-    const auto &portInfo = serversObj["info"].toObject()["vpn_ports"].toObject();
-    const QString warningMsg{"Could not find supported vpn_ports from region data. Error: %1"};
+    // Build legacy Locations from the JSON
+    LocationsById newLocations = buildLegacyLocations(_data.latencies(),
+                                                      serversObj,
+                                                      shadowsocksObj);
 
-    try
-    {
-        _data.udpPorts(JsonCaster{portInfo["udp"]});
-        _data.tcpPorts(JsonCaster{portInfo["tcp"]});
-    }
-    catch (const std::exception &ex)
-    {
-        qWarning() << warningMsg.arg(ex.what());
-    }
+    // If no locations were found, treat this as an error, since it would
+    // prevent any connections from being made
+    if(newLocations.empty())
+        return false;
 
-    // If our currently selected ports are not present in the supported ports, then reset to 0 (auto)
-    if (!_data.udpPorts().contains(_settings.remotePortUDP())) _settings.remotePortUDP(0);
-    if (!_data.tcpPorts().contains(_settings.remotePortTCP())) _settings.remotePortTCP(0);
+    // The data were loaded successfully, store it in DaemonData
+    _state.availableLocations(newLocations);
+
+    // Update the grouped locations from the new stored locations
+    _state.groupedLocations(buildGroupedLocations(_state.availableLocations()));
+
+    // Calculate new location preferences
+    calculateLocationPreferences();
+
+    // Update the locations in LatencyTracker
+    _latencyTracker.updateLocations(_state.availableLocations());
+
+    // Update the available ports
+    DescendingPortSet udpPorts, tcpPorts;
+    for(const auto &locationEntry : _state.availableLocations())
+    {
+        locationEntry.second->allPortsForService(Service::OpenVpnUdp, udpPorts);
+        locationEntry.second->allPortsForService(Service::OpenVpnTcp, tcpPorts);
+    }
+    _state.openvpnUdpPortChoices(udpPorts);
+    _state.openvpnTcpPortChoices(tcpPorts);
+
+    return true;
 }
 
 void Daemon::regionsLoaded(const QJsonDocument &regionsJsonDoc)
 {
     const auto &serversObj = regionsJsonDoc.object();
 
-    // update the available port numbers for udp/tcp
-    updateSupportedVpnPorts(serversObj);
-
-    //Build ServerLocations from the JSON document
-    ServerLocations newLocations = updateServerLocations(_data.locations(),
-                                                         serversObj);
-
-    //If no locations were found, treat this as an error, since it would
-    //prevent any connections from being made
-    if(newLocations.empty())
+    // Don't allow a regions list update to leave us with no regions.  If a
+    // problem causes this, we're better off keeping the stale regions around.
+    if(!rebuildLegacyLocations(serversObj, _data.cachedLegacyShadowsocksList()))
     {
         qWarning() << "Server location data could not be loaded.  Received"
             << regionsJsonDoc.toJson();
+        // Don't update cachedLegacyRegionsList, keep the last content (which
+        // might still be usable, the new content is no good).
+        // Don't treat this as a successful load (don't notify JsonRefresher)
         return;
     }
 
-    // The data were loaded successfully, store it in DaemonData
-    _data.locations(newLocations);
-
-    // Update the grouped locations too
-    rebuildLocations();
-
-    //Update the locations in LatencyTracker
-    _latencyTracker.updateLocations(newLocations);
-
+    _data.cachedLegacyRegionsList(serversObj);
     // A load succeeded, tell JsonRefresher to switch to the long interval
     _regionRefresher.loadSucceeded();
 }
@@ -1533,14 +1498,19 @@ void Daemon::shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJso
 {
     const auto &shadowsocksRegionsObj = shadowsocksRegionsJsonDoc.object();
 
-    // Build new ServerLocations
-    auto newLocations = updateShadowsocksLocations(_data.locations(),
-                                                   shadowsocksRegionsObj);
-    _data.locations(newLocations);
+    // It's unlikely that the Shadowsocks regions list could totally hose us,
+    // but the same resiliency is here for robustness.
+    if(!rebuildLegacyLocations(_data.cachedLegacyRegionsList(), shadowsocksRegionsObj))
+    {
+        qWarning() << "Shadowsocks location data could not be loaded.  Received"
+            << shadowsocksRegionsJsonDoc.toJson();
+        // Don't update cachedLegacyShadowsocksList, keep the last content
+        // (which might still be usable, the new content is no good).
+        // Don't treat this as a successful load (don't notify JsonRefresher)
+        return;
+    }
 
-    // Rebuild grouped locations and consequent location state
-    rebuildLocations();
-
+    _data.cachedLegacyShadowsocksList(shadowsocksRegionsObj);
     _shadowsocksRefresher.loadSucceeded();
 }
 
@@ -1583,8 +1553,7 @@ Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QStrin
 {
     const QString resource = token.isEmpty() ? QStringLiteral("api/client/account") : QStringLiteral("api/client/v2/account");
 
-    return ApiClient::instance()
-            ->getRetry(resource, ApiClient::autoAuth(username, password, token))
+    return _apiClient.getRetry(resource, ApiClient::autoAuth(username, password, token))
             ->then(this, [=](const QJsonDocument& json) {
                 if (!json.isObject())
                     throw Error(HERE, Error::ApiBadResponseError);
@@ -1680,11 +1649,23 @@ void Daemon::reapplyFirewallRules()
     else
         allowSplitTunnel = _settings.method() == QStringLiteral("openvpn");
 
+    // Enable the split tunnel when:
+    // - It's "allowed" (supported by the connection method)
+    // - It's enabled by the user
     if(allowSplitTunnel && _settings.splitTunnelEnabled())
     {
         params.enableSplitTunnel = true;
-        params.splitTunnelNetScan = { _state.originalGatewayIp(), _state.originalInterface(),  _state.originalInterfaceIp() };
     }
+
+    // For convenience we expose the netScan in params.
+    // This way we can use it in code that takes a FirewallParams argument
+    // - such as the split tunnel code
+    params.netScan = {
+                       _state.originalGatewayIp(),
+                       _state.originalInterface(),
+                       _state.originalInterfaceIp(),
+                       _state.originalInterfaceIp6()
+                     };
 
     params.excludeApps.reserve(_settings.splitTunnelRules().size());
     params.vpnOnlyApps.reserve(_settings.splitTunnelRules().size());
@@ -1741,8 +1722,14 @@ void Daemon::reapplyFirewallRules()
     _state.killswitchEnabled(killswitchEnabled);
 }
 
+// Check whether the host supports split tunnel and record errors
+// This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
 void Daemon::checkSplitTunnelSupport()
 {
+    // Early exit if we already have split tunnel errors
+    if(!_state.splitTunnelSupportErrors().isEmpty())
+        return;
+
     QJsonArray errors;
 
 #if defined(Q_OS_WIN)
@@ -1757,11 +1744,6 @@ void Daemon::checkSplitTunnelSupport()
 #endif
 
 #ifdef Q_OS_LINUX
-    // This cgroup must be mounted in this location for this feature.
-    QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
-    if(!cgroupFile.exists())
-        errors.push_back(QStringLiteral("cgroups_invalid"));
-
     // iptables 1.6.1 is required.
     QProcess iptablesVersion;
     iptablesVersion.start(QStringLiteral("iptables"), QStringList{QStringLiteral("--version")});
@@ -1784,6 +1766,22 @@ void Daemon::checkSplitTunnelSupport()
     // parts in its version number though.
     if(SemVersion{major, minor, patch} < SemVersion{1, 6, 1})
         errors.push_back(QStringLiteral("iptables_invalid"));
+
+    // This cgroup must be mounted in this location for this feature.
+    QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
+    if(!cgroupFile.exists())
+    {
+        // Try to create the net_cls VFS (if we have no other errors)
+        if(errors.isEmpty())
+        {
+            if(!CGroup::createNetCls())
+                errors.push_back(QStringLiteral("cgroups_invalid"));
+        }
+        else
+        {
+            errors.push_back(QStringLiteral("cgroups_invalid"));
+        }
+    }
 #endif
 
     if(!errors.isEmpty())
@@ -1811,6 +1809,24 @@ void Daemon::updatePortForwarder()
         pfEnabled = _settings.portForward();
 
     _portForwarder->enablePortForwarding(pfEnabled);
+}
+
+void Daemon::setOverrideActive(const QString &resourceName)
+{
+    FUNCTION_LOGGING_CATEGORY("daemon.override");
+    qInfo() << "Override is active:" << resourceName;
+    QStringList overrides = _state.overridesActive();
+    overrides.push_back(resourceName);
+    _state.overridesActive(overrides);
+}
+
+void Daemon::setOverrideFailed(const QString &resourceName)
+{
+    FUNCTION_LOGGING_CATEGORY("daemon.override");
+    qWarning() << "Override could not be loaded:" << resourceName;
+    QStringList overrides = _state.overridesFailed();
+    overrides.push_back(resourceName);
+    _state.overridesFailed(overrides);
 }
 
 static QString decryptOldPassword(const QString& bytes)
@@ -1981,13 +1997,10 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
         restrictAccountJson();
 }
 
-void Daemon::rebuildLocations()
+void Daemon::calculateLocationPreferences()
 {
-    // Update the grouped locations from the new stored locations
-    _state.groupedLocations(buildGroupedLocations(_data.locations()));
-
     // Pick the best location
-    NearestLocations nearest{_data.locations()};
+    NearestLocations nearest{_state.availableLocations()};
     // PF currently requires OpenVPN.  This duplicates some logic from
     // ConnectionConfig, but the hope is that over time we'll support all/most
     // settings with WireGuard too, so these checks will just go away.
@@ -1996,18 +2009,25 @@ void Daemon::rebuildLocations()
 
     // Find the user's chosen location (nullptr if it's 'auto' or doesn't exist)
     const auto &locationId = _settings.location();
-    if(locationId == QLatin1String("auto"))
-        _state.vpnLocations().chosenLocation({});
-    else
-        _state.vpnLocations().chosenLocation(_data.locations().value(locationId));
+    _state.vpnLocations().chosenLocation({});
+    if(locationId != QLatin1String("auto"))
+    {
+        auto itChosenLocation = _state.availableLocations().find(locationId);
+        if(itChosenLocation != _state.availableLocations().end())
+            _state.vpnLocations().chosenLocation(itChosenLocation->second);
+    }
 
     // Find the user's chosen SS location similarly, also ensure that it has
     // Shadowsocks
     const auto &ssLocId = _settings.proxyShadowsocksLocation();
-    QSharedPointer<ServerLocation> pSsLoc;
+    QSharedPointer<Location> pSsLoc;
     if(ssLocId != QLatin1String("auto"))
-        pSsLoc = _data.locations().value(ssLocId);
-    if(pSsLoc && !pSsLoc->shadowsocks())
+    {
+        auto itSsLocation = _state.availableLocations().find(ssLocId);
+        if(itSsLocation != _state.availableLocations().end())
+            pSsLoc = itSsLocation->second;
+    }
+    if(pSsLoc && !pSsLoc->hasService(Service::Shadowsocks))
         pSsLoc = {};    // Selected location does not have Shadowsocks
     _state.shadowsocksLocations().chosenLocation(pSsLoc);
 
@@ -2028,14 +2048,13 @@ void Daemon::rebuildLocations()
     }
 
     // If the next location has SS, use that, that will add the least latency
-    if(pNextLocation->shadowsocks())
+    if(pNextLocation->hasService(Service::Shadowsocks))
         _state.shadowsocksLocations().bestLocation(pNextLocation);
     else
     {
-        NearestLocations nearest{_data.locations()};
         // If no SS locations are known, this is set to nullptr
         _state.shadowsocksLocations().bestLocation(nearest.getNearestSafeServiceLocation(
-            [](auto loc){ return loc.shadowsocks(); }));
+            [](auto loc){ return loc.hasService(Service::Shadowsocks); }));
     }
 
     // Determine the next SS location
@@ -2147,6 +2166,7 @@ void Daemon::disconnectVPN()
     _state.vpnEnabled(false);
     _connection->disconnectVPN();
 }
+
 
 ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistry* registry, QObject *parent)
     : QObject(parent)

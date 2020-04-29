@@ -5,7 +5,7 @@
     "brandHasClassicTray": true,
     "brandReleaseChannelGA": "release",
     "brandReleaseChannelBeta": "beta",
-    "brandReleaseUpdateUris": ["https://www.privateinternetaccess.com/clients/desktop", "https://piaproxy.net/clients/desktop"],
+    "brandReleaseUpdateUris": ["https://www.privateinternetaccess.com/clients/desktop", "https://www.piaproxy.net/clients/desktop"],
     "forgotPasswordLink": "https://www.privateinternetaccess.com/pages/reset-password",
     "manageAccountLink":"https://www.privateinternetaccess.com/pages/client-sign-in",
     "buyAccountLink": "https://www.privateinternetaccess.com/pages/buy-vpn/",

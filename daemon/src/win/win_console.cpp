@@ -252,8 +252,6 @@ int WinConsole::run()
         catch (const Error& error)
         {
             qCritical(error);
-            if (_daemon && _daemon->exitCode())
-                return _daemon->exitCode();
             switch (error.systemCode())
             {
             case ERROR_SERVICE_EXISTS:
@@ -282,13 +280,13 @@ int WinConsole::run()
 
 int WinConsole::runDaemon()
 {
-    _daemon = new WinDaemon(_arguments, this);
+    _daemon = new WinDaemon(this);
     QObject::connect(_daemon, &Daemon::started, &QCoreApplication::exec);
     QObject::connect(_daemon, &Daemon::stopped, &QCoreApplication::quit);
     BOOL ctrlHandlerInstalled = SetConsoleCtrlHandler(ctrlHandler, TRUE);
     _daemon->start();
     if (ctrlHandlerInstalled) SetConsoleCtrlHandler(ctrlHandler, FALSE);
-    return _daemon->exitCode();
+    return 0;
 }
 
 void WinConsole::stopDaemon()

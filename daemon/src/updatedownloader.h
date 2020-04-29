@@ -126,7 +126,7 @@ public:
     // this case.)
     // If a valid update channel name isn't set (setUpdateChannel("")); calls to
     // run() are ignored.
-    void run(bool newRunning);
+    void run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi);
 
     // Discard any cached update.  If the channel is restarted later, or if it
     // is already running now, reverts to the quick timer for an initial reload.
@@ -148,7 +148,8 @@ public:
     // Set the current update channel, and indicate whether the new channel
     // should be started (run=true is equivalent to calling start() after
     // setting the channel).
-    void setUpdateChannel(const QString &updateChannel, bool newRunning);
+    void setUpdateChannel(const QString &updateChannel, bool newRunning,
+                          const std::shared_ptr<ApiBase> &pUpdateApi);
 
     // Get the current update available from this channel.
     // No update is available if the channel is not running, the channel didn't
@@ -201,7 +202,7 @@ private:
 
 public:
     // Start or stop refreshing the version metadata
-    void run(bool newRunning);
+    void run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi);
 
     // Reload the available update that was persisted in DaemonData.  This must
     // be called before the UpdateDownloader has been started, but after the
@@ -220,13 +221,13 @@ public:
     void refreshUpdate();
 
     // Set the current update channels
-    void setGaUpdateChannel(const QString &channel);
-    void setBetaUpdateChannel(const QString &channel);
+    void setGaUpdateChannel(const QString &channel, const std::shared_ptr<ApiBase> &pUpdateApi);
+    void setBetaUpdateChannel(const QString &channel, const std::shared_ptr<ApiBase> &pUpdateApi);
 
     // Enable or disable the beta channel.
     // This can be called while running or stopped; the beta channel is started
     // when UpdateDownloader is running and the beta channel is enabled.
-    void enableBetaChannel(bool enable);
+    void enableBetaChannel(bool enable, const std::shared_ptr<ApiBase> &pUpdateApi);
 
     // Start downloading the latest update.  Emits downloadProgress() initially
     // with progress 0, then periodically as the download progresses.

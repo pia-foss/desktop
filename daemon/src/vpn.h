@@ -135,8 +135,9 @@ class OriginalNetworkScan
 public:
     OriginalNetworkScan() = default;    // Required by Q_DECLARE_METATYPE
     OriginalNetworkScan(const QString &gatewayIp, const QString &interfaceName,
-                        const QString &ipAddress)
-        : _gatewayIp{gatewayIp}, _interfaceName{interfaceName}, _ipAddress{ipAddress}
+                        const QString &ipAddress, const QString &ipAddress6)
+        : _gatewayIp{gatewayIp}, _interfaceName{interfaceName}, _ipAddress{ipAddress},
+          _ipAddress6{ipAddress6}
     {
     }
 
@@ -156,19 +157,24 @@ public:
     // all fields.
     // Note that on Windows, we don't use the gatewayIp or interfaceName, these
     // are set to "N/A" which are considered valid.
-    bool isValid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty();}
+    bool ipv4Valid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty();}
+
+    // Whether the host has IPv6 available (as a global IP)
+    bool hasIpv6() const {return !ipAddress6().isEmpty();}
 
 public:
     void gatewayIp(const QString &value) {_gatewayIp = value;}
     void interfaceName(const QString &value) {_interfaceName = value;}
     void ipAddress(const QString &value) {_ipAddress = value;}
+    void ipAddress6(const QString &value) {_ipAddress6 = value;}
 
     const QString &gatewayIp() const {return _gatewayIp;}
     const QString &interfaceName() const {return _interfaceName;}
     const QString &ipAddress() const {return _ipAddress;}
+    const QString &ipAddress6() const {return _ipAddress6;}
 
 private:
-    QString _gatewayIp, _interfaceName, _ipAddress;
+    QString _gatewayIp, _interfaceName, _ipAddress, _ipAddress6;
 };
 
 // Custom logging for OriginalNetworkScan instances
@@ -179,6 +185,11 @@ Q_DECLARE_METATYPE(OriginalNetworkScan)
 // TransportSelector - used by VPNConnection to select transport settings for
 // each attempt.  This implements automatic fallback to other transport settings
 // if the selected settings do not work.
+//
+// Some of this is currently specific to OpenVPN, because OpenVPN has both UDP
+// and TCP support - beginAttempt() uses Service::OpenVpnUdp and
+// Service::OpenVpnTcp.  Eventually if we have multiple ports and/or multiple
+// protocols for WireGuard, this can be generalized.
 class TransportSelector
 {
     Q_GADGET
@@ -188,15 +199,16 @@ public:
     // intended to reset() it before the first connection attempt.
     TransportSelector();
 
+    // Explicitly provide the timeout for preferred transport before starting to try alternate transports.
+    TransportSelector(const std::chrono::seconds &transportTimeout);
 private:
     // Add alternates to the alternates list.  Adds the default port if it's
     // not in the list already, and skips the preferred transport.
-    void addAlternates(const QString &protocol, const ServerLocation &location,
-                       const QVector<uint> &ports);
+    void addAlternates(const QString &protocol, const DescendingPortSet &ports);
 
     // Find the local address that we would use to connect to a given remote
     // address.
-    QHostAddress findLocalAddress(const QString &remoteAddress);
+    QHostAddress findLocalAddress(const QHostAddress &testAddress);
 
     // Request the address of the given interface
     QHostAddress findInterfaceIp(const QString &interfaceName);
@@ -204,18 +216,15 @@ private:
     // Scan routes for the original gateway IP and interface
     void scanNetworkRoutes(OriginalNetworkScan &netScan);
 
-    // Get the local address that corresponds to the last used transport
-    // (never returns empty, unlike lastLocalAddress())
-    QHostAddress validLastLocalAddress() const;
-
 public:
     // Reset TransportSelector for a new connection sequence.
     void reset(Transport preferred, bool useAlternates,
-               const ServerLocation &location, const QVector<uint> &udpPorts,
-               const QVector<uint> &tcpPorts);
+               const DescendingPortSet &udpPorts,
+               const DescendingPortSet &tcpPorts);
 
-    // Get the current preferred transport
-    const Transport &preferred() const {return _preferred;}
+    // Get the preferred transport for the most recently used server (based on
+    // the user's selected transport and the server's default port)
+    const Transport &lastPreferred() const {return _lastPreferred;}
 
     // Get the transport that was most recently used
     const Transport &lastUsed() const {return _lastUsed;}
@@ -224,33 +233,45 @@ public:
     // TransportSelector - it's a stopgap solution since the iptables firewall
     // currently requires the network interface and gateway at startup.
     //
-    // A ServerLocation is required to get the local IP, but the gateway IP and
+    // A Server is required to get the local IP, but the gateway IP and
     // interface can still be found even if pLocation is nullptr.
-    OriginalNetworkScan scanNetwork(const ServerLocation *pLocation,
-                                    const QString &protocol);
+    OriginalNetworkScan scanNetwork();
 
     // Get the local address that was found for the last transport setting (the
     // local address we should use when connecting using that transport).
     // Returns a null QHostAddress if any local address can be used.
     QHostAddress lastLocalAddress() const;
 
-    // Begin a new connection attempt.  Updates lastUsed() and
-    // lastLocalAddress() to the settings to use for this attempt.  Returns a
-    // boolean indicating whether the next attempt after this one should be
-    // delayed or should occur immediately.
+    // Begin a new connection attempt.  Updates lastPreferred(), lastUsed() and
+    // lastLocalAddress().  Returns the OpenVPN server that will be used to
+    // connect for the current transport.
     //
     // The OriginalNetworkScan is populated with the scan results.  The IP
     // address is always populated; the gateway IP and interface are platform-
     // dependent.
-    bool beginAttempt(const ServerLocation &location, OriginalNetworkScan &netScan);
+    //
+    // delayNext is set to indicate whether to delay before the next attempt if
+    // this attempt fails.
+    const Server *beginAttempt(const Location &location, OriginalNetworkScan &netScan,
+                               bool &delayNext);
 
 private:
-    Transport _preferred, _lastUsed;
+    // The selected transport, based on the user's current settings.  This port
+    // may be 0 if "default" is selected.
+    Transport _selected;
+    // The preferred transport for the server being attempted, and the transport
+    // actually being attempted.  These ports are never 0.  _preferredForServer
+    // differs from _preferred if the default port was selected, and the
+    // resolved port is needed to determine if the actual transport is really
+    // different from the user's selection.
+    Transport _lastPreferred, _lastUsed;
     std::vector<Transport> _alternates;
-    QHostAddress _lastLocalUdpAddress, _lastLocalTcpAddress;
+    QHostAddress _lastLocalAddress;
     std::size_t _nextAlternate;
     QDeadlineTimer _startAlternates;
     bool _useAlternateNext;
+    // Timeout for preferred transport before starting to try alternate transports
+    std::chrono::seconds  _transportTimeout;
 };
 
 // Holds the configuration details that we provide via DaemonState for the
@@ -325,7 +346,7 @@ public:
 
     // The effective VPN location, and whether that location was an 'auto'
     // selection or an explicit selection from the user.
-    const QSharedPointer<ServerLocation> &vpnLocation() const {return _pVpnLocation;}
+    const QSharedPointer<Location> &vpnLocation() const {return _pVpnLocation;}
     bool vpnLocationAuto() const {return _vpnLocationAuto;}
 
     // Credentials for authenticating to the VPN.
@@ -366,7 +387,7 @@ public:
     ProxyType proxyType() const {return _proxyType;}
     const QHostAddress &socksHost() const {return _socksHostAddress;}
     const CustomProxy &customProxy() const {return _customProxy;}
-    const QSharedPointer<ServerLocation> &shadowsocksLocation() const {return _pShadowsocksLocation;}
+    const QSharedPointer<Location> &shadowsocksLocation() const {return _pShadowsocksLocation;}
     bool shadowsocksLocationAuto() const {return _shadowsocksLocationAuto;}
 
     // Whether to try alternate transports.  Requires OpenVPN and no proxy.
@@ -388,7 +409,7 @@ private:
     bool _methodForcedByAuth;
 
     // The VPN location used for this connection
-    QSharedPointer<ServerLocation> _pVpnLocation;
+    QSharedPointer<Location> _pVpnLocation;
     // Whether the VPN location was an automatic selection
     bool _vpnLocationAuto;
 
@@ -420,7 +441,7 @@ private:
     CustomProxy _customProxy;
     // Shadowsocks server location; meaningful if a Shadowsocks proxy was
     // selected.
-    QSharedPointer<ServerLocation> _pShadowsocksLocation;
+    QSharedPointer<Location> _pShadowsocksLocation;
     // Whether the Shadowsocks location was an automatic selection
     bool _shadowsocksLocationAuto;
 
@@ -478,7 +499,7 @@ public:
 
     // Do a network scan now - stopgap solution for the iptables firewall.
     // Emits scannedOriginalNetwork() with the result.
-    void scanNetwork(const ServerLocation *pLocation, const QString &protocol);
+    void scanNetwork();
 
 public slots:
     void connectVPN(bool force);
@@ -504,7 +525,7 @@ signals:
     void slowIntervalChanged(bool usingSlowInterval);
     // When VPNConnection's state changes, the new connecting/connected
     // configurations are provided.
-    // Note that the ServerLocations in these configurations are mutable, but
+    // Note that the Locations in these configurations are mutable, but
     // slots receiving this signal *must not* modify them...they're mutable to
     // work with JsonField-implemented fields in DaemonState.
     // In the Connected state only, chosenTransport and actualTransport are
@@ -579,6 +600,10 @@ private:
     // zero.
     int _connectionAttemptCount;
     TransportSelector _transportSelector;
+    // When connecting with Shadowsocks, this is the server IP selected.
+    // VPNConnection selects a server when starting the proxy, but it passes the
+    // IP to the VPNMethod to set up routes.
+    QHostAddress _shadowsocksServerIp;
     // Accumulated received/sent traffic over this connection. This includes
     // all traffic, even across multiple OpenVPN processes.
     quint64 _receivedByteCount, _sentByteCount;

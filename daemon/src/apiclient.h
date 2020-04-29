@@ -25,6 +25,7 @@
 #include "async.h"
 #include "apibase.h"
 #include "apiretry.h"
+#include "environment.h"
 #include <QJsonDocument>
 #include <QNetworkReply>
 #include <QPointer>
@@ -34,13 +35,13 @@
 // ApiClient is used to make requests to the PrivateInternetAccess client API.
 // This API includes requests such as connection status detection, geolocation,
 // and problem reports.
-class ApiClient : public QObject, public AutoSingleton<ApiClient>
+class ApiClient : public QObject
 {
     Q_OBJECT
     CLASS_LOGGING_CATEGORY("apiclient")
 
 public:
-    ApiClient();
+    explicit ApiClient(Environment &environment);
 
 private:
     // Create tasks to issue a request with retries and return its body (with
@@ -113,9 +114,8 @@ public:
     static QByteArray autoAuth(const QString& username, const QString& password, const QString& token);
 
 private:
-    // Index of the last API base URL that was successful (used to start from
-    // that base next time).
-    unsigned _nextApiBaseUrl;
+    // Environment used by this ApiClient for API bases (managed by Daemon)
+    Environment &_environment;
 };
 
 

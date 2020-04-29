@@ -51,6 +51,16 @@ Item {
         placeholderText: uiTranslate("ConnectionPage", "Auto")
       }
 
+      DropdownInput {
+        label: uiTr("Connection Timeout")
+        setting: DaemonSetting { name: "wireguardPingTimeout" }
+        model: [
+          { name: uiTr("30 seconds"), value: 30 },
+          { name: uiTr("1 minute"), value: 60 },
+          { name: uiTr("2 minutes"), value: 120 }
+        ]
+      }
+
       CheckboxInput {
         label: uiTranslate("ConnectionPage", "Use Small Packets")
         onValue: 1250
@@ -58,6 +68,7 @@ Item {
         setting: DaemonSetting { name: "mtu" }
         info: uiTranslate("ConnectionPage", "Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.")
       }
+
 
       CheckboxInput {
         id: wgUseKernel

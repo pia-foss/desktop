@@ -25,6 +25,7 @@
 #include "openssl.h"
 #include <QSharedPointer>
 #include <vector>
+#include <initializer_list>
 
 struct COMMON_EXPORT BaseUri
 {
@@ -47,6 +48,7 @@ class COMMON_EXPORT ApiBaseData
 {
 public:
     // Create ApiBaseData with plain base URIs - no overridden peer names.
+    ApiBaseData(const std::initializer_list<QString> &baseUris);
     ApiBaseData(const std::vector<QString> &baseUris);
     // Create ApiBaseData with one host, with an optional CA and peer name.
     ApiBaseData(const QString &uri, std::shared_ptr<PrivateCA> pCA,
@@ -104,22 +106,5 @@ public:
 private:
     const QSharedPointer<ApiBaseData> _pData;
 };
-
-namespace ApiBases
-{
-    // Base URIs for normal API requests
-    extern COMMON_EXPORT ApiBase piaApi;
-    // Base URI for API requests that fetch the user's IP address.
-    // This excludes API proxies because the IP address isn't fetched correctly when
-    // a proxy is used.
-    extern COMMON_EXPORT ApiBase piaIpAddrApi;
-    // Base URIs for update metadata.
-    // This is part of the PIA web API for the PIA brand, but for other brands
-    // it is provided by that brand.
-    extern COMMON_EXPORT ApiBase piaUpdateApi;
-
-    // Base URI for port forward requests
-    extern COMMON_EXPORT ApiBase piaPortForwardApi;
-}
 
 #endif

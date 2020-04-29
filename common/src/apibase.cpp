@@ -17,9 +17,15 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "apibase.h"
-#include "brand.h"
-
 ApiBaseData::ApiBaseData(const std::vector<QString> &baseUris)
+    : _baseUris{}, _nextStartIndex{0}
+{
+    _baseUris.reserve(baseUris.size());
+    for(auto &uri : baseUris)
+        addBaseUri(uri, {}, {});
+}
+
+ApiBaseData::ApiBaseData(const std::initializer_list<QString> &baseUris)
     : _baseUris{}, _nextStartIndex{0}
 {
     _baseUris.reserve(baseUris.size());
@@ -89,30 +95,4 @@ void ApiBaseSequence::attemptSucceeded()
 {
     Q_ASSERT(_pData);   // Class invariant
     _pData->attemptSucceeded(_currentBaseUri);
-}
-
-namespace ApiBases
-{
-    ApiBase piaApi
-    {std::vector<QString>{
-        QStringLiteral("https://www.privateinternetaccess.com/"),
-        QStringLiteral("https://piaproxy.net/")
-    }};
-
-    ApiBase piaIpAddrApi
-    {std::vector<QString>{
-        QStringLiteral("https://www.privateinternetaccess.com/")
-    }};
-
-    // Update endpoints are determined by branding info, since brands are
-    // responsible for hosting their own updates
-    ApiBase piaUpdateApi
-    {std::vector<QString>{
-        BRAND_UPDATE_APIS
-    }};
-
-    ApiBase piaPortForwardApi
-    {std::vector<QString>{
-        QStringLiteral("http://209.222.18.222:2000/")
-    }};
 }

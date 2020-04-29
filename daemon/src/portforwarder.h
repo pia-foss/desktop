@@ -27,6 +27,7 @@
 #include <QPointer>
 #include <QScopedPointer>
 #include <array>
+#include "apiclient.h"
 #include "async.h"
 #include "settings.h"
 
@@ -55,8 +56,10 @@ public:
 public:
     // Create PortForwarder with the client ID string (see
     // DaemonAccount::clientId)
+    // The ApiClient will be used to make API requests, it must outlive
+    // PortForwarder
     // Port forwarding is initially disabled when PortForwarder is created.
-    PortForwarder(QObject *pParent, const QString &clientId);
+    PortForwarder(QObject *pParent, ApiClient &apiClient, const QString &clientId);
 
 public:
     // Update the current VPN connection state.
@@ -86,6 +89,7 @@ private:
     void requestPort();
 
 private:
+    ApiClient &_apiClient;
     // The client Id (used to make a PF request)
     QString _clientId;
     // Whether the VPN is connected

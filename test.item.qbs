@@ -34,6 +34,12 @@ PiaApplication {
   targetName: "test-" + testName;
   type: ["application", "autotest"]
 
+  // Unit tests aren't built into bundles.
+  // For whatever reason, AutotestRunner runs a bundled test executable from a
+  // ".tmp" directory, while Qt Creator does not.  They behave the same for
+  // non-bundles.
+  bundle.isBundle: false
+
   // Exclude all normal sources as these are pulled in from all-tests-lib
   sourceDirectories: []
   // Manually specify common include directories instead

@@ -107,12 +107,12 @@ Item {
         DropdownInput {
           label: uiTranslate("ConnectionPage", "Remote Port")
           setting: DaemonSetting { name: "remotePortUDP" }
-          model: portSelection(Daemon.data.udpPorts)
+          model: portSelection(Daemon.state.openvpnUdpPortChoices)
         }
         DropdownInput {
           label: uiTranslate("ConnectionPage", "Remote Port")
           setting: DaemonSetting { name: "remotePortTCP" }
-          model: portSelection(Daemon.data.tcpPorts)
+          model: portSelection(Daemon.state.openvpnTcpPortChoices)
         }
       }
       TextboxInput {

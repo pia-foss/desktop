@@ -84,20 +84,20 @@ private slots:
         QCOMPARE(json_cast<QJsonValue>(arrayValue), QJsonValue(arrayValue));
         QCOMPARE(json_cast<QJsonValue>(objectValue), QJsonValue(objectValue));
 
-        QVERIFY_EXCEPTION_THROWN(json_cast<bool>(QJsonValue(intValue)), json_cast_exception);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonObject>(QJsonValue(arrayValue)), json_cast_exception);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonArray>(QJsonValue(objectValue)), json_cast_exception);
-        QVERIFY_EXCEPTION_THROWN(json_cast<int>(QJsonValue(1.5)), json_cast_exception);
+        QVERIFY_EXCEPTION_THROWN(json_cast<bool>(QJsonValue(intValue)), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonObject>(QJsonValue(arrayValue)), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonArray>(QJsonValue(objectValue)), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<int>(QJsonValue(1.5)), Error);
     }
     void castCollections()
     {
         const QList<int> listValue { 1, 2, 3 };
         QCOMPARE(json_cast<QList<int>>(QJsonArray { 1, 2, 3 }), listValue);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QList<int>>(QJsonArray { 1, 2, "test" }), json_cast_exception);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QList<int>>(QJsonArray { 1, 2, "test" }), Error);
 
-        const QHash<QString, QString> hashValue { { "test", "test" } };
-        QCOMPARE((json_cast<QHash<QString, QString>>(QJsonObject { { "test", "test" } })), hashValue);
-        QVERIFY_EXCEPTION_THROWN((json_cast<QHash<QString, QString>>(QJsonObject { { "test", 1 } })), json_cast_exception);
+        const std::unordered_map<QString, QString> hashValue { { "test", "test" } };
+        QCOMPARE((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", "test" } })), hashValue);
+        QVERIFY_EXCEPTION_THROWN((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", 1 } })), Error);
     }
     void castCustomStructures()
     {

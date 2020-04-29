@@ -17,6 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/latencytracker.h"
+#include "daemon/src/locations.h"
 #include <QtTest>
 #include <cassert>
 
@@ -50,7 +51,7 @@ public:
 
     ReceivedPing(QUdpSocket *pServerSocket, QHostAddress remoteAddress,
                  quint16 remotePort,
-                 QSharedPointer<ServerLocation> pLocation)
+                 QSharedPointer<Location> pLocation)
         : _pServerSocket{pServerSocket},
           _remoteAddress{std::move(remoteAddress)},
           _remotePort{remotePort},
@@ -81,7 +82,7 @@ private:
     //The remote port where the ping originated
     quint16 _remotePort;
     //The ServerLocation that describes this mock server.  Always valid
-    QSharedPointer<ServerLocation> _pLocation;
+    QSharedPointer<Location> _pLocation;
 };
 
 class MockPingServers : public QObject
@@ -100,7 +101,7 @@ public:
             _mockPingServers.push_back(pServerSocket);
             pServerSocket->bind(localhost);
 
-            QSharedPointer<ServerLocation> pLocation{new ServerLocation{}};
+            QSharedPointer<Location> pLocation{new Location{}};
 
             //Fill in the mock ServerLocaiton - most of these fields do not
             //matter, but the ping address must be the actual address of the
@@ -109,18 +110,16 @@ public:
             pLocation->id(serverId);
             pLocation->name(serverId);
             pLocation->country(QStringLiteral("US"));
-            pLocation->dns(serverId + QStringLiteral(".dummy.test"));
             pLocation->portForward(false);
-            pLocation->openvpnUDP(QStringLiteral("127.0.0.1:500"));
-            pLocation->openvpnTCP(QStringLiteral("127.0.0.1:8080"));
-            auto pingAddr = QStringLiteral("%1:%2")
-                .arg(pServerSocket->localAddress().toString())
-                .arg(pServerSocket->localPort());
-            pLocation->ping(pingAddr);
+            pLocation->servers({buildLegacyServer(QStringLiteral("127.0.0.1"),
+                                                  QStringLiteral("n/a"),
+                                                  Service::Latency,
+                                                  {pServerSocket->localPort()})});
 
-            _mockServerList.insert(pLocation->id(), pLocation);
+            _mockServerList[pLocation->id()] = pLocation;
 
-            _mockPingLocations.push_back({serverId, pingAddr});
+            _mockPingLocations.push_back({serverId, QStringLiteral("127.0.0.1"),
+                                          pServerSocket->localPort()});
 
             connect(pServerSocket, &QUdpSocket::readyRead, this,
                     [=](){onDatagramReady(pServerSocket, pLocation);});
@@ -132,7 +131,7 @@ signals:
 
 private slots:
     void onDatagramReady(QUdpSocket *pServerSocket,
-                         QSharedPointer<ServerLocation> pLocation)
+                         QSharedPointer<Location> pLocation)
     {
         QHostAddress remoteHost;
         quint16 remotePort;
@@ -146,11 +145,11 @@ private slots:
 public:
     //Get a ServerLocationList describing the mock servers.  (Used to pass the
     //mock servers to LatencyTracker.)
-    const ServerLocations &mockServerList() const {return _mockServerList;}
+    const LocationsById &mockServerList() const {return _mockServerList;}
 
     //Get a vector of PingLocations describing the mock servers.  (Used to pass
     //the mock servers to LatencyBatch.)
-    const QVector<LatencyTracker::PingLocation> &mockPingLocations() const {return _mockPingLocations;}
+    const std::vector<LatencyTracker::PingLocation> &mockPingLocations() const {return _mockPingLocations;}
 
     //Get a set of the the server socket addresses - used by unit tests to
     //verify that each server was pinged, etc.
@@ -169,8 +168,8 @@ public:
 
 private:
     QVector<QUdpSocket*> _mockPingServers;
-    ServerLocations _mockServerList;
-    QVector<LatencyTracker::PingLocation> _mockPingLocations;
+    LocationsById _mockServerList;
+    std::vector<LatencyTracker::PingLocation> _mockPingLocations;
 };
 
 class AutoEcho : public QObject
@@ -298,7 +297,7 @@ private slots:
             AutoEcho autoEcho{_mockServers};
             auto initialLocations = _mockServers.mockServerList();
             //Remove a server so we can add it later
-            initialLocations.remove(QStringLiteral("mock-server-0"));
+            initialLocations.erase(QStringLiteral("mock-server-0"));
 
             //Wait for all of the measurements to be emitted
             QSignalSpy initialLatencySpy{&splitter, &MeasurementSplitter::newMeasurement};
@@ -311,7 +310,7 @@ private slots:
         //removed above (which should trigger an immediate measurement), and
         //delete a different location (which should not trigger anything).
         auto updatedLocations = _mockServers.mockServerList();
-        updatedLocations.remove(QStringLiteral("mock-server-1"));
+        updatedLocations.erase(QStringLiteral("mock-server-1"));
 
         QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
         tracker.updateLocations(updatedLocations);
@@ -369,7 +368,7 @@ private slots:
 
         auto initialLocations = _mockServers.mockServerList();
         //Delete a location
-        initialLocations.remove(QStringLiteral("mock-server-0"));
+        initialLocations.erase(QStringLiteral("mock-server-0"));
         tracker.updateLocations(initialLocations);
 
         //Expect 3 measurements
@@ -416,10 +415,10 @@ private slots:
     void invalidCleanup()
     {
         //Bogus unparseable ping addresses
-        QVector<LatencyTracker::PingLocation> bogusAddresses
+        std::vector<LatencyTracker::PingLocation> bogusAddresses
         {
-            {"bogus-id-1", "bogus-address-1"},
-            {"bogus-id-2", "bogus-address-2"}
+            {"bogus-id-1", "bogus-address-1", 0},
+            {"bogus-id-2", "bogus-address-2", 0}
         };
 
         auto pBatch{new LatencyBatch{bogusAddresses, this}};

@@ -37,6 +37,11 @@ namespace TestData {
 
 const QByteArray &successJson = R"({"unit_test":true})";
 
+std::shared_ptr<ApiBase> pUnitTestDummyApi =
+    std::make_shared<ApiBase>(
+        std::initializer_list<QString>{QStringLiteral("https://www.privateinternetaccess.com/")}
+    );
+
 }
 
 // JsonRefresher with some dummy parameters filled in.
@@ -44,7 +49,7 @@ class TestRefresher : public JsonRefresher
 {
 public:
     TestRefresher()
-        : JsonRefresher{QStringLiteral("Unit test"), ApiBases::piaApi,
+        : JsonRefresher{QStringLiteral("Unit test"),
                         QStringLiteral("/unit_test"), std::chrono::seconds(1),
                         std::chrono::seconds(5)}
     {}
@@ -69,7 +74,7 @@ private slots:
 
         auto pReply = MockNetworkManager::enqueueReply();
         QSignalSpy replyDestroySpy(pReply.data(), &QObject::destroyed);
-        refresher.start();
+        refresher.start(TestData::pUnitTestDummyApi);
         // Should consume the reply
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
@@ -91,7 +96,7 @@ private slots:
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         auto pReply = MockNetworkManager::enqueueReply(TestData::successJson);
-        refresher.start();
+        refresher.start(TestData::pUnitTestDummyApi);
         // Should consume the reply
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());

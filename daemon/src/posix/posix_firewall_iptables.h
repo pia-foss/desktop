@@ -54,13 +54,9 @@ private:
     static int deleteChain(IPVersion ip, const QString& chain, const QString& tableName = kFilterTable);
     static int linkChain(IPVersion ip, const QString& chain, const QString& parent, bool mustBeFirst = false, const QString& tableName = kFilterTable);
     static int unlinkChain(IPVersion ip, const QString& chain, const QString& parent, const QString& tableName = kFilterTable);
-    static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const FilterCallbackFunc& enableFunc = {}, const FilterCallbackFunc& disableFunc = {});
+    static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable);
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static QStringList getDNSRules(const QString &adapterName, const QStringList& servers);
-    static void setupTrafficSplitting();
-    static void teardownTrafficSplitting();
-    static void setupCgroup(const Path &cGroupDir, QString cGroupId, QString packetTag, QString routingTableName);
-    static void teardownCgroup(QString packetTag, QString routingTableName);
     static int execute(const QString& command, bool ignoreErrors = false);
 private:
     // Chain names
@@ -89,6 +85,7 @@ private:
     // be updated
     QString _adapterName;
     QStringList _dnsServers;
+    QString _ipAddress6;
 };
 
 #endif

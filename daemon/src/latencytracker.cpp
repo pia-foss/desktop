@@ -21,6 +21,7 @@
 
 #include "latencytracker.h"
 #include <algorithm>
+#include <QRandomGenerator>
 
 namespace
 {
@@ -69,12 +70,12 @@ void LatencyTracker::onMeasureTrigger()
     //Measure all known addresses (if there are any)
     //This vector of PingLocations could in principle be built with _locations
     //and stored, but it shouldn't be a significant cost to just build it here.
-    QVector<PingLocation> measureLocations;
+    std::vector<PingLocation> measureLocations;
     measureLocations.reserve(_locations.size());
     for(auto itLocation = _locations.begin(); itLocation != _locations.end();
         ++itLocation)
     {
-        measureLocations.push_back({itLocation.key(), itLocation->pingAddress});
+        measureLocations.push_back(selectPingAddress(itLocation->first, itLocation->second.latencyServers));
     }
     beginMeasurement(measureLocations);
 }
@@ -93,7 +94,7 @@ void LatencyTracker::onNewMeasurements(const Latencies &measurements)
         {
             // Store the new latency measurement, and get the current aggregate
             // value.
-            auto aggregateLatency = itLocation->latency.updateLatency(measurement.second);
+            auto aggregateLatency = itLocation->second.latency.updateLatency(measurement.second);
             aggregatedMeasurements.push_back({measurement.first, aggregateLatency});
         }
     }
@@ -102,18 +103,32 @@ void LatencyTracker::onNewMeasurements(const Latencies &measurements)
         emit newMeasurements(aggregatedMeasurements);
 }
 
+auto LatencyTracker::selectPingAddress(const QString &locationId,
+                                       const std::vector<Server> &latencyServers) const
+    -> PingLocation
+{
+    if(latencyServers.empty())
+        return {locationId, {}, {}};
+
+    std::size_t idx = QRandomGenerator::global()->bounded(static_cast<quint32>(latencyServers.size()));
+    // Just use the default latency port, multiple ports aren't supported yet.
+    // All servers in this list should have the latency service, but if somehow
+    // we got one that didn't, we would specify port 0 here, which is handled
+    // by LatencyBatch.
+    return {locationId, latencyServers[idx].ip(), latencyServers[idx].defaultServicePort(Service::Latency)};
+}
+
 void LatencyTracker::measureNewLocations()
 {
-    QVector<PingLocation> newLocations;
+    std::vector<PingLocation> newLocations;
 
-    for(auto itLocation = _locations.begin(); itLocation != _locations.end();
-        ++itLocation)
+    for(auto &locationEntry : _locations)
     {
         //If this location hasn't been attempted yet, ping it now.
-        if(!itLocation->pingAttempted)
+        if(!locationEntry.second.pingAttempted)
         {
-            itLocation->pingAttempted = true;
-            newLocations.push_back({itLocation.key(), itLocation->pingAddress});
+            locationEntry.second.pingAttempted = true;
+            newLocations.push_back(selectPingAddress(locationEntry.first, locationEntry.second.latencyServers));
         }
     }
 
@@ -123,7 +138,7 @@ void LatencyTracker::measureNewLocations()
     }
 }
 
-void LatencyTracker::beginMeasurement(const QVector<PingLocation> &locations)
+void LatencyTracker::beginMeasurement(const std::vector<PingLocation> &locations)
 {
     //If there's at least one address to measure, start a measurement.
     if(!locations.empty())
@@ -150,31 +165,31 @@ void LatencyTracker::beginMeasurement(const QVector<PingLocation> &locations)
     }
 }
 
-void LatencyTracker::updateLocations(const ServerLocations &serverLocations)
+void LatencyTracker::updateLocations(const LocationsById &serverLocations)
 {
-    //Pull out the existing locations, then put back the ones that are still
-    //present.
-    QHash<QString, LocationData> oldLocations;
+    // Pull out the existing locations, then put back the ones that are still
+    // present.
+    std::unordered_map<QString, LocationData> oldLocations;
     oldLocations.swap(_locations);
 
     //Process the current locations
     _locations.reserve(serverLocations.size());
-    for(const auto &pLocation : serverLocations)
+    for(const auto &location : serverLocations)
     {
         //Create the location and store the current ping address.  No pings
         //have been attempted yet if we don't find this location in
         //oldLocations
-        auto itNewLocation = _locations.insert(pLocation->id(),
-                                               {pLocation->ping(), {}, false});
+        auto &newLocation = _locations[location.first];
+        newLocation = {location.second->allServersForService(Service::Latency), {}, false};
 
         //Did we have this location before?
-        auto itOldLocation = oldLocations.find(pLocation->id());
+        auto itOldLocation = oldLocations.find(location.first);
         if(itOldLocation != oldLocations.end())
         {
             //It existed, so preserve its latency measurements
-            itNewLocation->latency = std::move(itOldLocation->latency);
+            newLocation.latency = std::move(itOldLocation->second.latency);
             //Preserve pingAttempted
-            itNewLocation->pingAttempted = itOldLocation->pingAttempted;
+            newLocation.pingAttempted = itOldLocation->second.pingAttempted;
         }
     }
 
@@ -199,7 +214,7 @@ void LatencyTracker::stop()
     _measureTrigger.stop();
 }
 
-LatencyBatch::LatencyBatch(const QVector<LatencyTracker::PingLocation> &locations,
+LatencyBatch::LatencyBatch(const std::vector<LatencyTracker::PingLocation> &locations,
                            QObject *pParent)
     : QObject{pParent}
 {
@@ -221,15 +236,15 @@ LatencyBatch::LatencyBatch(const QVector<LatencyTracker::PingLocation> &location
     //Ping each address.
     for(const auto &location : locations)
     {
-        QHostAddress host;
-        quint16 port;
-        if(parsePingAddress(location.pingAddress, host, port))
+        QHostAddress host{location.echoIp};
+        if(host.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol &&
+           location.echoPort)
         {
             //This address is valid, so put it in the pending replies.
-            _pendingReplies.insert({host, port}, location.id);
+            _pendingReplies.insert({host, location.echoPort}, location.id);
 
             //Send a one-byte datagram to this address
-            _udpSocket.writeDatagram({1, 0x61}, host, port);
+            _udpSocket.writeDatagram({1, 0x61}, host, location.echoPort);
         }
     }
 

@@ -54,32 +54,6 @@
 # endif
 #endif
 
-std::tuple<int, QByteArray, QByteArray> shellExecute(const QString &command, bool showDebug)
-{
-    QProcess p;
-    p.start(QStringLiteral("/bin/bash"), { QStringLiteral("-c"), command });
-    p.closeWriteChannel();
-    auto exitCode = waitForExitCode(p);
-    QByteArray out = p.readAllStandardOutput().trimmed();
-    QByteArray err = p.readAllStandardError().trimmed();
-    auto result = std::make_tuple(exitCode, out, err);
-
-    if(exitCode != 0)
-    {
-        qWarning().noquote() << "Command:" << command << command << "failed with exit code:" << exitCode << "\n"
-            << "STDERR:" << err << "\n"
-            << "STDOUT:" << out;
-    }
-    else if(showDebug)
-    {
-        qInfo() << "Executed" << command << "\n"
-            << "STDERR:" << err << "\n"
-            << "STDOUT:" << out;
-    }
-
-    return result;
-}
-
 QString traceMsec(qint64 time)
 {
     Q_ASSERT(time >= 0);

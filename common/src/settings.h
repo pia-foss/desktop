@@ -25,148 +25,222 @@
 
 #include "json.h"
 #include <QVector>
+#include <set>
 
-// ShadowsocksServer describes a Shadowsocks endpoint in a location as obtained
-// from the Shadowsocks server list.
-class COMMON_EXPORT ShadowsocksServer : public NativeJsonObject
+// These are the services advertised by the regions list that are used by Desktop.
+enum class Service
 {
-    Q_OBJECT
-
-public:
-    ShadowsocksServer() {}
-    ShadowsocksServer(const ShadowsocksServer &other)
-    {
-        host(other.host());
-        port(other.port());
-        key(other.key());
-        cipher(other.cipher());
-    }
-
-public:
-    bool operator==(const ShadowsocksServer &other) const
-    {
-        return host() == other.host() && port() == other.port() &&
-               key() == other.key() && cipher() == other.cipher();
-    }
-    bool operator!=(const ShadowsocksServer &other) const
-    {
-        return !(*this == other);
-    }
-
-    JsonField(QString, host, {})
-    JsonField(uint, port, {})
-    JsonField(QString, key, {})
-    JsonField(QString, cipher, {})
+    OpenVpnTcp,
+    OpenVpnUdp,
+    WireGuard,
+    Shadowsocks,
+    // The "latency" service is a UDP echo service used to measure latency to
+    // a specific server.  The new servers list provides the latency
+    // service on all servers (of any type) to permit measuring per-service
+    // latency (though ports may vary).  The legacy servers list does not
+    // provide latency on all servers.
+    Latency
 };
 
-// ServerLocation describes a PIA region.  All regions have a VPN endpoint, some
-// regions additionally have auxiliary service endpoints.  Latency measurements
-// stored by the PIA daemon are also stored here.
-class COMMON_EXPORT ServerLocation : public NativeJsonObject
+// The available connection ports are listed and attempted in descending order.
+// This is subtle, but it generally places the ports that feel more natural at
+// the top (defaults, 8080, TCP 443), and unusual ports that are repurposed for
+// the VPN (DNS/POP/HTTP) at the bottom.
+using DescendingPortSet = std::set<quint16, std::greater<quint16>>;
+
+// Server describes a single server in a region, which may provide any
+// combination of services.
+class COMMON_EXPORT Server : public NativeJsonObject
 {
     Q_OBJECT
+public:
+    Server() {}
+    Server(const Server &other) {*this = other;}
+    Server &operator=(const Server &other)
+    {
+        ip(other.ip());
+        commonName(other.commonName());
+        openvpnTcpPorts(other.openvpnTcpPorts());
+        openvpnUdpPorts(other.openvpnUdpPorts());
+        wireguardPorts(other.wireguardPorts());
+        shadowsocksPorts(other.shadowsocksPorts());
+        latencyPorts(other.latencyPorts());
+        shadowsocksKey(other.shadowsocksKey());
+        shadowsocksCipher(other.shadowsocksCipher());
+        return *this;
+    }
 
-private:
-    static QString addressHost(const QString &address);
-    static quint16 addressPort(const QString &address);
+    bool operator==(const Server &other) const
+    {
+        return ip() == other.ip() && commonName() == other.commonName() &&
+            openvpnTcpPorts() == other.openvpnTcpPorts() &&
+            openvpnUdpPorts() == other.openvpnUdpPorts() &&
+            wireguardPorts() == other.wireguardPorts() &&
+            shadowsocksPorts() == other.shadowsocksPorts() &&
+            latencyPorts() == other.latencyPorts() &&
+            shadowsocksKey() == other.shadowsocksKey() &&
+            shadowsocksCipher() == other.shadowsocksCipher();
+    }
+    bool operator!=(const Server &other) const {return !(*this == other);}
 
 public:
-    ServerLocation() {}
-    ServerLocation(const ServerLocation &other)
+    // The server's IP address (used for all services)
+    JsonField(QString, ip, {})
+    // The server certificate CN to expect
+    JsonField(QString, commonName, {})
+
+    // These fields identify the available ports on this server for each
+    // possible service.  If a server doesn't have a particular service, that
+    // list is empty.  The first port is the "default" port for this server.
+    //
+    // There are also other services advertised that are not used by Desktop.
+    JsonField(std::vector<quint16>, openvpnTcpPorts, {})
+    JsonField(std::vector<quint16>, openvpnUdpPorts, {})
+    JsonField(std::vector<quint16>, wireguardPorts, {})
+    JsonField(std::vector<quint16>, shadowsocksPorts, {})
+    JsonField(std::vector<quint16>, latencyPorts, {})
+
+    // Service-specific additional fields
+
+    // For servers with the Shadowsocks service, the key and cipher used to
+    // connect
+    JsonField(QString, shadowsocksKey, {})
+    JsonField(QString, shadowsocksCipher, {})
+
+public:
+    // Check whether this server has a given service.
+    bool hasService(Service service) const;
+    // Check whether this server offers a specific port for the given service.
+    bool hasPort(Service service, quint16 port) const;
+    // Get/set the given service - returns or sets one of the vectors above
+    const std::vector<quint16> &servicePorts(Service service) const;
+    void servicePorts(Service service, std::vector<quint16> ports);
+    // Default port for a service on this server (first port from list), or 0
+    // if that service isn't provided
+    quint16 defaultServicePort(Service service) const;
+};
+
+// Location describes a single location, which can contain any number of servers
+// and services.  Some services may not be present in some regions at all.
+//
+// PIA Desktop currently supports both the "current" and "new" servers lists.
+// These are represented with different models.  The current servers list is
+// adapted to the format of the new region list.
+//
+// Regions from each infrastructure could be matched by ID if needed, but keep
+// in mind that region metadata like the name/country might vary between the two
+// infrastructures.
+class COMMON_EXPORT Location : public NativeJsonObject
+{
+    Q_OBJECT
+public:
+    Location() {}
+    Location(const Location &other) {*this = other;}
+    Location &operator=(const Location &other)
     {
         id(other.id());
         name(other.name());
         country(other.country());
-        dns(other.dns());
         portForward(other.portForward());
-        ping(other.ping());
-        isSafeForAutoConnect(other.isSafeForAutoConnect());
-        openvpnUDP(other.openvpnUDP());
-        openvpnTCP(other.openvpnTCP());
-        serial(other.serial());
-        wireguardUDP(other.wireguardUDP());
-        wireguardSerial(other.wireguardSerial());
-        shadowsocks(other.shadowsocks());   // Share the object since it is not mutated
-        latency(other.latency());
+        autoSafe(other.autoSafe());
+        servers(other.servers());
+        return *this;
     }
 
-    bool operator==(const ServerLocation &other)
+    bool operator==(const Location &other) const
     {
-        // Check Shadowsocks locations by value
-        if(shadowsocks() && other.shadowsocks())
-        {
-            // Both have SS endpoints, compare by value
-            if(*shadowsocks() != *other.shadowsocks())
-                return false;   // SS endpoints differ
-        }
-        else if(!shadowsocks() || !other.shadowsocks())
-        {
-            // One or both is nullptr.  They differ if one is valid (otherwise,
-            // they're both nullptr, so they are equal)
-            if(shadowsocks() || other.shadowsocks())
-                return false;
-        }
-
-        return name() == other.name() && country() == other.country() &&
-            dns() == other.dns() && portForward() == other.portForward() &&
-            ping() == other.ping() &&
-            isSafeForAutoConnect() == other.isSafeForAutoConnect() &&
-            openvpnUDP() == other.openvpnUDP() &&
-            openvpnTCP() == other.openvpnTCP() &&
-            serial() == other.serial() &&
-            wireguardUDP() == other.wireguardUDP() &&
-            wireguardSerial() == other.wireguardSerial() &&
-            latency() == other.latency();
+        return id() == other.id() && name() == other.name() &&
+            country() == other.country() && portForward() == other.portForward() &&
+            autoSafe() == other.autoSafe() && servers() == other.servers();
     }
-
-    // Region ID - matches the key in ServerLocations.  This is provided by all
-    // servers lists and is used to match the data.
-    JsonField(QString, id, {})
-
-    // These fields all originate from the VPN servers list.  Currently, all
-    // regions must have a VPN server endpoint to be recognized by Desktop,
-    // since we need the name, country, etc. from that list, and we need the
-    // 'ping' endpoint to measure latency.  If a region only has auxiliary
-    // services (Shadowsocks, etc.), it will be ignored.
-    //
-    // Someday we may relax that restriction and break these fields out into an
-    // optional service object.
-    JsonField(QString, name, {})
-    JsonField(QString, country, {})
-    JsonField(QString, dns, {})
-    JsonField(bool, portForward, {})
-    JsonField(QString, ping, {})
-    JsonField(bool, isSafeForAutoConnect, true)
-
-    // OpenVPN endpoint from the VPN servers list.
-    JsonField(QString, openvpnUDP, {})
-    JsonField(QString, openvpnTCP, {})
-    JsonField(QString, serial, {})
-
-    // WireGuard endpoint from the VPN servers list.
-    JsonField(QString, wireguardUDP, {})
-    JsonField(QString, wireguardSerial, {})
-
-    // The remaining fields do not come from the VPN servers list.
-
-    // Shadowsocks service endpoint.  Optional - nullptr if this region does not
-    // have Shadowsocks.
-    // This object should not be mutated once it is applied to a ServerLocation.
-    JsonField(QSharedPointer<ShadowsocksServer>, shadowsocks, {})
-    // Latency measured by the daemon
-    JsonField(Optional<double>, latency, {})
+    bool operator!=(const Location &other) const {return !(*this == other);}
 
 public:
-    // Get the host/port parts of the UDP or TCP addresses.  Ports return 0 if
-    // there isn't a port in the address from the server for some reason.
-    QString udpHost() const {return addressHost(openvpnUDP());}
-    QString tcpHost() const {return addressHost(openvpnTCP());}
-    quint16 udpPort() const {return addressPort(openvpnUDP());}
-    quint16 tcpPort() const {return addressPort(openvpnTCP());}
-    QString wireguardUdpHost() const {return addressHost(wireguardUDP());}
-    quint16 wireguardUdpPort() const {return addressPort(wireguardUDP());}
+    // The region's ID.  This is the immutable identifier for this region, which
+    // is used to identify location choices, favorites, etc.  Avoid displaying
+    // this in the UI (except possibly as a last resort).
+    JsonField(QString, id, {})
+    // Region name.  Desktop ships region names and translations (see
+    // DaemonData.qml), but we still check the advertised name to make sure our
+    // translation is still accurate.
+    JsonField(QString, name, {})
+    // Country code for this region - used to group regions and to display
+    // country flags/names.
+    JsonField(QString, country, {})
+    // Whether this region has port forwarding
+    JsonField(bool, portForward, false)
+    // Whether this region should be considered for automatic selection.  Ops
+    // can turn this off to reduce load on a particular region while leaving it
+    // available for manual selection, etc.
+    JsonField(bool, autoSafe, true)
+
+    // Latency is recorded for the whole region.  Eventually we may start
+    // measuring individual servers in the nearest regions.
+    JsonField(Optional<double>, latency, {})
+
+    // The available servers in this region.  These are all grouped together,
+    // not separated by type, because servers could contain any combination of
+    // services, and the combinations of services could change at any time.
+    //
+    // For example, today there are "VPN" servers that provide OpenVPN UDP,
+    // OpenVPN TCP, and WireGuard, but it's possible that in the future there
+    // could be servers that have OpenVPN UDP and WireGuard without OpenVPN TCP,
+    // in order to use TCP 443 for something else on the same server.
+    //
+    // When selecting a server for a needed service, the client should obviously
+    // look for servers that offer that service.
+    //
+    // In some cases, it may be preferred to use the same server for multiple
+    // services (such as OpenVPN via Shadowsocks in the same region, which would
+    // have the least latency when using the same server for both).  The client
+    // must be prepared for the possibility that there might be no servers with
+    // both services, though.
+    JsonField(std::vector<Server>, servers, {})
+
+private:
+    // Count the servers that satisfy a predicate
+    template<class PredicateFuncT>
+    std::size_t countServersFor(const PredicateFuncT &predicate) const;
+    // Count the servers that support a given service; used to implement
+    // randomServerForService() and allServersForService()
+    std::size_t countServersForService(Service service) const;
+
+    // Get a random server that satisfies a predicate
+    template<class PredicateFuncT>
+    const Server *randomServerFor(const PredicateFuncT &predicate) const;
+
+public:
+    // Check if a given service is available in this location (whether any
+    // server has the service)
+    bool hasService(Service service) const;
+
+    // Get a random server that has a given service (nullptr if there are none)
+    const Server *randomServerForService(Service service) const;
+
+    // Get a random server for a given service and port (nullptr if there are
+    // none)
+    const Server *randomServerForPort(Service service, quint16 port) const;
+
+    // Get a random server for the given service, and try to get the port
+    // specified (if any).  If the port is nonzero, and there is at least one
+    // server with that port, a server with that port is selected.  Otherwise,
+    // any server that provides the service is selected.
+    const Server *randomServer(Service service, quint16 tryPort) const;
+
+    // Get all servers for a given service
+    std::vector<Server> allServersForService(Service service) const;
+
+    // Get all available ports for a service in this region.  This is an ordered
+    // set so the attempt order in TransportSelector is consistent.
+    DescendingPortSet allPortsForService(Service service) const;
+    // Get all available ports for a service - append them to an existing set
+    // rather than returning a new set (used by Daemon to find the global set of
+    // all ports)
+    void allPortsForService(Service service, DescendingPortSet &ports) const;
 };
-typedef QHash<QString, QSharedPointer<ServerLocation>> ServerLocations;
+
+using LocationsById = std::unordered_map<QString, QSharedPointer<Location>>;
+using LatencyMap = std::unordered_map<QString, double>;
 
 // Locations for a given country, sorted by latency (ties broken by id).
 class COMMON_EXPORT CountryLocations : public NativeJsonObject
@@ -187,7 +261,7 @@ public:
     }
     bool operator!=(const CountryLocations &other) const {return !(*this == other);}
 
-    JsonField(QVector<QSharedPointer<ServerLocation>>, locations, {})
+    JsonField(std::vector<QSharedPointer<Location>>, locations, {})
 };
 
 // Bandwidth measurements for one measurement interval, in bytes
@@ -253,9 +327,28 @@ public:
     JsonField(uint, port, 0)
 
 public:
-    // If this transport has port 0 (default), determine the effective port to
-    // use when connecting to 'location'.  (Updates this transport's port.)
-    void resolvePort(const ServerLocation &location);
+    // If this transport had port 0 ("use default"), and the actual protocol
+    // selected is the same as this transport's protocol, apply the default
+    // port from the selected server.  This is used for the "preferred"
+    // transport so the client can tell whether a preferred "default" transport
+    // is the same as the actual transport.
+    void resolveDefaultPort(const QString &selectedProtocol, const Server *pSelectedServer);
+
+    // Based on the transport's protocol and port, select a server from the
+    // specified location, and determine the actual port to use to connect.  If
+    // no connection is possible, the port is set to 0.
+    //
+    // - A server is selected from the location given based on the protocol.  If
+    //   the transport has a specific port, it will try to get a server with
+    //   that port.
+    // - If the port is currently 0, the default port from the selected server
+    //   is used
+    // - If the port is nonzero but that port is not available on this server,
+    //   the default port from the selected server is used
+    //
+    // Returns the appropriate server for this transport's protocol (regardless
+    // of whether a port is found).
+    const Server *selectServerPort(const Location &location);
 };
 
 // Definition of a custom SOCKS proxy (see DaemonSettings::customProxy)
@@ -298,21 +391,40 @@ public:
 };
 
 // Class encapsulating 'data' properties of the daemon; these are cached
-// and persist between daemon instances, and typically determine the
-// operating parameters of the PIA service, such as certificates and
-// region lists. They are typically received from PIA servers or
-// calculated, but can also be hardcoded.
+// and persist between daemon instances.
 //
+// These are all fetched from servers at runtime in some way (regions lists,
+// update metadata, latency measurements); they're cached for use in case we
+// aren't able to fetch the data at some point in the future, and so we (likely)
+// have some data to work with at startup.
+//
+// Cached data are stored in the original format received from the server, not
+// an internalized format.  The caches may be reused even after a daemon update -
+// internalized formats are likely to change in an update, but the format from
+// the server is unlikely to change.
+//
+// Internalized versions of the same data are provided in DaemonState.
 class COMMON_EXPORT DaemonData : public NativeJsonObject
 {
     Q_OBJECT
 public:
     DaemonData();
 
-    typedef QHash<QString, QStringList> CertificateAuthorityMap;
+    // Latency measurements (by location ID).  These are restored when the
+    // daemon is started, but any new measurements will replace the cached
+    // values.
+    JsonField(LatencyMap, latencies, {})
 
-    JsonField(ServerLocations, locations, {})
-    JsonField(CertificateAuthorityMap, certificateAuthorities, {})
+    // Region list content - for each region list that's fetched.  This is the
+    // original JSON from the regions list, not the digested form stored in
+    // DaemonState.
+    //
+    // This is only used to cache the last known regions list; Daemon loads
+    // these caches into DaemonState on startup or when changing infrastructure.
+    // Everything else should use the locations map or grouped locations from
+    // DaemonState.
+    JsonField(QJsonObject, cachedLegacyRegionsList, {})
+    JsonField(QJsonObject, cachedLegacyShadowsocksList, {})
 
     // Persistent caches of the version advertised by update channel(s).  This
     // is mainly provided to provide consistent UX if the client/daemon are
@@ -333,13 +445,6 @@ public:
     JsonField(QString, gaChannelVersionUri, {})
     JsonField(QString, betaChannelVersion, {})
     JsonField(QString, betaChannelVersionUri, {})
-
-    // The supported remote ports for the VPN connection (both udp/tcp)
-    JsonField(QVector<uint>, udpPorts,  QVector<uint>({1194, 8080, 9201, 53}))
-    JsonField(QVector<uint>, tcpPorts,  QVector<uint>({443, 110, 80}))
-
-public:
-    QStringList getCertificateAuthority(const QString& type);
 };
 
 
@@ -406,6 +511,11 @@ public:
         linkTarget(other.linkTarget());
         mode(other.mode());
         return *this;
+    }
+    SplitTunnelRule(const QString &_path, const QString &_linkTarget, const QString &_mode) {
+        path(_path);
+        linkTarget(_linkTarget);
+        mode(_mode);
     }
 
     bool operator==(const SplitTunnelRule &other) const
@@ -567,6 +677,13 @@ public:
     // available.
     JsonField(bool, wireguardUseKernel, true)
 
+    // If no data is received for (wireguardPingTimeout/2) seconds, fire off a ping.
+    // If no data is recieved for another (wireguardPingTimeout/2) seconds, assume that the connection
+    // is lost
+    //
+    // Should be a multiple of statsInterval (5)
+    JsonField(uint, wireguardPingTimeout, 60)
+
     // These settings are legacy and have been moved to client-side settings.
     // They're still present in DaemonSettings so the client can migrate them.
     JsonField(bool, connectOnLaunch, false) // Connect when first client connects
@@ -576,12 +693,13 @@ public:
     JsonField(QString, themeName, QStringLiteral("dark"))
     JsonField(QVector<QString>, primaryModules, QVector<QString>::fromList({QStringLiteral("region"), QStringLiteral("ip")}))
     JsonField(QVector<QString>, secondaryModules, QVector<QString>::fromList({QStringLiteral("quickconnect"), QStringLiteral("performance"), QStringLiteral("usage"), QStringLiteral("settings"), QStringLiteral("account")}))
+
 };
 
-// Compare QSharedPointer<ServerLocation>s by value; used by ServiceLocations
+// Compare QSharedPointer<Location>s by value; used by ServiceLocations
 // and ConnectionInfo
-inline bool compareLocationsValue(const QSharedPointer<ServerLocation> &pFirst,
-                                  const QSharedPointer<ServerLocation> &pSecond)
+inline bool compareLocationsValue(const QSharedPointer<Location> &pFirst,
+                                  const QSharedPointer<Location> &pSecond)
 {
     // If one is nullptr, they're only the same if they're both nullptr
     if(!pFirst || !pSecond)
@@ -636,7 +754,7 @@ public:
     // location's object.  Otherwise, it is undefined, which indicates 'auto'.
     //
     // (The daemon interprets an invalid location as 'auto'.)
-    JsonField(QSharedPointer<ServerLocation>, chosenLocation, {})
+    JsonField(QSharedPointer<Location>, chosenLocation, {})
     // The best location (the location we would choose for 'auto', regardless of
     // whether 'auto' is actually selected).  This is undefined if and only if
     // no locations are currently known.
@@ -648,12 +766,12 @@ public:
     // it has Shadowsocks, otherwise the lowest-latency location with
     // Shadowsocks.  (Note that the best SS location therefore depends on
     // the chosen VPN location.)
-    JsonField(QSharedPointer<ServerLocation>, bestLocation, {})
+    JsonField(QSharedPointer<Location>, bestLocation, {})
     // The next location we would connect to if the user chooses to connect (or
     // reconnect) right now.
     //
     // Like 'chosenLocation', undefined if and only if no locations are known.
-    JsonField(QSharedPointer<ServerLocation>, nextLocation, {})
+    JsonField(QSharedPointer<Location>, nextLocation, {})
 };
 
 // Information about the current ongoing connection and the last successful
@@ -709,7 +827,7 @@ public:
 public:
     // The VPN location used for this connection.  Follows the truth table in
     // DaemonState.
-    JsonField(QSharedPointer<ServerLocation>, vpnLocation, {})
+    JsonField(QSharedPointer<Location>, vpnLocation, {})
     // Whether the VPN location was an automatic selection
     JsonField(bool, vpnLocationAuto, false)
 
@@ -731,7 +849,7 @@ public:
     // If proxy is 'custom', the custom proxy hostname:port that were used
     JsonField(QString, proxyCustom, {})
     // If proxy is 'shadowsocks', the Shadowsocks location that was used
-    JsonField(QSharedPointer<ServerLocation>, proxyShadowsocks, {})
+    JsonField(QSharedPointer<Location>, proxyShadowsocks, {})
     // Whether the Shadowsocks location was an automatic selection
     JsonField(bool, proxyShadowsocksLocationAuto, false)
 
@@ -815,11 +933,19 @@ public:
     JsonField(QString, externalVpnIp, {})
 
     // These are the transport settings that the user chose, and the settings
-    // that we actually connected with.
-    // The chosen settings are set in any Connecting state and the Connected
-    // state.  The actual settings are set only in the Connected state.
-    // Port values of '0' (auto) have been replaced with the actual port that
-    // would be used for the current location.
+    // that we actually connected with.  They are provided in the Connected
+    // state.
+    //
+    // The client mainly uses these to detect whether the chosen and actual
+    // transports are different.  If a connection is successfully made with
+    // alternate settings, the client will indicate the specific values used in
+    // the UI.
+    //
+    // chosenTransport.port will only be zero when a different protocol is used
+    // for actualTransport.  If the protocols are the same, and the default port
+    // was selected, then chosenTransport.port is set to the actual default port
+    // for the selected server (so the client can tell if it matches the actual
+    // transport).
     JsonField(Optional<Transport>, chosenTransport, {})
     JsonField(Optional<Transport>, actualTransport, {})
 
@@ -862,7 +988,13 @@ public:
     JsonObjectField(ConnectionInfo, connectingConfig, {})
     JsonObjectField(ConnectionInfo, connectedConfig, {})
 
-    // Locations grouped by country and sorted by latency.
+    // Available regions, mapped by region ID.  These are from either the
+    // current or new regions list.
+    JsonField(LocationsById, availableLocations, {})
+
+    // Locations grouped by country and sorted by latency.  The locations are
+    // chosen from the active infrastructure specified by the "infrastructure"
+    // setting.
     //
     // This is provided by the daemon to ensure that the client and daemon
     // handle these in exactly the same way.  Although Daemon itself only
@@ -872,7 +1004,17 @@ public:
     // The countries are sorted by the lowest latency of any location in the
     // country (which ensures that the lowest-latency location's country is
     // first).  Ties are broken by country code.
-    JsonField(QVector<CountryLocations>, groupedLocations, {})
+    JsonField(std::vector<CountryLocations>, groupedLocations, {})
+
+    // All supported ports for the OpenVpnUdp and OpenVpnTcp services in the
+    // active infrastructure (union of the supported ports among all advertised
+    // servers).  This can be derived from the regions lists above, but this
+    // derivation is relatively complex so these are stored.
+    //
+    // This is just used to define the choices presented in the "Remote Port"
+    // drop-down.
+    JsonField(DescendingPortSet, openvpnUdpPortChoices, {})
+    JsonField(DescendingPortSet, openvpnTcpPortChoices, {})
 
     // Per-interval bandwidth measurements while connected to the VPN.  Only a
     // limited number of intervals are kept (new values past the limit will bump
@@ -903,6 +1045,15 @@ public:
     // plain count for general use.)  0 indicates that the condition does not
     // currently apply.
 
+    // Testing override(s) were present, but could not be loaded (invalid JSON,
+    // etc.).  This is set when the daemon activates, and it can be updated if
+    // the daemon deactivates and then reactivates.  It's a list of
+    // human-readable names for the resources that are overridden (not
+    // localized, this is intended for testing only).
+    JsonField(QStringList, overridesFailed, {})
+    // Testing override(s) are active.  Human-readable names of the overridden
+    // features; set at daemon startup, like overridesFailed.
+    JsonField(QStringList, overridesActive, {})
     // Authorization failed in the OpenVPN connection (timestamp of failure).
     // Note that this does not really mean that the user's credentials are
     // incorrect, see ClientNotifications.qml.
@@ -978,6 +1129,9 @@ public:
     // The original gateway interface before we activated the VPN
     JsonField(QString, originalInterface, {})
 
+    // The original IPv6 interface IP before we activated the VPN
+    JsonField(QString, originalInterfaceIp6, {})
+
     // A multi-function value to indicate snooze state and
     // -1 -> Snooze not active
     // 0 -> Connection transitioning from "VPN Connected" to "VPN Disconnected" because user requested Snooze
@@ -1004,74 +1158,10 @@ public:
     // Whether a kernel implementation of Wireguard is available (only possible
     // on Linux).
     JsonField(bool, wireguardKernelSupport, false)
-
-public:
-    QSharedPointer<ServerLocation> getClosestServerLocation();
 };
 
 
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
-// Read the server locations given in the data from GET /vpninfo/servers, and
-// build a ServerLocations collection.
-//
-// ServerLocations that existed previously and still exist are cloned to
-// initialize the new ServerLocations, this preserves fields like 'latency' that
-// don't come from the data in GET /vpninfo/servers.  (Locations are matched by
-// ID.)
-//
-// Locations that don't have all required components are ignored.  If no valid
-// locations are found, this returns an empty ServerLocations.
-COMMON_EXPORT ServerLocations updateServerLocations(const ServerLocations &existingLocations,
-                                                    const QJsonObject &serversObj);
-
-// Read the Shadowsocks server locations from the SS server list, and build an
-// updated ServerLocations collection.  All locations are preserved (only the
-// SS server components are changed), and non-SS data in the existing locations
-// collection is preserved.
-COMMON_EXPORT ServerLocations updateShadowsocksLocations(const ServerLocations &existingLocations,
-                                                         const QJsonObject &shadowsocksObj);
-
-// Build the grouped and sorted locations from the flat locations.
-COMMON_EXPORT QVector<CountryLocations> buildGroupedLocations(const ServerLocations &locations);
-
-class COMMON_EXPORT NearestLocations
-{
-public:
-    NearestLocations(const ServerLocations &locations);
-
-public:
-    // Find the closest server location that is safe to use with 'connect auto'.
-    // The safe servers are found in in the "auto_regions" server json. Note
-    // that servers that do NOT appear in this list may still be connected to
-    // manually.
-    //
-    // If the portForward parameter is true, then prefer the closest location
-    // that supports port forwarding.  (Still fall back to the closest location
-    // if none support PF.)
-    QSharedPointer<ServerLocation> getNearestSafeVpnLocation(bool portForward) const;
-
-    // Find the closest server location that is safe and satisfies an arbitrary
-    // predicate.  Does _not_ fall back if no locations satisfy the predicate.
-    // (Usually used to find a location that provides an auxiliary service, like
-    // Shadowsocks.)
-    template<class LocationTestFunc>
-    QSharedPointer<ServerLocation> getNearestSafeServiceLocation(LocationTestFunc isAllowedLocation) const
-    {
-        auto itResult = std::find_if(_locations.begin(), _locations.end(),
-            [&isAllowedLocation](const auto &pLocation)
-            {
-                return pLocation && pLocation->isSafeForAutoConnect() &&
-                    isAllowedLocation(*pLocation);
-            });
-        if(itResult != _locations.end())
-            return *itResult;
-        return {};
-    }
-
-private:
-    QVector<QSharedPointer<ServerLocation>> _locations;
-};
 
 extern COMMON_EXPORT const QString hnsdLocalAddress;
 

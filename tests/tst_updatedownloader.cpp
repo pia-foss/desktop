@@ -120,12 +120,24 @@ public:
     DownloaderFixture()
         : _downloader{}, _updateSpy{&_downloader, &UpdateDownloader::updateRefreshed}
     {
-        _downloader.setGaUpdateChannel(TestData::gaChannel);
-        _downloader.setBetaUpdateChannel(TestData::betaChannel);
+        _pUpdateApi = std::make_shared<ApiBase>(
+                std::initializer_list<QString>{BRAND_UPDATE_APIS}
+            );
+        setGaUpdateChannel(TestData::gaChannel);
+        setBetaUpdateChannel(TestData::betaChannel);
     }
 
 public:
+    // Shortcuts for a few methods of UpdateDownloader including the ApiBase
+    // from DownloaderFixture automatically
+    void run(bool newRunning) {_downloader.run(newRunning, _pUpdateApi);}
+    void setGaUpdateChannel(const QString &channel) {_downloader.setGaUpdateChannel(channel, _pUpdateApi);}
+    void setBetaUpdateChannel(const QString &channel) {_downloader.setBetaUpdateChannel(channel, _pUpdateApi);}
+    void enableBetaChannel(bool enable) {_downloader.enableBetaChannel(enable, _pUpdateApi);}
+
+public:
     // All data members are public; this is just a shortcut for test setup.
+    std::shared_ptr<ApiBase> _pUpdateApi;
     UpdateDownloader _downloader;
     QSignalSpy _updateSpy;
 };
@@ -160,7 +172,7 @@ private slots:
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         auto pGaReply = enqueueUpdateReply(TestData::newerGa);
-        fixture._downloader.run(true);
+        fixture.run(true);
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
 
@@ -182,7 +194,7 @@ private slots:
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         auto pGaReply = enqueueUpdateReply(TestData::olderGa);
-        fixture._downloader.run(true);
+        fixture.run(true);
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
 
@@ -216,7 +228,7 @@ private slots:
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
         auto pGaReply = enqueueUpdateReply(TestData::sameGa);
-        fixture._downloader.run(true);
+        fixture.run(true);
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
 
@@ -236,8 +248,8 @@ private slots:
 
         auto pGaReply = enqueueUpdateReply(TestData::olderGa);
         auto pBetaReply = enqueueUpdateReply(TestData::sameGa);
-        fixture._downloader.enableBetaChannel(true);
-        fixture._downloader.run(true);
+        fixture.enableBetaChannel(true);
+        fixture.run(true);
         // Finish GA reply - update is notified
         pGaReply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
@@ -270,8 +282,8 @@ private slots:
         auto pGaReply = enqueueUpdateReply(TestData::newerGa);
         auto pBetaReply = enqueueUpdateReply(TestData::newerBeta);
 
-        fixture._downloader.enableBetaChannel(true);
-        fixture._downloader.run(true);
+        fixture.enableBetaChannel(true);
+        fixture.run(true);
 
         pGaReply->queueFinished();
         // An update occurs when GA is fetched
@@ -300,8 +312,8 @@ private slots:
         auto pGaReply = enqueueUpdateReply(TestData::newerGa);
         auto pBetaReply = enqueueUpdateReply(TestData::olderBeta);
 
-        fixture._downloader.enableBetaChannel(true);
-        fixture._downloader.run(true);
+        fixture.enableBetaChannel(true);
+        fixture.run(true);
 
         pGaReply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
@@ -328,8 +340,8 @@ private slots:
         auto pGaReply = enqueueUpdateReply(TestData::newerGa);
         auto pBetaReply = MockNetworkManager::enqueueReply(TestData::noBuildPayload);
 
-        fixture._downloader.enableBetaChannel(true);
-        fixture._downloader.run(true);
+        fixture.enableBetaChannel(true);
+        fixture.run(true);
 
         pGaReply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
@@ -355,7 +367,7 @@ private slots:
 
         // Start with just the GA channel
         auto pGaReply = enqueueUpdateReply(TestData::newerGa);
-        fixture._downloader.run(true);
+        fixture.run(true);
 
         pGaReply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
@@ -367,7 +379,7 @@ private slots:
 
         // Enable the beta channel.  It has a newer beta initially.
         auto pBetaNewerReply = enqueueUpdateReply(TestData::newerBeta);
-        fixture._downloader.enableBetaChannel(true);
+        fixture.enableBetaChannel(true);
         pBetaNewerReply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
 
@@ -379,7 +391,7 @@ private slots:
         // Disable the beta channel and verify that we offer the GA update
         // again.  This happens synchronouly and doesn't have to make any
         // network requests.
-        fixture._downloader.enableBetaChannel(false);
+        fixture.enableBetaChannel(false);
         QVERIFY(fixture._updateSpy.length() == 3);  // Emitted synchronously
         // We go back to the GA update, and the beta cache is cleared.
         QCOMPARE(fixture._updateSpy[2][0].value<Update>(), TestData::newerGa);
@@ -389,7 +401,7 @@ private slots:
         // Enable beta again.  We don't cache the beta channel when it's
         // stopped, so there shouldn't be any change at this point.
         auto pBetaNewer2Reply = enqueueUpdateReply(TestData::newerBeta2);
-        fixture._downloader.enableBetaChannel(true);
+        fixture.enableBetaChannel(true);
         QVERIFY(!fixture._updateSpy.wait(1000));    // No signal expected
 
         // Act as if the beta channel had been updated while it was stopped.

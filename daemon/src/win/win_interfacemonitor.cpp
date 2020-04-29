@@ -152,8 +152,8 @@ auto WinInterfaceMonitor::getAllNetworkAdapters(const wchar_t *pDesc,
                                                 wchar_t *IP_ADAPTER_ADDRESSES::*pItfNameMember)
     -> QList<std::shared_ptr<WinNetworkAdapter>>
 {
-    Q_ASSERT(pDesc);    // Ensured by caller
-    Q_ASSERT(pItfNameMember);   // Ensured by caller
+    Q_ASSERT(pDesc);          // Ensured by caller
+    Q_ASSERT(pItfNameMember); // Ensured by caller
 
     QList<std::shared_ptr<WinNetworkAdapter>> adapters;
 

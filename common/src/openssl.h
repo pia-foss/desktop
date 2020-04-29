@@ -28,7 +28,7 @@
 #include <QList>
 #include <QSslCertificate>
 
-bool COMMON_EXPORT verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature, const QByteArray& data, QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Sha256);
+bool COMMON_EXPORT verifySignature(const QByteArray& publicKeyPem, const QByteArray& signature, const QByteArray& data);
 
 // PrivateCA can be used to validate a certificate chain issued from a private
 // CA certificate.

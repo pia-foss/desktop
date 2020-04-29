@@ -35,6 +35,7 @@
 #include "posix/posix_firewall_pf.h"
 #include "processrunner.h"
 #include "settings.h"
+#include "exec.h"
 #include "vpn.h"
 
 struct WhitelistPort
@@ -159,7 +160,6 @@ private:
     void updateKextFirewall(const FirewallParams &params, bool isConnected);
     void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
                        QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
-    void manageWebKitApps(QVector<QString> &apps);
     QVector<QString> findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps);
     void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
@@ -201,6 +201,8 @@ private:
     // Keep track of the last few processes traced, so we can trace some of
     // these without completely overwhelming the log.
     std::deque<TracedResponse> _tracedResponses;
+
+    static Executor _executor;
 };
 
 class KextMonitor : public QObject

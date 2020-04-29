@@ -61,7 +61,6 @@ class WinDaemon : public Daemon, private MessageWnd
     CLASS_LOGGING_CATEGORY("win.daemon")
 
 public:
-    explicit WinDaemon(const QStringList& arguments, QObject* parent = nullptr);
     explicit WinDaemon(QObject* parent = nullptr);
     ~WinDaemon();
 
@@ -163,7 +162,7 @@ protected:
         WfpFilterObject permitAdapter[2];
         WfpFilterObject permitLocalhost[2];
         WfpFilterObject permitDHCP[2];
-        WfpFilterObject permitLAN[9];
+        WfpFilterObject permitLAN[10];
         WfpFilterObject blockDNS[2];
         WfpFilterObject permitDNS[2];
         WfpFilterObject blockAll[2];

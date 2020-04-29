@@ -25,10 +25,15 @@
 namespace
 {
     std::chrono::seconds _interval{1};
+
+    std::shared_ptr<ApiBase> pTunnelStatusApi =
+        std::make_shared<ApiBase>(
+            std::initializer_list<QString>{QStringLiteral("https://www.privateinternetaccess.com/")}
+        );
 }
 
 TunnelCheckStatus::TunnelCheckStatus()
-    : _refresher{QStringLiteral("client status"), ApiBases::piaIpAddrApi,
+    : _refresher{QStringLiteral("client status"),
                  QStringLiteral("api/client/status"), _interval, _interval},
       _status{Status::Unknown}
 {
@@ -49,5 +54,5 @@ TunnelCheckStatus::TunnelCheckStatus()
         }
     });
 
-    _refresher.start();
+    _refresher.start(pTunnelStatusApi);
 }

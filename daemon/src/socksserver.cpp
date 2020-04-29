@@ -219,7 +219,7 @@ SocksServer::SocksServer(QHostAddress bindAddress, QString bindInterface)
 
         // Generate a password.  The SocksServer port is reachable by any
         // application, but we only intend to use it from the daemon.
-        quint64 passwordData = QRandomGenerator::securelySeeded().generate64();
+        quint64 passwordData = QRandomGenerator::global()->generate64();
         _password = QByteArray::fromRawData(reinterpret_cast<const char*>(&passwordData), sizeof(passwordData)).toHex();
         // Use the hash of the password for validation; see SocksConnection
         QCryptographicHash hash{QCryptographicHash::Algorithm::Sha256};

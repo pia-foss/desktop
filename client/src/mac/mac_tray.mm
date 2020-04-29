@@ -399,7 +399,7 @@ namespace
             break;
         }
 
-        QString resource = QStringLiteral(":/brands/" BRAND_CODE "/gen_res/img/tray/wide-%1-%2.png").arg(baseName).arg(stateName);
+        QString resource = QStringLiteral(":/img/tray/wide-%1-%2.png").arg(baseName).arg(stateName);
         // Should always end up with a valid file name here - consequence of
         // the checks above on the theme and state, and all these resources
         // must exist

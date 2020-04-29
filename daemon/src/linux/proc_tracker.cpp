@@ -33,6 +33,8 @@
 
 #include "daemon.h"
 #include "path.h"
+#include "exec.h"
+#include "linux_cgroup.h"
 #include "linux_routing.h"
 #include "posix/posix_firewall_iptables.h"
 #include "proc_tracker.h"
@@ -43,6 +45,8 @@ namespace
     RegisterMetaType<OriginalNetworkScan> qNetScan;
     RegisterMetaType<FirewallParams> qFirewallParams;
 }
+
+Executor ProcTracker::_executor{CURRENT_CATEGORY};
 
 QSet<pid_t> ProcFs::filterPids(const std::function<bool(pid_t)> &filterFunc)
 {
@@ -225,7 +229,7 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
     {
         auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(gatewayIp, interfaceName, routingTableName);
         qInfo() << "Executing:" << cmd;
-        ::shellExecute(cmd);
+        _executor.bash(cmd);
     }
 
     // The VPN-only route can be left as-is if we're not connected, VPN-only
@@ -239,28 +243,28 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
     {
         auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(tunnelDeviceRemoteAddress, tunnelDeviceName, vpnOnlyRoutingTableName);
         qInfo() << "Executing:" << cmd;
-        ::shellExecute(cmd);
+        _executor.bash(cmd);
     }
 
-    ::shellExecute(QStringLiteral("ip route flush cache"));
+    _executor.cmd(QStringLiteral("ip"), {"route", "flush", "cache"});
 }
 
 void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
                                 QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
 {
     qInfo() << "previous gateway IP is" << _previousNetScan.gatewayIp();
-    qInfo() << "updated gateway IP is" << params.splitTunnelNetScan.gatewayIp();
+    qInfo() << "updated gateway IP is" << params.netScan.gatewayIp();
     qInfo() << "tunnel device is" << tunnelDeviceName;
 
-    if(_previousNetScan.interfaceName() != params.splitTunnelNetScan.interfaceName())
-        updateMasquerade(params.splitTunnelNetScan.interfaceName());
+    if(_previousNetScan.interfaceName() != params.netScan.interfaceName())
+        updateMasquerade(params.netScan.interfaceName());
 
     // Ensure that packets with the source IP of the physical interface go out the physical interface
-    if(_previousNetScan.ipAddress() != params.splitTunnelNetScan.ipAddress())
+    if(_previousNetScan.ipAddress() != params.netScan.ipAddress())
     {
         // Remove the old one (if it exists) before adding a new one
         removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), Routing::bypassTable);
-        addRoutingPolicyForSourceIp(params.splitTunnelNetScan.ipAddress(), Routing::bypassTable);
+        addRoutingPolicyForSourceIp(params.netScan.ipAddress(), Routing::bypassTable);
     }
 
     // Ensure that packets with source IP of the tunnel go out the tunnel interface
@@ -272,12 +276,12 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     }
 
     // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
-    updateRoutes(params.splitTunnelNetScan.gatewayIp(), params.splitTunnelNetScan.interfaceName(), tunnelDeviceName, tunnelDeviceRemoteAddress);
+    updateRoutes(params.netScan.gatewayIp(), params.netScan.interfaceName(), tunnelDeviceName, tunnelDeviceRemoteAddress);
 
     // If we just got a valid network scan (we're connecting) or we lost it
     // (we're disconnected), the subsequent call to updateApps() will add/remove
     // all excluded apps (which are only tracked when we have a network scan).
-    _previousNetScan = params.splitTunnelNetScan;
+    _previousNetScan = params.netScan;
     _previousTunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
 }
 
@@ -336,18 +340,16 @@ void ProcTracker::initiateConnection(const FirewallParams &params,
 
 void ProcTracker::setupReversePathFiltering()
 {
-    int exitCode;
-    QString out, err;
-    std::tie(exitCode, out, err) = ::shellExecute("sysctl -n 'net.ipv4.conf.all.rp_filter'");
+    QString out = _executor.bashWithOutput(QStringLiteral("sysctl -n 'net.ipv4.conf.all.rp_filter'"));
 
-    if(!exitCode)
+    if(!out.isEmpty())
     {
         if(out.toInt() != 2)
         {
             _previousRPFilter = out;
             qInfo() << "Storing old net.ipv4.conf.all.rp_filter value:" << out;
             qInfo() << "Setting rp_filter to loose";
-            ::shellExecute("sysctl -w 'net.ipv4.conf.all.rp_filter=2'");
+            _executor.bash(QStringLiteral("sysctl -w 'net.ipv4.conf.all.rp_filter=2'"));
         }
         else
             qInfo() << "rp_filter already 2 (loose mode); nothing to do!";
@@ -365,7 +367,7 @@ void ProcTracker::teardownReversePathFiltering()
     if(!_previousRPFilter.isEmpty())
     {
         qInfo() << "Restoring rp_filter to: " << _previousRPFilter;
-        ::shellExecute(QStringLiteral("sysctl -w 'net.ipv4.conf.all.rp_filter=%1'").arg(_previousRPFilter));
+        _executor.bash(QStringLiteral("sysctl -w 'net.ipv4.conf.all.rp_filter=%1'").arg(_previousRPFilter));
     }
 }
 
@@ -373,7 +375,7 @@ void ProcTracker::updateApps(QVector<QString> excludedApps, QVector<QString> vpn
 {
     qInfo() << "Inside updateApps." << "excludedApps:" << excludedApps << "vpnOnlyApps:" << vpnOnlyApps;
     // If we're not tracking excluded apps, remove everything
-    if(!_previousNetScan.isValid())
+    if(!_previousNetScan.ipv4Valid())
         excludedApps = {};
     // Update excluded apps
     removeApps(excludedApps, _exclusionsMap);
@@ -449,6 +451,8 @@ int ProcTracker::subscribeToProcEvents(int sock, bool enabled)
 
 void ProcTracker::setupFirewall()
 {
+    // setup cgroups + configure routing rules
+    CGroup::setupNetCls();
     // Setup the packet tagging rule (this rule is unaffected by network changes)
     // This rule also has callbacks that sets up the cgroup and the routing policy
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), true, IpTablesFirewall::kMangleTable);
@@ -463,19 +467,21 @@ void ProcTracker::teardownFirewall()
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), false, IpTablesFirewall::kNatTable);
     // Remove the cgroup marking rule
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), false, IpTablesFirewall::kMangleTable);
+    // Remove cgroup routing rules
+    CGroup::teardownNetCls();
 }
 
 void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
     if(!ipAddress.isEmpty())
-        ::shellExecute(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
+        _executor.bash(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
             .arg(ipAddress, routingTableName));
 }
 
 void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
     if(!ipAddress.isEmpty())
-        ::shellExecute(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
+        _executor.bash(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
             .arg(ipAddress, routingTableName));
 }
 
@@ -549,7 +555,7 @@ void ProcTracker::addLaunchedApp(pid_t pid)
     if(_exclusionsMap.contains(appName))
     {
         // Add it if we're currently tracking excluded apps.
-        if(_previousNetScan.isValid())
+        if(_previousNetScan.ipv4Valid())
         {
             _exclusionsMap[appName].insert(pid);
             qInfo() << "Adding" << pid << "to VPN exclusions for app:" << appName;

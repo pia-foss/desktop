@@ -66,8 +66,8 @@ std::chrono::microseconds WinUnbiasedDeadline::remaining() const
     return std::chrono::microseconds{(_expireTime - now) / 10};
 }
 
-WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
-    : Daemon(arguments, parent)
+WinDaemon::WinDaemon(QObject* parent)
+    : Daemon{parent}
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
     , _hnsdAppId{nullptr, Path::HnsdExecutable}
@@ -87,6 +87,31 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
     {
         _firewall->removeAll();
     }
+
+    // Qt for some reason passes Unix CA directories to OpenSSL by default on
+    // Windows.  This results in the daemon attempting to load CA certificates
+    // from C:\etc\ssl\, etc., which are not privileged directories on Windows.
+    //
+    // This seems to be an oversight.  QSslSocketPrivate::ensureCiphersAndCertsLoaded()
+    // enables s_loadRootCertsOnDemand on Windows supposedly to permit fetching
+    // CAs from Windows Update.  It's not clear how Windows would actually be
+    // notified to fetch the certificates though, since Qt handles TLS itself
+    // with OpenSSL.  The implementation of QSslCertificate::verify() does load
+    // updated system certificates if this flag is set, but that still doesn't
+    // mean that Windows would know to fetch a new root.
+    //
+    // Qt has already loaded the system CA certs as the default CAs by this
+    // point, this just sets s_loadRootCertsOnDemand back to false to prevent
+    // the Unix paths from being applied.
+    //
+    // This might break QSslCertificate::verify(), but PIA does not use this
+    // since it is not provided on the Mac SecureTransport backend, we implement
+    // this operation with OpenSSL directly.  Qt does not use
+    // QSslCertificate::verify(), it's just provided for application use.  (It's
+    // not part of the normal TLS connection establishment.)
+    auto newDefaultSslConfig = QSslConfiguration::defaultConfiguration();
+    newDefaultSslConfig.setCaCertificates(newDefaultSslConfig.caCertificates());
+    QSslConfiguration::setDefaultConfiguration(newDefaultSslConfig);
 
     connect(&WinInterfaceMonitor::instance(), &WinInterfaceMonitor::changed,
             this, &WinDaemon::checkNetworkAdapter);
@@ -123,12 +148,6 @@ WinDaemon::WinDaemon(const QStringList& arguments, QObject* parent)
     });
 }
 
-WinDaemon::WinDaemon(QObject* parent)
-    : WinDaemon(QCoreApplication::arguments(), parent)
-{
-
-}
-
 WinDaemon::~WinDaemon()
 {
     if (_firewall)
@@ -151,6 +170,7 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getNetworkAdapter()
     // Also update the DaemonState accordingly to keep everything in sync.
     auto adapters = WinInterfaceMonitor::getAllNetworkAdapters(L"Private Internet Access Network Adapter",
                                                                &IP_ADAPTER_ADDRESSES::Description);
+
     if (adapters.size() == 0)
     {
         auto remainingGracePeriod = _resumeGracePeriod.remaining().count();
@@ -412,6 +432,11 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     updateBooleanFilter(permitLAN[6], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("fc00::/7"), 8));
     updateBooleanFilter(permitLAN[7], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("fe80::/10"), 8));
     updateBooleanFilter(permitLAN[8], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("ff00::/8"), 8));
+    // Permit the IPv6 global Network Prefix - this allows on-link IPv6 hosts to communicate using their global IPs
+    // which is more common in practice than link-local
+    updateBooleanFilter(permitLAN[9], params.netScan.hasIpv6() && params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(
+            // First 64 bits of a global IPv6 IP is the Network Prefix.
+            QStringLiteral("%1/64").arg(params.netScan.ipAddress6()), 8));
 
     // Add rules to block non-PIA DNS servers if connected and DNS leak protection is enabled
     logFilter("blockDNS", _filters.blockDNS, params.blockDNS);
@@ -461,6 +486,7 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     // Get the current set of excluded app IDs.  If they've changed we recreate
     // all app rules, but if they stay the same we don't recreate them.
     std::set<const AppIdKey*, PtrValueLess> newExcludedApps, newVpnOnlyApps;
+    QString splitTunnelIp{""};
     if(params.enableSplitTunnel)
     {
         newExcludedApps = _appMonitor.getExcludedAppIds();
@@ -472,12 +498,15 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
             // route
             newVpnOnlyApps.insert(&_hnsdAppId);
         }
+
+        // Should only be set if split tunnel is enabled
+        splitTunnelIp = params.netScan.ipAddress();
     }
 
     qInfo() << "Number of excluded apps" << newExcludedApps.size();
     qInfo() << "Number of vpnOnly apps" << newVpnOnlyApps.size();
 
-    reapplySplitTunnelFirewall(params.splitTunnelNetScan.ipAddress(),
+    reapplySplitTunnelFirewall(splitTunnelIp,
                                _state.tunnelDeviceLocalAddress(),
                                newExcludedApps, newVpnOnlyApps, params.hasConnected);
 

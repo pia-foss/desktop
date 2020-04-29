@@ -59,7 +59,7 @@ Item {
       ToolButton {
         id: locationButton
         text: "Locations"
-        onClicked: tool.populate(Daemon.data.locations)
+        onClicked: tool.populate(Daemon.state.availableLocations)
       }
       ToolButton {
         text: "Settings"
@@ -71,11 +71,13 @@ Item {
       }
       ToolButton {
         text: "State"
-        // Grouped locations and the service locations are shown separately,
-        // they're huge and usually not important when viewing state.
+        // Locations, grouped locations, and the service locations are shown
+        // separately, they're huge and usually not important when viewing state.
+        // Location metadata is mostly static.
         onClicked: tool.populate(Daemon.state,
-                                 ["groupedLocations", "vpnLocations",
-                                  "shadowsocksLocations"])
+                                 ["availableLocations", "groupedLocations",
+                                  "vpnLocations", "shadowsocksLocations",
+                                  "locationMetadata"])
       }
       ToolButton {
         text: "ClientState"
@@ -83,12 +85,7 @@ Item {
       }
       ToolButton {
         text: "Data"
-        // Locations are shown separately, they're huge and uninteresting like
-        // the grouped locations.
-        // CAs and location metadata are mostly static.
-        onClicked: tool.populate(Daemon.data,
-                                 ["locations", "certificateAuthorities",
-                                  "locationMetadata"])
+        onClicked: tool.populate(Daemon.data)
       }
       ToolButton {
         text: "Grouped Locations"

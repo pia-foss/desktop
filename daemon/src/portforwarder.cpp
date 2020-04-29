@@ -21,15 +21,16 @@
 
 #include "portforwarder.h"
 #include "testshim.h"
-#include "apiclient.h"
 #include <QJsonDocument>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QRandomGenerator>
 #include <chrono>
 
-PortForwarder::PortForwarder(QObject *pParent, const QString &clientId)
+PortForwarder::PortForwarder(QObject *pParent, ApiClient &apiClient,
+                             const QString &clientId)
     : QObject{pParent},
+      _apiClient{apiClient},
       _clientId{clientId},
       _connectionState{State::Disconnected},
       _forwardingEnabled{false},
@@ -103,8 +104,8 @@ void PortForwarder::enablePortForwarding(bool enabled)
 
 void PortForwarder::requestPort()
 {
-   _pPortForwardRequest = ApiClient::instance()
-                ->getForwardedPort(QStringLiteral("?client_id=%1").arg(_clientId))
+   _pPortForwardRequest = _apiClient
+                .getForwardedPort(QStringLiteral("?client_id=%1").arg(_clientId))
                 ->then(this, [this](const QJsonDocument& json) {
                     const auto &port = json[QStringLiteral("port")].toInt();
                     emit portForwardUpdated(port ? port : PortForwardState::Failed);

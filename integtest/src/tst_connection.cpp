@@ -129,15 +129,18 @@ private slots:
     }
     void testRemotePorts()
     {
-        // The port lists are updated dynamically from the region list, but for
-        // now this just uses the defaults (which are currently the same)
-        DaemonData defaultData;
+        // Ideally we could get the current set of available ports from the
+        // daemon, but for now this just uses a fixed set of ports - these don't
+        // change often.  Also try a bogus port, the daemon should connect with
+        // the default port instead.
+        std::initializer_list<quint16> udpPorts{1194, 8080, 9201, 53, 1985};
+        std::initializer_list<quint16> tcpPorts{443, 110, 80, 1985};
 
         // Test TCP ports
         CliHarness::applySetting(QStringLiteral("protocol"), QStringLiteral("tcp"));
         // The port lists don't include "0" ("default"), this is covered by
         // testProtocolChoices() since it's the default setting
-        for(const auto &port : defaultData.tcpPorts())
+        for(const auto &port : tcpPorts)
         {
             CliHarness::applySetting(QStringLiteral("remotePortTCP"), static_cast<int>(port));
             runConnectionTest();
@@ -145,7 +148,7 @@ private slots:
 
         // Test UDP ports
         CliHarness::applySetting(QStringLiteral("protocol"), QStringLiteral("udp"));
-        for(const auto &port : defaultData.udpPorts())
+        for(const auto &port : udpPorts)
         {
             CliHarness::applySetting(QStringLiteral("remotePortUDP"), static_cast<int>(port));
             runConnectionTest();

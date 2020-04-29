@@ -204,7 +204,7 @@ fi
 # Check Qt version
 QTVER=$("$QT_ROOT/bin/qmake" --version | tail -n +2 | awk '{print $4}')
 
-SUPPORTED_VERS="5.12.2 5.12.3 5.12.4 5.12.5 5.12.6"
+SUPPORTED_VERS="5.12.2 5.12.3 5.12.4 5.12.5 5.12.6 5.12.7 5.12.8"
 
 echo "Detected Qt version $QTVER"
 
@@ -334,7 +334,7 @@ if [ $TASK_PACKAGE -eq 1 ]; then
     "$QBS" build profile:piaqt512 -f "$ROOT/pia_desktop.qbs" -d "$BUILD_PACKAGE" config:"$CONFIG" modules.cpp.rpaths:\[\"'$ORIGIN/../lib'\"\] project.brandCode:"$BRAND" --all-products
 
     { read -r VERSION; read -r PRODUCTNAME; read -r PACKAGENAME; read -r BUILDTIMESTAMP; } < "$BUILD_PACKAGE/$CONFIG/version/version.txt"
-    { read -r BRAND_NAME; read -r BRAND_CODE; } < "$BUILD_PACKAGE/$CONFIG/brand/brand.txt"
+    { read -r BRAND_NAME; read -r BRAND_CODE; read -r BRAND_ID; read -r BRAND_HELPDESK_LINK; } < "$BUILD_PACKAGE/$CONFIG/brand/brand.txt"
 
     echo "Building package for version $CONFIG"
     # Create a folder to stage the new build
@@ -365,7 +365,8 @@ if [ $TASK_PACKAGE -eq 1 ]; then
     [ "$BRAND_CODE" = "pia" ] || mv "$PKGROOT/installfiles/pia-uninstall.sh" "$PKGROOT/installfiles/$BRAND_CODE-uninstall.sh"
     cp "$ROOT/brands/$BRAND_CODE/icons/app.png" "$PKGROOT/installfiles/app.png"
 
-    BRAND_SUBSTITUTION="s/{{BRAND_CODE}}/${BRAND_CODE}/g; s/{{BRAND_NAME}}/${BRAND_NAME}/g"
+    # Use a different separator for brand link, because we'd expect the slashes of the URL to interfere with the sed command
+    BRAND_SUBSTITUTION="s/{{BRAND_CODE}}/${BRAND_CODE}/g; s/{{BRAND_NAME}}/${BRAND_NAME}/g; s/{{BRAND_ID}}/${BRAND_ID}/g; s#{{BRAND_HELPDESK_LINK}}#${BRAND_HELPDESK_LINK}#g"
 
     # Recursively find all files in PKGROOT and perform `sed` to do an in-place replace. This touches
     # various files in `installfiles`.

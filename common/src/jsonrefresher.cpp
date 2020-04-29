@@ -25,16 +25,12 @@
 #include <QNetworkReply>
 #include <QDir>
 
-JsonRefresher::JsonRefresher(QString name, ApiBase &apiBaseUris,
-                             QString resource,
+JsonRefresher::JsonRefresher(QString name, QString resource,
                              std::chrono::milliseconds initialInterval,
-                             std::chrono::milliseconds refreshInterval,
-                             QByteArray signatureKey)
-    : _name{std::move(name)}, _apiBaseUris{apiBaseUris},
-      _resource{std::move(resource)},
+                             std::chrono::milliseconds refreshInterval)
+    : _name{std::move(name)}, _resource{std::move(resource)},
       _initialInterval{std::move(initialInterval)},
-      _refreshInterval{std::move(refreshInterval)},
-      _signatureKey{std::move(signatureKey)}
+      _refreshInterval{std::move(refreshInterval)}
 {
     connect(&_refreshTimer, &QTimer::timeout, this,
             &JsonRefresher::refreshTimerElapsed);
@@ -53,11 +49,17 @@ void JsonRefresher::refreshTimerElapsed()
         return;
     }
 
+    if(!_pApiBaseUris)
+    {
+        qWarning() << "Timer for" << _name << "elapsed when not running, ignore this refresh";
+        return;
+    }
+
     // Fetch the resource.  Try each possible base URI one time.
     Async<QByteArray> pBodyTask = Async<QByteArray>{new NetworkTaskWithRetry{
                                         QNetworkAccessManager::GetOperation,
-                                        _apiBaseUris, _resource,
-                                        ApiRetries::counted(_apiBaseUris.getUriCount()),
+                                        *_pApiBaseUris, _resource,
+                                        ApiRetries::counted(_pApiBaseUris->getUriCount()),
                                         {}, {}}};
     // Use next() instead of notify() so we can abandon the task (if the
     // JsonRefresher is stopped) by dropping our reference to the outermost
@@ -158,22 +160,47 @@ void JsonRefresher::emitReply(QByteArray responsePayload)
         emit contentLoaded(doc);
 }
 
-// This member function is a variant of start() but allows for initial data
-// to be provided. This data can be useful to get things going if the user
-// is experiencing network difficulties or the resource endpoint is otherwise
-// unavailable.
-void JsonRefresher::start(const QByteArray &initialData)
+void JsonRefresher::start(std::shared_ptr<ApiBase> pApiBaseUris)
 {
-    // first process the provided data
-    emitReply(initialData);
+    Q_ASSERT(pApiBaseUris); // Ensured by caller
 
-    // then start as usual
-    start();
+    // If we're already running, and the API base URIs have not changed
+    // (pointers refer to same object), then there's nothing to do - don't
+    // restart, no need to refresh the resource (matters for UpdateDownloader).
+    if(isRunning() && pApiBaseUris == _pApiBaseUris)
+    {
+        qInfo() << "Refresher for" << _name
+            << "is already running and hasn't changed, nothing to do";
+        return;
+    }
+
+    // Otherwise, either we're not running (stop() has no effect) or the API
+    // base URIs have changed (stop() so we can restart and reload).
+    stop();
+
+    Q_ASSERT(!isRunning()); // Postcondition of stop()
+
+    _pApiBaseUris = std::move(pApiBaseUris);
+    // Issue a request for the resource right now.
+    refreshTimerElapsed();
+    // Start refreshing periodically.
+    _refreshTimer.start();
 }
 
-void JsonRefresher::startOrOverride(const QString &overridePath,
-                                    const QString &bundledPath, bool haveCache)
+void JsonRefresher::startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
+                                    const QString &overridePath,
+                                    const QString &bundledPath,
+                                    const QByteArray &signatureKey,
+                                    const QJsonObject &cache)
 {
+    Q_ASSERT(pApiBaseUris); // Ensured by caller
+
+    // Stop if previously running, we may alter _signatureKey which would affect
+    // an in-flight request
+    stop();
+
+    _signatureKey = signatureKey;
+
     QFile overrideRegionFile{overridePath};
 
     // an override file exists, use it instead of the endpoint
@@ -186,6 +213,7 @@ void JsonRefresher::startOrOverride(const QString &overridePath,
         {
             emit contentLoaded(jsonDoc);
             qInfo() << "Override for" << _name << "loaded successfully";
+            emit overrideActive();
             return; // Don't start refreshes since regions are overridden
         }
 
@@ -197,33 +225,32 @@ void JsonRefresher::startOrOverride(const QString &overridePath,
             << parseError.offset;
         // Regions are not overridden, so do normal initialization with the
         // servers.json and refreshes below.
+        emit overrideFailed();
     }
 
+    // No override.  Try to find initial data from the cache or bundled file,
+    // then start normally.
     QFile bundledRegionFile{bundledPath};
-    // If a bundled file is present, and we don't have any cache yet, use it
-    // as the initial data
-    if (bundledRegionFile.open(QFile::ReadOnly) && !haveCache)
+    // Prefer the cache if it's present
+    if(!cache.isEmpty())
+    {
+        qInfo() << "Using cached data for initial" << _name;
+        emit contentLoaded(QJsonDocument{cache});
+    }
+    // Otherwise, use the bundled data if it's present.  Note that this still
+    // enforces the signature on the bundled data (it is exactly the same data
+    // as a fetch from the API endpoint).
+    else if(bundledRegionFile.open(QFile::OpenModeFlag::ReadOnly))
     {
         qInfo() << "Loading initial" << _name << "from bundled file";
-        start(bundledRegionFile.readAll());
+        emitReply(bundledRegionFile.readAll());
     }
-    // just use the endpoint to fetch the regions
-    else
-    {
-        qInfo() << "Loading" << _name << "from endpoint";
-        start();
-    }
-}
 
-void JsonRefresher::start()
-{
-    if(!isRunning())
-    {
-        // Issue a request for the resource right now.
-        refreshTimerElapsed();
-        // Start refreshing periodically.
-        _refreshTimer.start();
-    }
+    // Then, start fetching from the endpoint.  Start with the fast interval,
+    // even if a cache or bundle was present, because the cached or bundled
+    // resource is probably stale.
+    qInfo() << "Loading" << _name << "from endpoint";
+    start(std::move(pApiBaseUris));
 }
 
 void JsonRefresher::stop()

@@ -30,7 +30,6 @@ QtObject {
 
     readonly property string imagePath: "qrc:/img/" + name
     readonly property string imagePathCommon: "qrc:/img/common"
-    readonly property string brandImagePath: "qrc:/brands/" + BrandHelper.brandCode + "/img/" + name
 
     readonly property DashboardStyle dashboard: DashboardStyle {}
     readonly property LoginStyle login: LoginStyle {}

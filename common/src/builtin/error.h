@@ -56,6 +56,7 @@ public:
         InvalidEnumValue,
 
         JsonFieldError,                   // %1 = field name, %2 = field type (empty for nonexistent fields), %3 = value (optional)
+        JsonCastError,
 
         // Standard JSON RPC codes
         JsonRPCParseError = -32700,

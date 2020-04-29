@@ -188,6 +188,7 @@ PiaProject {
             f.writeLine(project.brandName);
             f.writeLine(project.brandCode);
             f.writeLine(project.brandIdentifier);
+            f.writeLine(brandParams.helpDeskLink);
           } finally {
             f.close();
           }
@@ -231,7 +232,7 @@ PiaProject {
             if(!Array.isArray(updateApis) || updateApis.length < 1) {
               updateApis = [
                 "https://www.privateinternetaccess.com/clients/desktop",
-                "https://piaproxy.net/clients/desktop"
+                "https://www.piaproxy.net/clients/desktop"
               ]
             }
             f.writeLine('#define BRAND_UPDATE_APIS QStringLiteral(R"(' + updateApis.join(')"), QStringLiteral(R\"(') + ')")')

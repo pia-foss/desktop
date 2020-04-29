@@ -87,7 +87,7 @@ QPixmap getIconForAppBundle(const QString &path, const QSize &size)
     return qpixmap;
 }
 
-QPixmap MacAppIconProvider::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
+QPixmap MacAppIconProvider::requestPixmap(const QString &id, QSize *, const QSize &requestedSize)
 {
     // Qt doesn't decode the id after extracting it from the URI
     QString path = QUrl::fromPercentEncoding(id.toUtf8());

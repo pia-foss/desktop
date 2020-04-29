@@ -42,7 +42,7 @@ Item {
   }
 
   Item {
-    readonly property var locationMeta: location ? Daemon.data.locationMetadata[location.id] : undefined
+    readonly property var locationMeta: location ? Daemon.state.locationMetadata[location.id] : undefined
 
     // Top and bottom latitudes of map graphic
     readonly property real topLat: 83.65

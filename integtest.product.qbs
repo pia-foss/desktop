@@ -65,20 +65,17 @@ PiaProject {
       fileTags: ["integtest-stage", "application.windeploy"]
     }
 
-    // Windows OpenSSL dependencies
+    // OpenSSL dependencies
     Group {
-      condition: qbs.targetOS.contains("windows")
-      files: [
-        "deps/openvpn/win/" + qbs.architecture + "/libcrypto*.dll",
-        "deps/openvpn/win/" + qbs.architecture + "/libssl*.dll"
-      ]
-      fileTags: ["integtest-stage", "dynamiclibrary"]
-    }
-
-    // Linux OpenSSL dependencies
-    Group {
-      condition: qbs.targetOS.contains("linux")
-      files: "deps/openvpn/linux/" + qbs.architecture + "/lib*"
+      property string platformDir: {
+        if(qbs.targetOS.contains("windows"))
+          return "win"
+        if(qbs.targetOS.contains("macos"))
+          return "mac"
+        if(qbs.targetOS.contains("linux"))
+          return "linux"
+      }
+      files: "deps/openvpn/" + platformDir + "/" + qbs.architecture + "/lib*"
       fileTags: ["integtest-stage", "dynamiclibrary"]
     }
 

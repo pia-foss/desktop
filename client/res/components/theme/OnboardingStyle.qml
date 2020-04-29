@@ -52,8 +52,8 @@ QtObject {
   readonly property color sectionHeadlineColor: dark ? "#fff" : "#22252E"
   readonly property color sectionParagraphColor: sectionDividerColor
 
-  readonly property string logoImage: brandImagePath + "/onboarding/logo.png"
-  readonly property string spacemanImage: brandImagePath + "/onboarding/graphic.png"
+  readonly property string logoImage: imagePath + "/onboarding/logo.png"
+  readonly property string spacemanImage: imagePath + "/onboarding/graphic.png"
   readonly property string primaryButtonImage: Theme.imagePathCommon + "/onboarding/btn/primary.png"
   readonly property string secondaryButtonImage: Theme.imagePathCommon + "/onboarding/btn/secondary.png"
 

@@ -76,7 +76,8 @@ class LatencyTracker : public QObject
 private:
     struct LocationData
     {
-        QString pingAddress;
+        // All offered servers in the location that have the latency service
+        std::vector<Server> latencyServers;
         LatencyHistory latency;
         //Locations can sit in _locations without having been attempted if
         //measurements are not enabled.
@@ -87,11 +88,12 @@ public:
     struct PingLocation
     {
         QString id;
-        QString pingAddress;
+        QString echoIp;
+        quint16 echoPort;
     };
 
     // Group of latency measurements - location IDs and latency values.
-    using Latencies = QVector<QPair<QString, std::chrono::milliseconds>>;
+    using Latencies = std::vector<QPair<QString, std::chrono::milliseconds>>;
 
 public:
     //LatencyTracker begins with measurements stopped - call start() to enable
@@ -111,12 +113,19 @@ private slots:
     void onNewMeasurements(const Latencies &measurements);
 
 private:
+    // Select a ping address for a location, using its ID and list of latency
+    // servers.  A server is selected randomly.  If no server can be selected,
+    // this returns a PingLocation with an empty echoIp/echoPort, which is
+    // then handled by LatencyBatch.
+    PingLocation selectPingAddress(const QString &locationId,
+                                   const std::vector<Server> &latencyServers) const;
+
     //Begin a measurement for all locations in _locations that haven't been
     //attempted yet
     void measureNewLocations();
 
     //Begin a new measurement for a set of ping addresses
-    void beginMeasurement(const QVector<PingLocation> &locations);
+    void beginMeasurement(const std::vector<PingLocation> &locations);
 
 public:
     //Daemon passes the current set of locations to this method.
@@ -124,7 +133,7 @@ public:
     //If measurements are enabled, any new locations observed in this list will
     //be measured immediately.  If they are not enabled, new locations will be
     //measured whenever measurements are re-enabled.
-    void updateLocations(const ServerLocations &serverLocations);
+    void updateLocations(const LocationsById &serverLocations);
 
     //Enable latency measurements.
     //
@@ -155,7 +164,7 @@ private:
     //
     //Values are LocationData objects, which contain the location's ping address
     //and its LatencyHistory.
-    QHash<QString, LocationData> _locations;
+    std::unordered_map<QString, LocationData> _locations;
 };
 
 Q_DECLARE_METATYPE(std::chrono::milliseconds);
@@ -182,7 +191,7 @@ public:
 
 public:
     //Create LatencyBatch with the locations that will be checked.
-    LatencyBatch(const QVector<LatencyTracker::PingLocation> &locations,
+    LatencyBatch(const std::vector<LatencyTracker::PingLocation> &locations,
                  QObject *pParent);
 
 signals:

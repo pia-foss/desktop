@@ -48,12 +48,9 @@ class COMMON_EXPORT JsonRefresher : public QObject
     CLASS_LOGGING_CATEGORY("jsonrefresher")
 
 public:
-    // JsonRefresher expects apiBaseUris to outlive this object.  (This is
-    // normally a static storage duration object from apibase.cpp.)
-    JsonRefresher(QString name, ApiBase &apiBaseUris, QString resource,
+    JsonRefresher(QString name, QString resource,
                   std::chrono::milliseconds initialInterval,
-                  std::chrono::milliseconds refreshInterval,
-                  QByteArray signatureKey = {});
+                  std::chrono::milliseconds refreshInterval);
     ~JsonRefresher();
 
 private:
@@ -67,13 +64,16 @@ private:
 
 public:
     // Start trying to load the resource.
-    void start();
+    void start(std::shared_ptr<ApiBase> pApiBaseUris);
 
-    // Start with initial data, then continue trying to load the resource as in start()
-    void start(const QByteArray &initialData);
     // Check for an override file, bundled seed file, and load or start the
-    // refresher.  'haveCache' indicates whether the caller has an existing
-    // cache from a prior run, if so the bundled seed file will not be used.
+    // refresher.  'cache' is cached data from a prior run.  If a cache is
+    // present, and the override is not active, the cache is emitted as an
+    // initial result.
+    //
+    // A signing key can optionally be specified.  If signatureKey is not empty,
+    // bundled and fetched resources will be verified using the signing key.
+    // (Override resources are not expected to be signed.)
     //
     // - If an override file is loaded, it is used and the refresher is not
     //   started.
@@ -81,8 +81,14 @@ public:
     //   use that and start the refresher.
     // - Otherwise, just start the refresher - there may be no data available
     //   until it loads the resource.
-    void startOrOverride(const QString &overridePath,
-                         const QString &bundledPath, bool haveCache);
+    //
+    // Emits overrideActive() if an override is active, or overrideFailed() if
+    // an override was present but could not be loaded.
+    void startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
+                         const QString &overridePath,
+                         const QString &bundledPath,
+                         const QByteArray &signatureKey,
+                         const QJsonObject &cache);
     // Stop refreshing the resource.  If a request was in-flight, it is
     // canceled (contentLoaded() cannot be emitted while stopped).
     void stop();
@@ -109,9 +115,17 @@ signals:
     // Emitted any time the content of the resource is successfully loaded.
     void contentLoaded(const QJsonDocument &content);
 
+    // An override file was present and loaded by startOrOverride().
+    void overrideActive();
+    // An override file was present during startOrOverride(), but could not be
+    // loaded.
+    void overrideFailed();
+
 public:
     QString _name;
-    ApiBase &_apiBaseUris;
+    // Base URIs - can be changed whenever JsonRefresher is started.  Valid if
+    // (and only if) the JsonRefresher is running.
+    std::shared_ptr<ApiBase> _pApiBaseUris;
     QString _resource;
     std::chrono::milliseconds _initialInterval, _refreshInterval;
     QTimer _refreshTimer;

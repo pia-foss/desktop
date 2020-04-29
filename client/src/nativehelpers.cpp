@@ -565,41 +565,41 @@ QString NativeHelpers::iconPreviewResource(const QString &theme)
 {
 #if defined(Q_OS_MACOS)
     if(theme == QStringLiteral("auto"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/sample-auto.png");
+        return QStringLiteral("qrc:/img/tray/sample-auto.png");
     if(theme == QStringLiteral("light"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/wide-light-connected.png");
+        return QStringLiteral("qrc:/img/tray/wide-light-connected.png");
     if(theme == QStringLiteral("dark"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/wide-dark-connected.png");
+        return QStringLiteral("qrc:/img/tray/wide-dark-connected.png");
     if(theme == QStringLiteral("colored"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/wide-colored-connected.png");
+        return QStringLiteral("qrc:/img/tray/wide-colored-connected.png");
     if(theme == QStringLiteral("classic"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/wide-classic-connected.png");
+        return QStringLiteral("qrc:/img/tray/wide-classic-connected.png");
 #elif defined(Q_OS_WIN)
     if(theme == QStringLiteral("light"))
     {
         if(TrayIconLoader::useOutlineIcons())
-            return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-light-with-dark-outline-connected.png");
+            return QStringLiteral("qrc:/img/tray/square-light-with-dark-outline-connected.png");
         else
-            return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-light-no-outline-connected.png");
+            return QStringLiteral("qrc:/img/tray/square-light-no-outline-connected.png");
     }
     if(theme == QStringLiteral("colored"))
     {
         if(TrayIconLoader::useOutlineIcons())
-            return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-colored-with-dark-outline-connected.png");
+            return QStringLiteral("qrc:/img/tray/square-colored-with-dark-outline-connected.png");
         else
-            return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-colored-no-outline-connected.png");
+            return QStringLiteral("qrc:/img/tray/square-colored-no-outline-connected.png");
     }
     if(theme == QStringLiteral("classic"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-classic-connected.png");
+        return QStringLiteral("qrc:/img/tray/square-classic-connected.png");
 #elif defined(Q_OS_LINUX)
     if(theme == QStringLiteral("light"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-light-no-outline-connected.png");
+        return QStringLiteral("qrc:/img/tray/square-light-no-outline-connected.png");
     if(theme == QStringLiteral("dark"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-dark-no-outline-connected.png");
+        return QStringLiteral("qrc:/img/tray/square-dark-no-outline-connected.png");
     if(theme == QStringLiteral("colored"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-colored-no-outline-connected.png");
+        return QStringLiteral("qrc:/img/tray/square-colored-no-outline-connected.png");
     if(theme == QStringLiteral("classic"))
-        return QStringLiteral("qrc:/brands/" BRAND_CODE "/gen_res/img/tray/square-classic-connected.png");
+        return QStringLiteral("qrc:/img/tray/square-classic-connected.png");
 #else
     #error "Unknown platform - NativeHelpers::iconPreviewResource()"
 #endif

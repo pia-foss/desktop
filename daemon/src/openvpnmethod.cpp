@@ -58,8 +58,10 @@ OpenVPNMethod::~OpenVPNMethod()
 }
 
 void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
+                        const Server &vpnServer,
                         const Transport &transport,
                         const QHostAddress &localAddress,
+                        const QHostAddress &shadowsocksServerAddress,
                         quint16 shadowsocksProxyPort)
 {
     _connectingConfig = connectingConfig;
@@ -171,7 +173,8 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
 
         QFile configFile(Path::OpenVPNConfigFile);
         if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text) ||
-            !writeOpenVPNConfig(configFile, transport, localAddress, dnsServers,
+            !writeOpenVPNConfig(configFile, vpnServer, transport, localAddress,
+                                dnsServers, shadowsocksServerAddress,
                                 shadowsocksProxyPort))
         {
             throw Error(HERE, Error::OpenVPNConfigFileWriteError);
@@ -221,9 +224,11 @@ void OpenVPNMethod::shutdown()
 }
 
 bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
+                                       const Server &vpnServer,
                                        const Transport &transport,
                                        const QHostAddress &localAddress,
                                        const QStringList &dnsServers,
+                                       const QHostAddress &shadowsocksServerAddress,
                                        quint16 shadowsocksProxyPort)
 {
     QTextStream out{&outFile};
@@ -258,25 +263,20 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "client" << endl;
     out << "dev tun" << endl;
 
-    QString remoteServer;
     if (transport.protocol() == QStringLiteral("tcp"))
-    {
         out << "proto tcp-client" << endl;
-        remoteServer = sanitize(_connectingConfig.vpnLocation()->tcpHost());
-    }
     else
     {
         out << "proto udp" << endl;
         out << "explicit-exit-notify" << endl;
-        remoteServer = sanitize(_connectingConfig.vpnLocation()->udpHost());
     }
-    if (remoteServer.isEmpty())
-        return false;
 
+    QString remoteServer = sanitize(vpnServer.ip());
     out << "remote " << remoteServer << ' ' << transport.port() << endl;
 
-    if (!_connectingConfig.vpnLocation()->serial().isEmpty())
-        out << "verify-x509-name " << sanitize(_connectingConfig.vpnLocation()->serial()) << " name" << endl;
+    if (vpnServer.commonName().isEmpty())
+        return false;
+    out << "verify-x509-name " << sanitize(vpnServer.commonName()) << " name" << endl;
 
     // OpenVPN's default setting is 'ping-restart 120'.  This means it takes up
     // to 2 minutes to notice loss of connection.  (On some OSes/systems it may
@@ -340,14 +340,8 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
                     remoteHost = _connectingConfig.socksHost();
                     break;
                 case ConnectionConfig::ProxyType::Shadowsocks:
-                {
-                    QSharedPointer<ShadowsocksServer> _pSsServer;
-                    if(_connectingConfig.shadowsocksLocation())
-                        _pSsServer = _connectingConfig.shadowsocksLocation()->shadowsocks();
-                    if(_pSsServer)
-                        remoteHost = ConnectionConfig::parseIpv4Host(_pSsServer->host());
+                    remoteHost = shadowsocksServerAddress;
                     break;
-                }
             }
             // If the remote host address couldn't be parsed, fail now.
             if(remoteHost.isNull())
@@ -495,8 +489,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "pull-filter ignore \"dhcp-option DOMAIN local\"" << endl;
 
     out << "<ca>" << endl;
-    for (const auto& line : g_data.getCertificateAuthority(g_settings.serverCertificate()))
-        out << line << endl;
+    out << g_daemon->environment().getCertificateAuthority(g_settings.serverCertificate()) << endl;
     out << "</ca>" << endl;
 
     return true;

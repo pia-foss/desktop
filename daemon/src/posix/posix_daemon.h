@@ -40,7 +40,7 @@ class PosixDaemon : public Daemon
     Q_OBJECT
     CLASS_LOGGING_CATEGORY("posix.daemon")
 public:
-    PosixDaemon(const QStringList& arguments);
+    PosixDaemon();
     ~PosixDaemon();
 
     static PosixDaemon* instance() { return static_cast<PosixDaemon*>(Daemon::instance()); }

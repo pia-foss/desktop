@@ -58,10 +58,17 @@ private:
                 const QProcessEnvironment &env, QString *pOut,
                 bool ignoreErrors);
 
+    void cmdDetached(const QString &program, const QStringList &args);
+
 public:
 #if defined(Q_OS_UNIX)
     // Execute a shell command with /bin/bash -c "cmd"
     int bash(const QString &command, bool ignoreErrors = false);
+    void bashDetached(const QString &command);
+
+    // Execute a shell command with /bin/bash -c "cmd" and return the stdout
+    // If the command errors out, return an empty string (errors are also traced)
+    QString bashWithOutput(const QString &command, bool ignoreErrors = false);
 #endif
 
     // Execute a specific program with arguments
@@ -104,12 +111,21 @@ namespace Exec
     // Execute a shell command with /bin/bash -c "cmd", using the default logging
     // category
     int COMMON_EXPORT bash(const QString &command, bool ignoreErrors = false);
+    void COMMON_EXPORT bashDetached(const QString &command);
+
+    // Execute a shell command with /bin/bash -c "cmd", using the default logging
+    // category. Also return the stdout of the command (or an empty string on error)
+    QString COMMON_EXPORT bashWithOutput(const QString &command, bool ignoreErrors = false);
 #endif
 
     // Execute a process with arguments, tracing exit code/stdout/stderr, using the
     // default logging category
     int COMMON_EXPORT cmd(const QString &program, const QStringList &args,
                           bool ignoreErrors = false);
+
+    // Execute a process with arguments and return the stdout (or empty string on error)
+    QString COMMON_EXPORT cmdWithOutput(const QString &program, const QStringList &args);
+
 
     int COMMON_EXPORT cmdWithEnv(const QString &program, const QStringList &args,
                                  const QProcessEnvironment &env,

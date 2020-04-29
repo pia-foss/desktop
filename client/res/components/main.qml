@@ -128,6 +128,6 @@ QtObject {
     // daemon at this point (although it's also possible that the daemon itself
     // has not loaded the locations yet, the point of this is mainly to see
     // which locations are missing for devs).
-    Daemon.data.checkLocationMetadata(Daemon.state.groupedLocations)
+    Daemon.state.checkLocationMetadata(Daemon.state.groupedLocations)
   }
 }

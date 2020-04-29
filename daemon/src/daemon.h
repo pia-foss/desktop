@@ -25,6 +25,7 @@
 
 #include "settings.h"
 #include "async.h"
+#include "environment.h"
 #include "jsonrpc.h"
 #include "latencytracker.h"
 #include "portforwarder.h"
@@ -38,7 +39,6 @@
 #include <QSet>
 #include <QTimer>
 #include <QNetworkAccessManager>
-
 
 class IPCConnection;
 class IPCServer;
@@ -141,21 +141,17 @@ struct FirewallParams
     // PIA is started/connected, because they could have existing connections
     // that were permitted.
     //
-    // Bypass VPN apps though are only affected when we connect (see
-    // splitTunnelNetScan) - persistent connections from those apps would be
+    // Bypass VPN apps though are only affected when we connect
+    // - persistent connections from those apps would be
     // fine since they bypass the VPN anyway.
     //
     // On Mac, this causes the kext to be loaded, but on Windows the WFP callout
     // is not loaded until we connect (app blocks can be implemented in WFP
     // without loading the callout driver).
     bool enableSplitTunnel;
-    // Original network information used to manage Bypass VPN apps for split
-    // tunnel.  This is only valid while connecting/connected (cleared when
-    // disconnected) with split tunnel enabled.
-    //
-    // This enables Bypass VPN app behavior for split tunnel (if
-    // enableSplitTunnel is also set).
-    OriginalNetworkScan splitTunnelNetScan;
+    // Original network information used (among other things) to manage apps for split
+    // tunnel.
+    OriginalNetworkScan netScan;
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
     QVector<QString> vpnOnlyApps; // Apps to force on the VPN
 };
@@ -254,9 +250,11 @@ class Daemon : public QObject, public Singleton<Daemon>
     CLASS_LOGGING_CATEGORY("daemon")
 
 public:
-    explicit Daemon(const QStringList& arguments, QObject* parent = nullptr);
-    explicit Daemon(QObject* parent = nullptr); // Will pick up arguments from QCoreApplication::instance()
+    explicit Daemon(QObject* parent = nullptr);
     ~Daemon();
+
+    Environment &environment() {return _environment;}
+    ApiClient &apiClient() {return _apiClient;}
 
     DaemonData& data() { return _data; }
     DaemonAccount& account() { return _account; }
@@ -265,16 +263,12 @@ public:
 
     void reportError(Error error);
 
-    int exitCode() const { return _exitCode; }
-
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() = 0;
 
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
 
 protected:
-    const QStringList& arguments() const { return _arguments; }
-
     Async<QJsonObject> loadAccountInfo(const QString& username, const QString& password, const QString& token);
     void resetAccountInfo();
     void upgradeSettings(bool existingSettingsFile);
@@ -361,7 +355,7 @@ public slots:
     // Request that the daemon stop and exit.
     virtual void stop();
 
-protected slots:
+private:
     void clientConnected(IPCConnection* connection);
     void notifyChanges();
     void serialize();
@@ -375,6 +369,15 @@ protected slots:
     void vpnScannedOriginalNetwork(const OriginalNetworkScan &netScan);
     void newLatencyMeasurements(const LatencyTracker::Latencies &measurements);
     void portForwardUpdated(int port);
+
+    // Build the locations list, grouped locations, and all location preferences
+    // from the legacy locations lists.  serversObj and shadowsocksObj can be
+    // the cached objects from DaemonData, or new data retrieved (which should
+    // then be cached if successfully loaded).  Latencies from DaemonData are
+    // used.
+    bool rebuildLegacyLocations(const QJsonObject &serversObj,
+                                const QJsonObject &shadowsocksObj);
+    // Handle region list results from JsonRefresher
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
 
@@ -383,9 +386,10 @@ protected slots:
 
 
 private:
-    // Rebuild all location-based data (location lists, chosen/best/next
-    // locations, etc.)  Used when the entire location list changes.
-    void rebuildLocations();
+    // Rebuild location preferences from the grouped locations.  Used when
+    // settings are changed that affect the location preferences.  (Latency and
+    // region list changes result in rebuilding the entire region list.)
+    void calculateLocationPreferences();
     // Rebuild the chosen/best/next location selections (without rebuilding the
     // entire list).  Used when data changes that affect the location
     // selections.
@@ -396,13 +400,19 @@ private:
     void onUpdateDownloadFinished(const QString &version,
                                   const QString &installerPath);
     void onUpdateDownloadFailed(const QString &version, bool error);
-    void updateSupportedVpnPorts(const QJsonObject &serversObj);
 
+    // Check whether the host supports split tunnel and record errors
+    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
     void checkSplitTunnelSupport();
 
     // Update the port forwarder's enabled state, based on the current setting
     // or the setting value that we connected with
     void updatePortForwarder();
+
+    // Set _state.overridesActive() or _state.overridesFailed() and log
+    // appropriately
+    void setOverrideActive(const QString &resourceName);
+    void setOverrideFailed(const QString &resourceName);
 
     void logCommand(const QString &cmd, const QStringList &args);
     // Log the current routing table; used after connecting
@@ -410,10 +420,7 @@ private:
 
     void connectVPN();
     void disconnectVPN();
-
 protected:
-    QStringList _arguments;
-    int _exitCode;
     bool _started, _stopping;
 
     IPCServer* _server;
@@ -422,6 +429,9 @@ protected:
     RemoteNotificationInterface* _rpc;
 
     VPNConnection* _connection;
+
+    Environment _environment;
+    ApiClient _apiClient;
 
     LatencyTracker _latencyTracker;
     PortForwarder *_portForwarder;

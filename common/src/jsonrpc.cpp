@@ -61,10 +61,6 @@ Async<QJsonValue> LocalMethod::operator()(const QJsonArray &params) noexcept
     {
         return invoke(params);
     }
-    catch (const json_cast_exception&)
-    {
-        return Async<QJsonValue>::reject(JsonRPCInvalidParamsError(HERE));
-    }
     catch (const Error& e)
     {
         return Async<QJsonValue>::reject(e);
