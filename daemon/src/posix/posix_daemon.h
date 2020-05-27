@@ -90,6 +90,8 @@ private:
     bool _enableSplitTunnel;
     OriginalNetworkScan _splitTunnelNetScan;
 
+    SubnetBypass _subnetBypass;
+
 #ifdef Q_OS_LINUX
     IpTablesFirewall _firewall;
     LinuxModSupport _linuxModSupport;

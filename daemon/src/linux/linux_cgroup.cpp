@@ -58,10 +58,12 @@ void CGroup::setupNetCls()
     const QString bypassDir{Path::VpnExclusionsFile.parent()};
     const QString vpnOnlyDir{Path::VpnOnlyFile.parent()};
 
-    // Split tunnel (exclusions)
-    setupCgroup(bypassDir, bypassId, Fwmark::excludePacketTag, Routing::bypassTable);
+    // Split tunnel (exclusions) - we want the bypass rule to have lower priority than the vpnOnly rule (see Routing::Priorities)
+    // so that an app set to vpnOnly has all its packets sent over the VPN even if a bypass rule (such as a subnet bypass) would otherwise
+    // allow those packets to escape the VPN. "vpnOnly" should always win.
+    setupCgroup(bypassDir, bypassId, Fwmark::excludePacketTag, Routing::bypassTable, Routing::Priorities::bypass);
     // Inverse split tunnel (vpn only)
-    setupCgroup(vpnOnlyDir, vpnOnlyId, Fwmark::vpnOnlyPacketTag, Routing::vpnOnlyTable);
+    setupCgroup(vpnOnlyDir, vpnOnlyId, Fwmark::vpnOnlyPacketTag, Routing::vpnOnlyTable, Routing::Priorities::vpnOnly);
 }
 
 void CGroup::teardownNetCls()
@@ -70,16 +72,15 @@ void CGroup::teardownNetCls()
     teardownCgroup(Fwmark::vpnOnlyPacketTag, Routing::vpnOnlyTable);
 }
 
-void CGroup::setupCgroup(const Path &cGroupDir, const QString &cGroupId, const QString &packetTag, const QString &routingTableName)
+void CGroup::setupCgroup(const Path &cGroupDir, const QString &cGroupId, const QString &packetTag, const QString &routingTableName, int priority)
 {
     qInfo() << "Should be setting up cgroups in" << cGroupDir << "for traffic splitting";
 
     // Create the net_cls group
     execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi")
         .arg(cGroupDir).arg(cGroupId));
-    // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
-    execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi")
-        .arg(packetTag, routingTableName));
+    execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri %3 ; fi")
+        .arg(packetTag, routingTableName).arg(priority));
 }
 
 void CGroup::teardownCgroup(const QString &packetTag, const QString &routingTableName)

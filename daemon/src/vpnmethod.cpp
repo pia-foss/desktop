@@ -26,6 +26,15 @@ VPNMethod::VPNMethod(QObject *pParent, const OriginalNetworkScan &netScan)
 {
 }
 
+void VPNMethod::updateNetwork(const OriginalNetworkScan &newNetwork)
+{
+    if(newNetwork != _netScan)
+    {
+        _netScan = newNetwork;
+        networkChanged();
+    }
+}
+
 void VPNMethod::advanceState(State newState)
 {
     if(newState < _state)

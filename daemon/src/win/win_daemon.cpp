@@ -66,6 +66,59 @@ std::chrono::microseconds WinUnbiasedDeadline::remaining() const
     return std::chrono::microseconds{(_expireTime - now) / 10};
 }
 
+class WinRouteManager : public RouteManager
+{
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
+private:
+    void createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName);
+};
+
+void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+{
+    InitializeIpForwardEntry(&route);
+    NET_LUID luid{};
+
+    luid.Value = static_cast<ULONG64>(interfaceName.toULongLong());
+    route.InterfaceLuid = luid;
+
+    const auto subnetPair = QHostAddress::parseSubnet(subnet);
+    const QHostAddress &subnetIp = subnetPair.first;
+    const int subnetPrefixLength = subnetPair.second;
+
+    // Destination subnet
+    route.DestinationPrefix.Prefix.si_family = AF_INET;
+    route.DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr  = htonl(subnetIp.toIPv4Address());
+    route.DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+    route.DestinationPrefix.PrefixLength = subnetPrefixLength;
+
+    // Router address (next hop)
+    route.NextHop.Ipv4.sin_addr.s_addr = htonl(QHostAddress{gatewayIp}.toIPv4Address());
+    route.NextHop.Ipv4.sin_family = AF_INET;
+}
+
+void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+{
+    MIB_IPFORWARD_ROW2 route{};
+    createRouteEntry(route, subnet, gatewayIp, interfaceName);
+
+    qInfo() << "Adding bypass route for" << subnet;
+    // Add the routing entry
+    if(CreateIpForwardEntry2(&route) != NO_ERROR)
+        qWarning() << "Could not create route for" << subnet;
+}
+
+void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+{
+    MIB_IPFORWARD_ROW2 route{};
+    createRouteEntry(route, subnet, gatewayIp, interfaceName);
+    qInfo() << "Removing bypass route for" << subnet;
+
+    // Delete the routing entry
+    if(DeleteIpForwardEntry2(&route) != NO_ERROR)
+        qWarning() << "Could not delete route for" << subnet;
+}
+
 WinDaemon::WinDaemon(QObject* parent)
     : Daemon{parent}
     , MessageWnd(WindowType::Invisible)
@@ -73,6 +126,7 @@ WinDaemon::WinDaemon(QObject* parent)
     , _hnsdAppId{nullptr, Path::HnsdExecutable}
     , _lastConnected{false}
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
+    , _subnetBypass{std::make_unique<WinRouteManager>()}
 {
     _filters = FirewallFilters{};
     _filterAdapterLuid = 0;
@@ -168,9 +222,7 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getNetworkAdapter()
     // For robustness, when making a connection, we always re-query for the
     // network adapter, in case the change notifications aren't 100% reliable.
     // Also update the DaemonState accordingly to keep everything in sync.
-    auto adapters = WinInterfaceMonitor::getAllNetworkAdapters(L"Private Internet Access Network Adapter",
-                                                               &IP_ADAPTER_ADDRESSES::Description);
-
+    auto adapters = WinInterfaceMonitor::getDescNetworkAdapters(L"Private Internet Access Network Adapter");
     if (adapters.size() == 0)
     {
         auto remainingGracePeriod = _resumeGracePeriod.remaining().count();
@@ -438,6 +490,9 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
             // First 64 bits of a global IPv6 IP is the Network Prefix.
             QStringLiteral("%1/64").arg(params.netScan.ipAddress6()), 8));
 
+    // Poke holes in firewall for the bypass subnets for Ipv4 and Ipv6
+    updateAllBypassSubnetFilters(params);
+
     // Add rules to block non-PIA DNS servers if connected and DNS leak protection is enabled
     logFilter("blockDNS", _filters.blockDNS, params.blockDNS);
     updateBooleanFilter(blockDNS[0], params.blockDNS, DNSFilter<FWP_ACTION_BLOCK, FWP_IP_VERSION_V4>(10));
@@ -510,7 +565,56 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
                                _state.tunnelDeviceLocalAddress(),
                                newExcludedApps, newVpnOnlyApps, params.hasConnected);
 
+    // Update subnet bypass routes
+    _subnetBypass.updateRoutes(params);
+
     tx.commit();
+}
+
+void WinDaemon::updateAllBypassSubnetFilters(const FirewallParams &params)
+{
+    if(params.bypassIpv4Subnets != _bypassIpv4Subnets)
+        updateBypassSubnetFilters(params.bypassIpv4Subnets, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
+
+    if(params.bypassIpv6Subnets != _bypassIpv6Subnets)
+        updateBypassSubnetFilters(params.bypassIpv6Subnets, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
+}
+
+void WinDaemon::updateBypassSubnetFilters(const QSet<QString> &subnets, QSet<QString> &oldSubnets, std::vector<WfpFilterObject> &subnetBypassFilters, FWP_IP_VERSION ipVersion)
+{
+    for (auto &filter : subnetBypassFilters)
+        deactivateFilter(filter, true);
+
+    // If we have any IPv6 subnets we need to also whitelist IPv6 link-local and broadcast ranged
+    // required by IPv6 Neighbor Discovery
+    auto adjustedSubnets = subnets;
+    if(ipVersion == FWP_IP_VERSION_V6 && !subnets.isEmpty())
+    {
+        adjustedSubnets << QStringLiteral("fe80::/10");
+        adjustedSubnets << QStringLiteral("ff00::/8");
+    }
+
+    subnetBypassFilters.resize(adjustedSubnets.size());
+
+    int index{0};
+    for(auto it = adjustedSubnets.begin(); it != adjustedSubnets.end(); ++it, ++index)
+    {
+        if(ipVersion == FWP_IP_VERSION_V6)
+        {
+            qInfo() << "Creating Subnet ipv6 rule" << *it;
+            activateFilter(subnetBypassFilters[index], true,
+                IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(*it, 10));
+        }
+        else
+        {
+            qInfo() << "Creating Subnet ipv4 rule" << *it;
+            activateFilter(subnetBypassFilters[index], true,
+                IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(*it, 10));
+        }
+    }
+
+    // Update the bypass subnets
+    oldSubnets = subnets;
 }
 
 void WinDaemon::removeSplitTunnelAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
@@ -644,9 +748,14 @@ void WinDaemon::reapplySplitTunnelFirewall(const QString &newSplitTunnelIp,
         qInfo() << "deactivate connect callout object";
         deactivateFilter(_filters.splitCalloutConnect, true);
     }
+    if(_filters.providerContextKey != zeroGuid)
+    {
+        qInfo() << "deactivate exclusion provider context object";
+        deactivateFilter(_filters.providerContextKey, true);
+    }
     if(_filters.vpnOnlyProviderContextKey != zeroGuid)
     {
-        qInfo() << "deactivate provider context object";
+        qInfo() << "deactivate VPN-only provider context object";
         deactivateFilter(_filters.vpnOnlyProviderContextKey, true);
     }
 
@@ -817,6 +926,15 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     // Wireguard logs
     file.writeCommand("WireGuard Logs", Path::WireguardServiceExecutable,
                       QStringList{QStringLiteral("/dumplog"), Path::ConfigLogFile});
+
+    // Installed and running drivers (buggy drivers may prevent TAP installation)
+    file.writeCommand("Drivers", QStringLiteral("driverquery"), {QStringLiteral("/v")});
+    
+    // DNS
+    file.writeCommand("Resolve-DnsName (www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com"));
+    file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(specialPiaAddress));
+    file.writeCommand("ping (ping www.pia.com)", "ping", QStringLiteral("www.privateinternetaccess.com /w 1000 /n 1"));
+    file.writeCommand("ping (ping 209.222.18.222)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(specialPiaAddress));
 }
 
 void WinDaemon::checkWintunInstallation()

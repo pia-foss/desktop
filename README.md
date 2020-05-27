@@ -31,8 +31,13 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
   - Up-to-date version of Xcode
 - On **Linux**:
   - Ubuntu 16.04 or newer
-  - `build-essential`, `mesa-common-dev`, and `clang`
-  - (GCC can also be used, but Clang is recommended)
+  - The following development packages:
+    - `build-essential`
+    - `mesa-common-dev`
+    - `clang` (GCC can also be used, but Clang is recommended)
+    - `libnl-3-dev` (PIA can run without the library installed, but the headers are needed to build)
+    - `libnl-route-3-dev`
+    - `libnl-genl-3-dev`
 
 ### Cloning the repository
 

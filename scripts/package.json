@@ -6,7 +6,6 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "mkdirp": "^0.5.1",
     "recursive-readdir": "^2.2.2",
     "xml2js": "^0.4.19"
   }

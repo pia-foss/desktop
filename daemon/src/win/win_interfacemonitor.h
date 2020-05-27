@@ -87,13 +87,22 @@ public:
     // we need to tear it down.
     static WinInterfaceMonitor &instance();
 
+private:
+    template<class AdapterPredicateFunc>
+    static auto getAllNetworkAdapters(AdapterPredicateFunc predicate)
+        -> QList<std::shared_ptr<WinNetworkAdapter>>;
+
+public:
     // Get all network adapters with a given description.
     // Not really related to the interface change implementation, but these are
     // usually used together.
     // May throw if the adapters can't be retrieved.
-    static auto getAllNetworkAdapters(const wchar_t *pDesc,
-                                      wchar_t *IP_ADAPTER_ADDRESSES::*pItfNameMember)
+    static auto getDescNetworkAdapters(const wchar_t *pDesc)
         -> QList<std::shared_ptr<WinNetworkAdapter>>;
+
+    // Get the network adapter for a given LUID.
+    static auto getAdapterForLuid(quint64 luid)
+        -> std::shared_ptr<WinNetworkAdapter>;
 
 private:
     WinInterfaceMonitor();

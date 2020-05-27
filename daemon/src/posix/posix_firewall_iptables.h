@@ -47,8 +47,6 @@ public:
     // PIA process group names
     static QString kVpnGroupName;
 
-public:
-    using FilterCallbackFunc = std::function<void()>;
 private:
     static int createChain(IPVersion ip, const QString& chain, const QString& tableName = kFilterTable);
     static int deleteChain(IPVersion ip, const QString& chain, const QString& tableName = kFilterTable);
@@ -79,6 +77,7 @@ public:
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
     static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName = kFilterTable);
     void updateRules(const FirewallParams &params);
+    void updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion, const QSet<QString> &bypassSubnets, QSet<QString> &oldBypassSubnets);
 
 private:
     // Last state used by updateRules(); allows us to detect when the rules must
@@ -86,6 +85,8 @@ private:
     QString _adapterName;
     QStringList _dnsServers;
     QString _ipAddress6;
+    QSet<QString> _bypassIpv4Subnets;
+    QSet<QString> _bypassIpv6Subnets;
 };
 
 #endif

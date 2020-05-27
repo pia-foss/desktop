@@ -92,7 +92,7 @@ public:
     Q_INVOKABLE bool getStartOnLogin();
 
     // Set the start on login state
-    Q_INVOKABLE bool setStartOnLogin(bool enabled);
+    Q_INVOKABLE void setStartOnLogin(bool enabled);
 
     // Test whether a resource exists.  Pass a path beginning with "qrc:/", such
     // as a path that would be used in an Image.
@@ -188,6 +188,9 @@ public:
     Q_INVOKABLE void openSecurityPreferencesMac();
 
     Q_INVOKABLE void checkAppDeactivate();
+
+    static void applyStartOnLoginSetting(bool enabled);
+    static bool getStartOnLoginSetting();
 
 signals:
     // Emitted when the application loses focus (no window in the application is

@@ -23,6 +23,7 @@
 #include "path.h"
 #include "async.h"
 #include "exec.h"
+#include "brand.h"
 #include <unistd.h>
 #include <memory>
 
@@ -131,7 +132,7 @@ private:
 };
 
 MacInterfaceNameTask::MacInterfaceNameTask()
-    : _devFileWatcher{Path::WireguardGoInterfaceFile}
+    : _devFileWatcher{Path::WireguardInterfaceFile}
 {
     connect(&_devFileWatcher, &RecursiveWatcher::changed, this,
             &MacInterfaceNameTask::checkInterfaceFile);
@@ -140,7 +141,7 @@ MacInterfaceNameTask::MacInterfaceNameTask()
 
 void MacInterfaceNameTask::checkInterfaceFile()
 {
-    QFile itfFile{Path::WireguardGoInterfaceFile};
+    QFile itfFile{Path::WireguardInterfaceFile};
     if(!itfFile.open(QIODevice::ReadOnly))
     {
         qInfo() << "Interface name file does not exist yet, wait for it to be created";
@@ -316,7 +317,7 @@ void WireguardGoRunner::setupProcess(UidGidProcess &process)
 {
     auto env = QProcessEnvironment::systemEnvironment();
 #if defined(Q_OS_MAC)
-    env.insert(QStringLiteral("WG_TUN_NAME_FILE"), Path::WireguardGoInterfaceFile);
+    env.insert(QStringLiteral("WG_TUN_NAME_FILE"), Path::WireguardInterfaceFile);
 #elif defined(Q_OS_LINUX)
     // This has the same effect as --foreground, but it also suppresses the
     // "you should use the kernel module" warning
@@ -359,7 +360,7 @@ void WireguardGoBackend::cleanup()
     // On Mac, we don't know the interface name, since it's a utun### name.  We
     // don't want to risk tearing down any other WG tunnel or utun interface
     // that wasn't started by PIA.  (There could even be a stale
-    // Path::WireguardGoInterfaceFile that refers to some utun interface that's
+    // Path::WireguardInterfaceFile that refers to some utun interface that's
     // now used by some other process.)
     //
     // The most reasonable remaining option is to just try to terminate any
@@ -377,12 +378,42 @@ void WireguardGoBackend::cleanup()
 #endif
 }
 
+// Dump interface diagonstics when WireGuard fails to assign an address
+// This is used to investigate an issue on macOS Catalina where the tunnel interface
+// may be arbitrary deleted by the OS.
+// see: https://github.com/WireGuard/wireguard-apple/commit/794acb7e724f53043d33eaa68b68607dcdab6222
+#ifdef Q_OS_MACOS
+static void logInterfaces(const QByteArray &line)
+{
+    qInfo() << "Detected interface error, dumping ifconfig/netstat settings";
+    Exec::cmd(QStringLiteral("ifconfig"), {});
+    Exec::cmd(QStringLiteral("netstat"), {"-nr", "-f", "inet"});
+    Exec::cmd(QStringLiteral("scutil"), {"--dns"});
+    Exec::cmd(QStringLiteral("pfctl"), {"-a", BRAND_IDENTIFIER "/*", "-sr"});
+    Exec::cmd(QStringLiteral("pfctl"), {"-a", BRAND_IDENTIFIER "/310.blockDNS",
+                                        "-t", "dnsaddr", "-T", "show"});
+}
+#endif
+
 WireguardGoBackend::WireguardGoBackend()
     : _wgGoPid{0}
 {
     _wgGoRunner.emplace(wgGoRestartParams);
+
+#ifdef Q_OS_MACOS
+    // Rate-limit logIntefaces method to max invocations of once a second
+    auto debouncedLogInterfaces = debounce(logInterfaces, 1000);
+#endif
+
     connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
         [](const QByteArray &line){qInfo() << "wireguard-go:" << line;});
+#ifdef Q_OS_MACOS
+    connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
+        [=](const QByteArray &line) mutable {
+            if(line.contains("can't assign requested address"))
+                debouncedLogInterfaces(line);
+        });
+#endif
     connect(_wgGoRunner.ptr(), &ProcessRunner::started, this,
             &WireguardGoBackend::wgGoStarted);
     connect(_wgGoRunner.ptr(), &ProcessRunner::failed, this,
@@ -390,7 +421,7 @@ WireguardGoBackend::WireguardGoBackend()
     _wgGoRunner->setObjectName(QStringLiteral("wireguard-go"));
 #ifdef Q_OS_MAC
     // If there was an old interface file hanging around, remove it
-    QFile::remove(Path::WireguardGoInterfaceFile);
+    QFile::remove(Path::WireguardInterfaceFile);
 #endif
 }
 
@@ -407,7 +438,7 @@ WireguardGoBackend::~WireguardGoBackend()
 
 #ifdef Q_OS_MAC
     // Remove the interface file if it was created
-    QFile::remove(Path::WireguardGoInterfaceFile);
+    QFile::remove(Path::WireguardInterfaceFile);
 #endif
 }
 

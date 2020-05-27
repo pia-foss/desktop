@@ -46,7 +46,8 @@ namespace
         // specific.  We may eliminate this requirement in future versions of
         // the client.
         {Error::Code::DaemonRPCDaemonInactive, {CliExitCode::RequiresClient,
-            "Cannot connect - start the " BRAND_SHORT_NAME " client to activate the daemon and try again"}},
+            "Cannot connect - start the " BRAND_SHORT_NAME " client to activate the daemon, or use `"\
+                        BRAND_CODE "ctl background enable` to enable background mode."}},
         {Error::Code::DaemonRPCNotLoggedIn, {CliExitCode::NotLoggedIn,
             "This command requires a logged in account"}},
         {Error::Code::DaemonRPCUnknownSetting, {CliExitCode::UnknownSetting,

@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("connection.cpp")
+#line SOURCE_FILE("vpn.cpp")
 
 #include "vpn.h"
 #include "vpnmethod.h"
@@ -43,6 +43,8 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <unistd.h>
+#elif defined(Q_OS_WIN)
+#include "win/win.h"
 #endif
 
 // List of settings which require a reconnection.
@@ -325,74 +327,6 @@ void TransportSelector::addAlternates(const QString &protocol,
     }
 }
 
-QHostAddress TransportSelector::findInterfaceIp(const QString &interfaceName)
-{
-#ifdef Q_OS_UNIX
-    ifreq ifr = {};
-    int fd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    // We're interested in the IPv4 address
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, qPrintable(interfaceName), IFNAMSIZ - 1);
-
-    // Request the interface address
-    if(ioctl(fd, SIOCGIFADDR, &ifr))
-    {
-        qWarning() << "Unable to retrieve interface ip:" << qt_error_string(errno);
-        close(fd);
-        return {};
-    }
-
-    close(fd);
-
-    quint32 address = reinterpret_cast<sockaddr_in*>(&ifr.ifr_addr)->sin_addr.s_addr;
-    return QHostAddress{ntohl(address)};
-#else
-   return {};
-#endif
-}
-
-QHostAddress TransportSelector::findLocalAddress(const QHostAddress &testAddress)
-{
-    // Determine what local address we will use to connect to the Internet.
-    // A "UDP connect" doesn't actually send any packets, it just determines
-    // the local address to use for a connection.
-    QUdpSocket connTest;
-    connTest.connectToHost(testAddress, 8080);
-    return connTest.localAddress();
-}
-
-void TransportSelector::scanNetworkRoutes(OriginalNetworkScan &netScan)
-{
-
-#if defined(Q_OS_UNIX)
-    auto assignGatewayAndInterface = [](const QString &commandString, OriginalNetworkScan &netScan)
-    {
-        QString out = Exec::bashWithOutput(commandString);
-        if(!out.isEmpty())
-        {
-            QStringList result = out.split(' ');
-            netScan.gatewayIp(result.first());
-            netScan.interfaceName(result.last());
-        }
-    };
-#endif
-    // TODO: use system APIs for this rather than relying on flaky and changeable system tools (in terms of their output format)
-#if defined(Q_OS_MACOS)
-    // This awk script is necessary as the macOS 10.14 and 10.15 output of netstat has changed. As a result we need to actually locate the columns
-    // we're interested in, we can't just hard-code a column number
-    auto commandString = QStringLiteral("netstat -nr -f inet | sed '1,3 d' | awk 'NR==1 { for (i=1; i<=NF; i++) { f[$i] = i  } } NR>1 && $(f[\"Destination\"])==\"default\" { print $(f[\"Gateway\"]), $(f[\"Netif\"]) ; exit }'");
-    assignGatewayAndInterface(commandString, netScan);
-#elif defined(Q_OS_LINUX)
-    auto commandString = QStringLiteral("netstat -nr | tee /dev/stderr | awk '$1==\"default\" || ($1==\"0.0.0.0\" && $3==\"0.0.0.0\") { print $2, $8; exit }'");
-    assignGatewayAndInterface(commandString, netScan);
-#elif defined(Q_OS_WIN)
-    // Not needed for Windows
-    netScan.gatewayIp(QStringLiteral("N/A"));
-    netScan.interfaceName(QStringLiteral("N/A"));
-#endif
-}
-
 void TransportSelector::reset(Transport preferred, bool useAlternates,
                               const DescendingPortSet &udpPorts,
                               const DescendingPortSet &tcpPorts)
@@ -427,34 +361,6 @@ void TransportSelector::reset(Transport preferred, bool useAlternates,
     }
 }
 
-OriginalNetworkScan TransportSelector::scanNetwork()
-{
-    OriginalNetworkScan netScan;
-
-    // Get the gatewayIp and interfaceName
-    scanNetworkRoutes(netScan);
-
-// The findLocalAddress() code is only broken on macOS, so let's limit the ioctl() approach to there for now.
-// On macOS we add a 'bound route' (-ifscope route) that sometimes hangs around after changing network - this bound route can interfere with assigning source IPs
-// to sockets and so using the findLocalAddress() approach can sometimes return the incorrect IP. Using findInterfaceIp() we can query the interface for
-// its IP address which should always give us the correct result (assuming we ask the correct interface). The assumption behind using findInterfaceIp() is that
-// the interface associated with the "first" default route after changing networks is added by the system and is always correct.
-#ifdef Q_OS_UNIX
-    netScan.ipAddress(findInterfaceIp(netScan.interfaceName()).toString());
-#else
-    // Use an IPv4 address reserved for documentation for this test (192.0.2.1)
-    netScan.ipAddress(findLocalAddress(QHostAddress{0xC0000201}).toString());
-#endif
-    // Find the (global) IPv6 IP
-    // 2001:db8::123 is just a random global IPv6 endpoint (in the range dedicated for "documentation") used to find the locally bound global IPv6 IP.
-    // If the host does not have IPv6 setup then this results in an empty string.
-    // TODO: This currently only finds the global IP for the default ipv6 interface -
-    // we may want to gather global IPs from all the IPv6-enabled interfaces in the future.
-    netScan.ipAddress6(findLocalAddress(QHostAddress{"2001:db8::123"}).toString());
-
-    return netScan;
-}
-
 QHostAddress TransportSelector::lastLocalAddress() const
 {
     // If the last transport is the preferred transport, always allow any local
@@ -474,23 +380,9 @@ QHostAddress TransportSelector::lastLocalAddress() const
 }
 
 const Server *TransportSelector::beginAttempt(const Location &location,
-                                              OriginalNetworkScan &netScan,
+                                              const QHostAddress &localAddress,
                                               bool &delayNext)
 {
-    scanNetworkRoutes(netScan);
-
-    // Find the local addresses that we would use to connect to either the
-    // TCP or UDP addresses for this location.  If they change, we reset and go
-    // back to the preferred transport only.
-#ifdef Q_OS_MACOS
-    QHostAddress localAddress = findInterfaceIp(netScan.interfaceName());
-#else
-    // Use an IPv4 address reserved for documentation for this test (192.0.2.1)
-    QHostAddress localAddress = findLocalAddress(QHostAddress{0xC0000201});
-#endif
-
-    netScan.ipAddress({});
-
     // If the address has changed, a network connectivity change has
     // occurred.  Reset and try the preferred transport only for a while.
     //
@@ -545,8 +437,6 @@ const Server *TransportSelector::beginAttempt(const Location &location,
     }
 
     _lastPreferred = _selected;
-
-    netScan.ipAddress(_lastLocalAddress.toString());
 
     const Server *pSelectedServer = _lastUsed.selectServerPort(location);
     _lastPreferred.resolveDefaultPort(_lastUsed.protocol(), pSelectedServer);
@@ -950,9 +840,10 @@ bool VPNConnection::needsReconnect()
     return _needsReconnect;
 }
 
-void VPNConnection::scanNetwork()
+void VPNConnection::updateNetwork(const OriginalNetworkScan &newNetwork)
 {
-    emit scannedOriginalNetwork(_transportSelector.scanNetwork());
+    if(_method)
+        _method->updateNetwork(newNetwork);
 }
 
 void VPNConnection::connectVPN(bool force)
@@ -1239,9 +1130,9 @@ void VPNConnection::doConnect()
     _connectTimer.stop();
 
     Q_ASSERT(_connectingConfig.vpnLocation());  // Postcondition of copySettings()
-    OriginalNetworkScan netScan;
+    OriginalNetworkScan netScan = g_daemon->originalNetwork();
     bool delayNext = true;
-    const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), netScan, delayNext);
+    const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), QHostAddress{netScan.ipAddress()}, delayNext);
     // When using WireGuard, the TransportSelector is vestigial, since
     // WireGuard currently only supports one protocol and port.  It's still
     // active right now so transports are reported, but it reports the selected
@@ -1250,18 +1141,6 @@ void VPNConnection::doConnect()
     // server.
     if(_connectingConfig.method() == ConnectionConfig::Method::Wireguard)
         pVpnServer = _connectingConfig.vpnLocation()->randomServerForService(Service::WireGuard);
-
-    // Emit the current network configuration, so it can be used for split
-    // tunnel if it's known.  If we did find it (and it doesn't change by the
-    // time we connect), this avoids a blip for excluded apps where they might
-    // route into the VPN tunnel once OpenVPN sets up the routes.
-    //
-    // This scan is not reliable though - the network could come up or change
-    // between now and when OpenVPN starts.  We do another scan just after
-    // connecting to be sure that we get the correct config.  (If those scans
-    // differ, there may be a connectivity blip, but the network connections
-    // changed so a blip is OK.)
-    emit scannedOriginalNetwork(netScan);
 
     if(!pVpnServer)
     {
@@ -1336,14 +1215,6 @@ void VPNConnection::vpnMethodStateChanged()
             // the connected location.
             _connectedConfig = std::move(_connectingConfig);
             _connectingConfig = {};
-
-            // Do a new network scan now that we've connected.  If split tunnel
-            // is enabled (now or later while connected), this is necessary to
-            // ensure that we have the correct local IP address.  If the network
-            // configuration changes at any point after this (or even if it had
-            // already changed since the connection was established), we'll drop
-            // the OpenVPN connection and re-scan when we connect again.
-            scanNetwork();
 
             // If DNS is set to Handshake, start it now, since we've connected
             if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Handshake)

@@ -76,7 +76,7 @@ SplitTunnelRowBase {
   // Localized display name (used in list's accessibility table)
   readonly property string displayName: uiTr("Add Application")
 
-  implicitHeight: 50
+  implicitHeight: 35
 
   function clicked() {
     focusCell(0)
@@ -88,8 +88,8 @@ SplitTunnelRowBase {
   }
 
   Image {
-    height: 20
-    width: 20
+    height: 15
+    width: 15
 
     source: Theme.settings.splitTunnelAddApplicationButtonHover
     anchors.verticalCenter: parent.verticalCenter
@@ -101,7 +101,7 @@ SplitTunnelRowBase {
     id: addApplicationText
     text: addApplicationRow.displayName
     color: Theme.settings.hbarTextColor
-    font.pixelSize: 16
+    font.pixelSize: 12
     x: 40
     anchors.verticalCenter: parent.verticalCenter
   }

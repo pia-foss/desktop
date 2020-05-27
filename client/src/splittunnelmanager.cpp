@@ -25,6 +25,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QHostAddress>
 #if defined(Q_OS_MAC)
 #include "mac/mac_appscanner.h"
 #include "mac/mac_constants.h"
@@ -112,6 +113,21 @@ QString SplitTunnelManager::getLinuxNetClsPath() const
 #else
     return {};
 #endif
+}
+
+QString SplitTunnelManager::normalizeSubnet(const QString &subnet) const
+{
+    auto subnetPair = QHostAddress::parseSubnet(subnet);
+
+    const QHostAddress &ipAddress = subnetPair.first;
+    int prefixLength = subnetPair.second;
+
+    if(!ipAddress.isNull())
+        return QStringLiteral("%1/%2")
+            .arg(ipAddress.toString())
+            .arg(QString::number(prefixLength));
+    else
+        return {};
 }
 
 QString SplitTunnelManager::getMacWebkitFrameworkPath() const

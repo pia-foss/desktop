@@ -25,6 +25,7 @@
 #include "posix_firewall_pf.h"
 #include "posix_firewall_iptables.h"
 #include "path.h"
+#include "exec.h"
 #include "brand.h"
 
 #if defined(Q_OS_MACOS)
@@ -84,8 +85,32 @@ void setUidAndGid()
     } (qUtf8Printable(Path::SupportToolExecutable), gr->gr_gid);
 }
 
+// Only used by MacOs - Linux uses routing policies and packet tagging instead
+class PosixRouteManager : public RouteManager
+{
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
+};
+
+void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+{
+#if defined(Q_OS_MACOS)
+    qInfo() << "Adding bypass route for" << subnet;
+    Exec::cmd("route", {"add", "-net", subnet, gatewayIp});
+#endif
+}
+
+void PosixRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+{
+#if defined(Q_OS_MACOS)
+    qInfo() << "Removing bypass route for" << subnet;
+    Exec::cmd("route", {"delete", "-net", subnet, gatewayIp});
+#endif
+}
+
 PosixDaemon::PosixDaemon()
-    : Daemon{}, _enableSplitTunnel{false}
+    : Daemon{}, _enableSplitTunnel{false},
+      _subnetBypass{std::make_unique<PosixRouteManager>()}
 {
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
     ignoreSignals({ SIGPIPE });
@@ -217,6 +242,21 @@ static bool updateVpnTunOnlyAnchor(bool hasConnected, QString tunnelDeviceName, 
 }
 #endif
 
+#if defined(Q_OS_MACOS)
+// Figure out which subnets we need to bypass for the allowSubnets rule on MacOs
+static QStringList subnetsToBypass(const FirewallParams &params)
+{
+    if(params.bypassIpv6Subnets.isEmpty())
+        // No IPv6 subnets, so just return IPv4
+        return QStringList{params.bypassIpv4Subnets.toList()};
+    else
+        // If we have any IPv6 subnets then Whitelist link-local/broadcast IPv6 ranges too.
+        // These are required by IPv6 Neighbor Discovery
+        return QStringList{"fe80::/10", "ff00::/8"}
+               + (params.bypassIpv4Subnets + params.bypassIpv6Subnets).toList();
+}
+#endif
+
 void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 {
     const auto &netScan{params.netScan};
@@ -237,6 +277,8 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
         // First 64 bits is the IPv6 Network Prefix
         QStringLiteral("%1/64").arg(netScan.ipAddress6())});
     PFFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
+    PFFirewall::setAnchorEnabled(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
+    PFFirewall::setAnchorTable(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel, QStringLiteral("subnets"), subnetsToBypass(params));
     PFFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), params.blockDNS);
     PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), params.blockDNS, QStringLiteral("dnsaddr"), params.effectiveDnsServers);
     PFFirewall::setAnchorEnabled(QStringLiteral("350.allowHnsd"), params.allowHnsd);
@@ -257,6 +299,7 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("290.allowDHCP"), params.allowDHCP);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("300.allowLAN"), params.allowLAN);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
 
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), params.blockDNS);
@@ -284,8 +327,14 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
                                        enableVpnTunOnly,
                                        IpTablesFirewall::kRawTable);
 
-    // Update rules that depend on the adapter name and/or DNS servers.
+    // Update dynamic rules that depend on info such as the adapter name and/or DNS servers
     _firewall.updateRules(params);
+#endif
+
+#ifdef Q_OS_MACOS
+    // Subnet bypass routing for MacOs
+    // Linux doesn't make use of this, it uses packet tagging and routing policies instead.
+    _subnetBypass.updateRoutes(params);
 #endif
 
     toggleSplitTunnel(params);
@@ -305,6 +354,23 @@ QJsonValue PosixDaemon::RPC_installKext()
 #endif
 }
 
+#ifdef Q_OS_MAC
+void scutilDNSDiagnostics(DiagnosticsFile &file)
+{
+    QString primaryService = Exec::bashWithOutput("echo 'get State:/Network/Global/IPv4\nd.show' | scutil | awk '/PrimaryService/{print $3}'");
+    file.writeText("scutil Global:DNS", Exec::bashWithOutput("echo 'get State:/Network/Global/DNS\nd.show' | scutil"));
+    file.writeText("scutil Global:IPv4", Exec::bashWithOutput("echo 'get State:/Network/Global/IPv4\nd.show' | scutil"));
+    file.writeText("scutil State:PrimaryService:IPv4", Exec::bashWithOutput(QStringLiteral("echo 'get State:/Network/Service/%1/IPv4\nd.show' | scutil").arg(primaryService)));
+    file.writeText("scutil State:PrimaryService:DNS", Exec::bashWithOutput(QStringLiteral("echo 'get State:/Network/Service/%1/DNS\nd.show' | scutil").arg(primaryService)));
+    file.writeText("scutil Setup:PrimaryService:IPv4", Exec::bashWithOutput(QStringLiteral("echo 'get Setup:/Network/Service/%1/IPv4\nd.show' | scutil").arg(primaryService)));
+    file.writeText("scutil Setup:PrimaryService:DNS", Exec::bashWithOutput(QStringLiteral("echo 'get Setup:/Network/Service/%1/DNS\nd.show' | scutil").arg(primaryService)));
+    file.writeText("scutil State:PIA", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess\nd.show' | scutil"));
+    file.writeText("scutil State:PIA:DNS", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess/DNS\nd.show' | scutil"));
+    file.writeText("scutil State:PIA:OldStateDNS", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess/OldStateDNS\nd.show' | scutil"));
+    file.writeText("scutil State:PIA:OldSetupDNS", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess/OldSetupDNS\nd.show' | scutil"));
+}
+#endif
+
 void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 {
     QStringList emptyArgs;
@@ -315,8 +381,22 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (App anchors)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*"), QStringLiteral("-sr")});
+    file.writeCommand("PF (dnsaddr table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "dnsaddr", "-T", "show"});
+    file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
+    file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(specialPiaAddress), QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
+    file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("-c1"), QStringLiteral("-W1")});
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{specialPiaAddress,
+        QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
+    file.writeCommand("scutil (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
+    file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
+    scutilDNSDiagnostics(file);
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
+    file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
     file.writeText("kext syslog", _kextMonitor.getKextLog());
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
@@ -339,6 +419,14 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // iptables version - 1.6.1 is required for the split tunnel feature
     file.writeCommand("iptables --version", "iptables", QStringList{QStringLiteral("--version")});
+    file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(specialPiaAddress), QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
+    file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
+        QStringLiteral("-c1"), QStringLiteral("-W1")});
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{specialPiaAddress,
+        QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
     // Grab the routing tables from iproute2 also - we hope to change OpenVPN
     // from ifconfig to iproute2 at some point as long as this is always present
@@ -376,6 +464,8 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     // Info about the wireguard kernel module (whether it is loaded and/or available)
     file.writeCommand("ls -ld /sys/modules/wireguard", "ls", {"-ld", "/sys/modules/wireguard"});
     file.writeCommand("modprobe --show-depends wireguard", "modprobe", {"--show-depends", "wireguard"});
+    // Info about libnl libraries
+    file.writeCommand("ldconfig -p | grep libnl", "bash", QStringList{"-c", "ldconfig -p | grep libnl"});
 #endif
 }
 

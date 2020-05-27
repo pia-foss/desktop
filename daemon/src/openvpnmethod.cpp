@@ -223,6 +223,15 @@ void OpenVPNMethod::shutdown()
     }
 }
 
+void OpenVPNMethod::networkChanged()
+{
+    // OpenVPNMethod doesn't currently do anything when the network state
+    // changes.  On some platforms, OpenVPN or our helper will detect the change
+    // and kill the connection; on other platforms, we wait for a ping timeout.
+    // In the future we might be able to reconnect more quickly by detecting
+    // connection loss due to a network change.
+}
+
 bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
                                        const Server &vpnServer,
                                        const Transport &transport,

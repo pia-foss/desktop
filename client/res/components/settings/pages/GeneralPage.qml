@@ -40,11 +40,8 @@ Page {
       setting: Setting {
         onCurrentValueChanged: {
           if(currentValue !== sourceValue) {
-            var changeResult = NativeHelpers.setStartOnLogin(currentValue);
+            NativeHelpers.setStartOnLogin(currentValue);
             sourceValue = currentValue;
-            if(!changeResult) {
-              // TODO: show an error
-            }
           }
         }
       }

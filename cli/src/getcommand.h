@@ -29,7 +29,7 @@
 namespace GetSetType
 {
     extern const QString connectionState, debugLogging, portForward, protocol,
-                         region, regions, vpnIp;
+                         region, regions, vpnIp, daemonState, daemonSettings;
 }
 
 namespace GetSetValue
@@ -54,6 +54,12 @@ public:
 // instead of printing the value once.
 class MonitorCommand : public CliCommand
 {
+public:
+    virtual void printHelp(const QString &name) override;
+    virtual int exec(const QStringList &params, QCoreApplication &app) override;
+};
+
+class DumpCommand : public CliCommand {
 public:
     virtual void printHelp(const QString &name) override;
     virtual int exec(const QStringList &params, QCoreApplication &app) override;

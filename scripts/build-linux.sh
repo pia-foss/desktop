@@ -226,9 +226,13 @@ ARTIFACT_PATH="$OUTDIR/artifacts"
 if [ $TASK_CONFIGURE -eq 1 ]; then
   echo "Running task: configure"
   "$QBS" config --unset profiles.piaqt512
-  "$QBS" setup-toolchains --detect
+  # "qbs setup-toolchains --detect" no longer makes an unversioned "clang"
+  # profile, it seems to only make clang-3 / clang-6 / etc. depending on what
+  # version of clang is present.  Use the default clang from $PATH regardless of
+  # what version it is to support building on different versions of clang.
+  "$QBS" setup-toolchains "$(which clang)" piaclang
   "$QBS" setup-qt "$QT_ROOT/bin/qmake" piaqt512
-  "$QBS" config profiles.piaqt512.baseProfile clang
+  "$QBS" config profiles.piaqt512.baseProfile piaclang
   echoPass "Configured QBS. Profile config:"
   "$QBS" config --list profiles.piaqt512
 fi

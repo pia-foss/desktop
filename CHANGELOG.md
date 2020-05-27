@@ -1,5 +1,13 @@
 # Changelog
 
+### v2.1
+* Split tunnel "bypass" rules can be created for IP addresses and subnets
+* WireGuard now supports network roaming on Mac in addition to Windows and Linux
+* New {{BRAND_CODE}}ctl commands to log in and log out - '{{BRAND_CODE}}ctl login', '{{BRAND_CODE}}ctl logout'
+* New {{BRAND_CODE}}ctl command to enable killswitch and/or VPN connections without using the graphical client - '{{BRAND_CODE}}ctl background'
+* Fixed an issue that prevented WireGuard from connecting on Windows if the computer had been shut off unexpectedly
+* Fixed an issue on some Linux resolvconf systems that could block DNS incorrectly when using WireGuard
+
 ### v2.0.2
 * Improved handling of several Mac applications with split tunnel, such as Mail and Calendar
 * Split tunnel on Linux attempts to mount net_cls automatically if it's not mounted (as on Fedora)

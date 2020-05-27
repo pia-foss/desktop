@@ -133,6 +133,9 @@ public:
         VPNConfigInvalid = 1800,
 
         LocalSocketConnectionFailed = 1900,
+
+        // Library entry point loaded at runtime is not available
+        LibraryUnavailable = 2000,
     };
     Q_ENUM(Code)
 
@@ -316,7 +319,7 @@ extern void COMMON_EXPORT reportError(Error error);
         } \
         catch (const Error& e) \
         { \
-            qDebug(e); \
+            qDebug() << e; \
             report(e); \
         } \
         catch (const std::exception& e) \

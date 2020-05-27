@@ -43,6 +43,9 @@ public:
     void progressState(State newState) { advanceState(newState); }
 
 private:
+    virtual void networkChanged() override {}
+
+private:
     std::shared_ptr<NetworkAdapter> _networkAdapter;
 };
 
@@ -55,20 +58,20 @@ private slots:
 
     void testInitialState()
     {
-        TestVPNMethod vpnMethod{this, OriginalNetworkScan{}};
+        TestVPNMethod vpnMethod{nullptr, {}};
         QVERIFY(vpnMethod.state() == VPNMethod::State::Created);
     }
 
     void testCanAdvanceStateForward()
     {
-        TestVPNMethod vpnMethod{this, OriginalNetworkScan{}};
+        TestVPNMethod vpnMethod{nullptr, {}};
         vpnMethod.progressState(VPNMethod::State::Connecting);
         QVERIFY(vpnMethod.state() == VPNMethod::State::Connecting);
     }
 
     void testCannotRegressState()
     {
-        TestVPNMethod vpnMethod{this, OriginalNetworkScan{}};
+        TestVPNMethod vpnMethod{nullptr, {}};
         vpnMethod.progressState(VPNMethod::State::Connecting);
 
         QTest::ignoreMessage(QtCriticalMsg, "Attempted to revert from state Connecting to earlier state Created");
@@ -81,7 +84,7 @@ private slots:
 
     void testNoStateChange()
     {
-        TestVPNMethod vpnMethod{this, OriginalNetworkScan{}};
+        TestVPNMethod vpnMethod{nullptr, {}};
         vpnMethod.progressState(VPNMethod::State::Created);
         QVERIFY(vpnMethod.state() == VPNMethod::State::Created);
     }

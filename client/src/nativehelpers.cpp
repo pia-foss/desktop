@@ -151,10 +151,10 @@ namespace
 NativeHelpers::NativeHelpers()
 {
     connect(static_cast<QGuiApplication*>(QGuiApplication::instance()),
-            &QGuiApplication::focusWindowChanged, this,
-            &NativeHelpers::onFocusWindowChanged);
+        &QGuiApplication::focusWindowChanged, this,
+        &NativeHelpers::onFocusWindowChanged);
     connect(Logger::instance(), &Logger::configurationChanged, this,
-            &NativeHelpers::logToFileChanged);
+        &NativeHelpers::logToFileChanged);
 }
 
 void NativeHelpers::initDashboardPopup(QWindow *pDashboard)
@@ -207,30 +207,15 @@ QString NativeHelpers::getClientVersion()
 
 bool NativeHelpers::getStartOnLogin()
 {
-#if defined(Q_OS_WIN)
-    return winLaunchAtLogin();
-#elif defined(Q_OS_MACOS)
-    // TODO: Handle errors better and propogate error info to user.
-    return macLaunchAtLogin();
-#elif defined(Q_OS_LINUX)
-    return linuxLaunchAtLogin();
-#else
-    return false;
-#endif
+    return getStartOnLoginSetting();
 }
 
-bool NativeHelpers::setStartOnLogin(bool enabled)
+void NativeHelpers::setStartOnLogin(bool enabled)
 {
-#if defined(Q_OS_WIN)
-    winSetLaunchAtLogin(enabled);
-#elif defined(Q_OS_MACOS)
-    macSetLaunchAtLogin(enabled);
-#elif defined(Q_OS_LINUX)
-    linuxSetLaunchAtLogin(enabled);
-#endif
-
-    return false;
+    // Statics can't be marked Q_INVOKABLE, provide a non-static shim function
+    applyStartOnLoginSetting(enabled);
 }
+
 bool NativeHelpers::resourceExists(const QString &path)
 {
     // From QML, resources are accessed with paths beginning with "qrc:/", but
@@ -359,6 +344,9 @@ void NativeHelpers::loadDummyCrashDll(const QString &dllName)
 
 void NativeHelpers::startLogUploader(const QString &diagnosticsFile)
 {
+    // Write launch-on-login state for supportability
+    qInfo() << "Current launch-on-login:" << getStartOnLoginSetting();
+
     startSupportTool("logs", diagnosticsFile);
 }
 
@@ -630,6 +618,63 @@ void NativeHelpers::checkAppDeactivate()
 #ifdef Q_OS_MAC
     macCheckAppDeactivate();
 #endif
+}
+
+void NativeHelpers::applyStartOnLoginSetting(bool enabled)
+{
+    try
+    {
+        qInfo() << "Applying launch-on-login:" << enabled;
+#if defined(Q_OS_WIN)
+        winSetLaunchAtLogin(enabled);
+#elif defined(Q_OS_MACOS)
+        macSetLaunchAtLogin(enabled);
+#elif defined(Q_OS_LINUX)
+        linuxSetLaunchAtLogin(enabled);
+#endif
+        bool newState = getStartOnLoginSetting();
+        qInfo() << "Applied launch-on-login:" << enabled << "- new state:"
+            << newState;
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Unable to apply launch-on-login setting" << enabled << ":" << ex;
+    }
+    catch(const std::exception &ex)
+    {
+        qWarning() << "Unable to apply launch-on-login setting" << enabled << ":" << ex.what();
+    }
+    catch(...)
+    {
+        qWarning() << "Unable to apply launch-on-login setting" << enabled << ": unknown exception";
+    }
+}
+
+bool NativeHelpers::getStartOnLoginSetting()
+{
+    try
+    {
+#if defined(Q_OS_WIN)
+        return winLaunchAtLogin();
+#elif defined(Q_OS_MACOS)
+        return macLaunchAtLogin();
+#elif defined(Q_OS_LINUX)
+        return linuxLaunchAtLogin();
+#endif
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Unable to check launch-on-login setting:" << ex;
+    }
+    catch(const std::exception &ex)
+    {
+        qWarning() << "Unable to check launch-on-login setting:" << ex.what();
+    }
+    catch(...)
+    {
+        qWarning() << "Unable to check launch-on-login setting: unknown exception";
+    }
+    return false;
 }
 
 void NativeHelpers::onFocusWindowChanged(QWindow *pFocusWindow)

@@ -39,6 +39,7 @@ PiaApplication {
   Depends { name: "Qt.core" }
   Depends { name: "Qt.quick" }
   Depends { name: "Qt.gui" }
+  Depends { name: "Qt.network" }
   // Qt.widgets is needed only for Qt tray icon implementation; we have
   // native implementations for Mac and Windows
   Depends {

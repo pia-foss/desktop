@@ -37,6 +37,9 @@ QtObject {
   readonly property var splitTunnelSupportErrors: {
     "win_version_invalid": uiTr("This feature requires Windows 7 Service Pack 1 or later."),
     "iptables_invalid": uiTr("This feature requires iptables 1.6.1 or later."),
+    //: Message for Linux indicating that specific system libraries are needed
+    //: to support the split tunnel feature.
+    "libnl_invalid": uiTr("This feature requires libnl-3, libnl-route-3, and libnl-genl-3."),
     //: Message for Linux indicating that a kernel feature has to be mounted at
     //: a specific location to use the split tunnel feature.  %1 is a file path,
     //: currently /sys/fs/cgroups/net_cls.

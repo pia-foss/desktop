@@ -42,12 +42,13 @@
 
 // setsockopt() identifiers for our Kext socket.
 // setsockopt() is used to transfer data between userland/kernel
-#define PIA_IP_SET               1
-#define PIA_MSG_REPLY            2
-#define PIA_REMOVE_APP           3
-#define PIA_WHITELIST_PIDS       4
-#define PIA_WHTIELIST_PORTS      5
-#define PIA_FIREWALL_STATE       6
+#define PIA_IP_SET                1
+#define PIA_MSG_REPLY             2
+#define PIA_REMOVE_APP            3 // Not used currently
+#define PIA_WHITELIST_PIDS        4
+#define PIA_WHTIELIST_PORTS       5
+#define PIA_FIREWALL_STATE        6
+#define PIA_WHTIELIST_SUBNETS     7
 
 namespace
 {
@@ -153,7 +154,7 @@ QSet<pid_t> PidFinder::pids()
 
     // proc_listallpids() returns the total number of PIDs in the system
     // (assuming that maxPids is > than the total PIDs, otherwise it returns maxPids)
-     totalPidCount = proc_listallpids(allPidVector.data(), maxPids * sizeof(pid_t));
+    totalPidCount = proc_listallpids(allPidVector.data(), maxPids * sizeof(pid_t));
 
     for(int i = 0; i != totalPidCount; ++i)
     {
@@ -281,6 +282,30 @@ void KextClient::sendExistingPids(const QVector<QString> &excludedApps)
                  ports.size() * sizeof(ports[0]));
 }
 
+void KextClient::sendBypassIpv4Subnets(const QSet<QString> &bypassSubnets)
+{
+    if(bypassSubnets.size() > maxBypassSubnets)
+        qWarning() << QStringLiteral("Size of bypassSubnets %1 is greater than maximum allowed %2")
+            .arg(bypassSubnets.size()).arg(maxBypassSubnets);
+
+    std::array<WhitelistSubnet, maxBypassSubnets> subnets{};
+
+    auto endIt = subnets.size() > static_cast<size_t>(bypassSubnets.size()) ? bypassSubnets.end() : bypassSubnets.begin() + subnets.size();
+
+    std::transform(bypassSubnets.begin(), endIt, subnets.begin(),
+        [](const QString subnetStr)
+        {
+            const auto subnetPair = QHostAddress::parseSubnet(subnetStr);
+            const QHostAddress &address = subnetPair.first;
+            int prefixLength = subnetPair.second;
+
+            return WhitelistSubnet{address.toIPv4Address(), static_cast<uint32_t>(prefixLength)};
+        });
+
+    ::setsockopt(_sockFd, SYSPROTO_CONTROL, PIA_WHTIELIST_SUBNETS, subnets.data(),
+                 maxBypassSubnets * sizeof(subnets[0]));
+}
+
 void KextClient::removeCurrentBoundRoute(const QString &ipAddress, const QString &interfaceName)
 {
 
@@ -306,11 +331,13 @@ void KextClient::createBoundRoute(const QString &ipAddress, const QString &inter
     _executor.bash(routeCmd);
 }
 
-void KextClient::updateFirewall(QString ipAddress)
+void KextClient::updateFirewall(QString ipAddress, bool hasConnected)
 {
-    if(ipAddress.isEmpty())
+    if(!hasConnected)
     {
-        qInfo() << "Removing firewall rule - empty split tunnel IP address";
+        // We disable all non-vpn traffic when not connected
+        // Bypass traffic makes no sense when not connected, and vpnOnly traffic is blocked via the kext
+        qInfo() << "Removing firewall rule - not connected to VPN";
         PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName, false, {});
     }
     else
@@ -321,15 +348,15 @@ void KextClient::updateFirewall(QString ipAddress)
     }
 }
 
-void KextClient::updateIp(QString ipAddress)
+void KextClient::updateIp(QString ipAddress, bool hasConnected)
 {
     u_int32_t ip_address = 0;
-    // If the IP address is empty, send 0 to the kernel extension.  This keeps
+    // If we have not connected, send 0 to the kernel extension.  This keeps
     // the kext in sync with the firewall rule above - the purpose of this IP is
     // to tell the kext what IP we have permitted through the firewall that it
     // needs to apply the per-app filter to, and at this point we have disabled
     // that rule.
-    if(!ipAddress.isEmpty())
+    if(hasConnected)
         ::inet_pton(AF_INET, qPrintable(ipAddress), &ip_address);
     qInfo() << "Sending ip address to kext:" << ipAddress;
     ::setsockopt(_sockFd, SYSPROTO_CONTROL, PIA_IP_SET, &ip_address, sizeof(ip_address));
@@ -386,6 +413,11 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
             sendExistingPids(_excludedApps);
     }
 
+    if(_previousBypassIpv4Subnets != params.bypassIpv4Subnets)
+    {
+        sendBypassIpv4Subnets(params.bypassIpv4Subnets);
+    }
+
     // If the VPN does not have the default route, create a bound route for the
     // VPN interface, so sockets explicitly bound to that interface will work
     // (they could be bound by our kext, bound by the daemon, or bound by an app
@@ -407,16 +439,19 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
         }
     }
 
-    if(_previousNetScan.ipAddress() != params.netScan.ipAddress())
+    // Value of hasConnected determines whether we turn on the firewall rule to allow off-vpn traffic
+    if(_previousNetScan.ipAddress() != params.netScan.ipAddress() || _hasConnected != params.hasConnected)
     {
-        updateFirewall(params.netScan.ipAddress());
-        updateIp(params.netScan.ipAddress());
+        updateFirewall(params.netScan.ipAddress(), params.hasConnected);
+        updateIp(params.netScan.ipAddress(), params.hasConnected);
     }
 
     // Update our network info
     _previousNetScan = params.netScan;
     _tunnelDeviceName = tunnelDeviceName;
     _tunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
+    _previousBypassIpv4Subnets = params.bypassIpv4Subnets;
+    _hasConnected = params.hasConnected;
 }
 
 void KextClient::teardownFirewall()
@@ -515,20 +550,6 @@ void applyExtraRules(QVector<QString> &paths)
     }
 }
 
-
-QVector<QString> KextClient::findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps)
-{
-    QVector<QString> removedApps;
-
-    for(const auto &app : oldApps)
-    {
-        if(!newApps.contains(app))
-            removedApps.push_back(app);
-    }
-
-    return removedApps;
-}
-
 void KextClient::updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
     if(_state == State::Disconnected)
@@ -544,38 +565,17 @@ void KextClient::updateApps(QVector<QString> excludedApps, QVector<QString> vpnO
     // If nothing has changed, just return
     if(_excludedApps != excludedApps)
     {
-        removeApps(findRemovedApps(excludedApps, _excludedApps));
         _excludedApps = std::move(excludedApps);
         for(const auto &app : _excludedApps) qInfo() << "Excluded Apps:" << app;
     }
 
     if(_vpnOnlyApps != vpnOnlyApps)
     {
-        removeApps(findRemovedApps(vpnOnlyApps, _vpnOnlyApps));
         _vpnOnlyApps = std::move(vpnOnlyApps);
         for(const auto &app : _vpnOnlyApps) qInfo() << "VPN Only Apps:" << app;
     }
 
     qInfo() << "Updated apps";
-}
-
-void KextClient::removeApps(const QVector<QString> removedApps)
-{
-    if(_state == State::Disconnected) return;
-
-    qInfo() << "Attempting to remove apps no longer needed." << removedApps.size() << "apps found.";
-
-    char appName[PATH_MAX] = {};
-    for(const auto &app : removedApps)
-    {
-        strncpy(appName, qPrintable(app), sizeof(appName));
-        qInfo() << "Telling kext to remove" << appName << "from fast path.";
-
-        qInfo() << "Length of appName is " << ::strlen(appName);
-
-        if(::strlen(appName) > 0)
-            setsockopt(_sockFd, SYSPROTO_CONTROL, PIA_REMOVE_APP, appName, sizeof(appName));
-    }
 }
 
 void KextClient::readFromSocket(int socket)

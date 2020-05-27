@@ -69,7 +69,7 @@ static void serviceMain(int argc, wchar_t** argv)
     }
     catch (const Error& error)
     {
-        qCritical(error);
+        qCritical() << error;
         reportStatus(SERVICE_STOPPED, 1);
     }
 

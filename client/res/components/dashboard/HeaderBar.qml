@@ -395,6 +395,8 @@ Item {
     onLoggedInChanged: {
       if (!Daemon.account.loggedIn) {
         pm.setPage('login')
+      } else {
+        pm.setPage('connect')
       }
     }
   }

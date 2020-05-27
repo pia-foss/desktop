@@ -26,7 +26,7 @@ namespace
     QString gatewayIp{"192.168.1.1"};
     QString interfaceName{"eth0"};
     QString ipAddress{"192.168.1.50"};
-    QString ipAddress6{"2a01::1"};
+    QString ipAddress6{"2001:db8::123"};
 }
 
 class tst_originalnetworkscan : public QObject

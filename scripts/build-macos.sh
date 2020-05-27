@@ -64,7 +64,7 @@ BUILD=${BUILD:-"$OUTDIR/build"}
 ARTIFACTS=${ARTIFACTS:-"$OUTDIR/artifacts"}
 
 if [ -z "${QTROOT}" ]; then
-  die "Missing QTROOT env variable"
+  QTROOT="$(last $(echo "$HOME/Qt/5.*" | sort --version-sort))"  # Dies if there is no Qt installation
 fi
 
 # Optional paths to tools; can be overridden in environment

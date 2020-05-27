@@ -53,7 +53,7 @@ Rectangle {
   // There's always a keyboard cell - if at any point the selection becomes
   // invalid, it's moved to a nearby valid selection or defaulted to the 'add'
   // row.
-  property var keyboardRow: ({type: 'add', path: ''})
+  property var keyboardRow: ({type: 'add', value: ''})
   property int keyboardColumn: 0
   // If there's a highlight cell, this is the highlighted column within the
   // keyboard row.  (There's always a keyboard cell, but there's only a
@@ -98,8 +98,41 @@ Rectangle {
           // highlighted.
           showHighlight: splitTunnelSettings.highlightColumn !== -1 &&
                    splitTunnelSettings.keyboardRow.type === 'add' &&
-                   splitTunnelSettings.keyboardRow.path === ''
-          onFocusCell: mouseFocusCell({type: 'add', path: ''}, column)
+                   splitTunnelSettings.keyboardRow.value === ''
+          onFocusCell: mouseFocusCell({type: 'add', value: ''}, column)
+        }
+
+        SplitTunnelAddIpRow {
+          id: addIpRow
+          Layout.fillWidth: true
+          // Highlight this row if the highlight is being shown for any cell
+          // (this row only has 1 column) and if this is the row that's
+          // highlighted.
+          showHighlight: splitTunnelSettings.highlightColumn !== -1 &&
+                   splitTunnelSettings.keyboardRow.type === 'addIp' &&
+                   splitTunnelSettings.keyboardRow.value === ''
+          onFocusCell: mouseFocusCell({type: 'addIp', value: ''}, column)
+        }
+
+        Repeater {
+          id: ipRuleRepeater
+          model: Daemon.settings.bypassSubnets
+          delegate: SplitTunnelIpRow {
+            Layout.fillWidth: true
+            showAppIcons: Qt.platform.os !== 'linux'
+            subnet: modelData.subnet
+
+            highlightColumn: {
+              // If the highlighted row is this row, apply the highlight
+              // column
+              if(splitTunnelSettings.keyboardRow.type === 'ip' &&
+                 splitTunnelSettings.keyboardRow.value === subnet) {
+                return splitTunnelSettings.highlightColumn
+              }
+              return -1
+            }
+            onFocusCell: mouseFocusCell({type: 'ip', value: subnet}, column)
+          }
         }
 
         Repeater {
@@ -116,12 +149,12 @@ Rectangle {
               // If the highlighted row is this row, apply the highlight
               // column
               if(splitTunnelSettings.keyboardRow.type === 'app' &&
-                 splitTunnelSettings.keyboardRow.path === appPath) {
+                 splitTunnelSettings.keyboardRow.value === appPath) {
                 return splitTunnelSettings.highlightColumn
               }
               return -1
             }
-            onFocusCell: mouseFocusCell({type: 'app', path: appPath}, column)
+            onFocusCell: mouseFocusCell({type: 'app', value: appPath}, column)
           }
         }
 
@@ -134,7 +167,7 @@ Rectangle {
               return splitTunnelSettings.highlightColumn
             return -1
           }
-          onFocusCell: mouseFocusCell({type: 'other', path: ''}, column)
+          onFocusCell: mouseFocusCell({type: 'other', value: ''}, column)
         }
       }
     }
@@ -145,7 +178,7 @@ Rectangle {
   // - type - What type of row this is, either 'add' or 'app'.
   //   (Mainly out of paranoia in case an app path would somehow be 'add',
   //   avoids any possible conflict.)
-  // - path - For 'app' rows, the app path.
+  // - value - For 'app' rows, the app path.
   // - name - The row's display name
   // - item - The QML item - SplitTunnelAppRow (or the add app row)
   property var accTable: {
@@ -153,8 +186,22 @@ Rectangle {
     var table = []
 
     // 'Add' row
-    table.push({type: 'add', path: '', name: addApplicationRow.displayName,
+    table.push({type: 'add', value: '', name: addApplicationRow.displayName,
                 item: addApplicationRow})
+
+    // 'AddIp' row
+    table.push({type: 'addIp', value: '', name: addIpRow.displayName,
+                item: addIpRow})
+
+    // Ip rows
+    for(var i=0; i<ipRuleRepeater.count; ++i) {
+      var ipRowItem = ipRuleRepeater.itemAt(i)
+      if(!ipRowItem)
+        continue
+
+      table.push({type: 'ip',
+                  value: ipRowItem.subnet, item: ipRowItem})
+    }
 
     // App rows
     for(var i=0; i<appRuleRepeater.count; ++i) {
@@ -162,19 +209,19 @@ Rectangle {
       if(!appRowItem)
         continue
 
-      table.push({type: 'app', path: appRowItem.appPath,
+      table.push({type: 'app', value: appRowItem.appPath,
                   name: appRowItem.appName, item: appRowItem})
     }
 
     // 'Other apps' row
-    table.push({type: 'other', path: '', name: defaultBehaviourRow.displayName,
+    table.push({type: 'other', value: '', name: defaultBehaviourRow.displayName,
                 item: defaultBehaviourRow})
 
     return table
   }
   function findAccKeyboardIndex(table) {
     return table.findIndex(function(row) {
-      return row.type === keyboardRow.type && row.path === keyboardRow.path
+      return row.type === keyboardRow.type && row.value === keyboardRow.value
     })
   }
   // If the accessibility table changes, and the current keyboard row is
@@ -207,10 +254,10 @@ Rectangle {
       // in both tables.  It can happen at startup when the tables are first
       // built.
       if(nextKeyboardIdx < 0) {
-        keyboardRow = {type: 'add', path: ''}
+        keyboardRow = {type: 'add', value: ''}
         break
       }
-      keyboardRow = {type: lastAccTable[nextKeyboardIdx].type, path: lastAccTable[nextKeyboardIdx].path}
+      keyboardRow = {type: lastAccTable[nextKeyboardIdx].type, value: lastAccTable[nextKeyboardIdx].value}
     }
 
     lastAccTable = accTable
@@ -251,7 +298,7 @@ Rectangle {
 
     // Find the new row and update keyboardRow
     var newKeyboardRow = accTable[nextIdx]
-    keyboardRow = {type: newKeyboardRow.type, path: newKeyboardRow.path}
+    keyboardRow = {type: newKeyboardRow.type, value: newKeyboardRow.value}
     console.info("keyboard col " + keyboardColumn + " of " + JSON.stringify(keyboardRow))
     // Reveal the focus cue for the whole list
     focusCue.reveal()
@@ -332,11 +379,11 @@ Rectangle {
     var accRow, rowId
     for(var i=0; i<accTable.length; ++i) {
       accRow = accTable[i]
-      rowId = accRow.type + '/' + accRow.path
+      rowId = accRow.type + '/' + accRow.value
       tblRows.push({id: rowId,
                     row: accRow.item.accRow,
                     app: accRow.item.accAppCell,
-                    path: accRow.item.accPathCell,
+                    value: accRow.item.accPathCell,
                     mode: accRow.item.accModeCell,
                     remove: accRow.item.accRemoveCell})
     }

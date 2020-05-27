@@ -118,6 +118,7 @@ int WinNetworkAdapter::getMetric(const ADDRESS_FAMILY family)
     }
 }
 
+
 void WINAPI WinInterfaceMonitor::ipChangeCallback(PVOID callerContext,
                                                   PMIB_IPINTERFACE_ROW pRow,
                                                   MIB_NOTIFICATION_TYPE notificationType)
@@ -148,13 +149,10 @@ void WINAPI WinInterfaceMonitor::ipChangeCallback(PVOID callerContext,
     }
 }
 
-auto WinInterfaceMonitor::getAllNetworkAdapters(const wchar_t *pDesc,
-                                                wchar_t *IP_ADAPTER_ADDRESSES::*pItfNameMember)
+template<class AdapterPredicateFunc>
+auto WinInterfaceMonitor::getAllNetworkAdapters(AdapterPredicateFunc predicate)
     -> QList<std::shared_ptr<WinNetworkAdapter>>
 {
-    Q_ASSERT(pDesc);          // Ensured by caller
-    Q_ASSERT(pItfNameMember); // Ensured by caller
-
     QList<std::shared_ptr<WinNetworkAdapter>> adapters;
 
     int iterations = 0;
@@ -182,7 +180,7 @@ auto WinInterfaceMonitor::getAllNetworkAdapters(const wchar_t *pDesc,
     IP_ADAPTER_ADDRESSES *addresses{reinterpret_cast<IP_ADAPTER_ADDRESSES*>(pAddrBuf.get())};
     for (auto address = addresses; address; address = address->Next)
     {
-        if (address->*pItfNameMember && wcsstr(address->*pItfNameMember, pDesc))
+        if (address && predicate(*address))
         {
             auto adapter = std::make_shared<WinNetworkAdapter>(*address);
             adapters.append(std::move(adapter));
@@ -190,6 +188,37 @@ auto WinInterfaceMonitor::getAllNetworkAdapters(const wchar_t *pDesc,
     }
 
     return adapters;
+}
+
+auto WinInterfaceMonitor::getDescNetworkAdapters(const wchar_t *pDesc)
+    -> QList<std::shared_ptr<WinNetworkAdapter>>
+{
+    Q_ASSERT(pDesc);    // Ensured by caller
+    return getAllNetworkAdapters([pDesc](const IP_ADAPTER_ADDRESSES &addresses)
+    {
+        return addresses.Description && wcsstr(addresses.Description, pDesc);
+    });
+}
+
+auto WinInterfaceMonitor::getAdapterForLuid(quint64 luid)
+    -> std::shared_ptr<WinNetworkAdapter>
+{
+    auto adapters = getAllNetworkAdapters([luid](const IP_ADAPTER_ADDRESSES &addresses)
+    {
+        return addresses.Luid.Value == luid;
+    });
+    // LUID should be unique - there shouldn't be more than one such adapter.
+    // Trace if it happens somehow.
+    if(adapters.size() > 1)
+    {
+        qWarning() << "Found" << adapters.size() << "adapters for LUID" << luid;
+    }
+    if(adapters.empty())
+    {
+        qWarning() << "Could not find adapter for LUID" << luid;
+        return {};
+    }
+    return adapters.front();
 }
 
 WinInterfaceMonitor &WinInterfaceMonitor::instance()

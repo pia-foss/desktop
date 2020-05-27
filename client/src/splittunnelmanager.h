@@ -45,6 +45,7 @@ public:
     Q_INVOKABLE void scanApplications (bool force = false);
     Q_INVOKABLE QString getNameFromPath(const QString &path) const;
     Q_INVOKABLE bool validateCustomPath(const QString &path) const;
+    Q_INVOKABLE QString normalizeSubnet(const QString &path) const;
     // On Windows only, read the target of a shell link.  Returns an empty
     // string on other platforms.  (See SplitTunnelRule::linkTarget.)
     Q_INVOKABLE QString readWinLinkTarget(const QString &path) const;

@@ -63,9 +63,14 @@ function resolvconf_apply() {
   # using 169.254.12.97 is a dummy (link-local) address as ubuntu 16.04 resolvconf needs 3 ip addresses or it falls back to the original
   # user dns config as the 3rd ip, which could cause leaks
   local final_dns_servers=$(echo $dns_servers 169.254.12.97 169.254.12.98 | xargs -n1 echo nameserver | head -n 3)
+
   echo "Updating resolvconf with:"
   echo $final_dns_servers
-  echo $final_dns_servers | resolvconf -a "${dev}.openvpn" || dns_error "Failed to reconfigure using resolvconf"
+  # Hard-code tun0.* rather than use ${dev}.openvpn (which we used previously)
+  # this is so we can ensure high priority as per /run/resolvconf/interface-order
+  # Wireguard interfaces (wg*) do not appear in this file and
+  # would have lowest priority (if we had used ${dev}.openvpn) meaning our chosen DNS might not be set at all
+  echo $final_dns_servers | resolvconf -a "tun0.{{BRAND_CODE}}" || dns_error "Failed to reconfigure using resolvconf"
 }
 
 [ -n "$script_type" ] || dns_error "Missing script_type env var"
@@ -153,7 +158,9 @@ case "$script_type" in
       true
     elif  [ $(realpath /etc/resolv.conf) = $resolvconf_link_path ] && hash resolvconf 2>/dev/null; then
       echo "Resetting resolvconf configuration..."
-      resolvconf -d "${dev}.openvpn" || warn "Failed to reset resolvconf"
+      # Hard-code tun0.* rather than use ${dev}.openvpn (which we used previously)
+      # see comment above in resolvconf_apply
+      resolvconf -d "tun0.{{BRAND_CODE}}" || warn "Failed to reset resolvconf"
     else
       if [ -e $resolv_conf_backup ]; then
         echo "Restoring user /etc/resolv.conf from backup"

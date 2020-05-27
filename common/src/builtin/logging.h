@@ -100,27 +100,6 @@ public:
     inline auto info(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).info(std::forward<Args>(args)...); }
     template<typename... Args>
     inline auto debug(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).debug(std::forward<Args>(args)...); }
-
-    void Q_NORETURN fatal(const class Error& e);
-    void critical(const class Error& e);
-    void warning(const class Error& e)
-#if defined(QT_NO_WARNING_OUTPUT)
-    {}
-#else
-    ;
-#endif
-    void info(const class Error& e)
-#if defined(QT_NO_INFO_OUTPUT)
-    {}
-#else
-    ;
-#endif
-    void debug(const class Error& e)
-#if defined(QT_NO_DEBUG_OUTPUT)
-    {}
-#else
-    ;
-#endif
 };
 
 

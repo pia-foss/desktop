@@ -31,6 +31,7 @@ void dummyClientMain() {}
 #include "path.h"
 #include "semversion.h"
 #include "version.h"
+#include "nativehelpers.h"
 #include "appsingleton.h"
 
 #include "clientlib.h"
@@ -101,6 +102,19 @@ int clientMain(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 
     bool quietLaunch{false};
+    // CLI args are parsed before creating the app and initializing paths, but
+    // changing launch-on-login must be done after.  Save the requested
+    // operation and execute it later.
+    //
+    // Launch-on-login is implemented by pia-client rather than piactl since the
+    // logic is closely related to the graphical client, and the functionality
+    // is not intended for general use (it doesn't update the GUI state, etc.)
+    enum class RunMode
+    {
+        Normal, // Normal GUI client
+        EnableLaunchOnLogin,
+        DisableLaunchOnLogin,
+    } clientRunMode{RunMode::Normal};
     GraphicsMode gfxMode{GraphicsMode::Normal};
     for(auto i=1; i<argc; ++i)
     {
@@ -118,6 +132,14 @@ int clientMain(int argc, char *argv[])
             return -1;
         }
 #endif
+        else if(argv[i] && ::strcmp(argv[i], "--enable-launch-on-login") == 0)
+        {
+            clientRunMode = RunMode::EnableLaunchOnLogin;
+        }
+        else if(argv[i] && ::strcmp(argv[i], "--disable-launch-on-login") == 0)
+        {
+            clientRunMode = RunMode::DisableLaunchOnLogin;
+        }
         else
             qWarning() << "Unknown option:" << argv[i];
     }
@@ -187,7 +209,23 @@ int clientMain(int argc, char *argv[])
 #else
     QGuiApplication app{argc, argv};
 #endif
+
     Path::initializePostApp();
+
+    switch(clientRunMode)
+    {
+        default:
+        case RunMode::Normal:
+            // Just keep going below
+            break;
+        case RunMode::EnableLaunchOnLogin:
+            NativeHelpers::applyStartOnLoginSetting(true);
+            return 0;
+        case RunMode::DisableLaunchOnLogin:
+            NativeHelpers::applyStartOnLoginSetting(false);
+            return 0;
+    }
+
 #ifdef PIA_CRASH_REPORTING
     initCrashReporting();
     monitorDaemonDumps();
@@ -213,6 +251,9 @@ int clientMain(int argc, char *argv[])
         app.quit();
         return -1;
     }
+
+    // Trace the current state of launch-on-login for supportability
+    qInfo() << "Current launch-on-login:" << NativeHelpers::getStartOnLoginSetting();
 
 #if defined(Q_OS_WIN)
     // Exit if the uninstaller tells us to

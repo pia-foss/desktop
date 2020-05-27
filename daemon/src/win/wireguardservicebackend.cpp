@@ -22,6 +22,7 @@
 #include "wireguardservicebackend.h"
 #include "configwriter.h"
 #include "path.h"
+#include "exec.h"
 #include "win_servicestate.h"
 #include "../../extras/installer/win/service_inl.h"
 #include "win/win_util.h"
@@ -64,7 +65,7 @@ namespace
     // Timeout for service shutdown during initial cleanup.
     // The only effect of this is just to abandon tasks and trace the timeout,
     // since we already told SCM to shut down the service.
-    const std::chrono::seconds cleanupTimeout{10};
+    const std::chrono::seconds cleanupTimeout{40};
 
     // When starting or stopping Wireguard, this WinServiceState is used to
     // monitor the state of the service.
@@ -145,19 +146,6 @@ namespace
                 break;
         }
         return w;
-    }
-
-    // Get all wgpia0 WinTUN adapters
-    auto getPiaTunAdapters()
-    {
-        static const QString interfaceNameWide{WireguardBackend::interfaceName};
-        // WireGuard puts the interface name we specified in the friendly name.
-        // Although the user can change this, we find it when the interface was
-        // just created, so it's unlikely that this would be changed, and the
-        // most likely failure mode is a timeout resulting in connection
-        // failure.  There's no other way to find the adapter right now.
-        return WinInterfaceMonitor::getAllNetworkAdapters(qstringWBuf(interfaceNameWide),
-                                                          &IP_ADAPTER_ADDRESSES::FriendlyName);
     }
 
     // Task to connect to a local socket asynchronously...to the extent possible
@@ -277,47 +265,62 @@ namespace
 
             auto keepAlive = sharedFromThis();
 
-            try
+            int findResult = Exec::cmd(Path::WireguardServiceExecutable,
+                                       {QStringLiteral("/findinterface"),
+                                        WireguardBackend::interfaceName,
+                                        Path::WireguardInterfaceFile});
+            // Not finding the device is normal, it likely just hasn't been
+            // created yet.
+            if(findResult == 2)
+                return; // Output traced from /findinterface
+
+            // Any other error is unexpected
+            if(findResult != 0)
             {
-                auto adapters = getPiaTunAdapters();
-                if(adapters.empty())
-                {
-                    qInfo() << "Adapter" << WireguardBackend::interfaceName
-                        << "not ready yet, wait for it to be created";
-                    return;
-                }
-
-                // If there's more than one interface somehow, we don't know
-                // which to use
-                if(adapters.size() > 1)
-                {
-                    qWarning() << "Found" << adapters.size()
-                        << "adapters for name" << WireguardBackend::interfaceName
-                        << "- expected 1";
-                    int i=0;
-                    for(const auto &pAdapter : adapters)
-                    {
-                        Q_ASSERT(pAdapter);  // Postcondition of getAllNetworkAdapters(), no nullptrs
-                        qWarning() << "-" << i << "-" << *pAdapter;
-                        ++i;
-                    }
-                    reject({HERE, Error::Code::WireguardCreateDeviceFailed});
-                    return;
-                }
-
-                Q_ASSERT(adapters[0]);  // Postcondition of getAllNetworkAdapters(), no nullptrs
-                qInfo() << "Found adapter" << *adapters[0];
-                resolve(adapters[0]);
+                qWarning() << "Attempt to find interface returned error" << findResult;
+                return;
             }
-            catch(const Error &ex)
+
+            // Read the LUID from the interface file
+            QFile itfFile{Path::WireguardInterfaceFile};
+            if(!itfFile.open(QIODevice::ReadOnly))
             {
-                qWarning() << "Failed to check for adapter"
-                    << WireguardBackend::interfaceName << "-" << ex;
-                reject(ex);
+                qWarning() << "Interface file could not be opened";
+                return;
+            }
+
+            enum { NameLen = 20 };  // Max length for a 64-bit integer as a string
+            char itfLuidBuf[NameLen]{};
+            qint64 read = itfFile.read(itfLuidBuf, NameLen);
+            if(read <= 0)
+            {
+                qWarning() << "Failed to read interface LUID from file -"
+                    << read << "-" << itfFile.errorString();
+                return;
+            }
+
+            auto luidStr = QString::fromUtf8(itfLuidBuf, read);
+            // Parse the unsigned 64-bit value - 0 isn't a valid LUID, so no
+            // need to pass an explicit OK flag.
+            auto luid = luidStr.toULongLong();
+            if(!luid)
+            {
+                qWarning() << "Failed to parse interface LUID"
+                    << luidStr;
+                return;
+            }
+
+            auto pAdapter = WinInterfaceMonitor::getAdapterForLuid(luid);
+            if(pAdapter)
+            {
+                qInfo() << "Found adapter" << *pAdapter;
+                resolve(std::move(pAdapter));
             }
         }
     };
 }
+
+bool WireguardServiceBackend::_doingInitialCleanup{false};
 
 const QString &WireguardServiceBackend::pipePath()
 {
@@ -327,24 +330,31 @@ const QString &WireguardServiceBackend::pipePath()
     return _pipePath;
 }
 
-Async<void> WireguardServiceBackend::asyncCleanup()
+void WireguardServiceBackend::cleanFile(const Path &file, const QString &traceName)
 {
     // Remove a stale config file if it existed
-    if(QFile::remove(Path::WireguardConfigFile))
+    if(QFile::remove(file))
     {
-        qWarning() << "Removed leftover config file" << Path::WireguardConfigFile;
+        qWarning() << "Removed leftover" << traceName << "file" << file;
     }
     // We couldn't remove the file; if it's not there this is normal.  (This is
     // a filesystem race, but it only affects tracing.)
-    else if(QFile::exists(Path::WireguardConfigFile))
+    else if(QFile::exists(file))
     {
-        qWarning() << "Can't remove leftover config file" << Path::WireguardConfigFile;
+        qWarning() << "Can't remove leftover" << traceName << "file" << file;
     }
     else
     {
-        qInfo() << "No leftover config file to remove -" << Path::WireguardConfigFile;
+        qInfo() << "No leftover" << traceName << "file to remove -" << file;
     }
+}
 
+Async<void> WireguardServiceBackend::asyncCleanup()
+{
+    cleanFile(Path::WireguardConfigFile, QStringLiteral("config"));
+    cleanFile(Path::WireguardInterfaceFile, QStringLiteral("interface"));
+
+    // Stop the WireGuard service if it is running, then attempt to clean up
     openWgServiceState();
     Q_ASSERT(wgServiceState());  // Postcondition of openWgServiceState()
     TraceStopwatch stopwatch{"Stopping WireGuard"};
@@ -353,6 +363,14 @@ Async<void> WireguardServiceBackend::asyncCleanup()
 
 void WireguardServiceBackend::cleanup()
 {
+    // Should only be called once at startup
+    if(_doingInitialCleanup)
+    {
+        qWarning() << "Already doing initial cleanup";
+        return;
+    }
+
+    _doingInitialCleanup = true;
     // Stop the service if it was running.  This is asynchronous, just fire and
     // forget - even if we try to connect before the state change completes, the
     // start request will be properly serialized with the start (it could still
@@ -362,11 +380,20 @@ void WireguardServiceBackend::cleanup()
     // Like startService(), this can still block for up to 30 seconds if SCM is
     // busy, which will just block the daemon.
     return asyncCleanup()
-        ->then([]()
+        .timeout(cleanupTimeout)
+        // Try to clean the interface up even if the task above times out or
+        // fails
+        ->next([](const Error &err)
         {
+            // After ensuring that the service is stopped (or timing out), try
+            // to delete the wgpia0 interface if it already existed.  This can
+            // happen if we didn't cleanly shut down while connecte, such as if
+            // the OS crashes or power is lost.
+            Exec::cmd(Path::WireguardServiceExecutable, {QStringLiteral("/cleaninterface"), interfaceName});
+
+            _doingInitialCleanup = false;
             qInfo() << "WireGuard initial cleanup finished";
         })
-        .timeout(cleanupTimeout)
         ->runUntilFinished();
 }
 
@@ -384,21 +411,9 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
                                               const QPair<QHostAddress, int> &peerIpNet)
     -> Async<std::shared_ptr<NetworkAdapter>>
 {
-    // Before starting the service, make sure there are no wgpia0 adapters.  We
-    // have to check the friendly name, which the user can change.  If there is
-    // another adapter with this name, it would trip us up - we might pick this
-    // one if we observe it before the real wgpia0 was created.
-    auto existingAdapters = getPiaTunAdapters();
-    if(!existingAdapters.empty())
+    if(_doingInitialCleanup)
     {
-        qWarning() << "Can't start WireGuard, found" << existingAdapters.size()
-            << "interfaces already using name"
-            << WireguardBackend::interfaceName;
-        int i=0;
-        for(const auto &pAdapter : existingAdapters)
-        {
-            qWarning() << "-" << i << "-" << *pAdapter;
-        }
+        qWarning() << "Cannot connect to WireGuard yet, initial cleanup is still occurring";
         return Async<std::shared_ptr<NetworkAdapter>>::reject({HERE, Error::Code::WireguardCreateDeviceFailed});
     }
 

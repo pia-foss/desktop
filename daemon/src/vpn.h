@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line HEADER_FILE("connection.h")
+#line HEADER_FILE("vpn.h")
 
 #ifndef CONNECTION_H
 #define CONNECTION_H
@@ -155,8 +155,6 @@ public:
 
     // Check whether the OriginalNetworkScan has valid (non-empty) values for
     // all fields.
-    // Note that on Windows, we don't use the gatewayIp or interfaceName, these
-    // are set to "N/A" which are considered valid.
     bool ipv4Valid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty();}
 
     // Whether the host has IPv6 available (as a global IP)
@@ -171,6 +169,9 @@ public:
     const QString &gatewayIp() const {return _gatewayIp;}
     const QString &interfaceName() const {return _interfaceName;}
     const QString &ipAddress() const {return _ipAddress;}
+
+    // An IP address from the default IPv6 interface.  This may not be the same
+    // interface as the default IPv4 interface reported above.
     const QString &ipAddress6() const {return _ipAddress6;}
 
 private:
@@ -202,19 +203,8 @@ public:
     // Explicitly provide the timeout for preferred transport before starting to try alternate transports.
     TransportSelector(const std::chrono::seconds &transportTimeout);
 private:
-    // Add alternates to the alternates list.  Adds the default port if it's
-    // not in the list already, and skips the preferred transport.
+    // Add alternates to the alternates list.  Skips the preferred transport.
     void addAlternates(const QString &protocol, const DescendingPortSet &ports);
-
-    // Find the local address that we would use to connect to a given remote
-    // address.
-    QHostAddress findLocalAddress(const QHostAddress &testAddress);
-
-    // Request the address of the given interface
-    QHostAddress findInterfaceIp(const QString &interfaceName);
-
-    // Scan routes for the original gateway IP and interface
-    void scanNetworkRoutes(OriginalNetworkScan &netScan);
 
 public:
     // Reset TransportSelector for a new connection sequence.
@@ -228,14 +218,6 @@ public:
 
     // Get the transport that was most recently used
     const Transport &lastUsed() const {return _lastUsed;}
-
-    // Do a network scan now; this is independent of any state tracked by
-    // TransportSelector - it's a stopgap solution since the iptables firewall
-    // currently requires the network interface and gateway at startup.
-    //
-    // A Server is required to get the local IP, but the gateway IP and
-    // interface can still be found even if pLocation is nullptr.
-    OriginalNetworkScan scanNetwork();
 
     // Get the local address that was found for the last transport setting (the
     // local address we should use when connecting using that transport).
@@ -252,7 +234,7 @@ public:
     //
     // delayNext is set to indicate whether to delay before the next attempt if
     // this attempt fails.
-    const Server *beginAttempt(const Location &location, OriginalNetworkScan &netScan,
+    const Server *beginAttempt(const Location &location, const QHostAddress &localAddress,
                                bool &delayNext);
 
 private:
@@ -497,9 +479,8 @@ public:
     VPNMethod *vpnMethod() const {return _method;}
     const QStringList &effectiveDnsServers() const {return _effectiveDnsServers;}
 
-    // Do a network scan now - stopgap solution for the iptables firewall.
-    // Emits scannedOriginalNetwork() with the result.
-    void scanNetwork();
+    // Update the current network in the VPNMethod when it has changed.
+    void updateNetwork(const OriginalNetworkScan &newNetwork);
 
 public slots:
     void connectVPN(bool force);
@@ -536,9 +517,6 @@ signals:
                       const nullable_t<Transport> &chosenTransport,
                       const nullable_t<Transport> &actualTransport);
     void firewallParamsChanged();
-    // Just before each connection attempt, the original gateway/interface/IP
-    // address are scanned and emitted.
-    void scannedOriginalNetwork(const OriginalNetworkScan &netScan);
     // The total sent/received bytecounts and the interval measurements have
     // changed.
     void byteCountsChanged();

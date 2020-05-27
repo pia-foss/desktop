@@ -60,7 +60,7 @@ Path Path::OpenVPNUpDownScript;
 Path Path::HnsdExecutable;
 Path Path::SsLocalExecutable;
 Path Path::WireguardGoExecutable;
-Path Path::WireguardGoInterfaceFile;
+Path Path::WireguardInterfaceFile;
 #ifdef Q_OS_WIN
 Path Path::TapDriverDir;
 Path Path::WfpCalloutDriverDir;
@@ -247,7 +247,6 @@ void Path::initializePostApp()
     SupportToolExecutable = ExecutableDir / "support-tool-launcher";
 #else
     SupportToolExecutable = ExecutableDir / BRAND_CODE "-support-tool";
-    WireguardGoInterfaceFile = DaemonDataDir / "wgpia0-tun";
 #endif
 
     DaemonLocalSocket = DaemonDataDir / "daemon.sock";
@@ -258,6 +257,7 @@ void Path::initializePostApp()
     SupportToolExecutable = ExecutableDir / "../Resources/" BRAND_CODE "-support-tool.app/Contents/MacOS/" BRAND_CODE "-support-tool";
 #endif
 
+    WireguardInterfaceFile = DaemonDataDir / "wg" BRAND_CODE "0-tun";
 
     DaemonLogFile = DaemonDataDir / "daemon.log";
     ConfigLogFile = DaemonDataDir / "config.log";

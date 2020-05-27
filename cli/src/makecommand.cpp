@@ -24,16 +24,21 @@
 #include "applysettings.h"
 #include "getcommand.h"
 #include "setcommand.h"
-#include "watchcommand.h"
 #include "brand.h"
+#include "watchcommand.h"
+#include "authcommand.h"
+#include "brand.h"
+#include "backgroundcommand.h"
 
 const QString connectDescription =
     QStringLiteral(
         "Connects to the VPN, or reconnects to apply new settings.\n"
-        "The " BRAND_SHORT_NAME " client must be running to use this command.\n"
-        "(The " BRAND_SHORT_NAME " daemon is inactive when the client is not running.)");
+        "To use this command, the " BRAND_SHORT_NAME " GUI client must be running, or background mode must be enabled with `" BRAND_CODE "ctl background enable`\n"
+        "(By default, the " BRAND_SHORT_NAME " daemon is inactive when the GUI client is not running.)");
 const QString disconnectDescription =
     QStringLiteral("Disconnects from the VPN.");
+const QString logoutDescription =
+    QStringLiteral("Log out your " BRAND_SHORT_NAME " account on this computer.");
 const QString resetSettingsDescription =
     QStringLiteral("Resets daemon settings to the defaults (ports/protocols/etc.)\nClient settings (themes/icons/layouts) can't be set with the CLI.");
 const QString checkDriverDescription =
@@ -47,6 +52,9 @@ const CommandMap stableCommands
     {"get", std::make_shared<GetCommand>()},
     {"monitor", std::make_shared<MonitorCommand>()},
     {"resetsettings", std::make_shared<TrivialRpcCommand>("resetSettings", resetSettingsDescription)},
+    {"background", std::make_shared<BackgroundCommand>()},
+    {"logout", std::make_shared<TrivialRpcCommand>("logout", logoutDescription)},
+    {"login", std::make_shared<LoginCommand>()},
     {"set", std::make_shared<SetCommand>()}
 };
 
@@ -65,7 +73,8 @@ const CommandMap unstableCommands
     // crash on shutdown.
     {"checkdriver", std::make_shared<TrivialRpcCommand>("checkDriverState", checkDriverDescription)},
 #endif
-    {"watch", std::make_shared<WatchCommand>()}
+    {"watch", std::make_shared<WatchCommand>()},
+    {"dump", std::make_shared<DumpCommand>()}
 };
 
 CliCommand *getCommandFromMap(const CommandMap &commands, const QString &name)

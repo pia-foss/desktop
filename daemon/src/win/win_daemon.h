@@ -115,6 +115,9 @@ protected:
     virtual void applyFirewallRules(const FirewallParams& params) override;
 
 private:
+    void updateAllBypassSubnetFilters(const FirewallParams &params);
+    void updateBypassSubnetFilters(const QSet<QString> &subnets, QSet<QString> &oldSubnets,
+                                   std::vector<WfpFilterObject> &subnetBypassFilters, FWP_IP_VERSION ipVersion);
     void removeSplitTunnelAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
                                      const QString &traceType);
     void createBypassAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
@@ -188,6 +191,14 @@ protected:
     std::map<QByteArray, SplitAppFilters> excludedApps;
     std::map<QByteArray, SplitAppFilters> vpnOnlyApps;
 
+    QSet<QString> _bypassIpv4Subnets;
+    QSet<QString> _bypassIpv6Subnets;
+
+
+    std::vector<WfpFilterObject> _subnetBypassFilters4;
+    std::vector<WfpFilterObject> _subnetBypassFilters6;
+
+
     // App ID for hnsd, needed when we add a special "split" rule for hnsd.
     AppIdKey _hnsdAppId;
 
@@ -209,6 +220,8 @@ protected:
     WinUnbiasedDeadline _resumeGracePeriod;
     ServiceMonitor _wfpCalloutMonitor;
     WinAppMonitor _appMonitor;
+
+    SubnetBypass _subnetBypass;
 };
 
 #undef g_daemon

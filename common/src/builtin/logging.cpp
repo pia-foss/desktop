@@ -564,34 +564,6 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
     }
 }
 
-void QCustomMessageLogger::fatal(const Error& e)
-{
-    auto str = e.errorString().toUtf8();
-    e.fatal("%*s", str.size(), str.data());
-}
-void QCustomMessageLogger::critical(const Error& e)
-{
-    e.critical().noquote() << e.errorString();
-}
-#if !defined(QT_NO_WARNING_OUTPUT)
-void QCustomMessageLogger::warning(const Error& e)
-{
-    e.warning().noquote() << e.errorString();
-}
-#endif
-#if !defined(QT_NO_INFO_OUTPUT)
-void QCustomMessageLogger::info(const Error& e)
-{
-    e.info().noquote() << e.errorString();
-}
-#endif
-#if !defined(QT_NO_DEBUG_OUTPUT)
-void QCustomMessageLogger::debug(const Error& e)
-{
-    e.debug().noquote() << e.errorString();
-}
-#endif
-
 const QString oldFileSuffix = QStringLiteral(".old");
 
 TraceStopwatch::TraceStopwatch(const char *pMsg)

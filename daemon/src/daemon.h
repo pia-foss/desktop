@@ -28,6 +28,7 @@
 #include "environment.h"
 #include "jsonrpc.h"
 #include "latencytracker.h"
+#include "networkmonitor.h"
 #include "portforwarder.h"
 #include "socksserverthread.h"
 #include "updatedownloader.h"
@@ -154,8 +155,47 @@ struct FirewallParams
     OriginalNetworkScan netScan;
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
     QVector<QString> vpnOnlyApps; // Apps to force on the VPN
+
+    QSet<QString> bypassIpv4Subnets; // IPv4 subnets to bypass VPN
+    QSet<QString> bypassIpv6Subnets; // IPv6 subnets to bypass VPN
 };
 Q_DECLARE_METATYPE(FirewallParams)
+
+class RouteManager
+{
+    CLASS_LOGGING_CATEGORY("RouteManager")
+public:
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) = 0;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) = 0;
+    virtual ~RouteManager() {}
+};
+
+class SubnetBypass
+{
+    CLASS_LOGGING_CATEGORY("SubnetBypass")
+public:
+
+    // Inject the RouteManager dependency - also makes
+    // this class easily testable
+    SubnetBypass(std::unique_ptr<RouteManager> routeManager)
+        : _routeManager{std::move(routeManager)}
+        , _isEnabled{false}
+    {}
+
+    void updateRoutes(const FirewallParams &params);
+private:
+    bool didNetworkChange(const OriginalNetworkScan &netScan) {return netScan != _lastNetScan;}
+    bool didSubnetsChange(const QSet<QString> &subnets) {return subnets != _lastIpv4Subnets;}
+    void addAndRemoveSubnets(const FirewallParams &params);
+    void clearAllRoutes();
+    QString boolToString(bool value) {return value ? "ON" : "OFF";}
+    QString stateChangeString(bool oldValue, bool newValue);
+private:
+    std::unique_ptr<RouteManager> _routeManager;
+    OriginalNetworkScan _lastNetScan;
+    QSet<QString> _lastIpv4Subnets;
+    bool _isEnabled;
+};
 
 class DiagnosticsFile
 {
@@ -265,6 +305,9 @@ public:
 
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() = 0;
 
+    // Get the _state.original* fields as an OriginalNetworkScan
+    OriginalNetworkScan originalNetwork() const;
+
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
 
@@ -366,7 +409,6 @@ private:
                          const nullable_t<Transport> &actualTransport);
     void vpnError(const Error& error);
     void vpnByteCountsChanged();
-    void vpnScannedOriginalNetwork(const OriginalNetworkScan &netScan);
     void newLatencyMeasurements(const LatencyTracker::Latencies &measurements);
     void portForwardUpdated(int port);
 
@@ -380,6 +422,7 @@ private:
     // Handle region list results from JsonRefresher
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
+    void networksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
     void reapplyFirewallRules();
@@ -439,6 +482,7 @@ protected:
     SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;
+    std::unique_ptr<NetworkMonitor> _pNetworkMonitor;
 
     DaemonData _data;
     DaemonAccount _account;

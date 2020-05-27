@@ -219,6 +219,9 @@ public:
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() const override {return _pNetworkAdapter;}
 
 private:
+    virtual void networkChanged() override;
+
+private:
     // Authentication API request - set once the request is started (remains set
     // after that).
     Async<void> _pAuthRequest;
@@ -284,11 +287,8 @@ bool WireguardMethod::setupPosixDNS(const QString &deviceName, const QStringList
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
 #ifdef Q_OS_MACOS
-    // Kill wireguard-go if the local network connection goes down
-    QString killPid{QStringLiteral("0")};
-    if(_pBackend)
-        killPid = QString::number(_pBackend->killPid());
-    env.insert("kill_pid", killPid);
+    // kill_pid of 0 instructs helper not to kill wireguard-go when network changes
+    env.insert("kill_pid", QString::number(0));
 #endif
     env.insert("dev", deviceName);
     env.insert("script_type", "up");
@@ -331,7 +331,8 @@ void WireguardMethod::deleteInterface()
     teardownPosixDNS();
 
     // Delete the VPN route
-    _executor.bash(QStringLiteral("route delete %1").arg(_vpnHost.toString()));
+    if(!_vpnHost.isNull())
+        _executor.bash(QStringLiteral("route delete %1").arg(_vpnHost.toString()));
 #elif defined(Q_OS_WIN)
     // Nothing to do on Windows.  The backend takes care of the routes, and
     // destroying the interface takes care of DNS.
@@ -700,8 +701,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     // Ensure rule priority is less than split tunnel rule priorities (which are set at 100)
     // This rule sends all normal packets through the Wireguard interface, effectively setting the Wireguard interface as the default route
     // All wireguard packets (i.e those going to the wg endpoint) will fall back to the pre-existing gateway and so out the physical interface
-    _executor.bash(QStringLiteral("ip rule add not fwmark %1 lookup %2 pri 101")
-        .arg(Fwmark::wireguardFwmark).arg(Routing::wireguardTable));
+    _executor.bash(QStringLiteral("ip rule add not fwmark %1 lookup %2 pri %3")
+        .arg(Fwmark::wireguardFwmark).arg(Routing::wireguardTable).arg(Routing::Priorities::wireguard));
     _executor.bash(QStringLiteral("ip route replace default dev %1 table %2").arg(WireguardBackend::interfaceName, Routing::wireguardTable));
 
     // DNS
@@ -722,7 +723,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     // Routing
     _executor.bash(QStringLiteral("route -q -n add -inet 0.0.0.0/1 -interface %1").arg(deviceName));
     _executor.bash(QStringLiteral("route -q -n add -inet 128.0.0.0/1 -interface %1").arg(deviceName));
-    _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), _netScan.gatewayIp()));
+    _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), originalNetwork().gatewayIp()));
 
     // DNS
     setupPosixDNS(deviceName, _dnsServers);
@@ -1172,6 +1173,23 @@ void WireguardMethod::shutdown()
                 advanceState(State::Exited);
             });
         });
+}
+
+void WireguardMethod::networkChanged()
+{
+// Support roaming on macOS (Linux/Windows already support it out of the box)
+#ifdef Q_OS_MACOS
+    const auto &netScan = originalNetwork();
+
+    if(state() == State::Connected && netScan.ipv4Valid())
+    {
+        qInfo() << "Network changed - updating VPN host route";
+        // Delete old VPN host route
+        _executor.bash(QStringLiteral("route delete %1").arg(_vpnHost.toString()));
+        // Create new one
+        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+    }
+#endif
 }
 
 void WireguardMethod::cleanup()

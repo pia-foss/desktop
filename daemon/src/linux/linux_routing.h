@@ -27,5 +27,22 @@ namespace Routing
     extern const QString bypassTable;
     extern const QString vpnOnlyTable;
     extern const QString wireguardTable;
+
+    // Priorities for our routing policies. Lower values mean higher priority.
+    // - suppressedMain -> from all lookup main suppress_prefixlength 1
+    // - vpnOnly        -> from all fwmark <Fwmark::vpnOnlyPacketTag> lookup piavpnOnlyrt
+    // - bypass         -> from all fwmark <Fwmark::excludePacketTag> lookup piavpnrt
+    // - sourceIp       -> from <physical ip> lookup piavpnrt
+    // - wireguard      -> from all not fwmark <Fwmark::wireguardFwmark> lookup piavpnWgrt
+    namespace Priorities
+    {
+        enum {
+            suppressedMain = 99,
+            vpnOnly = 100,
+            bypass = 101,
+            sourceIp = 102,
+            wireguard = 102
+        };
+    }
 }
 #endif

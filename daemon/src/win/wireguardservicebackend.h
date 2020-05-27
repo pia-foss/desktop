@@ -39,7 +39,14 @@ class WireguardServiceBackend : public WireguardBackend
     CLASS_LOGGING_CATEGORY("wireguardservicebackend")
 
 private:
+    // If we're still actively doing initial cleanup, we can't connect yet.
+    // Cleanup usually doesn't take a long time, but SCM and wgservice have been
+    // known to take a while to start/stop in some cases, and we don't want the
+    // /cleaninterface cleanup step to occur while connected or connecting.
+    static bool _doingInitialCleanup;
+
     static const QString &pipePath();
+    static void cleanFile(const Path &file, const QString &traceName);
 
     static Async<void> asyncCleanup();
 

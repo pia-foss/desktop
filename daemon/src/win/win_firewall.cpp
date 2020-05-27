@@ -239,7 +239,7 @@ bool FirewallEngine::open()
 {
     if (DWORD error = FwpmEngineOpen(NULL, RPC_C_AUTHN_DEFAULT, NULL, NULL, &_handle))
     {
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     return true;
@@ -255,13 +255,13 @@ bool FirewallEngine::installProvider()
     case FWP_E_PROVIDER_NOT_FOUND:
         if (error = FwpmProviderAdd(_handle, &g_wfpProvider, NULL))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError{HERE, error};
             return false;
         }
         qInfo() << "Installed WFP provider";
         break;
     default:
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     FWPM_SUBLAYER* sublayer;
@@ -272,13 +272,13 @@ bool FirewallEngine::installProvider()
     case FWP_E_SUBLAYER_NOT_FOUND:
         if (error = FwpmSubLayerAdd(_handle, &g_wfpSublayer, NULL))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError{HERE, error};
             return false;
         }
         qInfo() << "Installed WFP sublayer";
         break;
     default:
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     return true;
@@ -291,13 +291,13 @@ bool FirewallEngine::uninstallProvider()
     {
     case ERROR_SUCCESS: qInfo() << "Removed WFP sublayer"; break;
     case FWP_E_SUBLAYER_NOT_FOUND: break;
-    default: qCritical(SystemError(HERE, error)); result = false; break;
+    default: qCritical() << SystemError(HERE, error); result = false; break;
     }
     switch (DWORD error = FwpmProviderDeleteByKey(_handle, &g_wfpProvider.providerKey))
     {
     case ERROR_SUCCESS: qInfo() << "Removed WFP provider"; break;
     case FWP_E_PROVIDER_NOT_FOUND: break;
-    default: qCritical(SystemError(HERE, error)); result = false; break;
+    default: qCritical() << SystemError(HERE, error); result = false; break;
     }
     return result;
 }
@@ -307,7 +307,7 @@ WfpFilterObject FirewallEngine::add(const FirewallFilter& filter)
     UINT64 id = 0;
     if (DWORD error = FwpmFilterAdd(_handle, &filter, NULL, &id))
     {
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return {zeroGuid};
     }
     return {filter.filterKey};
@@ -318,7 +318,7 @@ WfpCalloutObject FirewallEngine::add(const Callout& mCallout)
     UINT32 id = 0;
     if (DWORD error = FwpmCalloutAdd(_handle, &mCallout, NULL, &id))
     {
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return {zeroGuid};
     }
     return {mCallout.calloutKey};
@@ -329,7 +329,7 @@ WfpProviderContextObject FirewallEngine::add(const ProviderContext& providerCont
     UINT64 id = 0;
     if (DWORD error = FwpmProviderContextAdd(_handle, &providerContext, NULL, &id))
     {
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return {zeroGuid};
     }
     return {providerContext.providerContextKey};
@@ -339,7 +339,7 @@ bool FirewallEngine::remove(const WfpFilterObject &filter)
 {
     if(DWORD error = FwpmFilterDeleteByKey(_handle, &filter))
     {
-        qCritical(SystemError{HERE, error});
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     return true;
@@ -349,7 +349,7 @@ bool FirewallEngine::remove(const WfpCalloutObject &callout)
 {
     if(DWORD error = FwpmCalloutDeleteByKey(_handle, &callout))
     {
-        qCritical(SystemError{HERE, error});
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     return true;
@@ -359,7 +359,7 @@ bool FirewallEngine::remove(const WfpProviderContextObject &providerContext)
 {
     if(DWORD error = FwpmProviderContextDeleteByKey(_handle, &providerContext))
     {
-        qCritical(SystemError{HERE, error});
+        qCritical() << SystemError{HERE, error};
         return false;
     }
     return true;
@@ -414,7 +414,7 @@ bool FirewallEngine::enumObjects(const TemplateT &search,
     HANDLE enumHandle = NULL;
     if (DWORD error = createEnumHandleFunc(_handle, &search, &enumHandle))
     {
-        qCritical(SystemError(HERE, error));
+        qCritical() << SystemError{HERE, error};
         return false;
     }
 
@@ -424,7 +424,7 @@ bool FirewallEngine::enumObjects(const TemplateT &search,
     {
         if (DWORD error = enumFunc(_handle, enumHandle, 100, &entries, &count))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError(HERE, error);
             result = false;
             break;
         }
@@ -547,7 +547,7 @@ FirewallTransaction::FirewallTransaction(FirewallEngine* firewall)
     {
         if (DWORD error = FwpmTransactionBegin(_handle, 0))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError{HERE, error};
             _handle = NULL;
         }
     }
@@ -564,7 +564,7 @@ void FirewallTransaction::commit()
     {
         if (DWORD error = FwpmTransactionCommit(_handle))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError{HERE, error};
         }
         else
             _handle = NULL;
@@ -577,7 +577,7 @@ void FirewallTransaction::abort()
     {
         if (DWORD error = FwpmTransactionAbort(_handle))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError{HERE, error};
         }
         _handle = NULL;
     }

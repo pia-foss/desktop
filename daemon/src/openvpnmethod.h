@@ -49,6 +49,9 @@ public:
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() const override {return _networkAdapter;}
 
 private:
+    virtual void networkChanged() override;
+
+private:
     bool writeOpenVPNConfig(QFile& outFile,
                             const Server &vpnServer,
                             const Transport &transport,

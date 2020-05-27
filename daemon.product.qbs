@@ -27,6 +27,15 @@ PiaApplication {
 
   sourceDirectories: base.concat(["daemon/src", "deps/embeddable-wg-library/src"])
 
+  macosFrameworks: base.concat([
+    "CoreWLAN",
+    "SystemConfiguration",
+  ])
+  Properties {
+    condition: qbs.targetOS.contains('linux')
+    cpp.includePaths: outer.concat(["/usr/include/libnl3"])
+  }
+
   files: base.uniqueConcat([ "daemon/res/daemon.qrc" ])
 
   consoleApplication: true

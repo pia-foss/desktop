@@ -102,6 +102,14 @@ PiaProject {
       name: "Qt.macextras"
     }
     sourceDirectories: base.concat(["clientlib/src", "client/src", "client/src/nativeacc", "daemon/src", "deps/embeddable-wg-library/src", "tests/src"])
+    macosFrameworks: base.concat([
+      "CoreWLAN",
+      "SystemConfiguration",
+    ])
+    Properties {
+      condition: qbs.targetOS.contains('linux')
+      cpp.includePaths: outer.concat(["/usr/include/libnl3"])
+    }
     cpp.defines: base.concat(["PIA_CLIENT", "PIA_DAEMON", "UNIT_TEST"])
 
     // Link daemon resources into unit tests (CA certificates).
@@ -175,6 +183,7 @@ PiaProject {
   Test { testName: "raii" }
   Test { testName: "semversion" }
   Test { testName: "settings" }
+  Test { testName: "subnetbypass" }
   Test { testName: "tasks" }
   Test { testName: "transportselector" }
   Test { testName: "updatedownloader" }

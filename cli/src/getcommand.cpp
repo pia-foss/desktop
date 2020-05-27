@@ -35,6 +35,8 @@ namespace GetSetType
     const QString region{QStringLiteral("region")};
     const QString regions{QStringLiteral("regions")};
     const QString vpnIp{QStringLiteral("vpnip")};
+    const QString daemonState{QStringLiteral("daemon-state")};
+    const QString daemonSettings{QStringLiteral("daemon-settings")};
 }
 
 namespace GetSetValue
@@ -126,7 +128,14 @@ namespace
         {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
         {GetSetType::region, {QStringLiteral("Currently selected region (or \"auto\")"), {}}}
+    };
 
+
+    const std::map<QString, SupportedType> _dumpSupportedTypes
+    {
+
+        {GetSetType::daemonState, {QStringLiteral("Internal state of the daemon"), {}}},
+        {GetSetType::daemonSettings, {QStringLiteral("Internal settings of the daemon"), {}}}
     };
 
     // 'regions' is only supported by 'get', not 'monitor'.
@@ -257,6 +266,16 @@ namespace
             if(ip.isEmpty())
                 return QStringLiteral("Unknown");
             return ip;
+        }
+        else if(type == GetSetType::daemonSettings) {
+            QJsonDocument document;
+            document.setObject(client.connection().settings.toJsonObject());
+            return document.toJson(QJsonDocument::Indented);
+        }
+        else if(type == GetSetType::daemonState) {
+            QJsonDocument document;
+            document.setObject(client.connection().state.toJsonObject());
+            return document.toJson(QJsonDocument::Indented);
         }
         else
         {
@@ -391,6 +410,30 @@ int MonitorCommand::exec(const QStringList &params, QCoreApplication &app)
 
     CliClient client;
     ValuePrinter printer{client, params[1]};
+
+    return app.exec();
+}
+
+
+void DumpCommand::printHelp(const QString &name)
+{
+    outln() << "usage:" << name << "<type>";
+    outln() << "Prints internal information about the running PIA Daemon";
+    printSupportedTypes(_dumpSupportedTypes);
+}
+
+int DumpCommand::exec(const QStringList &params, QCoreApplication &app)
+{
+    checkParams(params, _dumpSupportedTypes);
+
+    CliClient client;
+    CliTimeout timeout{app};
+    QObject localConnState{};
+    QObject::connect(&client, &CliClient::firstConnected, &localConnState, [&]()
+    {
+        outln() << ValuePrinter::renderValue(client, params[1]);
+        app.exit(CliExitCode::Success);
+    });
 
     return app.exec();
 }

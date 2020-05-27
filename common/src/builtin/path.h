@@ -161,8 +161,8 @@ public:
     // wireguard-go executable (Userspace Wireguard implementation - Mac/Linux)
     static Path WireguardGoExecutable;
 
-    // Interface name file written by wireguard-go (Mac only)
-    static Path WireguardGoInterfaceFile;
+    // Interface name file written by wireguard-go or wgservice.exe (Mac/Win only)
+    static Path WireguardInterfaceFile;
 
 #ifdef Q_OS_WIN
     // Directory of TAP drivers

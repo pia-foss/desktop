@@ -38,10 +38,18 @@
 #include "exec.h"
 #include "vpn.h"
 
+// Matches struct in Kernel Extension (see ip_firewall.h)
 struct WhitelistPort
 {
     uint32_t source_ip;
     uint32_t source_port;
+};
+
+// Matches struct in Kernel Extension (see ip_firewall.h)
+struct WhitelistSubnet
+{
+    uint32_t network_ip;
+    uint32_t prefix_length;
 };
 
 // Given a vector of application paths, this class is responsible for returning
@@ -118,10 +126,11 @@ public:
 
 public:
     KextClient(QObject *pParent)
-        : QObject{pParent},
-          _state{State::Disconnected},
-          _firewallState{},
-          _sockFd{-1}
+        : QObject{pParent}
+        ,  _state{State::Disconnected}
+        ,  _firewallState{}
+        ,  _sockFd{-1}
+        ,  _hasConnected{false}
     {
     }
 
@@ -150,17 +159,16 @@ private:
     void showError(QString funcName);
     void verifyApp(const ProcQuery &proc_query, ProcQuery &proc_response);
     void processCommand(const ProcQuery &proc_query,  ProcQuery &proc_response);
-    void removeApps(const QVector<QString> removedApps);
     void removeCurrentBoundRoute(const QString &ipAddress, const QString &interfaceName);
     void createBoundRoute(const QString &ipAddress, const QString &interfaceName);
-    void updateFirewall(QString ipAddress);
+    void updateFirewall(QString ipAddress, bool hasConnected);
     void teardownFirewall();
-    void updateIp(QString ipAddress);
+    void updateIp(QString ipAddress, bool hasConnected);
     void sendExistingPids(const QVector<QString> &excludedApps);
+    void sendBypassIpv4Subnets(const QSet<QString> &bypassSubnets);
     void updateKextFirewall(const FirewallParams &params, bool isConnected);
     void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
                        QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
-    QVector<QString> findRemovedApps(const QVector<QString> &newApps, const QVector<QString> &oldApps);
     void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
@@ -185,16 +193,21 @@ private:
         bool isConnected;
     };
 
+    // Maximum number of ipv4 bypass subnets we allow
+    // We need to send these subnets to the kext for whitelisting
+    enum { maxBypassSubnets = 500};
 private:
     QVector<QString> _excludedApps;
     QVector<QString> _vpnOnlyApps;
     QPointer<QSocketNotifier> _readNotifier;
     OriginalNetworkScan _previousNetScan;
+    QSet<QString> _previousBypassIpv4Subnets;
     QString _tunnelDeviceName;
     QString _tunnelDeviceLocalAddress;
     State _state;
     FirewallState _firewallState;
     int _sockFd;
+    bool _hasConnected{false};
     // Tracing responses is really important for supportability of this feature
     // (if the daemon is checking PIDs incorrectly, taking too long to respond,
     // etc.), but these responses occur a _lot_, so we can't trace them all.

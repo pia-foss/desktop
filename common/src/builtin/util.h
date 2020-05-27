@@ -28,6 +28,7 @@
 #include <QMetaEnum>
 #include <QObject>
 #include <QFile>
+#include <QDeadlineTimer>
 
 #include <functional>
 #include <memory>
@@ -1080,6 +1081,25 @@ namespace std {
     struct hash<QLatin1String>
     {
         std::size_t operator()(const QLatin1String &str) const {return qHash(str);}
+    };
+}
+
+// Returns a rate-limited wrapper for a given function
+// auto debouncedFoo = debounce(foo, 1000);
+// debouncedFoo() can then be invoked at most once every 1000 ms
+template <typename Func_t>
+auto debounce(Func_t func, qint64 timeout)
+{
+    QDeadlineTimer timer;
+    return [=](auto&&...args) mutable {
+        // Since hasExpired() is true for a default-constructed object
+        // func() will be executed the first time the debounced function is called
+        // Successive calls will be rate-limited
+        if(timer.hasExpired())
+        {
+             timer.setRemainingTime(timeout);
+             func(std::forward<decltype(args)>(args)...);
+        }
     };
 }
 

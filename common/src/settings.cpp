@@ -256,6 +256,12 @@ SplitTunnelRule::SplitTunnelRule()
 
 }
 
+SplitTunnelSubnetRule::SplitTunnelSubnetRule()
+    : NativeJsonObject(DiscardUnknownProperties)
+{
+
+}
+
 DaemonSettings::DaemonSettings()
     : NativeJsonObject(SaveUnknownProperties)
 {
@@ -361,5 +367,7 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 const QString hnsdLocalAddress{QStringLiteral("127.80.73.65")};
+// Used for MACE, PF, DNS, etc
+const QString specialPiaAddress{QStringLiteral("209.222.18.222")};
 
 #endif

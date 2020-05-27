@@ -121,6 +121,7 @@ void IpTablesFirewall::ensureRootAnchorPriority(IpTablesFirewall::IPVersion ip)
 void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName)
 
 {
+
     if (ip == Both)
     {
         installAnchor(IPv4, anchor, rules, tableName);
@@ -232,6 +233,11 @@ void IpTablesFirewall::install()
         QStringLiteral("-p udp --dport 53 -j REJECT"),
         QStringLiteral("-p tcp --dport 53 -j REJECT"),
     });
+
+    installAnchor(Both, QStringLiteral("305.allowSubnets"), {
+        // Updated at run-time
+    });
+
     installAnchor(IPv4, QStringLiteral("300.allowLAN"), {
         QStringLiteral("-d 10.0.0.0/8 -j ACCEPT"),
         QStringLiteral("-d 169.254.0.0/16 -j ACCEPT"),
@@ -246,7 +252,7 @@ void IpTablesFirewall::install()
         QStringLiteral("-d ff00::/8 -j ACCEPT"),
     });
     installAnchor(IPv6, QStringLiteral("299.allowIPv6Prefix"), {
-        // To be added at runtime
+        // Updated at run-time
     });
     installAnchor(IPv4, QStringLiteral("290.allowDHCP"), {
         QStringLiteral("-p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT"),
@@ -254,6 +260,9 @@ void IpTablesFirewall::install()
     installAnchor(IPv6, QStringLiteral("290.allowDHCP"), {
         QStringLiteral("-p udp -d ff00::/8 --sport 546 --dport 547 -j ACCEPT"),
     });
+
+    // This rule exists as the 100.blockAll rule can be toggled off if killswitch=off.
+    // However we *always* want to block IPv6 traffic in any situation (until we properly support IPv6)
     installAnchor(IPv6, QStringLiteral("250.blockIPv6"), {
         QStringLiteral("! -o lo+ -j REJECT"),
     });
@@ -272,6 +281,19 @@ void IpTablesFirewall::install()
     }, kNatTable);
 
     // Mangle rules
+    // This rule is for "bypass subnets". The approach we use for
+    // allowing subnets to bypass the VPN is to tag packets heading towards those subnets
+    // with the "excludePacketTag" (same approach we use for bypass apps).
+    // Interestingly, in order to allow correct interaction between bypass subnets and vpnOnly apps
+    // ("vpnOnly apps always wins") we need to tag the subnets BEFORE we subsequently tag vpnOnly apps,
+    // hence tagPkts appearing after tagSubnets. If we were to apply the tags the other way round, then the
+    // "last tag wins", so the vpnOnly packet would have its tag replaced with excludePacketTag.
+    // Tagging bypass subnets (with excludePacketTag) first means that vpnOnly tags get priority.
+    installAnchor(Both, QStringLiteral("90.tagSubnets"), {
+        // Updated at runtime
+    }, kMangleTable);
+
+    // Mangle rules
     installAnchor(Both, QStringLiteral("100.tagPkts"), {
         // Split tunnel
         QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(CGroup::bypassId, Fwmark::excludePacketTag),
@@ -279,6 +301,7 @@ void IpTablesFirewall::install()
         // Inverse split tunnel
         QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(CGroup::vpnOnlyId, Fwmark::vpnOnlyPacketTag)
     }, kMangleTable);
+
 
     // A rule to mitigate CVE-2019-14899 - drop packets addressed to the local
     // VPN IP but that are not actually received on the VPN interface.
@@ -289,7 +312,7 @@ void IpTablesFirewall::install()
     }, kRawTable);
 
 
-    // Insert our fitler root chain at the top of the OUTPUT chain.
+    // Insert our filter root chain at the top of the OUTPUT chain.
     linkChain(Both, kRootChain, kOutputChain, true, kFilterTable);
 
     // Insert our NAT root chain at the top of the POSTROUTING chain.
@@ -304,6 +327,8 @@ void IpTablesFirewall::install()
 
 void IpTablesFirewall::uninstall()
 {
+    IpTablesFirewall::deactivate();
+
     // Filter chain
     unlinkChain(Both, kRootChain, kOutputChain, kFilterTable);
     deleteChain(Both, kRootChain, kFilterTable);
@@ -329,6 +354,7 @@ void IpTablesFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("340.blockVpnOnly"));
     uninstallAnchor(IPv4, QStringLiteral("320.allowDNS"));
     uninstallAnchor(Both, QStringLiteral("310.blockDNS"));
+    uninstallAnchor(Both, QStringLiteral("305.allowSubnets"));
     uninstallAnchor(Both, QStringLiteral("300.allowLAN"));
     uninstallAnchor(IPv6, QStringLiteral("299.allowIPv6Prefix"));
     uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
@@ -340,6 +366,7 @@ void IpTablesFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("100.transIp"), kNatTable);
 
     // Remove Mangle anchors
+    uninstallAnchor(Both, QStringLiteral("90.tagSubnets"), kMangleTable);
     uninstallAnchor(Both, QStringLiteral("100.tagPkts"), kMangleTable);
 
     // Remove Raw anchors
@@ -360,12 +387,12 @@ void IpTablesFirewall::activate()
     //
     // Note that we use "suppress_prefixlength 1", not 0 as is typical, because
     // we also suppress the /1 gateway override routes applied by OpenVPN.
-    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio 99"));
+    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 }
 
 void IpTablesFirewall::deactivate()
 {
-    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio 99"));
+    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 }
 
 bool IpTablesFirewall::isInstalled()
@@ -397,6 +424,7 @@ void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QStri
     }
     const QString cmd = getCommand(ip);
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
+
 
     execute(QStringLiteral("%1 -F %2.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
     for(const auto &rule : newRules)
@@ -492,9 +520,63 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         }
     }
 
+    updateBypassSubnets(IpTablesFirewall::IPv4, params.bypassIpv4Subnets, _bypassIpv4Subnets);
+    updateBypassSubnets(IpTablesFirewall::IPv6, params.bypassIpv6Subnets, _bypassIpv6Subnets);
+
     _ipAddress6 = ipAddress6;
     _dnsServers = params.effectiveDnsServers;
     _adapterName = adapterName;
+}
+
+void IpTablesFirewall::updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion, const QSet<QString> &bypassSubnets, QSet<QString> &oldBypassSubnets)
+{
+    if(bypassSubnets != oldBypassSubnets)
+    {
+        if(bypassSubnets.isEmpty())
+        {
+            QString versionString = ipVersion == IpTablesFirewall::IPv6 ? "IPv6" : "IPv4";
+            qInfo() << "Clearing out" << versionString << "allowSubnets rule, no subnets found";
+            replaceAnchor(ipVersion, QStringLiteral("305.allowSubnets"), {});
+
+            // Clear out the rules for tagging bypass subnet packets
+            if(ipVersion == IPv4)
+            {
+                qInfo() << "Clearing out 90.tagSubnets";
+                replaceAnchor(ipVersion, QStringLiteral("90.tagSubnets"), {}, kMangleTable);
+            }
+        }
+        else
+        {
+            QStringList subnetRules;
+            for(const auto &subnet : bypassSubnets)
+                subnetRules << QStringLiteral("-d %1 -j ACCEPT").arg(subnet);
+
+
+            // If there's any IPv6 addresses then we also need to whitelist link-local and broadcast
+            // as these address ranges are needed for IPv6 Neighbor Discovery.
+            if(ipVersion == IPv6)
+            {
+                subnetRules << QStringLiteral("-d fe80::/10 -j ACCEPT");
+                subnetRules << QStringLiteral("-d ff00::/8 -j ACCEPT");
+            }
+
+            IpTablesFirewall::replaceAnchor(ipVersion,
+                                            QStringLiteral("305.allowSubnets"), subnetRules);
+
+            // We tag all packets heading towards a bypass subnet. This tag (excludePacketTag) is
+            // used by our routing policies to route traffic outside the VPN.
+            if(ipVersion == IPv4)
+            {
+                qInfo() << "Should be setting 90.tagSubnets";
+                QStringList subnetRules;
+                for(const auto &subnet : bypassSubnets)
+                   subnetRules << QStringLiteral("-d %1 -j MARK --set-mark %2").arg(subnet).arg(Fwmark::excludePacketTag);
+
+                replaceAnchor(ipVersion, QStringLiteral("90.tagSubnets"), subnetRules, kMangleTable);
+            }
+        }
+    }
+    oldBypassSubnets = bypassSubnets;
 }
 
 int IpTablesFirewall::execute(const QString &command, bool ignoreErrors)

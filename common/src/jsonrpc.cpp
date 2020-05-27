@@ -136,7 +136,7 @@ bool LocalNotificationInterface::processMessage(const QByteArray &msg)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         return false;
     }
 }
@@ -161,7 +161,7 @@ bool LocalNotificationInterface::processRequest(const QJsonObject &request)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         return false;
     }
 }
@@ -174,7 +174,7 @@ bool LocalCallInterface::processMessage(const QByteArray &msg)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         respondWithError(QJsonValue::Null, error);
         return false;
     }
@@ -218,7 +218,7 @@ bool LocalCallInterface::processRequest(const QJsonObject &request)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         if (!id.isUndefined())
             respondWithError(id, error);
         return false;
@@ -306,7 +306,7 @@ bool RemoteCallInterface::processMessage(const QByteArray &msg)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         return false;
     }
 }
@@ -393,7 +393,7 @@ void RemoteCallInterface::requestSendError(const Error &error, const QByteArray 
     {
         // This _really_ shouldn't happen, this is a message object that we
         // previously tried to send
-        qError(error);
+        qError() << error;
     }
 }
 
@@ -452,7 +452,7 @@ bool ClientSideInterface::processMessage(const QByteArray &msg)
     }
     catch (const Error& error)
     {
-        qWarning(error);
+        qWarning() << error;
         return false;
     }
 }

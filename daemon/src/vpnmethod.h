@@ -85,7 +85,7 @@ public:
     Q_ENUM(State)
 
 public:
-    VPNMethod(QObject *pParent, const OriginalNetworkScan &netScan);
+    explicit VPNMethod(QObject *pParent, const OriginalNetworkScan &netScan);
     virtual ~VPNMethod() = default;
 
 public:
@@ -139,6 +139,15 @@ public:
     // - Linux - devNode() is used in the firewall implementation.
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() const = 0;
 
+    // Get the current original network scan.  If this changes, networkChanged()
+    // is called.  The network scan is not necessarily valid (such as if the
+    // network connection was just lost).
+    const OriginalNetworkScan &originalNetwork() const {return _netScan;}
+
+    // Update the original network scan - calls networkChanged() if it changes.
+    // Used by VpnConnection when the network scan is updated.
+    void updateNetwork(const OriginalNetworkScan &newNetwork);
+
 protected:
     // Advance the state.  Updates _state and emits stateChanged().
     // Can be called with the current state (no effect), but VPNMethod cannot
@@ -173,6 +182,13 @@ protected:
     // already, it may or may not call shutdown().)
     void raiseError(const Error &err);
 
+private:
+    // The network state returned by originalNetwork() has changed.  Override
+    // this to update routes, or abort the connection, etc.
+    // This can be called in any state, the implementation should check the
+    // current state.
+    virtual void networkChanged() = 0;
+
 signals:
     void stateChanged();
     void tunnelConfiguration(QString deviceName, QString deviceLocalAddress,
@@ -184,8 +200,6 @@ signals:
 
 private:
     State _state;
-
-public:
     OriginalNetworkScan _netScan;
 };
 

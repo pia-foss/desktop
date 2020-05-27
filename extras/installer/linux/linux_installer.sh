@@ -45,7 +45,7 @@ readonly wireguardRoutingTableName="${serviceName}Wgrt"
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
-readonly wgIfPrefix="wg${brandCode}"                                   # WireGuard interface prefix, e.g wgpia
+readonly wgIfPrefix="wg${brandCode}"                       # WireGuard interface prefix, e.g wgpia
 readonly nmConfigDir="/etc/NetworkManager/conf.d"
 readonly nmConfigPath="${nmConfigDir}/${wgIfPrefix}.conf"  # Our custom NetworkManager config
 
@@ -78,8 +78,8 @@ function fail() {
 # the user changes network.
 function wireguardUnmanaged() {
     if [ -d "$nmConfigDir" ] && [ ! -f "$nmConfigPath" ]; then
-       echo -e "[keyfile]\nunmanaged-devices=interface-name:wgpia*" | sudo tee "$nmConfigPath" > /dev/null
-       echoPass "Set wgpia interface to be unmanaged"
+       echo -e "[keyfile]\nunmanaged-devices=interface-name:${wgIfPrefix}*" | sudo tee "$nmConfigPath" > /dev/null
+       echoPass "Set $wgIfPrefix interface to be unmanaged"
     fi
 }
 
@@ -170,6 +170,9 @@ function hasDependencies() {
     # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
     if ! [ -x /sbin/ifconfig ]; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon-x11.so.0; then return 1; fi
+    if ! ldconfig -p | grep -q libnl-3.so.200; then return 1; fi
+    if ! ldconfig -p | grep -q libnl-route-3.so.200; then return 1; fi
+    if ! ldconfig -p | grep -q libnl-genl-3.so.200; then return 1; fi
     return 0
 }
 
@@ -182,7 +185,21 @@ function promptManualDependencies() {
     echo "Could not install dependencies.  Please install these packages:"
     echo " - net-tools (ifconfig)"
     echo " - libxkbcommon-x11 (libxkbcommon-x11.so.0, libxkbcommon.so.0, libxcb-xkb.so.1)"
+    echo " - libnl-3-200"
+    echo " - libnl-route-3-200, libnl-genl-3-200 (may be included in libnl-3-200)"
     requestConfirmation "Continue with installation?"
+}
+
+# Test whether manual dependencies are present.  Returns nonzero if any
+# dependency is missing.
+function hasManualDependencies() {
+    # Check for ifconfig, libnl-3.so.200, libnl-route-3.so.200, and libnl-genl-3.so.200
+    # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
+    if ! hash ifconfig >/dev/null; then return 1; fi
+    if ! ldconfig -p | grep libnl-3.so.200; then return 1; fi
+    if ! ldconfig -p | grep libnl-route-3.so.200; then return 1; fi
+    if ! ldconfig -p | grep libnl-genl-3.so.200; then return 1; fi
+    return 0
 }
 
 function installDependencies() {
@@ -191,11 +208,11 @@ function installDependencies() {
     if hasDependencies; then return 0; fi
 
     if hash yum 2>/dev/null; then
-        sudo yum -y install net-tools libxkbcommon-x11
+        sudo yum -y install net-tools libxkbcommon-x11 libnl3
     elif hash pacman 2>/dev/null; then
-        sudo pacman -S --noconfirm net-tools libxkbcommon-x11
+        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libnl
     elif hash zypper 2>/dev/null; then
-        sudo zypper install libxkbcommon-x11-0
+        sudo zypper install libxkbcommon-x11-0 libnl3-200
         # We can't set up ifconfig on openSUSE; our OpenVPN build has a
         # hard-coded path to /sbin/ifconfig, but openSUSE installs it to
         # /usr/bin/ifconfig.  We don't want to mess with the user's sbin
@@ -208,7 +225,7 @@ function installDependencies() {
     elif hash apt-get 2>/dev/null; then
         # A few releases do not have the net-tools package at all, still try to
         # install other dependencies
-        APT_PKGS="libxkbcommon-x11-0"
+        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200"
         if [[ $(apt-cache search --names-only net-tools) ]]; then
             sudo apt-get install --yes net-tools $APT_PKGS
         else

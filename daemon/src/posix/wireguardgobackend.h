@@ -73,9 +73,6 @@ public:
     virtual Async<WgDevPtr> getStatus() override;
 
     virtual Async<void> shutdown() override;
-
-    virtual qint64 killPid() override {return _wgGoPid;}
-
 private:
     // Handling the various error and finish signals from QProcess is
     // nontrivial, so use a ProcessRunner to run wireguard-go.

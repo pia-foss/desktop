@@ -408,7 +408,7 @@ struct ApplicationFilter : public ConditionalFirewallFilter<1, action, direction
     {
         if (DWORD error = FwpmGetAppIdFromFileName(qUtf16Printable(applicationPath), &applicationBlob))
         {
-            qCritical(SystemError(HERE, error));
+            qCritical() << SystemError(HERE, error);
             applicationBlob = NULL;
             // Rely on the filter addition failing later
         }

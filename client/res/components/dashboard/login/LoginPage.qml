@@ -161,14 +161,6 @@ FocusScope {
               break
             }
             console.warn('Login failed:', error);
-          } else {
-            // Success
-            // Stay in the 'loginInProgress' state during the page transition.
-            // The button is still visible for a little while during the page
-            // transition, so going back to 'normal' would show the "log in"
-            // text again, and the user could click the button again (or press
-            // Enter again) and cause another login.
-            pageManager.setPage('connect');
           }
         });
       }

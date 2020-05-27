@@ -373,7 +373,7 @@ void ProcTracker::teardownReversePathFiltering()
 
 void ProcTracker::updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
-    qInfo() << "Inside updateApps." << "excludedApps:" << excludedApps << "vpnOnlyApps:" << vpnOnlyApps;
+    qInfo() << "ExcludedApps:" << excludedApps << "VPN Only Apps:" << vpnOnlyApps;
     // If we're not tracking excluded apps, remove everything
     if(!_previousNetScan.ipv4Valid())
         excludedApps = {};
@@ -454,15 +454,19 @@ void ProcTracker::setupFirewall()
     // setup cgroups + configure routing rules
     CGroup::setupNetCls();
     // Setup the packet tagging rule (this rule is unaffected by network changes)
-    // This rule also has callbacks that sets up the cgroup and the routing policy
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), true, IpTablesFirewall::kMangleTable);
 
     // Enable the masquerading rule - this gets updated with interface changes via replaceAnchor()
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), true, IpTablesFirewall::kNatTable);
+
+    // Setup the packet tagging rule for subnet bypass (tag packets heading to a bypass subnet so they're excluded from VPN)
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), true, IpTablesFirewall::kMangleTable);
 }
 
 void ProcTracker::teardownFirewall()
 {
+    // Remove subnet bypass tagging rule
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), true, IpTablesFirewall::kMangleTable);
     // Remove the masquerading rule
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), false, IpTablesFirewall::kNatTable);
     // Remove the cgroup marking rule
@@ -474,15 +478,15 @@ void ProcTracker::teardownFirewall()
 void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
     if(!ipAddress.isEmpty())
-        _executor.bash(QStringLiteral("ip rule add from %1 lookup %3 pri 101")
-            .arg(ipAddress, routingTableName));
+        _executor.bash(QStringLiteral("ip rule add from %1 lookup %2 pri %3")
+            .arg(ipAddress, routingTableName).arg(Routing::Priorities::sourceIp));
 }
 
 void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
 {
     if(!ipAddress.isEmpty())
-        _executor.bash(QStringLiteral("ip rule del from %1 lookup %3 pri 101")
-            .arg(ipAddress, routingTableName));
+        _executor.bash(QStringLiteral("ip rule del from %1 lookup %2 pri %3")
+            .arg(ipAddress, routingTableName).arg(Routing::Priorities::sourceIp));
 }
 
 void ProcTracker::shutdownConnection()

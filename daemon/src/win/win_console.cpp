@@ -251,7 +251,7 @@ int WinConsole::run()
         }
         catch (const Error& error)
         {
-            qCritical(error);
+            qCritical() << error;
             switch (error.systemCode())
             {
             case ERROR_SERVICE_EXISTS:

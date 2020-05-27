@@ -79,18 +79,18 @@ private slots:
     void testPreferred()
     {
         TransportSelector transportSelector;
-        OriginalNetworkScan netScan;
+        QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
 
         // udp with port 0 should fall back to port in openvpn_udp
         transportSelector.reset({QStringLiteral("udp"), 0}, false, udpPorts, tcpPorts);
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastPreferred().port() == preferredUdpPort);
         QVERIFY(transportSelector.lastPreferred().protocol() == QStringLiteral("udp"));
 
         // tcp with port 0 should fall back to port in openvpn_tcp
         transportSelector.reset({QStringLiteral("tcp"), 0}, false, udpPorts, tcpPorts);
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastPreferred().port() == preferredTcpPort);
         QVERIFY(transportSelector.lastPreferred().protocol() == QStringLiteral("tcp"));
     }
@@ -98,7 +98,7 @@ private slots:
     void testAlternates()
     {
         const QString preferredProtocol{"udp"};
-        OriginalNetworkScan netScan;
+        QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
 
         // We don't want to wait before trying an alternate transport
@@ -107,48 +107,48 @@ private slots:
         transportSelector.reset({"udp", 0}, true, udpPorts, tcpPorts);
 
         // First attempt uses our preferred transport
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == preferredUdpPort);
         QVERIFY(transportSelector.lastUsed().protocol() == preferredProtocol);
 
         // Succussive attempts try the provided alternate udpPorts
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == firstAltUdp);
         QVERIFY(transportSelector.lastUsed().protocol() == preferredProtocol);
 
          // We try the preferred port again between trying alternates
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == preferredUdpPort);
         QVERIFY(transportSelector.lastUsed().protocol() == preferredProtocol);
 
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == secondAltUdp);
         QVERIFY(transportSelector.lastUsed().protocol() == preferredProtocol);
 
         // Every other attempt tries the preferred transport
         // (no need to verify it again)
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
 
         // Now we've exhausted all UDP ports The protocol changes to tcp
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == preferredTcpPort);
         QVERIFY(transportSelector.lastUsed().protocol() == "tcp");
 
         // We call beginAttempt() twice now to skip the preferred transport attempt
-        transportSelector.beginAttempt(location, netScan, delayNext);
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
 
         // Try the first alternate tcp port
         QVERIFY(transportSelector.lastUsed().port() == firstAltTcp);
         QVERIFY(transportSelector.lastUsed().protocol() == "tcp");
 
-        transportSelector.beginAttempt(location, netScan, delayNext);
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastUsed().port() == secondAltTcp);
         QVERIFY(transportSelector.lastUsed().protocol() == "tcp");
 
-        transportSelector.beginAttempt(location, netScan, delayNext);
-        transportSelector.beginAttempt(location, netScan, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
+        transportSelector.beginAttempt(location, dummyAddr, delayNext);
 
         // We've now exhausted all the tcp options, we start
         // again from the beginning with udp

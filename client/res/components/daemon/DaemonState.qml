@@ -107,6 +107,7 @@ QtObject {
     "bg": {lat: 42.655033, long: 25.231817, name: QT_TRANSLATE_NOOP("DaemonData", "Bulgaria")},
     "brazil": {lat: -14.235004, long: -51.92528, name: QT_TRANSLATE_NOOP("DaemonData", "Brazil")},
     "ca": {lat: 45.501689, long: -73.567256, name: QT_TRANSLATE_NOOP("DaemonData", "CA Montreal")},
+    "ca_ontario": {lat: 51.253777, long: -85.232212, name: QT_TRANSLATE_NOOP("DaemonData", "CA Ontario")},
     "ca_toronto": {lat: 43.653226, long: -79.383184, name: QT_TRANSLATE_NOOP("DaemonData", "CA Toronto")},
     "ca_vancouver": {lat: 49.282729, long: -123.120738, name: QT_TRANSLATE_NOOP("DaemonData", "CA Vancouver")},
     "czech": {lat: 50.075538, long: 14.4378, name: QT_TRANSLATE_NOOP("DaemonData", "Czech Republic")},
@@ -146,7 +147,7 @@ QtObject {
     "spain": {lat: 40.463667, long: -3.74922, name: QT_TRANSLATE_NOOP("DaemonData", "Spain")},
     "sweden": {lat: 60.128161, long: 18.643501, name: QT_TRANSLATE_NOOP("DaemonData", "Sweden")},
     "swiss": {lat: 46.818188, long: 8.227512, name: QT_TRANSLATE_NOOP("DaemonData", "Switzerland")},
-    "turkey": {lat: 38.963745, long: 35.243322, name: QT_TRANSLATE_NOOP("DaemonData", "Turkey")},
+    "tr": {lat: 38.963745, long: 35.243322, name: QT_TRANSLATE_NOOP("DaemonData", "Turkey")},
     "ua": {lat: 48.379433, long: 31.165581, name: QT_TRANSLATE_NOOP("DaemonData", "Ukraine")},
     "uk": {lat: 51.507351, long: -0.127758, name: QT_TRANSLATE_NOOP("DaemonData", "UK London")}, // London
     "uk_manchester": {lat: 53.480759, long: -2.242631, name: QT_TRANSLATE_NOOP("DaemonData", "UK Manchester")},

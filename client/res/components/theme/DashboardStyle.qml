@@ -55,6 +55,7 @@ QtObject {
     readonly property string connectButtonErrorImage: Theme.imagePathCommon + "/dashboard/connect/connect-button-error.png"
     readonly property string connectButtonErrorHoverImage: Theme.imagePath + "/dashboard/connect/connect-button-error-hover.png"
     readonly property string clipboardImage: Theme.imagePath + "/dashboard/connect/copy-content.png"
+    readonly property string subnetImage: Theme.imagePath + "/dashboard/connect/computer-screen-3.png"
     readonly property int connectButtonSizePx: 156
     readonly property int connectButtonVMarginPx: 22
 

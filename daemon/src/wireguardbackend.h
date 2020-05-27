@@ -156,14 +156,6 @@ public:
     // If shutdown times out, or the task is rejected, the backend will still be
     // destroyed.
     virtual Async<void> shutdown() = 0;
-
-    // Provide a PID that can be killed to tear down the connection.  This is
-    // used on Mac by the DNS helper script to kill the connection if local
-    // network connectivity changes.  It is not used on Windows or Linux.
-    //
-    // On Mac, a valid PID must be available after createInterface() resolves.
-    virtual qint64 killPid() {return 0;}
-
 signals:
     void error(const Error &err);
 };

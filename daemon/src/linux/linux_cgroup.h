@@ -42,7 +42,7 @@ public:
     static bool createNetCls();
 private:
     static void setupCgroup(const Path &cGroupDir, const QString &cGroupId, const QString &packetTag,
-                            const QString &routingTableName);
+                            const QString &routingTableName, int priority);
     static void teardownCgroup(const QString &packetTag, const QString &routingTableName);
     static bool mkdirNetCls(const QString &parentDir);
     static bool mountNetCls(const QString &netClsDir);

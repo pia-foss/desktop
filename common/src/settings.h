@@ -25,6 +25,7 @@
 
 #include "json.h"
 #include <QVector>
+#include <QHostAddress>
 #include <set>
 
 // These are the services advertised by the regions list that are used by Desktop.
@@ -498,6 +499,37 @@ public:
     JsonField(QString, clientId, {})
 };
 
+class COMMON_EXPORT SplitTunnelSubnetRule : public NativeJsonObject
+{
+    Q_OBJECT
+
+public:
+    SplitTunnelSubnetRule();
+    SplitTunnelSubnetRule(const SplitTunnelSubnetRule &other) {*this = other;}
+    SplitTunnelSubnetRule &operator=(const SplitTunnelSubnetRule &other)
+    {
+        subnet(other.subnet());
+        mode(other.mode());
+        return *this;
+    }
+
+    bool operator==(const SplitTunnelSubnetRule &other) const
+    {
+        return mode() == other.mode() && subnet() == other.subnet();
+    }
+    bool operator!=(const SplitTunnelSubnetRule &other) const {return !(*this == other);}
+
+    QString normalizedSubnet() const {
+        auto subnetPair = QHostAddress::parseSubnet(subnet());
+        return subnetPair.first.isNull() ? "" : QStringLiteral("%1/%2").arg(subnetPair.first.toString()).arg(subnetPair.second);
+    }
+
+    QAbstractSocket::NetworkLayerProtocol protocol() const { return QHostAddress::parseSubnet(subnet()).first.protocol(); }
+
+    JsonField(QString, subnet, {})
+    JsonField(QString, mode, QStringLiteral("exclude"))
+};
+
 class COMMON_EXPORT SplitTunnelRule : public NativeJsonObject
 {
     Q_OBJECT
@@ -672,6 +704,9 @@ public:
     // Rules for excluding/including apps from VPN
     JsonField(QVector<SplitTunnelRule>, splitTunnelRules, {})
 
+    // Subnets (both ipv4 and ipv6) to exclude from VPN
+    JsonField(QVector<SplitTunnelSubnetRule>, bypassSubnets, {})
+
     // Whether to use the WireGuard kernel module on Linux, if it's available.
     // If false, uses wireguard-go method instead, even if the kernel module is
     // available.
@@ -694,6 +729,7 @@ public:
     JsonField(QVector<QString>, primaryModules, QVector<QString>::fromList({QStringLiteral("region"), QStringLiteral("ip")}))
     JsonField(QVector<QString>, secondaryModules, QVector<QString>::fromList({QStringLiteral("quickconnect"), QStringLiteral("performance"), QStringLiteral("usage"), QStringLiteral("settings"), QStringLiteral("account")}))
 
+    JsonField(bool, persistDaemon, false);
 };
 
 // Compare QSharedPointer<Location>s by value; used by ServiceLocations
@@ -1164,6 +1200,9 @@ public:
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 extern COMMON_EXPORT const QString hnsdLocalAddress;
+
+// Used for MACE, PF, DNS, etc
+extern COMMON_EXPORT const QString specialPiaAddress;
 
 #endif
 
