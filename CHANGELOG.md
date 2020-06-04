@@ -1,5 +1,11 @@
 # Changelog
 
+### v2.2
+* Split tunnel is now supported with WireGuard
+* Geo-located regions are supported
+* The {{BRAND_SHORT_NAME}} Next Generation network is now in preview
+* Changed title of windowed dashboard to "{{BRAND}}"
+
 ### v2.1
 * Split tunnel "bypass" rules can be created for IP addresses and subnets
 * WireGuard now supports network roaming on Mac in addition to Windows and Linux

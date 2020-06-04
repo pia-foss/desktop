@@ -270,10 +270,6 @@ int WinConsole::run()
     }
     else
     {
-#ifdef QT_DEBUG
-        if (::IsDebuggerPresent())
-            return runDaemon();
-#endif
         return showHelp();
     }
 }

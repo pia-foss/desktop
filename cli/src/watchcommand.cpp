@@ -60,7 +60,12 @@ private:
 
 const std::unordered_set<QString> JsonChangePrinter::propertyBlacklist{
     QStringLiteral("availableLocations"),
-    QStringLiteral("groupedLocations")
+    QStringLiteral("groupedLocations"),
+    QStringLiteral("latencies"),
+    QStringLiteral("modernLatencies"),
+    QStringLiteral("cachedLegacyRegionsList"),
+    QStringLiteral("cachedLegacyShadowsocksList"),
+    QStringLiteral("cachedModernRegionsList")
 };
 
 void WatchCommand::printHelp(const QString &name)

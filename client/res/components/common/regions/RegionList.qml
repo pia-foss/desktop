@@ -35,6 +35,7 @@ Item {
   property alias serviceLocations: regionListView.serviceLocations
   property alias portForwardEnabled: regionListView.portForwardEnabled
   property alias canFavorite: regionListView.canFavorite
+  property alias collapsedCountriesSettingName: regionListView.collapsedCountriesSettingName
   signal regionSelected(string locationId)
 
   function clearSearch() {

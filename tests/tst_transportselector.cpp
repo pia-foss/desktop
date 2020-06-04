@@ -20,7 +20,7 @@
 #include <QtTest>
 
 #include "daemon/src/vpn.h"
-#include "daemon/src/locations.h"
+#include "common/src/locations.h"
 
 namespace samples
 {
@@ -32,6 +32,7 @@ namespace samples
     "dns": "nz.privateinternetaccess.com",
     "port_forward": false,
     "ping": "103.231.91.35:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "103.231.91.35:8080"

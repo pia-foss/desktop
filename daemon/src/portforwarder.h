@@ -30,6 +30,7 @@
 #include "apiclient.h"
 #include "async.h"
 #include "settings.h"
+#include "portforwardrequest.h"
 
 // PortForwarder forwards a port through the VPN connection when the VPN is
 // connected and the option is enabled.
@@ -47,19 +48,24 @@ public:
     enum class State
     {
         Disconnected,
+        // Connected to a server that supports PF.
         ConnectedSupported,
+        // Connected to a server that does not support PF (any infra).
         ConnectedUnsupported
     };
 
     using PortForwardState = DaemonState::PortForwardState;
 
 public:
-    // Create PortForwarder with the client ID string (see
-    // DaemonAccount::clientId)
+    // Create PortForwarder with the DaemonAccount, which is used to load/store
+    // the client ID (legacy infra) or PF token (modern infra).
+    //
     // The ApiClient will be used to make API requests, it must outlive
-    // PortForwarder
+    // PortForwarder.
+    //
     // Port forwarding is initially disabled when PortForwarder is created.
-    PortForwarder(QObject *pParent, ApiClient &apiClient, const QString &clientId);
+    PortForwarder(ApiClient &apiClient, DaemonAccount &account,
+                  DaemonState &state, const Environment &environment);
 
 public:
     // Update the current VPN connection state.
@@ -90,8 +96,10 @@ private:
 
 private:
     ApiClient &_apiClient;
-    // The client Id (used to make a PF request)
-    QString _clientId;
+    // Components of Daemon needed by the PF request implementations
+    DaemonAccount &_account;
+    DaemonState &_state;
+    const Environment &_environment;
     // Whether the VPN is connected
     State _connectionState;
     // Whether port forwarding is currently enabled
@@ -104,7 +112,10 @@ private:
     // This is never set when _connectionState is not State::ConnectedSupported.
     // (It can be set with _forwardingEnabled is false if the setting was
     // toggled while connected.)
-    Async<void> _pPortForwardRequest;
+    std::unique_ptr<PortForwardRequest> _pPortForwardRequest;
+    // If the port forward request enters the Retry state, we start this timer
+    // to retry after a delay.
+    QTimer _retryTimer;
 };
 
 // The client ID we use for requests - a 256-bit number encoded in Base-36

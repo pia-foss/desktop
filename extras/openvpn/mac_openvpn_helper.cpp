@@ -557,7 +557,7 @@ int main(int argc, char* argv[])
 
             qInfo().noquote().nospace() << "Using device:" << env.value(QStringLiteral("dev"))
                 << " local_address:" << env.value(QStringLiteral("ifconfig_local"))
-                << " remote_address:" << env.value(QStringLiteral("ifconfig_remote"));
+                << " remote_address:" << env.value(QStringLiteral("route_vpn_gateway"));
 
             // Parse all foreign_option_{i} variables
             for (int i = 1; ; i++)

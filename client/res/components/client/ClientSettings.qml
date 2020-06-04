@@ -30,6 +30,8 @@ QtObject {
   readonly property string regionSortKey: NativeClient.settings.regionSortKey
   readonly property var favoriteLocations: NativeClient.settings.favoriteLocations
   readonly property var recentLocations: NativeClient.settings.recentLocations
+  readonly property var vpnCollapsedCountries: NativeClient.settings.vpnCollapsedCountries
+  readonly property var shadowsocksCollapsedCountries: NativeClient.settings.shadowsocksCollapsedCountries
   readonly property var primaryModules: NativeClient.settings.primaryModules
   readonly property var secondaryModules: NativeClient.settings.secondaryModules
   readonly property string iconSet: NativeClient.settings.iconSet

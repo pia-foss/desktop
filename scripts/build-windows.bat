@@ -154,12 +154,17 @@ mkdir %BUILDDIR%
 mkdir %ARTIFACTSDIR%
 
 rem  Fetch a region list to bundle
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://www.privateinternetaccess.com/vpninfo/servers?version=1001&client=x-alpha', 'daemon\res\json\servers.json')"
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://www.privateinternetaccess.com/vpninfo/servers?version=1002&client=x-alpha', 'daemon\res\json\servers.json')"
 if %errorlevel% neq 0 (
   echo Error: Unable to fetch region list
   goto error
 )
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://www.privateinternetaccess.com/vpninfo/shadowsocks_servers', 'daemon\res\json\shadowsocks.json')"
+if %errorlevel% neq 0 (
+  echo Error: Unable to fetch shadowsocks region list
+  goto error
+)
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('"https://serverlist.piaservers.net/vpninfo/servers/new"', 'daemon\res\json\modern_servers.json')"
 if %errorlevel% neq 0 (
   echo Error: Unable to fetch shadowsocks region list
   goto error

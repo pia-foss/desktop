@@ -69,12 +69,12 @@ class StubRouteManager : public RouteManager
 
 // This is the public interface for RouteManager
 public:
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override
     {
         _methodRecorder.record({"addRoute",subnet, gatewayIp, interfaceName});
     }
 
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override
     {
         _methodRecorder.record({"removeRoute", subnet, gatewayIp, interfaceName});
     }
@@ -83,7 +83,7 @@ public:
 public:
     MethodRecorder &methodRecorder() {return _methodRecorder;}
 private:
-    MethodRecorder _methodRecorder;
+    mutable MethodRecorder _methodRecorder;
 };
 
 namespace

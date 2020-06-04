@@ -175,7 +175,7 @@ void ProcTracker::removePidFromCgroup(pid_t pid, const Path &cGroupPath)
     removeChildPidsFromCgroup(pid, cGroupPath);
 }
 
-void ProcTracker::updateMasquerade(QString interfaceName)
+void ProcTracker::updateMasquerade(QString interfaceName, QString tunnelDeviceName)
 {
     if(interfaceName.isEmpty())
     {
@@ -195,14 +195,14 @@ void ProcTracker::updateMasquerade(QString interfaceName)
             QStringLiteral("100.transIp"),
             {
                 QStringLiteral("-o %1 -j MASQUERADE").arg(interfaceName),
-                QStringLiteral("-o tun+ -j MASQUERADE")
+                QStringLiteral("-o %1 -j MASQUERADE").arg(tunnelDeviceName)
             },
             IpTablesFirewall::kNatTable
         );
     }
 }
 
-void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress)
+void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName)
 {
     const QString routingTableName = Routing::bypassTable;
     const QString vpnOnlyRoutingTableName = Routing::vpnOnlyTable;
@@ -234,14 +234,14 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
 
     // The VPN-only route can be left as-is if we're not connected, VPN-only
     // processes are expected to lose connectivity in that case.
-    if(tunnelDeviceRemoteAddress.isEmpty() || tunnelDeviceName.isEmpty())
+    if(tunnelDeviceName.isEmpty())
     {
-        qWarning() << "Tunnel configuration not known yet, can't configure VPN-only route yet - address:"
-            << tunnelDeviceRemoteAddress << "- interface:" << tunnelDeviceName;
+        qWarning() << "Tunnel configuration not known yet, can't configure VPN-only route yet"
+            << "- interface:" << tunnelDeviceName;
     }
     else
     {
-        auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(tunnelDeviceRemoteAddress, tunnelDeviceName, vpnOnlyRoutingTableName);
+        auto cmd = QStringLiteral("ip route replace default dev %1 table %2").arg(tunnelDeviceName, vpnOnlyRoutingTableName);
         qInfo() << "Executing:" << cmd;
         _executor.bash(cmd);
     }
@@ -250,14 +250,14 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
 }
 
 void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
-                                QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
+                                QString tunnelDeviceLocalAddress)
 {
     qInfo() << "previous gateway IP is" << _previousNetScan.gatewayIp();
     qInfo() << "updated gateway IP is" << params.netScan.gatewayIp();
     qInfo() << "tunnel device is" << tunnelDeviceName;
 
-    if(_previousNetScan.interfaceName() != params.netScan.interfaceName())
-        updateMasquerade(params.netScan.interfaceName());
+    if(_previousNetScan.interfaceName() != params.netScan.interfaceName() || _previousTunnelDeviceName != tunnelDeviceName)
+        updateMasquerade(params.netScan.interfaceName(), tunnelDeviceName);
 
     // Ensure that packets with the source IP of the physical interface go out the physical interface
     if(_previousNetScan.ipAddress() != params.netScan.ipAddress())
@@ -276,17 +276,18 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     }
 
     // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
-    updateRoutes(params.netScan.gatewayIp(), params.netScan.interfaceName(), tunnelDeviceName, tunnelDeviceRemoteAddress);
+    updateRoutes(params.netScan.gatewayIp(), params.netScan.interfaceName(), tunnelDeviceName);
 
     // If we just got a valid network scan (we're connecting) or we lost it
     // (we're disconnected), the subsequent call to updateApps() will add/remove
     // all excluded apps (which are only tracked when we have a network scan).
     _previousNetScan = params.netScan;
     _previousTunnelDeviceLocalAddress = tunnelDeviceLocalAddress;
+    _previousTunnelDeviceName = tunnelDeviceName;
 }
 
 void ProcTracker::initiateConnection(const FirewallParams &params,
-                                     QString tunnelDeviceName, QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
+                                     QString tunnelDeviceName, QString tunnelDeviceLocalAddress)
 {
     int sock;
     qInfo() << "Attempting to connect to Netlink";
@@ -331,8 +332,7 @@ void ProcTracker::initiateConnection(const FirewallParams &params,
     _sockFd = sock;
     setupFirewall();
     updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
-                      tunnelDeviceRemoteAddress, params.excludeApps,
-                      params.vpnOnlyApps);
+                      params.excludeApps, params.vpnOnlyApps);
     setupReversePathFiltering();
     _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
     connect(_readNotifier, &QSocketNotifier::activated, this, &ProcTracker::readFromSocket);
@@ -520,12 +520,12 @@ void ProcTracker::shutdownConnection()
 }
 
 void ProcTracker::updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                                    QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                                    QString tunnelDeviceLocalAddress,
                                     QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
     // Update network first, then updateApps() can add/remove all excluded apps
     // when we gain/lose a valid network scan
-    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress, tunnelDeviceRemoteAddress);
+    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress);
     updateApps(excludedApps, vpnOnlyApps);
 }
 

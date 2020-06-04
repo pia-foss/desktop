@@ -142,10 +142,10 @@ public:
 
 public slots:
     void initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
-                            QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
+                            QString tunnelDeviceLocalAddress);
     void shutdownConnection();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QString tunnelDeviceLocalAddress,
                            QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
@@ -168,7 +168,7 @@ private:
     void sendBypassIpv4Subnets(const QSet<QString> &bypassSubnets);
     void updateKextFirewall(const FirewallParams &params, bool isConnected);
     void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
-                       QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
+                       QString tunnelDeviceLocalAddress);
     void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:

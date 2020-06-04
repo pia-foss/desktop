@@ -70,11 +70,11 @@ public:
 
 public slots:
     void initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
-                            QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
+                            QString tunnelDeviceLocalAddress);
     void readFromSocket(int socket);
     void shutdownConnection();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QString tunnelDeviceLocalAddress,
                            QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
@@ -97,10 +97,10 @@ private:
     QString pathForPid(pid_t pid);
     void addLaunchedApp(pid_t pid);
     void removeTerminatedApp(pid_t pid);
-    void updateMasquerade(QString interfaceName);
-    void updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName, QString tunnelDeviceRemoteAddress);
+    void updateMasquerade(QString interfaceName, QString tunnelDeviceName);
+    void updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName);
     void updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
-                       QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress);
+                       QString tunnelDeviceLocalAddres);
     void addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
     void removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
     void setupFirewall();
@@ -116,6 +116,7 @@ private:
     AppMap _exclusionsMap;
     AppMap _vpnOnlyMap;
     QString _previousTunnelDeviceLocalAddress;
+    QString _previousTunnelDeviceName;
     int _sockFd;
 
     static Executor _executor;

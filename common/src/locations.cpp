@@ -20,6 +20,7 @@
 #line SOURCE_FILE("locations.cpp")
 
 #include "locations.h"
+#include <QJsonDocument>
 
 namespace
 {
@@ -42,6 +43,28 @@ namespace
         if(port <= std::numeric_limits<quint16>::max())
             return static_cast<quint16>(port);
         return 0;
+    }
+
+    // The "geo" flag was added in legacy regions list v1002 and isn't yet
+    // available in the modern regions list.  Tolerate issues when parsing this
+    // - a missing flag is fine and defaults to false, any unexpected value is
+    // also treated as false (with a warning).
+    bool getGeoFlag(const QJsonObject &region, const QString &regionIdTrace)
+    {
+        if(region.contains("geo"))
+        {
+            try
+            {
+                return JsonCaster{region.value(QStringLiteral("geo"))};
+            }
+            catch(const Error &ex)
+            {
+                qWarning() << "Unable to read 'geo' flag of region"
+                    << regionIdTrace << "-" << ex;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -67,6 +90,38 @@ Server buildLegacyServer(const QString &address, const QString &serial,
     }
     legacyServer.servicePorts(service, std::move(servicePorts));
     return legacyServer;
+}
+
+// If the location ID given is present in the Shadowsocks region data, add a
+// Shadowsocks server to the list of servers for this location.
+//
+// If the location ID doesn't have Shadowsocks, nothing happens.  If the
+// Shadowsocks server data are invalid, the error is traced and no changes are
+// made.
+void addLegacyShadowsocksServer(std::vector<Server> &servers,
+                                const QString &locationId,
+                                const QJsonObject &shadowsocksObj)
+{
+    // Look for Shadowsocks info for this region
+    const auto &shadowsocksServer = shadowsocksObj.value(locationId).toObject();
+    if(!shadowsocksServer.isEmpty())
+    {
+        try
+        {
+            Server shadowsocks;
+            shadowsocks.ip(JsonCaster{shadowsocksServer.value(QStringLiteral("host"))});
+            // No serial, not provided (or used) for Shadowsocks
+            shadowsocks.shadowsocksKey(JsonCaster{shadowsocksServer.value(QStringLiteral("key"))});
+            shadowsocks.shadowsocksCipher(JsonCaster{shadowsocksServer.value(QStringLiteral("cipher"))});
+            shadowsocks.shadowsocksPorts({json_cast<quint16>(shadowsocksServer.value(QStringLiteral("port")))});
+            servers.push_back(std::move(shadowsocks));
+        }
+        catch(const Error &ex)
+        {
+            qWarning() << "Ignoring invalid Shadowsocks info for region"
+                << locationId << "-" << ex;
+        }
+    }
 }
 
 LocationsById buildLegacyLocations(const LatencyMap &latencies,
@@ -148,6 +203,7 @@ LocationsById buildLegacyLocations(const LatencyMap &latencies,
             pLocation->name(JsonCaster{serverObj.value(QStringLiteral("name"))});
             pLocation->country(JsonCaster{serverObj.value(QStringLiteral("country"))});
             pLocation->portForward(JsonCaster{serverObj.value(QStringLiteral("port_forward"))});
+            pLocation->geoOnly(getGeoFlag(serverObj, itAttr.key()));
             // Set autoSafe from the list of auto regions.  Note that if all
             // regions have autoSafe() == false, we'll still be able to connect
             // automatically - NearestLocations::getNearestSafeVpnLocation()
@@ -178,7 +234,8 @@ LocationsById buildLegacyLocations(const LatencyMap &latencies,
             if(!wireguardServer.isEmpty())
             {
                 servers.push_back(buildLegacyServer(JsonCaster{wireguardServer.value(QStringLiteral("host"))},
-                                                    serial, Service::WireGuard, {}));
+                                                    JsonCaster{wireguardServer.value(QStringLiteral("serial"))},
+                                                    Service::WireGuard, {}));
             }
             else
             {
@@ -189,25 +246,7 @@ LocationsById buildLegacyLocations(const LatencyMap &latencies,
             }
 
             // Look for Shadowsocks info for this region
-            const auto &shadowsocksServer = shadowsocksObj.value(pLocation->id()).toObject();
-            if(!shadowsocksServer.isEmpty())
-            {
-                try
-                {
-                    Server shadowsocks;
-                    shadowsocks.ip(JsonCaster{shadowsocksServer.value(QStringLiteral("host"))});
-                    // No serial, not provided (or used) for Shadowsocks
-                    shadowsocks.shadowsocksKey(JsonCaster{shadowsocksServer.value(QStringLiteral("key"))});
-                    shadowsocks.shadowsocksCipher(JsonCaster{shadowsocksServer.value(QStringLiteral("cipher"))});
-                    shadowsocks.shadowsocksPorts({json_cast<quint16>(shadowsocksServer.value(QStringLiteral("port")))});
-                    servers.push_back(std::move(shadowsocks));
-                }
-                catch(const Error &ex)
-                {
-                    qWarning() << "Ignoring invalid Shadowsocks info for region"
-                        << pLocation->id() << "-" << ex;
-                }
-            }
+            addLegacyShadowsocksServer(servers, pLocation->id(), shadowsocksObj);
 
             pLocation->servers(servers);
 
@@ -219,6 +258,179 @@ LocationsById buildLegacyLocations(const LatencyMap &latencies,
             qWarning() << "Can't load location" << itAttr.key()
                 << "due to error" << ex;
         }
+    }
+
+    return newLocations;
+}
+
+void applyModernService(const QJsonObject &serviceObj, Server &groupTemplate,
+                        const QString &groupTrace)
+{
+    try
+    {
+        const auto &serviceName = json_cast<QString>(serviceObj["name"]);
+        Service knownService = Service::Latency;
+        if(serviceName == QStringLiteral("openvpn_tcp"))
+            knownService = Service::OpenVpnTcp;
+        else if(serviceName == QStringLiteral("openvpn_udp"))
+            knownService = Service::OpenVpnUdp;
+        else if(serviceName == QStringLiteral("wireguard"))
+            knownService = Service::WireGuard;
+        else if(serviceName == QStringLiteral("latency"))
+            knownService = Service::Latency;
+        else
+        {
+            // Otherwise, some other service not used by Desktop - ignore silently
+            // Shadowsocks is ignored in the new servers list; we haven't
+            // determined how to provide the Shadowsocks key/cipher yet.
+            return;
+        }
+        // Don't load "ports" until we know it's a service we use, some future
+        // services might not have ports in the same way.
+        auto servicePorts = json_cast<std::vector<quint16>>(serviceObj["ports"]);
+        groupTemplate.servicePorts(knownService, servicePorts);
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Service in group" << groupTrace << "is not valid:" << ex
+            << QJsonDocument{serviceObj}.toJson();
+    }
+}
+
+void readModernServer(const Server &groupTemplate, std::vector<Server> &servers,
+                      const QJsonObject &serverObj, const QString &rgnIdTrace)
+{
+    try
+    {
+        Server newServer{groupTemplate};
+        newServer.ip(JsonCaster{serverObj["ip"]});
+        newServer.commonName(JsonCaster{serverObj["cn"]});
+        // TODO - Need Shadowsocks key/cipher for servers with Shadowsocks
+        // service
+        servers.push_back(newServer);
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Can't load server in location" << rgnIdTrace
+            << "due to error:" << ex;
+    }
+}
+
+QSharedPointer<Location> readModernLocation(const QJsonObject &regionObj,
+                                            const std::unordered_map<QString, Server> &groupTemplates,
+                                            const QJsonObject &legacyShadowsocksObj)
+{
+    QSharedPointer<Location> pLocation{new Location{}};
+    QString id; // For tracing, if we get an ID and the read fails, this will be traced
+    try
+    {
+        pLocation->id(JsonCaster{regionObj["id"]});
+        id = pLocation->id();   // Found an id, trace it if the location fails
+        pLocation->name(JsonCaster{regionObj["name"]});
+        pLocation->country(JsonCaster{regionObj["country"]});
+        pLocation->geoOnly(getGeoFlag(regionObj, pLocation->id()));
+        pLocation->autoSafe(JsonCaster{regionObj["auto_region"]});
+        pLocation->portForward(JsonCaster{regionObj["port_forward"]});
+
+        // Build servers
+        std::vector<Server> servers;
+        const auto &serverGroupsObj = regionObj["servers"].toObject();
+        auto itGroup = serverGroupsObj.begin();
+        while(itGroup != serverGroupsObj.end())
+        {
+            // Find the group template
+            auto itTemplate = groupTemplates.find(itGroup.key());
+            if(itTemplate == groupTemplates.end())
+            {
+                qWarning() << "Group" << itGroup.key() << "not known in location"
+                    << pLocation->id();
+                // Skip all servers in this group
+            }
+            // If the group template has no known services, skip this group
+            // silently.  This can be normal for services not used by Desktop.
+            else if(itTemplate->second.hasNonLatencyService())
+            {
+                for(const auto &serverValue : itGroup->toArray())
+                {
+                    const auto &serverObj = serverValue.toObject();
+                    readModernServer(itTemplate->second, servers, serverObj,
+                        pLocation->id());
+                }
+            }
+            ++itGroup;
+        }
+
+        // Include the legacy Shadowsocks server for this location if present
+        addLegacyShadowsocksServer(servers, pLocation->id(), legacyShadowsocksObj);
+
+        pLocation->servers(servers);
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Can't load location" << id << "due to error" << ex;
+        return {};
+    }
+
+    // If the location was loaded but has no servers, treat that as an error
+    // too.
+    if(pLocation && pLocation->servers().empty())
+    {
+        qWarning() << "Location" << pLocation->id() << "has no servers, ignored";
+        return {};
+    }
+
+    return pLocation;
+}
+
+LocationsById buildModernLocations(const LatencyMap &latencies,
+                                   const QJsonObject &regionsObj,
+                                   const QJsonObject &legacyShadowsocksObj)
+{
+    // Build template Server objects for each "group" given in the regions list.
+    // These will be used later to construct the actual servers by filling in
+    // an ID and common name.
+    std::unordered_map<QString, Server> groupTemplates;
+    const auto &groupsObj = regionsObj["groups"].toObject();
+
+    // Group names are in keys, use Qt iterators
+    auto itGroup = groupsObj.begin();
+    while(itGroup != groupsObj.end())
+    {
+        Server groupTemplate;
+        // Apply the services.  There may be other services that Desktop doesn't
+        // use, ignore those.
+        for(const auto &service : itGroup.value().toArray())
+            applyModernService(service.toObject(), groupTemplate, itGroup.key());
+
+        // Keep groups even if they have no known services.  This prevents
+        // spurious "unknown group" warnings, the servers in this group will be
+        // ignored.
+        groupTemplates[itGroup.key()] = std::move(groupTemplate);
+        ++itGroup;
+    }
+
+    // Now read the locations and use the group templates to build servers
+    LocationsById newLocations;
+    const auto &regionsArray = regionsObj["regions"].toArray();
+    for(const auto &regionValue : regionsArray)
+    {
+        const auto &regionObj = regionValue.toObject();
+
+        auto pLocation = readModernLocation(regionObj, groupTemplates, legacyShadowsocksObj);
+
+        if(pLocation)
+        {
+            // Is there a latency measurement for this location?
+            auto itLatency = latencies.find(pLocation->id());
+            if(itLatency != latencies.end())
+            {
+                // Apply the latency measurement.  (Otherwise, the latency is
+                // left unset.)
+                pLocation->latency(itLatency->second);
+            }
+            newLocations[pLocation->id()] = std::move(pLocation);
+        }
+        // Failure to load the location is traced by readModernLocation()
     }
 
     return newLocations;
@@ -323,31 +535,14 @@ NearestLocations::NearestLocations(const LocationsById &allLocations)
 
 QSharedPointer<Location> NearestLocations::getNearestSafeVpnLocation(bool portForward) const
 {
-    if(_locations.empty())
-    {
-        qWarning() << "There are no available Server Locations!";
-        return {};
-    }
-
     // If port forwarding is on, then find fastest server that supports port forwarding
     if(portForward)
     {
-        auto result = std::find_if(_locations.begin(), _locations.end(),
-            [](const auto &location)
-            {
-                return location->portForward() && location->autoSafe();
-            });
-        if(result != _locations.end())
-            return *result;
+        auto result = getBestMatchingLocation([](const Location &loc){return loc.portForward();});
+        if(result)
+            return result;
     }
 
-    // otherwise just find the fastest 'safe' server
-    auto result = std::find_if(_locations.begin(), _locations.end(),
-        [](const auto &location) {return location->autoSafe();});
-    if(result != _locations.end())
-        return *result;
-
-    // We fall-back to the fastest region since we could not find a region meeting the above constraints
-    qWarning() << "Unable to find closest server location meeting constraints, falling back to fastest region";
-    return _locations.front();
+    // otherwise just find the best non-PF server
+    return getBestLocation();
 }

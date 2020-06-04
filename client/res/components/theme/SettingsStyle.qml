@@ -22,8 +22,8 @@ import "."
 QtObject {
     readonly property bool horizontal: Qt.platform.os !== 'windows'
 
-    readonly property int contentWidth: 430
-    readonly property int contentHeight: Theme.settings.horizontal ? 340 : 400
+    readonly property int contentWidth: 460
+    readonly property int contentHeight: Theme.settings.horizontal ? 390 : 430
 
     readonly property color backgroundColor: Theme.dark ? "#323642" : "#eeeeee"
 
@@ -71,9 +71,9 @@ QtObject {
     readonly property int vbarContentBottomMargin: 30
 
     // Extra left margin for pages with relatively narrow content
-    readonly property int narrowPageLeftMargin: horizontal ? 60 : 0
+    readonly property int narrowPageLeftMargin: horizontal ? 75 : 0
 
-    readonly property int headingHeight: 100
+    readonly property int headingHeight: 90
     readonly property color headingLineColor: Theme.dark ? "#484a55" : "#d7d8d9"
     readonly property color headingTextColor: Theme.dark ? "#ffffff" : "#22252e"
     readonly property int headingTextPx: 24

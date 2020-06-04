@@ -120,6 +120,10 @@ public:
     // macOS & Linux: <DaemonDataDir>/daemon.sock
     static Path DaemonLocalSocket;
 
+    // Daemon local socket for IPC from the OpenVPN helper - used to push
+    // environment variables and errors back from the OpenVPN helper to the
+    // daemon.
+    static Path DaemonHelperIpcSocket;
 
     // Directory to store crash reports
     // All (Client): <ClientDataDir>/crashes/
@@ -163,6 +167,16 @@ public:
 
     // Interface name file written by wireguard-go or wgservice.exe (Mac/Win only)
     static Path WireguardInterfaceFile;
+
+    // Region override files
+    static Path LegacyRegionOverride;
+    static Path LegacyShadowsocksOverride;
+    static Path ModernRegionOverride;
+
+    // Bundled region files
+    static Path LegacyRegionBundle;
+    static Path LegacyShadowsocksBundle;
+    static Path ModernRegionBundle;
 
 #ifdef Q_OS_WIN
     // Directory of TAP drivers

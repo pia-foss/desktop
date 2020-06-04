@@ -2,15 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>SplitTunnelIpRow</name>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelIpRow.qml" line="73"/>
-        <source>SplitTunnelIpRow --- Remove</source>
-        <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel ip rule. (Should be labeled like a normal command button.)</extracomment>
-        <translation>Kaldır</translation>
-    </message>
-</context>
-<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -764,382 +755,387 @@
 <context>
     <name>DaemonData</name>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="80"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="81"/>
         <source>DaemonData --- UAE</source>
         <translation>BAE</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="81"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="82"/>
         <source>DaemonData --- Albania</source>
         <translation>Arnavutluk</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="82"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="83"/>
         <source>DaemonData --- Argentina</source>
         <translation>Arjantin</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="83"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="84"/>
         <source>DaemonData --- AU Sydney</source>
         <translation>AU Sidney</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="84"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="85"/>
         <source>DaemonData --- AU Melbourne</source>
         <translation>AU Melbourne</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="85"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="86"/>
         <source>DaemonData --- AU Perth</source>
         <translation>AU Perth</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="86"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="87"/>
         <source>DaemonData --- Austria</source>
         <translation>Avusturya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="87"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="88"/>
         <source>DaemonData --- Bosnia and Herzegovina</source>
         <translation>Bosna Hersek</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="88"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="89"/>
         <source>DaemonData --- Belgium</source>
         <translation>Belçika</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="89"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="90"/>
         <source>DaemonData --- Bulgaria</source>
         <translation>Bulgaristan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="90"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="91"/>
         <source>DaemonData --- Brazil</source>
         <translation>Brezilya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="91"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="92"/>
         <source>DaemonData --- CA Montreal</source>
         <translation>CA Montreal</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="92"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="93"/>
+        <source>DaemonData --- CA Ontario</source>
+        <translation>CA Ontario</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="94"/>
         <source>DaemonData --- CA Toronto</source>
         <translation>CA Toronto</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="93"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="95"/>
         <source>DaemonData --- CA Vancouver</source>
         <translation>CA Vancouver</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="94"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="96"/>
         <source>DaemonData --- Czech Republic</source>
         <translation>Çek Cumhuriyeti</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="95"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="97"/>
         <source>DaemonData --- DE Berlin</source>
         <translation>DE Berlin</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="96"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="98"/>
         <source>DaemonData --- Denmark</source>
         <translation>Danimarka</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="97"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="99"/>
         <source>DaemonData --- Estonia</source>
         <translation>Estonya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="98"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="100"/>
         <source>DaemonData --- Finland</source>
         <translation>Finlandiya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="99"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="101"/>
         <source>DaemonData --- France</source>
         <translation>Fransa</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="100"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="102"/>
         <source>DaemonData --- DE Frankfurt</source>
         <translation>DE Frankfurt</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="101"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="103"/>
         <source>DaemonData --- Greece</source>
         <translation>Yunanistan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="102"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="104"/>
         <source>DaemonData --- Hong Kong</source>
         <translation>Hong Kong</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="103"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="105"/>
         <source>DaemonData --- Croatia</source>
         <translation>Hırvatistan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="104"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="106"/>
         <source>DaemonData --- Hungary</source>
         <translation>Macaristan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="105"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="107"/>
         <source>DaemonData --- India</source>
         <translation>Hindistan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="106"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="108"/>
         <source>DaemonData --- Ireland</source>
         <translation>İrlanda</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="107"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="109"/>
         <source>DaemonData --- Iceland</source>
         <translation>İzlanda</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="108"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="110"/>
         <source>DaemonData --- Israel</source>
         <translation>İsrail</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="109"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="111"/>
         <source>DaemonData --- Italy</source>
         <translation>İtalya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="110"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="112"/>
         <source>DaemonData --- Japan</source>
         <translation>Japonya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="111"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="113"/>
         <source>DaemonData --- Lithuania</source>
         <translation>Litvanya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="112"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="114"/>
         <source>DaemonData --- Luxembourg</source>
         <translation>Lüksemburg</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="113"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="115"/>
         <source>DaemonData --- Latvia</source>
         <translation>Letonya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="114"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="116"/>
         <source>DaemonData --- Moldova</source>
         <translation>Moldova</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="115"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="117"/>
         <source>DaemonData --- Mexico</source>
         <translation>Meksika</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="116"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="118"/>
         <source>DaemonData --- North Macedonia</source>
         <translation>Kuzey Makedonya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="117"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="119"/>
         <source>DaemonData --- Malaysia</source>
         <translation>Malezya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="118"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="120"/>
         <source>DaemonData --- Netherlands</source>
         <translation>Hollanda</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="119"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="121"/>
         <source>DaemonData --- Norway</source>
         <translation>Norveç</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="120"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="122"/>
         <source>DaemonData --- New Zealand</source>
         <translation>Yeni Zelanda</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="121"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="123"/>
         <source>DaemonData --- Poland</source>
         <translation>Polonya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="122"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="124"/>
         <source>DaemonData --- Portugal</source>
         <translation>Portekiz</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="123"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="125"/>
         <source>DaemonData --- Romania</source>
         <translation>Romanya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="124"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="126"/>
         <source>DaemonData --- Serbia</source>
         <translation>Sırbistan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="125"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="127"/>
         <source>DaemonData --- Singapore</source>
         <translation>Singapur</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="126"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="128"/>
         <source>DaemonData --- Slovenia</source>
         <translation>Slovakya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="127"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="129"/>
         <source>DaemonData --- Slovakia</source>
         <translation>Slovakya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="128"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="130"/>
         <source>DaemonData --- Spain</source>
         <translation>İspanya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="129"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="131"/>
         <source>DaemonData --- Sweden</source>
         <translation>İsveç</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="130"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="132"/>
         <source>DaemonData --- Switzerland</source>
         <translation>İsviçre</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="131"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="133"/>
         <source>DaemonData --- Turkey</source>
         <translation>Türkiye</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="132"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="134"/>
         <source>DaemonData --- Ukraine</source>
         <translation>Ukrayna</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="133"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="135"/>
         <source>DaemonData --- UK London</source>
         <translation>Birleşik Krallık Londra</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="134"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="136"/>
         <source>DaemonData --- UK Manchester</source>
         <translation>Birleşik Krallık Manchester</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="135"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="137"/>
         <source>DaemonData --- UK Southampton</source>
         <translation>Birleşik Krallık Southampton</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="136"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="138"/>
         <source>DaemonData --- US East</source>
         <translation>ABD Doğu</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="137"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="139"/>
         <source>DaemonData --- US West</source>
         <translation>ABD Batı</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="138"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="140"/>
         <source>DaemonData --- US Atlanta</source>
         <translation>ABD Atlanta</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="139"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="141"/>
         <source>DaemonData --- US California</source>
         <translation>ABD Kaliforniya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="140"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="142"/>
         <source>DaemonData --- US Chicago</source>
         <translation>ABD Şikago</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="141"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="143"/>
         <source>DaemonData --- US Denver</source>
         <translation>ABD Denver</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="142"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="144"/>
         <source>DaemonData --- US Florida</source>
         <translation>ABD Florida</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="143"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="145"/>
         <source>DaemonData --- US Houston</source>
         <translation>ABD Houston</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="144"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="146"/>
         <source>DaemonData --- US Las Vegas</source>
         <translation>ABD Las Vegas</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="145"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="147"/>
         <source>DaemonData --- US New York City</source>
         <translation>ABD New York City</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="146"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="148"/>
         <source>DaemonData --- US Seattle</source>
         <translation>ABD Seattle</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="147"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="149"/>
         <source>DaemonData --- US Silicon Valley</source>
         <translation>ABD Silikon Vadisi</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="148"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="150"/>
         <source>DaemonData --- US Texas</source>
         <translation>ABD Teksas</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="149"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="151"/>
         <source>DaemonData --- US Washington DC</source>
         <translation>ABD Washington DC</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="150"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="152"/>
         <source>DaemonData --- South Africa</source>
         <translation>Güney Afrika</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="156"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="158"/>
         <source>DaemonData --- Germany</source>
         <translation>Almanya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="157"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="159"/>
         <source>DaemonData --- Canada</source>
         <translation>Kanada</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="158"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="160"/>
         <source>DaemonData --- United States</source>
         <translation>Birleşik Devletler</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="159"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="161"/>
         <source>DaemonData --- Australia</source>
         <translation>Avustralya</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="160"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="162"/>
         <source>DaemonData --- United Kingdom</source>
         <translation>Birleşik Krallık</translation>
     </message>
@@ -1185,26 +1181,6 @@
 <context>
     <name>Error</name>
     <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="40"/>
-        <source>Error --- Unknown error</source>
-        <translation>Bilinmeyen hata</translation>
-    </message>
-    <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
-        <source>Error --- System error %1: %2</source>
-        <translation>Sistem hatası %1: %2</translation>
-    </message>
-    <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="41"/>
-        <source>Error --- System error %1 inside %3: %2</source>
-        <translation>%3 içinde sistem hatası %1: %2</translation>
-    </message>
-    <message>
-        <location filename="../../../../../common/src/builtin/error.cpp" line="42"/>
-        <source>Error --- Unknown error code %1</source>
-        <translation>Bilinmeyen hata kodu %1</translation>
-    </message>
-    <message>
         <location filename="../../../../../common/src/builtin/error.cpp" line="50"/>
         <source>Error --- No additional information available.</source>
         <translation>Kullanılabilir ek bilgi yok.</translation>
@@ -1243,48 +1219,48 @@
         <translation>Sistem Başlangıcında Başlat</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="40"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="37"/>
         <source>GeneralPage --- Connect on Launch</source>
         <translation>Başlatırken Bağlan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="44"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="41"/>
         <source>GeneralPage --- Show Desktop Notifications</source>
         <translation>Masaüstü Bildirimlerini Göster</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="49"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="46"/>
         <source>GeneralPage --- Language</source>
         <translation>Dil</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="65"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="62"/>
         <source>GeneralPage --- Theme</source>
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="68"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="65"/>
         <source>GeneralPage --- Dark</source>
         <translation>Koyu</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="69"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="66"/>
         <source>GeneralPage --- Light</source>
         <translation>Açık</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="76"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="73"/>
         <source>GeneralPage --- Tray Icon Style</source>
         <extracomment>This setting allows the user to choose a style for the icon shown in the system tray / notification area. It should use the typical desktop terminology for the &quot;tray&quot;.</extracomment>
         <translation>Tepsi Simgesi Stili</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="81"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="78"/>
         <source>GeneralPage --- The &apos;Auto&apos; setting chooses an icon based on your desktop theme.</source>
         <translation>&apos;Otomatik&apos; ayarı, masaüstü temanıza göre bir simge seçer.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="83"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Auto</source>
         
@@ -1292,7 +1268,7 @@
         <comment>icon-theme</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Light</source>
         
@@ -1300,7 +1276,7 @@
         <comment>icon-theme</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="88"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Dark</source>
         
@@ -1308,7 +1284,7 @@
         <comment>icon-theme</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="89"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Colored</source>
         
@@ -1316,7 +1292,7 @@
         <comment>icon-theme</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="90"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Classic</source>
         
@@ -1324,35 +1300,35 @@
         <comment>icon-theme</comment>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="107"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="104"/>
         <source>GeneralPage --- Dashboard Appearance</source>
         <extracomment>Setting controlling how the dashboard is displayed - either as a popup attached to the system tray or as an ordinary window.</extracomment>
         <translation>Kontrol Paneli Görünümü</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="112"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="109"/>
         <source>GeneralPage --- Attached to Tray</source>
         <extracomment>Setting value indicating that the dashboard is a popup attached to the system tray.</extracomment>
         <translation>Tepsiye İliştirilmiş</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="114"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="111"/>
         <source>GeneralPage --- Window</source>
         <extracomment>Setting value indicating that the dashboard is an ordinary window</extracomment>
         <translation>Pencere</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="118"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="115"/>
         <source>GeneralPage --- Attached mode may not work with all desktop environments, and it requires a system tray. If you can&apos;t find the dashboard, start Private Internet Access again to show it, and switch back to Window mode in Settings.</source>
         <translation>İliştirilmiş mod, tüm masaüstü ortamlarında çalışmayabilir ve bunun için bir sistem tepsisi gereklidir. Kontrol panelini bulamazsanız, Private Internet Access&apos;i yeniden başlatarak görüntülenmesini sağlayın ve Ayarlar kısmından tekrar Pencere modunda geçirin.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="132"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="129"/>
         <source>GeneralPage --- Reset All Settings</source>
         <translation>Tüm Ayarları Sıfırla</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="135"/>
+        <location filename="../../../../../client/res/components/settings/pages/GeneralPage.qml" line="132"/>
         <source>GeneralPage --- Reset all settings to their default values?</source>
         <translation>Tüm ayarlar varsayılan değerlere sıfırlansın mı?</translation>
     </message>
@@ -1475,102 +1451,117 @@
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="159"/>
+        <source>HelpPage --- Network</source>
+        <translation>Ağ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="196"/>
+        <source>HelpPage --- Current</source>
+        <translation>Güncel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="199"/>
+        <source>HelpPage --- Next Generation</source>
+        <translation>Yeni Nesil</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="217"/>
         <source>HelpPage --- Support</source>
         <translation>Destek</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="167"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="225"/>
         <source>HelpPage --- Disable Accelerated Graphics</source>
         <translation>Hızlandırılmış Grafikleri Kapat</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="176"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="234"/>
         <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
         <translation>Bu ayarı uygulamak için Private Internet Access&apos;i yeniden başlatın</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="184"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="242"/>
         <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
         <translation>Hızlandırılmış grafikler işlemci kullanımını azaltır ve grafik efektlerini açar, ancak belirli grafik kartlarında ya da sunucularda sorunlara neden olabilir.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="188"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="246"/>
         <source>HelpPage --- Enable Debug Logging</source>
         <translation>Hata Ayıklama Günlüğünü Etkinleştir</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="247"/>
         <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
         <translation>Sorunların giderilmesine yardımcı olması için teknik desteğe gönderilebilen hata ayıklama günlüklerini kaydedin.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="205"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="263"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>Hata Ayıklama Günlükleri Gönder</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="211"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="269"/>
         <source>HelpPage --- Support Portal</source>
         <translation>Destek Portalı</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="226"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="284"/>
         <source>HelpPage --- Maintenance</source>
         <translation>Bakım</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="236"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="294"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>OpenVPN Ağ Adaptörünü Tekrar Yükle</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="295"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>OpenVPN Ağ Adaptörünü Tekrar Yüklüyor...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="247"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="305"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>WireGuard Ağ Adaptörünü Tekrar Yükle</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="248"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="306"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>WireGuard Ağ Adaptörünü Tekrar Yüklüyor...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="271"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="329"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>Ayrık Tünelleme Filtresi Yeniden Yükleniyor...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="272"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="330"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>Ayrık Tünelleme Filtresini Yeniden Yükle</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="311"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="369"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>Ayrık tünelleme filtresi yeniden yüklendi.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="334"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="392"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>Özel İnternet Erişimini Kaldır</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="375"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="433"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>Terminalde komut çalıştırılamadı. Lütfen x terminal öyküncüsüyle uyumlu bir terminal yükleyin.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="377"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="435"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>Terminal açılamıyor</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="386"/>
+        <location filename="../../../../../client/res/components/settings/pages/HelpPage.qml" line="444"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -1640,13 +1631,13 @@
         <translation>Port yönlendirme</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="173"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="175"/>
         <source>IPModule --- Failed</source>
         <extracomment>Port forward - label used in IP widget when request fails</extracomment>
         <translation>Başarısız Oldu</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="176"/>
+        <location filename="../../../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="178"/>
         <source>IPModule --- Not Available</source>
         <extracomment>Port forward - label used in IP widget when not available for this region</extracomment>
         <translation>Kullanılamıyor</translation>
@@ -1862,84 +1853,84 @@
         <translation>Özel DNS Kullan</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="172"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="173"/>
         <source>NetworkPage --- Request Port Forwarding</source>
         <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
         <translation>Bağlantı Noktası İletimi Talep Et</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="179"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="180"/>
         <source>NetworkPage --- Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
         <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
         <translation>VPN IP&apos;sinden bir bağlantı noktasını bilgisayarınıza iletir. Bağlantı noktası sizin için seçilir. Bağlantı noktası iletimini tüm konumlar desteklemez.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="191"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="196"/>
         <source>NetworkPage --- Allow LAN Traffic</source>
         <translation>LAN Trafiğine İzin Ver</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="192"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="197"/>
         <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
         <translation>Yerel ağınızdaki cihazlar arasında trafiğe her zaman, VPN durdurma anahtarı kullanıldığında bile izin verir.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="205"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="210"/>
         <source>NetworkPage --- Choose which applications use the VPN.</source>
         <extracomment>Description for the split tunnel setting.</extracomment>
         <translation>Hangi uygulamaların VPN&apos;yi kullanacağını seçin.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="209"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="214"/>
         <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
         <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
         <translation>VPN&apos;yi Atla: Uygulama daima doğrudan İnternet&apos;e bağlanır</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="214"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="219"/>
         <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
         <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
         <translation>Yalnızca VPN - Uygulama, yalnızca PIA açıkken ve VPN bağlı iken bağlanabilir</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="319"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="225"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="314"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>Ayrık Tünelleme</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="246"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="245"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>Bu özelliği etkinleştirmek için ayrık tünelleme uzantısını onaylayın.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="257"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="256"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>Güvenlik Tercihleri</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="380"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="369"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>Ayrık tünelleme filtresi yükleniyor...</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="389"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="378"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>Bu özelliği etkinleştirdiğinizde ayrık tünelleme filtresi yüklenir.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="396"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="385"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>Ayrık tünelleme filtresi yüklü değil. Yardım sayfasından yeniden yükleyin.</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="461"/>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="466"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="446"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="451"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>Uygulamaları Hariç Tut</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="510"/>
+        <location filename="../../../../../client/res/components/settings/pages/NetworkPage.qml" line="492"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>Değişikliklerin uygulanması için uygulamaların yeniden başlatılması gerekebilir.</translation>
     </message>
@@ -3072,6 +3063,15 @@
         <location filename="../../../../../client/res/components/settings/pages/SplitTunnelDefaultRow.qml" line="84"/>
         <source>SplitTunnelDefaultRow --- All Other Apps</source>
         <translation>Diğer Tüm Uygulamalar</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelIpRow</name>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/SplitTunnelIpRow.qml" line="73"/>
+        <source>SplitTunnelIpRow --- Remove</source>
+        <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel ip rule. (Should be labeled like a normal command button.)</extracomment>
+        <translation>Kaldır</translation>
     </message>
 </context>
 <context>

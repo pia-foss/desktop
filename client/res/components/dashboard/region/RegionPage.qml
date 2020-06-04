@@ -54,6 +54,7 @@ FocusScope {
     serviceLocations: Daemon.state.vpnLocations
     portForwardEnabled: Daemon.settings.portForward && Daemon.settings.method === "openvpn"
     canFavorite: true
+    collapsedCountriesSettingName: "vpnCollapsedCountries"
     onRegionSelected: {
       // Choose this location, and reconnect if we were connected to a
       // different one

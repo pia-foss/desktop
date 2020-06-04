@@ -18,7 +18,7 @@
 
 #include "common.h"
 #include "settings.h"
-#include "daemon/src/locations.h"
+#include "common/src/locations.h"
 #include <QtTest>
 
 namespace samples
@@ -31,6 +31,7 @@ namespace samples
     "dns": "austria.privateinternetaccess.com",
     "port_forward": false,
     "ping": "185.216.34.231:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "185.216.34.231:8080"
     },
@@ -45,6 +46,7 @@ namespace samples
     "dns": "czech.privateinternetaccess.com",
     "port_forward": false,
     "ping": "89.238.186.229:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "89.238.186.229:8080"
     },
@@ -70,6 +72,7 @@ namespace samples
     "dns": "au-melbourne.privateinternetaccess.com",
     "port_forward": false,
     "ping": "168.1.99.210:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "168.1.99.210:8080"
     },
@@ -84,6 +87,7 @@ namespace samples
     "dns": "au-perth.privateinternetaccess.com",
     "port_forward": false,
     "ping": "103.231.89.4:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "103.231.89.4:8080"
     },
@@ -107,6 +111,7 @@ namespace samples
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -122,6 +127,7 @@ namespace samples
     "dns": "us-east.privateinternetaccess.com",
     "port_forward": false,
     "ping": "209.222.23.59:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "209.222.23.59:8080"
@@ -137,6 +143,7 @@ namespace samples
     "dns": "poland.privateinternetaccess.com",
     "port_forward": true,
     "ping": "185.244.214.14:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "185.244.214.14:8080"
     },
@@ -151,6 +158,7 @@ namespace samples
     "dns": "ro.privateinternetaccess.com",
     "port_forward": true,
     "ping": "89.33.8.42:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "89.33.8.42:8080"
     },
@@ -165,6 +173,7 @@ namespace samples
     "dns": "hungary.privateinternetaccess.com",
     "port_forward": false,
     "ping": "185.128.26.18:8888",
+    "geo": false,
     "openvpn_udp": {
       "best": "185.128.26.18:8080"
     },
@@ -184,6 +193,99 @@ namespace samples
 }
 )").object();
 
+    const auto locationsGeo = QJsonDocument::fromJson(R"(
+{
+  "pf_auto_ng": {
+    "name": "has PF, auto safe, not geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": true,
+    "geo": false
+  },
+  "pf_auto_g": {
+    "name": "has PF, auto safe, is geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": true,
+    "geo": true
+  },
+  "pf_nauto_ng": {
+    "name": "has PF, not auto safe, not geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": true,
+    "geo": false
+  },
+  "pf_nauto_g": {
+    "name": "has PF, not auto safe, is geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": true,
+    "geo": true
+  },
+  "npf_auto_ng": {
+    "name": "no PF, auto safe, not geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": false,
+    "geo": false
+  },
+  "npf_auto_g": {
+    "name": "no PF, auto safe, is geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": false,
+    "geo": true
+  },
+  "npf_nauto_ng": {
+    "name": "no PF, not auto safe, not geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": false,
+    "geo": false
+  },
+  "npf_nauto_g": {
+    "name": "no PF, not auto safe, is geo",
+    "country": "us",
+    "ping": "0.0.0.0:1",
+    "openvpn_udp":{"best":"0.0.0.0:1"},
+    "openvpn_tcp":{"best":"0.0.0.0:1"},
+    "serial":"na",
+    "port_forward": false,
+    "geo": true
+  },
+  "info": {
+    "auto_regions": [
+      "pf_auto_ng",
+      "pf_auto_g",
+      "npf_auto_ng",
+      "npf_auto_g"
+    ]
+  }
+}
+)").object();
+
     const auto emptyShadowsocks = QJsonDocument::fromJson("{}").object();
 }
 
@@ -192,13 +294,35 @@ namespace
     const LocationsById locs{buildLegacyLocations({}, samples::locations, samples::emptyShadowsocks)};
     const LocationsById locsNoPF{buildLegacyLocations({}, samples::locationsNoPF, samples::emptyShadowsocks)};
     const LocationsById locsNoAutoRegions{buildLegacyLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks)};
+    const LocationsById locsGeo{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)};
 }
+
 class tst_nearestlocations : public QObject
 {
     Q_OBJECT
 
-private slots:
+    // Region latencies:
+    // hungary       500 (lowest latency but not part of auto_regions so should be ignored by getNearestSafeVpnLocation)
+    // us2           600
+    // us_california 700
+    // romania       800  (has port forwarding)
+    // poland        900  (has port forwarding)
+    void setLatencies()
+    {
+        auto &hungary = *locs.at("hungary");
+        auto &usEast = *locs.at("us2");
+        auto &usCalif = *locs.at("us_california");
+        auto &romania = *locs.at("ro");
+        auto &poland = *locs.at("poland");
 
+        hungary.latency(500);
+        usEast.latency(600);
+        usCalif.latency(700);
+        romania.latency(800);
+        poland.latency(900);
+    }
+
+private slots:
     void testGetNearestSafeVpnLocation()
     {
         setLatencies();
@@ -254,38 +378,74 @@ private slots:
 
         // Nearest region after constraining output to region ids that begin with "u"
         // i.e "us2" and "us_california" in this case
-        auto &nearest1 = *nearestLocations.getNearestSafeServiceLocation(
+        auto &nearest1 = *nearestLocations.getBestMatchingLocation(
             [](auto loc){ return loc.id().startsWith(QStringLiteral("u")); });
 
         QVERIFY(nearest1.id() == "us2");
 
         // Only regions that begin with "zzz"
         // There are none, so return nothing
-        auto nearest2 = nearestLocations.getNearestSafeServiceLocation(
+        auto nearest2 = nearestLocations.getBestMatchingLocation(
             [](auto loc){ return loc.id().startsWith(QStringLiteral("zzz")); });
 
         QVERIFY(!nearest2);
     }
 
-    // Region latencies:
-    // hungary       500 (lowest latency but not part of auto_regions so should be ignored by getNearestSafeVpnLocation)
-    // us2           600
-    // us_california 700
-    // romania       800  (has port forwarding)
-    // poland        900  (has port forwarding)
-    void setLatencies()
+    // Test all combinations of preferences with geo, auto, and port forwarding.
+    //
+    void testGeoPreferences()
     {
-        auto &hungary = *locs.at("hungary");
-        auto &usEast = *locs.at("us2");
-        auto &usCalif = *locs.at("us_california");
-        auto &romania = *locs.at("ro");
-        auto &poland = *locs.at("poland");
+        LocationsById testLocations{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)};
 
-        hungary.latency(500);
-        usEast.latency(600);
-        usCalif.latency(700);
-        romania.latency(800);
-        poland.latency(900);
+        // Set latencies in reverse precedence order.  This follows the table
+        // in NearestLocations (port forwarding is the "context" requirement
+        // here).
+        testLocations["pf_auto_ng"]->latency(1000);
+        testLocations["pf_auto_g"]->latency(900);
+        testLocations["pf_nauto_ng"]->latency(800);
+        testLocations["pf_nauto_g"]->latency(700);
+        testLocations["npf_auto_ng"]->latency(600);
+        testLocations["npf_auto_g"]->latency(500);
+        testLocations["npf_nauto_ng"]->latency(400);
+        testLocations["npf_nauto_g"]->latency(300);
+
+        auto getBestId = [&]() -> QString
+        {
+            auto pBest = NearestLocations{testLocations}.getNearestSafeVpnLocation(true);
+            return pBest ? pBest->id() : QString{};
+        };
+
+        // First preference is PF, auto, not geo
+        QCOMPARE(getBestId(), "pf_auto_ng");
+
+        // Remove that - next preference is PF+auto, even if it's a geo location
+        testLocations.erase("pf_auto_ng");
+        QCOMPARE(getBestId(), "pf_auto_g");
+
+        // Next preference is PF and non-geo, even if it's not auto safe
+        testLocations.erase("pf_auto_g");
+        QCOMPARE(getBestId(), "pf_nauto_ng");
+
+        // Next preference is the only remaining PF location (not auto and geo)
+        testLocations.erase("pf_nauto_ng");
+        QCOMPARE(getBestId(), "pf_nauto_g");
+
+        // After that, there are no PF locations, it'll try to match the other
+        // criteria.  Next is auto and not geo.
+        testLocations.erase("pf_nauto_g");
+        QCOMPARE(getBestId(), "npf_auto_ng");
+
+        // Next is auto, even if it's geo.
+        testLocations.erase("npf_auto_ng");
+        QCOMPARE(getBestId(), "npf_auto_g");
+
+        // Next is geo, even if it's not auto safe.
+        testLocations.erase("npf_auto_g");
+        QCOMPARE(getBestId(), "npf_nauto_ng");
+
+        // Finally, anything.
+        testLocations.erase("npf_nauto_ng");
+        QCOMPARE(getBestId(), "npf_nauto_g");
     }
 };
 

@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/latencytracker.h"
-#include "daemon/src/locations.h"
+#include "common/src/locations.h"
 #include <QtTest>
 #include <cassert>
 
@@ -117,9 +117,7 @@ public:
                                                   {pServerSocket->localPort()})});
 
             _mockServerList[pLocation->id()] = pLocation;
-
-            _mockPingLocations.push_back({serverId, QStringLiteral("127.0.0.1"),
-                                          pServerSocket->localPort()});
+            _mockPingLocations.push_back(pLocation);
 
             connect(pServerSocket, &QUdpSocket::readyRead, this,
                     [=](){onDatagramReady(pServerSocket, pLocation);});
@@ -147,9 +145,9 @@ public:
     //mock servers to LatencyTracker.)
     const LocationsById &mockServerList() const {return _mockServerList;}
 
-    //Get a vector of PingLocations describing the mock servers.  (Used to pass
-    //the mock servers to LatencyBatch.)
-    const std::vector<LatencyTracker::PingLocation> &mockPingLocations() const {return _mockPingLocations;}
+    // Get a vector of locations from the mock servers.  (Used to pass the mock
+    // servers to LatencyBatch.)
+    const std::vector<QSharedPointer<Location>> &mockPingLocations() const {return _mockPingLocations;}
 
     //Get a set of the the server socket addresses - used by unit tests to
     //verify that each server was pinged, etc.
@@ -169,7 +167,7 @@ public:
 private:
     QVector<QUdpSocket*> _mockPingServers;
     LocationsById _mockServerList;
-    std::vector<LatencyTracker::PingLocation> _mockPingLocations;
+    std::vector<QSharedPointer<Location>> _mockPingLocations;
 };
 
 class AutoEcho : public QObject
@@ -217,7 +215,10 @@ private slots:
 MeasurementSplitter::MeasurementSplitter(LatencyTracker &tracker)
 {
     connect(&tracker, &LatencyTracker::newMeasurements, this,
-            &MeasurementSplitter::onNewMeasurements);
+            [this](ConnectionConfig::Infrastructure, const LatencyTracker::Latencies &measurements)
+            {
+                onNewMeasurements(measurements);
+            });
 }
 
 MeasurementSplitter::MeasurementSplitter(LatencyBatch &batch)
@@ -241,7 +242,7 @@ private slots:
     //emits latency measurements when the replies are sent
     void locationPings()
     {
-        LatencyTracker tracker;
+        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
         MeasurementSplitter splitter{tracker};
         tracker.start();
 
@@ -288,7 +289,7 @@ private slots:
     //immediately
     void newLocations()
     {
-        LatencyTracker tracker;
+        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
         MeasurementSplitter splitter{tracker};
         tracker.start();
 
@@ -329,7 +330,7 @@ private slots:
     //measured after measurements are enabled
     void delayedNewLocations()
     {
-        LatencyTracker tracker;
+        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
         MeasurementSplitter splitter{tracker};
 
         QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
@@ -358,7 +359,7 @@ private slots:
     //emitted for it when we start measurements.
     void deletionWhileStopped()
     {
-        LatencyTracker tracker;
+        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
         MeasurementSplitter splitter{tracker};
         tracker.start();
 
@@ -397,7 +398,8 @@ private slots:
 
         //Create a LatencyBatch with these ping locations, then verify that it
         //destroys itself.
-        auto pBatch{new LatencyBatch{_mockServers.mockPingLocations(), this}};
+        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
+                                     _mockServers.mockPingLocations(), this}};
         MeasurementSplitter splitter{*pBatch};
         QSignalSpy measurementSpy{&splitter, &MeasurementSplitter::newMeasurement};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
@@ -414,14 +416,23 @@ private slots:
     //the measurement timeout.)
     void invalidCleanup()
     {
-        //Bogus unparseable ping addresses
-        std::vector<LatencyTracker::PingLocation> bogusAddresses
-        {
-            {"bogus-id-1", "bogus-address-1", 0},
-            {"bogus-id-2", "bogus-address-2", 0}
-        };
+        //Bogus locations - no latency servers, unparseable addresses
+        QSharedPointer<Location> pBogusAddr{new Location{}};
+        pBogusAddr->id(QStringLiteral("mock-bogus-addr"));
+        pBogusAddr->name(QStringLiteral("mock-bogus-addr"));
+        pBogusAddr->country(QStringLiteral("US"));
+        pBogusAddr->portForward(false);
+        pBogusAddr->servers({buildLegacyServer(QStringLiteral("bogus_address"),
+                                               QStringLiteral("n/a"),
+                                               Service::Latency, {8888})});
+        QSharedPointer<Location> pNoServers{new Location{}};
+        pBogusAddr->id(QStringLiteral("mock-no-servers"));
+        pBogusAddr->name(QStringLiteral("mock-no-servers"));
+        pBogusAddr->country(QStringLiteral("US"));
+        pBogusAddr->portForward(false);
 
-        auto pBatch{new LatencyBatch{bogusAddresses, this}};
+        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
+                                     {pBogusAddr, pNoServers}, this}};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
 
         //If this wait times out, the LatencyBatch probably waited for the
@@ -436,7 +447,8 @@ private slots:
     {
         //Note that we're not creating an AutoEcho and not calling echo(); the
         //servers will not respond at all.
-        auto pBatch{new LatencyBatch{_mockServers.mockPingLocations(), this}};
+        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
+                                     _mockServers.mockPingLocations(), this}};
         QSignalSpy measurementSpy{pBatch, &LatencyBatch::newMeasurements};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
 
@@ -475,24 +487,6 @@ private slots:
         QHostAddress ipv6{"2001:0db8:0000:0042:0000:8a2e:0370:7334"};
 
         QCOMPARE(getEquivalentAddresses(ipv6), QVector<QHostAddress>{{ipv6}});
-    }
-
-    //Verify host/port parsing
-    void hostPortParsing()
-    {
-        QHostAddress host;
-        quint16 port;
-
-        QVERIFY(parsePingAddress("172.16.254.254:8888", host, port));
-        QCOMPARE(host, QHostAddress{0xAC10FEFE});
-        QCOMPARE(port, 8888);
-
-        //Invalid - no port
-        QCOMPARE(parsePingAddress("172.16.254.254", host, port), false);
-        //Invalid - port is 0
-        QCOMPARE(parsePingAddress("172.16.254.254:0", host, port), false);
-        //Invalid - bogus address
-        QCOMPARE(parsePingAddress("bogus:8888", host, port), false);
     }
 
 private:

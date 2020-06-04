@@ -117,7 +117,7 @@ resolvconf_link_path=/run/resolvconf/resolv.conf
 case "$script_type" in
   up)
     echo "Setting up DNS."
-    echo "Using device:$dev local_address:$ifconfig_local remote_address:$ifconfig_remote" >&2 # Used in openvpnmethod.cpp to pass in tunnel info
+    echo "Using device:$dev local_address:$ifconfig_local remote_address:$route_vpn_gateway" >&2 # Used in openvpnmethod.cpp to pass in tunnel info
 
     if [ -n "$dns_servers" ] ; then
       echo "Requested nameservers: $dns_servers"

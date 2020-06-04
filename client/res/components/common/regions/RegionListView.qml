@@ -54,6 +54,8 @@ Rectangle {
   // Whether regions in this list can be favorited (only applicable to VPN
   // regions currently; settings for this are fixed in RegionListView)
   property bool canFavorite
+  // The client setting name used to store the collapsed country groups
+  property string collapsedCountriesSettingName
 
   // A region has been selected
   signal regionSelected(string locationId)
@@ -120,45 +122,85 @@ Rectangle {
     ScrollBar.vertical.policy: ScrollBar.AlwaysOn
     label: regionListView.regionListLabel
     anchors.fill: parent
-    // don't allow horizontal scrolling.
-    contentWidth: parent.width
     clip: true
 
-    ColumnLayout {
-      id: scrollViewColumn
-      width: parent.width
-      spacing: 0
-      RegionAuto {
-        id: regionAuto
-        visible: searchTerm === ""
-        height: 68
-        Layout.fillWidth: true
-        highlightColumn: {
-          if(keyboardRow.country === 'auto' && keyboardRow.location === 'auto') {
-            return regionListView.highlightColumn
+    Flickable {
+      id: regionListFlickable
+      boundsBehavior: Flickable.StopAtBounds
+      // don't allow horizontal scrolling.
+      contentWidth: parent.width
+
+      // The scroll view should keep its scroll position when regions are
+      // updated.  This usually doesn't change the size of the view; the most
+      // common change is just updating latencies.
+      //
+      // When the regions are rebuilt, the ColumnLayout calculates a new height
+      // after each region is added by the repeater.  Normally this would cause
+      // the scroll view to go back to the top, because it would briefly observe
+      // a short height of ~68 or so when the first region is added.
+      //
+      // Instead, defer height updates for one frame to collect all these
+      // updates.  This means that the scroll view only observes a height change
+      // after all regions have been built, so it is able to keep its scroll
+      // position.
+      contentHeight: 1
+
+        function applyViewHeight() {
+          if(scrollViewColumn.implicitHeight !== regionListFlickable.contentHeight) {
+            regionListFlickable.contentHeight = scrollViewColumn.implicitHeight
           }
-          return -1
         }
-        serviceLocations: regionListView.serviceLocations
-        onRegionSelected: regionListView.regionSelected('auto')
-        onFocusCell: mouseFocusCell({country: 'auto', location: 'auto'}, keyColumn)
-      }
-      Repeater {
-        id: regionsRepeater
-        model: displayRegionsArray
-        delegate: RegionDelegate {
-          region: modelData.region
-          regionCountry: modelData.regionCountry
-          regionChildren: modelData.regionChildren
-          portForwardEnabled: regionListView.portForwardEnabled
-          serviceLocations: regionListView.serviceLocations
-          canFavorite: regionListView.canFavorite
-          highlightRow: keyboardRow
-          highlightColumn: regionListView.highlightColumn
-          onRegionSelected: regionListView.regionSelected(locationId)
-          onFocusCell: mouseFocusCell(row, keyColumn)
+
+        Timer {
+          id: heightDeferralTimer
+          repeat: false
+          interval: 0
+          onTriggered: regionListFlickable.applyViewHeight()
+          Component.onCompleted: regionListFlickable.applyViewHeight()
         }
-      }
+
+        Connections {
+          target: scrollViewColumn
+          onImplicitHeightChanged: heightDeferralTimer.start()
+        }
+
+        ColumnLayout {
+          id: scrollViewColumn
+          width: parent.width
+          spacing: 0
+          RegionAuto {
+            id: regionAuto
+            visible: searchTerm === ""
+            height: 68
+            Layout.fillWidth: true
+            highlightColumn: {
+              if(keyboardRow.country === 'auto' && keyboardRow.location === 'auto') {
+                return regionListView.highlightColumn
+              }
+              return -1
+            }
+            serviceLocations: regionListView.serviceLocations
+            onRegionSelected: regionListView.regionSelected('auto')
+            onFocusCell: mouseFocusCell({country: 'auto', location: 'auto'}, keyColumn)
+          }
+          Repeater {
+            id: regionsRepeater
+            model: displayRegionsArray
+            delegate: RegionDelegate {
+              region: modelData.region
+              regionCountry: modelData.regionCountry
+              regionChildren: modelData.regionChildren
+              portForwardEnabled: regionListView.portForwardEnabled
+              serviceLocations: regionListView.serviceLocations
+              canFavorite: regionListView.canFavorite
+              collapsedCountriesSettingName: regionListView.collapsedCountriesSettingName
+              highlightRow: keyboardRow
+              highlightColumn: regionListView.highlightColumn
+              onRegionSelected: regionListView.regionSelected(locationId)
+              onFocusCell: mouseFocusCell(row, keyColumn)
+            }
+          }
+        }
     }
   }
 

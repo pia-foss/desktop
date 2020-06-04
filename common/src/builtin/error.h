@@ -90,6 +90,7 @@ public:
         OpenVPNProxyResolveError,
         OpenVPNProxyAuthenticationError,
         OpenVPNProxyError,
+        OpenVPNHelperListenError,
 
         FirewallError = 1100,
         FirewallInitializationError,

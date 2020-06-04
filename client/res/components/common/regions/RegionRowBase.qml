@@ -55,6 +55,8 @@ Item {
   // Tip shown for the port forwarding warning (depends on whether this is a
   // single region or a group).
   property string pfWarningTipText
+  // Whether to show the "geo" location indicator
+  property bool geoLocation
 
   // When this row is highlighted with the keyboard, highlightColumn is set to
   // the column that is highlighted (an integer in range
@@ -139,7 +141,21 @@ Item {
     //   changing the navigational structure of the table to indicate, which
     //   would be pretty disruptive.
     name: {
-      if(pfWarningTip.visible) {
+      if(geoTip.visible && pfWarningTip.visible) {
+        //: Screen reader annotation used for a region that is a geo-only region
+        //: and does not support port forwarding.  Corresponds to the two badges
+        //: shown in the regions list.  %1 is a translated region name.  The
+        //: region name should come first so the screen reader reads it first.
+        return uiTr("%1, geo-located region, does not support port forwarding").arg(regionRowBase.label)
+      }
+      else if(geoTip.visible) {
+        //: Screen reader annotation used for a region that is a geo-only
+        //: region.  Corresponds to the globe badge shown in the regions list.
+        //: %1 is a translated region name.  The region name should come first
+        // so the screen reader reads it first.
+        return uiTr("%1, geo-located region").arg(regionRowBase.label)
+      }
+      else if(pfWarningTip.visible) {
         //: Screen reader annotation used for a region that does not support
         //: port forwarding when the feature is enabled.  Corresponds to the
         //: "slashed-arrow" indicator and "Port forwarding is not supported by
@@ -211,7 +227,7 @@ Item {
 
     // Dim the row when the port forward notice is shown (the region probably
     // shouldn't be selected, but it still could be)
-    opacity: pfWarning.visible ? 0.4 : 1.0
+    opacity: pfWarningTip.visible ? 0.4 : 1.0
 
     // Label text
     Text {
@@ -223,29 +239,62 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
       anchors.leftMargin: 56
-      anchors.right: pfWarning.left
+      anchors.right: badges.left
       elide: Text.ElideRight
     }
 
-    // Slashed arrow - shown when port forwarding is enabled, but this region
-    // doesn't support it
     Item {
-      id: pfWarning
+      id: badges
       // Follow the label text, unless it's too long to fit everything before
       // the latency text, in which case align to the latency text (which causes
       // the label to truncate).
       x: Math.min(latencyText.x - width, labelText.x + labelText.implicitWidth)
       anchors.verticalCenter: latencyText.verticalCenter
 
-      visible: regionRowBase.lacksPortForwarding
-      width: visible ? pfWarningTip.implicitWidth + 12 : 0
-      height: pfWarningTip.implicitHeight
+      readonly property real horzMargins: 6
 
+      width: {
+        var w = 0
+        if(pfWarningTip.show)
+          w += pfWarningTip.implicitWidth + horzMargins
+        if(geoTip.show)
+          w += geoTip.implicitWidth + horzMargins
+        // If anything was visible, add another margin for the right side
+        if(w > 0)
+          w += horzMargins
+        return w
+      }
+      height: Math.max(geoTip.implicitHeight, pfWarningTip.implicitHeight)
+      visible: width > 0
+
+      GeoTip {
+        id: geoTip
+        anchors.verticalCenter: parent.verticalCenter
+        x: parent.horzMargins
+        readonly property bool show: regionRowBase.geoLocation
+        visible: show
+        selected: regionRowBase.selected
+
+        // Like the PF warning, don't provide accessibility for tips, include
+        // that in the region cell.
+        accessible: false
+      }
+
+      // Slashed arrow - shown when port forwarding is enabled, but this region
+      // doesn't support it
       InfoTip {
         id: pfWarningTip
 
-        anchors.centerIn: parent
-        icon: Theme.dashboard.ipPortForwardSlashImage
+        anchors.verticalCenter: parent.verticalCenter
+        x: geoTip.visible ? (geoTip.x + geoTip.implicitWidth + parent.horzMargins) : parent.horzMargins
+        icon: regionRowBase.selected ? Theme.dashboard.ipPortForwardSlashSelectedImage : Theme.dashboard.ipPortForwardSlashImage
+        // 'badges.width' can't depend on pfWarningTip.visible, because reading
+        // pfWarningTip.visible doesn't actually return the value assigned to it
+        // - it returns the combined result including the parent items'
+        // visibilities.  Put the desired 'visible' value in an intermediate
+        // property and use that instead.
+        readonly property bool show: regionRowBase.lacksPortForwarding
+        visible: show
 
         tipText: pfWarningTipText
 
@@ -264,10 +313,10 @@ Item {
     Item {
       id: regionCellBound
       anchors.left: labelText.left
-      anchors.right: pfWarning.right
-      y: Math.min(labelText.y, pfWarning.y)
+      anchors.right: badges.right
+      y: Math.min(labelText.y, badges.y)
       height: {
-        var bottom = Math.max(labelText.y + labelText.height, pfWarning.y + pfWarning.height)
+        var bottom = Math.max(labelText.y + labelText.height, badges.y + badges.height)
         return bottom - y
       }
     }

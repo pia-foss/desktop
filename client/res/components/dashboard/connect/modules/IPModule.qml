@@ -157,21 +157,23 @@ MovableModule {
     anchors.leftMargin: 3
     y: 65
 
-    readonly property string currentMethod: {
+    // Port forwarding is possible with OpenVPN in the legacy infra or with any
+    // protocol on the modern infra.
+    // When connected or connecting, display based on the connected/connecting
+    // config as appropriate.  Otherwise, display based on the current settings.
+    readonly property string pfPossible: {
       if(Daemon.state.connectionState === "Connected")
-        return Daemon.state.connectedConfig.method
+        return Daemon.state.connectedConfig.method === "openvpn" || Daemon.state.connectedConfig.infrastructure === "modern"
       else if(Daemon.state.connectingConfig.vpnLocation)
-        return Daemon.state.connectingConfig.method
-      return Daemon.settings.method
+        return Daemon.state.connectingConfig.method === "openvpn" || Daemon.state.connectingConfig.infrastructure === "modern"
+      return Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern"
     }
 
     // PF is "active" when the setting is enabled or if the port forward
     // is anything other than "inactive" (it could be active, but not enabled
     // if it was turned off after a port was already forwarded).
     readonly property bool pfActive: (Daemon.settings.portForward || Daemon.state.forwardedPort !== Daemon.state.portForward.inactive)
-    // Show PF only when using OpenVPN; it's not currently supported with
-    // WireGuard.
-    readonly property bool showPf: currentMethod === "openvpn" && pfActive
+    readonly property bool showPf: pfPossible && pfActive
 
     opacity: showPf ? vpnElementsOpacityTarget : 0.0
     visible: opacity > 0.0

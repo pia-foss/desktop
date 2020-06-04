@@ -41,9 +41,88 @@ namespace
         return std::any_of(ipv4LocalSubnets.begin(), ipv4LocalSubnets.end(),
             [&](const SubnetPair &subnet) {return addr.isInSubnet(subnet);});
     }
+}
 
-    // PIA DNS servers are currently hard-coded for the OpenVPN method
-    const QStringList piaDnsServers{ QStringLiteral("209.222.18.222"), QStringLiteral("209.222.18.218") };
+HelperIpcConnection::HelperIpcConnection(QLocalSocket *pConnection)
+    : _pConnection{pConnection}
+{
+    Q_ASSERT(pConnection);  // Ensured by caller
+
+    _pConnection->setParent(nullptr);
+    connect(_pConnection.get(), &QLocalSocket::readyRead, this, [this]()
+    {
+        _buffer.append(_pConnection->readAll());
+    });
+    connect(&_buffer, &LineBuffer::lineComplete, this, [this](const QByteArray &line)
+    {
+        QString lineStr{QString::fromUtf8(line)};
+        qInfo() << "HELPER" << reinterpret_cast<qintptr>(_pConnection.get())
+            << ":" << lineStr;
+        emit ipcMessage(lineStr);
+    });
+}
+
+HelperIpcConnection::~HelperIpcConnection()
+{
+    Q_ASSERT(_pConnection); // Class invariant
+
+    // If any incomplete message was in the buffer, trace it
+    auto incompleteLine = _buffer.reset();
+    if(!incompleteLine.isEmpty())
+    {
+        qWarning() << "HELPER" << reinterpret_cast<qintptr>(_pConnection.get())
+            << "- incomplete message:" << QString::fromUtf8(incompleteLine);
+    }
+
+    // Close the socket if it isn't already closed, may signal from destructor
+    // otherwise.
+    _pConnection->close();
+}
+
+HelperIpcServer::HelperIpcServer()
+{
+    _server.setSocketOptions(QLocalServer::SocketOption::UserAccessOption);
+    connect(&_server, &QLocalServer::newConnection, this,
+            &HelperIpcServer::acceptConnections);
+}
+
+HelperIpcServer::~HelperIpcServer()
+{
+    // Remove client connections and close the server to ensure they don't
+    // signal from destructors.
+    _clients.clear();
+    _server.close();
+}
+
+void HelperIpcServer::acceptConnections()
+{
+    while(QLocalSocket *pNextClient = _server.nextPendingConnection())
+    {
+        auto emplaceResult = _clients.emplace(pNextClient,
+            std::unique_ptr<HelperIpcConnection>{new HelperIpcConnection{pNextClient}});
+        Q_ASSERT(emplaceResult.second); // New object, can't have already existed
+        auto itNewClient = emplaceResult.first;
+        Q_ASSERT(itNewClient != _clients.end());    // Postcondition of emplace()
+
+        connect(pNextClient, &QLocalSocket::disconnected, this, [this, pNextClient]()
+        {
+            _clients.erase(pNextClient);
+        }, Qt::ConnectionType::QueuedConnection);
+        connect(itNewClient->second.get(), &HelperIpcConnection::ipcMessage, this,
+                &HelperIpcServer::ipcMessage);
+    }
+}
+
+bool HelperIpcServer::listen()
+{
+    if(!_server.listen(Path::DaemonHelperIpcSocket))
+    {
+        qWarning() << "Unable to listen on helper IPC socket:"
+            << Path::DaemonHelperIpcSocket << "-" << _server.errorString();
+        return false;
+    }
+
+    return true;
 }
 
 OpenVPNMethod::OpenVPNMethod(QObject *pParent, const OriginalNetworkScan &netScan)
@@ -65,6 +144,20 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
                         quint16 shadowsocksProxyPort)
 {
     _connectingConfig = connectingConfig;
+
+#if defined(Q_OS_WIN)
+    if(!_helperIpcServer.listen())
+    {
+        // Traced by HelperIpcServer
+        raiseError({HERE, Error::Code::OpenVPNHelperListenError});
+        return;
+    }
+    connect(&_helperIpcServer, &HelperIpcServer::ipcMessage, this, [this](const QString &message)
+    {
+        // Line was traced by HelperIpcServer
+        checkForMagicStrings(message);
+    });
+#endif
 
     QStringList arguments;
     try
@@ -119,11 +212,20 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
             updownCmd += " --log ";
             updownCmd += escapeArg(Path::UpdownLogFile);
         }
+
+        // Pass the configuration method on Windows
+        updownCmd += " --method ";
+        updownCmd += escapeArg(g_settings.windowsIpMethod());
+
+        // Pass the IPC pipe/socket path to receive tunnel configuration
+        updownCmd += " --ipc ";
+        updownCmd += escapeArg(_helperIpcServer.fullServerName());
 #endif
 
-        // Pass DNS server addresses.
-        // PIA DNS addresses are currently hard-coded for the OpenVPN method
-        const auto &dnsServers = _connectingConfig.getDnsServers(piaDnsServers);
+        // Pass DNS server addresses.  The OpenVPN method does not get DNS
+        // server addresses from the server in either infrastructure; use the
+        // defaults.
+        const auto &dnsServers = _connectingConfig.getDnsServers({});
         if(!dnsServers.isEmpty())
         {
             updownCmd += " --dns ";
@@ -139,15 +241,10 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
 #ifdef Q_OS_WIN
         if(g_settings.windowsIpMethod() == QStringLiteral("static"))
         {
-            // Static configuration on Windows - use OpenVPN's netsh method, use
-            // updown script to apply DNS with netsh
+            // Static configuration on Windows - use OpenVPN's netsh method,
+            // updown script will apply DNS with netsh
             arguments += "--ip-win32";
             arguments += "netsh";
-            // Use the same script for --up and --down
-            arguments += "--up";
-            arguments += updownCmd;
-            arguments += "--down";
-            arguments += updownCmd;
         }
         else
         {
@@ -160,14 +257,13 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
                 arguments += dnsServer;
             }
         }
-#else
-        // Mac and Linux - always use updown script for DNS
+#endif
+
         // Use the same script for --up and --down
         arguments += "--up";
         arguments += updownCmd;
         arguments += "--down";
         arguments += updownCmd;
-#endif
 
         arguments += QStringLiteral("--config");
 
@@ -402,14 +498,14 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     }
     else
     {
-        QString specialPiaAddress = QStringLiteral("209.222.18.222");
         // Always route this special address through the VPN even when not using
-        // PIA DNS; it's also used for MACE and port forwarding
-        out << "route " << specialPiaAddress << " 255.255.255.255 vpn_gateway 0" << endl;
+        // PIA DNS; it's also used for port forwarding in the legacy
+        // infrastructure.
+        out << "route " << piaLegacyDnsPrimary << " 255.255.255.255 vpn_gateway 0" << endl;
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
         for(const auto &dnsServer : dnsServers)
         {
-            if(dnsServer != specialPiaAddress)
+            if(dnsServer != piaLegacyDnsPrimary)
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
         }
 
@@ -516,27 +612,6 @@ void OpenVPNMethod::openvpnStateChanged()
             advanceState(State::Created);
             break;
         case OpenVPNProcess::State::AssignIP:
-#if defined(Q_OS_WIN)
-            // On Windows, we can't easily get environment variables from the
-            // updown script like other platforms - stdout/stderr are not forwarded
-            // through OpenVPN - so we can't capture the tunnel configuration that
-            // way.
-            //
-            // Right now we only need the local tunnel interface IP on Windows (we
-            // don't need the remote or interface name), so we can get that from
-            // the AssignIP state information.  Only do this on Windows so the other
-            // platforms still report all configuration components together.
-            if(!_openvpn || _openvpn->tunnelIP().isEmpty())
-            {
-                qWarning() << "Tunnel interface IP address not known in AssignIP state";
-            }
-            else
-            {
-                qInfo() << "Tunnel device is assigned IP address" << _openvpn->tunnelIP();
-                emitTunnelConfiguration({}, _openvpn->tunnelIP(), {},
-                                        _connectingConfig.getDnsServers(piaDnsServers));
-            }
-#endif
             advanceState(State::Connecting);
             break;
         case OpenVPNProcess::State::Connecting:
@@ -628,7 +703,7 @@ void OpenVPNMethod::checkForMagicStrings(const QString& line)
         if(!_networkAdapter)
             _networkAdapter.reset(new NetworkAdapter{tunDeviceNameRegex.cap(1)});
 
-        const auto &dnsServers = _connectingConfig.getDnsServers(piaDnsServers);
+        const auto &dnsServers = _connectingConfig.getDnsServers({});
         emitTunnelConfiguration(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2),
                                 tunDeviceNameRegex.cap(3), dnsServers);
     }

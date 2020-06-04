@@ -321,12 +321,12 @@ if [ $TASK_PACKAGE -eq 1 ]; then
   addQmlImport "QtQuick"
 
   if [ -z "$SERVER_DATA_DIR" ]; then
-    curl -o "$ROOT/daemon/res/json/servers.json" "https://www.privateinternetaccess.com/vpninfo/servers?version=1001&client=x-alpha" || fail "unable to fetch region list"
+    curl -o "$ROOT/daemon/res/json/servers.json" "https://www.privateinternetaccess.com/vpninfo/servers?version=1002&client=x-alpha" || fail "unable to fetch region list"
     curl -o "$ROOT/daemon/res/json/shadowsocks.json" "https://www.privateinternetaccess.com/vpninfo/shadowsocks_servers" || fail "unable to fetch shadowsocks region list"
+    curl -o "$ROOT/daemon/res/json/modern_servers.json" "https://serverlist.piaservers.net/vpninfo/servers/new" || fail "unable to fetch modern region list"
   else
     echo "Using servers.json and shadowsocks.json from $SERVER_DATA_DIR"
-    cp "$SERVER_DATA_DIR/servers.json" "$ROOT/daemon/res/json/servers.json"
-    cp "$SERVER_DATA_DIR/shadowsocks.json" "$ROOT/daemon/res/json/shadowsocks.json"
+    cp "$SERVER_DATA_DIR/*.json" "$ROOT/daemon/res/json/"
   fi
   # Set the LD_LIBRARY_PATH so it's picked up by rpath
   export LD_LIBRARY_PATH="$STAGE_ROOT/lib"

@@ -18,7 +18,7 @@
 
 #include "common.h"
 #include "settings.h"
-#include "daemon/src/locations.h"
+#include "common/src/locations.h"
 #include <QtTest>
 
 namespace sample_docs {
@@ -37,6 +37,7 @@ const auto twoLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -52,6 +53,7 @@ const auto twoLocations = QJsonDocument::fromJson(R"(
     "dns": "us-east.privateinternetaccess.com",
     "port_forward": false,
     "ping": "209.222.23.59:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "209.222.23.59:8080"
@@ -72,6 +74,7 @@ const auto oneLocation = QJsonDocument::fromJson(R"(
     "dns": "ca.privateinternetaccess.com",
     "port_forward": true,
     "ping": "173.199.65.36:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "173.199.65.36:8080"
@@ -93,6 +96,7 @@ const auto oneLocationNewIps = QJsonDocument::fromJson(R"(
     "dns": "ca.privateinternetaccess.com",
     "port_forward": true,
     "ping": "173.199.65.59:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "173.199.65.59:8080"
@@ -113,6 +117,7 @@ const auto partialInvalid = QJsonDocument::fromJson(R"(
     "dns": "nz.privateinternetaccess.com",
     "port_forward": false,
     "ping": "103.231.91.35:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "103.231.91.35:8080"
@@ -135,6 +140,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -149,6 +155,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -163,6 +170,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "country": "US",
     "dns": "us-california.privateinternetaccess.com",
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -178,6 +186,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "serial": "dummy",
+    "geo": false,
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
     },
@@ -192,6 +201,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
     },
@@ -206,6 +216,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_tcp": {
       "best": "198.8.80.174:500"
@@ -218,6 +229,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -232,9 +244,25 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
+    "geo": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
+    },
+    "ips": []
+  }
+  "missing_geo": {
+    "name": "US California",
+    "country": "US",
+    "dns": "us-california.privateinternetaccess.com",
+    "port_forward": false,
+    "ping": "198.8.80.174:8888",
+    "serial": "dummy",
+    "openvpn_udp": {
+      "best": "198.8.80.174:8080"
+    },
+    "openvpn_tcp": {
+      "best": "198.8.80.174:500"
     },
     "ips": []
   }

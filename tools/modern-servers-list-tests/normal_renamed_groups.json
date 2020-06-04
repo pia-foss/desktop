@@ -1,0 +1,124 @@
+{
+  "groups":{
+    "renamed_vpn":[
+      {"name":"openvpn_tcp","ports":[500,443,110,80]},
+      {"name":"openvpn_udp","ports":[8080,1194,9201,53]},
+      {"name":"wireguard","ports":[1337]},
+      {"name":"ikev2","ports":[500,4500]},
+      {"name":"latency","ports":[8888]}
+    ],
+    "renamed_proxy":[
+      {"name":"socks","ports":[1080]},
+      {"name":"shadowsocks","ports":[443]},
+      {"name":"latency","ports":[8888]}
+    ]
+  },
+  "regions":[
+    {
+      "id":"us_california",
+      "name":"US California (Renamed Groups)",
+      "country":"US",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"91.207.175.88","cn":"377a7d36ef0c7614f3c74ff45f541d53"},
+          {"ip":"185.245.87.169","cn":"1e78e66cef97b865af7c1075af1332e7"}
+        ]
+      }
+    },
+    {
+      "id":"us_south_west",
+      "name":"US Texas (M)",
+      "country":"US",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"162.216.46.157","cn":"d930235a7f3936fef658e32cfbb02be8"},
+          {"ip":"162.216.46.22","cn":"c8e3963ec0b847c9a27395a3b5c45512"}
+        ],
+        "renamed_proxy":[
+          {"ip":"162.216.46.178","cn":"n/a"}
+        ]
+      }
+    },
+    {
+      "id":"us_new_york_city",
+      "name":"US New York City (M)",
+      "country":"US",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"209.95.50.103","cn":"eeb17b354f51fa97880473ce1ecafe64"},
+          {"ip":"209.95.50.46","cn":"b53a9c224a79d72354836fa347563885"}
+        ]
+      }
+    },
+    {
+      "id":"ca_toronto",
+      "name":"CA Toronto (M)",
+      "country":"CA",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"162.219.176.194","cn":"ef474bf8035e1172097916656f5c37"},
+          {"ip":"184.75.208.34","cn":"28d9854a736ac021f195079430f34477"}
+        ]
+      }
+    },
+    {
+      "id":"nl",
+      "name":"Netherlands (M)",
+      "country":"NL",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"185.107.44.38","cn":"c0a5011bad556670bbf67db7c0f74831"},
+          {"ip":"46.166.186.225","cn":"acede04be2333ca8ff1493afdb53a60d"}
+        ],
+        "renamed_proxy":[
+          {"ip":"212.92.109.55","cn":"n/a"}
+        ]
+      }
+    },
+    {
+      "id":"sweden",
+      "name":"Sweden (M)",
+      "country":"SE",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"45.12.220.184","cn":"fb29e86877165e98269069f625462e86"},
+          {"ip":"45.12.220.204","cn":"9637a5a5017d86566f686608ebb2cb9a"}
+        ]
+      }
+    },
+    {
+      "id":"swiss",
+      "name":"Switzerland (M)",
+      "country":"CH",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"185.212.170.189","cn":"f20f9638c0d762ae790502e5280029d1"},
+          {"ip":"185.230.125.38","cn":"c672dfeb0fc60bf9f2a2f5220c958c89"}
+        ],
+        "renamed_proxy":[
+          {"ip":"82.102.24.170","cn":"n/a"}
+        ]
+      }
+    },
+    {
+      "id":"hk",
+      "name":"Hong Kong (M)",
+      "country":"HK",
+      "auto_region":true,
+      "servers":{
+        "renamed_vpn":[
+          {"ip":"119.81.253.241","cn":"9623244453c36a07afeace630e2fc70f"},
+          {"ip":"119.81.135.53","cn":"ab71dd4a0e112b8aaa741aa08e5209b2"}
+        ]
+      }
+    }
+  ]
+}
+

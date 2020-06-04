@@ -91,8 +91,9 @@ verify "$ZIP"
 rm -rf "$OUTDIR"
 
 # Fetch a region list to bundle.
-"$CURL" -o "$ROOT/daemon/res/json/servers.json" "https://www.privateinternetaccess.com/vpninfo/servers?version=1001&client=x-alpha" || die "Unable to fetch region list"
+"$CURL" -o "$ROOT/daemon/res/json/servers.json" "https://www.privateinternetaccess.com/vpninfo/servers?version=1002&client=x-alpha" || die "Unable to fetch region list"
 "$CURL" -o "$ROOT/daemon/res/json/shadowsocks.json" "https://www.privateinternetaccess.com/vpninfo/shadowsocks_servers" || die "Unable to fetch shadowsocks region list"
+"$CURL" -o "$ROOT/daemon/res/json/modern_servers.json" "https://serverlist.piaservers.net/vpninfo/servers/new" || die "Unable to fetch modern region list"
 
 # Build all produects in the project in debug/release (use an in-source
 # build directory or GitLab won't let us pick up artifacts)

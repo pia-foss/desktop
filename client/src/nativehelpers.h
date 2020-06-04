@@ -23,6 +23,7 @@
 #define NATIVEHELPERS_H
 #pragma once
 
+#include "settings.h"
 #include <QWindow>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>
@@ -188,6 +189,12 @@ public:
     Q_INVOKABLE void openSecurityPreferencesMac();
 
     Q_INVOKABLE void checkAppDeactivate();
+
+    // Get the best location for a country - provides
+    // NearestLocations::getBestMatchingLocation() to QML with an appropriate
+    // predicate.  The DaemonState is used to get the location data.
+    Q_INVOKABLE QString getBestLocationForCountry(QObject *pDaemonStateObj,
+                                                  const QString &countryCode);
 
     static void applyStartOnLoginSetting(bool enabled);
     static bool getStartOnLoginSetting();

@@ -183,6 +183,7 @@ Page {
         spacing: 10
 
         CheckboxInput {
+          id: portForwardCheckbox
           //: Label for the setting that controls whether the application tries to
           //: forward a port from the public VPN IP to the user's computer. This
           //: feature is not guaranteed to work or be available, therefore we label
@@ -197,12 +198,16 @@ Page {
           info: enabled ? uiTr("Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.") : ""
           warning: enabled ? "" : SettingsMessages.requiresOpenVpnMessage
           setting: DaemonSetting {
-            override: Daemon.settings.method !== "openvpn"
+            override: !portForwardCheckbox.settingEnabled
             overrideValue: false
             name: "portForward"
           }
-          enabled: Daemon.settings.method === "openvpn"
-
+          // The legacy infrastructure only supports PF with OpenVPN.  The
+          // modern infrastructure supports it with any protocol.
+          // (reading "enabled" also considers parents' "enabled" flags, use an
+          // intermediate property)
+          readonly property bool settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern"
+          enabled: settingEnabled
         }
 
         CheckboxInput {
@@ -242,9 +247,6 @@ Page {
 
       property bool inKextTest: false
       enabled: {
-        // Disable unless connection method is openvpn
-        if(Daemon.settings.method !== "openvpn")
-          return false;
         // Always disable during a kext test
         if(inKextTest)
           return false
@@ -257,9 +259,6 @@ Page {
         return Daemon.state.splitTunnelSupportErrors.length === 0
       }
       desc: {
-        if(Daemon.settings.method !== "openvpn")
-          return SettingsMessages.requiresOpenVpnMessage
-
         if(Daemon.state.netExtensionState === "NotInstalled")
           return uiTr("Approve the split tunnel extension to enable this feature.")
 
@@ -282,11 +281,7 @@ Page {
       setting: Setting {
         id: appExclusionSettingMac
 
-        readonly property DaemonSetting daemonSetting: DaemonSetting {
-          override: Daemon.settings.method !== "openvpn"
-          overrideValue: false
-          name: "splitTunnelEnabled"
-        }
+        readonly property DaemonSetting daemonSetting: DaemonSetting { name: "splitTunnelEnabled" }
 
         sourceValue: daemonSetting.sourceValue
 
@@ -357,9 +352,6 @@ Page {
            NativeHelpers.reinstallWfpCalloutStatus === "denied"
       }
       enabled: {
-        if(Daemon.settings.method !== "openvpn")
-          return false;
-
         if(setting.currentValue) {
           // Disabling is always allowed - this might be the only way to clear
           // warnings if the driver has somehow been removed and can't be
@@ -375,9 +367,6 @@ Page {
         return false
       }
       desc: {
-        if(Daemon.settings.method !== "openvpn")
-          return SettingsMessages.requiresOpenVpnMessage
-
         // The status of an ongoing installation overrides anything else.
         // (If the user manually installs the extension on Win 7 RTM, and they
         // get the "reboot" state, show that rather than the OS version error.)
@@ -420,11 +409,7 @@ Page {
       }
       setting: Setting {
         id: appExclusionSetting
-        readonly property DaemonSetting daemonSetting: DaemonSetting {
-          override: Daemon.settings.method !== "openvpn"
-          overrideValue: false
-          name: 'splitTunnelEnabled'
-        }
+        readonly property DaemonSetting daemonSetting: DaemonSetting { name: 'splitTunnelEnabled' }
         sourceValue: daemonSetting.sourceValue
 
         // This is enabled whenever we trigger a driver install.  The help page
@@ -504,9 +489,6 @@ Page {
       Layout.topMargin: 1 // For check box's focus cue
       label: appExclusionCheckbox.label
       enabled: {
-        if(Daemon.settings.method !== "openvpn")
-          return false;
-
         // On any platform, disable if the split tunnel feature is not supported
         if(Daemon.state.splitTunnelSupportErrors.length)
           return false

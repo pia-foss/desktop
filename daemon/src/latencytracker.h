@@ -24,6 +24,7 @@
 
 #include "thread.h"
 #include "settings.h"
+#include "vpn.h"
 #include <QObject>
 #include <QElapsedTimer>
 #include <QHostAddress>
@@ -33,7 +34,20 @@
 
 //Key for a map/set containing both a host address and a port number.  (Used in
 //both LatencyTracker and unit tests.)
-using HostPortKey = QPair<QHostAddress, quint16>;
+using HostPortKey = std::pair<QHostAddress, quint16>;
+
+struct HashPair
+{
+    template<class T1, class T2>
+    std::size_t operator()(const std::pair<T1, T2> &value) const
+    {
+        return std::hash<T1>{}(value.first) ^ std::hash<T2>{}(value.second);
+    }
+};
+
+// Map of pending replies - keys are server addresses+ports that were pinged,
+// values are the associated location IDs.
+using PendingRepliesMap = std::unordered_map<HostPortKey, QString, HashPair>;
 
 //LatencyHistory queues up latency measurements for a particular remote host.
 //As measurements are taken, they're queued up in LatencyHistory, which
@@ -76,8 +90,7 @@ class LatencyTracker : public QObject
 private:
     struct LocationData
     {
-        // All offered servers in the location that have the latency service
-        std::vector<Server> latencyServers;
+        QSharedPointer<Location> pLocation;
         LatencyHistory latency;
         //Locations can sit in _locations without having been attempted if
         //measurements are not enabled.
@@ -85,26 +98,22 @@ private:
     };
 
 public:
-    struct PingLocation
-    {
-        QString id;
-        QString echoIp;
-        quint16 echoPort;
-    };
-
     // Group of latency measurements - location IDs and latency values.
     using Latencies = std::vector<QPair<QString, std::chrono::milliseconds>>;
 
 public:
-    //LatencyTracker begins with measurements stopped - call start() to enable
-    //them.
-    LatencyTracker();
+    // LatencyTracker begins with measurements stopped - call start() to enable
+    // them.
+    // Specify the infrastructure type to determine what type of measurements
+    // are used; this is used for tracing and emitted with newMeasurements().
+    explicit LatencyTracker(ConnectionConfig::Infrastructure infrastructure);
 
 signals:
     // This signal is emitted whenever new measurements have been taken.
     //
     // (Note that moc requires redundant qualifications of nested types)
-    void newMeasurements(const LatencyTracker::Latencies &measurements);
+    void newMeasurements(ConnectionConfig::Infrastructure infrastructure,
+                         const LatencyTracker::Latencies &measurements);
 
 private slots:
     //Trigger a new latency measurement
@@ -113,19 +122,12 @@ private slots:
     void onNewMeasurements(const Latencies &measurements);
 
 private:
-    // Select a ping address for a location, using its ID and list of latency
-    // servers.  A server is selected randomly.  If no server can be selected,
-    // this returns a PingLocation with an empty echoIp/echoPort, which is
-    // then handled by LatencyBatch.
-    PingLocation selectPingAddress(const QString &locationId,
-                                   const std::vector<Server> &latencyServers) const;
-
     //Begin a measurement for all locations in _locations that haven't been
     //attempted yet
     void measureNewLocations();
 
-    //Begin a new measurement for a set of ping addresses
-    void beginMeasurement(const std::vector<PingLocation> &locations);
+    //Begin a new measurement for a group of locations
+    void beginMeasurement(const std::vector<QSharedPointer<Location>> &locations);
 
 public:
     //Daemon passes the current set of locations to this method.
@@ -150,6 +152,7 @@ public:
     void stop();
 
 private:
+    ConnectionConfig::Infrastructure _infrastructure;
     // Measurement batches are executed on this thread.
     RunningWorkerThread _measurementThread;
     //This QTimer triggers when we need to refresh the measurements for all
@@ -169,6 +172,29 @@ private:
 
 Q_DECLARE_METATYPE(std::chrono::milliseconds);
 Q_DECLARE_METATYPE(LatencyTracker::Latencies);
+
+// BatchPinger is an interface to measure latency to a batch of servers using
+// different methods.  There is a UDP echo implementation of this interface for
+// the legacy infrastructure, and there are platform-specific ICMP echo
+// implementations for the modern infrastructure.
+//
+// The servers are batched in order to allow one socket to be used to measure
+// all servers when possible.
+class BatchPinger : public QObject
+{
+    Q_OBJECT
+    CLASS_LOGGING_CATEGORY("latency");
+
+public:
+    virtual ~BatchPinger() = default;
+
+signals:
+    // A server has responded.
+    // It's possible that the BatchPinger could receive spurious replies from
+    // hosts that weren't pinged in this batch; the receiver of this signal
+    // should ignore these.
+    void receivedResponse(const QHostAddress &address, quint16 port);
+};
 
 // LatencyBatch represents one batch of latency measurements.
 // LatencyTracker creates a batch each time it needs to measure latency to one or
@@ -191,7 +217,8 @@ public:
 
 public:
     //Create LatencyBatch with the locations that will be checked.
-    LatencyBatch(const std::vector<LatencyTracker::PingLocation> &locations,
+    LatencyBatch(ConnectionConfig::Infrastructure infrastructure,
+                 const std::vector<QSharedPointer<Location>> &locations,
                  QObject *pParent);
 
 signals:
@@ -207,22 +234,22 @@ signals:
 private:
     void emitBatchedMeasurements();
 
-private slots:
-    //When the UDP socket has a datagram ready, it signals this slot.
-    void onDatagramReady();
+private:
+    void onReceivedResponse(const QHostAddress &address, quint16 port);
     void onTimeoutElapsed();
     // The batch timer has elapsed, process the batched measurements
     void onBatchElapsed();
 
 private:
+    ConnectionConfig::Infrastructure _infrastructure;
     //This timer measures the elapsed time since the pings were sent, which is
     //used to calculate latency when the echoes are received.
     QElapsedTimer _timeSincePing;
-    //This UDP socket is used to send pings and receive echoes.
-    QUdpSocket _udpSocket;
     //This map holds the addresses that we haven't heard echoes from yet.
     //Values are the location IDs that we received in the constructor.
-    QHash<HostPortKey, QString> _pendingReplies;
+    PendingRepliesMap _pendingReplies;
+    // Ping implementation
+    std::unique_ptr<BatchPinger> _pPinger;
     // This QTimer is used to batch up new measurements.
     // We batch them and report them in groups to reduce the amount of changes
     // broadcast to clients and the number of events that have to be processed
@@ -231,13 +258,6 @@ private:
     // These are the latency measurements we've received in this batch.
     Latencies _batchedMeasurements;
 };
-
-//Parse a ping address into a host and port.  If this succeeds, 'host' and
-//'port' are both set, and this returns true.
-//The method returns false if the parse fails - 'host' and/or 'port' may
-//have been modified in this case.
-bool parsePingAddress(const QString &address, QHostAddress &host,
-                      quint16 &port);
 
 //Get other QHostAddress values that are semantically equivalent to this one.
 //

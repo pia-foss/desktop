@@ -228,6 +228,11 @@ void Environment::loadApiBases()
                     QStringLiteral("https://www.piaproxy.net/")
                 });
 
+    loadApiBase(overridePresent, apiOverride, _pModernRegionsListApi, QStringLiteral("modern_regions_list_api"),
+                QStringLiteral("modern regions list API"), {
+                    QStringLiteral("https://serverlist.piaservers.net")
+                });
+
     loadApiBase(overridePresent, apiOverride, _pIpAddrApi, QStringLiteral("ip_api"),
                 QStringLiteral("IP API"), {
                     QStringLiteral("https://www.privateinternetaccess.com/")

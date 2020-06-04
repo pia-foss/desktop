@@ -30,8 +30,6 @@
 #include "win/win_messagewnd.h"
 #include "win/servicemonitor.h"
 
-inline const PMIB_IPINTERFACE_ROW foo{nullptr};
-
 // Deadline timer (like QDeadlineTimer) that does not count time when the system
 // is suspended.  (Both clock sources for QDeadlineTimer do count suspend time.)
 class WinUnbiasedDeadline
@@ -53,6 +51,15 @@ public:
 
 private:
     ULONGLONG _expireTime;
+};
+
+class WinRouteManager : public RouteManager
+{
+public:
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
+private:
+    void createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const;
 };
 
 class WinDaemon : public Daemon, private MessageWnd
@@ -194,10 +201,8 @@ protected:
     QSet<QString> _bypassIpv4Subnets;
     QSet<QString> _bypassIpv6Subnets;
 
-
     std::vector<WfpFilterObject> _subnetBypassFilters4;
     std::vector<WfpFilterObject> _subnetBypassFilters6;
-
 
     // App ID for hnsd, needed when we add a special "split" rule for hnsd.
     AppIdKey _hnsdAppId;

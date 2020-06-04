@@ -88,11 +88,12 @@ void setUidAndGid()
 // Only used by MacOs - Linux uses routing policies and packet tagging instead
 class PosixRouteManager : public RouteManager
 {
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
+public:
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
 };
 
-void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
 #if defined(Q_OS_MACOS)
     qInfo() << "Adding bypass route for" << subnet;
@@ -100,7 +101,7 @@ void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp
 #endif
 }
 
-void PosixRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+void PosixRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
 {
 #if defined(Q_OS_MACOS)
     qInfo() << "Removing bypass route for" << subnet;
@@ -385,11 +386,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(specialPiaAddress), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{specialPiaAddress,
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("scutil (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
@@ -421,11 +422,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("iptables --version", "iptables", QStringList{QStringLiteral("--version")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(specialPiaAddress), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{specialPiaAddress,
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
     // Grab the routing tables from iproute2 also - we hope to change OpenVPN
@@ -490,7 +491,6 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
 
         startSplitTunnel(params, _state.tunnelDeviceName(),
                          _state.tunnelDeviceLocalAddress(),
-                         _state.tunnelDeviceRemoteAddress(),
                          params.excludeApps, params.vpnOnlyApps);
     }
     // Deactivate if it's supposed to be inactive but is currently active
@@ -523,7 +523,6 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
         // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
         updateSplitTunnel(params, _state.tunnelDeviceName(),
                           _state.tunnelDeviceLocalAddress(),
-                          _state.tunnelDeviceRemoteAddress(),
                           params.excludeApps, params.vpnOnlyApps);
     }
     _splitTunnelNetScan = params.netScan;

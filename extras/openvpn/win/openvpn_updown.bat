@@ -21,21 +21,41 @@ setlocal EnableDelayedExpansion
 
 rem Version logged in order to track script revisions since this file has been
 rem manually distributed to some users.
-set VERSION=2019-07-12b
-
-set PIA_ARG_DNS=
+set VERSION=2020-05-12
 
 rem No logging unless enabled with --log (by default, redirect to NUL)
 set LOG=NUL
 
+rem The configuration method in use - "static" or "dhcp".  The "dhcp" method
+rem relies on OpenVPN to handle most of the adapter configuration, in that case
+rem the script is just used to capture some environment variables.
+set PIA_ARG_METHOD=
+
+rem The path to the named pipe where the tunnel configuration is sent.
+set PIA_ARG_IPC=
+
+rem The --dns argument specifies the DNS server addresses applied to the TAP
+rem adapter when using the "static" method.  If this is empty, existing DNS
+rem addresses are still deleted, but no DNS addresses are applied (for Use
+rem Existing DNS).  This is ignored for other methods.
+set PIA_ARG_DNS=
+
 :pia_arg_loop
 if not "%1"=="" (
-  if "%1"=="--dns" (
-    set PIA_ARG_DNS=%2
-    shift
-    shift
-  ) else if "%1"=="--log" (
+  if "%1"=="--log" (
     call :init_log %2
+    shift
+    shift
+  ) else if "%1"=="--method" (
+    set PIA_ARG_METHOD=%2
+    shift
+    shift
+  ) else if "%1"=="--ipc" (
+    set PIA_ARG_IPC=%2
+    shift
+    shift
+  ) else if "%1"=="--dns" (
+    set PIA_ARG_DNS=%2
     shift
     shift
   ) else if "%1"=="--" (
@@ -56,45 +76,53 @@ rem right now (we use the dev environment variable instead of the tun_dev
 rem parameter)
 rem tun_dev tun_mtu link_mtu ifconfig_local_ip ifconfig_remote_ip [init|restart]
 
-if "%script_type%"=="up" (
-  rem Delete all DNS servers that might already exist.
-  rem Customer logs show that it is possible for DNS servers to be left around
-  rem on the TAP adapter somehow.  This should be benign normally since they
-  rem wouldn't be used while the adapter is "disconnected", but they need to be
-  rem removed now that we're reconnecting.
-  echo Delete all DNS servers from dev %dev_idx% >> "%LOG%"
-  netsh interface ipv4 delete dnsservers %dev_idx% address=all >> "%LOG%"
-  echo result: %errorlevel% >> "%LOG%"
-
-  rem Add DNS servers
-  set /A DNS_IDX = 1
-  :add_dns_split_loop
-  for /f "tokens=1* delims=:" %%G IN ("%PIA_ARG_DNS%") DO (
-    echo Add dev %dev_idx% DNS !DNS_IDX!: %%G >> "%LOG%"
-    netsh interface ipv4 add dnsservers %dev_idx% address=%%G index=!DNS_IDX! validate=no >> "%LOG%"
+rem For the "static" configuration method, apply DNS
+if "%PIA_ARG_METHOD%"=="static" (
+  if "%script_type%"=="up" (
+    rem Delete all DNS servers that might already exist.
+    rem Customer logs show that it is possible for DNS servers to be left around
+    rem on the TAP adapter somehow.  This should be benign normally since they
+    rem wouldn't be used while the adapter is "disconnected", but they need to be
+    rem removed now that we're reconnecting.
+    echo Delete all DNS servers from dev %dev_idx% >> "%LOG%"
+    netsh interface ipv4 delete dnsservers %dev_idx% address=all >> "%LOG%"
     echo result: %errorlevel% >> "%LOG%"
-    rem If this fails, abort
-    if %errorlevel% neq 0 exit /b 1
 
-    set /A DNS_IDX += 1
-    set PIA_ARG_DNS=%%H
-    if not "%PIA_ARG_DNS%"=="" goto add_dns_split_loop
-  )
-) else if "%script_type%"=="down" (
-  rem Delete DNS servers
-  :del_dns_split_loop
-  for /f "tokens=1* delims=:" %%G IN ("%PIA_ARG_DNS%") DO (
-    echo Delete dev %dev_idx% DNS: %%G >> "%LOG%"
-    netsh interface ipv4 delete dnsservers %dev_idx% address=%%G validate=no >> "%LOG%"
-    echo result: %errorlevel% >> "%LOG%"
-    rem Ignore failure to delete DNS servers
+    rem Add DNS servers
+    set /A DNS_IDX = 1
+    :add_dns_split_loop
+    for /f "tokens=1* delims=:" %%G IN ("%PIA_ARG_DNS%") DO (
+      echo Add dev %dev_idx% DNS !DNS_IDX!: %%G >> "%LOG%"
+      netsh interface ipv4 add dnsservers %dev_idx% address=%%G index=!DNS_IDX! validate=no >> "%LOG%"
+      echo result: %errorlevel% >> "%LOG%"
+      rem If this fails, abort
+      if %errorlevel% neq 0 exit /b 1
 
-    set PIA_ARG_DNS=%%H
-    if not "%PIA_ARG_DNS%"=="" goto del_dns_split_loop
+      set /A DNS_IDX += 1
+      set PIA_ARG_DNS=%%H
+      if not "%PIA_ARG_DNS%"=="" goto add_dns_split_loop
+    )
+  ) else if "%script_type%"=="down" (
+    rem Delete DNS servers
+    :del_dns_split_loop
+    for /f "tokens=1* delims=:" %%G IN ("%PIA_ARG_DNS%") DO (
+      echo Delete dev %dev_idx% DNS: %%G >> "%LOG%"
+      netsh interface ipv4 delete dnsservers %dev_idx% address=%%G validate=no >> "%LOG%"
+      echo result: %errorlevel% >> "%LOG%"
+      rem Ignore failure to delete DNS servers
+
+      set PIA_ARG_DNS=%%H
+      if not "%PIA_ARG_DNS%"=="" goto del_dns_split_loop
+    )
   )
+  rem Otherwise, some other script action, don't care about any other action
 )
 
-rem Otherwise, some other script action, don't care about any other action
+if not "%PIA_ARG_IPC%"=="" (
+  rem Send tunnel device configuration to the IPC pipe (also echo to log)
+  echo Using device:%dev_idx% local_address:%ifconfig_local% remote_address:%route_vpn_gateway% >> "%LOG%"
+  echo Using device:%dev_idx% local_address:%ifconfig_local% remote_address:%route_vpn_gateway% > "%PIA_ARG_IPC%"
+)
 
 echo Completed >> "%LOG%"
 rem Exit successfully (%errorlevel% could be nonzero if we were deleting DNS

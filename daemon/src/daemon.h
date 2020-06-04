@@ -165,8 +165,8 @@ class RouteManager
 {
     CLASS_LOGGING_CATEGORY("RouteManager")
 public:
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) = 0;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) = 0;
+    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
+    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
     virtual ~RouteManager() {}
 };
 
@@ -273,11 +273,7 @@ public:
 
 protected slots:
   void handleTimeout();
-  void handleNewConnectionState(VPNConnection::State state,
-       const ConnectionConfig &connectingConfig,
-       const ConnectionConfig &connectedConfig,
-       const nullable_t<Transport> &chosenTransport,
-       const nullable_t<Transport> &actualTransport);
+  void handleNewConnectionState(VPNConnection::State state);
 };
 
 // The main application class for the daemon, housing the main thread
@@ -405,23 +401,55 @@ private:
     void vpnStateChanged(VPNConnection::State state,
                          const ConnectionConfig &connectingConfig,
                          const ConnectionConfig &connectedConfig,
+                         const nullable_t<Server> &connectedServer,
                          const nullable_t<Transport> &chosenTransport,
                          const nullable_t<Transport> &actualTransport);
     void vpnError(const Error& error);
     void vpnByteCountsChanged();
-    void newLatencyMeasurements(const LatencyTracker::Latencies &measurements);
+    void newLatencyMeasurements(ConnectionConfig::Infrastructure infrastructure,
+                                const LatencyTracker::Latencies &measurements);
     void portForwardUpdated(int port);
 
-    // Build the locations list, grouped locations, and all location preferences
-    // from the legacy locations lists.  serversObj and shadowsocksObj can be
-    // the cached objects from DaemonData, or new data retrieved (which should
-    // then be cached if successfully loaded).  Latencies from DaemonData are
-    // used.
+    // Store new locations built from one of the regions lists and update
+    // dependent properties - used by rebuild*Location().
+    void applyBuiltLocations(const LocationsById &newLocations);
+
+    // Build the locations list from the legacy regions and Shadowsocks lists.
+    // Returns true if the resulting location list is not empty (indicating that
+    // the data is valid and should be cached).
+    //
+    // If the legacy infrastructure is selected, the new locations are applied,
+    // and all dependent properties are rebuilt.  (If it is not active, the new
+    // locations list is just discarded, it's just used to make sure the new
+    // data are valid before we cache it.)
+    //
+    // serversObj and shadowsocksObj can be the cached objects from DaemonData,
+    // or new data retrieved (which should then be cached if successfully
+    // loaded).  Latencies from DaemonData are used.
     bool rebuildLegacyLocations(const QJsonObject &serversObj,
                                 const QJsonObject &shadowsocksObj);
+    // Build the locations list from the modern regions list.  Like
+    // rebuildLegacyLocations(), returns true if the new locations list is not
+    // empty, meaning the new data can be cached.
+    //
+    // If the modern infrastructure is selected, the new locations are applied,
+    // like rebuildLegacyLocations().
+    //
+    // regionsObj can be the cached object from DaemonData or new data retrieved
+    // (which should then be cached if successful).  Latencies from DaemonData
+    // are used.
+    bool rebuildModernLocations(const QJsonObject &regionsObj,
+                                const QJsonObject &legacyShadowsocksObj);
+
+    // Rebuild either the legacy or modern locations from the cached data,
+    // depending on the infrastructure setting.  Used when latencies are updated
+    // or when initially building the regions list.
+    void rebuildActiveLocations();
+
     // Handle region list results from JsonRefresher
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
+    void modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc);
     void networksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
@@ -476,18 +504,21 @@ protected:
     Environment _environment;
     ApiClient _apiClient;
 
-    LatencyTracker _latencyTracker;
-    PortForwarder *_portForwarder;
-    JsonRefresher _regionRefresher, _shadowsocksRefresher;
-    SocksServerThread _socksServer;
-    UpdateDownloader _updateDownloader;
-    SnoozeTimer _snoozeTimer;
-    std::unique_ptr<NetworkMonitor> _pNetworkMonitor;
-
     DaemonData _data;
     DaemonAccount _account;
     DaemonSettings _settings;
     DaemonState _state;
+
+    // Latencies are measured for both infrastructures regardless of which one
+    // is active, so we are able to switch infrastructures at any time.
+    LatencyTracker _legacyLatencyTracker;
+    LatencyTracker _modernLatencyTracker;
+    PortForwarder _portForwarder;
+    JsonRefresher _regionRefresher, _shadowsocksRefresher, _modernRegionRefresher;
+    SocksServerThread _socksServer;
+    UpdateDownloader _updateDownloader;
+    SnoozeTimer _snoozeTimer;
+    std::unique_ptr<NetworkMonitor> _pNetworkMonitor;
 
     QSet<QString> _dataChanges;
     QSet<QString> _accountChanges;

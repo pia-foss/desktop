@@ -174,6 +174,70 @@ Page {
     }
 
     StaticText {
+      text: uiTr("Network")
+      color: Theme.settings.inputLabelColor
+      font.pixelSize: Theme.settings.inputLabelTextPx
+      font.bold: true
+    }
+
+    // Radio buttons size themselves really tall for whatever reason, cut off
+    // some of that extra height
+    Item {
+      id: networkInputLayout
+
+      Layout.fillWidth: true
+      Layout.preferredHeight: networkInput.height - 12
+
+      ThemedRadioGroup {
+        id: networkInput
+        anchors.top: parent.top
+        anchors.topMargin: -3
+        anchors.left: parent.left
+
+        // Internally this is a three-valued setting to distinguish users that
+        // have never changed it - we intend to eventually change the default
+        // value, and this way we won't affect any users that have changed the
+        // setting and changed it back.
+        function effectiveValue(currentValue) {
+          if(currentValue === "default")
+            return "current"
+          return currentValue
+        }
+
+        readonly property DaemonSetting daemonInfra: DaemonSetting {
+          name: "infrastructure"
+          onCurrentValueChanged: networkInput.setSelection(networkInput.effectiveValue(currentValue))
+        }
+
+        verticalOrientation: false
+        columnSpacing: 10
+        model: [{
+            "name": uiTr("Current"),
+            "value": "current"
+          }, {
+            "name": uiTr("Next Generation"),
+            "value": "modern",
+            "preview": true
+          }]
+        onSelected: {
+          daemonInfra.currentValue = value;
+        }
+        Component.onCompleted: setSelection(effectiveValue(daemonInfra.currentValue))
+      }
+    }
+
+    CheckboxInput {
+      label: uiTr("Include Geo-Located Regions")
+      setting: DaemonSetting { name: 'includeGeoOnly' }
+    }
+
+    // Spacer between groups
+    Item {
+      width: 1
+      height: 4
+    }
+
+    StaticText {
       text: uiTr("Support")
       color: Theme.settings.inputLabelColor
       font.pixelSize: Theme.settings.inputLabelTextPx

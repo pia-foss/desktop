@@ -79,6 +79,11 @@ public:
     // The user's recently-used regions (set automatically by the client).
     // This is stored in order of use.  (Most recent is first.)
     JsonField(QStringList, recentLocations, {})
+    // The collapsed country groups in the VPN regions list (groups are expanded
+    // by default)
+    JsonField(QStringList, vpnCollapsedCountries, {})
+    // The collapsed country groups in the Shadowsocks regions list
+    JsonField(QStringList, shadowsocksCollapsedCountries, {})
 
     JsonField(QVector<QString>, primaryModules, QVector<QString>::fromList({QStringLiteral("region"), QStringLiteral("ip")}))
     JsonField(QVector<QString>, secondaryModules, QVector<QString>::fromList({QStringLiteral("quickconnect"), QStringLiteral("performance"), QStringLiteral("usage"), QStringLiteral("settings"), QStringLiteral("account")}))

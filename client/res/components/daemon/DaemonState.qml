@@ -18,6 +18,7 @@
 
 import QtQuick 2.0
 import PIA.NativeDaemon 1.0
+import PIA.NativeHelpers 1.0
 
 QtObject {
   readonly property bool vpnEnabled: NativeDaemon.state.vpnEnabled
@@ -35,6 +36,7 @@ QtObject {
   readonly property var shadowsocksLocations: NativeDaemon.state.shadowsocksLocations
   readonly property var connectingConfig: NativeDaemon.state.connectingConfig
   readonly property var connectedConfig: NativeDaemon.state.connectedConfig
+  readonly property var connectedServer: NativeDaemon.state.connectedServer
   readonly property var availableLocations: NativeDaemon.state.availableLocations
   readonly property var groupedLocations: NativeDaemon.state.groupedLocations
   readonly property var openvpnUdpPortChoices: NativeDaemon.state.openvpnUdpPortChoices
@@ -183,6 +185,10 @@ QtObject {
   // Daemon.getCountryName() - just fills in the correct context for uiTranslate().
   function translateName(name) {
     return uiTranslate("DaemonData", name)
+  }
+
+  function getBestLocationForCountry(countryCode) {
+    return NativeHelpers.getBestLocationForCountry(NativeDaemon.state, countryCode)
   }
 
   // Check location metadata and log diagnostics for devs - such as new

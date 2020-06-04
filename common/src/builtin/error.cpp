@@ -55,9 +55,9 @@ QString Error::errorString() const
 {
     switch (_code)
     {
-    case Unknown: return [](auto&& a, auto&& b) { return b.isEmpty() ? a : QStringLiteral("%1: %2").arg(a, b); }(tr("Unknown error"), _params.value(0));
-    case System: return [](auto&& code, auto&& desc, auto&& op) { return op.isEmpty() ? tr("System error %1: %2").arg(code, desc) : tr("System error %1 inside %3: %2").arg(code, desc, op); }(_params.value(0), _params.value(1), _params.value(2));
-    default: return tr("Unknown error code %1: %2").arg(_code).arg(qEnumToString(_code));
+    case Unknown: return [](auto&& a, auto&& b) { return b.isEmpty() ? a : QStringLiteral("%1: %2").arg(a, b); }("Unknown error", _params.value(0));
+    case System: return [](auto&& code, auto&& desc, auto&& op) { return op.isEmpty() ? QStringLiteral("System error %1: %2").arg(code, desc) : QStringLiteral("System error %1 inside %3: %2").arg(code, desc, op); }(_params.value(0), _params.value(1), _params.value(2));
+    default: return QStringLiteral("Unknown error code %1: %2").arg(_code).arg(qEnumToString(_code));
     }
 }
 

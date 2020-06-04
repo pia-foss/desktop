@@ -93,39 +93,11 @@ QtObject {
     return ""
   }
 
-  // Find the best location for a country - taking into account port forwarding
-  // and also whether a country is 'safe' to connect to
-  function bestLocationForCountry(country) {
-    var countries = Daemon.state.groupedLocations
-    for(var i=0; i<countries.length; ++i) {
-      if(countries[i].locations.length <= 0)
-        continue
-
-      if(countries[i].locations[0].country == country) {
-        var countryLocations = countries[i].locations
-        var result = null
-
-        if(Daemon.settings.portForward) {
-          // try most specific filter first (portForward support + safe, i.e respects auto_regions)
-          result = countryLocations.filter(function(loc) { return loc.portForward && loc.autoSafe })[0]
-          if (result) { return result.id }
-        }
-
-        // if cannot find entries, loosen filter slightly (we can't find a region that supports port forwarding, so skip it)
-        result = countryLocations.filter(function(loc) { return loc.autoSafe })[0]
-        if(result) { return result.id }
-
-        // failing that, fall back to just the region in this country with the lowest ping
-        return countryLocations[0].id
-      }
-    }
-  }
-
   // convert an auto/COUNTRY to a real location (finding the best region for that country)
   function realLocation(location) {
     if(location.startsWith("auto/")) {
       var country = countryFromAutoCountryLocation(location)
-      return bestLocationForCountry(country)
+      return Daemon.state.getBestLocationForCountry(country)
     }
     else {
       return location

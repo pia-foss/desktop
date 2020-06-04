@@ -66,15 +66,7 @@ std::chrono::microseconds WinUnbiasedDeadline::remaining() const
     return std::chrono::microseconds{(_expireTime - now) / 10};
 }
 
-class WinRouteManager : public RouteManager
-{
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) override;
-private:
-    void createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName);
-};
-
-void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
     InitializeIpForwardEntry(&route);
     NET_LUID luid{};
@@ -88,31 +80,34 @@ void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString 
 
     // Destination subnet
     route.DestinationPrefix.Prefix.si_family = AF_INET;
-    route.DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr  = htonl(subnetIp.toIPv4Address());
+    route.DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(subnetIp.toIPv4Address());
     route.DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
     route.DestinationPrefix.PrefixLength = subnetPrefixLength;
 
     // Router address (next hop)
     route.NextHop.Ipv4.sin_addr.s_addr = htonl(QHostAddress{gatewayIp}.toIPv4Address());
     route.NextHop.Ipv4.sin_family = AF_INET;
+
+    route.Metric = metric;
 }
 
-void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
     MIB_IPFORWARD_ROW2 route{};
-    createRouteEntry(route, subnet, gatewayIp, interfaceName);
+    createRouteEntry(route, subnet, gatewayIp, interfaceName, metric);
 
-    qInfo() << "Adding bypass route for" << subnet;
+    qInfo() << "Adding route for" << subnet << "via" << interfaceName
+        << "with metric:" << metric;
     // Add the routing entry
     if(CreateIpForwardEntry2(&route) != NO_ERROR)
         qWarning() << "Could not create route for" << subnet;
 }
 
-void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName)
+void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
 {
     MIB_IPFORWARD_ROW2 route{};
-    createRouteEntry(route, subnet, gatewayIp, interfaceName);
-    qInfo() << "Removing bypass route for" << subnet;
+    createRouteEntry(route, subnet, gatewayIp, interfaceName, 0);
+    qInfo() << "Removing route for" << subnet << "via" << interfaceName;
 
     // Delete the routing entry
     if(DeleteIpForwardEntry2(&route) != NO_ERROR)
@@ -724,9 +719,11 @@ void WinDaemon::reapplySplitTunnelFirewall(const QString &newSplitTunnelIp,
     {
         qInfo() << "Split tunnel rules have not changed - excluded:"
             << excludedApps.size() << "- VPN-only:" << vpnOnlyApps.size()
-            << "split tunnel IP known:" << !_lastSplitTunnelIp.isEmpty()
-            << "tunnel IP known:" << !_lastTunnelIp.isEmpty()
-            << "and have connected:" << _lastConnected;
+            << "- split tunnel IP known:" << !_lastSplitTunnelIp.isEmpty()
+            << _lastSplitTunnelIp
+            << "- tunnel IP known:" << !_lastTunnelIp.isEmpty()
+            << _lastTunnelIp
+            << "- and have connected:" << _lastConnected;
         return;
     }
 
@@ -765,8 +762,8 @@ void WinDaemon::reapplySplitTunnelFirewall(const QString &newSplitTunnelIp,
     _lastTunnelIp = newTunnelIp;
     _lastConnected = hasConnected;
     qInfo() << "Creating split tunnel rules with state - split tunnel IP known:"
-        << !_lastSplitTunnelIp.isEmpty() << "- tunnel IP known:"
-        << !_lastTunnelIp.isEmpty() << "- have connected:" << _lastConnected;
+        << !_lastSplitTunnelIp.isEmpty() << _lastSplitTunnelIp << "- tunnel IP known:"
+        << !_lastTunnelIp.isEmpty() << _lastTunnelIp << "- have connected:" << _lastConnected;
 
     // We can only create exclude rules when the appropriate bind IP address is known
     bool createExcludedRules = !_lastSplitTunnelIp.isEmpty() && !newExcludedApps.empty();
@@ -932,9 +929,9 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     
     // DNS
     file.writeCommand("Resolve-DnsName (www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com"));
-    file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(specialPiaAddress));
+    file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(piaLegacyDnsPrimary));
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringLiteral("www.privateinternetaccess.com /w 1000 /n 1"));
-    file.writeCommand("ping (ping 209.222.18.222)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(specialPiaAddress));
+    file.writeCommand("ping (ping 209.222.18.222)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(piaLegacyDnsPrimary));
 }
 
 void WinDaemon::checkWintunInstallation()

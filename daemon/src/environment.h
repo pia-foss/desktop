@@ -98,6 +98,8 @@ public:
     // Base URIs for the regions list.  (Default is the same as the PIA API, but
     // this is separated so it can be overridden separately.)
     const std::shared_ptr<ApiBase> &getRegionsListApi() {Q_ASSERT(_pRegionsListApi); return _pRegionsListApi;}
+    // Base URIs for the modern regions list.
+    const std::shared_ptr<ApiBase> &getModernRegionsListApi() {Q_ASSERT(_pModernRegionsListApi); return _pModernRegionsListApi;}
     // Base URI for API requests that fetch the user's IP address.
     // This excludes API proxies because the IP address isn't fetched correctly when
     // a proxy is used.
@@ -121,8 +123,8 @@ private:
     QByteArray _regionsListPublicKey;
     // API bases - these are always valid.  They're in shared_ptrs so callers
     // using them can keep the object alive even if we replace them.
-    std::shared_ptr<ApiBase> _pPiaApi, _pRegionsListApi, _pIpAddrApi,
-        _pUpdateApi, _pPortForwardApi;
+    std::shared_ptr<ApiBase> _pPiaApi, _pRegionsListApi, _pModernRegionsListApi,
+        _pIpAddrApi, _pUpdateApi, _pPortForwardApi;
 };
 
 #endif

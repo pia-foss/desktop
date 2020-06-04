@@ -109,6 +109,9 @@ public:
     JsonField(QString, shadowsocksCipher, {})
 
 public:
+    // Check whether this server has any service known to Desktop other than
+    // Latency - used to ignore servers with no known services.
+    bool hasNonLatencyService() const;
     // Check whether this server has a given service.
     bool hasService(Service service) const;
     // Check whether this server offers a specific port for the given service.
@@ -143,6 +146,7 @@ public:
         name(other.name());
         country(other.country());
         portForward(other.portForward());
+        geoOnly(other.geoOnly());
         autoSafe(other.autoSafe());
         servers(other.servers());
         return *this;
@@ -152,7 +156,8 @@ public:
     {
         return id() == other.id() && name() == other.name() &&
             country() == other.country() && portForward() == other.portForward() &&
-            autoSafe() == other.autoSafe() && servers() == other.servers();
+            geoOnly() == other.geoOnly() && autoSafe() == other.autoSafe() &&
+            servers() == other.servers();
     }
     bool operator!=(const Location &other) const {return !(*this == other);}
 
@@ -162,7 +167,7 @@ public:
     // this in the UI (except possibly as a last resort).
     JsonField(QString, id, {})
     // Region name.  Desktop ships region names and translations (see
-    // DaemonData.qml), but we still check the advertised name to make sure our
+    // DaemonSettings.qml), but we still check the advertised name to make sure our
     // translation is still accurate.
     JsonField(QString, name, {})
     // Country code for this region - used to group regions and to display
@@ -170,6 +175,8 @@ public:
     JsonField(QString, country, {})
     // Whether this region has port forwarding
     JsonField(bool, portForward, false)
+    // Whether this location is provided by geolocation only.
+    JsonField(bool, geoOnly, false)
     // Whether this region should be considered for automatic selection.  Ops
     // can turn this off to reduce load on a particular region while leaving it
     // available for manual selection, etc.
@@ -214,6 +221,17 @@ public:
     // Check if a given service is available in this location (whether any
     // server has the service)
     bool hasService(Service service) const;
+
+    // Get any random server in the location suitable for measuring latency with
+    // ICMP pings (for the modern infrastructure).
+    // This picks any random server with any VPN service (servers with only
+    // Shadowsocks or UdpLatency are ignored).
+    // Only servers with a VPN service are used because the legacy Shadowsocks
+    // servers are also included in the modern environment (Shadowsocks isn't
+    // yet available in modern), but they may not be representative of the
+    // latency to the VPN servers in the modern environment, which is much more
+    // important.
+    const Server *randomIcmpLatencyServer() const;
 
     // Get a random server that has a given service (nullptr if there are none)
     const Server *randomServerForService(Service service) const;
@@ -414,7 +432,13 @@ public:
     // Latency measurements (by location ID).  These are restored when the
     // daemon is started, but any new measurements will replace the cached
     // values.
+    //
+    // Measurements are maintained for both infrastructures, so we can switch at
+    // any time.  'latencies' are the measurements for the legacy infrastructure
+    // (name was maintained to preserve measurements from prior versions of
+    // Desktop).
     JsonField(LatencyMap, latencies, {})
+    JsonField(LatencyMap, modernLatencies, {})
 
     // Region list content - for each region list that's fetched.  This is the
     // original JSON from the regions list, not the digested form stored in
@@ -426,6 +450,9 @@ public:
     // DaemonState.
     JsonField(QJsonObject, cachedLegacyRegionsList, {})
     JsonField(QJsonObject, cachedLegacyShadowsocksList, {})
+
+    // Cached region list content for the modern infrastructure.
+    JsonField(QJsonObject, cachedModernRegionsList, {})
 
     // Persistent caches of the version advertised by update channel(s).  This
     // is mainly provided to provide consistent UX if the client/daemon are
@@ -491,12 +518,18 @@ public:
     JsonField(QString, openvpnUsername, {})
     JsonField(QString, openvpnPassword, {})
 
-    // ClientId is a random identifier used for port forward requests (and
-    // possibly other things in the future).
+    // ClientId is a random identifier used for legacy port forward requests.
+    //
     // Although it's not directly tied to the user's account, it does identify
     // the computer, and it makes sense to wipe it with the account credentials.
     // This is a 256-bit number encoded in base36.
     JsonField(QString, clientId, {})
+
+    // Port forwarding token and signature used for port forward requests in the
+    // modern infrastructure.  Collectively, these are the "port forwarding
+    // token".
+    JsonField(QString, portForwardPayload, {})
+    JsonField(QString, portForwardSignature, {})
 };
 
 class COMMON_EXPORT SplitTunnelSubnetRule : public NativeJsonObject
@@ -623,6 +656,17 @@ public:
     // values expressed in DaemonState.  (The client should only use this to set
     // a new choice.)
     JsonField(QString, location, QStringLiteral("auto"))
+    // Which infrastructure is being used.  This determines which regions are
+    // used in availableLocations, groupedLocations, and the service locations.
+    //
+    // Although this is displayed with two choices in the UI, it is internally a
+    // three-valued setting so we can later change the "default" behavior
+    // without affecting users that have ever changed the setting, even if they
+    // have changed it back.  The intent is to eventually make the modern infra
+    // the default, then eventually remove the legacy infra.
+    JsonField(QString, infrastructure, QStringLiteral("default"), { "default", "current", "modern" })
+    // Whether to include geo-only locations.
+    JsonField(bool, includeGeoOnly, true)
     // The method used to connect to the VPN
     JsonField(QString, method, QStringLiteral("openvpn"), { "openvpn", "wireguard" })
     JsonField(QString, protocol, QStringLiteral("udp"), { "udp", "tcp" })
@@ -872,6 +916,14 @@ public:
     // Whether the VPN method was forced to OpenVPN due to lack of an auth token
     JsonField(bool, methodForcedByAuth, false)
 
+    // Which infrastructure is in use for this connection.  This affects the
+    // behavior for port forwarding, MACE, etc., which are implemented
+    // differently on the new infrastructure.
+    //
+    // Note that "default" is not a choice here (unlike DaemonSettings::infrastructure),
+    // this is a concrete value.
+    JsonField(QString, infrastructure, QStringLiteral("current"), {"current", "modern"})
+
     // DNS type used for this connection
     JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "existing", "custom"})
 
@@ -1023,6 +1075,10 @@ public:
     // states and represents the last successful connection.
     JsonObjectField(ConnectionInfo, connectingConfig, {})
     JsonObjectField(ConnectionInfo, connectedConfig, {})
+
+    // The specific server that we have connected to, when connected (only
+    // provided in the Connected state)
+    JsonField(Optional<Server>, connectedServer, {})
 
     // Available regions, mapped by region ID.  These are from either the
     // current or new regions list.
@@ -1199,10 +1255,18 @@ public:
 
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
+// The 127/8 loopback address used for Handshake DNS.
 extern COMMON_EXPORT const QString hnsdLocalAddress;
 
-// Used for MACE, PF, DNS, etc
-extern COMMON_EXPORT const QString specialPiaAddress;
+// The IP used for PIA DNS and MACE activation in the legacy infrastructure.
+extern COMMON_EXPORT const QString piaLegacyDnsPrimary;
+// The IP used for the secondary PIA DNS address in the legacy infrastructure.
+extern COMMON_EXPORT const QString piaLegacyDnsSecondary;
+
+// The IP used for PIA DNS in the modern infrastructure - on-VPN, and with MACE.
+extern COMMON_EXPORT const QString piaModernDnsVpnMace;
+// The IP used for PIA DNS in the modern infrastructure - on-VPN (no MACE).
+extern COMMON_EXPORT const QString piaModernDnsVpn;
 
 #endif
 

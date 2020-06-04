@@ -213,17 +213,18 @@ void MacNetworks::readConnections()
                 addressesIpv6.push_back(addr);
         }
 
-        // On some versions of macOS Catalina the "Router" field is not present for network services.
+        // On some versions of macOS Catalina the "Router" field is not present in the service data
         // This is very likely a bug in Catalina, nonetheless we work around the absense of this field
-        // by falling back to the "Global" IPv4 state which appears to always have the Router field set.
+        // by falling back to the Global IP state which appears to always have the Router field set.
         // If this bug is fixed in the future we can remove all the code below and just use the ipv{4,6}ServiceRouterIp
         // directly when setting the ipv{4,6}RouterAddr.
         // Note: we only care about setting the router for the Default network.
-        auto getRouterIp = [&](const QString &serviceRouterIp, const QString &globalRouterIp, bool isDefault) {
+        auto getRouterIp = [&](const QString &serviceRouterIp, const QString &ipVersion, bool isDefault) {
             if(serviceRouterIp.isEmpty() && isDefault)
             {
-                qWarning() << "Router IP not found in service data, falling back to Global Router IP:" << globalRouterIp;
-                return globalRouterIp;
+                QString globalRouterIp = getGlobalRouterIp(ipVersion);
+                qWarning() << QStringLiteral("Router %1 address not found in service data, falling back to Global Router address: %2").arg(ipVersion, globalRouterIp);
+                return globalRouterIp;;
             }
             else
             {
@@ -231,8 +232,8 @@ void MacNetworks::readConnections()
             }
         };
 
-        QString ipv4RouterIp = getRouterIp(ipv4ServiceRouterIp.toQString(), getGlobalRouterIp("IPv4"), ipConfig._defIpv4);
-        QString ipv6RouterIp = getRouterIp(ipv6ServiceRouterIp.toQString(), getGlobalRouterIp("IPv6"), ipConfig._defIpv6);
+        QString ipv4RouterIp = getRouterIp(ipv4ServiceRouterIp.toQString(), "IPv4", ipConfig._defIpv4);
+        QString ipv6RouterIp = getRouterIp(ipv6ServiceRouterIp.toQString(), "IPv6", ipConfig._defIpv6);
 
         Ipv4Address ipv4RouterAddr{ipv4RouterIp};
         Ipv6Address ipv6RouterAddr{ipv6RouterIp};

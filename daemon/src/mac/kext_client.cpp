@@ -187,7 +187,7 @@ void KextClient::showError(QString funcName)
 }
 
 void KextClient::initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
-                                    QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
+                                    QString tunnelDeviceLocalAddress)
 {
     qInfo() << "Attempting to connect to kext";
     if(_state == State::Connected)
@@ -199,7 +199,7 @@ void KextClient::initiateConnection(const FirewallParams &params, QString tunnel
 
     qInfo() << "sizeof(ProcQuery) is: " << sizeof(ProcQuery);
 
-    ctl_info ctl_info = {};
+    ctl_info ctl_info{};
 
     int sock = ::socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
     if(sock < 0)
@@ -217,6 +217,8 @@ void KextClient::initiateConnection(const FirewallParams &params, QString tunnel
 
     strncpy(ctl_info.ctl_name, "com.privateinternetaccess.PiaKext", sizeof(ctl_info.ctl_name));
 
+    // Translate from a Kernel control name to a Kernel control id
+    // The id is used to identify the Kext and setup the control socket
     if(::ioctl(sock, CTLIOCGINFO, &ctl_info) == -1)
     {
         showError("::ioctl");
@@ -244,8 +246,7 @@ void KextClient::initiateConnection(const FirewallParams &params, QString tunnel
     _state = State::Connected;
 
     updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
-                      tunnelDeviceRemoteAddress, params.excludeApps,
-                      params.vpnOnlyApps);
+                      params.excludeApps, params.vpnOnlyApps);
 
     _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
     connect(_readNotifier, &QSocketNotifier::activated, this, &KextClient::readFromSocket);
@@ -316,19 +317,27 @@ void KextClient::removeCurrentBoundRoute(const QString &ipAddress, const QString
     }
 
     qInfo() << "Removing bound route";
-    QString routeCmd = QStringLiteral("route delete 0.0.0.0 %1 -ifscope %2")
-        .arg(ipAddress, interfaceName);
-    qInfo() << "Executing" << routeCmd;
-    _executor.bash(routeCmd);
+
+    if(ipAddress.isEmpty())
+        _executor.bash(QStringLiteral("route delete 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
+    else
+        _executor.bash(QStringLiteral("route delete 0.0.0.0 %1 -ifscope %2").arg(ipAddress, interfaceName));
 }
 
 void KextClient::createBoundRoute(const QString &ipAddress, const QString &interfaceName)
 {
     qInfo() << "Adding new bound route";
-    QString routeCmd = QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2")
-        .arg(ipAddress, interfaceName);
-    qInfo() << "Executing" << routeCmd;
-    _executor.bash(routeCmd);
+    if(ipAddress.isEmpty())
+    {
+        // Create direct interface route  - this is fine for tunnel devices since they're point to point
+        // so there will only be one acceptable "next hop"
+        _executor.bash(QStringLiteral("route add -net 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
+    }
+    else
+    {
+        // Create a route with an explicit hop
+        _executor.bash(QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2").arg(ipAddress, interfaceName));
+    }
 }
 
 void KextClient::updateFirewall(QString ipAddress, bool hasConnected)
@@ -344,7 +353,7 @@ void KextClient::updateFirewall(QString ipAddress, bool hasConnected)
     {
         qInfo() << "Updating the firewall rule for new ip" << ipAddress;
         PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName,
-            true, { QStringLiteral("pass out from %1 no state").arg(ipAddress)});
+            true, { QStringLiteral("pass out from %1 no state").arg(ipAddress) });
     }
 }
 
@@ -385,7 +394,7 @@ void KextClient::updateKextFirewall(const FirewallParams &params, bool isConnect
 }
 
 void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDeviceName,
-                               QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress)
+                               QString tunnelDeviceLocalAddress)
 {
     qInfo() << "Updating Network";
 
@@ -403,20 +412,18 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
     // bound sockets for excluded apps will route correctly.
     // Don't create this when we're not connected; the network info may not be
     // up to date, and it would create a routing conflict.
-    if(params.netScan.ipv4Valid())
+    if(params.hasConnected)
     {
         createBoundRoute(params.netScan.gatewayIp(), params.netScan.interfaceName());
 
         // If we were ignoring excluded apps before (since we didn't have this
         // info), enumerate them now to permit through the firewall
-        if(!_previousNetScan.ipv4Valid())
+        if(!_hasConnected)
             sendExistingPids(_excludedApps);
     }
 
     if(_previousBypassIpv4Subnets != params.bypassIpv4Subnets)
-    {
         sendBypassIpv4Subnets(params.bypassIpv4Subnets);
-    }
 
     // If the VPN does not have the default route, create a bound route for the
     // VPN interface, so sockets explicitly bound to that interface will work
@@ -427,15 +434,15 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
         // We don't know the tunnel interface info right away; these are found
         // later.  (Split tunnel is started immediately to avoid blips for apps
         // that bypass the VPN.)
-        if(tunnelDeviceName.isEmpty() || tunnelDeviceRemoteAddress.isEmpty())
+        if(tunnelDeviceName.isEmpty())
         {
             qInfo() << "Can't create bound route for VPN network yet - interface:"
-                << tunnelDeviceName << "- remote:" << tunnelDeviceRemoteAddress;
+                << tunnelDeviceName;
         }
         else
         {
             // We don't need to remove the previous bound route as if the IP changes that means the interface went down, which will destroy that route
-            createBoundRoute(tunnelDeviceRemoteAddress, tunnelDeviceName);
+            createBoundRoute({}, tunnelDeviceName);
         }
     }
 
@@ -513,13 +520,13 @@ void KextClient::shutdownConnection()
 }
 
 void KextClient::updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                                   QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                                   QString tunnelDeviceLocalAddress,
                                    QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
 {
     // Update apps first - updateNetwork() will enumerate the updated bypass
     // apps if we start tracking bypass apps
     updateApps(params.excludeApps, params.vpnOnlyApps);
-    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress, tunnelDeviceRemoteAddress);
+    updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress);
 }
 
 
@@ -685,7 +692,7 @@ void KextClient::verifyApp(const ProcQuery &procQuery, ProcQuery &procResponse)
     {
         // Ignore excluded apps when not connected; we don't know the current IP
         // address (but they'll route to the physical interface anyway).
-        if(_previousNetScan.ipv4Valid())
+        if(_hasConnected)
         {
             procResponse.accept = true;
             procResponse.rule_type = RuleType::BypassVPN;

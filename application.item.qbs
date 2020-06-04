@@ -149,7 +149,7 @@ CppApplication {
   // one block's condition should hold true on any target platform
   Properties {
     condition: qbs.toolchain.contains('msvc')
-    cpp.cxxFlags: outer.concat([ "/Zc:rvalueCast", "/utf-8", "/we4834" ]).concat(qbs.buildVariant == "release" ? [ "/GL" ] : [])
+    cpp.cxxFlags: outer.concat([ "/Zc:rvalueCast", "/utf-8", "/we4834" ]).concat(qbs.buildVariant == "release" ? [ "/GL" ] : [ "/bigobj" ])
     cpp.linkerFlags: outer.concat([ "/INCREMENTAL:NO", "/MANIFEST:EMBED", "/MANIFESTINPUT:" + path + "/common/res/manifest.xml" ]).concat(qbs.buildVariant == "release" ? [ "/LTCG" ] : [])
     cpp.defines: outer.concat([ "NTDDI_VERSION=NTDDI_WIN7", "UNICODE", "_UNICODE" ])
   }

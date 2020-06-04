@@ -142,6 +142,10 @@ QtObject {
 
     readonly property string ipPortForwardImage: Theme.imagePathCommon + "/dashboard/connect/port-forward.png"
     readonly property string ipPortForwardSlashImage: Theme.imagePathCommon + "/dashboard/connect/port-forward-slash.png"
+    readonly property string ipPortForwardSlashSelectedImage: Theme.imagePathCommon + "/dashboard/connect/port-forward-slash-green.png"
+
+    readonly property string geoImage: Theme.imagePathCommon + "/dashboard/connect/geo-gray.png"
+    readonly property string geoSelectedImage: Theme.imagePathCommon + "/dashboard/connect/geo-green.png"
 
     readonly property string quickConnectingImage: Theme.imagePath + "/dashboard/connect/quick-connect-connecting.png"
     readonly property string quickConnectedImage: Theme.imagePath + "/dashboard/connect/quick-connect-connected.png"

@@ -51,6 +51,7 @@ Path Path::ConfigLogFile;
 Path Path::UpdownLogFile;
 Path Path::DaemonDiagnosticsDir;
 Path Path::DaemonLocalSocket;
+Path Path::DaemonHelperIpcSocket;
 Path Path::CrashReportDir;
 Path Path::SupportToolExecutable;
 Path Path::OpenVPNWorkingDir;
@@ -61,6 +62,12 @@ Path Path::HnsdExecutable;
 Path Path::SsLocalExecutable;
 Path Path::WireguardGoExecutable;
 Path Path::WireguardInterfaceFile;
+Path Path::LegacyRegionOverride;
+Path Path::LegacyShadowsocksOverride;
+Path Path::ModernRegionOverride;
+Path Path::LegacyRegionBundle;
+Path Path::LegacyShadowsocksBundle;
+Path Path::ModernRegionBundle;
 #ifdef Q_OS_WIN
 Path Path::TapDriverDir;
 Path Path::WfpCalloutDriverDir;
@@ -238,6 +245,7 @@ void Path::initializePostApp()
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd.exe";
     SsLocalExecutable = ExecutableDir / BRAND_CODE "-ss-local.exe";
     DaemonLocalSocket = QStringLiteral("\\\\.\\pipe\\" BRAND_WINDOWS_SERVICE_NAME);
+    DaemonHelperIpcSocket = QStringLiteral("\\\\.\\pipe\\" BRAND_WINDOWS_SERVICE_NAME "HelperIpc");
 #else
     OpenVPNExecutable = OpenVPNWorkingDir / BRAND_CODE "-openvpn";
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd";
@@ -250,7 +258,15 @@ void Path::initializePostApp()
 #endif
 
     DaemonLocalSocket = DaemonDataDir / "daemon.sock";
+    DaemonHelperIpcSocket = DaemonDataDir / "helper_ipc.sock";
 #endif
+
+    LegacyRegionOverride = DaemonSettingsDir / "region_override.json";
+    LegacyShadowsocksOverride = DaemonSettingsDir / "shadowsocks_override.json";
+    ModernRegionOverride = DaemonSettingsDir / "modern_regions_override.json";
+    LegacyRegionBundle = ResourceDir / "servers.json";
+    LegacyShadowsocksBundle = ResourceDir / "shadowsocks.json";
+    ModernRegionBundle = ResourceDir / "modern_servers.json";
 
 #ifdef Q_OS_MAC
     // launch support tool from the bundle

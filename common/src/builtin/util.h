@@ -29,6 +29,7 @@
 #include <QObject>
 #include <QFile>
 #include <QDeadlineTimer>
+#include <QHostAddress>
 
 #include <functional>
 #include <memory>
@@ -1081,6 +1082,11 @@ namespace std {
     struct hash<QLatin1String>
     {
         std::size_t operator()(const QLatin1String &str) const {return qHash(str);}
+    };
+    template<>
+    struct hash<QHostAddress>
+    {
+        std::size_t operator()(const QHostAddress &addr) const {return qHash(addr);}
     };
 }
 

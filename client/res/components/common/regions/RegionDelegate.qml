@@ -24,6 +24,7 @@ import "../../daemon"
 import "../../theme"
 import "../../common"
 import "../../core"
+import "../../client"
 
 // RegionDelegate is used by RegionListView to display each group of server
 // locations in a particular region (country).
@@ -35,7 +36,12 @@ import "../../core"
 Item {
   id: regionDelegate
 
-  property bool expanded: true
+  readonly property bool expanded: {
+    if(!hasSubRegions)
+      return true
+    var collapsed = Client.settings[collapsedCountriesSettingName] || []
+    return !collapsed.find(function(country){return country === regionCountry})
+  }
   readonly property int countryHeight: 40
   readonly property int regionHeight: 36
   readonly property bool hasSubRegions: regionChildren.length > 0
@@ -54,6 +60,7 @@ Item {
   property var serviceLocations
   property bool portForwardEnabled
   property bool canFavorite
+  property string collapsedCountriesSettingName
 
   readonly property string singleRegionPfWarning: uiTr("Port forwarding is not available for this location.")
   readonly property string regionGroupPfWarning: uiTr("Port forwarding is not available for this country.")
@@ -151,6 +158,16 @@ Item {
       return true // Lacks PF
     }
     pfWarningTipText: hasSubRegions ? regionGroupPfWarning : singleRegionPfWarning
+    geoLocation: {
+      if(region)
+        return region.geoOnly
+      // For a group, show the geo indicator if all subregions are geo locations
+      for(var i=0; i<regionChildren.length; ++i) {
+        if(!regionChildren[i].subregion.geoOnly)
+          return false
+      }
+      return true // All regions are geo
+    }
     highlightColumn: {
       // If this row is currently highlighted, apply the highlighted column
       if(regionDelegate.highlightRow.country === regionCountry &&
@@ -169,7 +186,17 @@ Item {
 
     onClicked: {
       if (hasSubRegions) {
-        regionDelegate.expanded = !regionDelegate.expanded
+        var oldCollapsed = Client.settings[collapsedCountriesSettingName]
+        var newCollapsed
+        if (regionDelegate.expanded) {
+          newCollapsed = oldCollapsed.concat([regionDelegate.regionCountry])
+        }
+        else {
+          newCollapsed = oldCollapsed.filter(function(country){return country !== regionDelegate.regionCountry})
+        }
+        var newSettings = {}
+        newSettings[regionDelegate.collapsedCountriesSettingName] = newCollapsed
+        Client.applySettings(newSettings)
       } else {
         regionSelected(regionKey)
       }
@@ -228,6 +255,7 @@ Item {
         canFavorite: regionDelegate.canFavorite
         favoriteRegionId: subregionKey
         lacksPortForwarding: regionDelegate.portForwardEnabled && !subregion.portForward
+        geoLocation: subregion.geoOnly
         pfWarningTipText: singleRegionPfWarning
         highlightColumn: {
           // If this row is currently highlighted, apply the highlighted column

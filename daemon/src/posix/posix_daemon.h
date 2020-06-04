@@ -103,11 +103,11 @@ private:
 
 signals:
     void startSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                          QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                          QString tunnelDeviceLocalAddress,
                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
     void shutdownSplitTunnel();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                           QString tunnelDeviceLocalAddress, QString tunnelDeviceRemoteAddress,
+                           QString tunnelDeviceLocalAddress,
                            QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 };
 

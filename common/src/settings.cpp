@@ -27,6 +27,12 @@
 #include <QSharedPointer>
 #include <iterator>
 
+bool Server::hasNonLatencyService() const
+{
+    return !openvpnTcpPorts().empty() || !openvpnUdpPorts().empty() ||
+        !wireguardPorts().empty() || !shadowsocksPorts().empty();
+}
+
 bool Server::hasService(Service service) const
 {
     return !servicePorts(service).empty();
@@ -149,6 +155,16 @@ bool Location::hasService(Service service) const
             return true;
     }
     return false;
+}
+
+const Server *Location::randomIcmpLatencyServer() const
+{
+    return randomServerFor([](const Server &server)
+    {
+        return server.hasService(Service::OpenVpnTcp) ||
+            server.hasService(Service::OpenVpnUdp) ||
+            server.hasService(Service::WireGuard);
+    });
 }
 
 const Server *Location::randomServerForService(Service service) const
@@ -367,7 +383,9 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 const QString hnsdLocalAddress{QStringLiteral("127.80.73.65")};
-// Used for MACE, PF, DNS, etc
-const QString specialPiaAddress{QStringLiteral("209.222.18.222")};
+const QString piaLegacyDnsPrimary{QStringLiteral("209.222.18.222")};
+const QString piaLegacyDnsSecondary{QStringLiteral("209.222.18.218")};
+const QString piaModernDnsVpnMace{QStringLiteral("10.0.0.241")};
+const QString piaModernDnsVpn{QStringLiteral("10.0.0.243")};
 
 #endif

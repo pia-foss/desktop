@@ -23,6 +23,7 @@ import QtQuick.Window 2.10
 import PIA.WindowClipper 1.0
 import PIA.WindowMaxSize 1.0
 import PIA.NativeHelpers 1.0
+import PIA.BrandHelper 1.0
 import PIA.WindowScaler 1.0
 import "../theme"
 import "../common"
@@ -70,7 +71,7 @@ DecoratedWindow {
   // background brush to the dashboard color (which would probably be OK since
   // all windows in this app use this color).
   color: Theme.dashboard.backgroundColor
-  title: uiTr("Connect")
+  title: BrandHelper.brandName
   // The dashboard isn't sizeable.
   flags: Qt.Dialog|Qt.CustomizeWindowHint|Qt.WindowCloseButtonHint|Qt.WindowTitleHint|Qt.MSWindowsFixedSizeDialogHint
   visible: false

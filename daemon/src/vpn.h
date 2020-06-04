@@ -273,6 +273,12 @@ class ConnectionConfig
     Q_GADGET
 
 public:
+    enum class Infrastructure
+    {
+        Current,
+        Modern,
+    };
+    Q_ENUM(Infrastructure);
     enum class Method
     {
         OpenVPN,
@@ -318,6 +324,10 @@ public:
     // ID only - other location metadata changes are not considered a change.
     bool hasChanged(const ConnectionConfig &other) const;
 
+    // The effective infrastructure.  Derived from the infrastructure() setting;
+    // "default" is replaced with an actual value.
+    Infrastructure infrastructure() const {return _infrastructure;}
+
     // The effective VPN method.  Normally the method() setting; may be forced
     // to OpenVPN if an auth token is not available for WireGuard.
     Method method() const {return _method;}
@@ -350,9 +360,20 @@ public:
     // least one entry for Custom.  Not provided for any other type.
     const QStringList &customDns() const {return _customDns;}
 
-    // Get the effective DNS server addresses.  The PIA addresses must be
-    // provided, since they are returned by the server for newer methods.
-    QStringList getDnsServers(const QStringList &piaDns) const;
+    // Get the effective DNS server addresses to use.
+    //
+    // For the modern infrastructure, this applies MACE (by selecting a
+    // different PIA DNS address).  (piaLegacyDnsOverride is not used.)
+    //
+    // For the legacy infrastructure, MACE is not applied, and the PIA DNS
+    // server list may optionally be overridden with piaLegacyDnsOverride (if
+    // the method provides DNS server addresses from the server - WireGuard).
+    QStringList getDnsServers(const QStringList &piaLegacyDnsOverride) const;
+
+    // Get the effective DNS server addresses to use for the modern
+    // infrastructure.  This does depend on MACE, which simply selects a
+    // different DNS address.
+    QStringList getModernDnsServers() const;
 
     quint16 localPort() const {return _localPort;}
     uint mtu() const {return _mtu;}
@@ -386,6 +407,9 @@ public:
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
 
 private:
+    // The infrastructure in use.  This affects the way MACE, port forwarding,
+    // etc. are applied.
+    Infrastructure _infrastructure;
     // The method used to connect to the VPN
     Method _method;
     bool _methodForcedByAuth;
@@ -514,6 +538,7 @@ signals:
     void stateChanged(State state,
                       const ConnectionConfig &connectingConfig,
                       const ConnectionConfig &connectedConfig,
+                      const nullable_t<Server> &connectedServer,
                       const nullable_t<Transport> &chosenTransport,
                       const nullable_t<Transport> &actualTransport);
     void firewallParamsChanged();
@@ -565,6 +590,12 @@ private:
     ConnectionConfig _connectingConfig;
     // The configuration that we last connected with.
     ConnectionConfig _connectedConfig;
+
+    // The connecting / connected servers.  These are stored like
+    // _connectingConfig/_connectedConfig, but only the connected server is
+    // reported by state changes, and only while connected.  _connectingServer
+    // is updated for each connection attempt (unlike _connectingConfig)
+    Server _connectingServer, _connectedServer;
 
     // Timer for ensuring a minimum interval between connection attempts
     QDeadlineTimer _timeUntilNextConnectionAttempt;

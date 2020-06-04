@@ -158,7 +158,7 @@ FocusScope {
 
     StaticText {
       x: Theme.settings.vbarContentLeftMargin
-      y: 60
+      y: Theme.settings.headingHeight - 40
       color: Theme.settings.headingTextColor
       font.weight: Font.Light
       font.pixelSize: Theme.settings.headingTextPx

@@ -27,15 +27,24 @@
 #include <QRandomGenerator>
 #include <chrono>
 
-PortForwarder::PortForwarder(QObject *pParent, ApiClient &apiClient,
-                             const QString &clientId)
-    : QObject{pParent},
-      _apiClient{apiClient},
-      _clientId{clientId},
+namespace
+{
+    std::chrono::seconds pfRetryDelay{5};
+}
+
+PortForwarder::PortForwarder(ApiClient &apiClient, DaemonAccount &account,
+                             DaemonState &state, const Environment &environment)
+    : _apiClient{apiClient},
+      _account{account},
+      _state{state},
+      _environment{environment},
       _connectionState{State::Disconnected},
       _forwardingEnabled{false},
       _pPortForwardRequest{}
 {
+    _retryTimer.setInterval(msec(pfRetryDelay));
+    _retryTimer.setSingleShot(true);
+    connect(&_retryTimer, &QTimer::timeout, this, &PortForwarder::requestPort);
 }
 
 void PortForwarder::updateConnectionState(State connectionState)
@@ -47,6 +56,7 @@ void PortForwarder::updateConnectionState(State connectionState)
     {
         // Invariant - cleared in any state other than ConnectedSupported
         Q_ASSERT(!_pPortForwardRequest);
+        Q_ASSERT(!_retryTimer.isActive());
         _connectionState = State::ConnectedSupported;
         // The connection is established, so request a port if forwarding is enabled
         if(_forwardingEnabled)
@@ -59,7 +69,8 @@ void PortForwarder::updateConnectionState(State connectionState)
         _connectionState = connectionState;
         // If a request is in progress, abort it.  If the request had completed,
         // the forwarded port has been lost.
-        _pPortForwardRequest.abandon();
+        _pPortForwardRequest.reset();
+        _retryTimer.stop();
 
         // If a port had been forwarded, it's gone now
         if(!_forwardingEnabled || connectionState == State::Disconnected)
@@ -97,6 +108,7 @@ void PortForwarder::enablePortForwarding(bool enabled)
         // Class invariant - can only be set in ConnectedSupported state.
         // (Guarantees that we're not about to overwrite a valid port forward.)
         Q_ASSERT(!_pPortForwardRequest);
+        Q_ASSERT(!_retryTimer.isActive());
         emit portForwardUpdated(_forwardingEnabled ? PortForwardState::Unavailable : PortForwardState::Inactive);
         break;
     }
@@ -104,18 +116,44 @@ void PortForwarder::enablePortForwarding(bool enabled)
 
 void PortForwarder::requestPort()
 {
-   _pPortForwardRequest = _apiClient
-                .getForwardedPort(QStringLiteral("?client_id=%1").arg(_clientId))
-                ->then(this, [this](const QJsonDocument& json) {
-                    const auto &port = json[QStringLiteral("port")].toInt();
-                    emit portForwardUpdated(port ? port : PortForwardState::Failed);
-                })
-                ->except(this, [this](const Error& err) {
-                    qWarning() << "Couldn't request port forward due to error:" << err;
-                    emit portForwardUpdated(PortForwardState::Failed);
-                });
+    // Use the appropriate implementation for the current infrastructure.
+    // DaemonState::connectedConfig will be set at this point since we are
+    // currently connected - Daemon updates the state if we lose the connection.
+    // If, somehow, we were to try to do a PF request while not connected, this
+    // would just default to the modern implementation.
+    if(_state.connectedConfig().infrastructure() == QStringLiteral("current"))
+    {
+        _pPortForwardRequest.reset(new PortForwardRequestLegacy{_apiClient, _account.clientId()});
+    }
+    else
+    {
+        _pPortForwardRequest.reset(
+            new PortForwardRequestModern{_apiClient, _account, _state, _environment});
+    }
 
-   emit portForwardUpdated(PortForwardState::Attempting);
+    emit portForwardUpdated(PortForwardState::Attempting);
+    connect(_pPortForwardRequest.get(), &PortForwardRequest::stateUpdated,
+            this, [this](PortForwardRequest::State state, int port)
+            {
+                switch(state)
+                {
+                    case PortForwardRequest::State::Success:
+                        emit portForwardUpdated(port);
+                        break;
+                    case PortForwardRequest::State::Retry:
+                        qInfo() << "PF request signaled Retry state, will retry after delay";
+                        // Go back to the Attempting state
+                        emit portForwardUpdated(PortForwardState::Attempting);
+                        // Retry after a delay
+                        _retryTimer.start();
+                        break;
+                    default:
+                    case PortForwardRequest::State::Failed:
+                        qInfo() << "PF request signaled failure";
+                        emit portForwardUpdated(PortForwardState::Failed);
+                        break;
+                }
+            });
 }
 
 // The existing client uses lowercase characters for this encoding

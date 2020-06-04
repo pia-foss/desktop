@@ -26,6 +26,7 @@ import "../../../common"
 import "../../../core"
 
 MovableModule {
+  id: regionModule
   implicitHeight: proxyVia.visible ? 130 : 80
   moduleKey: 'region'
 
@@ -36,13 +37,13 @@ MovableModule {
   //: go to the Region page and choose a region.
   tileName: uiTr("Region tile")
 
-  readonly property var displayLocation: {
-    // When connected, show the connected location
+  // When connected with 'auto', show the connected location name (it might
+  // not be the current best location if the best location has changed).
+  // Otherwise, show the best location name.
+  readonly property var autoLocation: {
     if(Daemon.state.connectionState === "Connected")
       return Daemon.state.connectedConfig.vpnLocation
-
-    // Otherwise, show the location we would connect to next
-    return Daemon.state.vpnLocations.nextLocation
+    return Daemon.state.vpnLocations.bestLocation
   }
 
   LocationMap {
@@ -71,25 +72,32 @@ MovableModule {
     y: 20
   }
 
+  GeoTip {
+    id: geoTip
+    x: 20
+    anchors.verticalCenter: regionValue.verticalCenter
+    visible: {
+      if(Daemon.state.vpnLocations.chosenLocation)
+        return Daemon.state.vpnLocations.chosenLocation.geoOnly
+      else if(regionModule.autoLocation)
+        return regionModule.autoLocation.geoOnly
+      return false
+    }
+  }
+
   Text {
     id: regionValue
     text: {
-      // When connected with 'auto', show the connected location name (it might
-      // not be the current best location if the best location has changed).
-      // Otherwise, show the best location name.
-      var autoLocation
-      if(Daemon.state.connectionState === "Connected")
-        autoLocation = Daemon.state.connectedConfig.vpnLocation
-      else
-        autoLocation = Daemon.state.vpnLocations.bestLocation
       return Messages.displayLocationSelection(Daemon.state.vpnLocations.chosenLocation,
-                                               autoLocation)
+                                               regionModule.autoLocation)
     }
 
     color: Theme.dashboard.moduleTextColor
     font.pixelSize: Theme.dashboard.moduleValueTextPx
-    x: 20
+    x: geoTip.visible ? (geoTip.x + geoTip.width + 6) : 20
     y: 40
+    width: rightChevron.x - 5 - x
+    elide: Text.ElideRight
   }
 
   function displayConnectionProxy(config) {
@@ -173,6 +181,7 @@ MovableModule {
   }
 
   Image {
+    id: rightChevron
     anchors.right: parent.right
     anchors.rightMargin: 15
     y: 30

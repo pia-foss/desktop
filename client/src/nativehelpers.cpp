@@ -26,6 +26,7 @@
 #include "version.h"
 #include "brand.h"
 #include "exec.h"
+#include "locations.h"
 
 #include <QProcess>
 #include <QStringList>
@@ -618,6 +619,23 @@ void NativeHelpers::checkAppDeactivate()
 #ifdef Q_OS_MAC
     macCheckAppDeactivate();
 #endif
+}
+
+QString NativeHelpers::getBestLocationForCountry(QObject *pDaemonStateObj,
+                                                 const QString &countryCode)
+{
+    const DaemonState *pDaemonState = dynamic_cast<const DaemonState*>(pDaemonStateObj);
+    if(!pDaemonState)
+        return {};
+    NearestLocations nearest{pDaemonState->availableLocations()};
+    const auto &countryLower = countryCode.toLower();
+    const auto &pBestInCountry = nearest.getBestMatchingLocation([&countryLower](const Location &loc)
+    {
+        return loc.country().toLower() == countryLower;
+    });
+    if(pBestInCountry)
+        return pBestInCountry->id();
+    return {};
 }
 
 void NativeHelpers::applyStartOnLoginSetting(bool enabled)

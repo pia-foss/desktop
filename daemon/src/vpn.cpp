@@ -469,7 +469,8 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 }
 
 ConnectionConfig::ConnectionConfig()
-    : _method{Method::OpenVPN}, _methodForcedByAuth{false},
+    : _infrastructure{Infrastructure::Current}, _method{Method::OpenVPN},
+      _methodForcedByAuth{false},
       _vpnLocationAuto{false}, _dnsType{DnsType::Pia}, _localPort{0}, _mtu{0},
       _defaultRoute{true}, _proxyType{ProxyType::None},
       _shadowsocksLocationAuto{false}, _automaticTransport{false},
@@ -491,6 +492,12 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     _vpnUsername = account.openvpnUsername();
     _vpnPassword = account.openvpnPassword();
     _vpnToken = account.token();
+
+    const auto &infrastructureValue = settings.infrastructure();
+    if(infrastructureValue == QStringLiteral("modern"))
+        _infrastructure = Infrastructure::Modern;
+    else    // current or default
+        _infrastructure = Infrastructure::Current;
 
     const auto &methodValue = settings.method();
     if(methodValue == QStringLiteral("openvpn"))
@@ -537,14 +544,13 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
 
     _requestMace = settings.enableMACE();
 
+    if(settings.splitTunnelEnabled())
+        _defaultRoute = settings.defaultRoute();
+
     // defaultRoute, proxy, automatic transport, and port forwarding all
     // require OpenVPN.
     if(_method == Method::OpenVPN)
     {
-        // defaultRoute = false requires split tunnel and OpenVPN.  Otherwise, use
-        // the VPN as the default route.
-        if(settings.splitTunnelEnabled())
-            _defaultRoute = settings.defaultRoute();
 
         if(settings.proxy() == QStringLiteral("custom"))
         {
@@ -571,14 +577,19 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         // unreachable)
         if(_proxyType == ProxyType::None)
             _automaticTransport = settings.automaticTransport();
+    }
 
+    // The port forwarding setting requires OpenVPN in the current
+    // infrastructure.  In the modern infrastructure, both methods support it.
+    if(_infrastructure == Infrastructure::Modern || _method == Method::OpenVPN)
+    {
         // The port forwarding setting is more complex, because changes are
         // applied on the fly in some cases, but require reconnects in others.
         //
-        // When connected to a region that supports PF with OpenVPN, any change
-        // requires a reconnect.  We have to reconnect to start a new PF
-        // request, or when disabling PF, we keep the port that we got until
-        // we reconnect.
+        // When connected to a region that supports PF using a connection that
+        // supports PF, any change requires a reconnect.  We have to reconnect
+        // to start a new PF request, or when disabling PF, we keep the port
+        // that we got until we reconnect.
         //
         // When connected to a region that doesn't support it, changing the
         // setting just toggles between Inactive and Unavailable.  This doesn't
@@ -637,7 +648,8 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
     QString otherVpnLocationId = other.vpnLocation() ? other.vpnLocation()->id() : QString{};
     QString otherSsLocationId = other.shadowsocksLocation() ? other.shadowsocksLocation()->id() : QString{};
 
-    return method() != other.method() ||
+    return infrastructure() != other.infrastructure() ||
+        method() != other.method() ||
         methodForcedByAuth() != other.methodForcedByAuth() ||
         vpnUsername() != other.vpnUsername() ||
         vpnPassword() != other.vpnPassword() ||
@@ -658,13 +670,24 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         ssLocationId != otherSsLocationId;
 }
 
-QStringList ConnectionConfig::getDnsServers(const QStringList &piaDns) const
+QStringList ConnectionConfig::getDnsServers(const QStringList &piaLegacyDnsOverride) const
 {
     switch(dnsType())
     {
         default:
         case DnsType::Pia:
-            return piaDns;
+            switch(infrastructure())
+            {
+                case Infrastructure::Modern:
+                    return {requestMace() ? piaModernDnsVpnMace : piaModernDnsVpn};
+                default:
+                case Infrastructure::Current:
+                    // MACE is activated separately for the legacy
+                    // infrastructure.
+                    if(!piaLegacyDnsOverride.isEmpty())
+                        return piaLegacyDnsOverride;
+                    return {piaLegacyDnsPrimary, piaLegacyDnsSecondary};
+            }
         case DnsType::Handshake:
             return {hnsdLocalAddress};
         case DnsType::Existing:
@@ -761,7 +784,7 @@ void VPNConnection::activateMACE()
     // issues occured by sending a packet immediately.
     auto maceActivate1 = new QTcpSocket();
     qDebug () << "Sending MACE Packet 1";
-    maceActivate1->connectToHost(QStringLiteral("209.222.18.222"), 1111);
+    maceActivate1->connectToHost(piaLegacyDnsPrimary, 1111);
     // Tested if error condition is hit by changing the port/invalid IP
     connect(maceActivate1,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
             [maceActivate1](QAbstractSocket::SocketError socketError) {
@@ -778,7 +801,7 @@ void VPNConnection::activateMACE()
     QTimer::singleShot(std::chrono::milliseconds(5000).count(), this, [this]() {
         auto maceActivate2 = new QTcpSocket();
         qDebug () << "Sending MACE Packet 2";
-        maceActivate2->connectToHost(QStringLiteral("209.222.18.222"), 1111);
+        maceActivate2->connectToHost(piaLegacyDnsPrimary, 1111);
         connect(maceActivate2,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
             [maceActivate2](QAbstractSocket::SocketError socketError) {
         qError() << "Failed to activate MACE packet 2 " << socketError;
@@ -894,6 +917,7 @@ void VPNConnection::connectVPN(bool force)
     case State::Disconnected:
         updateAttemptCount(0);
         _connectedConfig = {};
+        _connectedServer = {};
         if(copySettings(State::Connecting, State::Disconnected))
             queueConnectionAttempt();
         return;
@@ -905,6 +929,7 @@ void VPNConnection::disconnectVPN()
     if (_state != State::Disconnected)
     {
         _connectingConfig = {};
+        _connectingServer = {};
         setState(State::Disconnecting);
         if (_method && _method->state() < VPNMethod::State::Exiting)
             _method->shutdown();
@@ -1149,8 +1174,11 @@ void VPNConnection::doConnect()
             << traceEnum(_connectingConfig.method()) << "and transport"
             << _transportSelector.lastUsed().protocol();
         raiseError({HERE, Error::Code::VPNConfigInvalid});
+        _connectingServer = {};
         return;
     }
+
+    _connectingServer = *pVpnServer;
 
     // Set when the next earliest reconnect attempt is allowed
     if(delayNext)
@@ -1186,7 +1214,8 @@ void VPNConnection::doConnect()
 
     try
     {
-        _method->run(_connectingConfig, *pVpnServer, _transportSelector.lastUsed(),
+        _method->run(_connectingConfig, _connectingServer,
+                     _transportSelector.lastUsed(),
                      _transportSelector.lastLocalAddress(),
                      _shadowsocksServerIp, _shadowsocksRunner.localPort());
     }
@@ -1214,7 +1243,9 @@ void VPNConnection::vpnMethodStateChanged()
             // The connection was established, so the connecting location is now
             // the connected location.
             _connectedConfig = std::move(_connectingConfig);
+            _connectedServer = std::move(_connectingServer);
             _connectingConfig = {};
+            _connectingServer = {};
 
             // If DNS is set to Handshake, start it now, since we've connected
             if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Handshake)
@@ -1256,6 +1287,7 @@ void VPNConnection::vpnMethodStateChanged()
         {
             // Reconnect to the same location again
             _connectingConfig = _connectedConfig;
+            // Don't set _connectingServer; set by each connection attempt
             newState = State::Interrupted;
             queueConnectionAttempt();
         }
@@ -1272,6 +1304,7 @@ void VPNConnection::vpnMethodStateChanged()
             // Reconnect to the same location again
             _connectingConfig = _connectedConfig;
             newState = State::Interrupted;
+            // Don't set _connectingServer; set by each connection attempt
             queueConnectionAttempt();
             break;
         case State::DisconnectingToReconnect:
@@ -1385,6 +1418,7 @@ void VPNConnection::setState(State state)
 
         // Sanity-check location invariants and grab transports if they're
         // reported in this state
+        nullable_t<Server> connectedServer;
         nullable_t<Transport> preferredTransport, actualTransport;
         switch(_state)
         {
@@ -1406,6 +1440,7 @@ void VPNConnection::setState(State state)
         case State::Connected:
             Q_ASSERT(!_connectingConfig.vpnLocation());
             Q_ASSERT(_connectedConfig.vpnLocation());
+            connectedServer = _connectedServer; // Report only in Connected state
             preferredTransport = _transportSelector.lastPreferred();
             actualTransport = _transportSelector.lastUsed();
             break;
@@ -1421,7 +1456,7 @@ void VPNConnection::setState(State state)
         }
 
         emit stateChanged(_state, _connectingConfig, _connectedConfig,
-                          preferredTransport, actualTransport);
+                          connectedServer, preferredTransport, actualTransport);
     }
 }
 
@@ -1505,6 +1540,7 @@ bool VPNConnection::copySettings(State successState, State failureState)
             << traceEnum(successState) << "due to failure to load locations";
         // Clear everything
         _connectingConfig = {};
+        _connectingServer = {};
         // Go to the failure state
         setState(failureState);
         return false;

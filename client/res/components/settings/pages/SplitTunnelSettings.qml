@@ -36,7 +36,7 @@ import "qrc:/javascript/util.js" as Util
 Rectangle {
   id: splitTunnelSettings
 
-  // Shadow the default enalbed property; SplitTunnelSettings remains scrollable
+  // Shadow the default enabled property; SplitTunnelSettings remains scrollable
   // when disabled.
   property bool enabled: true
 
