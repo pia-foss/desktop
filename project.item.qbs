@@ -29,7 +29,7 @@ Project {
 
   property string productName: brandName
   property string productVersion: "2.2.0"
-  property string productPrerelease: "alpha.1"
+  property string productPrerelease: ""
   property string brandCode: "pia"
   id: piaProject
 
@@ -38,6 +38,13 @@ Project {
   // a bundle that was previously deployed.
   // (Override on the qbs command line or in Qt Creator build configuration).
   property bool macdeployqt: false
+
+  // Temporary feature toggle for the Handshake feature.  Testnet has been gone
+  // for some time, and the feature is currently broken, as hnsd doesn't support
+  // mainnet.  However, the Handshake team appears to be working on it and might
+  // have support soon, so we're going to keep this implementation around for a
+  // little while, and bring the feature back if mainnet support is ready soon.
+  property bool includeFeatureHandshake: false
 
   readonly property var productVersionFields: {
     var fields = productVersion.split('.').map(function (v) { return parseInt(v, 10); });

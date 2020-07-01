@@ -104,6 +104,10 @@ public:
     static auto getAdapterForLuid(quint64 luid)
         -> std::shared_ptr<WinNetworkAdapter>;
 
+    // Get all network adapters, excluding loopback
+    static auto getNetworkAdapters()
+        -> QList<std::shared_ptr<WinNetworkAdapter>>;
+
 private:
     WinInterfaceMonitor();
     ~WinInterfaceMonitor();

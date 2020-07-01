@@ -473,6 +473,10 @@ public:
     JsonField(QString, gaChannelVersionUri, {})
     JsonField(QString, betaChannelVersion, {})
     JsonField(QString, betaChannelVersionUri, {})
+
+
+    // Flags published in the release channel that we are currently loading
+    JsonField(QJsonArray, flags, {})
 };
 
 
@@ -773,7 +777,9 @@ public:
     JsonField(QVector<QString>, primaryModules, QVector<QString>::fromList({QStringLiteral("region"), QStringLiteral("ip")}))
     JsonField(QVector<QString>, secondaryModules, QVector<QString>::fromList({QStringLiteral("quickconnect"), QStringLiteral("performance"), QStringLiteral("usage"), QStringLiteral("settings"), QStringLiteral("account")}))
 
-    JsonField(bool, persistDaemon, false);
+    JsonField(bool, persistDaemon, false)
+
+    JsonField(QString, macStubDnsMethod, QStringLiteral("NX"), {"NX", "Refuse", "0.0.0.0"})
 };
 
 // Compare QSharedPointer<Location>s by value; used by ServiceLocations
@@ -879,7 +885,9 @@ public:
         vpnLocationAuto(other.vpnLocationAuto());
         method(other.method());
         methodForcedByAuth(other.methodForcedByAuth());
+        infrastructure(other.infrastructure());
         dnsType(other.dnsType());
+        defaultRoute(other.defaultRoute());
         proxy(other.proxy());
         proxyCustom(other.proxyCustom());
         proxyShadowsocks(other.proxyShadowsocks());
@@ -895,7 +903,9 @@ public:
             vpnLocationAuto() == other.vpnLocationAuto() &&
             method() == other.method() &&
             methodForcedByAuth() == other.methodForcedByAuth() &&
+            infrastructure() == other.infrastructure() &&
             dnsType() == other.dnsType() &&
+            defaultRoute() == other.defaultRoute() &&
             proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
             proxyShadowsocksLocationAuto() == other.proxyShadowsocksLocationAuto() &&
@@ -925,7 +935,7 @@ public:
     JsonField(QString, infrastructure, QStringLiteral("current"), {"current", "modern"})
 
     // DNS type used for this connection
-    JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "existing", "custom"})
+    JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "local", "existing", "custom"})
 
     // Whether the VPN is being used as the default route for this connection.
     // (Not precisely equivalent to DaemonSettings::defaultRoute; the setting is
@@ -1195,6 +1205,10 @@ public:
     // split tunnel setting if necessary, or show warnings if the driver is not
     // installed and the setting is already enabled.
     JsonField(QString, netExtensionState, QStringLiteral("NotInstalled"))
+    // Result of the connection test performed after connecting to the VPN.  If
+    // the connection is not working, this will be set, and the client will show
+    // a warning.
+    JsonField(bool, connectionProblem, false)
 
     // We failed to configure DNS on linux
     JsonField(qint64, dnsConfigFailed, 0)
@@ -1223,6 +1237,9 @@ public:
 
     // The original IPv6 interface IP before we activated the VPN
     JsonField(QString, originalInterfaceIp6, {})
+
+    // The key for the primary service on macOS
+    JsonField(QString, macosPrimaryServiceKey, {})
 
     // A multi-function value to indicate snooze state and
     // -1 -> Snooze not active
@@ -1255,8 +1272,8 @@ public:
 
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
-// The 127/8 loopback address used for Handshake DNS.
-extern COMMON_EXPORT const QString hnsdLocalAddress;
+// The 127/8 loopback address used for local DNS.
+extern COMMON_EXPORT const QString resolverLocalAddress;
 
 // The IP used for PIA DNS and MACE activation in the legacy infrastructure.
 extern COMMON_EXPORT const QString piaLegacyDnsPrimary;

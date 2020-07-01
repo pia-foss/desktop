@@ -164,7 +164,7 @@
 #define NOWINSTYLES        // WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
 #define NOSYSMETRICS       // SM_*
 #define NOMENUS            // MF_*
-#define NOICONS            // IDI_*
+//#define NOICONS            // IDI_*
 #define NOKEYSTATES        // MK_*
 #define NOSYSCOMMANDS      // SC_*
 #define NORASTEROPS        // Binary and Tertiary raster ops

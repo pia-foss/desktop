@@ -27,6 +27,7 @@ import "../../theme"
 FocusScope {
   property bool loginEnabled
   property bool loginWorking
+  property string buttonText: uiTr("LOG IN")
 
   width: 260
   height: 40
@@ -176,9 +177,13 @@ FocusScope {
 
   Text {
     id: loginLabel
-    anchors.horizontalCenter: loginImage.horizontalCenter
-    anchors.verticalCenter: loginImage.verticalCenter
-    text: uiTr("LOG IN")
+    anchors.fill: parent
+    anchors.leftMargin: 15
+    anchors.rightMargin: 15
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+    text: buttonText
     font.pixelSize: Theme.login.buttonTextPx
   }
 

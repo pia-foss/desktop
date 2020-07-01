@@ -221,6 +221,12 @@ auto WinInterfaceMonitor::getAdapterForLuid(quint64 luid)
     return adapters.front();
 }
 
+auto WinInterfaceMonitor::getNetworkAdapters()
+    -> QList<std::shared_ptr<WinNetworkAdapter>>
+{
+    return getAllNetworkAdapters([](const IP_ADAPTER_ADDRESSES &addresses) { return addresses.IfType != IF_TYPE_SOFTWARE_LOOPBACK; });
+}
+
 WinInterfaceMonitor &WinInterfaceMonitor::instance()
 {
     static WinInterfaceMonitor _inst;

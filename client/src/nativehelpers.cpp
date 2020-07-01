@@ -302,6 +302,11 @@ QString NativeHelpers::getProductName() const
     return QStringLiteral(PIA_PRODUCT_NAME);
 }
 
+bool NativeHelpers::getIncludeFeatureHandshake() const
+{
+    return INCLUDE_FEATURE_HANDSHAKE;
+}
+
 bool NativeHelpers::getLogToFile()
 {
   return Logger::instance()->logToFile();
@@ -695,6 +700,25 @@ bool NativeHelpers::getStartOnLoginSetting()
     return false;
 }
 
+void NativeHelpers::openUrl(const QString &path, const QJsonObject &queryItems)
+{
+    if(isSignalConnected(QMetaMethod::fromSignal(&NativeHelpers::urlOpenRequested)))
+    {
+        qInfo() << "QML handler is ready, emit URL event for" << path << "now";
+        emit urlOpenRequested(path, queryItems);
+    }
+    else
+    {
+        qInfo() << "QML handler is not ready, queue URL event for" << path;
+        if(!_queuedOpenUrlPath.isEmpty())
+        {
+            qWarning() << "Discarding existing queued URL event for" << _queuedOpenUrlPath;
+        }
+        _queuedOpenUrlPath = path;
+        _queuedOpenUrlQuery = queryItems;
+    }
+}
+
 void NativeHelpers::onFocusWindowChanged(QWindow *pFocusWindow)
 {
     if(!pFocusWindow)
@@ -717,5 +741,33 @@ void NativeHelpers::setDriverReinstallStatus(Driver type, const QString &status)
             _reinstallWfpCalloutStatus = status;
             emit reinstallWfpCalloutStatusChanged();
             break;
+    }
+}
+
+void NativeHelpers::checkQueuedUrlEvent()
+{
+    if(!_queuedOpenUrlPath.isEmpty())
+    {
+        qInfo() << "Re-process queued URL event for" << _queuedOpenUrlPath << "now";
+        QString path = std::move(_queuedOpenUrlPath);
+        QJsonObject query = std::move(_queuedOpenUrlQuery);
+        _queuedOpenUrlPath = QString{};
+        _queuedOpenUrlQuery = QJsonObject{};
+        // If, for whatever reason, there isn't anything connected to the
+        // signal right now, this will just queue up the request again until a
+        // connection is made
+        openUrl(path, query);
+    }
+}
+
+void NativeHelpers::connectNotify(const QMetaMethod &signal)
+{
+    if(signal == QMetaMethod::fromSignal(&NativeHelpers::urlOpenRequested))
+    {
+        // This isn't necessarily called on the main thread, so we can't do
+        // much here but schedule a call to a method on our thread
+        qInfo() << "Observed connection to urlOpenRequested, check for queued URL event on main thread";
+        QMetaObject::invokeMethod(this, &NativeHelpers::checkQueuedUrlEvent,
+                                  Qt::ConnectionType::QueuedConnection);
     }
 }

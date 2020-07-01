@@ -27,6 +27,7 @@
 #include "brand.h"
 #include "openvpnmethod.h"
 #include "wireguardmethod.h"
+#include "configwriter.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -34,6 +35,7 @@
 #include <QTimer>
 #include <QHostInfo>
 #include <QRandomGenerator>
+#include <QNetworkProxy>
 
 // For use by findInterfaceIp on Mac/Linux
 #if defined(Q_OS_UNIX)
@@ -84,14 +86,14 @@ namespace
     const QString hnscanSeed = QStringLiteral("ak2hy7feae2o5pfzsdzw3cxkxsu3lxypykcl6iphnup4adf2ply6a@138.68.61.31");
 
     // Fixed arguments for hnsd (some args are also added dynamically)
-    const QStringList &hnsdFixedArgs{"-n", hnsdLocalAddress + ":1053",
-                                     "-r", hnsdLocalAddress + ":53",
+    const QStringList &hnsdFixedArgs{"-n", resolverLocalAddress + ":1053",
+                                     "-r", resolverLocalAddress + ":53",
                                      "--seeds", hnsdSeed + "," + hnscanSeed};
 
-    // Restart strategy for hnsd
-    const RestartStrategy::Params hnsdRestart{std::chrono::milliseconds(100), // Min restart delay
-                                              std::chrono::seconds(3), // Max restart delay
-                                              std::chrono::seconds(30)}; // Min "successful" run time
+    // Restart strategy for local resolver processes
+    const RestartStrategy::Params resolverRestart{std::chrono::milliseconds(100), // Min restart delay
+                                                  std::chrono::seconds(3), // Max restart delay
+                                                  std::chrono::seconds(30)}; // Min "successful" run time
 
     // Restart strategy for shadowsocks
     const RestartStrategy::Params shadowsocksRestart{std::chrono::milliseconds(100),
@@ -107,10 +109,10 @@ namespace
     const std::chrono::seconds preferredTransportTimeout{30};
 }
 
-HnsdRunner::HnsdRunner(RestartStrategy::Params restartParams)
-    : ProcessRunner{std::move(restartParams)}
+ResolverRunner::ResolverRunner(RestartStrategy::Params restartParams)
+    : ProcessRunner{std::move(restartParams)}, _activeResolver{Resolver::Unbound}
 {
-    setObjectName(QStringLiteral("hnsd"));
+    setObjectName(QStringLiteral("resolver"));
 
     _hnsdSyncTimer.setSingleShot(true);
     _hnsdSyncTimer.setInterval(msec(hnsdSyncTimeout));
@@ -127,7 +129,7 @@ HnsdRunner::HnsdRunner(RestartStrategy::Params restartParams)
     connect(this, &ProcessRunner::stdoutLine, this,
             [this](const QByteArray &line)
             {
-                if(line.contains(QByteArrayLiteral(" new height: ")))
+                if(_activeResolver == Resolver::Handshake && line.contains(QByteArrayLiteral(" new height: ")))
                 {
                     // At least 1 block has been synced, handshake is connected.
                     _hnsdSyncTimer.stop();
@@ -148,17 +150,22 @@ HnsdRunner::HnsdRunner(RestartStrategy::Params restartParams)
     connect(this, &ProcessRunner::started, this,
             [this]()
             {
-                // Start (or restart) the sync timer.
-                _hnsdSyncTimer.start();
+                // For handshake, start (or restart) the sync timer.
+                if(_activeResolver == Resolver::Handshake)
+                    _hnsdSyncTimer.start();
             });
     // 'succeeded' means that the process has been running for long enough that
     // ProcessRunner considers it successful.  It hasn't necessarily synced any
     // blocks yet; don't emit hnsdSyncFailure() at all.
-    connect(this, &ProcessRunner::succeeded, this, &HnsdRunner::hnsdSucceeded);
+    connect(this, &ProcessRunner::succeeded, this,
+            [this]()
+            {
+                emit resolverSucceeded(_activeResolver);
+            });
     connect(this, &ProcessRunner::failed, this,
             [this](std::chrono::milliseconds failureDuration)
             {
-                emit hnsdFailed(failureDuration);
+                emit resolverFailed(_activeResolver, failureDuration);
                 // Stop the sync timer since hnsd isn't running.  The failure
                 // signal covers this state, avoid spuriously emitting a sync
                 // failure too (though these states _can_ overlap so we do still
@@ -167,14 +174,14 @@ HnsdRunner::HnsdRunner(RestartStrategy::Params restartParams)
             });
 }
 
-void HnsdRunner::setupProcess(UidGidProcess &process)
+void ResolverRunner::setupProcess(UidGidProcess &process)
 {
 #ifdef Q_OS_LINUX
      if(hasNetBindServiceCapability())
          // Drop root privileges ("nobody" is a low-priv account that should exist on all Linux systems)
         process.setUser("nobody");
     else
-        qWarning() << Path::HnsdExecutable << "did not have cap_net_bind_service set; running hnsd as root.";
+        qWarning() << getResolverExecutable() << "did not have cap_net_bind_service set; running resolver as root.";
 #endif
 #ifdef Q_OS_UNIX
     // Setting this group allows us to manage hnsd firewall rules
@@ -182,16 +189,17 @@ void HnsdRunner::setupProcess(UidGidProcess &process)
 #endif
 }
 
-bool HnsdRunner::enable(QString program, QStringList arguments)
+bool ResolverRunner::enable(Resolver resolver, QStringList arguments)
 {
+    _activeResolver = resolver;
 #ifdef Q_OS_MACOS
-    Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "alias", ::hnsdLocalAddress, "up"});
+    Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "alias", ::resolverLocalAddress, "up"});
 #endif
     // Invoke the original
-    return ProcessRunner::enable(std::move(program), std::move(arguments));
+    return ProcessRunner::enable(getResolverExecutable(), std::move(arguments));
 }
 
-void HnsdRunner::disable()
+void ResolverRunner::disable()
 {
     // Invoke the original
     ProcessRunner::disable();
@@ -204,18 +212,25 @@ void HnsdRunner::disable()
     QString out = Exec::cmdWithOutput(QStringLiteral("ifconfig"), {QStringLiteral("lo0")});
 
     // Only try to remove the alias if it exists
-    if(out.contains(::hnsdLocalAddress.toLatin1()))
+    if(out.contains(::resolverLocalAddress.toLatin1()))
     {
-        Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "-alias", hnsdLocalAddress});
+        Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "-alias", resolverLocalAddress});
     }
 #endif
 }
 
+const Path &ResolverRunner::getResolverExecutable() const
+{
+    if(_activeResolver == Resolver::Handshake)
+        return Path::HnsdExecutable;
+    return Path::UnboundExecutable;
+}
+
 // Check if Hnsd can bind to low ports without requiring root
-bool HnsdRunner::hasNetBindServiceCapability()
+bool ResolverRunner::hasNetBindServiceCapability()
 {
 #ifdef Q_OS_LINUX
-    QString out = Exec::cmdWithOutput(QStringLiteral("getcap"), {Path::HnsdExecutable});
+    QString out = Exec::cmdWithOutput(QStringLiteral("getcap"), {getResolverExecutable()});
     if(out.isEmpty())
         return false;
     else
@@ -327,11 +342,18 @@ void TransportSelector::addAlternates(const QString &protocol,
     }
 }
 
-void TransportSelector::reset(Transport preferred, bool useAlternates,
+void TransportSelector::reset(const QString &protocol, uint port,
+                              bool useAlternates,
                               const DescendingPortSet &udpPorts,
                               const DescendingPortSet &tcpPorts)
 {
-    _selected = preferred;
+    // If the specified port isn't actually a possible choice for the current
+    // infrastructure and protocol at all, use "Default" instead.
+    if(protocol == QStringLiteral("udp") && udpPorts.count(port) == 0)
+        port = 0;
+    else if(protocol == QStringLiteral("tcp") && tcpPorts.count(port) == 0)
+        port = 0;
+    _selected = {protocol, port};
     _alternates.clear();
     _nextAlternate = 0;
     _startAlternates.setRemainingTime(msec(_transportTimeout));
@@ -533,6 +555,8 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         _dnsType = DnsType::Pia;
     else if(dnsSetting == QStringLiteral("handshake"))
         _dnsType = DnsType::Handshake;
+    else if(dnsSetting == QStringLiteral("local"))
+        _dnsType = DnsType::Local;
     // Otherwise, check if it's a QStringList of server addresses
     else if(dnsSetting.get(_customDns) && !_customDns.isEmpty())
         _dnsType = DnsType::Custom;
@@ -689,7 +713,8 @@ QStringList ConnectionConfig::getDnsServers(const QStringList &piaLegacyDnsOverr
                     return {piaLegacyDnsPrimary, piaLegacyDnsSecondary};
             }
         case DnsType::Handshake:
-            return {hnsdLocalAddress};
+        case DnsType::Local:
+            return {resolverLocalAddress};
         case DnsType::Existing:
             return {};
         case DnsType::Custom:
@@ -702,7 +727,7 @@ VPNConnection::VPNConnection(QObject* parent)
     , _state(State::Disconnected)
     , _connectionStep{ConnectionStep::Initializing}
     , _method(nullptr)
-    , _hnsdRunner{hnsdRestart}
+    , _resolverRunner{resolverRestart}
     , _shadowsocksRunner{shadowsocksRestart}
     , _connectionAttemptCount(0)
     , _receivedByteCount(0)
@@ -716,9 +741,23 @@ VPNConnection::VPNConnection(QObject* parent)
     _connectTimer.setSingleShot(true);
     connect(&_connectTimer, &QTimer::timeout, this, &VPNConnection::beginConnection);
 
-    connect(&_hnsdRunner, &HnsdRunner::hnsdSucceeded, this, &VPNConnection::hnsdSucceeded);
-    connect(&_hnsdRunner, &HnsdRunner::hnsdFailed, this, &VPNConnection::hnsdFailed);
-    connect(&_hnsdRunner, &HnsdRunner::hnsdSyncFailure, this, &VPNConnection::hnsdSyncFailure);
+    connect(&_resolverRunner, &ResolverRunner::resolverSucceeded, this,
+        [this](ResolverRunner::Resolver _resolver)
+        {
+            if(_resolver == ResolverRunner::Resolver::Handshake)
+                emit hnsdSucceeded();
+            else
+                emit unboundSucceeded();
+        });
+    connect(&_resolverRunner, &ResolverRunner::resolverFailed, this,
+        [this](ResolverRunner::Resolver _resolver, std::chrono::milliseconds failureDuration)
+        {
+            if(_resolver == ResolverRunner::Resolver::Handshake)
+                emit hnsdFailed(failureDuration);
+            else
+                emit unboundFailed(failureDuration);
+        });
+    connect(&_resolverRunner, &ResolverRunner::hnsdSyncFailure, this, &VPNConnection::hnsdSyncFailure);
 
     // The succeeded/failed signals from _shadowsocksRunner are ignored.  It
     // rarely fails, particularly since it does not do much of anything until we
@@ -783,6 +822,7 @@ void VPNConnection::activateMACE()
     // We can later test if we need a second packet, but it might be used to mitigate
     // issues occured by sending a packet immediately.
     auto maceActivate1 = new QTcpSocket();
+    maceActivate1->setProxy({QNetworkProxy::ProxyType::NoProxy});
     qDebug () << "Sending MACE Packet 1";
     maceActivate1->connectToHost(piaLegacyDnsPrimary, 1111);
     // Tested if error condition is hit by changing the port/invalid IP
@@ -800,6 +840,7 @@ void VPNConnection::activateMACE()
 
     QTimer::singleShot(std::chrono::milliseconds(5000).count(), this, [this]() {
         auto maceActivate2 = new QTcpSocket();
+        maceActivate2->setProxy({QNetworkProxy::ProxyType::NoProxy});
         qDebug () << "Sending MACE Packet 2";
         maceActivate2->connectToHost(piaLegacyDnsPrimary, 1111);
         connect(maceActivate2,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
@@ -1139,7 +1180,7 @@ void VPNConnection::doConnect()
         // the UI will indicate that we used a different transport (since the
         // preferred transport still indicates the user's selection, due to
         // Transport::resolveDefaultPort()).
-        _transportSelector.reset({protocol, selectedPort},
+        _transportSelector.reset(protocol, selectedPort,
                                  _connectingConfig.automaticTransport(),
                                  _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnUdp),
                                  _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnTcp));
@@ -1265,7 +1306,38 @@ void VPNConnection::vpnMethodStateChanged()
                 // use loopback interfaces for loopback queries only.
                 hnsdArgs.push_back(QStringLiteral("--outgoing-dns-if"));
                 hnsdArgs.push_back(QStringLiteral("127.0.0.1,") + g_state.tunnelDeviceLocalAddress());
-                _hnsdRunner.enable(Path::HnsdExecutable, hnsdArgs);
+                _resolverRunner.enable(ResolverRunner::Resolver::Handshake, hnsdArgs);
+            }
+            else if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Local)
+            {
+                // Write the config file
+                {
+                    ConfigWriter conf{Path::UnboundConfigFile};
+                    conf << "server:" << conf.endl;
+                    conf << "    logfile: \"\"" << conf.endl;   // Log to stderr
+                    conf << "    edns-buffer-size: 4096" << conf.endl;
+                    conf << "    max-udp-size: 4096" << conf.endl;
+                    conf << "    qname-minimisation: yes" << conf.endl;
+                    conf << "    do-ip6: no" << conf.endl;
+                    conf << "    interface: " << resolverLocalAddress << conf.endl;
+                    conf << "    outgoing-interface:" << g_state.tunnelDeviceLocalAddress() << conf.endl;
+                    conf << "    verbosity: 1" << conf.endl;
+                    // We can't let unbound drop rights, even on Mac/Linux - it
+                    // drops both user and group rights, and we need it to keep
+                    // the piavpn group to be permitted through the firewall.
+                    //
+                    // On Linux, if the cap_net_bind_service capability is
+                    // available, ResolverRunner will drop to nobody/piavpn.
+                    conf << "    username: \"\"" << conf.endl;
+                    conf << "    do-daemonize: no" << conf.endl;
+                    conf << "    use-syslog: no" << conf.endl;
+                    conf << "    hide-identity: yes" << conf.endl;
+                    conf << "    hide-version: yes" << conf.endl;
+                    conf << "    directory: \"" << Path::InstallationDir << "\"" << conf.endl;
+                    conf << "    pidfile: \"\"" << conf.endl;
+                    conf << "    chroot: \"\"" << conf.endl;
+                }
+                _resolverRunner.enable(ResolverRunner::Resolver::Unbound, {"-c", Path::UnboundConfigFile});
             }
 
             newState = State::Connected;
@@ -1408,11 +1480,15 @@ void VPNConnection::setState(State state)
             _connectTimer.stop();
         }
 
-        // In any state other than Connected, stop hnsd, even if that's our
-        // current DNS setting.  (If we're reconnecting while Handshake is
-        // selected, it'll be restarted after we connect.)
+        // In any state other than Connected, stop the resolver, even if that's
+        // our current DNS setting.  (If we're reconnecting while Handshake/Local
+        // DNS is selected, it'll be restarted after we connect.)
         if(state != State::Connected)
-            _hnsdRunner.disable();
+        {
+            _resolverRunner.disable();
+            // If it was Unbound, delete the old config file
+            QFile::remove(Path::UnboundConfigFile);
+        }
 
         _state = state;
 

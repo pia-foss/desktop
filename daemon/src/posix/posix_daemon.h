@@ -28,6 +28,7 @@
 
 #if defined(Q_OS_MAC)
 #include "mac/kext_client.h"
+#include "mac/mac_dns.h"
 #elif defined(Q_OS_LINUX)
 #include "posix/posix_firewall_iptables.h"
 #include "linux/linux_modsupport.h"
@@ -56,6 +57,9 @@ protected:
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
 
 private:
+    // On Mac, update the bound route on the physical interface; used for split
+    // tunnel and DNS leak protection
+    void updateBoundRoute(const FirewallParams &params);
     void toggleSplitTunnel(const FirewallParams &params);
     template <typename T>
     void prepareSplitTunnel()
@@ -88,7 +92,6 @@ private:
     // The current configuration applied to split tunnel - whether it is
     // enabled, and the network info for bypass apps.
     bool _enableSplitTunnel;
-    OriginalNetworkScan _splitTunnelNetScan;
 
     SubnetBypass _subnetBypass;
 
@@ -99,6 +102,9 @@ private:
 
 #ifdef Q_OS_MAC
     KextMonitor _kextMonitor;
+    MacDns _macDnsMonitor;
+    // Network scan last used to create bound route (see applyFirewallRules())
+    OriginalNetworkScan _boundRouteNetScan;
 #endif
 
 signals:

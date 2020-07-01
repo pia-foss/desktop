@@ -58,6 +58,7 @@ QtObject {
   readonly property bool tapAdapterMissing: NativeDaemon.state.tapAdapterMissing
   readonly property bool wintunMissing: NativeDaemon.state.wintunMissing
   readonly property string netExtensionState: NativeDaemon.state.netExtensionState
+  readonly property bool connectionProblem: NativeDaemon.state.connectionProblem
   readonly property bool invalidClientExit: NativeDaemon.state.invalidClientExit
   readonly property double hnsdFailing: NativeDaemon.state.hnsdFailing
   readonly property double hnsdSyncFailure: NativeDaemon.state.hnsdSyncFailure
@@ -80,111 +81,293 @@ QtObject {
     'unavailable': -3
   }
 
-  // Location metadata - info we need about the locations, but that isn't
-  // provided by the server list.
-  // Currently contains:
-  // - Latitude/longitude
-  // - Translatable name
-  //
-  // Note that the names here are just marked with QT_TRANSLATE_NOOP, they are not
-  // actually translated in the metadata.  Daemon.getLocationName() checks if
-  // the name from the server list still matches the name that was translated,
-  // and only uses the translation if it does.  (This handles cases like
-  // "Germany" becoming "DE Frankfurt", which happened when "DE Berlin" was
-  // added - without this check, we would have displayed
-  // "DE" -> "Germany", "DE Berlin" when the regions were updated.)
-  //
-  // Also, note that Qt's doc calls the function "qsTranslateNoOp", but the name is
-  // actually QT_TRANSLATE_NOOP per the code sample and qqmlbuiltinfunctions.cpp (1801)
-  readonly property var locationMetadata: {
-    "ae": {lat: 23.424076, long: 53.847818, name: QT_TRANSLATE_NOOP("DaemonData", "UAE")},
-    "al": {lat: 41.33165, long: 19.8318, name: QT_TRANSLATE_NOOP("DaemonData", "Albania")},
-    "ar": {lat: -38.416096, long: -63.616673, name: QT_TRANSLATE_NOOP("DaemonData", "Argentina")},
-    "aus": {lat: -33.868820, long: 151.209296, name: QT_TRANSLATE_NOOP("DaemonData", "AU Sydney")},
-    "aus_melbourne": {lat: -37.813628, long: 144.963058, name: QT_TRANSLATE_NOOP("DaemonData", "AU Melbourne")},
-    "aus_perth": {lat: -31.950527, long: 115.860458, name: QT_TRANSLATE_NOOP("DaemonData", "AU Perth")},
-    "austria": {lat: 47.516231, long: 14.550072, name: QT_TRANSLATE_NOOP("DaemonData", "Austria")},
-    "ba": {lat: 43.858181, long: 18.412340, name: QT_TRANSLATE_NOOP("DaemonData", "Bosnia and Herzegovina")},
-    "belgium": {lat: 50.503887, long: 4.469936, name: QT_TRANSLATE_NOOP("DaemonData", "Belgium")},
-    "bg": {lat: 42.655033, long: 25.231817, name: QT_TRANSLATE_NOOP("DaemonData", "Bulgaria")},
-    "brazil": {lat: -14.235004, long: -51.92528, name: QT_TRANSLATE_NOOP("DaemonData", "Brazil")},
-    "ca": {lat: 45.501689, long: -73.567256, name: QT_TRANSLATE_NOOP("DaemonData", "CA Montreal")},
-    "ca_ontario": {lat: 51.253777, long: -85.232212, name: QT_TRANSLATE_NOOP("DaemonData", "CA Ontario")},
-    "ca_toronto": {lat: 43.653226, long: -79.383184, name: QT_TRANSLATE_NOOP("DaemonData", "CA Toronto")},
-    "ca_vancouver": {lat: 49.282729, long: -123.120738, name: QT_TRANSLATE_NOOP("DaemonData", "CA Vancouver")},
-    "czech": {lat: 50.075538, long: 14.4378, name: QT_TRANSLATE_NOOP("DaemonData", "Czech Republic")},
-    "de_berlin": {lat: 52.520007, long: 13.404954, name: QT_TRANSLATE_NOOP("DaemonData", "DE Berlin")},
-    "denmark": {lat: 56.263920, long: 9.501785, name: QT_TRANSLATE_NOOP("DaemonData", "Denmark")},
-    "ee": {lat: 59.436962, long: 24.753574, name: QT_TRANSLATE_NOOP("DaemonData", "Estonia")},
-    "fi": {lat: 61.924110, long: 25.748151, name: QT_TRANSLATE_NOOP("DaemonData", "Finland")},
-    "france": {lat: 46.227638, long: 2.213749, name: QT_TRANSLATE_NOOP("DaemonData", "France")},
-    "germany": {lat: 50.110922, long: 8.682127, name: QT_TRANSLATE_NOOP("DaemonData", "DE Frankfurt")}, //Frankfurt
-    "gr": {lat: 37.983810, long: 23.727539, name: QT_TRANSLATE_NOOP("DaemonData", "Greece")},
-    "hk": {lat: 22.396428, long: 114.109497, name: QT_TRANSLATE_NOOP("DaemonData", "Hong Kong")},
-    "hr": {lat: 45.815399, long: 15.966568, name: QT_TRANSLATE_NOOP("DaemonData", "Croatia")},
-    "hungary": {lat: 47.162494, long: 19.503304, name: QT_TRANSLATE_NOOP("DaemonData", "Hungary")},
-    "in": {lat: 20.593684, long: 78.96288, name: QT_TRANSLATE_NOOP("DaemonData", "India")},
-    "ireland": {lat: 53.142367, long: -7.692054, name: QT_TRANSLATE_NOOP("DaemonData", "Ireland")},
-    "is": {lat: 64.852829, long: -18.301501, name: QT_TRANSLATE_NOOP("DaemonData", "Iceland")},
-    "israel": {lat: 31.046051, long: 34.851612, name: QT_TRANSLATE_NOOP("DaemonData", "Israel")},
-    "italy": {lat: 41.871940, long: 12.56738, name: QT_TRANSLATE_NOOP("DaemonData", "Italy")},
-    "japan": {lat: 36.204824, long: 138.252924, name: QT_TRANSLATE_NOOP("DaemonData", "Japan")},
-    "lt": {lat: 54.687157, long: 25.279652, name: QT_TRANSLATE_NOOP("DaemonData", "Lithuania")},
-    "lu": {lat: 49.815273, long: 6.129583, name: QT_TRANSLATE_NOOP("DaemonData", "Luxembourg")},
-    "lv": {lat: 56.946285, long: 24.105078, name: QT_TRANSLATE_NOOP("DaemonData", "Latvia")},
-    "md": {lat: 47.265819, long: 28.598334, name: QT_TRANSLATE_NOOP("DaemonData", "Moldova")},
-    "mexico": {lat: 23.634501, long: -102.552784, name: QT_TRANSLATE_NOOP("DaemonData", "Mexico")},
-    "mk": {lat: 41.608635, long: 21.745275, name: QT_TRANSLATE_NOOP("DaemonData", "North Macedonia")},
-    "my": {lat: 3.140853, long: 101.693207, name: QT_TRANSLATE_NOOP("DaemonData", "Malaysia")},
-    "nl": {lat: 52.132633, long: 5.291266, name: QT_TRANSLATE_NOOP("DaemonData", "Netherlands")},
-    "no": {lat: 60.472024, long: 8.468946, name: QT_TRANSLATE_NOOP("DaemonData", "Norway")},
-    "nz": {lat: -40.900557, long: 174.885971, name: QT_TRANSLATE_NOOP("DaemonData", "New Zealand")},
-    "poland": {lat: 51.919438, long: 19.145136, name: QT_TRANSLATE_NOOP("DaemonData", "Poland")},
-    "pt": {lat: 38.736946, long: -9.142685, name: QT_TRANSLATE_NOOP("DaemonData", "Portugal")},
-    "ro": {lat: 45.943161, long: 24.96676, name: QT_TRANSLATE_NOOP("DaemonData", "Romania")},
-    "rs": {lat: 44.016421, long: 21.005859, name: QT_TRANSLATE_NOOP("DaemonData", "Serbia")},
-    "sg": {lat: 1.352083, long: 103.819836, name: QT_TRANSLATE_NOOP("DaemonData", "Singapore")},
-    "si": {lat: 46.075219, long: 14.882733, name: QT_TRANSLATE_NOOP("DaemonData", "Slovenia")},
-    "sk": {lat: 48.148598, long: 17.107748, name: QT_TRANSLATE_NOOP("DaemonData", "Slovakia")},
-    "spain": {lat: 40.463667, long: -3.74922, name: QT_TRANSLATE_NOOP("DaemonData", "Spain")},
-    "sweden": {lat: 60.128161, long: 18.643501, name: QT_TRANSLATE_NOOP("DaemonData", "Sweden")},
-    "swiss": {lat: 46.818188, long: 8.227512, name: QT_TRANSLATE_NOOP("DaemonData", "Switzerland")},
-    "tr": {lat: 38.963745, long: 35.243322, name: QT_TRANSLATE_NOOP("DaemonData", "Turkey")},
-    "ua": {lat: 48.379433, long: 31.165581, name: QT_TRANSLATE_NOOP("DaemonData", "Ukraine")},
-    "uk": {lat: 51.507351, long: -0.127758, name: QT_TRANSLATE_NOOP("DaemonData", "UK London")}, // London
-    "uk_manchester": {lat: 53.480759, long: -2.242631, name: QT_TRANSLATE_NOOP("DaemonData", "UK Manchester")},
-    "uk_southampton": {lat: 50.909700, long: -1.404351, name: QT_TRANSLATE_NOOP("DaemonData", "UK Southampton")},
-    "us2": {lat: 36.414652, long: -77.739258, name: QT_TRANSLATE_NOOP("DaemonData", "US East")}, // East
-    "us3": {lat: 40.607697, long: -120.805664, name: QT_TRANSLATE_NOOP("DaemonData", "US West")},
-    "us_atlanta": {lat: 33.748995, long: -84.387982, name: QT_TRANSLATE_NOOP("DaemonData", "US Atlanta")},
-    "us_california": {lat: 36.778261, long: -119.417932, name: QT_TRANSLATE_NOOP("DaemonData", "US California")},
-    "us_chicago": {lat: 41.878114, long: -87.629798, name: QT_TRANSLATE_NOOP("DaemonData", "US Chicago")},
-    "us_denver": {lat: 39.739236, long: -104.990251, name: QT_TRANSLATE_NOOP("DaemonData", "US Denver")},
-    "us_florida": {lat: 27.664827, long: -81.515754, name: QT_TRANSLATE_NOOP("DaemonData", "US Florida")},
-    "us_houston": {lat: 29.760427, long: -95.369803, name: QT_TRANSLATE_NOOP("DaemonData", "US Houston")},
-    "us_las_vegas": {lat: 36.169941, long: -115.13983, name: QT_TRANSLATE_NOOP("DaemonData", "US Las Vegas")},
-    "us_new_york_city": {lat: 40.712775, long: -74.005973, name: QT_TRANSLATE_NOOP("DaemonData", "US New York City")},
-    "us_seattle": {lat: 47.606209, long: -122.332071, name: QT_TRANSLATE_NOOP("DaemonData", "US Seattle")},
-    "us_silicon_valley": {lat: 37.593392, long: -122.04383, name: QT_TRANSLATE_NOOP("DaemonData", "US Silicon Valley")},
-    "us_south_west": {lat: 33.623962, long: -109.654814, name: QT_TRANSLATE_NOOP("DaemonData", "US Texas")},
-    "us_washington_dc": {lat: 38.907192, long: -77.036871, name: QT_TRANSLATE_NOOP("DaemonData", "US Washington DC")},
-    "za": {lat: -30.559482, long: 22.937506, name: QT_TRANSLATE_NOOP("DaemonData", "South Africa")}
+  // Location geographic coordinates.  Not currently provided by servers lists.
+  readonly property var locationCoords: {
+    "ad": {lat: 42.506287, long: 1.521801},
+    "ae": {lat: 23.424076, long: 53.847818},
+    "al": {lat: 41.33165, long: 19.8318},
+    "am": {lat: 40.179188, long: 44.499104},
+    "ar": {lat: -38.416096, long: -63.616673},
+    "aus": {lat: -33.868820, long: 151.209296},
+    "aus_melbourne": {lat: -37.813628, long: 144.963058},
+    "aus_perth": {lat: -31.950527, long: 115.860458},
+    "austria": {lat: 47.516231, long: 14.550072},
+    "ba": {lat: 43.858181, long: 18.412340},
+    "bd": {lat: 23.810331, long: 90.412521},
+    "belgium": {lat: 50.503887, long: 4.469936},
+    "bg": {lat: 42.655033, long: 25.231817},
+    "br": {lat: -14.235004, long: -51.92528},
+    "bs": {lat: 25.047983, long: -77.355415},
+    "by": {lat: 27.561524, long: 53.904540},
+    "ca": {lat: 45.501689, long: -73.567256},
+    "ca_ontario": {lat: 51.253777, long: -85.232212},
+    "ca_toronto": {lat: 43.653226, long: -79.383184},
+    "ca_vancouver": {lat: 49.282729, long: -123.120738},
+    "cn": {lat: 114.057868, long: 22.543099},
+    "cy": {lat: 33.382988, long: 35.188336},
+    "czech": {lat: 50.075538, long: 14.4378},
+    "de-frankfurt": {lat: 50.110922, long: 8.682127},
+    "de_berlin": {lat: 52.520007, long: 13.404954},
+    "denmark": {lat: 56.263920, long: 9.501785},
+    "dz": {lat: 36.753769, long: 3.058756},
+    "ee": {lat: 59.436962, long: 24.753574},
+    "eg": {lat: 30.044420, long: 31.235712},
+    "fi": {lat: 61.924110, long: 25.748151},
+    "france": {lat: 46.227638, long: 2.213749},
+    "ge": {lat: 41.716667, long: 44.783333},
+    "germany": {lat: 50.110922, long: 8.682127},
+    "gl": {lat: 64.175000, long: -51.738889},
+    "gr": {lat: 37.983810, long: 23.727539},
+    "hk": {lat: 22.396428, long: 114.109497},
+    "hr": {lat: 45.815399, long: 15.966568},
+    "hungary": {lat: 47.162494, long: 19.503304},
+    "im": {lat: 54.152337, long: -4.486123},
+    "in": {lat: 20.593684, long: 78.96288},
+    "ir": {lat: 35.689197, long: 51.388974},
+    "ireland": {lat: 53.142367, long: -7.692054},
+    "is": {lat: 64.852829, long: -18.301501},
+    "israel": {lat: 31.046051, long: 34.851612},
+    "italy": {lat: 41.871940, long: 12.56738},
+    "japan": {lat: 36.204824, long: 138.252924},
+    "kh": {lat: 104.892167, long: 11.544873},
+    "kz": {lat: 51.160523, long: 71.470356},
+    "li": {lat: 47.141370, long: 9.520700},
+    "lk": {lat: 6.927079, long: 79.861243},
+    "lt": {lat: 54.687157, long: 25.279652},
+    "lu": {lat: 49.815273, long: 6.129583},
+    "lv": {lat: 56.946285, long: 24.105078},
+    "ma": {lat: 33.971590, long: -6.849813},
+    "mc": {lat: 43.738418, long: 7.424616},
+    "md": {lat: 47.265819, long: 28.598334},
+    "me": {lat: 42.441286, long: 19.262892},
+    "mexico": {lat: 23.634501, long: -102.552784},
+    "mk": {lat: 41.608635, long: 21.745275},
+    "mn": {lat: 47.920000, long: 106.920000},
+    "mo": {lat: 22.198745, long: 113.543873},
+    "mt": {lat: 35.898908, long: 14.514553},
+    "mx": {lat: 23.634501, long: -102.552784},
+    "my": {lat: 3.140853, long: 101.693207},
+    "ng": {lat: 6.524379, long: 3.379206},
+    "nl": {lat: 52.132633, long: 5.291266},
+    "nl_amsterdam": {lat: 52.370216, long: 4.895168},
+    "no": {lat: 60.472024, long: 8.468946},
+    "nz": {lat: -40.900557, long: 174.885971},
+    "pa": {lat: 8.983333, long: -79.516667},
+    "poland": {lat: 51.919438, long: 19.145136},
+    "pt": {lat: 38.736946, long: -9.142685},
+    "qa": {lat: 25.291610, long: 51.530437},
+    "ro": {lat: 45.943161, long: 24.96676},
+    "rs": {lat: 44.016421, long: 21.005859},
+    "ru": {lat: 59.934280, long: 30.335099},
+    "sa": {lat: 24.713552, long: 46.675296},
+    "sg": {lat: 1.352083, long: 103.819836},
+    "si": {lat: 46.075219, long: 14.882733},
+    "sk": {lat: 48.148598, long: 17.107748},
+    "sofia": {lat: 42.697708, long: 23.321867},
+    "spain": {lat: 40.463667, long: -3.74922},
+    "sweden": {lat: 60.128161, long: 18.643501},
+    "swiss": {lat: 46.818188, long: 8.227512},
+    "tr": {lat: 38.963745, long: 35.243322},
+    "tw": {lat: 25.032969, long: 121.565418},
+    "ua": {lat: 48.379433, long: 31.165581},
+    "uk": {lat: 51.507351, long: -0.127758},
+    "uk_manchester": {lat: 53.480759, long: -2.242631},
+    "uk_southampton": {lat: 50.909700, long: -1.404351},
+    "us2": {lat: 36.414652, long: -77.739258},
+    "us3": {lat: 40.607697, long: -120.805664},
+    "us_atlanta": {lat: 33.748995, long: -84.387982},
+    "us_california": {lat: 36.778261, long: -119.417932},
+    "us_chicago": {lat: 41.878114, long: -87.629798},
+    "us_denver": {lat: 39.739236, long: -104.990251},
+    "us_florida": {lat: 27.664827, long: -81.515754},
+    "us_houston": {lat: 29.760427, long: -95.369803},
+    "us_las_vegas": {lat: 36.169941, long: -115.13983},
+    "us_new_york_city": {lat: 40.712775, long: -74.005973},
+    "us_seattle": {lat: 47.606209, long: -122.332071},
+    "us_silicon_valley": {lat: 37.593392, long: -122.04383},
+    "us_south_west": {lat: 33.623962, long: -109.654814},
+    "us_washington_dc": {lat: 38.907192, long: -77.036871},
+    "ve": {lat: 10.469640, long: -66.803719},
+    "vn": {lat: 21.027764, long: 105.834160},
+    "za": {lat: -30.559482, long: 22.937506},
   }
 
-  // The regions list doesn't give us country names either.  We only need them
-  // for countries with more than one region.
+  // Location names, so they can be translated, and translations shipped with
+  // the app.
+  //
+  // These are all put in one big pool, _not_ associated with specific
+  // locations, since they have moved around in some instances (especially in
+  // the legacy-modern transition).  Location names have also become country
+  // group names, and vice versa - country group names are also included in this
+  // list.
+  //
+  // These are just marked with QT_TRANSLATE_NOOP, so the resulting array is
+  // just all the English location names.  It's only used to see if a name from
+  // the regions list is actually one that we know about and can translate.
+  //
+  // Also, note that Qt's doc calls the function "qsTranslateNoOp", but the name
+  // is actually QT_TRANSLATE_NOOP per the code sample and
+  // qqmlbuiltinfunctions.cpp (1801)
+  readonly property var locationTranslatableNames: [
+    QT_TRANSLATE_NOOP("DaemonData", "AU Melbourne"),
+    QT_TRANSLATE_NOOP("DaemonData", "AU Perth"),
+    QT_TRANSLATE_NOOP("DaemonData", "AU Sydney"),
+    QT_TRANSLATE_NOOP("DaemonData", "Albania"),
+    QT_TRANSLATE_NOOP("DaemonData", "Algeria"),
+    QT_TRANSLATE_NOOP("DaemonData", "Andorra"),
+    QT_TRANSLATE_NOOP("DaemonData", "Argentina"),
+    QT_TRANSLATE_NOOP("DaemonData", "Armenia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Australia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Austria"),
+    QT_TRANSLATE_NOOP("DaemonData", "Bahamas"),
+    QT_TRANSLATE_NOOP("DaemonData", "Bangladesh"),
+    QT_TRANSLATE_NOOP("DaemonData", "Belarus"),
+    QT_TRANSLATE_NOOP("DaemonData", "Belgium"),
+    QT_TRANSLATE_NOOP("DaemonData", "Bosnia and Herzegovina"),
+    QT_TRANSLATE_NOOP("DaemonData", "Brazil"),
+    QT_TRANSLATE_NOOP("DaemonData", "Bulgaria"),
+    QT_TRANSLATE_NOOP("DaemonData", "CA Montreal"),
+    QT_TRANSLATE_NOOP("DaemonData", "CA Ontario"),
+    QT_TRANSLATE_NOOP("DaemonData", "CA Toronto"),
+    QT_TRANSLATE_NOOP("DaemonData", "CA Vancouver"),
+    QT_TRANSLATE_NOOP("DaemonData", "Cambodia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Canada"),
+    QT_TRANSLATE_NOOP("DaemonData", "China"),
+    QT_TRANSLATE_NOOP("DaemonData", "Cyprus"),
+    QT_TRANSLATE_NOOP("DaemonData", "Croatia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Czech Republic"),
+    QT_TRANSLATE_NOOP("DaemonData", "DE Berlin"),
+    QT_TRANSLATE_NOOP("DaemonData", "DE Frankfurt"),
+    QT_TRANSLATE_NOOP("DaemonData", "Denmark"),
+    QT_TRANSLATE_NOOP("DaemonData", "Egypt"),
+    QT_TRANSLATE_NOOP("DaemonData", "Estonia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Finland"),
+    QT_TRANSLATE_NOOP("DaemonData", "France"),
+    QT_TRANSLATE_NOOP("DaemonData", "Germany"),
+    QT_TRANSLATE_NOOP("DaemonData", "Georgia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Greece"),
+    QT_TRANSLATE_NOOP("DaemonData", "Greenland"),
+    QT_TRANSLATE_NOOP("DaemonData", "Hong Kong"),
+    QT_TRANSLATE_NOOP("DaemonData", "Hungary"),
+    QT_TRANSLATE_NOOP("DaemonData", "Iceland"),
+    QT_TRANSLATE_NOOP("DaemonData", "India"),
+    QT_TRANSLATE_NOOP("DaemonData", "Iran"),
+    QT_TRANSLATE_NOOP("DaemonData", "Ireland"),
+    QT_TRANSLATE_NOOP("DaemonData", "Isle of Man"),
+    QT_TRANSLATE_NOOP("DaemonData", "Israel"),
+    QT_TRANSLATE_NOOP("DaemonData", "Italy"),
+    QT_TRANSLATE_NOOP("DaemonData", "Japan"),
+    QT_TRANSLATE_NOOP("DaemonData", "Kazakhstan"),
+    QT_TRANSLATE_NOOP("DaemonData", "Latvia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Liechtenstein"),
+    QT_TRANSLATE_NOOP("DaemonData", "Lithuania"),
+    QT_TRANSLATE_NOOP("DaemonData", "Luxembourg"),
+    QT_TRANSLATE_NOOP("DaemonData", "Macau"),
+    QT_TRANSLATE_NOOP("DaemonData", "Malaysia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Malta"),
+    QT_TRANSLATE_NOOP("DaemonData", "Mexico"),
+    QT_TRANSLATE_NOOP("DaemonData", "Moldova"),
+    QT_TRANSLATE_NOOP("DaemonData", "Monaco"),
+    QT_TRANSLATE_NOOP("DaemonData", "Mongolia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Montenegro"),
+    QT_TRANSLATE_NOOP("DaemonData", "Morocco"),
+    QT_TRANSLATE_NOOP("DaemonData", "Netherlands"),
+    QT_TRANSLATE_NOOP("DaemonData", "New Zealand"),
+    QT_TRANSLATE_NOOP("DaemonData", "Nigeria"),
+    QT_TRANSLATE_NOOP("DaemonData", "North Macedonia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Norway"),
+    QT_TRANSLATE_NOOP("DaemonData", "Panama"),
+    QT_TRANSLATE_NOOP("DaemonData", "Philippines"),
+    QT_TRANSLATE_NOOP("DaemonData", "Poland"),
+    QT_TRANSLATE_NOOP("DaemonData", "Portugal"),
+    QT_TRANSLATE_NOOP("DaemonData", "Qatar"),
+    QT_TRANSLATE_NOOP("DaemonData", "Romania"),
+    QT_TRANSLATE_NOOP("DaemonData", "Russia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Saudi Arabia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Serbia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Singapore"),
+    QT_TRANSLATE_NOOP("DaemonData", "Slovakia"),
+    QT_TRANSLATE_NOOP("DaemonData", "Slovenia"),
+    QT_TRANSLATE_NOOP("DaemonData", "South Africa"),
+    QT_TRANSLATE_NOOP("DaemonData", "Spain"),
+    QT_TRANSLATE_NOOP("DaemonData", "Sri Lanka"),
+    QT_TRANSLATE_NOOP("DaemonData", "Sweden"),
+    QT_TRANSLATE_NOOP("DaemonData", "Switzerland"),
+    QT_TRANSLATE_NOOP("DaemonData", "Taiwan"),
+    QT_TRANSLATE_NOOP("DaemonData", "Turkey"),
+    QT_TRANSLATE_NOOP("DaemonData", "UAE"),
+    QT_TRANSLATE_NOOP("DaemonData", "UK London"),
+    QT_TRANSLATE_NOOP("DaemonData", "UK Manchester"),
+    QT_TRANSLATE_NOOP("DaemonData", "UK Southampton"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Atlanta"),
+    QT_TRANSLATE_NOOP("DaemonData", "US California"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Chicago"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Denver"),
+    QT_TRANSLATE_NOOP("DaemonData", "US East"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Florida"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Houston"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Las Vegas"),
+    QT_TRANSLATE_NOOP("DaemonData", "US New York City"),
+    QT_TRANSLATE_NOOP("DaemonData", "US New York"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Seattle"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Silicon Valley"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Texas"),
+    QT_TRANSLATE_NOOP("DaemonData", "US Washington DC"),
+    QT_TRANSLATE_NOOP("DaemonData", "US West"),
+    QT_TRANSLATE_NOOP("DaemonData", "Ukraine"),
+    QT_TRANSLATE_NOOP("DaemonData", "United Kingdom"),
+    QT_TRANSLATE_NOOP("DaemonData", "United States"),
+    QT_TRANSLATE_NOOP("DaemonData", "Venezuela"),
+    QT_TRANSLATE_NOOP("DaemonData", "Vietnam"),
+  ]
+
+  // Put the translatable names in an object (as a crude map) to avoid iterating
+  // through the list just to sanity-check each name as it's translated
+  readonly property var locationNames: {
+    var names = {}
+    for(var i=0; i<locationTranslatableNames.length; ++i) {
+      names[locationTranslatableNames[i]] = true
+    }
+    return names
+  }
+
+  // The regions list just gives us country codes, not names.  Map the codes to
+  // names here.  The translatable names appear in the list above.
   readonly property var countryNames: {
-    "de": QT_TRANSLATE_NOOP("DaemonData", "Germany"),
-    "ca": QT_TRANSLATE_NOOP("DaemonData", "Canada"),
-    "us": QT_TRANSLATE_NOOP("DaemonData", "United States"),
-    "au": QT_TRANSLATE_NOOP("DaemonData", "Australia"),
-    "gb": QT_TRANSLATE_NOOP("DaemonData", "United Kingdom")
+    "de": "Germany",
+    "ca": "Canada",
+    "us": "United States",
+    "au": "Australia",
+    "gb": "United Kingdom"
+  }
+
+  function haveTranslatableName(name) {
+    return !!locationNames[name]
   }
 
   // Translate a location name.  Used by Daemon.getLocationName() and
   // Daemon.getCountryName() - just fills in the correct context for uiTranslate().
   function translateName(name) {
-    return uiTranslate("DaemonData", name)
+    // Make sure the name is one we're aware of.  Locations can be added and
+    // renamed, so we may get names here that we didn't know about when the app
+    // was shipped.
+    //
+    // If a location is renamed to a name that we haven't translated, it will
+    // display the new English name, and the old translations will not be used.
+    // This is intentional to handle cases like "Germany" becoming
+    // "DE Frankfurt", which happened when "DE Berlin" was added - without this
+    // check, we would have displayed "DE" -> "Germany", "DE Berlin" when the
+    // regions were updated.
+    //
+    // It would _probably_ be fine to skip this check, but this is best for
+    // robustness:
+    // - makes sure we don't rely on any particular Qt behavior when trying to
+    //   translate a string that doens't exist in translation files
+    // - makes sure we don't accidentally use some non-location-name string that
+    //   might appear in the DaemonData context somehow
+    if(haveTranslatableName(name))
+      return uiTranslate("DaemonData", name)
+    return name // Name not known
   }
 
   function getBestLocationForCountry(countryCode) {
@@ -200,33 +383,12 @@ QtObject {
     // be manually added.
     for(var locId in availableLocations) {
       loc = availableLocations[locId]
-      if(!locationMetadata[locId]) {
-        console.info('Location ' + loc.name + ' (' + locId + ') does not have metadata')
+      if(!locationCoords[locId]) {
+        console.info('Location ' + loc.name + ' (' + locId + ') does not have coordinates')
       }
-      else {
-        // Check translatable names against the names the server reports.  This
-        // detects server names that have changed and need to be re-localized.
-        meta = locationMetadata[locId]
-        if(loc.name !== meta.name) {
-          console.info('Location ' + locId + ' has changed name: ' + meta.name +
-                       ' -> ' + loc.name)
-        }
-      }
-    }
 
-    // Log any locations that might have been removed - metadata that doesn't
-    // correspond to an actual location.
-    // Do this only if at least one location exists.  (In case the locations
-    // haven't been loaded at all by the daemon, don't log a bunch of spurious
-    // warnings.  This is mainly for dev diagnostics so it doesn't have to be
-    // perfect.)
-    if(availableLocations.length > 0) {
-      for(var metaId in locationMetadata) {
-        if(!availableLocations[metaId]) {
-          meta = locationMetadata[metaId]
-          console.info('Location ' + meta.name + ' (' + metaId + ') has metadata but was not listed by server')
-        }
-      }
+      if(!haveTranslatableName(loc.name))
+        console.info('Location ' + loc.name + ' (' + locId + ') does not have name translations')
     }
 
     // Check for countries that have more than one location but are missing a

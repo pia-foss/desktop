@@ -353,6 +353,7 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
     static const QStringList validDNSSettings {
         "pia",
         "handshake",
+        "local",
     };
     static const QRegularExpression validIP(QStringLiteral("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$"));
     QString value;
@@ -382,7 +383,9 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
-const QString hnsdLocalAddress{QStringLiteral("127.80.73.65")};
+// Local 127/8 address used by a local resolver.  We can't put this on 127.0.0.1
+// because port 53 may already be in use on that address.
+const QString resolverLocalAddress{QStringLiteral("127.80.73.65")};
 const QString piaLegacyDnsPrimary{QStringLiteral("209.222.18.222")};
 const QString piaLegacyDnsSecondary{QStringLiteral("209.222.18.218")};
 const QString piaModernDnsVpnMace{QStringLiteral("10.0.0.241")};

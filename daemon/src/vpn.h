@@ -54,27 +54,40 @@ protected:
     QString _devNode;
 };
 
-
+// ResolverRunner runs a local DNS resolver process - either Unbound or
+// hnsd (the Handshake resolver).  Both of these are recursive DNS resolvers, so
+// they will contact authoritative DNS servers and must be allowed through the
+// firewall.
+//
 // We subclass ProcessRunner to implement the setupProcess() method.
 // Doing this allows us to set the process group as "piahnsd", which we need
-// to properly manage handshake firewall rules.
+// to properly manage the resolver firewall rules.  (The group is now also used
+// for unbound, but the name has been kept to avoid changing it on user
+// systems.)
 //
-// HnsdRunner also monitors hnsd to trigger notifications if it won't start or
-// doesn't sync any blocks.
-class HnsdRunner : public ProcessRunner
+// When running hnsd, ResolverRunner also monitors it to trigger notifications
+// if it won't start or doesn't sync any blocks.
+class ResolverRunner : public ProcessRunner
 {
     Q_OBJECT
 
 public:
-    HnsdRunner(RestartStrategy::Params restartParams);
+    enum class Resolver
+    {
+        Unbound,
+        Handshake,
+    };
+
+public:
+    ResolverRunner(RestartStrategy::Params restartParams);
 
 signals:
-    // hnsd has successfully started.
-    void hnsdSucceeded();
-    // hnsd has failed (possibly again), includes the failure time from
+    // Resolver has successfully started.
+    void resolverSucceeded(Resolver resolver);
+    // Resolver has failed (possibly again), includes the failure time from
     // ProcessRunner (which could be 0 if the failure has just started).
-    void hnsdFailed(std::chrono::milliseconds failureDuration);
-    // Indicate whether hnsd is failing to sync.
+    void resolverFailed(Resolver resolver, std::chrono::milliseconds failureDuration);
+    // Indicate whether hnsd is failing to sync (not used for Unbound).
     // - It's failing to sync if it has been running for 5 seconds, but hasn't
     //   synced at least 1 block.
     // - It's not failing to sync once it syncs a block, or if hnsd is disabled
@@ -87,11 +100,13 @@ signals:
 public:
     // Change process UID/GID on Linux/MacOS
     void setupProcess(UidGidProcess &process) override;
-    bool enable(QString program, QStringList arguments) override;
-    void disable() override;
+    bool enable(Resolver resolver, QStringList arguments);
+    void disable();
 
 private:
-    // Only used by Linux - check whether Hnsd can bind to low ports (cap_net_bind_service capability)
+    const Path &getResolverExecutable() const;
+    // Only used by Linux - check whether the resolver can bind to low ports
+    // (cap_net_bind_service capability)
     bool hasNetBindServiceCapability();
 
 private:
@@ -99,6 +114,9 @@ private:
     // sync at least 1 block before this timer elapses, or we assume it is not
     // working.
     QTimer _hnsdSyncTimer;
+    // The resolver we're currently running when active.  Controls whether we
+    // do the hnsd sync timeout, and emitted with success/failure signals.
+    Resolver _activeResolver;
 };
 
 // ProcessRunner for Shadowsocks - drops UID to 'nobody' on Unix platforms, and
@@ -112,7 +130,7 @@ public:
     ShadowsocksRunner(RestartStrategy::Params restartParams);
 
 public:
-    virtual bool enable(QString program, QStringList arguments) override;
+    bool enable(QString program, QStringList arguments);
     virtual void setupProcess(UidGidProcess &process) override;
 
     // Get the local port - 0 if it hasn't been detected yet since Shadowsocks
@@ -208,7 +226,7 @@ private:
 
 public:
     // Reset TransportSelector for a new connection sequence.
-    void reset(Transport preferred, bool useAlternates,
+    void reset(const QString &protocol, uint port, bool useAlternates,
                const DescendingPortSet &udpPorts,
                const DescendingPortSet &tcpPorts);
 
@@ -289,6 +307,7 @@ public:
     {
         Pia,
         Handshake,
+        Local,
         Existing,
         Custom
     };
@@ -505,13 +524,13 @@ public:
 
     // Update the current network in the VPNMethod when it has changed.
     void updateNetwork(const OriginalNetworkScan &newNetwork);
+    void scheduleMaceDnsCacheFlush();
 
 public slots:
     void connectVPN(bool force);
     void disconnectVPN();
 
 private:
-    void scheduleMaceDnsCacheFlush();
     void beginConnection();
     // Whether to use slow reconnect intervals based on the current attempt
     // count
@@ -545,7 +564,9 @@ signals:
     // The total sent/received bytecounts and the interval measurements have
     // changed.
     void byteCountsChanged();
-    // Signals forwarded from HnsdRunner
+    // Signals forwarded from ResolverRunner for each resolver
+    void unboundSucceeded();
+    void unboundFailed(std::chrono::milliseconds failureDuration);
     void hnsdSucceeded();
     void hnsdFailed(std::chrono::milliseconds failureDuration);
     void hnsdSyncFailure(bool failing);
@@ -576,7 +597,7 @@ private:
     // connection.
     VPNMethod* _method;
     // Runner for hnsd process, enabled when we connect with Handshake DNS.
-    HnsdRunner _hnsdRunner;
+    ResolverRunner _resolverRunner;
     // Runner for ss-local process, enabled when we connect with a Shadowsocks
     // proxy.
     ShadowsocksRunner _shadowsocksRunner;

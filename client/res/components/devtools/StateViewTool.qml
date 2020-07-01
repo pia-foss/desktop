@@ -77,7 +77,8 @@ Item {
         onClicked: tool.populate(Daemon.state,
                                  ["availableLocations", "groupedLocations",
                                   "vpnLocations", "shadowsocksLocations",
-                                  "locationMetadata"])
+                                  "locationCoords", "locationTrasnlatableNames",
+                                  "locationNames", "countryNames"])
       }
       ToolButton {
         text: "ClientState"

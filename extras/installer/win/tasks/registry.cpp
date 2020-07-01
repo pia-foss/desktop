@@ -19,58 +19,152 @@
 #include "registry.h"
 #include "file.h"
 #include "brand.h"
+#include <cassert>
 
-static const wchar_t g_uninstallRegistryKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" BRAND_WINDOWS_PRODUCT_GUID;
-
-std::vector<std::wstring> loadAllUserRegistryHives()
+namespace
 {
-    HKEY key;
-    if (LSTATUS err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList", 0, KEY_READ, &key))
+    const wchar_t g_uninstallRegistryKey[] = L"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" BRAND_WINDOWS_PRODUCT_GUID;
+    const wchar_t g_urlHandlerRegistryKey[] = L"HKCR\\" BRAND_CODE "vpn";
+
+    // Check if a UTF-16 value starts with a known prefix.  If it does, returns
+    // the position following the prefix (the rest of the string).  Otherwise,
+    // returns nullptr.
+    //
+    // If the two strings are exactly the same, returns an empty string (it
+    // matches, but there is no content left).  (Specifically, this returns the
+    // pointer to the original value's null terminator.)
+    template<std::size_t len>
+    utf16ptr matchPrefix(const wchar_t (&prefix)[len], utf16ptr value)
     {
-        LOG("Failed to get list of profiles (%d)", err);
-        return {};
+        assert(prefix[len-1] == 0); // Null-terminated
+        if(std::wcsncmp(prefix, value, len-1) == 0)
+            return &value[len-1];
+        return nullptr;
     }
-    std::vector<std::wstring> sids;
-    for (DWORD index = 0; ; index++)
+
+    HKEY openSubkey(HKEY root, utf16ptr path)
     {
-        std::wstring name;
-        name.resize(MAX_PATH, 0);
-        DWORD len = name.size();
-        if (LSTATUS err = RegEnumKeyExW(key, index, &name[0], &len, NULL, NULL, NULL, NULL))
+        HKEY hkey{nullptr};
+        DWORD disposition;
+        if(LSTATUS err = RegCreateKeyExW(root, path, 0, NULL, 0, KEY_ALL_ACCESS,
+                                         NULL, &hkey, &disposition))
         {
-            if (err == ERROR_NO_MORE_ITEMS)
-                return sids;
-            LOG("Failed to retrieve profile %d (%d)", err);
-            continue;
+            LOG("Failed to create/open registry key %ls (%d)",
+                path, err);
+            return nullptr;
         }
-        name.resize(len, 0);
-        HKEY subkey;
-        if (LSTATUS err = RegOpenKeyW(HKEY_USERS, name.c_str(), &subkey))
-        {
-            std::wstring path;
-            path.resize(MAX_PATH, 0);
-            DWORD len = path.size() * 2, type;
-            if (LSTATUS err = RegGetValueW(key, name.c_str(), L"ProfileImagePath", RRF_RT_ANY, &type, &path[0], &len))
-            {
-                LOG("Failed to get profile path for %ls (%d)", name, err);
-                continue;
-            }
-            path.resize(len / 2 - 1, 0);
-            path += L"\\ntuser.dat";
-            if (!PathFileExistsW(path.c_str()))
-                continue;
-            if (LSTATUS err = RegLoadKeyW(HKEY_USERS, name.c_str(), path.c_str()))
-            {
-                LOG("Unable to load registry hive for %ls (%d)", name, err);
-                continue;
-            }
-        }
-        else
-            RegCloseKey(subkey);
-        sids.emplace_back(std::move(name));
+
+        utf16ptr dispositionStr{L"Unknown"};
+        if(disposition == REG_OPENED_EXISTING_KEY)
+            dispositionStr = L"Opened existing";
+        else if(disposition == REG_CREATED_NEW_KEY)
+            dispositionStr = L"Created";
+        LOG("Opened subkey %ls - (%d) %ls", path, disposition, dispositionStr);
+        return hkey;
     }
-    RegCloseKey(key);
-    return sids;
+}
+
+std::pair<HKEY, utf16ptr> splitRegistryRootedPath(utf16ptr rootedPath)
+{
+    utf16ptr path{nullptr};
+    path = matchPrefix(L"HKCR\\", rootedPath);
+    if(path)
+        return {HKEY_CLASSES_ROOT, path};
+    path = matchPrefix(L"HKCC\\", rootedPath);
+    if(path)
+        return {HKEY_CURRENT_CONFIG, path};
+    path = matchPrefix(L"HKCU\\", rootedPath);
+    if(path)
+        return {HKEY_CURRENT_USER, path};
+    path = matchPrefix(L"HKLM\\", rootedPath);
+    if(path)
+        return {HKEY_LOCAL_MACHINE, path};
+    path = matchPrefix(L"HKU\\", rootedPath);
+    if(path)
+        return {HKEY_USERS, path};
+    LOG("Unrecognized registry path: %ls", rootedPath);
+    return {nullptr, nullptr};
+}
+
+void RegistryBackup::backup(HKEY hkey, utf16ptr tracePath)
+{
+    _existingKeyBackup = createBackupFile();
+    if (!_existingKeyBackup.empty())
+    {
+        DeleteFileW(_existingKeyBackup.c_str());
+        if(LSTATUS err = RegSaveKeyExW(hkey, _existingKeyBackup.c_str(), NULL, REG_LATEST_FORMAT))
+        {
+            LOG("Unable to backup registry key %ls (%d)", tracePath, err);
+        }
+        if (!PathFileExistsW(_existingKeyBackup.c_str()))
+            _existingKeyBackup.clear();
+    }
+}
+
+void RegistryBackup::restore(HKEY root, utf16ptr path)
+{
+    if (!_existingKeyBackup.empty())
+    {
+        LOG("Restoring registry key %ls from backup", path);
+        HKEY hkey;
+        if (LSTATUS err = RegCreateKeyExW(root, path, 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hkey, NULL))
+        {
+            LOG("Failed to create registry key %ls (%d)", path, err);
+            return;
+        }
+
+        if (LSTATUS err = RegRestoreKeyW(hkey, _existingKeyBackup.c_str(), REG_FORCE_RESTORE))
+            LOG("Failed to restore registry key %ls (%d)", path, err);
+        RegCloseKey(hkey);
+    }
+}
+
+RegistryKeyTask::RegistryKeyTask(std::wstring rootedPath)
+    : _rootedPath{std::move(rootedPath)}, _splitPath{nullptr, nullptr}
+{
+    _splitPath = splitRegistryRootedPath(_rootedPath);
+}
+
+void RegistryKeyTask::execute()
+{
+    // The registry keys set by this installer currently aren't critical, if for
+    // some reason the path was malformed, skip it.  Should not normally happen
+    // though.
+    if(!_splitPath.first || !_splitPath.second)
+    {
+        LOG("Can't install registry key %ls, path not valid", _rootedPath.c_str());
+        return;
+    }
+
+    HKEY hkey;
+    DWORD disposition;
+    if(LSTATUS err = RegCreateKeyExW(_splitPath.first, _splitPath.second, 0,
+                                     NULL, 0, KEY_ALL_ACCESS, NULL, &hkey,
+                                     &disposition))
+    {
+        LOG("Failed to create/open registry key %ls (%d)",
+            _rootedPath.c_str(), err);
+        return;
+    }
+
+    // If we opened an existing key, back it up
+    if (disposition == REG_OPENED_EXISTING_KEY)
+        _existingKeyBackup.backup(hkey, _rootedPath.c_str());
+    // Otherwise, we don't have to do anything but delete the key
+
+    if(updateKey(hkey))
+        recordUninstallAction("REGISTRYKEY", _rootedPath);
+
+    RegCloseKey(hkey);
+}
+
+void RegistryKeyTask::rollback()
+{
+    if(LSTATUS err = RegDeleteTreeW(_splitPath.first, _splitPath.second))
+    {
+        LOG("Failed to delete registry key %ls (%d)", _rootedPath.c_str(), err);
+    }
+    _existingKeyBackup.restore(_splitPath.first, _splitPath.second);
 }
 
 #ifdef INSTALLER
@@ -96,76 +190,128 @@ static void writeRegistry(HKEY hkey, utf16ptr name, DWORD value)
     writeRegistry(hkey, name, REG_DWORD, &value, sizeof(DWORD));
 }
 
-void WriteUninstallRegistryTask::execute()
+WriteUninstallRegistryTask::WriteUninstallRegistryTask()
+    : RegistryKeyTask{g_uninstallRegistryKey}
+{
+}
+
+bool WriteUninstallRegistryTask::updateKey(HKEY hkey)
 {
     LOG("Writing uninstall entry");
 
-    HKEY hkey;
-    DWORD disposition;
-    if (LSTATUS err = RegCreateKeyExW(HKEY_LOCAL_MACHINE, g_uninstallRegistryKey, 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hkey, &disposition))
-    {
-        LOG("Failed to open registry key (%d)", err);
-    }
-    else
-    {
-        if (disposition == REG_OPENED_EXISTING_KEY)
-        {
-            _existingKeyBackup = createBackupFile();
-            if (!_existingKeyBackup.empty())
-            {
-                DeleteFileW(_existingKeyBackup.c_str());
-                if (err = RegSaveKeyExW(hkey, _existingKeyBackup.c_str(), NULL, REG_LATEST_FORMAT))
-                {
-                    LOG("Unable to backup registry key (%d)", err);
-                }
-                if (!PathFileExistsW(_existingKeyBackup.c_str()))
-                    _existingKeyBackup.clear();
-            }
-        }
-        // Translation note - product and company names are not translated.
-        writeRegistry(hkey, L"DisplayName", REG_SZ, L"" PIA_PRODUCT_NAME);
-        writeRegistry(hkey, L"InstallLocation", REG_EXPAND_SZ, g_installPath);
-        writeRegistry(hkey, L"UninstallString", REG_EXPAND_SZ, g_installPath + L"\\uninstall.exe");
-        writeRegistry(hkey, L"Publisher", REG_SZ, L"Private Internet Access, Inc.");
-        writeRegistry(hkey, L"DisplayVersion", REG_SZ, L"" PIA_VERSION);
-        writeRegistry(hkey, L"DisplayIcon", REG_EXPAND_SZ, g_installPath + L"\\" BRAND_CODE "-client.exe");
-        writeRegistry(hkey, L"URLInfoAbout", REG_SZ, L"https://www.privateinternetaccess.com/");
-        if (g_installationSize)
-            writeRegistry(hkey, L"EstimatedSize", (DWORD)(g_installationSize / 1024));
-        writeRegistry(hkey, L"NoModify", 1);
-        RegCloseKey(hkey);
-    }
+    // Translation note - product and company names are not translated.
+    writeRegistry(hkey, L"DisplayName", REG_SZ, L"" PIA_PRODUCT_NAME);
+    writeRegistry(hkey, L"InstallLocation", REG_EXPAND_SZ, g_installPath);
+    writeRegistry(hkey, L"UninstallString", REG_EXPAND_SZ, g_installPath + L"\\uninstall.exe");
+    writeRegistry(hkey, L"Publisher", REG_SZ, L"Private Internet Access, Inc.");
+    writeRegistry(hkey, L"DisplayVersion", REG_SZ, L"" PIA_VERSION);
+    writeRegistry(hkey, L"DisplayIcon", REG_EXPAND_SZ, g_installPath + L"\\" BRAND_CODE "-client.exe");
+    writeRegistry(hkey, L"URLInfoAbout", REG_SZ, L"https://www.privateinternetaccess.com/");
+    if (g_installationSize)
+        writeRegistry(hkey, L"EstimatedSize", (DWORD)(g_installationSize / 1024));
+    writeRegistry(hkey, L"NoModify", 1);
+
+    // Don't write an uninstall entry for this, it has a specific cleanup task.
+    return false;
 }
 
-void WriteUninstallRegistryTask::rollback()
+WriteUrlHandlerRegistryTask::WriteUrlHandlerRegistryTask(utf16ptr clientPath)
+    : RegistryKeyTask{g_urlHandlerRegistryKey}, _clientPath{clientPath}
 {
-    if (LSTATUS err = RegDeleteTreeW(HKEY_LOCAL_MACHINE, g_uninstallRegistryKey))
+    assert(_clientPath);    // Ensured by caller
+}
+
+bool WriteUrlHandlerRegistryTask::updateKey(HKEY hkey)
+{
+    LOG("Writing URL handler");
+
+    // Refer to https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa767914(v=vs.85)
+    writeRegistry(hkey, nullptr, REG_SZ, L"" PIA_PRODUCT_NAME);
+    writeRegistry(hkey, L"URL Protocol", REG_SZ, L"");  // This is supposed to be empty per MSDN
+
+    HKEY defIcon = openSubkey(hkey, L"DefaultIcon");
+    if(defIcon)
     {
-        LOG("Failed to delete uninstall entry (%d)", err);
+        // Use first icon from client executable
+        std::wstring iconPathIdx{L"\""};
+        iconPathIdx += _clientPath;
+        iconPathIdx += L"\",-1";
+        writeRegistry(defIcon, nullptr, REG_SZ, iconPathIdx.c_str());
+        ::RegCloseKey(defIcon);
     }
-    if (!_existingKeyBackup.empty())
+
+    HKEY shellOpenCommand = openSubkey(hkey, L"shell\\open\\command");
+    if(shellOpenCommand)
     {
-        LOG("Restoring uninstall entry");
-        HKEY hkey;
-        if (LSTATUS err = RegCreateKeyExW(HKEY_LOCAL_MACHINE, g_uninstallRegistryKey, 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hkey, NULL))
-            LOG("Failed to create uninstall entry (%d)", err);
-        else
-        {
-            if (LSTATUS err = RegRestoreKeyW(hkey, _existingKeyBackup.c_str(), REG_FORCE_RESTORE))
-                LOG("Failed to restore uninstall entry (%d)", err);
-            RegCloseKey(hkey);
-        }
+        std::wstring command{L"\""};
+        command += _clientPath;
+        command += L"\" \"%1\"";
+        writeRegistry(shellOpenCommand, nullptr, REG_SZ, command.c_str());
+        ::RegCloseKey(shellOpenCommand);
     }
+
+    return true;
 }
 
 #endif // INSTALLER
+
+RemoveRegistryKeyTask::RemoveRegistryKeyTask(std::wstring rootedPath)
+    : _rootedPath{std::move(rootedPath)}, _splitPath{nullptr, nullptr}
+{
+    _splitPath = splitRegistryRootedPath(_rootedPath.c_str());
+}
+
+void RemoveRegistryKeyTask::execute()
+{
+    // This is possible; a future version could theoretically write a path that
+    // we don't understand.  We'll just have to skip this key if it happens.
+    if(!_splitPath.first || !_splitPath.second)
+    {
+        LOG("Can't install registry key %ls, path not valid", _rootedPath.c_str());
+        return;
+    }
+
+    HKEY hkey{nullptr};
+    LSTATUS err = ::RegOpenKeyExW(_splitPath.first, _splitPath.second, 0,
+                                  KEY_ALL_ACCESS, &hkey);
+    if(err == ERROR_NOT_FOUND)
+    {
+        LOG("Registry key does not exist: %ls", _splitPath.second);
+        return;
+    }
+    else if(err)
+    {
+        LOG("Failed to open registry key %ls (%d)", _splitPath.second, err);
+        return;
+    }
+
+    // Back up the key
+    _existingKeyBackup.backup(hkey, _rootedPath.c_str());
+
+    // Close the key and delete it
+    ::RegCloseKey(hkey);
+
+    LOG("Removing registry key: %ls", _rootedPath.c_str());
+    if(LSTATUS err = ::RegDeleteTreeW(_splitPath.first, _splitPath.second))
+    {
+        LOG("Failed to delete registry key %ls (%d)", _rootedPath.c_str(), err);
+    }
+}
+
+void RemoveRegistryKeyTask::rollback()
+{
+    // If we backed the key up, restore it.  If it didn't exist, this does
+    // nothing.
+    _existingKeyBackup.restore(_splitPath.first, _splitPath.second);
+}
 
 #ifdef UNINSTALLER
 
 void RemoveUninstallRegistryTask::execute()
 {
+    auto splitPath = splitRegistryRootedPath(g_uninstallRegistryKey);
     LOG("Removing uninstall entry");
-    if (LSTATUS err = RegDeleteTreeW(HKEY_LOCAL_MACHINE, g_uninstallRegistryKey))
+    if (LSTATUS err = RegDeleteTreeW(splitPath.first, splitPath.second))
     {
         LOG("Failed to delete uninstall entry (%d)", err);
     }

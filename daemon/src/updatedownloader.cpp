@@ -68,18 +68,22 @@ namespace
     const std::chrono::hours versionRefreshInterval{1};
 }
 
-Update::Update(const QString &uri, const QString &version)
+Update::Update(const QString &uri, const QString &version, const QJsonArray &flags)
 {
     if(!uri.isEmpty() && !version.isEmpty())
     {
         _uri = uri;
         _version = version;
     }
+
+    if(!flags.isEmpty()) {
+        _flags = flags;
+    }
 }
 
 bool Update::operator==(const Update &other) const
 {
-    return uri() == other.uri() && version() == other.version();
+    return uri() == other.uri() && version() == other.version() && flags() == other.flags();
 }
 
 UpdateChannel::UpdateChannel()
@@ -136,9 +140,16 @@ void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
       }
     }
 
+    const auto &flagListVal= regionsDoc[QStringLiteral("flags")];
+    QJsonArray flags;
+
+    if(flagListVal.isArray()) {
+        flags = flagListVal.toArray();
+    }
+
     // Store the update.  (Update ignores partial data if the server returned
     // only a URI or version somehow.)
-    _update = Update{downloadUrl, latestVersion};
+    _update = Update{downloadUrl, latestVersion, flags};
 }
 
 void UpdateChannel::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi)

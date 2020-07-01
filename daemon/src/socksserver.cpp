@@ -23,6 +23,7 @@
 #include "brand.h"
 #include <QRandomGenerator>
 #include <QCryptographicHash>
+#include <QNetworkProxy>
 
 // For SO_BINDTODEVICE
 #ifdef Q_OS_LINUX
@@ -259,6 +260,13 @@ SocksConnection::SocksConnection(QTcpSocket &socksSocket,
       _passwordHash{std::move(passwordHash)},
       _state{State::ReceiveAuthMethodsHeader}, _nextMessageBytes{2}
 {
+    // By default QTcpSocket will try to use a system proxy, if configured.
+    // This virtually never makes sense for these connections, since we're on
+    // the VPN and the proxy is likely not reachable through the VPN.  Worse, on
+    // Mac only it can cause Qt to block our thread trying to execute a PAC
+    // script; delays have been observed up to 20 seconds on this thread.
+    _targetSocket.setProxy({QNetworkProxy::ProxyType::NoProxy});
+
     connect(&_socksSocket, &QTcpSocket::readyRead, this, &SocksConnection::onSocksReadyRead);
     connect(&_socksSocket, QOverload<QTcpSocket::SocketError>::of(&QTcpSocket::error),
             this, &SocksConnection::onSocksError);

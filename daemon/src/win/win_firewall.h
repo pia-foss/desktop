@@ -36,6 +36,7 @@ class Callout;
 class ProviderContext;
 
 extern GUID zeroGuid;
+extern FWPM_SUBLAYER g_wfpSublayer;
 
 // Identifier types for different WFP objects.
 // WFP uses GUID for everything, so having separate types for these objects
@@ -533,7 +534,7 @@ struct SplitFilter : public AppIdFilter<ipVersion>
         this->layerKey = layerKey;
         this->action.type = FWP_ACTION_CALLOUT_TERMINATING;
         this->action.calloutKey = calloutKey;
-        this->subLayerKey = FWPM_SUBLAYER_UNIVERSAL; // should we introduce our own sublayer?
+        this->subLayerKey = g_wfpSublayer.subLayerKey;
         this->flags |= FWPM_FILTER_FLAG_HAS_PROVIDER_CONTEXT;
 
         this->providerContextKey = provCtxt;

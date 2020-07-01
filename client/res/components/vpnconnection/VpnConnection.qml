@@ -103,6 +103,7 @@ QtObject {
     if (Daemon.state.vpnLocations.chosenLocation) {
       _addRecentLocation(Daemon.state.vpnLocations.chosenLocation.id)
     }
+    console.info("Requesting to connect to current location")
     Daemon.connectVPN()
   }
 }

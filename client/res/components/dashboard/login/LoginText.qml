@@ -34,6 +34,7 @@ Item {
   property alias masked: textField.masked
   property alias inputMask: textField.inputMask
   property alias validator: textField.validator
+  readonly property bool acceptableInput: textField.acceptableInput
 
   signal updated(string val);
   signal accepted();

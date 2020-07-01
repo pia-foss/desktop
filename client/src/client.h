@@ -29,6 +29,7 @@
 #include "settings.h"
 #include "nativehelpers.h"
 #include "preconnectstatus.h"
+#include "appsingleton.h"
 
 #include <QFontDatabase>
 #include <QObject>
@@ -250,6 +251,9 @@ public:
     // done so, and allow for the notification to complete if it's still in
     // progress.
     void notifyExitAndWait();
+
+    void handleURL (const QString &url);
+    void checkForURL();
 
     IMPLEMENT_NOTIFICATIONS(Client)
 

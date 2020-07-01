@@ -161,7 +161,7 @@ MovableModule {
     // protocol on the modern infra.
     // When connected or connecting, display based on the connected/connecting
     // config as appropriate.  Otherwise, display based on the current settings.
-    readonly property string pfPossible: {
+    readonly property bool pfPossible: {
       if(Daemon.state.connectionState === "Connected")
         return Daemon.state.connectedConfig.method === "openvpn" || Daemon.state.connectedConfig.infrastructure === "modern"
       else if(Daemon.state.connectingConfig.vpnLocation)

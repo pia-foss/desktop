@@ -59,7 +59,7 @@ QtObject {
   readonly property bool wireguardUseKernel: NativeDaemon.settings.wireguardUseKernel
   readonly property int wireguardPingTimeout: NativeDaemon.settings.wireguardPingTimeout
   readonly property bool persistDaemon: NativeDaemon.settings.persistDaemon
-
+  readonly property string macStubDnsMethod: NativeDaemon.settings.macStubDnsMethod
 
   // Deprecated settings aren't passed through to QML, they're migrated by
   // ClientInterface

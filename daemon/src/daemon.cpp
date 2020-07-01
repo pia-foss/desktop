@@ -375,6 +375,8 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(writeDummyLogs));
     _methodRegistry->add(RPC_METHOD(disconnectVPN));
     _methodRegistry->add(RPC_METHOD(login));
+    _methodRegistry->add(RPC_METHOD(emailLogin));
+    _methodRegistry->add(RPC_METHOD(setToken));
     _methodRegistry->add(RPC_METHOD(logout));
     _methodRegistry->add(RPC_METHOD(refreshUpdate));
     _methodRegistry->add(RPC_METHOD(downloadUpdate));
@@ -536,8 +538,8 @@ Daemon::Daemon(QObject* parent)
     _updateDownloader.setGaUpdateChannel(_settings.updateChannel(), _environment.getUpdateApi());
     _updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel(), _environment.getUpdateApi());
     _updateDownloader.enableBetaChannel(_settings.offerBetaUpdates(), _environment.getUpdateApi());
-    _updateDownloader.reloadAvailableUpdates(Update{_data.gaChannelVersionUri(), _data.gaChannelVersion()},
-                                             Update{_data.betaChannelVersionUri(), _data.betaChannelVersion()});
+    _updateDownloader.reloadAvailableUpdates(Update{_data.gaChannelVersionUri(), _data.gaChannelVersion(), {}},
+                                             Update{_data.betaChannelVersionUri(), _data.betaChannelVersion(), {}});
 
     queueApplyFirewallRules();
 
@@ -914,6 +916,57 @@ QJsonValue Daemon::RPC_writeDiagnostics()
     return QJsonValue{diagFilePath};
 }
 
+QString Daemon::diagnosticsOverview() const
+{
+    auto boolToString = [](bool b) { return b == true ? QStringLiteral("true") : QStringLiteral("false"); };
+
+    const auto &connectedConfig = _state.connectedConfig();
+    const auto &actualTransport = _state.actualTransport();
+
+    const auto &connectionMethod = connectedConfig.method();
+    const bool isConnected = _state.connectionState() == QStringLiteral("Connected");
+
+    auto ifOpenVPN = [&connectionMethod](const QString &displayString) {
+        return connectionMethod == QStringLiteral("openvpn") ? displayString : QStringLiteral("");
+    };
+
+    auto commonDiagnostics = [&] {
+        auto strings = QStringList {
+            QStringLiteral("Connected: %1").arg(boolToString(isConnected)),
+            QStringLiteral("Split Tunnel enabled: %1").arg(boolToString(_settings.splitTunnelEnabled())),
+            QStringLiteral("VPN has default route: %1").arg(boolToString(_settings.splitTunnelEnabled() ?  _settings.defaultRoute() : true)),
+            QStringLiteral("Killswitch: %1").arg(_settings.killswitch()),
+            QStringLiteral("Allow LAN: %1").arg(boolToString(_settings.allowLAN())),
+            QStringLiteral("Network: %1").arg(_settings.infrastructure()),
+#ifdef Q_OS_WIN
+            ifOpenVPN(QStringLiteral("Windows IP config: %1").arg(_settings.windowsIpMethod())),
+#endif
+            QStringLiteral("Use Small Packets: %1").arg(boolToString(_settings.mtu() != 0))
+        };
+        strings.removeAll(QStringLiteral(""));
+
+        return strings.join('\n');
+    };
+
+    auto connectedDiagnostics = [&] {
+        auto strings = QStringList {
+            QStringLiteral("Connection method: %1").arg(connectionMethod),
+            ifOpenVPN(QStringLiteral("Protocol: %1").arg(actualTransport->protocol())),
+            ifOpenVPN(QStringLiteral("Port: %1").arg(actualTransport->port())),
+            ifOpenVPN(QStringLiteral("Cipher: %1").arg(_settings.cipher())),
+            QStringLiteral("DNS selection: %1").arg(connectedConfig.dnsType())
+        };
+        strings.removeAll(QStringLiteral(""));
+
+        return strings.join('\n');
+    };
+
+    if(isConnected)
+        return commonDiagnostics() + "\n" + connectedDiagnostics();
+    else
+        return commonDiagnostics();
+}
+
 void Daemon::RPC_writeDummyLogs()
 {
     qDebug () << "Writing dummy logs";
@@ -1007,7 +1060,41 @@ void Daemon::RPC_startSnooze(qint64 seconds)
 
 void Daemon::RPC_stopSnooze()
 {
-  _snoozeTimer.stopSnooze();
+    _snoozeTimer.stopSnooze();
+}
+
+Async<void> Daemon::RPC_emailLogin(const QString &email)
+{
+    qDebug () << "Requesting email login";
+    return _apiClient.postRetry(
+                QStringLiteral("api/client/v2/login_link"),
+                QJsonDocument(
+                    QJsonObject({
+                          { QStringLiteral("email"), email},
+                  })))
+            ->then(this, [this](const QJsonDocument& json) {
+        Q_UNUSED(json);
+        qDebug () << "Email login request success";
+    })->except(this, [](const Error& error) {
+        qWarning () << "Email login request failed " << error.errorString();
+        throw error;
+    });
+}
+
+Async<void> Daemon::RPC_setToken(const QString &token)
+{
+    return loadAccountInfo({}, {}, token)
+            ->then(this, [=](const QJsonObject& account) {
+                _account.password({});
+                _account.token(token);
+                _account.openvpnUsername(token.left(token.length() / 2));
+                _account.openvpnPassword(token.right(token.length() - (token.length() / 2)));
+                _account.assign(account);
+                _account.loggedIn(true);
+            })
+            ->except(this, [](const Error& error) {
+                throw error;
+            });
 }
 
 QJsonValue Daemon::RPC_installKext()
@@ -1256,6 +1343,204 @@ void Daemon::serialize()
     }
 }
 
+struct IpResult
+{
+    QString address;    // VPN IP address
+    bool problem;   // True if we think there is a connection problem
+};
+
+IpResult parseVpnIpResponse(const QJsonDocument &json)
+{
+    IpResult result{};
+    result.address = json[QStringLiteral("ip")].toString();
+
+    // Check if the API says we are connected (using a PIA IP).
+    // If not, it indicates a routing problem.  If the value is
+    // missing for any reason, assume it's fine by default (do not
+    // show a warning).
+    result.problem = !json[QStringLiteral("connected")].toBool(true);
+    if(result.problem)
+    {
+        qWarning() << "API indicates we are not connected, may indicate a routing problem";
+    }
+    else
+    {
+        qWarning() << "VPN IP routing confirmed";
+    }
+    return result;
+}
+
+class VpnIpProbeTask : public Task<IpResult>
+{
+public:
+    VpnIpProbeTask(ApiClient &apiClient, Environment &environment)
+    {
+        _pPiaApiTask = apiClient.getVpnIpRetry(*environment.getIpAddrApi(),
+                                               QStringLiteral("api/client/status"),
+                                               std::chrono::seconds{10})
+            ->then(this, [this](const QJsonDocument &json)
+            {
+                auto keepAlive = sharedFromThis();
+                const auto &result = parseVpnIpResponse(json);
+                if(result.problem)
+                {
+                    qWarning() << "API was reachable but indicates were are not connected, may indicate routing problem";
+                }
+                else
+                {
+                    qInfo() << "API was reachable and confirmed connection";
+                }
+                // If the proxy API task was still ongoing, abandon it
+                if(_pProxyApiTask && !_pProxyApiTask->isFinished())
+                    _pProxyApiTask.abandon();
+                resolve(result);
+            })
+            ->except(this, [this](const Error &err)
+            {
+                auto keepAlive = sharedFromThis();
+                // If the proxy task hasn't finished yet, wait for it to finish.
+                if(_pProxyApiTask && !_pProxyApiTask->isFinished())
+                {
+                    qInfo() << "Still waiting for API proxy to respond";
+                }
+                else
+                {
+                    bool proxyReachable = false;
+                    if(_pProxyApiTask && _pProxyApiTask->isResolved())
+                        proxyReachable = _pProxyApiTask->result();
+                    resolveApiUnreachable(proxyReachable);
+                }
+            });
+
+        // This task results in a boolean value; indicates whether the API proxy
+        // is reachable.
+        _pProxyApiTask = Async<DelayTask>::create(std::chrono::seconds{4})
+            ->then(this, [this, &apiClient, &environment]()
+            {
+                return apiClient.getVpnIpRetry(*environment.getIpProxyApi(),
+                                               QStringLiteral("api/client/status"),
+                                               std::chrono::seconds{6});
+            })
+            ->next(this, [this](const Error &err, const QJsonDocument &)
+            {
+                auto keepAlive = sharedFromThis();
+                if(err)
+                {
+                    qWarning() << "API is not reachable through proxy:" << err;
+                }
+
+                bool proxyReachable = !err;
+                if(_pPiaApiTask->isFinished())
+                {
+                    // If the normal API request has completed, but we haven't
+                    // resolved this task, the API was not reachable.
+                    resolveApiUnreachable(proxyReachable);
+                }
+                else
+                {
+                    qInfo() << "Still waiting for PIA API to respond to status request";
+                }
+                return proxyReachable;
+            });
+    }
+
+private:
+    // Resolve the task when the API isn't directly reachable.  proxyReachable
+    // indicates whether the API proxy was reachable.
+    void resolveApiUnreachable(bool proxyReachable)
+    {
+        if(proxyReachable)
+        {
+            // Proxy was reachable.  Can't confirm routing, but Internet is
+            // reachable.
+            qWarning() << "API is reachable through proxy only, can't confirm routing";
+            resolve({{}, false});
+        }
+        else
+        {
+            // Proxy wasn't reachable either, likely indicates connection
+            // problem.
+            qWarning() << "API is not reachable through any source, may indicate a connection problem";
+            resolve({{}, true});
+        }
+    }
+
+private:
+    Async<void> _pPiaApiTask;
+    Async<bool> _pProxyApiTask;
+};
+
+Async<void> Daemon::loadVpnIp()
+{
+    // Test the connection to determine:
+    // - the VPN IP (DaemonState::externalVpnIp)
+    // - whether there might be a connection problem (DaemonState::connectionProblem)
+    //
+    // Connection problems include incorrect routing (routing via physical
+    // interface instead of VPN interface), or lack of Internet connectivity
+    // (broken DNS, missing routes, etc.).
+    //
+    // This algorithm is somewhat complex due to several requirements:
+    // 1. The IP address can only be determined using the proper PIA API, not a
+    //    proxy (would give the IP of the proxy)
+    // 2. We can't wait too long to report a connection problem (if we wait more
+    //    than 10 seconds or so, users would probably have already noticed the
+    //    problem).
+    // 3. The PIA API may in rare cases only be reachable through the proxy
+    // 4. The API proxy is pretty slow, commonly takes 3+ seconds to respond
+    // 5. The IP address API is known to take a while to become reachable in some
+    //    cases
+    //
+    // To meet all these requirements, we use the following strategy
+    // 1. Try to get status from both the PIA API and the proxy in parallel.  We
+    //    give the PIA API a short head start, but both are timed to finish
+    //    around the 10-second mark.
+    // 2. If the PIA API request completes, abandon the proxy request.  (If the
+    //    proxy request completes, continue the PIA API request until it times
+    //    out.)
+    // 3. Depending on the results from above, trigger the connection problem
+    //    warning:
+    //    - if the PIA API was reachable, use that result (check connected flag)
+    //    - if only the proxy was reachable, asssume it's an API reachability
+    //      problem and do not show a warning
+    //    - if neither was reachable, assume there is a connection problem
+    // 4. If the PIA API wasn't reachable (regardless of proxy reachability),
+    //    continue trying to fetch the VPN IP for up to 2 minutes.
+    //
+    // So problems will typically be reported within ~10 seconds.  If a
+    // connection is just very poor and the IP eventually is retrieved, the
+    // connection problem warning may appear and then disappear later, which is
+    // reasonable.
+    return Async<VpnIpProbeTask>::create(_apiClient, _environment)
+        ->then(this, [this](const IpResult &result)
+        {
+            _state.externalVpnIp(result.address);
+            _state.connectionProblem(result.problem);
+            // If we didn't get an IP address, continue trying to reach the API
+            if(result.address.isEmpty())
+            {
+                return _apiClient.getVpnIpRetry(*_environment.getIpAddrApi(),
+                                                QStringLiteral("api/client/status"),
+                                                std::chrono::minutes{2})
+                    ->then(this, [this](const QJsonDocument &json)
+                    {
+                        const auto &result = parseVpnIpResponse(json);
+                        _state.externalVpnIp(result.address);
+                        _state.connectionProblem(result.problem);
+                    })
+                    ->except(this, [this](const Error &err)
+                    {
+                        qWarning() << "API is unreachable, can't determine VPN IP -"
+                            << err;
+                        // Does not necessarily indicate a connection problem, the
+                        // API isn't reachable from all regions.
+                    });
+            }
+            else
+                return Async<void>::resolve();
+        });
+}
+
 void Daemon::vpnStateChanged(VPNConnection::State state,
                              const ConnectionConfig &connectingConfig,
                              const ConnectionConfig &connectedConfig,
@@ -1309,6 +1594,9 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
                 break;
             case ConnectionConfig::DnsType::Handshake:
                 info.dnsType(QStringLiteral("handshake"));
+                break;
+            case ConnectionConfig::DnsType::Local:
+                info.dnsType(QStringLiteral("local"));
                 break;
             case ConnectionConfig::DnsType::Existing:
                 info.dnsType(QStringLiteral("existing"));
@@ -1456,6 +1744,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         // Clear warnings that are only valid in the Connected state
         _state.hnsdFailing(0);
         _state.hnsdSyncFailure(0);
+        _state.connectionProblem(false);
     }
     // The VPN is connected - if we haven't found the VPN IP yet, find it
     else if (_state.externalVpnIp().isEmpty())
@@ -1465,13 +1754,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         _state.connectionTimestamp(monotonicTimer.msecsSinceReference());
 
         // Get the user's VPN IP address now that we're connected
-        _pVpnIpRequest = _apiClient.getVpnIpRetry(QStringLiteral("api/client/status"))
-                ->then(this, [this](const QJsonDocument& json) {
-                    _state.externalVpnIp(json[QStringLiteral("ip")].toString());
-                })
-                ->except(this, [this](const Error& err) {
-                    qWarning() << "Couldn't get VPN IP address due to error:" << err;
-                });
+        _pVpnIpRequest = loadVpnIp();
     }
 
     // Clear the external IP address if we're completely disconnected.  Leave
@@ -1767,6 +2050,10 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
 {
     OriginalNetworkScan defaultConnection;
     qInfo() << "Networks changed: currently" << networks.size() << "networks";
+
+    // Relevant only to macOS
+    QString macosPrimaryServiceKey;
+
     int i=0;
     for(const auto &network : networks)
     {
@@ -1804,6 +2091,10 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
                 defaultConnection.ipAddress(network.addressesIpv4().front().toString());
             else
                 defaultConnection.ipAddress({});
+
+#ifdef Q_OS_MACOS
+            macosPrimaryServiceKey = network.macosPrimaryServiceKey();
+#endif
         }
         if(network.defaultIpv6())
         {
@@ -1819,6 +2110,10 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
     _state.originalInterface(defaultConnection.interfaceName());
     _state.originalInterfaceIp(defaultConnection.ipAddress());
     _state.originalInterfaceIp6(defaultConnection.ipAddress6());
+
+    // Relevant only to macOS
+    _state.macosPrimaryServiceKey(macosPrimaryServiceKey);
+
     queueApplyFirewallRules();
     _connection->updateNetwork(originalNetwork());
 }
@@ -1889,6 +2184,7 @@ Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QStrin
                 assignOrDefault(expireAlert, "expire_alert");
                 assignOrDefault(expired, "expired");
                 assignOrDefault(email, "email");
+                assignOrDefault(username, "username");
                 #undef assignOrDefault
 
                 return result;
@@ -1991,12 +2287,16 @@ void Daemon::reapplyFirewallRules()
     // reconnect.
     params.defaultRoute = pConnSettings ? pConnSettings->defaultRoute() : true;
 
-    // When not using the VPN as the default route, force Handshake into the
-    // VPN with an "include" rule.  (Just routing the Handshake seeds into the
-    // VPN is not sufficient; hnsd uses a local recursive DNS resolver that will
-    // query authoritative DNS servers, and we want that to go through the VPN.)
+    // When not using the VPN as the default route, force Handshake and Unbound
+    // into the VPN with an "include" rule.  (Just routing the Handshake seeds
+    // into the VPN is not sufficient; hnsd uses a local recursive DNS resolver
+    // that will query authoritative DNS servers, and we want that to go through
+    // the VPN.)
     if(!params.defaultRoute)
+    {
         params.vpnOnlyApps.push_back(Path::HnsdExecutable);
+        params.vpnOnlyApps.push_back(Path::UnboundExecutable);
+    }
 
     params.blockAll = killswitchEnabled && params.defaultRoute;
     params.allowVPN = params.allowDHCP = params.blockAll;
@@ -2008,7 +2308,7 @@ void Daemon::reapplyFirewallRules()
     // - we've connected at least once since the VPN was enabled
     params.blockDNS = pConnSettings && pConnSettings->dnsType() != QStringLiteral("existing") && vpnActive && params.hasConnected;
     params.allowPIA = params.allowLoopback = (params.blockAll || params.blockIPv6 || params.blockDNS);
-    params.allowHnsd = params.blockDNS && pConnSettings && pConnSettings->dnsType() == QStringLiteral("handshake");
+    params.allowResolver = params.blockDNS && pConnSettings && (pConnSettings->dnsType() == QStringLiteral("handshake") || pConnSettings->dnsType() == QStringLiteral("local"));
 
     qInfo() << "Reapplying firewall rules;"
             << "state:" << qEnumToString(_connection->state())
@@ -2305,6 +2605,26 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     // this file.
     if(previous < SemVersion{1, 6, 0})
         restrictAccountJson();
+
+    // Handshake was removed in 2.2.0.
+#if !INCLUDE_FEATURE_HANDSHAKE
+    DaemonSettings::DNSSetting handshakeValue;
+    handshakeValue = QStringLiteral("handshake");
+    if(previous < SemVersion{2, 2, 0} && _settings.overrideDNS() == handshakeValue)
+    {
+        // Migrate to the "Local Resolver" setting.  Since Handshake's testnet
+        // never actually had any useful domains in it, this is essentially what
+        // the Handshake setting used to do - it would virtually always fall
+        // back to the ICANN DNS root.
+        qInfo() << "Migrating DNS setting to local resolver from Handshake";
+        _settings.overrideDNS(QStringLiteral("local"));
+    }
+#endif
+
+    // Some alpha builds prior to 2.2.0 were released with other values for
+    // this setting.
+    if(previous < SemVersion{2, 2, 0})
+        _settings.macStubDnsMethod(QStringLiteral("NX"));
 }
 
 void Daemon::calculateLocationPreferences()
@@ -2314,7 +2634,12 @@ void Daemon::calculateLocationPreferences()
     // PF currently requires OpenVPN.  This duplicates some logic from
     // ConnectionConfig, but the hope is that over time we'll support all/most
     // settings with WireGuard too, so these checks will just go away.
-    bool portForwardEnabled = _settings.method() == QStringLiteral("openvpn") ? _settings.portForward() : false;
+    bool portForwardEnabled = false;
+    if(_settings.method() == QStringLiteral("openvpn") ||
+        _settings.infrastructure() == QStringLiteral("modern"))
+    {
+        portForwardEnabled = _settings.portForward();
+    }
     _state.vpnLocations().bestLocation(nearest.getNearestSafeVpnLocation(portForwardEnabled));
 
     // Find the user's chosen location (nullptr if it's 'auto' or doesn't exist)
@@ -2380,6 +2705,7 @@ void Daemon::onUpdateRefreshed(const Update &availableUpdate,
     _state.availableVersion(availableUpdate.version());
     _data.gaChannelVersion(gaUpdate.version());
     _data.gaChannelVersionUri(gaUpdate.uri());
+    _data.flags(gaUpdate.flags());
     _data.betaChannelVersion(betaUpdate.version());
     _data.betaChannelVersionUri(betaUpdate.uri());
 }

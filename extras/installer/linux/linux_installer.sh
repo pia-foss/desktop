@@ -288,9 +288,9 @@ function installPia() {
     sudo chmod +x "$installDir/bin/"*.sh
     echoPass "Copied $appName files"
 
-    # Allow us to run handshake without root
-    if sudo setcap 'cap_net_bind_service=+ep' "$installDir/bin/pia-hnsd" 2>/dev/null; then
-        echoPass "Allow non-root $installDir/bin/pia-hnsd to bind to privileged ports"
+    # Allow us to run unbound without root
+    if sudo setcap 'cap_net_bind_service=+ep' "$installDir/bin/pia-unbound" 2>/dev/null; then
+        echoPass "Allow non-root $installDir/bin/pia-unbound to bind to privileged ports"
     fi
 
     sudo mkdir -p $installDir/var
@@ -309,6 +309,9 @@ function installPia() {
         sudo mkdir -p /usr/share/applications/
     fi
     sudo cp "$root/installfiles/piavpn.desktop" "/usr/share/applications/${brandCode}vpn.desktop"
+    if hash update-desktop-database 2>/dev/null; then
+        sudo update-desktop-database
+    fi
     echoPass "Created desktop entry"
 
     # Create routing tables for split-tunneling

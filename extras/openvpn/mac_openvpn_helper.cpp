@@ -24,6 +24,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonDocument>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QString>
@@ -38,38 +39,8 @@ enum ProcessErrorBehavior
     HaltOnErrors,
     IgnoreErrors,
 };
-
-QStringList g_servicesWithDisabledIPv6;
-
-QString g_watcherPlistPath = QStringLiteral("/Library/Application Support/" BRAND_IDENTIFIER "/watcher.plist");
-QString g_watcherPlist = QStringLiteral(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            "<plist version=\"1.0\">\n"
-            "  <dict>\n"
-            "    <key>Label</key>\n"
-            "    <string>" BRAND_IDENTIFIER ".watcher</string>\n"
-            "    <key>ProgramArguments</key>\n"
-            "    <array>\n"
-            "      <string>%1</string>\n"
-            "    </array>\n"
-            "    <key>EnvironmentVariables</key>\n"
-            "    <dict>\n"
-            "      <key>script_type</key>\n"
-            "      <string>watch-notify</string>\n"
-            "    </dict>\n"
-            "    <key>StandardErrorPath</key>\n"
-            "    <string>/Library/Application Support/" BRAND_IDENTIFIER "/watcher.log</string>\n"
-            "    <key>WatchPaths</key>\n"
-            "    <array>\n"
-            "      <string>/Library/Preferences/SystemConfiguration</string>\n"
-            "    </array>\n"
-            "  </dict>\n"
-            "</plist>\n");
-
-void restoreIPv6();
 void restoreConfiguration();
-
+void applyConfiguration(const QString &primaryService, int killPid, QStringList dnsServers, QString domain, QStringList winsServers);
 
 pid_t getParentPID()
 {
@@ -223,57 +194,50 @@ void flushDNSCache()
     QProcess::execute(QStringLiteral("killall -HUP mDNSResponderHelper"));
 }
 
-void disableIPv6()
+QString detectPrimaryService()
 {
-    QStringList networkServices;
-    for (const QString& service : QString(execute(QStringLiteral("networksetup -listallnetworkservices"))).split('\n', QString::SkipEmptyParts).mid(1))
-    {
-        // Skip disabled services
-        if (service.startsWith('*'))
-            continue;
-        networkServices += service;
-    }
-    qInfo() << "Network services:" << networkServices;
-
-    // Disable IPv6 on any services where it is set to "Automatic"
-    QStringList servicesWithDisabledIPv6;
-    for (const QString& service : networkServices)
-    {
-        if (QString(execute(QStringLiteral("networksetup"), { QStringLiteral("-getinfo"), service })).split('\n', QString::SkipEmptyParts).contains(QLatin1String("IPv6: Automatic")))
-        {
-            execute(QStringLiteral("networksetup"), { QStringLiteral("-setv6off"), service });
-            servicesWithDisabledIPv6 += service;
-        }
-    }
-    qInfo() << "Disabled IPv6 on services:" << servicesWithDisabledIPv6;
-
-    g_servicesWithDisabledIPv6 = servicesWithDisabledIPv6;
-}
-
-void restoreIPv6()
-{
-    for (const QString& service : g_servicesWithDisabledIPv6)
-    {
-        execute(QStringLiteral("networksetup"), { QStringLiteral("-setv6automatic"), service }, IgnoreErrors);
-    }
-    qInfo() << "Restored IPv6 on services:" << g_servicesWithDisabledIPv6;
-
-    g_servicesWithDisabledIPv6.clear();
-}
-
-void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServers, QString domain, QStringList winsServers)
-{
-    // If needed, disable IPv6 on all services where it's set to Automatic
-    if (shouldDisableIPv6)
-        disableIPv6();
-    else
-        restoreIPv6();
-
-    // Wait until network settings have settled
-    QThread::msleep(200);
-
     QString primaryService = scutilGet(QStringLiteral("State:/Network/Global/IPv4")).value(QLatin1String("PrimaryService")).toString();
     qInfo() << "Primary service:" << primaryService;
+    return primaryService;
+}
+
+void saveAndApplyConfiguration(int killPid, QStringList dnsServers, QString domain, QStringList winsServers)
+{
+    // Store the setup parameters so we can apply the configuration again if the
+    // DNS configuration is changed
+    scutil({
+        QStringLiteral("d.init"),
+        QStringLiteral("d.add killPid %1").arg(killPid),
+        QStringLiteral("d.add dnsServers * %1").arg(dnsServers.join(' ')),
+        QStringLiteral("d.add domain %1").arg(domain),
+        QStringLiteral("d.add winsServers * %1").arg(winsServers.join(' ')),
+        QStringLiteral("set State:/Network/PrivateInternetAccess/SetupParams")
+    });
+
+    QString primaryService{detectPrimaryService()};
+    if(primaryService.isEmpty())
+    {
+        qWarning() << "No primary service - cannot apply DNS yet, will apply later when network is connected";
+        return;
+    }
+
+    applyConfiguration(primaryService, killPid, dnsServers, domain, winsServers);
+}
+
+void reapplyConfiguration(const QString &primaryService, const QJsonObject &setupParams)
+{
+    uint killPid = setupParams.value(QLatin1String("killPid")).toString().toUInt();
+    QStringList dnsServers = arrayToStringList(setupParams.value(QLatin1String("dnsServers")).toArray());
+    QString domain = setupParams.value(QLatin1String("domain")).toString();
+    QStringList winsServers = arrayToStringList(setupParams.value(QLatin1String("winsServers")).toArray());
+
+    applyConfiguration(primaryService, killPid, dnsServers, domain, winsServers);
+}
+
+void applyConfiguration(const QString &primaryService, int killPid, QStringList dnsServers, QString domain, QStringList winsServers)
+{
+    // Wait until network settings have settled
+    QThread::msleep(200);
 
     QByteArray oldDNS = scutil({ QStringLiteral("open"), QStringLiteral("show State:/Network/Global/DNS"), QStringLiteral("quit") });
 
@@ -296,11 +260,8 @@ void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServ
 
     // Store general PIA properties for the down script to use
     commands << QStringLiteral("d.init");
-    commands << QStringLiteral("d.add PID %1").arg(killPid);
     commands << QStringLiteral("d.add Service %1").arg(primaryService);
     commands << QStringLiteral("d.add Addresses * %1").arg(originalAddresses.join(' '));
-    if (!g_servicesWithDisabledIPv6.isEmpty())
-        commands << QStringLiteral("d.add ServicesWithDisabledIPv6 * %1").arg(g_servicesWithDisabledIPv6.join(' '));
     if (overrideDNS)
         commands << QStringLiteral("d.add OverrideDNS ? TRUE");
     commands << QStringLiteral("set State:/Network/PrivateInternetAccess");
@@ -371,53 +332,48 @@ void applyConfiguration(bool shouldDisableIPv6, int killPid, QStringList dnsServ
     flushDNSCache();
 
     qInfo() << "Finished applying settings";
-
-    // Write plist for the network config watcher and launch it
-    QFile plist(g_watcherPlistPath);
-    if (plist.open(QFile::WriteOnly))
-    {
-        QTextStream(&plist) << g_watcherPlist.arg(QCoreApplication::applicationFilePath());
-        plist.close();
-        execute(QStringLiteral("/bin/launchctl"), { QStringLiteral("load"), g_watcherPlistPath }, IgnoreErrors);
-    }
 }
 
 void restoreConfiguration()
 {
-    // Unload the watcher if it is present
-    QFile plist(g_watcherPlistPath);
-    if (plist.exists())
-    {
-        execute(QStringLiteral("/bin/launchctl"), { QStringLiteral("unload"), g_watcherPlistPath }, IgnoreErrors);
-        plist.remove();
-    }
-
-    //bool configExists = 0 == QProcess::execute(QStringLiteral("scutil"), { QStringLiteral("-w"), QStringLiteral("State:/Network/PrivateInternetAccess") });
     QJsonObject config = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess"));
 
     QString service = config.value(QLatin1String("Service")).toString();
-    //QStringList originalAddresses = arrayToStringList(config.value(QLatin1String("Addresses")).toArray());
-    QStringList servicesWithDisabledIPv6 = arrayToStringList(config.value(QLatin1String("ServicesWithDisabledIPv6")).toArray());
-
-    for (const QString& service : servicesWithDisabledIPv6)
-    {
-        if (!g_servicesWithDisabledIPv6.contains(service))
-            g_servicesWithDisabledIPv6.append(service);
-    }
 
     QStringList commands;
     commands << QStringLiteral("open");
 
-    auto restoreConfigKey = [&commands](const QString& savedKey, const QString& destKey) {
-        if (scutilExists(savedKey))
+    QJsonObject intendedDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/DNS"));
+
+    auto restoreConfigKey = [&commands, &intendedDNS](const QString& savedKey, const QString& destKey)
+    {
+        // Only restore the key if the value PIA applied is still there.
+        // Otherwise, it has likely been changed by the system to reflect a new
+        // network configuration, and we should leave the new configuration.
+        //
+        // In particular, we shouldn't restore to a "State" key that no longer
+        // exists, that commonly happens when a network interface is
+        // disconnected while connected to PIA.
+        bool destExists;
+        QJsonObject destValue = scutilGet(destKey, &destExists);
+        // We can restore the backup over this value if it still exists and is still
+        // set to the configuration applied by PIA
+        if(destExists && destValue == intendedDNS)
         {
-            commands << QStringLiteral("get %1").arg(savedKey);
-            commands << QStringLiteral("set %1").arg(destKey);
+            // If we backed up a value (and it's not PIAEmpty), restore it.
+            if (scutilExists(savedKey))
+            {
+                commands << QStringLiteral("get %1").arg(savedKey);
+                commands << QStringLiteral("set %1").arg(destKey);
+            }
+            // Otherwise, our backup was empty, just remove the key to restore
+            // that.
+            else
+            {
+                commands << QStringLiteral("remove %1").arg(destKey);
+            }
         }
-        else
-        {
-            commands << QStringLiteral("remove %1").arg(destKey);
-        }
+        // Remove the backup key, even if we decided not to restore it.
         commands << QStringLiteral("remove %1").arg(savedKey);
     };
 
@@ -435,68 +391,120 @@ void restoreConfiguration()
 
     flushDNSCache();
 
-    restoreIPv6();
-
     qInfo() << "Finished restoring settings";
 }
 
 void configurationChanged()
 {
     bool present;
-    QJsonObject data = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess"), &present);
+    QJsonObject setupParams = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/SetupParams"), &present);
 
-    if (!present)
+    if(!present)
     {
-        qInfo() << "No PIA network configuration found; aborting";
+        qWarning() << "Can't update configuration, no PIA configuration was found";
         return;
     }
 
-    uint pid = data.value(QLatin1String("PID")).toString().toUInt();
-    QString service = data.value(QLatin1String("Service")).toString();
-    QStringList originalAddresses = arrayToStringList(data.value(QLatin1String("Addresses")).toArray());
-    QStringList currentAddresses = arrayToStringList(scutilGet(QStringLiteral("State:/Network/Service/%1/IPv4").arg(service)).value(QLatin1String("Addresses")).toArray());
-    QJsonObject originalDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/OldStateDNS"));
-    QJsonObject intendedDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/DNS"));
-    QJsonObject currentDNS = scutilGet(QStringLiteral("State:/Network/Service/%1/DNS").arg(service));
+    // Determine what (if any) change has occurred.
+    //
+    // - If the local IP addresses have changed (including to/from "none"), we
+    //   have changed networks.
+    //   - If the current method supports roaming, redo the configuration from
+    //     scratch - clean up and set up again.
+    //   - Otherwise, just kill the connection and clean up.
+    // - If the local IPs have not changed, but the DNS configuration has
+    //   changed, just reapply our DNS configuration.  This tends to happen on
+    //   10.15.4+ - the OS tends to reapply the network's DNS configuration even
+    //   though nothing has changed.
 
-    // Check if IP address has changed
-    if (originalAddresses != currentAddresses)
+    uint killPid = setupParams.value(QLatin1String("killPid")).toString().toUInt();
+
+    QJsonObject data = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess"));
+
+    QString oldPrimary = data.value(QLatin1String("Service")).toString();
+    QStringList originalAddresses = arrayToStringList(data.value(QLatin1String("Addresses")).toArray());
+    QString currentPrimary{detectPrimaryService()};
+    QStringList currentAddresses = arrayToStringList(scutilGet(QStringLiteral("State:/Network/Service/%1/IPv4").arg(currentPrimary)).value(QLatin1String("Addresses")).toArray());
+
+    // Have the primary service or the local IP addresses changed?
+    if(oldPrimary != currentPrimary || originalAddresses != currentAddresses)
     {
-        qInfo() << "IP address has changed; killing connection";
-        goto killConnection;
+        // Yes, the network connection has changed
+        qInfo().nospace() << "Network connection has changed from "
+            << oldPrimary << " (" << originalAddresses.size()
+            << " addresses) to " << currentPrimary << " ("
+            << currentAddresses.size() << " addresses)";
+
+        // Does the current connection support roaming?
+        if(killPid)
+        {
+            // Can't roam; kill the connection.
+            qInfo() << "Network connection has changed; killing connection";
+            execute(QStringLiteral("kill %1").arg(killPid), IgnoreErrors);
+        }
+        else
+        {
+            // Roaming is possible - tear down and/or reconfigure DNS.
+
+            // Tear down the old configuration if it was known - this is
+            // important to restore the old setup configuration to that
+            // interface, even if it's not currently connected.
+            if(!oldPrimary.isEmpty() && !originalAddresses.isEmpty())
+            {
+                qInfo() << "Restore old configuration";
+                restoreConfiguration();
+            }
+
+            // Configure again if the new interface is ready
+            if(!currentPrimary.isEmpty() && !currentAddresses.isEmpty())
+            {
+                qInfo() << "Reconfigure with new primary interface";
+                reapplyConfiguration(currentPrimary, setupParams);
+            }
+        }
+        return;
     }
+
+    // The primary service hasn't changed, but there could be no primary service
+    // if we had already observed this state and there still isn't an active
+    // network connection.
+    if(currentPrimary.isEmpty() || currentAddresses.isEmpty())
+    {
+        qWarning() << "No primary service - cannot apply DNS yet, will apply later when network is connected";
+        return;
+    }
+
+    QJsonObject oldStateDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/OldStateDNS"));
+    QJsonObject oldSetupDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/OldSetupDNS"));
+    QJsonObject intendedDNS = scutilGet(QStringLiteral("State:/Network/PrivateInternetAccess/DNS"));
+    QJsonObject currentStateDNS = scutilGet(QStringLiteral("State:/Network/Service/%1/DNS").arg(currentPrimary));
+    QJsonObject currentSetupDNS = scutilGet(QStringLiteral("Setup:/Network/Service/%1/DNS").arg(currentPrimary));
 
     // Check if DNS has changed
     if (data.value(QLatin1String("OverrideDNS")).toString() == QLatin1String("TRUE"))
     {
-        if (currentDNS != intendedDNS)
+        if (currentStateDNS != intendedDNS || currentSetupDNS != intendedDNS)
         {
-            // If we merely changed back to the original DNS, reapply settings
-            if (currentDNS == originalDNS)
-            {
-                qInfo() << "DNS reverted to original setting; reapplying";
-                scutil({
-                           QStringLiteral("open"),
-                           QStringLiteral("get State:/Network/PrivateInternetAccess/DNS"),
-                           QStringLiteral("set State:/Network/Service/%1/DNS").arg(service),
-                           QStringLiteral("set Setup:/Network/Service/%1/DNS").arg(service),
-                           QStringLiteral("quit"),
-                       }, IgnoreErrors);
-            }
-            else
-            {
-                qInfo() << "DNS has changed; killing connection";
-                goto killConnection;
-            }
+            // Reapply regardless of the new config, but trace the state for
+            // supportability
+            qInfo() << "DNS has changed, reapplying";
+            qInfo() << "intended DNS:" << QJsonDocument{intendedDNS}.toJson();
+            qInfo() << "old state DNS:" << QJsonDocument{oldStateDNS}.toJson();
+            qInfo() << "old setup DNS:" << QJsonDocument{oldSetupDNS}.toJson();
+            qInfo() << "current state DNS:" << QJsonDocument{currentStateDNS}.toJson();
+            qInfo() << "current setup DNS:" << QJsonDocument{currentSetupDNS}.toJson();
+            scutil({
+                       QStringLiteral("open"),
+                       QStringLiteral("get State:/Network/PrivateInternetAccess/DNS"),
+                       QStringLiteral("set State:/Network/Service/%1/DNS").arg(currentPrimary),
+                       QStringLiteral("set Setup:/Network/Service/%1/DNS").arg(currentPrimary),
+                       QStringLiteral("quit"),
+                   }, IgnoreErrors);
         }
-    }
-
-    return;
-
-killConnection:
-    if (pid)
-    {
-        execute(QStringLiteral("kill %1").arg(pid), IgnoreErrors);
+        else
+        {
+            qInfo() << "DNS is still configured, nothing to update.";
+        }
     }
 }
 
@@ -520,12 +528,11 @@ int main(int argc, char* argv[])
             QStringList winsServers;
             QString domain;
 
-            bool shouldDisableIPv6 = env.value(QStringLiteral("ifconfig_ipv6_remote")) == QLatin1String("::1");
-
             // If the local network connection goes down, we kill a process to
             // cause a reconnect.  The default is the parent of this script,
             // which is OpenVPN itself for OpenVPN.  The kill_pid variable
-            // overrides this, and 0 prevents us from killing anything.
+            // overrides this, and 0 prevents us from killing anything (0
+            // indicates that the connection supports roaming - WireGuard)
             int killPid{0};
             QString killPidEnvVal{env.value(QStringLiteral("kill_pid"))};
             if(!killPidEnvVal.isEmpty())
@@ -580,7 +587,7 @@ int main(int argc, char* argv[])
 
             try
             {
-                applyConfiguration(shouldDisableIPv6, killPid, dnsServers, domain, winsServers);
+                saveAndApplyConfiguration(killPid, dnsServers, domain, winsServers);
             }
             catch (int exitCode)
             {
@@ -591,6 +598,10 @@ int main(int argc, char* argv[])
         }
         else if (scriptType == QLatin1String("down"))
         {
+            // Remove the saved setup parameters
+            scutil({
+                QStringLiteral("remove State:/Network/PrivateInternetAccess/SetupParams"),
+            }, ProcessErrorBehavior::IgnoreErrors);
             restoreConfiguration();
         }
         else if (scriptType == QLatin1String("watch-notify"))

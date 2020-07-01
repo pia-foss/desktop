@@ -93,6 +93,12 @@ QtObject {
   function login(username, password) {
     call("login", arguments);
   }
+  function emailLogin(email) {
+    call("emailLogin", arguments);
+  }
+  function setToken(token) {
+    call("setToken", arguments);
+  }
   function logout() {
     call("logout", arguments);
   }
@@ -132,18 +138,9 @@ QtObject {
 
   // Get the name of a location.
   // Returns the location's localized name if possible, otherwise the name
-  // provided by the server, or its ID as a last resort.
+  // provided by the server.
   function getLocationName(loc) {
-    var locMeta = state.locationMetadata[loc.id]
-    if(locMeta && loc.name && loc.name === locMeta.name) {
-      // The translatable name is known and the server name still matches the
-      // name that was translated.  Return a localized name.
-      return state.translateName(locMeta.name)
-    }
-    // The location has no metadata, its name has changed, or the server did not
-    // provide a name, etc.  Return the server name if it exists or the ID
-    // otherwise.
-    return loc.name || loc.id
+    return state.translateName(loc.name)
   }
 
   // Get the name of a location from a location ID.

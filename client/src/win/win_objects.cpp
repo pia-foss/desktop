@@ -20,6 +20,7 @@
 #line SOURCE_FILE("win_objects.cpp")
 
 #include "win_objects.h"
+#include "win_resources.h"
 #include "win/win_util.h"
 
 #include <QPainter>
@@ -77,6 +78,18 @@ HMENU WinPopupMenu::createMenu(const NativeMenuItem::List& items)
                 auto pixmap = QPixmap(file);
                 if (!pixmap.isNull())
                 {
+                    int cx = GetSystemMetrics(SM_CXSMICON);
+                    int cy = GetSystemMetrics(SM_CYSMICON);
+                    // Negative metric values have been observed in the tray
+                    // icon loader in the field in rare casesl guard against
+                    // these here.
+                    if(cx <= 0 || cy <= 0)
+                    {
+                        qWarning() << "Got invalid small icon size from system:"
+                            << cx << "x" << cy;
+                        // Use some sane default, possibly blurry icon is better than nothing
+                        cx = cy = 16;
+                    }
                     QPixmap icon(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
                     icon.fill(Qt::transparent);
                     {
@@ -156,11 +169,56 @@ IconResource::IconResource(WORD resId, Size size)
         cx = ::GetSystemMetrics(SM_CXICON);
         cy = ::GetSystemMetrics(SM_CYICON);
     }
-    _icon = reinterpret_cast<HICON>(::LoadImageW(::GetModuleHandleW(nullptr),
-                                    MAKEINTRESOURCE(resId), IMAGE_ICON, cx, cy,
-                                    LR_DEFAULTCOLOR));
+
+    // In rare cases, negative values have been observed in the field, which
+    // prevents the icons from being loaded.  If this happens, trace it and just
+    // use the resource size.
+    if(cx < 0 || cy < 0)
+    {
+        qWarning() << "System returned invalid metrics for icon size:"
+            << (size == Size::Small ? QStringLiteral("small") : QStringLiteral("large"))
+            << "- got" << cx << "x" << cy;
+        // Use size 0 to get the resource default size.
+        cx = cy = 0;
+    }
+
+    HMODULE thisModule{::GetModuleHandleW(nullptr)};
+    QString sizeTrace{size == Size::Small ? QStringLiteral("small") : QStringLiteral("large")};
+
+    // This has multiple fallbacks because failure to load icons has been
+    // observed in the field.  We would rather the client start up with any icon
+    // than not start up at all.
+    if(thisModule)
+    {
+        _icon = loadModuleIcon(thisModule, resId, cx, cy, sizeTrace);
+    }
+    else
+    {
+        qWarning() << "Can't load icon" << resId << "in size" << sizeTrace
+            << "with dimensions" << cx << "x" << cy
+            << "- could not get handle to this module";
+    }
+
+    // If we failed to load the icon, but did have a module handle, try to load
+    // the app icon as a relatively decent placeholder
+    if(!_icon && thisModule)
+    {
+        _icon = loadModuleIcon(thisModule, IDI_APP, cx, cy, sizeTrace);
+    }
+
+    // If we still failed to load the icon, try to load a dummy stock icon - we
+    // seem to be completely unable to load app icons, this is better than
+    // nothing (slightly)
     if(!_icon)
     {
+        _icon = loadStockIcon(IDI_APPLICATION, cx, cy, sizeTrace);
+    }
+
+    if(!_icon)
+    {
+        qWarning() << "Unable to load icon or any fallback icons:" << resId << "in size"
+            << (size == Size::Small ? QStringLiteral("small") : QStringLiteral("large"))
+            << "with dimensions" << cx << "x" << cy;
         CHECK_THROW("Loading Windows icon resource");
     }
 }
@@ -198,6 +256,51 @@ IconResource::IconResource(LPCWSTR pPath, const QSize &size)
 IconResource::~IconResource()
 {
     ::DestroyIcon(_icon);
+}
+
+HICON IconResource::loadModuleIcon(HMODULE module, UINT resId, int cx, int cy,
+                                   const QString &sizeTrace)
+{
+    HICON icon = reinterpret_cast<HICON>(::LoadImageW(module,
+                                                      MAKEINTRESOURCE(resId),
+                                                      IMAGE_ICON, cx, cy,
+                                                      LR_DEFAULTCOLOR));
+    if(!icon)
+    {
+        QString moduleName;
+        if(module)
+        {
+            wchar_t moduleFileCheck[MAX_PATH]{};
+            ::GetModuleFileNameW(module, moduleFileCheck, MAX_PATH);
+        }
+
+        qWarning() << "Failed to load icon:" << resId << "in size"
+            << sizeTrace << "with dimensions" << cx << "x" << cy
+            << "from module" << reinterpret_cast<qintptr>(module)
+            << "-" << moduleName;
+    }
+
+    return icon;
+}
+
+HICON IconResource::loadStockIcon(const wchar_t *pRes, int cx, int cy,
+                                  const QString &sizeTrace)
+{
+    HICON icon = reinterpret_cast<HICON>(::LoadImageW(nullptr, pRes,
+                                                      IMAGE_ICON, cx, cy,
+                                                      LR_DEFAULTCOLOR|LR_SHARED));
+    if(!icon)
+    {
+        QString resName;
+        if(IS_INTRESOURCE(pRes))
+            resName = QString::number(reinterpret_cast<qintptr>(pRes));
+        else if(pRes)
+            resName = QString::fromWCharArray(pRes);
+        qWarning() << "Failed to load stock icon:" << resName << "in size"
+            << sizeTrace << "with dimensions" << cx << "x" << cy;
+    }
+
+    return icon;
 }
 
 bool WinResId::empty() const

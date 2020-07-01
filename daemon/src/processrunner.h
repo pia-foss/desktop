@@ -216,10 +216,10 @@ public:
     // synchronously during this call.  This is not necessarily the case for
     // later calls to enable() (ProcessRunner could be waiting on a prior
     // process to exit, etc.)
-    virtual bool enable(QString program, QStringList arguments);
+    bool enable(QString program, QStringList arguments);
     // Disable the process.  If it was running, the process is killed with
     // kill().
-    virtual void disable();
+    void disable();
 
     bool isEnabled() const {return _enabled;}
 

@@ -166,7 +166,6 @@ Page {
       }
     }
 
-
     // Spacer between groups
     Item {
       width: 1

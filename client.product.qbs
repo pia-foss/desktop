@@ -93,7 +93,15 @@ PiaApplication {
       "LSUIElement": true,
       "CFBundleIconFile": "app.icns",
       "NSSupportsAutomaticGraphicsSwitching" : true,
-      "SMPrivilegedExecutables": smPrivExec
+      "SMPrivilegedExecutables": smPrivExec,
+      "CFBundleURLTypes": [
+        {
+          "CFBundleTypeRole": "Viewer",
+          "CFBundleURLName": project.brandIdentifier + ".uri",
+          "CFBundleURLSchemes": [project.brandCode + "vpn"],
+          "CFBundleURLIconFIle": "app.icns"
+        }
+      ]
     }
 
     // Include the complete version in a custom key, used by install helper.

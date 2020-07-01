@@ -619,11 +619,6 @@ DWORD Installer::workerThreadMain()
             if (messageBox(IDS_MB_CORRUPTINSTALLATION, IDS_MB_CAP_CORRUPTINSTALLATION, 0, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1) != IDYES)
                 throw InstallerAbort();
         }
-
-        // This will load all user registry hives, needed to access their
-        // settings (e.g. app paths, run entries etc.). Disabled for now
-        // until we figure out what the drawbacks of this hack are.
-        //auto sids = loadAllUserRegistryHives();
     #endif
 
     #ifdef INSTALLER
@@ -696,6 +691,9 @@ DWORD Installer::workerThreadMain()
 
         // Copy new files
         tasks.addNew<PayloadTask>(g_installPath);
+
+        // Add piavpn: URI handler
+        tasks.addNew<WriteUrlHandlerRegistryTask>(g_clientPath);
 
         // Plant any remembered account/settings
         tasks.addNew<WriteSettingsTask>(g_daemonDataPath);

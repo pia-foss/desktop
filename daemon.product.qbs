@@ -80,7 +80,9 @@ PiaApplication {
   Group {
     name: "dep_bins"
     files: {
-      var depPaths = ["deps/openvpn/", "deps/hnsd/", "deps/shadowsocks/", "deps/wireguard-go/", "deps/wgservice/"];
+      var depPaths = ["deps/openvpn/", "deps/resolvers/unbound/", "deps/shadowsocks/", "deps/wireguard-go/", "deps/wgservice/"];
+      if(product.includeFeatureHandshake)
+        depPaths.push("deps/resolvers/hnsd/")
       var platformDir
       if (qbs.targetOS.contains("windows")) {
         platformDir = "win/";

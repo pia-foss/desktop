@@ -36,10 +36,9 @@ namespace
     const QByteArray authBasicPrefix{QByteArrayLiteral("Basic ")};
     const QByteArray authTokenPrefix{QByteArrayLiteral("Token ")};
 
-    // Number of times we will attempt any retryable API request.
-    // Note that these retries are spread among the possible API base URLs, so
-    // it should normally be at least apiBaseUris.size()
-    const int apiAttempts{4};
+    // Number of times we will attempt any retryable API request per possible
+    // API base.
+    const int apiAttemptsPerBase{2};
 
     static inline QJsonDocument parseJsonBody(const QByteArray& body)
     {
@@ -97,7 +96,8 @@ Async<QJsonDocument> ApiClient::getRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
                         *_environment.getPiaApi(), std::move(resource),
-                        apiAttempts, {}, std::move(auth))
+                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
+                        {}, std::move(auth))
             ->then(parseJsonBody);
 }
 
@@ -105,7 +105,8 @@ Async<QJsonDocument> ApiClient::getRetry(ApiBase &apiBaseUris, QString resource,
                                          QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        apiBaseUris, std::move(resource), apiAttempts, {},
+                        apiBaseUris, std::move(resource),
+                        apiBaseUris.getUriCount()*apiAttemptsPerBase, {},
                         std::move(auth))
             ->then(parseJsonBody);
 }
@@ -123,16 +124,19 @@ Async<QJsonDocument> ApiClient::getIpRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
                         *_environment.getIpAddrApi(), std::move(resource),
-                        apiAttempts, {}, std::move(auth))
+                        _environment.getIpAddrApi()->getUriCount()*apiAttemptsPerBase,
+                        {}, std::move(auth))
             ->then(parseJsonBody);
 }
 
-Async<QJsonDocument> ApiClient::getVpnIpRetry(QString resource, QByteArray auth)
+Async<QJsonDocument> ApiClient::getVpnIpRetry(ApiBase &apiBaseUris,
+                                              QString resource,
+                                              std::chrono::seconds timeout,
+                                              QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getIpAddrApi(), std::move(resource),
-                        ApiRetries::timed(std::chrono::seconds{5},
-                                          std::chrono::minutes{2}),
+                        apiBaseUris, std::move(resource),
+                        ApiRetries::timed(std::chrono::seconds{5}, timeout),
                         {}, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -148,7 +152,8 @@ Async<QJsonDocument> ApiClient::post(QString resource, const QJsonDocument &data
 Async<QJsonDocument> ApiClient::postRetry(QString resource, const QJsonDocument &data, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::PostOperation,
-                        *_environment.getPiaApi(), std::move(resource), apiAttempts,
+                        *_environment.getPiaApi(), std::move(resource),
+                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
                         data, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -165,7 +170,8 @@ Async<void> ApiClient::headRetry(QString resource, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::HeadOperation,
                         *_environment.getPiaApi(), std::move(resource),
-                        apiAttempts, {}, std::move(auth));
+                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
+                        {}, std::move(auth));
 }
 
 Async<QJsonDocument> ApiClient::getForwardedPort(QString resource, QByteArray auth)

@@ -87,8 +87,10 @@ public:
     Async<QJsonDocument> getIpRetry(QString resource, QByteArray auth = {});
 
     // GET for the VPN IP address - uses a timed retry strategy tuned for the
-    // VPN IP address (with a relatively long 10-minute max retry time).
-    Async<QJsonDocument> getVpnIpRetry(QString resource, QByteArray auth = {});
+    // VPN IP address (with the specified max retry time).
+    Async<QJsonDocument> getVpnIpRetry(ApiBase &apiBaseUris, QString resource,
+                                       std::chrono::seconds timeout,
+                                       QByteArray auth = {});
 
     // Do a POST request for a particular resource with optional parameter
     // data in JSON format.

@@ -126,7 +126,7 @@ struct FirewallParams
     bool blockDNS;      // Block all DNS traffic except specified DNS servers
     bool allowPIA;      // Exempt PIA executables
     bool allowLoopback; // Exempt loopback traffic
-    bool allowHnsd;     // Exempt Handshake DNS traffic
+    bool allowResolver; // Exempt local DNS resolver traffic
 
     // Have we connected to the VPN since it was enabled?  (Some rules are only
     // activated once we successfully connect, but remain active even if we lose
@@ -339,6 +339,8 @@ protected:
     void RPC_notifyClientDeactivate();
     void RPC_startSnooze(qint64 seconds);
     void RPC_stopSnooze();
+    Async<void> RPC_emailLogin(const QString &email);
+    Async<void> RPC_setToken(const QString& token);
     Async<void> RPC_login(const QString& username, const QString& password);
     void RPC_logout();
     // Refresh update metadata (asynchronously)
@@ -373,6 +375,8 @@ protected:
     // Write platform-specific diagnostics to implement RPC_writeDiagnostics()
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) = 0;
 
+    // Overview of common diagnostic information
+    QString diagnosticsOverview() const;
 signals:
     // The daemon has started and will need the message loop to be pumped.
     void started();
@@ -398,6 +402,7 @@ private:
     void clientConnected(IPCConnection* connection);
     void notifyChanges();
     void serialize();
+    Async<void> loadVpnIp();
     void vpnStateChanged(VPNConnection::State state,
                          const ConnectionConfig &connectingConfig,
                          const ConnectionConfig &connectedConfig,

@@ -22,26 +22,7 @@
 #include "openvpnmethod.h"
 #include "daemon.h"
 #include "path.h"
-
-namespace
-{
-    // All IPv4 LAN and loopback subnets
-    using SubnetPair = QPair<QHostAddress, int>;
-    std::array<SubnetPair, 5> ipv4LocalSubnets{
-        QHostAddress::parseSubnet(QStringLiteral("192.168.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("172.16.0.0/12")),
-        QHostAddress::parseSubnet(QStringLiteral("10.0.0.0/8")),
-        QHostAddress::parseSubnet(QStringLiteral("169.254.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("127.0.0.0/8"))
-    };
-
-    // Test if an address is an IPv4 LAN or loopback address
-    bool isIpv4Local(const QHostAddress &addr)
-    {
-        return std::any_of(ipv4LocalSubnets.begin(), ipv4LocalSubnets.end(),
-            [&](const SubnetPair &subnet) {return addr.isInSubnet(subnet);});
-    }
-}
+#include "ipaddress.h"
 
 HelperIpcConnection::HelperIpcConnection(QLocalSocket *pConnection)
     : _pConnection{pConnection}

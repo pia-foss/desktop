@@ -162,6 +162,15 @@ public:
     // macOS & Linux: <ExecutableDir>/pia-ss-local
     static Path SsLocalExecutable;
 
+    // Unbound executable
+    static Path UnboundExecutable;
+
+    // Unbound config file
+    static Path UnboundConfigFile;
+
+    // Config file for Unbound instance used to block DNS on Mac
+    static Path UnboundDnsStubConfigFile;
+
     // wireguard-go executable (Userspace Wireguard implementation - Mac/Linux)
     static Path WireguardGoExecutable;
 

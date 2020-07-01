@@ -2,6 +2,8 @@
 # individually turned on or off; they have a numeric prefix in order to
 # produce a well-defined alphabetical order.
 
+nat-anchor "000.natVPN"
+rdr-anchor "000.stubDNS"
 anchor "000.allowLoopback"
 anchor "100.blockAll"
 anchor "150.allowExcludedApps"
@@ -12,5 +14,6 @@ anchor "299.allowIPv6Prefix"
 anchor "300.allowLAN"
 anchor "305.allowSubnets"
 anchor "310.blockDNS"
+anchor "311.stubDNS"
 anchor "350.allowHnsd"
 anchor "400.allowPIA"

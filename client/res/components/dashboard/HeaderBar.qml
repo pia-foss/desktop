@@ -262,8 +262,15 @@ Item {
   // image for proper control ordering with screen readers.
   StaticText {
     id: title
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.topMargin: 8
+    anchors.bottomMargin: 8
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
+    width: 210
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    wrapMode: Text.Wrap
     font.pixelSize: Theme.dashboard.headerTextPx
     text: {
       if(ClientNotifications.firstErrorTitle)

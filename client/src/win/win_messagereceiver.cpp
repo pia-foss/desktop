@@ -51,6 +51,7 @@ LRESULT MessageReceiver::proc(UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(_showDashboardMsgCode && uMsg == _showDashboardMsgCode)
     {
         qInfo() << "Showing dashboard due to message received";
+        Client::instance()->checkForURL();
         Client::instance()->openDashboard();
         return 0;
     }

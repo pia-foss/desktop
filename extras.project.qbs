@@ -109,6 +109,7 @@ PiaProject {
             var cert = Environment.getEnv("PIA_CODESIGN_CERT") ? Environment.getEnv("PIA_CODESIGN_CERT") : "Unknown"
             f.writeLine("#define PIA_CODESIGN_CERT " + Utilities.cStringQuote(cert));
             f.writeLine("#define RUBY_MIGRATION R\"(" + (Environment.getEnv("RUBY_MIGRATION") || "") + ")\"")
+            f.writeLine("#define INCLUDE_FEATURE_HANDSHAKE " + (project.includeFeatureHandshake ? "1" : "0"))
 
             // Windows-style four-part version number used in VERSIONINFO.
             // This can't completely encode a semantic version, so we use the

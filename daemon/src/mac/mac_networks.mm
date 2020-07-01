@@ -224,7 +224,7 @@ void MacNetworks::readConnections()
             {
                 QString globalRouterIp = getGlobalRouterIp(ipVersion);
                 qWarning() << QStringLiteral("Router %1 address not found in service data, falling back to Global Router address: %2").arg(ipVersion, globalRouterIp);
-                return globalRouterIp;;
+                return globalRouterIp;
             }
             else
             {
@@ -245,6 +245,9 @@ void MacNetworks::readConnections()
                                     ipv4RouterAddr, ipv6RouterAddr,
                                     std::move(addressesIpv4),
                                     std::move(addressesIpv6));
+
+        // Expose the primary service key
+        connectionInfo.back().macosPrimaryServiceKey(defIpv4SvcKey);
     }
 
     updateNetworks(std::move(connectionInfo));

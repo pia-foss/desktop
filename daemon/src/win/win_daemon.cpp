@@ -100,7 +100,9 @@ void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, 
         << "with metric:" << metric;
     // Add the routing entry
     if(CreateIpForwardEntry2(&route) != NO_ERROR)
+    {
         qWarning() << "Could not create route for" << subnet;
+    }
 }
 
 void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
@@ -111,7 +113,9 @@ void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayI
 
     // Delete the routing entry
     if(DeleteIpForwardEntry2(&route) != NO_ERROR)
+    {
         qWarning() << "Could not delete route for" << subnet;
+    }
 }
 
 WinDaemon::WinDaemon(QObject* parent)
@@ -119,6 +123,7 @@ WinDaemon::WinDaemon(QObject* parent)
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
     , _hnsdAppId{nullptr, Path::HnsdExecutable}
+    , _unboundAppId{nullptr, Path::UnboundExecutable}
     , _lastConnected{false}
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
     , _subnetBypass{std::make_unique<WinRouteManager>()}
@@ -511,14 +516,15 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     // wireguardservicebackend.cpp
     updateBooleanFilter(permitPIA[5], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::WireguardServiceExecutable, 15));
 
-    // Handshake related filters
-    // (1) First we block everything coming from the handshake process
-    logFilter("allowHnsd (block everything)", _filters.blockHnsd, luid && params.allowHnsd, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(blockHnsd[0], luid && params.allowHnsd, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 14));
+    // Local resolver related filters
+    // (1) First we block everything coming from the resolver processes
+    logFilter("allowResolver (block everything)", _filters.blockResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
+    updateBooleanInvalidateFilter(blockResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 14));
+    updateBooleanInvalidateFilter(blockResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 14));
 
     // (2) Next we poke a hole in this block but only allow data that goes across the tunnel
-    logFilter("allowHnsd (tunnel traffic)", _filters.permitHnsd, luid && params.allowHnsd, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(permitHnsd[0], luid && params.allowHnsd, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 15,
+    logFilter("allowResolver (tunnel traffic)", _filters.permitResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
+    updateBooleanInvalidateFilter(permitResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 15,
         Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
 
         // OR'ing of conditions is done automatically when you have 2 or more consecutive conditions of the same fieldId.
@@ -526,6 +532,10 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
 
         // 13038 is the Handshake control port
         Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 13038}
+    ));
+    updateBooleanInvalidateFilter(permitResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 15,
+        Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
+        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53}
     ));
 
     // Always permit loopback traffic, including IPv6.
@@ -568,11 +578,22 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
 
 void WinDaemon::updateAllBypassSubnetFilters(const FirewallParams &params)
 {
-    if(params.bypassIpv4Subnets != _bypassIpv4Subnets)
-        updateBypassSubnetFilters(params.bypassIpv4Subnets, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
+    if(params.enableSplitTunnel)
+    {
+        if(params.bypassIpv4Subnets != _bypassIpv4Subnets)
+            updateBypassSubnetFilters(params.bypassIpv4Subnets, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
 
-    if(params.bypassIpv6Subnets != _bypassIpv6Subnets)
-        updateBypassSubnetFilters(params.bypassIpv6Subnets, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
+        if(params.bypassIpv6Subnets != _bypassIpv6Subnets)
+            updateBypassSubnetFilters(params.bypassIpv6Subnets, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
+    }
+    else
+    {
+        if(!_bypassIpv4Subnets.isEmpty())
+            updateBypassSubnetFilters({}, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
+
+        if(!_bypassIpv6Subnets.isEmpty())
+            updateBypassSubnetFilters({}, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
+    }
 }
 
 void WinDaemon::updateBypassSubnetFilters(const QSet<QString> &subnets, QSet<QString> &oldSubnets, std::vector<WfpFilterObject> &subnetBypassFilters, FWP_IP_VERSION ipVersion)
@@ -580,7 +601,7 @@ void WinDaemon::updateBypassSubnetFilters(const QSet<QString> &subnets, QSet<QSt
     for (auto &filter : subnetBypassFilters)
         deactivateFilter(filter, true);
 
-    // If we have any IPv6 subnets we need to also whitelist IPv6 link-local and broadcast ranged
+    // If we have any IPv6 subnets we need to also whitelist IPv6 link-local and broadcast ranges
     // required by IPv6 Neighbor Discovery
     auto adjustedSubnets = subnets;
     if(ipVersion == FWP_IP_VERSION_V6 && !subnets.isEmpty())
@@ -886,9 +907,16 @@ void WinDaemon::RPC_checkDriverState()
 void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 {
     file.writeCommand("OS Version", "wmic", QStringLiteral("os get Caption,CSDVersion,BuildNumber,Version /value"));
+    file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("Interfaces (ipconfig)", "ipconfig", QStringLiteral("/all"));
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringLiteral("-nr"));
     file.writeCommand("DNS configuration", "netsh", QStringLiteral("interface ipv4 show dnsservers"));
+
+    for(const auto &adapter : WinInterfaceMonitor::getNetworkAdapters())
+    {
+        auto index = adapter->indexIpv4();
+        file.writeCommand(QStringLiteral("Interface info (index=%1)").arg(index), "netsh", QStringLiteral("interface ipv4 show interface %1").arg(index));
+    }
 
     // WFP (windows firewall) filter information. We need to process it as the raw data is XML.
     file.writeCommand("WFP filters", "netsh", QStringLiteral("wfp show filters dir = out file = -"),
@@ -926,7 +954,7 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // Installed and running drivers (buggy drivers may prevent TAP installation)
     file.writeCommand("Drivers", QStringLiteral("driverquery"), {QStringLiteral("/v")});
-    
+
     // DNS
     file.writeCommand("Resolve-DnsName (www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com"));
     file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(piaLegacyDnsPrimary));

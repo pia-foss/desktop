@@ -3,8 +3,17 @@
 ### v2.2
 * Split tunnel is now supported with WireGuard
 * Geo-located regions are supported
-* The {{BRAND_SHORT_NAME}} Next Generation network is now in preview
+* The {{BRAND_SHORT}} Next Generation network is now in preview
+* Added Built-in Resolver option to Name Servers setting
+* Removed Handshake testnet resolver from Name Servers setting (testnet no longer exists, hnsd does not support mainnet)
+* Added 'requestportforward' option to '{{BRAND_CODE}}ctl get/set' to control port forwarding setting
+* Improved DNS leak protection compatibility with macOS 10.15.4 and later
+* Improved compatibility of split tunnel on Windows with other WFP callout drivers
+* Fixed an issue preventing IP split tunnel rules from being disabled on Windows in some cases
+* Fixed layout of the killswitch warning in some translations
 * Changed title of windowed dashboard to "{{BRAND}}"
+* The regions list keeps its scroll position as latencies are updated
+* Diagnostic improvements in debug reports
 
 ### v2.1
 * Split tunnel "bypass" rules can be created for IP addresses and subnets

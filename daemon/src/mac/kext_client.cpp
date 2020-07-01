@@ -307,23 +307,6 @@ void KextClient::sendBypassIpv4Subnets(const QSet<QString> &bypassSubnets)
                  maxBypassSubnets * sizeof(subnets[0]));
 }
 
-void KextClient::removeCurrentBoundRoute(const QString &ipAddress, const QString &interfaceName)
-{
-
-    if(ipAddress.isEmpty() || interfaceName.isEmpty())
-    {
-        qInfo() << "No bound route to remove!";
-        return;
-    }
-
-    qInfo() << "Removing bound route";
-
-    if(ipAddress.isEmpty())
-        _executor.bash(QStringLiteral("route delete 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
-    else
-        _executor.bash(QStringLiteral("route delete 0.0.0.0 %1 -ifscope %2").arg(ipAddress, interfaceName));
-}
-
 void KextClient::createBoundRoute(const QString &ipAddress, const QString &interfaceName)
 {
     qInfo() << "Adding new bound route";
@@ -347,12 +330,12 @@ void KextClient::updateFirewall(QString ipAddress, bool hasConnected)
         // We disable all non-vpn traffic when not connected
         // Bypass traffic makes no sense when not connected, and vpnOnly traffic is blocked via the kext
         qInfo() << "Removing firewall rule - not connected to VPN";
-        PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName, false, {});
+        PFFirewall::setFilterWithRules(kSplitTunnelAnchorName, false, {});
     }
     else
     {
         qInfo() << "Updating the firewall rule for new ip" << ipAddress;
-        PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName,
+        PFFirewall::setFilterWithRules(kSplitTunnelAnchorName,
             true, { QStringLiteral("pass out from %1 no state").arg(ipAddress) });
     }
 }
@@ -401,26 +384,10 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
     // The kext maintains its own IP filter firewall and needs to be kept in sync with our pf firewall
     updateKextFirewall(params, !tunnelDeviceName.isEmpty());
 
-    // We *always* update the bound route as it's possible a user connected to another network
-    // with the same gateway IP/interface/IP. In this case the system may wipe our bound route so we have to recreate it.
-    // Note this does result in constantly deleting/recreating the bound route for every firewall change but it doesn't appear
-    // to affect connectivity of apps, so it should be ok.
-    if(_previousNetScan.ipv4Valid())
-        removeCurrentBoundRoute(_previousNetScan.gatewayIp(), _previousNetScan.interfaceName());
-
-    // If we're connected, create a bound route for the physical interface, so
-    // bound sockets for excluded apps will route correctly.
-    // Don't create this when we're not connected; the network info may not be
-    // up to date, and it would create a routing conflict.
-    if(params.hasConnected)
-    {
-        createBoundRoute(params.netScan.gatewayIp(), params.netScan.interfaceName());
-
-        // If we were ignoring excluded apps before (since we didn't have this
-        // info), enumerate them now to permit through the firewall
-        if(!_hasConnected)
-            sendExistingPids(_excludedApps);
-    }
+    // When we're first connected, enumerate excluded apps and send them to the
+    // kext to permit them through the firewall.
+    if(params.hasConnected && !_hasConnected)
+        sendExistingPids(_excludedApps);
 
     if(_previousBypassIpv4Subnets != params.bypassIpv4Subnets)
         sendBypassIpv4Subnets(params.bypassIpv4Subnets);
@@ -436,13 +403,17 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
         // that bypass the VPN.)
         if(tunnelDeviceName.isEmpty())
         {
-            qInfo() << "Can't create bound route for VPN network yet - interface:"
-                << tunnelDeviceName;
+            qInfo() << "Can't create bound route for VPN network yet - interface not known";
         }
         else
         {
-            // We don't need to remove the previous bound route as if the IP changes that means the interface went down, which will destroy that route
-            createBoundRoute({}, tunnelDeviceName);
+            // We don't need to remove the previous bound route as if the IP
+            // changes that means the interface went down, which will destroy
+            // that route.
+            // Create a direct interface route  - this is fine for tunnel
+            // devices since they're point to point so there will only be one
+            // acceptable "next hop"
+            _executor.bash(QStringLiteral("route add -net 0.0.0.0 -interface %1 -ifscope %1").arg(tunnelDeviceName));
         }
     }
 
@@ -464,7 +435,7 @@ void KextClient::updateNetwork(const FirewallParams &params, QString tunnelDevic
 void KextClient::teardownFirewall()
 {
     // Remove all firewall rules
-    PFFirewall::setAnchorWithRules(kSplitTunnelAnchorName, false, QStringList{});
+    PFFirewall::setFilterWithRules(kSplitTunnelAnchorName, false, QStringList{});
 }
 
 void KextClient::shutdownConnection()
@@ -490,19 +461,21 @@ void KextClient::shutdownConnection()
 
     // Remove all firewall rules
     teardownFirewall();
-    removeCurrentBoundRoute(_previousNetScan.ipAddress(), _previousNetScan.interfaceName());
 
      _excludedApps = {};
      _vpnOnlyApps = {};
 
     _sockFd = -1;
 
-    // clear out our network info
-    _previousNetScan = {};
-
     // Ensure we reset our Kext firewall state
     _firewallState = {};
+
+    // clear out our network info
+    _previousNetScan = {};
     _tunnelDeviceName.clear();
+    _tunnelDeviceLocalAddress.clear();
+    _previousBypassIpv4Subnets = {};
+    _hasConnected = false;
 
     // Discard the trace cache
     qInfo() << "Discarding" << _tracedResponses.size() << "trace cache entries";

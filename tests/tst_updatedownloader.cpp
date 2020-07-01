@@ -44,18 +44,18 @@ const QString &betaChannel = QStringLiteral("beta");
 // Newer release
 // The UpdateDownloader uses the actual version even in unit tests, so the
 // 'newer' version is set really high.
-const Update newerGa{QStringLiteral("https://unit.test/v100"), QStringLiteral("100.0.0")};
+const Update newerGa{QStringLiteral("https://unit.test/v100"), QStringLiteral("100.0.0"), {}};
 // Older release
-const Update olderGa{QStringLiteral("https://unit.test/v080"), QStringLiteral("0.8.0")};
+const Update olderGa{QStringLiteral("https://unit.test/v080"), QStringLiteral("0.8.0"), {}};
 // The same release.
 // (The version here could actually have pre-release tags depending on the
 // version being built.)
-const Update sameGa{QStringLiteral("https://unit.test/vCurrent"), QStringLiteral(PIA_VERSION)};
+const Update sameGa{QStringLiteral("https://unit.test/vCurrent"), QStringLiteral(PIA_VERSION), {}};
 
 // The newer/older betas are relative to the "newer" GA release.
-const Update newerBeta{QStringLiteral("https://unit.test/v101b"), QStringLiteral("101.0.0-beta.3")};
-const Update newerBeta2{QStringLiteral("https://unit.test/v102b"), QStringLiteral("102.0.0-beta.2")};
-const Update olderBeta{QStringLiteral("https://unit.test/v99b"), QStringLiteral("99.0.0-beta.7")};
+const Update newerBeta{QStringLiteral("https://unit.test/v101b"), QStringLiteral("101.0.0-beta.3"), {}};
+const Update newerBeta2{QStringLiteral("https://unit.test/v102b"), QStringLiteral("102.0.0-beta.2"), {}};
+const Update olderBeta{QStringLiteral("https://unit.test/v99b"), QStringLiteral("99.0.0-beta.7"), {}};
 
 // Payload for no build at all on a channel.
 // (Just an empty 'latest_version_piax' object.)

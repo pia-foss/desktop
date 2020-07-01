@@ -74,6 +74,9 @@ public:
     // from Logger, which works with or without a daemon connection.
     Q_PROPERTY(bool logToFile READ getLogToFile NOTIFY logToFileChanged)
 
+    // Temporary Handshake feature toggle
+    Q_PROPERTY(bool includeFeatureHandshake READ getIncludeFeatureHandshake FINAL CONSTANT)
+
     // Do native initialization on the popup-style dashboard window.
     // On OS X, sets the dashboard window to appear on all workspaces.
     Q_INVOKABLE void initDashboardPopup(QWindow *pDashboard);
@@ -199,6 +202,8 @@ public:
     static void applyStartOnLoginSetting(bool enabled);
     static bool getStartOnLoginSetting();
 
+    void openUrl (const QString &path, const QJsonObject &queryItems);
+
 signals:
     // Emitted when the application loses focus (no window in the application is
     // focused).
@@ -209,11 +214,13 @@ signals:
     void reinstallWfpCalloutStatusChanged();
     void terminalStartFailed (const QString &command);
     void dashboardOpenRequested();
+    void urlOpenRequested(const QString &path, const QJsonObject &queryItems);
 
 
 private:
     Platform getPlatform() const;
     QString getProductName() const;
+    bool getIncludeFeatureHandshake() const;
     bool getLogToFile();
     bool getSplitTunnelSupported() const;
     void onFocusWindowChanged(QWindow *pFocusWindow);
@@ -226,6 +233,13 @@ private:
     void reinstallDriver(Driver type, const wchar_t *commandParams);
     // Set either the TAP or WFP Callout driver reinstallation status.
     void setDriverReinstallStatus(Driver type, const QString &status);
+
+    // Check if we can emit a queued URL event now
+    void checkQueuedUrlEvent();
+
+    // A signal has been connected - queue a call to checkQueuedUrlEvent() if it
+    // is the urlOpenRequested signal
+    virtual void connectNotify(const QMetaMethod &signal) override;
 
 private:
 #ifdef Q_OS_WIN
@@ -240,6 +254,14 @@ private:
     // Status of WFP callout driver reinstallation (or installation if this is
     // the first time)
     QString _reinstallWfpCalloutStatus;
+
+    // If openUrl() is called before the client QML is ready to handle this
+    // signal, the path and query parameters are held here until a connection is
+    // made to urlOpenRequested().  In particular, this occurs on macOS if the
+    // client is not open when a URL is clicked (this both launches the client
+    // and quickly sends it an event to open a URL).
+    QString _queuedOpenUrlPath;
+    QJsonObject _queuedOpenUrlQuery;
 };
 
 #endif // MAC_INSTALL_H

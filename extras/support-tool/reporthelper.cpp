@@ -292,7 +292,9 @@ bool ReportHelper::checkDumpFileAgainstBlacklist(const QString &dmpPath) const
               << "ig9icd32.dll"
               << "atio6axx.dll"
               << "nvoglv64.dll"
-              << "atioglxx.dll";
+              << "atioglxx.dll"
+              << "atig6txx.dll";
+
 
     QFile file(dmpPath);
     file.open(QIODevice::ReadOnly);

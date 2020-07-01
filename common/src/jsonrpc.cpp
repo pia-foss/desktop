@@ -21,6 +21,17 @@
 
 #include "jsonrpc.h"
 
+namespace
+{
+    // The "data" method is used from the daemon to provide updates to clients.
+    // It's invoked a lot and is not interesting, suppress normal tracing for
+    // this method.
+    bool suppressMethodTracing(const QString &method)
+    {
+        return method == QStringLiteral("data");
+    }
+}
+
 QJsonObject parseJsonRPCMessage(const QByteArray &msg) throws(Error)
 {
     QJsonParseError error;
@@ -117,9 +128,59 @@ Async<QJsonValue> LocalMethodRegistry::invoke(const QString &method, const QJson
 {
     auto it = _methods.find(method);
     if (it != _methods.end())
-        return (*it)(params);
+    {
+        if(!suppressMethodTracing(method))
+        {
+            qInfo() << "Invoking" << method;
+        }
+        // Trace the result of this invocation for supportability - important to
+        // see why connect requests fail, etc., if that happens.  It might also
+        // be traced by LocalCallInterface if the result is being sent back to
+        // the caller, but this only happens if the caller is interested in the
+        // result (the GUI client frequently ignores the result).
+        try
+        {
+            return (*it)(params)
+                ->next([method](const Error &err, const QJsonValue &result)
+                {
+                    if(err)
+                    {
+                        qWarning() << "Invocation of" << method
+                            << "resulted in error" << err;
+                        throw err;
+                    }
+
+                    // Don't trace the actual result; we can't redact any
+                    // potentially sensitive info since we don't know what it
+                    // is.
+                    if(!suppressMethodTracing(method))
+                    {
+                        qInfo() << "Invocation of" << method << "succeeded";
+                    }
+                    return result;
+                });
+        }
+        catch(const Error &error)
+        {
+            qWarning() << "Invocation of" << method << "threw error:" << error;
+            throw;
+        }
+        catch(const std::exception &ex)
+        {
+            qWarning() << "Invocation of" << method << "threw exception:" << ex.what();
+            throw;
+        }
+        catch(...)
+        {
+            qWarning() << "Invocation of" << method << "threw unknown exception";
+            throw;
+        }
+    }
     else
+    {
+        qWarning() << "Can't invoke" << method << "- method not found";
         return Async<QJsonValue>::reject(JsonRPCMethodNotFoundError(HERE, method));
+    }
 }
 
 LocalNotificationInterface::LocalNotificationInterface(LocalMethodRegistry *registry, QObject *parent)
@@ -274,6 +335,10 @@ void RemoteNotificationInterface::postWithParams(const QString& method, const QJ
 
 void RemoteNotificationInterface::request(const QJsonValue &id, const QString &method, const QJsonArray &params)
 {
+    if(!suppressMethodTracing(method))
+    {
+        qInfo() << "Sending request" << id << "to invoke RPC method" << method;
+    }
     QJsonObject msg;
     msg[QStringLiteral("jsonrpc")] = QStringLiteral("2.0");
     if (id.isString() || id.isDouble())
@@ -357,16 +422,18 @@ bool RemoteCallInterface::processResponse(const QJsonObject &response)
             {
                 params.push_back(v.toString());
             }
-            qWarning() << "Response error:" << message;
+            qWarning() << "Request" << id << "received error:" << message;
             task->reject(Error(HERE, code, params));
         }
         else
         {
+            qWarning() << "Request" << id << "received unknown error";
             task->reject(UnknownError(HERE));
         }
     }
     else
     {
+        qInfo() << "Request" << id << "succeeded";
         task->resolve(result);
     }
     return true;
@@ -393,7 +460,7 @@ void RemoteCallInterface::requestSendError(const Error &error, const QByteArray 
     {
         // This _really_ shouldn't happen, this is a message object that we
         // previously tried to send
-        qError() << error;
+        qError() << "Unable to send request:" << error;
     }
 }
 

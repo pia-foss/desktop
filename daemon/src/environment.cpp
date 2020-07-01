@@ -237,6 +237,10 @@ void Environment::loadApiBases()
                 QStringLiteral("IP API"), {
                     QStringLiteral("https://www.privateinternetaccess.com/")
                 });
+    loadApiBase(overridePresent, apiOverride, _pIpProxyApi, QStringLiteral("ip_proxy_api"),
+                QStringLiteral("IP proxy API"), {
+                    QStringLiteral("https://www.piaproxy.net/")
+                });
     loadApiBase(overridePresent, apiOverride, _pUpdateApi, QStringLiteral("update_api"),
                 QStringLiteral("update API"), {
                     BRAND_UPDATE_APIS

@@ -27,13 +27,17 @@
 #include <QString>
 
 
-class COMMON_EXPORT AppSingleton : public QObject
+class COMMON_EXPORT AppSingleton : public QObject, public Singleton<AppSingleton>
 {
     Q_OBJECT
 
 private:
     QSharedMemory _pidShare;
+    QSharedMemory _resourceShare;
     QString _executableName;
+
+    bool lockResourceShare ();
+    bool unlockResourceShare();
 
 public:
     AppSingleton(const QString &executableName, QObject *parent = nullptr);
@@ -44,7 +48,10 @@ public:
     // -1 otherwise
     qint64 isAnotherInstanceRunning ();
 
-
+    void setLaunchResource (QString url);
+    QString getLaunchResource();
 };
+
+extern template class COMMON_EXPORT_TMPL_SPEC_DECL Singleton<AppSingleton>;
 
 #endif

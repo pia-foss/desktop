@@ -60,6 +60,9 @@ Path Path::OpenVPNConfigFile;
 Path Path::OpenVPNUpDownScript;
 Path Path::HnsdExecutable;
 Path Path::SsLocalExecutable;
+Path Path::UnboundExecutable;
+Path Path::UnboundConfigFile;
+Path Path::UnboundDnsStubConfigFile;
 Path Path::WireguardGoExecutable;
 Path Path::WireguardInterfaceFile;
 Path Path::LegacyRegionOverride;
@@ -244,12 +247,14 @@ void Path::initializePostApp()
     SupportToolExecutable = ExecutableDir / BRAND_CODE "-support-tool.exe";
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd.exe";
     SsLocalExecutable = ExecutableDir / BRAND_CODE "-ss-local.exe";
+    UnboundExecutable = ExecutableDir / BRAND_CODE "-unbound.exe";
     DaemonLocalSocket = QStringLiteral("\\\\.\\pipe\\" BRAND_WINDOWS_SERVICE_NAME);
     DaemonHelperIpcSocket = QStringLiteral("\\\\.\\pipe\\" BRAND_WINDOWS_SERVICE_NAME "HelperIpc");
 #else
     OpenVPNExecutable = OpenVPNWorkingDir / BRAND_CODE "-openvpn";
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd";
     SsLocalExecutable = ExecutableDir / BRAND_CODE "-ss-local";
+    UnboundExecutable = ExecutableDir / BRAND_CODE "-unbound";
     WireguardGoExecutable = ExecutableDir / Files::wireguardGoBasename;
 #ifdef Q_OS_LINUX
     SupportToolExecutable = ExecutableDir / "support-tool-launcher";
@@ -273,6 +278,8 @@ void Path::initializePostApp()
     SupportToolExecutable = ExecutableDir / "../Resources/" BRAND_CODE "-support-tool.app/Contents/MacOS/" BRAND_CODE "-support-tool";
 #endif
 
+    UnboundConfigFile = DaemonDataDir / "unbound.conf";
+    UnboundDnsStubConfigFile = DaemonDataDir / "unbound_stub.conf";
     WireguardInterfaceFile = DaemonDataDir / "wg" BRAND_CODE "0-tun";
 
     DaemonLogFile = DaemonDataDir / "daemon.log";

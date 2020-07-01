@@ -59,7 +59,7 @@ Page {
           }
 
           function isThirdPartyDNS(value) {
-            return !isStringValue(value, "pia") && !isStringValue(value, "handshake")
+            return !isStringValue(value, "pia") && !isStringValue(value, "handshake") && !isStringValue(value, "local")
           }
 
           onSourceValueChanged: {
@@ -83,7 +83,7 @@ Page {
           }
         }
         warning: {
-          if(setting.sourceValue !== "pia" && setting.sourceValue !== "handshake")
+          if(setting.isThirdPartyDNS(setting.sourceValue))
             return uiTr("Warning: Using a third party DNS could compromise your privacy.")
           return ""
         }
@@ -97,11 +97,17 @@ Page {
         model: {
           var items = [
                 { name: uiTr("PIA DNS"), value: "pia" },
+                //: Indicates that we will run a built-in DNS resolver locally
+                //: on the user's computer.
+                { name: uiTr("Built-in Resolver"), value: "local" },
                 // "Handshake" is a brand name, not translated.
                 { name: "Handshake", value: "handshake" },
                 { name: uiTr("Use Existing DNS"), value: "" },
                 { name: uiTr("Set Custom DNS..."), value: "custom" },
               ];
+          if (!NativeHelpers.includeFeatureHandshake)
+            items.splice(2, 1)  // Delete Handshake
+
           if (Array.isArray(setting.currentValue) && setting.currentValue.length > 0) {
             items.splice(-1, 0, { name: setting.currentValue.join(" / "), value: setting.currentValue });
           } else if (setting.knownCustomServers) {
@@ -495,11 +501,11 @@ Page {
         // On Windows, disable the split tunnel app list when the checkbox is
         // disabled, or if the driver hasn't been installed yet
         if(Qt.platform.os === 'windows')
-          return appExclusionCheckbox.enabled && !appExclusionCheckbox.needsInstall
+          return appExclusionCheckbox.enabled && !appExclusionCheckbox.needsInstall && Daemon.settings.splitTunnelEnabled
         // On all other platforms, enable it all the time (on Linux, there's no
         // install; on Mac, we don't reliably know whether the kext has been
         // approved yet).
-        return true
+        return Daemon.settings.splitTunnelEnabled
       }
     }
 

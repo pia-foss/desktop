@@ -17,6 +17,8 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "appsingleton.h"
+#include "brand.h"
+
 #ifdef Q_OS_WIN
 #pragma comment(lib, "Kernel32.lib")
 #include <Windows.h>
@@ -28,17 +30,43 @@
 #include <QProcess>
 #include <QRegularExpression>
 
+const int RESOURCE_LENGTH_LIMIT = 4000;
+
+bool AppSingleton::lockResourceShare()
+{
+    if(!_resourceShare.isAttached()) {
+        qCritical() << "Attempting to lock resource share when not attached";
+        return false;
+    }
+    return _resourceShare.lock();
+}
+
+bool AppSingleton::unlockResourceShare()
+{
+    return _resourceShare.unlock();
+}
+
 AppSingleton::AppSingleton(const QString &executableName, QObject *parent) :
     QObject(parent),
     _pidShare(executableName),
+    _resourceShare(executableName + QStringLiteral("_RESOURCE")),
     _executableName(executableName) {
 
+    _resourceShare.create(RESOURCE_LENGTH_LIMIT);
+
+    if(_resourceShare.error() == QSharedMemory::NoError || _resourceShare.error() == QSharedMemory::AlreadyExists) {
+        if(!_resourceShare.attach()) {
+            qWarning() << "Unable to attach to shared memory" << _resourceShare.errorString();
+        }
+    }
 }
 
 AppSingleton::~AppSingleton()
 {
     if(_pidShare.isAttached())
         _pidShare.detach();
+    if(_resourceShare.isAttached())
+        _resourceShare.detach();
 }
 
 // Returns true if finds a process with the pid
@@ -144,5 +172,30 @@ qint64 AppSingleton::isAnotherInstanceRunning()
     if(processFound)
       return *data;
     else
-      return -1;
+        return -1;
 }
+
+void AppSingleton::setLaunchResource(QString url)
+{
+    if(lockResourceShare()) {
+        char* data = reinterpret_cast<char*>(_resourceShare.data());
+        strcpy(data, url.toUtf8().constData());
+        unlockResourceShare();
+    }
+}
+
+QString AppSingleton::getLaunchResource()
+{
+    QString result;
+    if(lockResourceShare()) {
+        result = QString::fromUtf8(reinterpret_cast<const char*>(_resourceShare.constData()));
+
+        memset(_resourceShare.data(), 0, RESOURCE_LENGTH_LIMIT - 1);
+
+        unlockResourceShare();
+    }
+
+    return result;
+}
+
+template class COMMON_EXPORT Singleton<AppSingleton>;

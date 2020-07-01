@@ -70,19 +70,21 @@ public:
     // Construct Update with the URI and version.  If either is empty, both
     // strings are left empty in the resulting object (there is never a
     // partially-valid Update).
-    Update(const QString &uri, const QString &version);
+    Update(const QString &uri, const QString &version, const QJsonArray &flags);
 
 public:
     // A valid Update has a non-empty URI and version.
     bool isValid() const {return !_uri.isEmpty();}
     const QString &uri() const {return _uri;}
     const QString &version() const {return _version;}
+    const QJsonArray &flags() const {return _flags;}
 
     bool operator==(const Update &other) const;
     bool operator!=(const Update &other) const {return !(*this == other);}
 
 private:
     QString _uri, _version;
+    QJsonArray _flags;
 };
 
 inline QDebug &operator<<(QDebug &dbg, const Update &update)

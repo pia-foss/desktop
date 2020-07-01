@@ -84,13 +84,13 @@ private slots:
         bool delayNext;
 
         // udp with port 0 should fall back to port in openvpn_udp
-        transportSelector.reset({QStringLiteral("udp"), 0}, false, udpPorts, tcpPorts);
+        transportSelector.reset(QStringLiteral("udp"), 0, false, udpPorts, tcpPorts);
         transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastPreferred().port() == preferredUdpPort);
         QVERIFY(transportSelector.lastPreferred().protocol() == QStringLiteral("udp"));
 
         // tcp with port 0 should fall back to port in openvpn_tcp
-        transportSelector.reset({QStringLiteral("tcp"), 0}, false, udpPorts, tcpPorts);
+        transportSelector.reset(QStringLiteral("tcp"), 0, false, udpPorts, tcpPorts);
         transportSelector.beginAttempt(location, dummyAddr, delayNext);
         QVERIFY(transportSelector.lastPreferred().port() == preferredTcpPort);
         QVERIFY(transportSelector.lastPreferred().protocol() == QStringLiteral("tcp"));
@@ -105,7 +105,7 @@ private slots:
         // We don't want to wait before trying an alternate transport
         // so we set _transportTimeout to 0 in the constructor
         TransportSelector transportSelector{std::chrono::seconds(0)};
-        transportSelector.reset({"udp", 0}, true, udpPorts, tcpPorts);
+        transportSelector.reset("udp", 0, true, udpPorts, tcpPorts);
 
         // First attempt uses our preferred transport
         transportSelector.beginAttempt(location, dummyAddr, delayNext);

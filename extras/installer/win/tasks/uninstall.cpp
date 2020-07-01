@@ -18,6 +18,7 @@
 
 #include "uninstall.h"
 #include "shortcut.h"
+#include "registry.h"
 
 std::wstring getUninstallDataPath(std::wstring uninstallPath)
 {
@@ -79,6 +80,11 @@ void ExecuteUninstallDataTask::prepare()
                 addNew<RemoveDirectoryTask>(getInstalledFilePath(entryPath), false);
             else if (entry == "SHORTCUT")
                 addNew<RemoveShortcutTask>(std::move(entryPath));
+            // Remove an entire registry key (including values and subkeys)
+            // The name permits a possible "REGISTRYVALUE" type if needed in the
+            // future
+            else if (entry == "REGISTRYKEY")
+                addNew<RemoveRegistryKeyTask>(std::move(entryPath));
             else
                 LOG("Unrecognized uninstall entry type %s", entry);
         }

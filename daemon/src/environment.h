@@ -104,6 +104,10 @@ public:
     // This excludes API proxies because the IP address isn't fetched correctly when
     // a proxy is used.
     const std::shared_ptr<ApiBase> &getIpAddrApi() {Q_ASSERT(_pIpAddrApi); return _pIpAddrApi;}
+    // Base URI for API requests using the proxy only.  This complements the
+    // IP address API - we'll still check the proxy to determine Internet
+    // connectivity, but the IP and status reported will not be used.
+    const std::shared_ptr<ApiBase> &getIpProxyApi() {Q_ASSERT(_pIpProxyApi); return _pIpProxyApi;}
     // Base URIs for update metadata.
     // This is part of the PIA web API for the PIA brand, but for other brands
     // it is provided by that brand.
@@ -124,7 +128,7 @@ private:
     // API bases - these are always valid.  They're in shared_ptrs so callers
     // using them can keep the object alive even if we replace them.
     std::shared_ptr<ApiBase> _pPiaApi, _pRegionsListApi, _pModernRegionsListApi,
-        _pIpAddrApi, _pUpdateApi, _pPortForwardApi;
+        _pIpAddrApi, _pIpProxyApi, _pUpdateApi, _pPortForwardApi;
 };
 
 #endif

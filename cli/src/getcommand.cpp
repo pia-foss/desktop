@@ -31,6 +31,7 @@ namespace GetSetType
     const QString connectionState{QStringLiteral("connectionstate")};
     const QString debugLogging{QStringLiteral("debuglogging")};
     const QString portForward{QStringLiteral("portforward")};
+    const QString requestPortForward{QStringLiteral("requestportforward")};
     const QString protocol{QStringLiteral("protocol")};
     const QString region{QStringLiteral("region")};
     const QString regions{QStringLiteral("regions")};
@@ -125,6 +126,7 @@ namespace
         {GetSetType::debugLogging, {QStringLiteral("State of debug logging setting"), {}}},
         {GetSetType::portForward, {QStringLiteral("Forwarded port number if available, or the status of the request to forward a port"),
             qEnumValues<DaemonState::PortForwardState>(QStringLiteral("[forwarded port]"))}},
+        {GetSetType::requestPortForward, {QStringLiteral("Whether a forwarded port will be requested on the next connection attempt"), {}}},
         {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
         {GetSetType::region, {QStringLiteral("Currently selected region (or \"auto\")"), {}}}
@@ -248,6 +250,11 @@ namespace
                 return name;
             return QString::number(forwardedPort);
         }
+        else if(type == GetSetType::requestPortForward)
+        {
+            bool enabled = client.connection().settings.portForward();
+            return GetSetValue::getBooleanText(enabled);
+        }
         else if(type == GetSetType::protocol)
         {
             return client.connection().settings.method();
@@ -308,6 +315,11 @@ namespace
         else if(_type == GetSetType::protocol)
         {
             QObject::connect(&client.connection().settings, &DaemonSettings::methodChanged,
+                             this, func);
+        }
+        else if(_type == GetSetType::requestPortForward)
+        {
+            QObject::connect(&client.connection().settings, &DaemonSettings::portForwardChanged,
                              this, func);
         }
         else if(_type  == GetSetType::region)

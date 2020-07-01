@@ -28,7 +28,7 @@
 // "Type" keywords used by get, set, and monitor
 namespace GetSetType
 {
-    extern const QString connectionState, debugLogging, portForward, protocol,
+    extern const QString connectionState, debugLogging, portForward, requestPortForward, protocol,
                          region, regions, vpnIp, daemonState, daemonSettings;
 }
 

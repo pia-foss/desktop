@@ -39,6 +39,8 @@
 #include "brand.h"
 #include "nativeacc/nativeacc.h"
 #include "splittunnelmanager.h"
+#include "appsingleton.h"
+#include "apiretry.h"
 
 #if defined(Q_OS_MACOS)
 #include "mac/mac_loginitem.h"
@@ -64,6 +66,8 @@
 #include <QQmlContext>
 #include <QTimer>
 #include <QtGlobal>
+#include <QUrl>
+#include <QUrlQuery>
 
 QmlCallResult::QmlCallResult(Async<QJsonValue> asyncResult)
     : _asyncResult{std::move(asyncResult)}
@@ -604,6 +608,7 @@ Client::Client(bool hasExistingSettingsFile, const QJsonObject &initialSettings,
     connect(signalHandler, &UnixSignalHandler::sigUsr1, this, [this]() {
       qDebug () << "Showing dashboard because received SIGUSR1";
       this->openDashboard();
+      this->checkForURL();
     });
     connect(signalHandler, &UnixSignalHandler::sigInt, this, [this]() {
       qInfo() << "Exit due to SIGINT";
@@ -737,7 +742,34 @@ void Client::notifyExitAndWait()
 
         // If the event loop here ends due to timeout, eventLoopExitTask logs an
         // abandon warning.
-     }
+    }
+}
+
+void Client::handleURL(const QString &resourceUrl)
+{
+    qDebug () << "Handling URL " << ApiResource{resourceUrl};
+    QUrl url{resourceUrl};
+    if(url.scheme() != BRAND_CODE "vpn") {
+        qWarning () << "Invalid scheme " << url.scheme();
+        return;
+    }
+
+    QUrlQuery query{url};
+    auto items = query.queryItems();
+    QJsonObject queryObject;
+    for(auto i = items.begin(); i != items.end(); ++i) {
+        auto queryItem = *i;
+        queryObject.insert(queryItem.first, queryItem.second);
+    }
+
+    _nativeHelpers.openUrl(url.path(), queryObject);
+}
+
+void Client::checkForURL()
+{
+    auto urlCheck = AppSingleton::instance();
+    QString url = urlCheck->getLaunchResource();
+    handleURL(url);
 }
 
 void Client::loadQml(const QString &qmlResource)
@@ -819,6 +851,7 @@ void Client::daemonConnectedChanged(bool connected)
                     createMainWindow();
                 }
             });
+
     }
     // If we lost the connection, discard any exit notification that occurred
     // on the prior connection.

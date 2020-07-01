@@ -33,6 +33,7 @@ void dummyClientMain() {}
 #include "version.h"
 #include "nativehelpers.h"
 #include "appsingleton.h"
+#include "apiretry.h"
 
 #include "clientlib.h"
 
@@ -47,6 +48,7 @@ void dummyClientMain() {}
 #include <QOpenGLContext>
 #include <QSurfaceFormat>
 #include <iostream>
+#include <unordered_set>
 #ifdef Q_OS_LINUX
 #include "linux/linux_env.h"
 #include "linux/linux_language.h"
@@ -92,6 +94,110 @@ bool winShouldUseSoftwareBackend()
 }
 #endif
 
+// Linux still uses the QSystemTrayIcon implementation from Qt.Widgets, so
+// it needs a QApplication instead of a plain QGuiApplication.
+#ifdef Q_OS_LINUX
+using PiaApplicationBase = QApplication;
+#else
+using PiaApplicationBase = QGuiApplication;
+#endif
+
+class PiaClientApplication : public PiaApplicationBase
+{
+    Q_OBJECT
+
+public:
+    using PiaApplicationBase::PiaApplicationBase;
+
+    virtual bool notify(QObject *receiver, QEvent *event) override;
+
+    virtual bool event(QEvent *event) override;
+
+signals:
+    void openFile(const QUrl &url);
+};
+
+bool PiaClientApplication::notify(QObject *receiver, QEvent *event)
+{
+    // Exceptions aren't supposed to escape event handlers - but in rare
+    // instances this has occurred in the field, and Qt just aborts with an
+    // unhelpful error message by default (no context about the event or
+    // exception).  Trace details so this can be diagnosed if it happens.
+    try
+    {
+        return PiaApplicationBase::notify(receiver, event);
+    }
+    catch(const Error &ex)
+    {
+        qWarning() << "Event handler exception:" << ex;
+    }
+    catch(const std::exception &ex)
+    {
+        qWarning() << "Event handler exception:" << ex.what();
+    }
+    catch(...)
+    {
+        qWarning() << "Event handler exception: unknown";
+    }
+
+    if(!event)
+    {
+        qWarning() << "No event";
+    }
+    else
+    {
+        qWarning() << "Event" << event->type() << "- spontaneous:"
+            << event->spontaneous() << "- is accepted:"
+            << event->isAccepted();
+    }
+
+    if(!receiver)
+    {
+        qWarning() << "No receiver";
+    }
+    else
+    {
+        // Trace the receiver and all parents to provide as much information
+        // as possible.  Guard against a possible parent loop also.
+        std::unordered_set<QObject*> visitedObjects;
+        QObject *pChainObj = receiver;
+        qWarning() << "Receiver and parent chain:";
+        while(pChainObj)
+        {
+            const QMetaObject *pObjMeta = pChainObj->metaObject();
+            qWarning() << "-" << visitedObjects.size() << pChainObj << "-"
+                << (pObjMeta ? pObjMeta->className() : QStringLiteral("<nullptr>"))
+                << "-" << pChainObj->objectName();
+
+            if(!visitedObjects.insert(pChainObj).second)
+            {
+                qWarning() << "<parent loop>";
+                break;
+            }
+
+            pChainObj = pChainObj->parent();
+        }
+    }
+
+    // The event generated an exception.  Eat the event instead of propagating
+    // it.
+    return true;
+}
+
+bool PiaClientApplication::event(QEvent *event)
+{
+    QFileOpenEvent *pFileEvent{};
+    if(event && event->type() == QEvent::FileOpen &&
+       (pFileEvent = dynamic_cast<QFileOpenEvent*>(event)))
+    {
+        qInfo() << "Open URL:" << ApiResource{pFileEvent->url().toString()};
+        emit openFile(pFileEvent->url());
+        return true;
+    }
+
+    return PiaApplicationBase::event(event);
+}
+
 int clientMain(int argc, char *argv[])
 {
     Path::initializePreApp();
@@ -113,8 +219,9 @@ int clientMain(int argc, char *argv[])
     {
         Normal, // Normal GUI client
         EnableLaunchOnLogin,
-        DisableLaunchOnLogin,
+        DisableLaunchOnLogin
     } clientRunMode{RunMode::Normal};
+    QString resourceURL;
     GraphicsMode gfxMode{GraphicsMode::Normal};
     for(auto i=1; i<argc; ++i)
     {
@@ -139,6 +246,14 @@ int clientMain(int argc, char *argv[])
         else if(argv[i] && ::strcmp(argv[i], "--disable-launch-on-login") == 0)
         {
             clientRunMode = RunMode::DisableLaunchOnLogin;
+        }
+        // If the final parameter does not start with '-', open it as a URL
+        // resource.  (Ignore '-' params to ensure we ignore Qt params like
+        // '-qmljsdebugger=...', etc.)
+        else if(argv[i] && argv[i][0] != '-' && i == argc - 1 && clientRunMode == RunMode::Normal)
+        {
+            qWarning () << "Assuming last option as URL resource" << ApiResource{argv[i]};
+            resourceURL = argv[i];
         }
         else
             qWarning() << "Unknown option:" << argv[i];
@@ -202,13 +317,9 @@ int clientMain(int argc, char *argv[])
     // This has to occur before creating the QApplication.
     LinuxEnv::preAppInit();
     linuxLanguagePreAppInit();
-
-    // Linux still uses the QSystemTrayIcon implementation from Qt.Widgets, so
-    // it needs a QApplication instead of a plain QGuiApplication.
-    QApplication app{argc, argv};
-#else
-    QGuiApplication app{argc, argv};
 #endif
+
+    PiaClientApplication app{argc, argv};
 
     Path::initializePostApp();
 
@@ -241,6 +352,9 @@ int clientMain(int argc, char *argv[])
     qint64 runningInstancePid = runGuard.isAnotherInstanceRunning();
     if(runningInstancePid > 0) {
         qWarning () << "Exiting because another instance appears to be running";
+        if(!resourceURL.isEmpty()) {
+            runGuard.setLaunchResource(resourceURL);
+        }
 #ifdef Q_OS_UNIX
         UnixSignalHandler::sendSignalUsr1(runningInstancePid);
 #endif
@@ -249,7 +363,7 @@ int clientMain(int argc, char *argv[])
         broadcastMessage(L"WM_PIA_SHOW_DASHBOARD");
 #endif
         app.quit();
-        return -1;
+        return 0;
     }
 
     // Trace the current state of launch-on-login for supportability
@@ -299,6 +413,17 @@ int clientMain(int argc, char *argv[])
     // settings out to disk).
     Client client{hasExistingClientSettings, initialSettings.toJsonObject(),
                   gfxMode, quietLaunch};
+    // If a URL was given, pass it over to Client - NativeHelpers will queue
+    // this up until the QML login page is ready to handle it
+    if(!resourceURL.isEmpty())
+        client.handleURL(resourceURL);
+
+    QObject::connect(&app, &PiaClientApplication::openFile, &client,
+        [&client](const QUrl &url)
+        {
+            client.openDashboard();
+            client.handleURL(url.toString());
+        });
 
 #ifdef Q_OS_MACOS
     // Check for installation on Mac.  (On Mac, the downloaded app bundle just
@@ -366,3 +491,5 @@ int main(int argc, char *argv[])
 }
 
 #endif
+
+#include "main.moc"

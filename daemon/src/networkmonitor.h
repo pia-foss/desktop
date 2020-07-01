@@ -131,6 +131,10 @@ public:
     const QString &networkInterface() const {return _networkInterface;}
     void networkInterface(QString networkInterface) {_networkInterface = networkInterface;}
 
+    // macOS only - the unique identifier for the primary IPv4 service
+    const QString &macosPrimaryServiceKey() const {return _macosPrimaryServiceKey;}
+    void macosPrimaryServiceKey(QString key) {_macosPrimaryServiceKey = key;}
+
     // Whether this connection is the default for IPv4 and/or IPv6.
     bool defaultIpv4() const {return _defaultIpv4;}
     void defaultIpv4(bool defaultIpv4) {_defaultIpv4 = defaultIpv4;}
@@ -171,6 +175,7 @@ private:
     Ipv6Address _gatewayIpv6;
     std::vector<Ipv4Address> _addressesIpv4;
     std::vector<Ipv6Address> _addressesIpv6;
+    QString _macosPrimaryServiceKey;
 };
 
 // NetworkMonitor monitors the current network connections and identifies the

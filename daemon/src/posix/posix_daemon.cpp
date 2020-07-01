@@ -25,6 +25,7 @@
 #include "posix_firewall_pf.h"
 #include "posix_firewall_iptables.h"
 #include "path.h"
+#include "ipaddress.h"
 #include "exec.h"
 #include "brand.h"
 
@@ -152,12 +153,25 @@ PosixDaemon::PosixDaemon()
     });
 
 #ifdef Q_OS_MAC
+    connect(_connection, &VPNConnection::stateChanged, this,
+        [this](VPNConnection::State state)
+        {
+            if(state == VPNConnection::State::Connected)
+                _macDnsMonitor.enableMonitor();
+            else
+                _macDnsMonitor.disableMonitor();
+        });
     connect(&_kextMonitor, &KextMonitor::kextStateChanged, this,
             [this](DaemonState::NetExtensionState extState)
             {
                 state().netExtensionState(qEnumToString(extState));
             });
     state().netExtensionState(qEnumToString(_kextMonitor.lastState()));
+
+    PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());
+
+    connect(&_settings, &DaemonSettings::macStubDnsMethodChanged, this,
+            [this](){PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());});
 #endif
 
 #ifdef Q_OS_LINUX
@@ -186,7 +200,8 @@ PosixDaemon::~PosixDaemon()
     IpTablesFirewall::uninstall();
 #endif
 
-    // Ensure split tunnel is shutdown
+    // Ensure bound routes are cleaned up and split tunnel is shutdown
+    updateBoundRoute({});
     toggleSplitTunnel({});
 }
 
@@ -268,22 +283,76 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     if (!PFFirewall::isInstalled()) PFFirewall::install();
 
     PFFirewall::ensureRootAnchorPriority();
-    PFFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), params.allowLoopback);
-    PFFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), params.blockAll);
-    PFFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
-    PFFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
-    PFFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
-    PFFirewall::setAnchorEnabled(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
+
+    PFFirewall::setTranslationEnabled(QStringLiteral("000.natVPN"), params.hasConnected);
+    PFFirewall::setFilterEnabled(QStringLiteral("000.allowLoopback"), params.allowLoopback);
+    PFFirewall::setFilterEnabled(QStringLiteral("100.blockAll"), params.blockAll);
+    PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
+    PFFirewall::setFilterEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
+    PFFirewall::setFilterEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
+    PFFirewall::setFilterEnabled(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
     PFFirewall::setAnchorTable(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN, QStringLiteral("ipv6prefix"), {
         // First 64 bits is the IPv6 Network Prefix
         QStringLiteral("%1/64").arg(netScan.ipAddress6())});
-    PFFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
-    PFFirewall::setAnchorEnabled(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
+    PFFirewall::setFilterEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
+    PFFirewall::setFilterEnabled(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
     PFFirewall::setAnchorTable(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel, QStringLiteral("subnets"), subnetsToBypass(params));
-    PFFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), params.blockDNS);
-    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), params.blockDNS, QStringLiteral("dnsaddr"), params.effectiveDnsServers);
-    PFFirewall::setAnchorEnabled(QStringLiteral("350.allowHnsd"), params.allowHnsd);
-    PFFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), params.allowPIA);
+
+    // On Mac, there are two DNS leak protection modes depending on whether we
+    // are connected.
+    //
+    // These modes are needed to handle quirks in mDNSResponder.  It has been
+    // observed sending DNS packets on the physical interface even when the
+    // DNS server is properly routed via the VPN.  When resuming from sleep, it
+    // also may prevent traffic from being sent over the physical interface
+    // until it has received DNS responses over that interface (which we don't
+    // want to allow to prevent leaks).
+    //
+    // - When connected, 310.blockDNS blocks access to UDP/TCP 53 on servers
+    //   other than the configured DNS servers, and UDP/TCP 53 to the configured
+    //   servers is forced onto the tunnel, even if the sender had bound to the
+    //   physical interface.
+    // - In any other state, 000.stubDNS redirects all UDP/TCP 53 to a local
+    //   resolver that just returns NXDOMAIN for all queries.  This should
+    //   satisfy mDNSResponder without creating leaks.
+    bool macBlockDNS{false}, macStubDNS{false};
+    QStringList localDnsServers, tunnelDnsServers;
+
+    // In addition to the normal case (connected) some versions of macOS
+    // set the PrimaryService Key to empty when switching networks.
+    // In this case we want to use stubDNS to work-around this behavior.
+    if(_state.connectionState() == QStringLiteral("Connected") &&
+       !_state.macosPrimaryServiceKey().isEmpty())
+    {
+        macBlockDNS = params.blockDNS;
+        for(const auto &address : params.effectiveDnsServers)
+        {
+            QHostAddress parsed{address};
+            if(isModernInfraDns(parsed) || !isIpv4Local(parsed))
+                tunnelDnsServers.push_back(address);
+            else
+                localDnsServers.push_back(address);
+        }
+    }
+    else
+    {
+        macStubDNS = params.blockDNS;
+    }
+
+    PFFirewall::setTranslationEnabled(QStringLiteral("000.stubDNS"), macStubDNS);
+    if(PFFirewall::setDnsStubEnabled(macStubDNS))
+    {
+        // Schedule a DNS cache flush since the DNS stub was disabled; important
+        // if the user disables the VPN while in this state.
+        _connection->scheduleMaceDnsCacheFlush();
+    }
+    PFFirewall::setFilterEnabled(QStringLiteral("310.blockDNS"), macBlockDNS, { {"interface", _state.tunnelDeviceName()} });
+    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), macBlockDNS, QStringLiteral("localdns"), localDnsServers);
+    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), macBlockDNS, QStringLiteral("tunneldns"), tunnelDnsServers);
+    PFFirewall::setFilterEnabled(QStringLiteral("311.stubDNS"), macStubDNS);
+    PFFirewall::setFilterEnabled(QStringLiteral("350.allowHnsd"), params.allowResolver);
+    PFFirewall::setFilterEnabled(QStringLiteral("400.allowPIA"), params.allowPIA);
+
 #elif defined(Q_OS_LINUX)
 
    // double-check + ensure our firewall is installed and enabled
@@ -307,8 +376,8 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     // block VpnOnly packets when the VPN is not connected
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowHnsd && params.defaultRoute);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowHnsd && !params.defaultRoute);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowResolver && params.defaultRoute);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowResolver && !params.defaultRoute);
 
     // Allow PIA Wireguard packets when PIA is allowed.  These come from the
     // kernel when using the kernel module method, so they aren't covered by the
@@ -338,6 +407,7 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     _subnetBypass.updateRoutes(params);
 #endif
 
+    updateBoundRoute(params);
     toggleSplitTunnel(params);
 }
 
@@ -378,12 +448,19 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
 #if defined(Q_OS_MAC)
     file.writeCommand("OS Version", "sw_vers", emptyArgs);
+    file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (App anchors)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*"), QStringLiteral("-sr")});
-    file.writeCommand("PF (dnsaddr table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "dnsaddr", "-T", "show"});
+    file.writeCommand("PF (localdns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "localdns", "-T", "show"});
+    file.writeCommand("PF (tunneldns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "tunneldns", "-T", "show"});
+    file.writeCommand("PF (allowed subnets table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/305.allowSubnets"), "-t", "subnets", "-T", "show"});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
+    file.writeCommand("PF (NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn")});
+    file.writeCommand("PF (App NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*")});
+    file.writeCommand("PF (000.natVPN)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.natVPN")});
+    file.writeCommand("PF (000.stubDNS)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.stubDNS")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary), QStringLiteral("www.privateinternetaccess.com"),
@@ -392,8 +469,9 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         QStringLiteral("-c1"), QStringLiteral("-W1")});
     file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
+    file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
-    file.writeCommand("scutil (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
+    file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
     file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
     scutilDNSDiagnostics(file);
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
@@ -401,6 +479,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeText("kext syslog", _kextMonitor.getKextLog());
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
+    file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("Distro", "lsb_release", QStringList{QStringLiteral("-a")});
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("ip addr", "ip", QStringList{QStringLiteral("addr")});
@@ -470,6 +549,81 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 #endif
 }
 
+void PosixDaemon::updateBoundRoute(const FirewallParams &params)
+{
+#if defined(Q_OS_MAC)
+    auto createBoundRoute = [](const QString &ipAddress, const QString &interfaceName)
+    {
+        // Checked by caller (OriginalNetworkScan::ipv4Valid() below)
+        Q_ASSERT(!ipAddress.isEmpty());
+        Q_ASSERT(!interfaceName.isEmpty());
+
+        Exec::bash(QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2").arg(ipAddress, interfaceName));
+    };
+    auto removeBoundRoute = [](const QString &ipAddress, const QString &interfaceName)
+    {
+        // Checked by caller (OriginalNetworkScan::ipv4Valid() below)
+        Q_ASSERT(!ipAddress.isEmpty());
+        Q_ASSERT(!interfaceName.isEmpty());
+
+        Exec::bash(QStringLiteral("route delete 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
+    };
+
+
+    // When we have connected (even if we're currently reconnecting), create a
+    // bound route for the physical interface.  This has two purposes:
+    // - Split tunnel - it allows "bypass" apps to bind to the physical
+    //   interface
+    // - DNS leak protection - we allow apps to try to send DNS packets out the
+    //   physical interface toward the configured DNS servers, but then force
+    //   them into the tunnel anyway.  (mDNSResponder does this on 10.15.4+.)
+    if(params.hasConnected)
+    {
+        // Remove the previous bound route if it's present and different
+        if(_boundRouteNetScan.ipv4Valid() &&
+           (_boundRouteNetScan.gatewayIp() != params.netScan.gatewayIp() ||
+            _boundRouteNetScan.interfaceName() != params.netScan.interfaceName()))
+        {
+            qInfo() << "Network has changed from"
+                << _boundRouteNetScan.interfaceName() << "/"
+                << _boundRouteNetScan.gatewayIp() << "to"
+                << params.netScan.interfaceName() << "/"
+                << params.netScan.gatewayIp() << "- create new bound route";
+            removeBoundRoute(_boundRouteNetScan.gatewayIp(),
+                                    _boundRouteNetScan.interfaceName());
+        }
+
+        // Add the new bound route.  Do this even if it doesn't seem to have
+        // changed, because the route can be lost if the user switches to a new
+        // network on the same interface with the same gateway (common with
+        // 2.4GHz <-> 5GHz network switching)
+        if(params.netScan.ipv4Valid())
+        {
+            // Trace this only when it appears to be new
+            if(!_boundRouteNetScan.ipv4Valid())
+            {
+                qInfo() << "Creating bound route for new network"
+                    << params.netScan.interfaceName() << "/"
+                    << params.netScan.gatewayIp();
+            }
+            createBoundRoute(params.netScan.gatewayIp(), params.netScan.interfaceName());
+        }
+
+        _boundRouteNetScan = params.netScan;
+    }
+    else
+    {
+        // Remove the bound route if it's there
+        if(_boundRouteNetScan.ipv4Valid())
+        {
+            removeBoundRoute(_boundRouteNetScan.gatewayIp(),
+                                    _boundRouteNetScan.interfaceName());
+        }
+        _boundRouteNetScan = {};
+    }
+#endif
+}
+
 void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
 {
     qInfo() << "Tunnel device is:" << _state.tunnelDeviceName();
@@ -509,15 +663,6 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     // active, update the configuration
     else if(params.enableSplitTunnel)
     {
-        // Split tunnel is already running, but network has changed
-        if(_splitTunnelNetScan != params.netScan)
-        {
-            qInfo() << "Split tunnel Network has changed from"
-                <<  _splitTunnelNetScan
-                << "to:"
-                << params.netScan;
-        }
-
         // Inform of Network changes
         // Note we do not check first for _splitTunnelNetScan != params.netScan as
         // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
@@ -525,7 +670,7 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
                           _state.tunnelDeviceLocalAddress(),
                           params.excludeApps, params.vpnOnlyApps);
     }
-    _splitTunnelNetScan = params.netScan;
+
     _enableSplitTunnel = params.enableSplitTunnel;
 }
 

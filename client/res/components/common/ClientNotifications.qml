@@ -80,7 +80,7 @@ Item {
     title: errorHeaderTitle
     // Override notifications aren't translated since these are for testing
     // purposes only
-    message: "Testing overrides could not be loaded"
+    message: "Testing overrides could not be loaded."
     severity: severities.error
     tipText: "Testing overrides were present but couldn't be loaded for: " +
              Daemon.state.overridesFailed.join(", ") +
@@ -95,7 +95,7 @@ Item {
     id: overridesActive
     // Override notifications aren't translated since these are for testing
     // purposes only
-    message: "Testing overrides are active"
+    message: "Testing overrides are active."
     tipText: "Testing overrides are loaded for: " +
              Daemon.state.overridesActive.join(", ") + "."
     severity: severities.info
@@ -258,6 +258,32 @@ Item {
     // Daemon reports these two conditions indicating problems in hnsd.  We show
     // the same warning for both of them since they overlap.
     active: Daemon.state.hnsdFailing > 0 || Daemon.state.hnsdSyncFailure > 0
+  }
+
+  NotificationStatus {
+    id: connectionProblem
+    message: uiTr("There may be a problem with the connection.")
+    tipText: uiTr("Connected to the VPN, but can't reach the Internet.  Check Network and Connection settings.")
+    severity: severities.warning
+    links: [{
+      text: uiTr("Settings"),
+      clicked: function() {showNetworkPage()}
+    }]
+    dismissible: false
+    // Only show this if the user is connected to an auto-safe region.  If the
+    // current region isn't auto-safe, that usually indicates that it's somehow
+    // unhealthy, and our connectivity test probably isn't reliable.  Turkey is
+    // currently affected by this, it's not auto-safe because the PIA API is not
+    // reachable (even via the proxy).
+    //
+    // Problems were found with this warning, in some cases the API is not
+    // reachable for up to ~60 seconds following connection, possibly due to
+    // Qt's internal DNS cache.  For now, disabling this warning in general
+    // releases, test it in beta.
+    active: Client.features.beta &&
+            Daemon.state.connectionProblem && Daemon.state.connectedConfig &&
+            Daemon.state.connectedConfig.vpnLocation &&
+            Daemon.state.connectedConfig.vpnLocation.autoSafe
   }
 
   NotificationStatus {
@@ -458,6 +484,22 @@ Item {
     }
   }
 
+  NotificationStatus {
+    id: splitTunnelInstallKext
+    severity: severities.warning
+    message: uiTr("Approve the split tunnel extension to enable split tunnel.")
+    tipText: uiTr("The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.")
+    dismissible: false
+    active: Qt.platform.os === 'osx' && Daemon.settings.splitTunnelEnabled && Daemon.state.netExtensionState === "NotInstalled"
+    links: [{
+        text: uiTr("Security Preferences"),
+        clicked: function(){
+          Daemon.installKext();
+          NativeHelpers.openSecurityPreferencesMac()
+        }
+    }]
+  }
+
   // This property holds a list of all notifications, whether they are active,
   // their messages, severities, etc.  This is in the order they're displayed in
   // the list.
@@ -505,10 +547,12 @@ Item {
     authFailure,
     dnsConfigFailed,
     hnsdFailing,
+    connectionProblem,  // Could be caused by DNS-related errors above
     // Possibly unexpected conditions
     winIsElevated, // May cause other issues, list first
     killswitchEnabled,
     connectionLost,
+    splitTunnelInstallKext,
     proxyUnreachable,
     connectionTrouble,
     // Informational

@@ -32,7 +32,8 @@ namespace
     {
         {GetSetType::debugLogging, QStringLiteral("Enable or disable debug logging")},
         {GetSetType::protocol, QStringLiteral("Select a VPN protocol")},
-        {GetSetType::region, QStringLiteral("Select a region (or \"auto\")")}
+        {GetSetType::region, QStringLiteral("Select a region (or \"auto\")")},
+        {GetSetType::requestPortForward, QStringLiteral("Whether to request a forwarded port on the next connection attempt")}
     };
 
     // Match the location specified on the command line to the daemon's location
@@ -91,6 +92,14 @@ namespace
             QJsonValue newValue = enabled ? client.connection().settings.getDefaultDebugLogging() : QJsonValue{};
             QJsonObject newSettings;
             newSettings.insert(QStringLiteral("debugLogging"), newValue);
+            return {newSettings};
+        }
+        else if(params[1] == GetSetType::requestPortForward)
+        {
+            bool enabled = GetSetValue::parseBooleanParam(params[2]);
+            QJsonValue newValue = enabled;
+            QJsonObject newSettings;
+            newSettings.insert(QStringLiteral("portForward"), newValue);
             return {newSettings};
         }
 

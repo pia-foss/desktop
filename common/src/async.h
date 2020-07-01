@@ -763,6 +763,26 @@ private:
     QTimer _timer;
 };
 
+// Delay task - just resolves after the specified time has elapsed
+class DelayTask : public Task<void>
+{
+public:
+    explicit DelayTask(std::chrono::milliseconds timeout)
+    {
+        QObject::connect(&_timer, &QTimer::timeout, this, [this]()
+        {
+            auto keepAlive = sharedFromThis();
+            resolve();
+        });
+
+        _timer.setSingleShot(true);
+        _timer.start(msec(timeout));
+    }
+
+private:
+    QTimer _timer;
+};
+
 // Just a wrapper for some of Async's static functions to be able to
 // call them with deduced instead of explicit result types.
 //

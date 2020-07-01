@@ -28,29 +28,43 @@
 #include <QString>
 #include <QStringList>
 
-// TODO: Break out firewall handling to a base class that can be used directly
-// by the base daemon class, for some common functionality.
-
 class PFFirewall
 {
     CLASS_LOGGING_CATEGORY("pf")
 
 private:
+    using MacroPairs = QHash<QString, QString>;
+private:
     static int execute(const QString &command, bool ignoreErrors = false);
     static bool isPFEnabled();
-    static bool isRootAnchorLoaded();
+    static void installRootAnchors();
+    // Test if a specific type of root anchor is loaded and non-empty
+    static bool isRootAnchorLoaded(const QString &modifier);
+    static bool areAllRootAnchorsLoaded();
+    static bool areAnyRootAnchorsLoaded();
+    static QString getMacroArgs(const MacroPairs& macroPairs);
 
 public:
     static void install();
     static void uninstall();
     static bool isInstalled();
-    static void enableAnchor(const QString &anchor);
-    static void disableAnchor(const QString &anchor);
-    static bool isAnchorEnabled(const QString &anchor);
-    static void setAnchorEnabled(const QString &anchor, bool enable);
+    static void enableAnchor(const QString &anchor, const QString &modifier, const MacroPairs &macroPairs);
+    static void disableAnchor(const QString &anchor, const QString &modifier);
+    static void setAnchorEnabled(const QString &anchor, const QString &modifier, bool enable, const MacroPairs &macroPairs);
     static void setAnchorTable(const QString &anchor, bool enabled, const QString &table, const QStringList &items);
-    static void setAnchorWithRules(const QString &anchor, bool enabled, const QStringList &rules);
+
+    // Manipulate anchors containing filter rules
+    static void setFilterEnabled(const QString &anchor, bool enable, const MacroPairs &macroPairs={});
+    static void setFilterWithRules(const QString &anchor, bool enabled, const QStringList &rules);
+
+    // Manipulate anchors containing translation rules
+    static void setTranslationEnabled(const QString &anchor, bool enable);
+
     static void ensureRootAnchorPriority();
+
+    // Update the DNS stub used when blocking DNS
+    static void setMacDnsStubMethod(const QString &macDnsStubMethod);
+    static bool setDnsStubEnabled(bool enabled);
 };
 
 #endif

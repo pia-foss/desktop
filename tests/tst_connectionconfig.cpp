@@ -49,8 +49,21 @@ private slots:
 
         settings.overrideDNS(QStringLiteral("handshake"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{hnsdLocalAddress});
+        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress});
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Handshake);
+    }
+
+    // Local DNS
+    void testGenDnsServersLocal()
+    {
+        DaemonSettings settings;
+        DaemonState state;
+        DaemonAccount account;
+
+        settings.overrideDNS(QStringLiteral("local"));
+        ConnectionConfig config{settings, state, account};
+        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress});
+        QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Local);
     }
 
     // Custom DNS

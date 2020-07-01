@@ -86,6 +86,13 @@ public:
 private:
     IconResource(const IconResource &) = delete;
     IconResource &operator=(const IconResource &) = delete;
+
+private:
+    HICON loadModuleIcon(HMODULE module, UINT resId, int cx, int cy,
+                         const QString &sizeTrace);
+    HICON loadStockIcon(const wchar_t *pRes, int cx, int cy,
+                        const QString &sizeTrace);
+
 public:
     HICON getHandle() const {return _icon;}
 private:

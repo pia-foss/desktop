@@ -176,8 +176,8 @@ protected:
         WfpFilterObject blockDNS[2];
         WfpFilterObject permitDNS[2];
         WfpFilterObject blockAll[2];
-        WfpFilterObject permitHnsd[2];
-        WfpFilterObject blockHnsd[2];
+        WfpFilterObject permitResolvers[2];
+        WfpFilterObject blockResolvers[2];
 
         // This is not strictly a filter, but it can in nearly all respects be treated the same way
         // so we store it here for simplicity and so we can re-use the filter-related code
@@ -204,8 +204,8 @@ protected:
     std::vector<WfpFilterObject> _subnetBypassFilters4;
     std::vector<WfpFilterObject> _subnetBypassFilters6;
 
-    // App ID for hnsd, needed when we add a special "split" rule for hnsd.
-    AppIdKey _hnsdAppId;
+    // App IDs for resolvers, needed when we add a special "split" rule.
+    AppIdKey _hnsdAppId, _unboundAppId;
 
     // The last 'hasConnected' state and local VPN IP address used to create the
     // VPN-only split tunnel rules - the rules are recreated if they change
