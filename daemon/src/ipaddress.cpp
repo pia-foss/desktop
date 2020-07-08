@@ -19,6 +19,8 @@
 #include "common.h"
 #line SOURCE_FILE("ipaddress.cpp")
 
+#include <array>
+
 namespace
 {
     // All IPv4 LAN and loopback subnets

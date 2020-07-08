@@ -122,8 +122,10 @@ WinDaemon::WinDaemon(QObject* parent)
     : Daemon{parent}
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
-    , _hnsdAppId{nullptr, Path::HnsdExecutable}
     , _unboundAppId{nullptr, Path::UnboundExecutable}
+#if INCLUDE_FEATURE_HANDSHAKE
+    , _hnsdAppId{nullptr, Path::HnsdExecutable}
+#endif
     , _lastConnected{false}
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
     , _subnetBypass{std::make_unique<WinRouteManager>()}
@@ -519,12 +521,19 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     // Local resolver related filters
     // (1) First we block everything coming from the resolver processes
     logFilter("allowResolver (block everything)", _filters.blockResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(blockResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 14));
-    updateBooleanInvalidateFilter(blockResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 14));
+    updateBooleanInvalidateFilter(blockResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 14));
+#if INCLUDE_FEATURE_HANDSHAKE
+    updateBooleanInvalidateFilter(blockResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 14));
+#endif
 
     // (2) Next we poke a hole in this block but only allow data that goes across the tunnel
     logFilter("allowResolver (tunnel traffic)", _filters.permitResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(permitResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 15,
+    updateBooleanInvalidateFilter(permitResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 15,
+        Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
+        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53}
+    ));
+#if INCLUDE_FEATURE_HANDSHAKE
+    updateBooleanInvalidateFilter(permitResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 15,
         Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
 
         // OR'ing of conditions is done automatically when you have 2 or more consecutive conditions of the same fieldId.
@@ -533,10 +542,7 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
         // 13038 is the Handshake control port
         Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 13038}
     ));
-    updateBooleanInvalidateFilter(permitResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 15,
-        Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
-        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53}
-    ));
+#endif
 
     // Always permit loopback traffic, including IPv6.
     logFilter("allowLoopback", _filters.permitLocalhost, params.allowLoopback);
@@ -556,7 +562,10 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
         {
             // Put hnsd in the VPN since we did not use the VPN as the default
             // route
+            newVpnOnlyApps.insert(&_unboundAppId);
+#if INCLUDE_FEATURE_HANDSHAKE
             newVpnOnlyApps.insert(&_hnsdAppId);
+#endif
         }
 
         // Should only be set if split tunnel is enabled

@@ -113,8 +113,8 @@ bool AppIdKey::operator<(const AppIdKey &other) const
 
 bool AppIdKey::operator==(const QByteArray &value) const
 {
-    if(!_pBlob && value.isEmpty())
-        return true;
+    if(!_pBlob)
+        return value.isEmpty(); // Empty blob - equal if the value is also empty
     return std::equal(_pBlob->data, _pBlob->data + _pBlob->size,
                       value.begin(), value.end());
 }

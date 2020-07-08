@@ -1,5 +1,8 @@
 # Changelog
 
+### v2.2.1
+* Fixed an issue on Windows causing the PIA service to crash when connecting with some Split Tunnel configurations
+
 ### v2.2
 * Split tunnel is now supported with WireGuard
 * Geo-located regions are supported

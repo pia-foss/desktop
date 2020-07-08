@@ -168,6 +168,16 @@ protected:
     FirewallEngine* _firewall;
     struct FirewallFilters
     {
+        // If hnsd is excluded from this build, there is only one set of
+        // resolver filters (for Unbound)
+        enum : std::size_t
+        {
+#if INCLUDE_FEATURE_HANDSHAKE
+            ResolverFilterCount = 2,
+#else
+            ResolverFilterCount = 1,
+#endif
+        };
         WfpFilterObject permitPIA[6];
         WfpFilterObject permitAdapter[2];
         WfpFilterObject permitLocalhost[2];
@@ -176,8 +186,8 @@ protected:
         WfpFilterObject blockDNS[2];
         WfpFilterObject permitDNS[2];
         WfpFilterObject blockAll[2];
-        WfpFilterObject permitResolvers[2];
-        WfpFilterObject blockResolvers[2];
+        WfpFilterObject permitResolvers[ResolverFilterCount];
+        WfpFilterObject blockResolvers[ResolverFilterCount];
 
         // This is not strictly a filter, but it can in nearly all respects be treated the same way
         // so we store it here for simplicity and so we can re-use the filter-related code
@@ -205,7 +215,10 @@ protected:
     std::vector<WfpFilterObject> _subnetBypassFilters6;
 
     // App IDs for resolvers, needed when we add a special "split" rule.
-    AppIdKey _hnsdAppId, _unboundAppId;
+    AppIdKey _unboundAppId;
+#if INCLUDE_FEATURE_HANDSHAKE
+    AppIdKey _hnsdAppId;
+#endif
 
     // The last 'hasConnected' state and local VPN IP address used to create the
     // VPN-only split tunnel rules - the rules are recreated if they change
