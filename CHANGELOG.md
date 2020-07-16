@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.2.2
+* Fixed an issue causing high CPU usage on some Linux systems
+* Fixed an issue causing WireGuard to disconnect in some cases using split tunnel with All Other Apps set to Bypass
+
 ### v2.2.1
 * Fixed an issue on Windows causing the PIA service to crash when connecting with some Split Tunnel configurations
 

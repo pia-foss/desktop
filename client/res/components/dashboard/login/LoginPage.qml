@@ -311,7 +311,7 @@ FocusScope {
 
           RotationAnimator {
             target: spinnerImage
-            running: true
+            running: spinnerImage.visible
             from: 0;
             to: 360;
             duration: 1000

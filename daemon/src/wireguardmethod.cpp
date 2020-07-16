@@ -730,6 +730,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
         // Always route special address through VPN (used for MACE, port forwarding etc)
         _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(piaLegacyDnsPrimary, deviceName));
+        // Route virtual server IP (ping endpoint) through VPN
+        _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(_pingEndpointAddress.toString(), deviceName));
 
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
@@ -764,6 +766,9 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     {
         // Always route special address through VPN (used for MACE, port forwarding etc)
         _executor.bash(QStringLiteral("route -q -n add %1 -interface %2").arg(piaLegacyDnsPrimary, deviceName));
+
+        // Route virtual server IP (ping endpoint) through VPN
+        _executor.bash(QStringLiteral("route -q -n add %1 -interface %2").arg(_pingEndpointAddress.toString(), deviceName));
 
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
@@ -840,6 +845,9 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
 
         // Create a low-priority default route for the VPN endpoint (so opt-in traffic can bind to it)
         routeManager.addRoute(QStringLiteral("0.0.0.0/0"), onLink, luidStr, 32000);
+
+        // Route virtual server IP (ping endpoint) through VPN
+        routeManager.addRoute(_pingEndpointAddress.toString(), onLink, luidStr);
 
         // Always route special address through VPN (used for MACE, port forwarding etc)
         routeManager.addRoute(piaLegacyDnsPrimary, onLink, luidStr);
