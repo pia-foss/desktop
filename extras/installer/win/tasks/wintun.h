@@ -42,56 +42,30 @@
 // component in the package could change in the future, such as if WinTUN broke
 // API compatibility and transitioned to a "WinTUN 2" component, etc.
 
-class WintunTask : public Task
+// Uninstall the WinTUN driver.  Only used in uninstaller.
+class UninstallWintunTask : public Task
 {
-private:
-    static bool _loadedProducts;
-    static std::vector<std::wstring> _installedProducts;
-    static WinDriverVersion _installedVersion;
-
-protected:
-    // Reinstall on rollback is implemented by the uninstall task, but in some
-    // cases must be flagged by the install task (for a regular in-place upgrade
-    // of the WinTUN package)
-    static bool _rollbackReinstall;
-
-public:
-    static void loadProducts();
-    static const WinDriverVersion &getInstalledVersion();
-    static const std::vector<std::wstring> &getInstalledProducts();
-
-protected:
-    // Uninstall a WinTUN package specified by the installed product code.
-    // Traces result, returns false for failure.
-    bool uninstallProduct(const wchar_t *pProductCode);
-    // Install the WinTUN package.  Traces result, returns false for failure.
-    bool installPackage();
-
 public:
     using Task::Task;
-};
-
-// Uninstall the WinTUN driver.  In the installer, only uninstalls if the
-// installed version is different from the shipped version.
-class UninstallWintunTask : public WintunTask
-{
-public:
-    using WintunTask::WintunTask;
     virtual void execute() override;
     virtual void rollback() override;
     virtual double getEstimatedExecutionTime() const override { return 2.0; }
 };
 
-class InstallWintunTask : public WintunTask
+// "Install" the WinTUN driver.  Installation is actually deferred until the
+// daemon starts up, since MSI packages can't be installed in safe mode, and we
+// support installation during safe mode.  This task just creates a flag file
+// that tells the daemon to do the installation the next time it starts.
+class InstallWintunTask : public Task
 {
 public:
-    using WintunTask::WintunTask;
+    using Task::Task;
     virtual void execute() override;
     virtual void rollback() override;
     virtual double getEstimatedExecutionTime() const override { return 2.0; }
 
 private:
-    bool _rollbackUninstall{false};
+    std::wstring _rollbackRunOnceRestore;
 };
 
 #endif

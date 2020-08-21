@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
-import "."
-
 QtObject {
     // Font sizes are all intended to be used as 'font.pixelSize' (not
     // pointSize).  pixelSize tends to be more consistent between Windows and

@@ -60,6 +60,7 @@ QtObject {
   readonly property string netExtensionState: NativeDaemon.state.netExtensionState
   readonly property bool connectionProblem: NativeDaemon.state.connectionProblem
   readonly property bool invalidClientExit: NativeDaemon.state.invalidClientExit
+  readonly property bool killedClient: NativeDaemon.state.killedClient
   readonly property double hnsdFailing: NativeDaemon.state.hnsdFailing
   readonly property double hnsdSyncFailure: NativeDaemon.state.hnsdSyncFailure
   readonly property string originalGatewayIp: NativeDaemon.state.originalGatewayIp

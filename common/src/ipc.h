@@ -71,6 +71,9 @@ public:
 
     virtual bool isConnected() = 0;
     virtual bool isError() { return false; }
+    // Set the threshold used to trigger the remoteLagging() signal.  Tracing
+    // starts at half this threshold.  (Used in unit tests.)
+    virtual void setLagThreshold(int threshold) = 0;
 public slots:
     virtual void sendMessage(const QByteArray &msg) = 0;
     virtual void close() = 0;
@@ -82,6 +85,9 @@ signals:
     void error(const QString& errorString);
     // A message queued for sending with sendMessage() could not be sent.
     void messageError(const Error &error, const QByteArray &msg);
+    // The remote party is not acknowledging messages (emitted when a message is
+    // sent if there are 9 prior unacknowledged messages)
+    void remoteLagging();
 };
 
 // IPC connection for use in clients.  In addition to IPCConnection, has
@@ -129,8 +135,10 @@ class COMMON_EXPORT LocalSocketIPCConnection : public ClientIPCConnection
     Q_OBJECT
 
 public:
-    // Just serialize a message into a raw buffer.
-    static void writeMessage(const QByteArray &data, QDataStream &stream);
+    // Just serialize a frame into a raw buffer.  This can be a message frame
+    // (non-empty data) or an acknowledgement frame (empty data).
+    static void writeFrame(quint16 sequence, const QByteArray &data,
+                           QDataStream &stream);
 
 private:
     // Wrap around an existing socket
@@ -145,6 +153,7 @@ public:
 
     virtual bool isConnected() override;
     virtual bool isError() override;
+    virtual void setLagThreshold(int threshold) override;
 
 #ifdef UNIT_TEST
     virtual void sendRawMessage(const QByteArray& msg) override;
@@ -153,14 +162,29 @@ public:
 protected slots:
     void onReadReady();
 
+private:
+    int getUnackedCount() const;
+    void sendFrame(quint16 sequence, const QByteArray &payload);
+
 public slots:
     virtual void sendMessage(const QByteArray &msg) override;
     virtual void close() override;
 
 private:
     class QLocalSocket* _socket;
+    // Payload currently being recieved.  This is sized to the expected size
+    // when a header is completed.  If it has size 0, we're receiving the header
+    // (which is left in the socket buffer until it is complete).
     QByteArray _payload;
+    // Bytes received so far in _payload
     int _payloadReceived;
+    int _lagThreshold;
+    // The sequence of the payload currently being received
+    quint16 _payloadSequence;
+    // Sequence that was last sent - incremented when we send a message
+    quint16 _lastSendSequence;
+    // The last sequence that was acknowledged from the remote side
+    quint16 _acknowledgedSequence;
     bool _error;
 
     friend class LocalSocketIPCServer;
@@ -193,6 +217,9 @@ public:
     virtual void connectToSocketFd(qintptr socketFd) override;
     virtual bool isConnected() override;
     virtual bool isError() override;
+    // The lag threshold is applied asynchronously, but it is serialized with
+    // calls to sendMessage().
+    virtual void setLagThreshold(int threshold) override;
     virtual void sendMessage(const QByteArray &msg) override;
     virtual void close() override;
 

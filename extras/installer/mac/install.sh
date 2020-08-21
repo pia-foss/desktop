@@ -296,7 +296,7 @@ elif [[ "$1" == "uninstall" ]] ; then ##########################################
     rm -f /Users/*/Library/LaunchAgents/"$brandIdentifier.client.plist"
 
     # Remove daemon data
-    rm -rf /Library/Application\ Support/"$brandIdentifier.vpn"
+    rm -rf /Library/Application\ Support/"$brandIdentifier"
     rm -rf /Library/Preferences/"$brandIdentifier"
 
     exit 0
@@ -512,6 +512,13 @@ EOF
         # default, but the directory doesn't actually exist by default)
         mkdir -p "${ctlSymlinkDir}"
         ln -s "${ctlExecutablePath}" "${ctlSymlinkPath}"
+    fi
+
+    # If the installing user has a .pia-early-debug file, create a corresponding
+    # file in the daemon data directory, so it will enable tracing early in
+    # startup.
+    if [ -e "/Users/$INSTALLING_USER/.$brandCode-early-debug" ]; then
+        touch "/Library/Application Support/$brandIdentifier/.$brandCode-early-debug"
     fi
 
     # Launch daemon

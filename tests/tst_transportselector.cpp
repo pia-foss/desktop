@@ -51,8 +51,6 @@ namespace samples
 
 namespace
 {
-    const LocationsById locs{buildLegacyLocations({}, samples::locationJson, samples::emptyJson)};
-    const Location &location = *locs.at(QStringLiteral("nz"));
 
     enum : quint16
     {
@@ -79,6 +77,9 @@ private slots:
 
     void testPreferred()
     {
+        LocationsById locs{buildLegacyLocations({}, samples::locationJson, samples::emptyJson)};
+        Location &location = *locs.at(QStringLiteral("nz"));
+
         TransportSelector transportSelector;
         QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
@@ -101,6 +102,9 @@ private slots:
         const QString preferredProtocol{"udp"};
         QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
+
+        LocationsById locs{buildLegacyLocations({}, samples::locationJson, samples::emptyJson)};
+        Location &location = *locs.at(QStringLiteral("nz"));
 
         // We don't want to wait before trying an alternate transport
         // so we set _transportTimeout to 0 in the constructor

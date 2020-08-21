@@ -20,10 +20,12 @@
 #include "brand.h"
 #include "service_inl.h"
 #include "tun_inl.h"
+#include "safemode_inl.h"
 #include "tasks.h"
 #include "tasks/callout.h"
 #include "tasks/file.h"
 #include "tasks/function.h"
+#include "tasks/launch.h"
 #include "tasks/list.h"
 #include "tasks/migrate.h"
 #include "tasks/payload.h"
@@ -336,14 +338,6 @@ int Installer::run()
         threadResult = 1;
     }
 
-#ifdef INSTALLER
-    if (_result == Success)
-    {
-        // Launch the client non-elevated
-        launchProgramAsDesktopUser(g_clientPath, {});
-    }
-#endif
-
     return (int)threadResult;
 }
 
@@ -588,6 +582,13 @@ DWORD Installer::workerThreadMain()
             InstallerError::abort(IDS_MB_32BITON64BIT);
     #endif
 
+        // The installer/uninstaller requires at least Safe Mode with
+        // Networking.  The TAP adapter can't be installed in safe mode.
+        if(getBootMode() == BootMode::SafeMode)
+        {
+            InstallerError::abort(IDS_MB_REQUIRESNETWORKING);
+        }
+
     #ifdef INSTALLER
         auto alphaPath = getShellFolder(CSIDL_PROGRAM_FILES) + L"\\piaX";
         auto alphaDaemonDataPath = getShellFolder(CSIDL_COMMON_APPDATA) + L"\\piaX";
@@ -657,15 +658,14 @@ DWORD Installer::workerThreadMain()
 
         // Uninstall the wireguard service
         tasks.addNew<UninstallWgServiceTask>();
+
+        // Uninstall the WinTUN driver
+        tasks.addNew<UninstallWintunTask>();
     #endif
 
         // Uninstall existing TAP driver (noop in installation, may perfom
         // rollback during aborted installation)
         tasks.addNew<UninstallTapDriverTask>();
-
-        // Uninstall existing WinTUN driver (noop in installation, may perfom
-        // rollback during aborted installation)
-        tasks.addNew<UninstallWintunTask>();
 
     #ifdef INSTALLER
         // Remove any existing installation (listed in uninstall.dat)
@@ -694,6 +694,10 @@ DWORD Installer::workerThreadMain()
 
         // Add piavpn: URI handler
         tasks.addNew<WriteUrlHandlerRegistryTask>(g_clientPath);
+
+        // Create the data directory (even if we don't have any settings to
+        // write; the MSI install flag is written here)
+        tasks.addNew<CreateDirectoryTask>(g_daemonDataPath, true);
 
         // Plant any remembered account/settings
         tasks.addNew<WriteSettingsTask>(g_daemonDataPath);
@@ -788,6 +792,11 @@ DWORD Installer::workerThreadMain()
 
         // Wipe the TAP driver from the driver store if possible
         tasks.addNew<CleanupTapDriverTask>();
+    #endif
+
+    #ifdef INSTALLER
+        // Launch the client, or show a message asking to reboot if in safe mode
+        tasks.addNew<LaunchClientTask>();
     #endif
 
         tasks.prepare();

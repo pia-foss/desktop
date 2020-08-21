@@ -62,7 +62,7 @@ int IpTablesFirewall::createChain(IpTablesFirewall::IPVersion ip, const QString&
         return result4 ? result4 : result6;
     }
     const QString cmd = getCommand(ip);
-    return execute(QStringLiteral("%1 -N %2 -t %3 || %1 -F %2 -t %3").arg(cmd, chain, tableName));
+    return execute(QStringLiteral("%1 -w -N %2 -t %3 || %1 -F %2 -t %3").arg(cmd, chain, tableName));
 }
 
 int IpTablesFirewall::deleteChain(IpTablesFirewall::IPVersion ip, const QString& chain, const QString& tableName)
@@ -74,7 +74,7 @@ int IpTablesFirewall::deleteChain(IpTablesFirewall::IPVersion ip, const QString&
         return result4 ? result4 : result6;
     }
     const QString cmd = getCommand(ip);
-    return execute(QStringLiteral("if %1 -L %2 -n -t %3 > /dev/null 2> /dev/null ; then %1 -F %2 -t %3 && %1 -X %2 -t %3; fi").arg(cmd, chain, tableName));
+    return execute(QStringLiteral("if %1 -w -L %2 -n -t %3 > /dev/null 2> /dev/null ; then %1 -w -F %2 -t %3 && %1 -X %2 -t %3; fi").arg(cmd, chain, tableName));
 }
 
 int IpTablesFirewall::linkChain(IpTablesFirewall::IPVersion ip, const QString& chain, const QString& parent, bool mustBeFirst, const QString& tableName)
@@ -95,10 +95,10 @@ int IpTablesFirewall::linkChain(IpTablesFirewall::IPVersion ip, const QString& c
         //    (we can't safely delete all rules at once since rule numbers change)
         // TODO: occasionally this script results in warnings in logs "Bad rule (does a matching rule exist in the chain?)" - this happens when
         // the e.g OUTPUT chain is empty but this script attempts to delete things from it anyway. It doesn't cause any problems, but we should still fix at some point..
-        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
+        return execute(QStringLiteral("if ! %1 -w -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -w -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs %1 -w -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
     }
     else
-        return execute(QStringLiteral("if ! %1 -C %2 -j %3 -t %4 2> /dev/null ; then %1 -A %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
+        return execute(QStringLiteral("if ! %1 -w -C %2 -j %3 -t %4 2> /dev/null ; then %1 -w -A %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
 }
 
 int IpTablesFirewall::unlinkChain(IpTablesFirewall::IPVersion ip, const QString& chain, const QString& parent, const QString& tableName)
@@ -110,7 +110,7 @@ int IpTablesFirewall::unlinkChain(IpTablesFirewall::IPVersion ip, const QString&
         return result4 ? result4 : result6;
     }
     const QString cmd = getCommand(ip);
-    return execute(QStringLiteral("if %1 -C %2 -j %3 -t %4 2> /dev/null ; then %1 -D %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
+    return execute(QStringLiteral("if %1 -w -C %2 -j %3 -t %4 2> /dev/null ; then %1 -w -D %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
 }
 
 void IpTablesFirewall::ensureRootAnchorPriority(IpTablesFirewall::IPVersion ip)
@@ -143,7 +143,7 @@ void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QStri
     // placeholder anchor when needed.
     createChain(ip, actualChain, tableName);
     for (const QString& rule : rules)
-        execute(QStringLiteral("%1 -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
+        execute(QStringLiteral("%1 -w -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
 }
 
 void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QString& tableName)
@@ -397,7 +397,7 @@ void IpTablesFirewall::deactivate()
 
 bool IpTablesFirewall::isInstalled()
 {
-    return execute(QStringLiteral("iptables -C %1 -j %2 2> /dev/null").arg(kOutputChain, kRootChain)) == 0;
+    return execute(QStringLiteral("iptables -w -C %1 -j %2 2> /dev/null").arg(kOutputChain, kRootChain)) == 0;
 }
 
 void IpTablesFirewall::enableAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString& tableName)
@@ -411,7 +411,7 @@ void IpTablesFirewall::enableAnchor(IpTablesFirewall::IPVersion ip, const QStrin
     const QString cmd = getCommand(ip);
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
 
-    execute(QStringLiteral("if %1 -C %5.a.%2 -j %5.%2 -t %4 2> /dev/null ; then echo '%2%3: ON' ; else echo '%2%3: OFF -> ON' ; %1 -A %5.a.%2 -j %5.%2 -t %4; fi").arg(cmd, anchor, ipStr, tableName, kAnchorName));
+    execute(QStringLiteral("if %1 -w -C %5.a.%2 -j %5.%2 -t %4 2> /dev/null ; then echo '%2%3: ON' ; else echo '%2%3: OFF -> ON' ; %1 -w -A %5.a.%2 -j %5.%2 -t %4; fi").arg(cmd, anchor, ipStr, tableName, kAnchorName));
 }
 
 void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName)
@@ -426,10 +426,10 @@ void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QStri
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
 
 
-    execute(QStringLiteral("%1 -F %2.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
+    execute(QStringLiteral("%1 -w -F %2.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
     for(const auto &rule : newRules)
     {
-        execute(QStringLiteral("%1 -A %2.%3 %4 -t %5").arg(cmd, kAnchorName, anchor, rule, tableName));
+        execute(QStringLiteral("%1 -w -A %2.%3 %4 -t %5").arg(cmd, kAnchorName, anchor, rule, tableName));
     }
 }
 
@@ -443,13 +443,13 @@ void IpTablesFirewall::disableAnchor(IpTablesFirewall::IPVersion ip, const QStri
     }
     const QString cmd = getCommand(ip);
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
-    execute(QStringLiteral("if ! %1 -C %5.a.%2 -j %5.%2 -t %4 2> /dev/null ; then echo '%2%3: OFF' ; else echo '%2%3: ON -> OFF' ; %1 -F %5.a.%2 -t %4; fi").arg(cmd, anchor, ipStr, tableName, kAnchorName));
+    execute(QStringLiteral("if ! %1 -w -C %5.a.%2 -j %5.%2 -t %4 2> /dev/null ; then echo '%2%3: OFF' ; else echo '%2%3: ON -> OFF' ; %1 -w -F %5.a.%2 -t %4; fi").arg(cmd, anchor, ipStr, tableName, kAnchorName));
 }
 
 bool IpTablesFirewall::isAnchorEnabled(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString& tableName)
 {
     const QString cmd = getCommand(ip);
-    return execute(QStringLiteral("%1 -C %4.a.%2 -j %4.%2 -t %3 2> /dev/null").arg(cmd, anchor, tableName, kAnchorName)) == 0;
+    return execute(QStringLiteral("%1 -w -C %4.a.%2 -j %4.%2 -t %3 2> /dev/null").arg(cmd, anchor, tableName, kAnchorName)) == 0;
 }
 
 void IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPVersion ip, const QString &anchor, bool enabled, const QString &tableName)
@@ -470,11 +470,11 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     // changed
     if(params.effectiveDnsServers != _dnsServers || adapterName != _adapterName)
     {
-        execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
+        execute(QStringLiteral("iptables -w -F %1.320.allowDNS").arg(kAnchorName));
         // If the adapter name isn't set, getDNSRules() returns an empty list
         for (const QString& rule : getDNSRules(adapterName, params.effectiveDnsServers))
         {
-            execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
+            execute(QStringLiteral("iptables -w -A %1.320.allowDNS %2").arg(kAnchorName, rule));
         }
     }
 

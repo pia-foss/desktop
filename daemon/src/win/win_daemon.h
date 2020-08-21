@@ -29,6 +29,7 @@
 #include "win_interfacemonitor.h"
 #include "win/win_messagewnd.h"
 #include "win/servicemonitor.h"
+#include "win/win_servicestate.h"
 
 // Deadline timer (like QDeadlineTimer) that does not count time when the system
 // is suspended.  (Both clock sources for QDeadlineTimer do count suspend time.)
@@ -153,6 +154,9 @@ private:
     // some circumstances.
     void checkWintunInstallation();
 
+    // Trace memory usage of client processes.
+    void traceClientMemory();
+
 public:
     // WireguardServiceBackend calls these methods to hint to us to consider
     // re-checking the WinTUN installation state.
@@ -163,6 +167,8 @@ public:
     void wireguardServiceFailed();
     // Indicates that a WG connection succeeded.
     void wireguardConnectionSucceeded();
+
+    void handlePendingWinTunInstall();
 
 protected:
     FirewallEngine* _firewall;
@@ -237,9 +243,13 @@ protected:
     // missing" error briefly after a system resume.
     WinUnbiasedDeadline _resumeGracePeriod;
     ServiceMonitor _wfpCalloutMonitor;
+    std::unique_ptr<WinServiceState> _pMsiServiceState;
     WinAppMonitor _appMonitor;
 
     SubnetBypass _subnetBypass;
+
+    // Trace memory usage of client processes periodically
+    QTimer _clientMemTraceTimer;
 };
 
 #undef g_daemon

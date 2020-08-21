@@ -400,6 +400,11 @@ Async<void> WinServiceState::startService()
         return Async<void>::reject({HERE, Error::Code::TaskRejected});
     }
 
+    return waitForStart();
+}
+
+Async<void> WinServiceState::waitForStart()
+{
     return Async<WinServiceStateTask>::create(*this, State::StartPending,
                                               State::Running);
 }

@@ -129,25 +129,6 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // gateway into the VPN).
     QNetworkAccessManager &networkManager = ApiNetwork::instance()->getAccessManager();
 
-    // Clear the connection cache for every request.
-    //
-    // QNetworkManager caches connections for reuse, but if we connect or
-    // disconnect from the VPN, these connections break.  If QNetworkManager
-    // uses a cached connection that's broken, we end up waiting the full
-    // 10 seconds before the request is aborted.
-    //
-    // The cost of waiting for a bad cached connection to time out is a lot
-    // higher than the cost of establishing a new connection, so clear them
-    // every time.  (There is no way to disable connection caching in
-    // QNetworkAccessManager.)
-    //
-    // In principle, we could try to do this only when the connection state
-    // changes, but it would have to be cleared any time the OpenVPNProcess
-    // state changes, which doesn't always cause a state transition in
-    // VPNConnection.  The cost of failing to clear the cache is pretty high,
-    // but the cost of clearing it an extra time is pretty small, so such an
-    // optimization probably would be too complex to make sense.
-    networkManager.clearConnectionCache();
 
     const BaseUri &nextBase = _baseUriSequence.getNextUri();
     QNetworkRequest request(nextBase.uri + _resource);

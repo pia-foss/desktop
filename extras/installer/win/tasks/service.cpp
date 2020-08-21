@@ -19,6 +19,7 @@
 #include "service.h"
 #include "brand.h"
 #include "service_inl.h"
+#include "safemode_inl.h"
 
 bool ServiceTask::_rollbackNeedsReinstall = false;
 
@@ -152,6 +153,13 @@ void StartInstalledServiceTask::execute()
 {
     LOG("Starting service");
     _listener->setCaption(IDS_CAPTION_STARTINGSERVICE);
+
+    // Skip in safe mode - service can't be started.
+    if(getBootMode() != BootMode::Normal)
+    {
+        LOG("Can't start service in safe mode; skip");
+        return;
+    }
 
 retry:
     ServiceStatus status = startService(g_daemonServiceParams.pName);

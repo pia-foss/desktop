@@ -137,6 +137,11 @@ private slots:
             receivedMessages.append(msg);
         }), "failed to setup client-server connection");
 
+        // Raise lag thresholds - for the non-threaded test, the remote side
+        // can't send acks until we free up the event loop
+        _connection->setLagThreshold(500);
+        _serverClientConnection->setLagThreshold(500);
+
         // Send messages
         for (int i = 0; i < 200; i++)
         {
@@ -171,6 +176,11 @@ private slots:
             // empty
         }), "failed to setup client-server connection");
 
+        // Since we send garbage sequence numbers for this test, set the lag
+        // threshold very high to effectively disable lag detection.
+        _connection->setLagThreshold(0x20000);
+        _serverClientConnection->setLagThreshold(0x20000);
+
         // Send 9 messages in valid-invalid-valid order, checking that
         // all the valid ones get through intact. Send a valid message
         // at the end so we notice errors more quickly.
@@ -179,12 +189,12 @@ private slots:
             QByteArray msg;
             {
                 QDataStream stream(&msg, QIODevice::WriteOnly);
-                LocalSocketIPCConnection::writeMessage(QByteArray(4, i), stream);
+                LocalSocketIPCConnection::writeFrame(0xFFFFu, QByteArray(4, i), stream);
             }
             switch (i % 8)
             {
             case 1: // corrupt magic tag
-                QTest::ignoreMessage(QtWarningMsg, "Invalid message: missing or incorrect magic tag");
+                QTest::ignoreMessage(QtWarningMsg, "Invalid message: missing or incorrect magic tag: \"ffacce66\"");
                 msg[3] = 0x66;
                 break;
             case 3: // truncate message
@@ -193,12 +203,12 @@ private slots:
                 break;
             case 5: // corrupt payload with 0xFF (truncates message and makes the rest of message look like garbage)
                 QTest::ignoreMessage(QtWarningMsg, "Invalid message: truncated message");
-                QTest::ignoreMessage(QtWarningMsg, "Invalid message: missing or incorrect magic tag");
-                msg[9] = 0xFF;
+                QTest::ignoreMessage(QtWarningMsg, "Invalid message: missing or incorrect magic tag: \"ff0505ff\"");
+                msg[13] = 0xFF;
                 break;
             case 7: // corrupt size
-                QTest::ignoreMessage(QtWarningMsg, "Invalid message: payload too large");
-                msg[6] = 100;
+                QTest::ignoreMessage(QtWarningMsg, QRegularExpression{R"(Invalid message: payload too large: \d+)"});
+                msg[10] = 100;
                 break;
             default:
                 validMessages.append(i);

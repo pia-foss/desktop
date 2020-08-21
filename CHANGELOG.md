@@ -1,5 +1,12 @@
 # Changelog
 
+### v2.3
+* Updated Qt to 5.15.0
+* Fixed several issues relating to installation or uninstallation on Windows in Safe Mode
+* Fixed an issue causing a memory leak on some Windows systems when Windows suspends pia-client to save power
+* Fixed an issue preventing split tunnel from working with WireGuard on some newer Linux distributions
+* Removed unneeded WireGuard kernel module logging on Linux
+
 ### v2.2.2
 * Fixed an issue causing high CPU usage on some Linux systems
 * Fixed an issue causing WireGuard to disconnect in some cases using split tunnel with All Other Apps set to Bypass

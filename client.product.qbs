@@ -90,6 +90,7 @@ PiaApplication {
       "and info [" + project.brandIdentifier + ".version] = \"" + project.semanticVersion + "\""
 
     var props = {
+      "LSMinimumSystemVersion": "10.13.0",
       "LSUIElement": true,
       "CFBundleIconFile": "app.icns",
       "NSSupportsAutomaticGraphicsSwitching" : true,

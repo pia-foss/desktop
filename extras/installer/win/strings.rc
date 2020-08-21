@@ -109,6 +109,9 @@ IDS_MB_WIREGUARDINSTALLFAILED       QT_TRANSLATE_NOOP("winstaller", "WireGuard i
 IDS_MB_WIREGUARDUNINSTALLFAILED     QT_TRANSLATE_NOOP("winstaller", "WireGuard uninstallation failed.")
 IDS_MB_WINTUNINSTALLFAILED          QT_TRANSLATE_NOOP("winstaller", "WinTUN installation failed.")
 IDS_MB_WINTUNUNINSTALLFAILED        QT_TRANSLATE_NOOP("winstaller", "WinTUN uninstallation failed.")
+IDS_MB_REQUIRESNETWORKING           QT_TRANSLATE_NOOP("winstaller", "Use Safe Mode with Networking to install or uninstall Private Internet Access.")
+IDS_MB_CAP_INSTALLCOMPLETE          QT_TRANSLATE_NOOP("winstaller", "Installation complete")
+IDS_MB_RESTARTTOUSE                 QT_TRANSLATE_NOOP("winstaller", "Restart your computer to use Private Internet Access.")
 
 IDS_MB_SUFFIX_INSTALL_ABORT         QT_TRANSLATE_NOOP("winstaller", "The installation will now abort.")
 IDS_MB_SUFFIX_INSTALL_RETRY         QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")

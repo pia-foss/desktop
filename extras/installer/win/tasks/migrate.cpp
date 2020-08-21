@@ -21,6 +21,8 @@
 #include "process.h"
 #include "uninstall.h"
 #include "util.h"
+#include "brand.h"
+#include <shlobj.h>
 
 #include <map>
 
@@ -98,10 +100,17 @@ void WriteSettingsTask::execute()
     for (const auto& p : g_migrationFiles)
     {
         auto path = _settingsPath + L"\\" + p.first;
-        // Ensure the directory exists first
-        CreateDirectoryW(_settingsPath.c_str(), NULL);
         // Write the file only if the target doesn't already exist
         writeTextFile(path, p.second, CREATE_NEW);
+    }
+
+    // If the user has a .pia-early-debug file, create data\.pia-early-debug, so
+    // the daemon will enable logging on the first startup.
+    std::wstring earlyDebugFile{L"\\." BRAND_CODE L"-early-debug"};
+    auto userEarlyDebug = getShellFolder(CSIDL_PROFILE) + earlyDebugFile;
+    if(::PathFileExistsW(userEarlyDebug.c_str()))
+    {
+        writeTextFile(_settingsPath + earlyDebugFile, "", CREATE_ALWAYS);
     }
 }
 

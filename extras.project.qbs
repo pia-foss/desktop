@@ -227,6 +227,7 @@ PiaProject {
             writeStrDef("BRAND_PARAMS", JSON.stringify(brandParams))
             writeStrDef("BRAND_WINTUN_AMD64_PRODUCT", brandParams.wintunAmd64Product)
             writeStrDef("BRAND_WINTUN_X86_PRODUCT", brandParams.wintunX86Product)
+            writeStrDef("BRAND_WINTUN_PRODUCT_NAME", brandParams.wintunProductName)
 
             var updateApis = brandParams.brandReleaseUpdateUris
             // This was added to the brand kit, default to the old defaults
@@ -637,11 +638,13 @@ PiaProject {
         property string windowsSdkBinPath: Environment.getEnv('WindowsSdkBinPath')
         property string windowsSdkDir: Environment.getEnv('WindowsSdkDir')
         property bool debug: qbs.buildVariant == "debug"
-        property stringList msvcLibraries: [ "msvcp140", "vcruntime140" ]
+        // vcruntime140_1.dll is required on x86_64 (SEH fix in VC runtime), but
+        // does not exist at all in x86.
+        property stringList msvcLibraries: [ "msvcp140", "msvcp140_1", "vcruntime140" ].concat(qbs.architecture == 'x86_64' ? ["vcruntime140_1"] : [])
         property stringList msvcFiles
         property stringList ucrtFiles
         configure: {
-          var msvcPath = vctoolsRedistDir + (debug ? "/debug_nonredist/" : "/") + arch + (debug ? "/Microsoft.VC141.DebugCRT" : "/Microsoft.VC141.CRT")
+          var msvcPath = vctoolsRedistDir + (debug ? "/debug_nonredist/" : "/") + arch + (debug ? "/Microsoft.VC142.DebugCRT" : "/Microsoft.VC142.CRT")
           msvcFiles = msvcLibraries.map(function(l) { return msvcPath + "/" + l + (debug ? "d" : "") + ".dll"; });
           if (debug) {
             var lastSdkVersion = File.directoryEntries(windowsSdkBinPath, File.Dirs).filter(function(f) { return f.startsWith("10."); }).reduce(function(a,v) { return v; }, null);

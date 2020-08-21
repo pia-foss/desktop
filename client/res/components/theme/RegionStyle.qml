@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
-import "."
-
 QtObject {
     readonly property color itemBackgroundColor: Theme.dashboard.backgroundColor
     readonly property color itemHighlightBackgroundColor: Theme.dark ? "#2b2e39" : "#e2e2e3"

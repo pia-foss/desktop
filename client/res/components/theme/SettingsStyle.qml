@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
-import "."
-
 QtObject {
     readonly property bool horizontal: Qt.platform.os !== 'windows'
 

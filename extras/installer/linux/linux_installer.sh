@@ -32,6 +32,7 @@ readonly appName="{{BRAND_NAME}}"
 readonly brandCode="{{BRAND_CODE}}"
 readonly installDir="/opt/${brandCode}vpn"
 readonly daemonSettingsPath="$installDir/etc"
+readonly daemonDataPath="$installDir/var"
 readonly oldSettingsPath="/$HOME/.pia_manager/data"
 readonly systemdServiceLocation="/etc/systemd/system/${brandCode}vpn.service"
 readonly sysvinitServiceLocation="/etc/init.d/${brandCode}vpn"
@@ -169,7 +170,10 @@ function hasDependencies() {
 
     # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
     if ! [ -x /sbin/ifconfig ]; then return 1; fi
+    if ! ldconfig -p | grep -q libxkbcommon.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon-x11.so.0; then return 1; fi
+    if ! ldconfig -p | grep -q libxcb-xkb.so.1; then return 1; fi
+    if ! ldconfig -p | grep -q libxcb-xinerama.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libnl-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnl-route-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnl-genl-3.so.200; then return 1; fi
@@ -184,22 +188,13 @@ function promptNetTools() {
 function promptManualDependencies() {
     echo "Could not install dependencies.  Please install these packages:"
     echo " - net-tools (ifconfig)"
-    echo " - libxkbcommon-x11 (libxkbcommon-x11.so.0, libxkbcommon.so.0, libxcb-xkb.so.1)"
+    echo " - libxkbcommon-x11 (libxkbcommon-x11.so.0, libxkbcommon.so.0)"
+    echo " - libxcb (libxcb.so.1)"
+    echo " - libxcb-xkb (libxcb-xkb.so.1, may be included in libxcb)"
+    echo " - libxcb-xinerama (libxcb-xinerama.so.0, may be included in libxcb)"
     echo " - libnl-3-200"
     echo " - libnl-route-3-200, libnl-genl-3-200 (may be included in libnl-3-200)"
     requestConfirmation "Continue with installation?"
-}
-
-# Test whether manual dependencies are present.  Returns nonzero if any
-# dependency is missing.
-function hasManualDependencies() {
-    # Check for ifconfig, libnl-3.so.200, libnl-route-3.so.200, and libnl-genl-3.so.200
-    # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
-    if ! hash ifconfig >/dev/null; then return 1; fi
-    if ! ldconfig -p | grep libnl-3.so.200; then return 1; fi
-    if ! ldconfig -p | grep libnl-route-3.so.200; then return 1; fi
-    if ! ldconfig -p | grep libnl-genl-3.so.200; then return 1; fi
-    return 0
 }
 
 function installDependencies() {
@@ -208,11 +203,14 @@ function installDependencies() {
     if hasDependencies; then return 0; fi
 
     if hash yum 2>/dev/null; then
-        sudo yum -y install net-tools libxkbcommon-x11 libnl3
+        # Fedora and relatives put all xcb libs in libxcb
+        sudo yum -y install net-tools libxkbcommon-x11 libxcb libnl3
     elif hash pacman 2>/dev/null; then
-        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libnl
+        # Arch puts all xcb libs in the libxcb package.
+        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libxcb libnl
     elif hash zypper 2>/dev/null; then
-        sudo zypper install libxkbcommon-x11-0 libnl3-200
+        # openSUSE splits up xcb
+        sudo zypper install libxkbcommon-x11-0 libxcb1 libxcb-xkb1 libxcb-xinerama0 libnl3-200
         # We can't set up ifconfig on openSUSE; our OpenVPN build has a
         # hard-coded path to /sbin/ifconfig, but openSUSE installs it to
         # /usr/bin/ifconfig.  We don't want to mess with the user's sbin
@@ -223,9 +221,10 @@ function installDependencies() {
     # manager.  This check uses Debian package names though that aren't
     # necessarily the same on other distributions.
     elif hash apt-get 2>/dev/null; then
+        # Debian splits up the xcb libs
+        APT_PKGS="libxkbcommon-x11-0 libxcb1 libxcb-xkb1 libxcb-xinerama0 libnl-3-200 libnl-route-3-200"
         # A few releases do not have the net-tools package at all, still try to
         # install other dependencies
-        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200"
         if [[ $(apt-cache search --names-only net-tools) ]]; then
             sudo apt-get install --yes net-tools $APT_PKGS
         else
@@ -293,7 +292,7 @@ function installPia() {
         echoPass "Allow non-root $installDir/bin/pia-unbound to bind to privileged ports"
     fi
 
-    sudo mkdir -p $installDir/var
+    sudo mkdir -p "$daemonDataPath"
     echoPass "Created var folder"
 
     # Ideally we don't want to put them in pixmaps but this seems to be the
@@ -471,6 +470,12 @@ installDependencies
 installPia
 if [ $brandCode = "pia" ]; then
     migrateLegacySettings
+fi
+
+# If the installing user has a .pia-early-debug file, create .pia-early-debug in
+# the daemon data directory, so it will enable tracing early in startup
+if [ -e "$HOME/.$brandCode-early-debug" ]; then
+    sudo touch "$daemonDataPath/.$brandCode-early-debug"
 fi
 
 case "$BOOT_MANAGER" in

@@ -16,9 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-import QtQuick 2.0
-QtObject {
-    readonly property int normalDuration: 500
-    readonly property int quickDuration: 250
-    readonly property int dashSlideAmount: 80
-}
+#ifndef TASKS_LAUNCH_H
+#define TASKS_LAUNCH_H
+
+#include "tasks.h"
+
+class LaunchClientTask : public Task
+{
+public:
+    using Task::Task;
+    virtual void execute() override;
+    virtual void rollback() override {}
+    virtual double getEstimatedExecutionTime() const override { return 0.1; }
+};
+
+#endif

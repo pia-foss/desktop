@@ -49,5 +49,45 @@ void ApiNetwork::setProxy(const QNetworkProxy &proxy)
 QNetworkAccessManager &ApiNetwork::getAccessManager() const
 {
     Q_ASSERT(_pAccessManager);  // Class invariant
+
+    // Clear the connection cache for every request.
+    //
+    // QNetworkManager caches connections for reuse, but if we connect or
+    // disconnect from the VPN, these connections break.  If QNetworkManager
+    // uses a cached connection that's broken, we end up waiting the full
+    // 10 seconds before the request is aborted.
+    //
+    // The cost of waiting for a bad cached connection to time out is a lot
+    // higher than the cost of establishing a new connection, so clear them
+    // every time.  (There is no way to disable connection caching in
+    // QNetworkAccessManager.)
+    //
+    // In principle, we could try to do this only when the connection state
+    // changes, but it would have to be cleared any time the OpenVPNProcess
+    // state changes, which doesn't always cause a state transition in
+    // VPNConnection.  The cost of failing to clear the cache is pretty high,
+    // but the cost of clearing it an extra time is pretty small, so such an
+    // optimization probably would be too complex to make sense.
+    _pAccessManager->clearConnectionCache();
+
+    // Additionally, Qt 5.15 on Mac added even more network state monitoring
+    // beyond the "bearer management" stuff worked around in the constructor.
+    // This doesn't work either - it never seems to update the state after the
+    // app starts, which means if the network isn't up when the daemon starts,
+    // we can never send API requests even after the network comes up.
+    //
+    // Strangely, it tracks the "accessibility" state reported by
+    // QNetworkStatusMonitor in QNetworkAccessManagerPrivate::networkAccessible,
+    // which is also used to allow the app to override the network
+    // accessibility.  This probably means that manually overriding the network
+    // state wouldn't really work, but fortunately we can work around the
+    // QNetworkStatusMonitor issues by manually setting the state to Accessible
+    // before any request.
+    //
+    // Setting it once might be OK if QNetworkStatusMonitor never emits any
+    // updates, but setting it for each request will also cover us if it does
+    // ever emit an update.
+    _pAccessManager->setNetworkAccessible(QNetworkAccessManager::NetworkAccessibility::Accessible);
+
     return *_pAccessManager;
 }

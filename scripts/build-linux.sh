@@ -204,7 +204,7 @@ fi
 # Check Qt version
 QTVER=$("$QT_ROOT/bin/qmake" --version | tail -n +2 | awk '{print $4}')
 
-SUPPORTED_VERS="5.12.2 5.12.3 5.12.4 5.12.5 5.12.6 5.12.7 5.12.8"
+SUPPORTED_VERS="5.12.2 5.12.3 5.12.4 5.12.5 5.12.6 5.12.7 5.12.8 5.15.0"
 
 echo "Detected Qt version $QTVER"
 
@@ -302,6 +302,8 @@ if [ $TASK_PACKAGE -eq 1 ]; then
   addQtLib "libQt5Gui.so.5"
   addQtLib "libQt5Network.so.5"
   addQtLib "libQt5Qml.so.5"
+  addQtLib "libQt5QmlModels.so.5"
+  addQtLib "libQt5QmlWorkerScript.so.5"
   addQtLib "libQt5QuickControls2.so.5"
   addQtLib "libQt5Quick.so.5"
   addQtLib "libQt5QuickShapes.so.5"

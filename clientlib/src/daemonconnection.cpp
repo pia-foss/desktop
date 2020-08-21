@@ -101,6 +101,7 @@ void DaemonConnection::RPC_data(const QJsonObject &data)
 
 void DaemonConnection::RPC_error(const QJsonObject& errorObject)
 {
+    qInfo() << "Received error:" << QJsonDocument{errorObject}.toJson();
     Error e(errorObject);
     emit error(e);
 }

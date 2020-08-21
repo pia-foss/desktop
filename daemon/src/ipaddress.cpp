@@ -18,6 +18,7 @@
 
 #include "common.h"
 #line SOURCE_FILE("ipaddress.cpp")
+#include <array>
 
 #include <array>
 

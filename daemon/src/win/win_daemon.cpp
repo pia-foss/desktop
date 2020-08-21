@@ -26,13 +26,189 @@
 #include "win_interfacemonitor.h"
 #include "path.h"
 #include "win.h"
+#include "brand.h"
 #include "../../../extras/installer/win/tap_inl.h"
 #include "../../../extras/installer/win/tun_inl.h"
+#include "brand.h"
+#include <QDir>
+
+#include <Msi.h>
+#include <MsiQuery.h>
+
+#pragma comment(lib, "Msi.lib")
+
+#include <TlHelp32.h>
+#include <Psapi.h>
 
 // The 'bind' callout GUID is the GUID used in 1.7 and earlier; the WFP callout
 // only handled the bind layer in those releases.
 GUID PIA_WFP_CALLOUT_BIND_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
 GUID PIA_WFP_CALLOUT_CONNECT_V4 = { 0xb80ca14a, 0xa807, 0x4ef2, { 0x87, 0x2d, 0x4b, 0x1a, 0x51, 0x82, 0x54, 0x2 } };
+
+namespace
+{
+    // The shipped version of the WinTUN driver
+    const WinDriverVersion shippedWintunVersion{1, 0, 0, 0};
+
+    // Get a property of an installed MSI product - returns "" if the version
+    // can't be retrieved.
+    std::wstring getProductProperty(const wchar_t *pProductCode,
+                                    const wchar_t *pProperty)
+    {
+        DWORD valueLen{0};
+        unsigned queryResult = ::MsiGetProductInfoExW(pProductCode, nullptr,
+                                                      MSIINSTALLCONTEXT_MACHINE,
+                                                      pProperty, nullptr,
+                                                      &valueLen);
+        if(queryResult != ERROR_SUCCESS)
+        {
+            qWarning() << "Can't get length of" << QStringView{pProperty}
+                << "- result" << queryResult << "-" << QStringView{pProductCode};
+            return {};
+        }
+
+        std::wstring value;
+        // Add room for the null terminator
+        ++valueLen;
+        value.resize(valueLen);
+        queryResult = ::MsiGetProductInfoExW(pProductCode, nullptr,
+                                             MSIINSTALLCONTEXT_MACHINE,
+                                             pProperty, value.data(),
+                                             &valueLen);
+        if(queryResult != ERROR_SUCCESS)
+        {
+            qWarning() << "Can't get" << QStringView{pProperty} << "- result"
+                << queryResult << "-" << QStringView{pProductCode};
+            return {};
+        }
+        value.resize(valueLen);
+        return value;
+    }
+
+    // Parse a product version string.  Reads three version parts only, the
+    // fourth is set to 0.  Returns 0.0.0 if the version is not valid.
+    WinDriverVersion parseProductVersion(const std::wstring &value)
+    {
+        enum { PartCount = 3 };
+        WORD versionParts[PartCount];
+        int i=0;
+        const wchar_t *pNext = value.c_str();
+        while(i < PartCount && pNext && *pNext)
+        {
+            wchar_t *pPartEnd{nullptr};
+            unsigned long part = std::wcstoul(pNext, &pPartEnd, 10);
+            // Not valid if:
+            // - no characters consumed (not pointing to a digit)
+            // - version part exceeds 65535 (MSI limit)
+            // - not pointing to a '.' or '\0' following the part
+            if(pPartEnd == pNext || part > 65535 || !pPartEnd ||
+               (*pPartEnd != '.' && *pPartEnd != '\0'))
+            {
+                qWarning() << "Product version is not valid -" << QStringView{value};
+                return {};
+            }
+            versionParts[i] = static_cast<WORD>(part);
+            // If we hit the end of the string, we're done - tolerate versions
+            // with fewer than 3 parts
+            if(!*pPartEnd)
+                break;
+            // Otherwise, continue with the next part.  (pPartEnd+1) is valid
+            // because the string is null-terminated and it's currently pointing
+            // to a '.'.
+            pNext = pPartEnd+1;
+            ++i;
+        }
+        qInfo().nospace() << "Product version " << versionParts[0] << "."
+            << versionParts[1] << "." << versionParts[2] << "is installed ("
+            << QStringView{value} << ")";
+        return {versionParts[0], versionParts[1], versionParts[2], 0};
+    }
+
+    void installWinTun()
+    {
+        std::vector<std::wstring> installedProducts;
+        WinDriverVersion installedVersion;
+
+        installedProducts = findInstalledWintunProducts();
+
+        // If, somehow, more than one product with our upgrade code is installed,
+        // uninstall them all (assume they are newer than the shipped package).
+        // Shouldn't happen since the upgrade settings in the MSI should prevent
+        // this.
+        if(installedProducts.size() > 1)
+        {
+            qWarning() << "Found" << installedProducts.size()
+                << "installed products, expected 0-1";
+            installedVersion = WinDriverVersion{65535, 0, 0, 0};
+        }
+        else if(installedProducts.size() == 1)
+        {
+            auto versionStr = getProductProperty(installedProducts[0].c_str(),
+                                                 INSTALLPROPERTY_VERSIONSTRING);
+            installedVersion = parseProductVersion(versionStr);
+        }
+        // Otherwise, nothing is installed, leave installedVersion set to 0.
+
+        // Determine whether we need to uninstall the existing driver -
+        // uninstall if there is a package installed, and it is newer than the
+        // version we shipped.
+        //
+        // The MSI package is flagged to prevent downgrades, so users don't
+        // accidentally downgrade it if driver packages are sent out by support,
+        // etc.  However, if PIA itself is downgraded, we do want to downgrade
+        // the driver package.
+        if(installedVersion == WinDriverVersion{})
+        {
+            qInfo() << "WinTUN package is not installed, nothing to uninstall";
+        }
+        else if(installedVersion == shippedWintunVersion)
+        {
+            qInfo() << "Version" << QString::fromStdString(installedVersion.printable())
+                << "of WinTUN package is installed, do not need to install new version"
+                << QString::fromStdString(shippedWintunVersion.printable());
+            return;
+        }
+        else if(installedVersion < shippedWintunVersion)
+        {
+            qInfo() << "Version" << QString::fromStdString(installedVersion.printable())
+                << "of WinTUN package is installed, do not need to uninstall before installing version"
+                << QString::fromStdString(shippedWintunVersion.printable());
+        }
+        else
+        {
+            qInfo() << "Version" << QString::fromStdString(installedVersion.printable())
+                << "of WinTUN package is installed, uninstall before installing version"
+                << QString::fromStdString(shippedWintunVersion.printable());
+            auto itInstalledProduct = installedProducts.begin();
+            while(itInstalledProduct != installedProducts.end())
+            {
+                if(uninstallMsiProduct(itInstalledProduct->c_str()))
+                {
+                    qInfo() << "Uninstalled product" << QStringView{itInstalledProduct->c_str()};
+                    ++itInstalledProduct;
+                }
+                else
+                {
+                    qWarning() << "Failed to uninstall MSI product"
+                        << QStringView{itInstalledProduct->c_str()}
+                        << "- aborting WinTUN installation";
+                    return;
+                }
+            }
+        }
+
+        // Finally, install the new package
+        QString packagePath = QDir::toNativeSeparators(Path::BaseDir / "wintun" / BRAND_CODE "-wintun.msi");
+        if(installMsiPackage(qUtf16Printable(packagePath)))
+        {
+            qInfo() << "Installed WinTUN from package";
+        }
+        else
+        {
+            qWarning() << "WinTUN package installation failed";
+        }
+    }
+}
 
 WinUnbiasedDeadline::WinUnbiasedDeadline()
     : _expireTime{getUnbiasedTime()} // Initially expired
@@ -201,6 +377,19 @@ WinDaemon::WinDaemon(QObject* parent)
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, [this]()
     {
         _wfpCalloutMonitor.doManualCheck();
+    });
+
+    _clientMemTraceTimer.setInterval(msec(std::chrono::minutes(5)));
+    connect(&_clientMemTraceTimer, &QTimer::timeout, this, &WinDaemon::traceClientMemory);
+
+    connect(this, &WinDaemon::firstClientConnected, this, [this]()
+    {
+        _clientMemTraceTimer.start();
+        traceClientMemory();
+    });
+    connect(this, &WinDaemon::lastClientDisconnected, this, [this]()
+    {
+        _clientMemTraceTimer.stop();
     });
 }
 
@@ -980,6 +1169,104 @@ void WinDaemon::checkWintunInstallation()
     _state.wintunMissing(installedProducts.empty());
 }
 
+class TraceMemSize : public DebugTraceable<TraceMemSize>
+{
+public:
+    TraceMemSize(std::size_t mem) : _mem{mem} {}
+
+public:
+    void trace(QDebug &dbg) const
+    {
+        const std::array<QStringView, 3> units
+        {{
+            {L"B"},
+            {L"KiB"},
+            {L"MiB"}
+        }};
+
+        int unitIdx{0};
+        std::size_t memInUnits{_mem};
+        while(unitIdx+1 < units.size() && memInUnits > 1024)
+        {
+            ++unitIdx;
+            memInUnits /= 1024;
+        }
+
+        QDebugStateSaver save{dbg};
+        dbg.noquote() << memInUnits << units[unitIdx];
+    }
+
+private:
+    std::size_t _mem;
+};
+
+void WinDaemon::traceClientMemory()
+{
+    WinHandle procSnapshot{::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)};
+
+    PROCESSENTRY32W proc{};
+    proc.dwSize = sizeof(proc);
+
+    QStringView clientModule{BRAND_CODE L"-client.exe"};
+    QStringView cliModule{BRAND_CODE L"ctl.exe"};
+
+    int clientProcesses{0};
+
+    BOOL nextProc = ::Process32FirstW(procSnapshot.get(), &proc);
+    while(nextProc)
+    {
+        // Avoid wchar_t[] constructor for QStringView which assumes the string
+        // fills the entire array
+        QStringView processName{&proc.szExeFile[0]};
+        if(clientModule == processName || cliModule == processName)
+        {
+            ++clientProcesses;
+            WinHandle clientProcess{::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ,
+                                                  false, proc.th32ProcessID)};
+            DWORD dwError{ERROR_SUCCESS};
+            if(!clientProcess)
+                dwError = ::GetLastError();
+            PROCESS_MEMORY_COUNTERS_EX procMem{};
+            procMem.cb = sizeof(procMem);
+            BOOL gotMemory = FALSE;
+            if(clientProcess)
+            {
+                gotMemory = ::GetProcessMemoryInfo(clientProcess.get(),
+                                                   reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&procMem),
+                                                   procMem.cb);
+                if(!gotMemory)
+                    dwError = ::GetLastError();
+            }
+
+            if(gotMemory)
+            {
+                qInfo() << "PID" << proc.th32ProcessID
+                    << processName
+                    << "- Private mem:" << TraceMemSize{procMem.PrivateUsage}
+                    << "- Nonpaged pool:" << TraceMemSize{procMem.QuotaNonPagedPoolUsage}
+                    << "- Paged pool:" << TraceMemSize{procMem.QuotaPagedPoolUsage}
+                    << "- Working set:" << TraceMemSize{procMem.WorkingSetSize};
+            }
+            else
+            {
+                qInfo() << "PID" << proc.th32ProcessID
+                    << QStringView{proc.szExeFile}
+                    << "- can't access memory usage -"
+                    << WinErrTracer{dwError};
+            }
+        }
+        nextProc = ::Process32NextW(procSnapshot.get(), &proc);
+    }
+
+    DWORD dwError = ::GetLastError();
+    if(dwError != ERROR_SUCCESS && dwError != ERROR_NO_MORE_FILES)
+    {
+        qWarning() << "Unable to enumerate processes:" << WinErrTracer{dwError};
+    }
+
+    qInfo() << "Found" << clientProcesses << "running client processes";
+}
+
 void WinDaemon::wireguardServiceFailed()
 {
     // If the connection failed after the WG service was started, check whether
@@ -996,4 +1283,25 @@ void WinDaemon::wireguardConnectionSucceeded()
     // potentially-expensive check in the normal case.
     if(_state.wintunMissing())
         checkWintunInstallation();
+}
+
+void WinDaemon::handlePendingWinTunInstall()
+{
+    // If PIA was recently installed, do WinTUN installation now.  The installer
+    // creates a file to flag this condition; this applies to upgrades,
+    // downgrades, and reinstalls.
+    //
+    // Installation of WinTUN is performed by the daemon itself, not the
+    // installer, because it can't be installed in Safe Mode (the msiservice
+    // service can't be started).
+    //
+    // We use an explicit flag instead of checking the last-used version so a
+    // reinstall will also cause WinTUN to be re-checked.
+    if(QFile::exists(Path::DaemonDataDir / ".need-wintun-install"))
+    {
+        qInfo() << "MSI install needed, install WinTUN now";
+        QFile::remove(Path::DaemonDataDir / ".need-wintun-install");
+        installWinTun();
+        checkWintunInstallation();
+    }
 }

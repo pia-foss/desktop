@@ -42,8 +42,6 @@ void WireguardKernelBackend::cleanup()
 WireguardKernelBackend::WireguardKernelBackend()
     : _created{false}
 {
-  qDebug () << "Attempting to enable wireguard kernel logs";
-  Exec::bash(QStringLiteral("modprobe wireguard && echo module wireguard +p > /sys/kernel/debug/dynamic_debug/control"));
 }
 
 WireguardKernelBackend::~WireguardKernelBackend()

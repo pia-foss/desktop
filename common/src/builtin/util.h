@@ -1064,6 +1064,8 @@ qint64 COMMON_EXPORT getMonotonicTime();
 void COMMON_EXPORT testCrash();
 
 namespace std {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     // QString doesn't provide a std::hash<> specialization.  It provides
     // qHash(), but QHash/QMultiHash are poor container choices:
     // - they require the types to be copy-assignable, this breaks value type
@@ -1083,6 +1085,7 @@ namespace std {
     {
         std::size_t operator()(const QLatin1String &str) const {return qHash(str);}
     };
+#endif
     template<>
     struct hash<QHostAddress>
     {

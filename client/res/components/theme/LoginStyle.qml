@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
-import "."
-
 QtObject {
     readonly property string buttonDisabledImage: Theme.imagePath + "/dashboard/login/login-button-disabled.png"
     readonly property string buttonNormalImage: Theme.imagePathCommon + "/dashboard/login/login-button-primary.png"

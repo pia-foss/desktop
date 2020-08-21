@@ -59,7 +59,17 @@ static void serviceMain(int argc, wchar_t** argv)
         Logger logSingleton{Path::DaemonLogFile};
 
         WinService service;
-        QObject::connect(&service, &Daemon::started, [] { reportStatus(SERVICE_RUNNING); QCoreApplication::exec(); });
+        QObject::connect(&service, &Daemon::started, [&service]
+        {
+            reportStatus(SERVICE_RUNNING);
+
+            // Do this after reporting the service as "running", it may wait for
+            // the MSI service to start, and we don't want to wait on that while
+            // SCM thinks we're still initializing
+            service.handlePendingWinTunInstall();
+
+            QCoreApplication::exec();
+        });
         QObject::connect(&service, &Daemon::stopped, [] { QCoreApplication::quit(); });
 
         service.start();

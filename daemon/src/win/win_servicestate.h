@@ -96,6 +96,10 @@ public:
     // rejected Task.
     Async<void> startService();
 
+    // Wait for a service to start.  This doesn't attempt to start the service,
+    // it just resolves if the service is started.
+    Async<void> waitForStart();
+
     // Stop the service, and return a task that resolves when the service
     // reaches the Stopped state.  If the service can't be stopped, returns a
     // rejected Task.

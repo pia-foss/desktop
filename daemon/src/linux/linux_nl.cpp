@@ -108,6 +108,13 @@ LinuxNl::Worker::Worker(LinuxNl &parent, LinuxFd killSocket)
                                        {RTNLGRP_IPV4_ROUTE, RTNLGRP_IPV6_ROUTE,
                                         RTNLGRP_DECnet_ROUTE}, // Just to stay in sync with libnl
                                        {RTM_NEWROUTE, RTM_DELROUTE, RTM_GETROUTE});
+
+    // Read the initial state and emit the initial network configuration.
+    // It seems that on older distributions, we always get an initial change
+    // that causes us to do this anyway, but on newer distributions this doesn't
+    // occur.  It's not clear if this is due to a difference in the kernel/
+    // libnl/etc., but it's consistent.
+    readCaches();
 }
 
 bool readNlAddr(libnl::nl_addr *pNlAddr, std::size_t valueSize, void *pValue)

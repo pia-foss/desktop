@@ -67,8 +67,12 @@ for %%G in (x64,x86) do (
 
 rem  Detect Visual Studio 2017
 for %%G in (Professional,Community,BuildTools) do (
-  if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\%%G" (
+  if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\%%G"  (
+    set "MSVCROOT=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\%%G"
+  ) else if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\%%G" (
     set "MSVCROOT=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\%%G"
+  )
+  if not ["!MSVCROOT!"] == [] (
     if exist "!MSVCROOT!\VC\Auxiliary\Build\vcvarsall.bat" (
       set "MSVCVARS=!MSVCROOT!\VC\Auxiliary\Build\vcvarsall.bat"
     )

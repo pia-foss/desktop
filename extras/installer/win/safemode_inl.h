@@ -16,9 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-import QtQuick 2.0
-QtObject {
-    readonly property int normalDuration: 500
-    readonly property int quickDuration: 250
-    readonly property int dashSlideAmount: 80
-}
+#ifndef SAFEMODE_INL_H
+#define SAFEMODE_INL_H
+
+enum class BootMode
+{
+    Normal,
+    SafeMode,
+    SafeModeWithNetworking
+};
+
+// Get the current boot mode.  This also traces the boot mode.
+BootMode getBootMode();
+
+#endif

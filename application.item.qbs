@@ -76,11 +76,11 @@ CppApplication {
 
   cpp.defines: {
     var defs = [
-      // The following define makes your compiler emit warnings if you use
-      // any feature of Qt which as been marked deprecated (the exact warnings
-      // depend on your compiler). Please consult the documentation of the
-      // deprecated API in order to know how to port your code away from it.
-      "QT_DEPRECATED_WARNINGS",
+      // TODO: Qt 5.15 has deprecated a lot of API elements from Qt 5.12 (note
+      // that deprecated warnings are also issued by default now).  Silence
+      // these for now to highlight actual errors, we'll resolve deprecations
+      // when the build is working with 5.15
+      "QT_NO_DEPRECATED_WARNINGS",
       "SOURCE_ROOT=" + Utilities.cStringQuote(project.sourceDirectory),
     ]
 

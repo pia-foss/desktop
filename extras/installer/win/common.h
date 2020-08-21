@@ -20,6 +20,8 @@
 #define COMMON_H
 #pragma once
 
+#define NOMINMAX    // Suppress annoying min / max macros from windows.h
+
 //#define OEMRESOURCE
 #define STRICT 1
 #include <windows.h>

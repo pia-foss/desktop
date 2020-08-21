@@ -28,8 +28,8 @@ Project {
   minimumQbsVersion: "1.10"
 
   property string productName: brandName
-  property string productVersion: "2.2.2"
-  property string productPrerelease: ""
+  property string productVersion: "2.3.0"
+  property string productPrerelease: "beta.1"
   property string brandCode: "pia"
   id: piaProject
 

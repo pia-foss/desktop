@@ -1197,6 +1197,8 @@ void VPNConnection::doConnect()
 
     Q_ASSERT(_connectingConfig.vpnLocation());  // Postcondition of copySettings()
     OriginalNetworkScan netScan = g_daemon->originalNetwork();
+    qInfo() << "Initial netScan for VPN method" << netScan;
+
     bool delayNext = true;
     const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), QHostAddress{netScan.ipAddress()}, delayNext);
     // When using WireGuard, the TransportSelector is vestigial, since

@@ -43,6 +43,20 @@ FuncT subclassMethod(Class subclass, Class baseClass, SEL selector,
     return baseImpl;
 }
 
+// Add a method on subclass that is not implemented in baseClass.  (Verifies
+// that the method is actuall not implemented in the base class - use
+// subclassMethod() instead if it is, as the base implementation should usually
+// be used.)
+template<class FuncT>
+void addMethod(Class subclass, Class baseClass, SEL selector,
+               FuncT implFunc, const char *funcTypes)
+{
+    Method baseMethod = class_getInstanceMethod(baseClass, selector);
+    Q_ASSERT(!baseMethod);   // Class must _not_ have this method
+    class_addMethod(subclass, selector, reinterpret_cast<IMP>(implFunc),
+                    funcTypes);
+}
+
 /*** Base methods of QMacAccessibilityElement ***/
 // Initialized when the subclass is built.
 
@@ -56,11 +70,11 @@ std::ptrdiff_t axidOffset = 0;
 using ElementWithIdFunc = QMacAccessibilityElement*(*)(id, SEL, QAccessible::Id);
 ElementWithIdFunc classElementWithIdFunc = nil;
 
-using AccessibilityAttributeNamesFunc = NSArray<NSString*>*(*)(id, SEL);
-AccessibilityAttributeNamesFunc baseAccessibilityAttributeNames = nil;
+using AccessibilityRoleFunc = NSAccessibilityRole(*)(id, SEL);
+AccessibilityRoleFunc baseAccessibilityRole = nil;
 
-using AccessibilityAttributeValueFunc = id(*)(id, SEL, NSString*);
-AccessibilityAttributeValueFunc baseAccessibilityAttributeValue = nil;
+using AccessibilityValueFunc = id(*)(id, SEL);
+AccessibilityValueFunc baseAccessibilityValue = nil;
 
 using AccessibilityParameterizedAttributeNamesFunc = NSArray<NSString*>*(*)(id, SEL);
 AccessibilityParameterizedAttributeNamesFunc baseAccessibilityParameterizedAttributeNames = nil;
@@ -148,231 +162,207 @@ NSArray<QMacAccessibilityElement*> *emptyMacElements()
 
 // The subclass itself.
 Class macElementSubclass = nil;
-NSArray<NSString*> *accessibilityAttributeNames(id self, SEL _cmd)
-{
-    Q_ASSERT(baseAccessibilityAttributeNames);  // Initialized
-    static NSArray<NSString*> *tableAttributes = @[
-        NSAccessibilityColumnsAttribute,
-        NSAccessibilityVisibleColumnsAttribute,
-        NSAccessibilitySelectedColumnsAttribute,
-        NSAccessibilityRowsAttribute,
-        NSAccessibilityVisibleRowsAttribute,
-        NSAccessibilitySelectedRowsAttribute,
-    ];
-    static NSArray<NSString*> *rowAttributes = @[
-        NSAccessibilityDisclosingAttribute,
-        NSAccessibilityDisclosedRowsAttribute,
-        NSAccessibilityDisclosedByRowAttribute,
-        NSAccessibilityDisclosureLevelAttribute,
-        NSAccessibilityIndexAttribute
-    ];
-    static NSArray<NSString*> *cellAttributes = @[
-        NSAccessibilityColumnIndexRangeAttribute,
-        NSAccessibilityRowIndexRangeAttribute,
-        NSAccessibilityExpandedAttribute
-    ];
-    static NSArray<NSString*> *comboBoxAttributes = @[
-        NSAccessibilityValueAttribute
-    ];
 
-    NSArray<NSString*> *baseAttrs = baseAccessibilityAttributeNames(self, _cmd);
+/*** Attribute accessor overrides ***/
+
+/*** Role/subrole fixups ***/
+
+NSAccessibilityRole accessibilityRole(id self, SEL _cmd)
+{
+    Q_ASSERT(baseAccessibilityRole);    // Initialized
 
     QAccessibleInterface *pAccItf = getAccInterface(self);
 
-    // If this has the table and table filler interfaces, add the table attributes
-    if(getTable(self) && getTableFiller(self))
-        return [baseAttrs arrayByAddingObjectsFromArray:tableAttributes];
-
-    if(getRowFiller(self))
-        return [baseAttrs arrayByAddingObjectsFromArray:rowAttributes];
-
-    // If it's a cell, add the cell attributes
-    if(getTableCell(self))
-        return [baseAttrs arrayByAddingObjectsFromArray:cellAttributes];
-
-    // If it's a combo box, add combo box attributes.
-    // (This includes "Value", Qt only adds this on Mac if we provide a value
-    // interface, which we do not because that's wrong for Windows; see
-    // accessibilityAttributeValue().)
+    // Use the "pop-up button" role for combo boxes.  The "ButtonDropDown" type
+    // would really be a little more appropriate, but this type doesn't read
+    // well on Windows (it just says it's a "button", drop downs are normally
+    // annotated as combo boxes).
     if(pAccItf && pAccItf->role() == QAccessible::Role::ComboBox)
-        return [baseAttrs arrayByAddingObjectsFromArray:comboBoxAttributes];
+        return NSAccessibilityPopUpButtonRole;
 
-    return baseAttrs;
+    // For tables, substitute the "outline" row, because our tables can have
+    // collapsed sections.
+    // This doesn't require every table to have collapsed sections, it's
+    // common on Mac to use the outline role for plain tables too.
+    // (We only have one table right now anyway, the regions list.)
+    if(pAccItf && pAccItf->role() == QAccessible::Role::Table)
+        return NSAccessibilityOutlineRole;
+
+    return baseAccessibilityRole(self, _cmd);
 }
 
-id accessibilityAttributeValue(id self, SEL _cmd, NSString *attribute)
+NSAccessibilitySubrole accessibilitySubrole(id self, SEL)
 {
-    Q_ASSERT(baseAccessibilityAttributeValue);  // Initialized
+    QAccessibleInterface *pAccItf = getAccInterface(self);
 
-    /*** Role/subrole fixups ***/
-    if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+    // Like tables above, use the outline-row subrole for table rows.
+    if(pAccItf && pAccItf->role() == QAccessible::Role::Row)
+        return NSAccessibilityOutlineRowSubrole;
+
+    return NSAccessibilityUnknownSubrole;
+}
+
+/*** Table attributes ***/
+NSArray *accessibilityColumns(id self, SEL)
+{
+    NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
+    return pTableItf ? returnMacElements(pTableItf->getTableColumns()) : emptyMacElements();
+}
+
+NSArray *accessibilityVisibleColumns(id self, SEL)
+{
+    NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
+    return pTableItf ? returnMacElements(pTableItf->getTableColumns()) : emptyMacElements();
+}
+
+NSArray *accessibilityRows(id self, SEL)
+{
+    NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
+    return pTableItf ? returnMacElements(pTableItf->getTableRows()) : emptyMacElements();
+}
+
+NSArray *accessibilityVisibleRows(id self, SEL)
+{
+    NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
+    return pTableItf ? returnMacElements(pTableItf->getTableRows()) : emptyMacElements();
+}
+
+NSArray *accessibilitySelectedColumns(id, SEL)
+{
+    return emptyMacElements();
+}
+
+NSArray *accessibilitySelectedRows(id self, SEL)
+{
+    NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
+    return pTableItf ? returnMacElements(pTableItf->getSelectedRows()) : emptyMacElements();
+}
+
+/*** Table row attributes ***/
+
+BOOL isAccessibilityDisclosed(id self, SEL)
+{
+    // "disclosing" means "is the row disclosing its children"; i.e. "is it
+    // expanded"
+    NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
+    return pRowItf ? pRowItf->getExpanded() : false;
+}
+
+id accessibilityDisclosedRows(id self, SEL)
+{
+    NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
+    return pRowItf ? returnMacElements(pRowItf->getOutlineChildren()) : emptyMacElements();
+}
+
+id accessibilityDisclosedByRow(id self, SEL)
+{
+    NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
+    return pRowItf ? macGetAccElement(pRowItf->getOutlineParent()) : nil;
+}
+
+NSInteger accessibilityDisclosureLevel(id self, SEL)
+{
+    // "disclosure level" is the "outline level" - number of indentations
+    NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
+    return pRowItf ? pRowItf->getOutlineLevel() : 0;
+}
+
+NSInteger accessibilityIndex(id self, SEL)
+{
+    QAccessibleTableCellInterface *pCellItf = getTableCell(self);
+    return pCellItf ? pCellItf->rowIndex() : 0;
+}
+
+/*** Table cell attributes ***/
+
+NSRange accessibilityColumnIndexRange(id self, SEL)
+{
+    QAccessibleTableCellInterface *pCellItf = getTableCell(self);
+    NSRange range{};
+    if(pCellItf)
     {
-        QAccessibleInterface *pAccItf = getAccInterface(self);
+        range.location = pCellItf->columnIndex();
+        range.length = pCellItf->columnExtent();
+    }
+    return range;
+}
 
-        // For tables, substitute the "outline" row, because our tables can have
-        // collapsed sections.
-        // This doesn't require every table to have collapsed sections, it's
-        // common on Mac to use the outline role for plain tables too.
-        // (We only have one table right now anyway, the regions list.)
-        if(pAccItf && pAccItf->role() == QAccessible::Role::Table)
-            return NSAccessibilityOutlineRole;
+NSRange accessibilityRowIndexRange(id self, SEL)
+{
+    QAccessibleTableCellInterface *pCellItf = getTableCell(self);
+    NSRange range{};
+    if(pCellItf)
+    {
+        range.location = pCellItf->rowIndex();
+        range.length = pCellItf->rowExtent();
+    }
+    return range;
+}
 
-        return baseAccessibilityAttributeValue(self, _cmd, attribute);
+/*** General attribute fixups ***/
+
+// Qt incorrectly implements an "accessibilityEnabledAttribute" getter, it's
+// actually "isAccessibilityEnabled".
+// This means "is the control represented by the accessibility element enabled",
+// not whether accessibility is enabled at all for this control.
+BOOL isAccessibilityEnabled(id self, SEL)
+{
+    QAccessibleInterface *pAccItf = getAccInterface(self);
+    return pAccItf ? !pAccItf->state().disabled : true;
+}
+
+id accessibilityValue(id self, SEL _cmd)
+{
+    Q_ASSERT(baseAccessibilityValue);
+
+    // The 'value' implementation in QAccessible is especially bizarre.  Fix
+    // it up on Mac to behave like Win/Linux.
+    //
+    // All platforms have a generic "value" concept.  Windows also has the
+    // concept of a "range value", which is numeric with min/max.  On Mac,
+    // this is folded into the generic "value", which is a variant value
+    // with optional min/max variants.
+    //
+    // The bizarre part is how Qt implements these concepts.  Qt has both a
+    // "text value" concept (QAccessible::Text::Value) and a "variant value"
+    // concept (QAccessibleValueInterface).  It seems like these would fit
+    // the platform models pretty clearly.
+    //
+    // On Mac though, Qt never uses QAccessible::Text::Value at all (as a
+    // getter anyway).  It exclusively uses QAccessibleValueInterface's
+    // value as a string, with some "magic" sprinkled in to fix up some
+    // specific roles (getValueAttribute() in qcocoaaccessibility.mm).
+    //
+    // On Windows, Qt uses QAccessible::Text::Value for the string value.
+    // If the control provides QAccessibleValueInterface, Qt assumes it is
+    // numeric and exclusively uses the value as a double.
+    //
+    // So for a text-valued control like a combo box, it's possible to
+    // implement the correct behavior on each platform, but there's no way
+    // to implement the correct behavior on _both_ platforms simultaneously.
+    //
+    // For the affected controls, just return the Value text as the value
+    // as Qt probably should have.  Keep Qt's other quirks (for now at
+    // least), like mapping StaticTexts' names to their value instead of
+    // description.
+    QAccessibleInterface *pAccItf = getAccInterface(self);
+    QAccessible::Role role = pAccItf ? pAccItf->role() : QAccessible::Role::NoRole;
+
+    // - Fix up the value for combo boxes.
+    // - Fix up the value for edits.  Qt would fill it in from the text
+    //   interface, but these controls also have to provide the text value
+    //   too in order to work on Windows.  For consistency, always use this
+    //   value.  (Note that ValueText provides this value but does not have
+    //   a text interface, since it is not editable.)
+    if(role == QAccessible::Role::ComboBox ||
+        role == QAccessible::Role::EditableText)
+    {
+        qInfo() << "returning" << pAccItf->text(QAccessible::Text::Value)
+            << "for role" << traceEnum(role);
+        return pAccItf->text(QAccessible::Text::Value).toNSString();
     }
 
-    if([attribute isEqualToString:NSAccessibilitySubroleAttribute])
-    {
-        QAccessibleInterface *pAccItf = getAccInterface(self);
-
-        // Like tables above, use the outline-row subrole for table rows.
-        if(pAccItf && pAccItf->role() == QAccessible::Role::Row)
-            return NSAccessibilityOutlineRowSubrole;
-
-        return baseAccessibilityAttributeValue(self, _cmd, attribute);
-    }
-
-    /*** Table attributes ***/
-    if([attribute isEqualToString:NSAccessibilityColumnsAttribute] ||
-       [attribute isEqualToString:NSAccessibilityVisibleColumnsAttribute])
-    {
-        NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
-        return pTableItf ? returnMacElements(pTableItf->getTableColumns()) : emptyMacElements();
-    }
-
-    if([attribute isEqualToString:NSAccessibilityRowsAttribute] ||
-       [attribute isEqualToString:NSAccessibilityVisibleRowsAttribute])
-    {
-        NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
-        return pTableItf ? returnMacElements(pTableItf->getTableRows()) : emptyMacElements();
-    }
-
-    if([attribute isEqualToString:NSAccessibilitySelectedColumnsAttribute])
-    {
-        return emptyMacElements();
-    }
-
-    if([attribute isEqualToString:NSAccessibilitySelectedRowsAttribute])
-    {
-        NativeAcc::AccessibleTableFiller *pTableItf = getTableFiller(self);
-        return pTableItf ? returnMacElements(pTableItf->getSelectedRows()) : emptyMacElements();
-    }
-
-    /*** Table row attributes ***/
-    if([attribute isEqualToString:NSAccessibilityDisclosingAttribute])
-    {
-        // "disclosing" means "is the row disclosing its children"; i.e. "is it
-        // expanded"
-        NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
-        bool disclosing = pRowItf ? pRowItf->getExpanded() : false;
-        return [NSNumber numberWithBool:disclosing];
-    }
-
-    if([attribute isEqualToString:NSAccessibilityDisclosedRowsAttribute])
-    {
-        NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
-        return pRowItf ? returnMacElements(pRowItf->getOutlineChildren()) : emptyMacElements();
-    }
-
-    if([attribute isEqualToString:NSAccessibilityDisclosedByRowAttribute])
-    {
-        NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
-        return pRowItf ? macGetAccElement(pRowItf->getOutlineParent()) : nil;
-    }
-
-    if([attribute isEqualToString:NSAccessibilityDisclosureLevelAttribute])
-    {
-        // "disclosure level" is the "outline level" - number of indentations
-        NativeAcc::AccessibleRowFiller *pRowItf = getRowFiller(self);
-        int level = pRowItf ? pRowItf->getOutlineLevel() : 0;
-        return [NSNumber numberWithInt:level];
-    }
-
-    if([attribute isEqualToString:NSAccessibilityIndexAttribute])
-    {
-        QAccessibleTableCellInterface *pCellItf = getTableCell(self);
-        int index = pCellItf ? pCellItf->rowIndex() : 0;
-        return [NSNumber numberWithInt:index];
-    }
-
-    /*** Table cell attributes ***/
-    if([attribute isEqualToString:NSAccessibilityColumnIndexRangeAttribute])
-    {
-        QAccessibleTableCellInterface *pCellItf = getTableCell(self);
-        NSRange range{};
-        if(pCellItf)
-        {
-            range.location = pCellItf->columnIndex();
-            range.length = pCellItf->columnExtent();
-        }
-
-        return [NSValue valueWithRange:range];
-    }
-
-    if([attribute isEqualToString:NSAccessibilityRowIndexRangeAttribute])
-    {
-        QAccessibleTableCellInterface *pCellItf = getTableCell(self);
-        NSRange range{};
-        if(pCellItf)
-        {
-            range.location = pCellItf->rowIndex();
-            range.length = pCellItf->rowExtent();
-        }
-
-        return [NSValue valueWithRange:range];
-    }
-
-    /*** General attribute fixups ***/
-    if([attribute isEqualToString:NSAccessibilityValueAttribute])
-    {
-        // The 'value' implementation in QAccessible is especially bizarre.  Fix
-        // it up on Mac to behave like Win/Linux.
-        //
-        // All platforms have a generic "value" concept.  Windows also has the
-        // concept of a "range value", which is numeric with min/max.  On Mac,
-        // this is folded into the generic "value", which is a variant value
-        // with optional min/max variants.
-        //
-        // The bizarre part is how Qt implements these concepts.  Qt has both a
-        // "text value" concept (QAccessible::Text::Value) and a "variant value"
-        // concept (QAccessibleValueInterface).  It seems like these would fit
-        // the platform models pretty clearly.
-        //
-        // On Mac though, Qt never uses QAccessible::Text::Value at all (as a
-        // getter anyway).  It exclusively uses QAccessibleValueInterface's
-        // value as a string, with some "magic" sprinkled in to fix up some
-        // specific roles (getValueAttribute() in qcocoaaccessibility.mm).
-        //
-        // On Windows, Qt uses QAccessible::Text::Value for the string value.
-        // If the control provides QAccessibleValueInterface, Qt assumes it is
-        // numeric and exclusively uses the value as a double.
-        //
-        // So for a text-valued control like a combo box, it's possible to
-        // implement the correct behavior on each platform, but there's no way
-        // to implement the correct behavior on _both_ platforms simultaneously.
-        //
-        // For the affected controls, just return the Value text as the value
-        // as Qt probably should have.  Keep Qt's other quirks (for now at
-        // least), like mapping StaticTexts' names to their value instead of
-        // description.
-        QAccessibleInterface *pAccItf = getAccInterface(self);
-        QAccessible::Role role = pAccItf ? pAccItf->role() : QAccessible::Role::NoRole;
-
-        // - Fix up the value for combo boxes.
-        // - Fix up the value for edits.  Qt would fill it in from the text
-        //   interface, but these controls also have to provide the text value
-        //   too in order to work on Windows.  For consistency, always use this
-        //   value.  (Note that ValueText provides this value but does not have
-        //   a text interface, since it is not editable.)
-        if(role == QAccessible::Role::ComboBox ||
-            role == QAccessible::Role::EditableText)
-        {
-            return pAccItf->text(QAccessible::Text::Value).toNSString();
-        }
-
-        return baseAccessibilityAttributeValue(self, _cmd, attribute);
-    }
-
-    return baseAccessibilityAttributeValue(self, _cmd, attribute);
+    return baseAccessibilityValue(self, _cmd);
 }
 
 NSArray<NSString *> *accessibilityParameterizedAttributeNames(id self, SEL _cmd)
@@ -601,13 +591,62 @@ void macInitElementSubclass()
         Q_ASSERT(axidVar);  // It must have this variable
         axidOffset = ivar_getOffset(axidVar);
 
-        baseAccessibilityAttributeNames = subclassMethod(macElementSubclass,
-            macElementBaseClass, @selector(accessibilityAttributeNames),
-            &accessibilityAttributeNames, "@@:");
+        baseAccessibilityRole = subclassMethod(macElementSubclass,
+            macElementBaseClass, @selector(accessibilityRole),
+            &accessibilityRole, "i@:");
+        qInfo() << "check NSAccessibilityRole - should be i:"
+            << QLatin1String(@encode(NSAccessibilityRole));
 
-        baseAccessibilityAttributeValue = subclassMethod(macElementSubclass,
-            macElementBaseClass, @selector(accessibilityAttributeValue:),
-            &accessibilityAttributeValue, "@@:@");
+        // The remaining attributes are not implemented by Qt, so they do not
+        // have base implementations.
+        addMethod(macElementSubclass, macElementBaseClass,
+            @selector(accessibilitySubrole), &accessibilitySubrole,
+            "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityColumns), &accessibilityColumns,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityVisibleColumns), &accessibilityVisibleColumns,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityRows), &accessibilityRows,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityVisibleRows), &accessibilityVisibleRows,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilitySelectedColumns), &accessibilitySelectedColumns,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilitySelectedRows), &accessibilitySelectedRows,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(isAccessibilityDisclosed), &isAccessibilityDisclosed,
+                  "c@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityDisclosedRows), &accessibilityDisclosedRows,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityDisclosedByRow), &accessibilityDisclosedByRow,
+                  "@@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityDisclosureLevel), &accessibilityDisclosureLevel,
+                  "q@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityIndex), &accessibilityIndex,
+                  "q@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityColumnIndexRange), &accessibilityColumnIndexRange,
+                  "{_NSRange=QQ}@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(accessibilityRowIndexRange), &accessibilityRowIndexRange,
+                  "{_NSRange=QQ}@:");
+        addMethod(macElementSubclass, macElementBaseClass,
+                  @selector(isAccessibilityEnabled), &isAccessibilityEnabled,
+                  "c@:");
+        baseAccessibilityValue = subclassMethod(macElementSubclass,
+            macElementBaseClass, @selector(accessibilityValue),
+            &accessibilityValue, "@@:");
 
         baseAccessibilityParameterizedAttributeNames = subclassMethod(macElementSubclass,
             macElementBaseClass, @selector(accessibilityParameterizedAttributeNames),

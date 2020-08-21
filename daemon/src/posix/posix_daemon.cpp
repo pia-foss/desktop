@@ -450,6 +450,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("OS Version", "sw_vers", emptyArgs);
     file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
+    file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (App anchors)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*"), QStringLiteral("-sr")});
@@ -470,19 +471,22 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
+    file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
+    file.writeText("kext syslog", _kextMonitor.getKextLog());
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
     file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
     scutilDNSDiagnostics(file);
-    file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
-    file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
-    file.writeText("kext syslog", _kextMonitor.getKextLog());
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("Distro", "lsb_release", QStringList{QStringLiteral("-a")});
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("ip addr", "ip", QStringList{QStringLiteral("addr")});
+    file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
+    // Grab the routing tables from iproute2 also - we hope to change OpenVPN
+    // from ifconfig to iproute2 at some point as long as this is always present
+    file.writeCommand("ip route show", "ip", QStringList{"route", "show"});
     // Write iptables dumps for each table that PIA uses
     auto dumpIpTables = [&](const QString &table)
     {
@@ -507,10 +511,6 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         QStringLiteral("-c1"), QStringLiteral("-W1")});
     file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
-    file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
-    // Grab the routing tables from iproute2 also - we hope to change OpenVPN
-    // from ifconfig to iproute2 at some point as long as this is always present
-    file.writeCommand("ip route show", "ip", QStringList{"route", "show"});
     file.writeCommand("resolv.conf", "cat", QStringList{QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("ls -l resolv.conf", "ls", QStringList{QStringLiteral("-l"), QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("systemd-resolve --status", "systemd-resolve", QStringList{QStringLiteral("--status")});
@@ -536,6 +536,10 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // net_cls cgroup required for split tunnel
     file.writeCommand("ls -l <net_cls>", "ls", QStringList{"-l", Path::ParentVpnExclusionsFile.parent()});
+    file.writeText("cat piavpnonly: cgroup.procs", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnonly/cgroup.procs"));
+    file.writeText("ps -p piavpnonly", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnonly/cgroup.procs | xargs -n1 ps -p"));
+    file.writeText("cat piavpnexclusions: cgroup.procs", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnexclusions/cgroup.procs"));
+    file.writeText("ps -p piavpnexclusions", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnexclusions/cgroup.procs | xargs -n1 ps -p"));
     file.writeCommand("ip rule list", "ip", QStringList{"rule", "list"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnrt"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnWgrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnWgrt"});

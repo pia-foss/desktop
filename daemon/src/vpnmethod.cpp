@@ -30,6 +30,7 @@ void VPNMethod::updateNetwork(const OriginalNetworkScan &newNetwork)
 {
     if(newNetwork != _netScan)
     {
+        qInfo() << "Updating netScan for VPN method, old:" << _netScan << "new:" << newNetwork;
         _netScan = newNetwork;
         networkChanged();
     }

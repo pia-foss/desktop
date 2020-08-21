@@ -130,8 +130,13 @@ std::string vstrprintf(LPCSTR fmt, va_list ap)
 {
     std::string result;
     int len = _vscprintf(fmt, ap);
+    if(len < 0)
+        return {};
     result.resize(len + 1);
-    result.resize(_vsnprintf(&result[0], result.size(), fmt, ap));
+    int actual = _vsnprintf(&result[0], result.size(), fmt, ap);
+    if(actual < 0)
+        return {};
+    result.resize(actual);
     return result;
 }
 
@@ -139,8 +144,12 @@ std::wstring vwstrprintf(LPCWSTR fmt, va_list ap)
 {
     std::wstring result;
     int len = _vscwprintf(fmt, ap);
+    if(len < 0)
+        return {};
     result.resize(len + 1);
-    result.resize(_vsnwprintf(&result[0], result.size(), fmt, ap));
+    int actual = _vsnwprintf(&result[0], result.size(), fmt, ap);
+    if(actual < 0)
+        return {};
     return result;
 }
 

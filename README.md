@@ -20,17 +20,17 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
   - [Qt 5.11](https://www.qt.io/download) or later (open source edition)
   - *Optional:* [Node.js](https://nodejs.org) (for auxiliary scripts)
 - On **Windows**:
-  - [Visual Studio Community 2017](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2017](https://www.visualstudio.com/downloads/)
+  - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
      - The Windows SDK must be at least 10.0.17763.0
      - Install the "Windows 8.1 SDK and UCRT SDK" to get the UCRT redistributable DLLs for 7/8/8.1
   - Debugger: Install Debugging Tools from the [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
      - The VS installer doesn't include the Console Debugger (CDB), which is needed to debug in Qt Creator.  More info: [Setting Up Debugger](https://doc.qt.io/qtcreator/creator-debugger-engines.html)
   - [7-zip](https://www.7-zip.org/)
 - On **macOS**:
-  - Sierra or newer
+  - High Sierra or newer
   - Up-to-date version of Xcode
 - On **Linux**:
-  - Ubuntu 16.04 or newer
+  - Ubuntu 18.04 or newer
   - The following development packages:
     - `build-essential`
     - `mesa-common-dev`

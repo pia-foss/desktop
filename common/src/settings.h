@@ -1215,6 +1215,11 @@ public:
     // Flag to indicate that the last time a client exited, it was an invalid exit
     // and an message should possibly be displayed
     JsonField(bool, invalidClientExit, false)
+    // Flag to indicate that the daemon killed the last client connection.
+    // Similar to invalidClientExit, but does not trigger any client warning,
+    // since this is normally caused by the OS freezing the client process, and
+    // we expect the client process to reconnect.
+    JsonField(bool, killedClient, false)
 
     // hnsd is failing to launch.  Set after it fails for 10 seconds, cleared
     // when it launches successfully and runs for at least 30 seconds.

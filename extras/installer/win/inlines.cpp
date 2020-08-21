@@ -44,3 +44,6 @@
 
 #define TUN_LOG LOG
 #include "tun.inl"
+
+#define SAFEMODE_LOG LOG
+#include "safemode.inl"

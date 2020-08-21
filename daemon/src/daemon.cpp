@@ -342,6 +342,26 @@ Daemon::Daemon(QObject* parent)
         }
     });
 
+    // If .pia-early-debug exists in the daemon data directory, enable debug
+    // logging now.  This provides a way to capture early debug tracing during
+    // the first daemon startup, and for QA to always keep debug mode enabled
+    // through uninstall/reinstall.  The installers create the daemon's
+    // .pia-early-debug if the installing user has a ~/.pia-early-debug.
+    const Path earlyDebugFile = Path::DaemonDataDir / "." BRAND_CODE "-early-debug";
+    if(QFile::exists(earlyDebugFile))
+    {
+        if(!g_logger->logToFile())
+        {
+            g_logger->configure(true, DaemonSettings::defaultDebugLogging);
+            qInfo() << "Enabled debug logging due to" << earlyDebugFile;
+        }
+        else
+        {
+            qInfo() << "Debug logging already enabled, ignore" << earlyDebugFile;
+        }
+        QFile::remove(earlyDebugFile);
+    }
+
     // Set initial value of debug logging
     if(g_logger->logToFile())
         _settings.debugLogging(g_logger->filters());
@@ -598,7 +618,8 @@ bool Daemon::hasActiveClient() const
 
 bool Daemon::isActive() const
 {
-    return _state.invalidClientExit() || hasActiveClient() || _settings.persistDaemon();
+    return _state.invalidClientExit() || _state.killedClient() ||
+        hasActiveClient() || _settings.persistDaemon();
 }
 
 QString Daemon::RPC_handshake(const QString &version)
@@ -1045,8 +1066,10 @@ void Daemon::RPC_notifyClientDeactivate()
     qDebug () << "Client" << pClient << "has deactivated";
     pClient->setActive(false);
 
-    // Since a client is exiting cleanly, clear the invalid client exit flag
+    // Since a client is exiting cleanly, clear the invalid client exit and
+    // killed client flags
     _state.invalidClientExit(false);
+    _state.killedClient(false);
 
     // If it was the last interactive client, shut down
     if(!isActive())
@@ -1263,16 +1286,35 @@ void Daemon::clientConnected(IPCConnection* connection)
         _clients.remove(connection);
         qInfo() << "Client" << client << "disconnected, total client count now"
             << _clients.size() << "- have active client:" << hasActiveClient();
-        // If the client was active, this exit is unexpected (assume the client
-        // crashed).  If this would have caused the daemon to deactivate, set
-        // invalidClientExit() to remain active.
-        if(client->getActive() && !isActive())
+
+        // If the client was active, this exit is unexpected.  Either the daemon
+        // was killing the connection due to lack of response, or we assume the
+        // client had crashed.  The daemon was active and should remain active.
+        if(client->getActive())
         {
-            qWarning() << "Client" << client << "disconnected but did not deactivate";
-            _state.invalidClientExit(true);
-            // This causes the daemon to remain active (we don't emit
-            // lastClientDisconnected())
-            Q_ASSERT(isActive());
+            // Reset the current invalidClientExit() / killedClient() flags, so
+            // we can switch between those if needed (if a killed connection is
+            // followed by a client crash, etc.)
+            _state.killedClient(false);
+            _state.invalidClientExit(false);
+            // If this would have caused the daemon to deactivate, set either
+            // invalidClientExit() or killedClient() to remain active.
+            if(!isActive())
+            {
+                if(client->getKilled())
+                {
+                    qWarning() << "Client" << client << "connection was killed by daemon, will remain active";
+                    _state.killedClient(true);
+                }
+                else
+                {
+                    qWarning() << "Client" << client << "disconnected but did not deactivate, will remain active";
+                    _state.invalidClientExit(true);
+                }
+                // This causes the daemon to remain active (we don't emit
+                // lastClientDisconnected())
+                Q_ASSERT(isActive());
+            }
         }
     });
 
@@ -2054,10 +2096,10 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
     // Relevant only to macOS
     QString macosPrimaryServiceKey;
 
-    int i=0;
+    int netIdx=0;
     for(const auto &network : networks)
     {
-        qInfo() << "Network" << i;
+        qInfo() << "Network" << netIdx;
         qInfo() << " - itf:" << network.networkInterface();
         qInfo() << " - def4:" << network.defaultIpv4();
         qInfo() << " - def6:" << network.defaultIpv6();
@@ -2103,7 +2145,7 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
             else
                 defaultConnection.ipAddress6({});
         }
-        ++i;
+        ++netIdx;
     }
 
     _state.originalGatewayIp(defaultConnection.gatewayIp());
@@ -2809,6 +2851,7 @@ ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistr
     , _connection(connection)
     , _rpc(new ServerSideInterface(registry, this))
     , _active(false)
+    , _killed(false)
     , _state(Connected)
 {
     auto setDisconnected = [this]() {
@@ -2821,6 +2864,11 @@ ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistr
     };
     connect(_connection, &IPCConnection::disconnected, this, setDisconnected);
     connect(_connection, &IPCConnection::destroyed, this, setDisconnected);
+    connect(_connection, &IPCConnection::remoteLagging, this, [this]
+    {
+        qWarning() << "Killing connection" << this << "due to unacknowledged messages";
+        kill();
+    });
 
     connect(_connection, &IPCConnection::messageReceived, [this](const QByteArray & msg) {
       ClientConnection::_invokingClient = this;
@@ -2832,11 +2880,12 @@ ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistr
 }
 ClientConnection* ClientConnection::_invokingClient = nullptr;
 
-void ClientConnection::disconnect()
+void ClientConnection::kill()
 {
     if (_state < Disconnecting)
     {
-        _connection->disconnect();
+        _killed = true;
+        _connection->close();
     }
 }
 

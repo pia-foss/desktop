@@ -88,7 +88,9 @@ public:
     bool getActive() const {return _active;}
     void setActive(bool active) {_active = active;}
 
-    void disconnect();
+    bool getKilled() const {return _killed;}
+
+    void kill();
 
 signals:
     void disconnected();
@@ -98,6 +100,10 @@ private:
     static ClientConnection *_invokingClient;
     ServerSideInterface* _rpc;
     bool _active;
+    // Whether the client connection is being killed by the server.  If an
+    // active client connection unexpectedly exits, this affects the way the
+    // daemon remains active (invalidClientExit vs. killedClient)
+    bool _killed;
     State _state;
 };
 
@@ -319,7 +325,7 @@ protected:
     // firstClientConnected() or lastClientDisconnected().
     // Normally the daemon is active when any active client is connected, but it
     // can also remain active if an active client exits unexpectedly
-    // (DaemonState::invalidClientExit).
+    // (DaemonState::invalidClientExit / killedClient).
     bool isActive() const;
 
     IMPLEMENT_NOTIFICATIONS(Daemon)

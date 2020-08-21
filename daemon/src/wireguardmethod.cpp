@@ -242,6 +242,11 @@ private:
     ConnectionConfig _connectionConfig;
     // The address of the VPN host
     QHostAddress _vpnHost;
+    // Whether routes are up for this connection.  They go up during the
+    // Connecting state.  It's possible a network change could occur after
+    // routes go up, but before we've reached the Connected state, so we need to
+    // be sure we update them in that case.
+    bool _routesUp;
 
     // Number of consecutive intervals with no new data received
     unsigned _noRxIntervals;
@@ -261,7 +266,8 @@ private:
 Executor WireguardMethod::_executor{CURRENT_CATEGORY};
 
 WireguardMethod::WireguardMethod(QObject *pParent, const OriginalNetworkScan &netScan)
-    : VPNMethod{pParent, netScan}, _noRxIntervals{0}, _lastReceivedBytes{0}
+    : VPNMethod{pParent, netScan}, _routesUp{false}, _noRxIntervals{0},
+      _lastReceivedBytes{0}
 {
     _firstHandshakeTimer.setInterval(msec(firstHandshakeInterval));
     connect(&_firstHandshakeTimer, &QTimer::timeout, this,
@@ -322,6 +328,7 @@ void WireguardMethod::teardownPosixDNS()
 void WireguardMethod::deleteInterface()
 {
     // Routing/DNS cleanup
+    _routesUp = false;
 #if defined(Q_OS_LINUX)
     teardownPosixDNS();
 
@@ -694,6 +701,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     TraceStopwatch stopwatch{"Configuring WireGuard interface"};
 
     const OriginalNetworkScan &netScan = originalNetwork();
+
     const auto &peerIpNet = authResult._peerIpNet;
     _dnsServers = _connectionConfig.getDnsServers(authResult._piaDnsServers);
 
@@ -727,7 +735,16 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Create a low-priority default route for the VPN endpoint (so opt-in traffic can bind to it)
         _executor.bash(QStringLiteral("ip route add default dev %1 metric 32000").arg(WireguardBackend::interfaceName));
         // Create VPN route (without this, wireguard packets seem to end up on the wireguard interface itself...)
-        _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+        if(netScan.ipv4Valid())
+            _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+        else
+        {
+            // This is possible in rare cases - if the network connection is
+            // established just as the connection attempt occurs, and we haven't
+            // detected the new network state yet.  Skip the route for now and
+            // create it when the network change occurs.
+            qInfo() << "Can't create VPN host route yet, original gateway not known";
+        }
         // Always route special address through VPN (used for MACE, port forwarding etc)
         _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(piaLegacyDnsPrimary, deviceName));
         // Route virtual server IP (ping endpoint) through VPN
@@ -777,7 +794,16 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
                 _executor.bash(QStringLiteral("route -q -n add -inet %1 -interface %2").arg(dnsServer, deviceName));
         }
     }
-    _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+
+    if(netScan.ipv4Valid())
+        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+    else
+    {
+        // As on Linux, this is possible in rare cases if the connection races
+        // with a network change - if it happens, skip the route for now and
+        // create it when the network change is observed.
+        qInfo() << "Can't create VPN host route yet, original gateway not known";
+    }
 
     // DNS
     setupPosixDNS(deviceName, _dnsServers);
@@ -877,6 +903,9 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         }
     }
 #endif
+
+    // Routes are up, if a network change occurs, update the routes
+    _routesUp = true;
 
     emitTunnelConfiguration(deviceName, peerIpNet.first.toString(),
                             authResult._serverVirtualIp.toString(),
@@ -1270,7 +1299,7 @@ void WireguardMethod::shutdown()
 void WireguardMethod::networkChanged()
 {
     const auto &netScan = originalNetwork();
-    if(state() == State::Connected && netScan.ipv4Valid())
+    if(_routesUp && netScan.ipv4Valid())
     {
 
         qInfo() << "Network changed - updating VPN host route";

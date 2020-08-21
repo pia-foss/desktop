@@ -289,14 +289,6 @@ namespace samples
     const auto emptyShadowsocks = QJsonDocument::fromJson("{}").object();
 }
 
-namespace
-{
-    const LocationsById locs{buildLegacyLocations({}, samples::locations, samples::emptyShadowsocks)};
-    const LocationsById locsNoPF{buildLegacyLocations({}, samples::locationsNoPF, samples::emptyShadowsocks)};
-    const LocationsById locsNoAutoRegions{buildLegacyLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks)};
-    const LocationsById locsGeo{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)};
-}
-
 class tst_nearestlocations : public QObject
 {
     Q_OBJECT
@@ -322,7 +314,22 @@ class tst_nearestlocations : public QObject
         poland.latency(900);
     }
 
+    LocationsById locs;
+    LocationsById locsNoPF;
+    LocationsById locsNoAutoRegions;
+    LocationsById locsGeo;
+
+public:
+    tst_nearestlocations(QObject *parent = NULL) : QObject(parent)
+      , locs{buildLegacyLocations({}, samples::locations, samples::emptyShadowsocks)}
+      , locsNoPF{buildLegacyLocations({}, samples::locationsNoPF, samples::emptyShadowsocks)}
+      , locsNoAutoRegions{buildLegacyLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks)}
+      , locsGeo{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)} {
+
+    }
+
 private slots:
+
     void testGetNearestSafeVpnLocation()
     {
         setLatencies();
