@@ -25,12 +25,6 @@
 #include "settings.h"
 #include "apiclient.h"
 
-// PF TODOs -
-// - can we get the expire_time in the token?  (so we can drop it at connection
-//   if it's about to expire anyway)
-// - does the 15 minute bind interval include headroom or is this absolute
-//   minimum?
-
 // PortForwardRequest is the interface to the legacy and modern port forwarding
 // methods used by PortForwarder.
 //
@@ -77,7 +71,8 @@ class PortForwardRequestLegacy : public PortForwardRequest
     Q_OBJECT
 
 public:
-    PortForwardRequestLegacy(ApiClient &apiClient, const QString &clientId);
+    PortForwardRequestLegacy(ApiClient &apiClient, Environment &environment,
+                             const QString &clientId);
 };
 
 // This is the modern infrastructure implementation of PortForwardRequest.
@@ -133,7 +128,7 @@ private:
 private:
     ApiClient &_apiClient;
     DaemonAccount &_account;
-    ApiBase _pfApiBase;
+    FixedApiBase _pfApiBase;
     QString _gateway;
     // Whether we are able to retry with a new token if the request fails.
     // If we just obtained a new token and it fails immediately, we won't retry;

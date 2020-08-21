@@ -199,7 +199,7 @@ Page {
         // setting and changed it back.
         function effectiveValue(currentValue) {
           if(currentValue === "default")
-            return "current"
+            return "modern"
           return currentValue
         }
 
@@ -215,8 +215,7 @@ Page {
             "value": "current"
           }, {
             "name": uiTr("Next Generation"),
-            "value": "modern",
-            "preview": true
+            "value": "modern"
           }]
         onSelected: {
           daemonInfra.currentValue = value;

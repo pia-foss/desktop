@@ -52,7 +52,7 @@ FocusScope {
     regionListLabel: uiTranslate("RegionListView", "Region list")
 
     serviceLocations: Daemon.state.vpnLocations
-    portForwardEnabled: Daemon.settings.portForward && (Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern")
+    portForwardEnabled: Daemon.settings.portForward && (Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current")
     canFavorite: true
     collapsedCountriesSettingName: "vpnCollapsedCountries"
     onRegionSelected: {

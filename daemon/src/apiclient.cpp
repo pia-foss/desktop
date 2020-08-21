@@ -53,8 +53,7 @@ namespace
     }
 }
 
-ApiClient::ApiClient(Environment &environment)
-    : _environment{environment}
+ApiClient::ApiClient()
 {
 }
 
@@ -83,48 +82,21 @@ Async<QByteArray> ApiClient::requestRetry(QNetworkAccessManager::Operation verb,
                                                std::move(auth));
 }
 
-Async<QJsonDocument> ApiClient::get(QString resource, QByteArray auth)
-{
-    // Just use a max attempt count of 1 to do a GET with no retries.
-    return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getPiaApi(), std::move(resource), 1,
-                        {}, std::move(auth))
-            ->then(parseJsonBody);
-}
-
-Async<QJsonDocument> ApiClient::getRetry(QString resource, QByteArray auth)
-{
-    return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getPiaApi(), std::move(resource),
-                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
-                        {}, std::move(auth))
-            ->then(parseJsonBody);
-}
-
 Async<QJsonDocument> ApiClient::getRetry(ApiBase &apiBaseUris, QString resource,
                                          QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
                         apiBaseUris, std::move(resource),
-                        apiBaseUris.getUriCount()*apiAttemptsPerBase, {},
+                        apiBaseUris.getAttemptCount(apiAttemptsPerBase), {},
                         std::move(auth))
             ->then(parseJsonBody);
 }
 
-Async<QJsonDocument> ApiClient::getIp(QString resource, QByteArray auth)
+Async<QJsonDocument> ApiClient::getIp(ApiBase &apiBaseUris, QString resource, QByteArray auth)
 {
-    // Like get(), max of 1 attempt
+    // Max of 1 attempt so no retries occur
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getIpAddrApi(), std::move(resource), 1,
-                        {}, std::move(auth))
-            ->then(parseJsonBody);
-}
-
-Async<QJsonDocument> ApiClient::getIpRetry(QString resource, QByteArray auth)
-{
-    return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getIpAddrApi(), std::move(resource),
-                        _environment.getIpAddrApi()->getUriCount()*apiAttemptsPerBase,
+                        apiBaseUris, std::move(resource), 1,
                         {}, std::move(auth))
             ->then(parseJsonBody);
 }
@@ -141,46 +113,21 @@ Async<QJsonDocument> ApiClient::getVpnIpRetry(ApiBase &apiBaseUris,
             ->then(parseJsonBody);
 }
 
-Async<QJsonDocument> ApiClient::post(QString resource, const QJsonDocument &data, QByteArray auth)
+Async<QJsonDocument> ApiClient::postRetry(ApiBase &apiBaseUris, QString resource, const QJsonDocument &data, QByteArray auth)
 {
     return requestRetry(QNetworkAccessManager::Operation::PostOperation,
-                        *_environment.getPiaApi(), std::move(resource), 1,
+                        apiBaseUris, std::move(resource),
+                        apiBaseUris.getAttemptCount(apiAttemptsPerBase),
                         data, std::move(auth))
             ->then(parseJsonBody);
 }
 
-Async<QJsonDocument> ApiClient::postRetry(QString resource, const QJsonDocument &data, QByteArray auth)
-{
-    return requestRetry(QNetworkAccessManager::Operation::PostOperation,
-                        *_environment.getPiaApi(), std::move(resource),
-                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
-                        data, std::move(auth))
-            ->then(parseJsonBody);
-}
-
-Async<void> ApiClient::head(QString resource, QByteArray auth)
-{
-    // Like get(), just use a max attempt count of 1.
-    return requestRetry(QNetworkAccessManager::Operation::HeadOperation,
-                        *_environment.getPiaApi(), std::move(resource), 1,
-                        {}, std::move(auth));
-}
-
-Async<void> ApiClient::headRetry(QString resource, QByteArray auth)
-{
-    return requestRetry(QNetworkAccessManager::Operation::HeadOperation,
-                        *_environment.getPiaApi(), std::move(resource),
-                        _environment.getPiaApi()->getUriCount()*apiAttemptsPerBase,
-                        {}, std::move(auth));
-}
-
-Async<QJsonDocument> ApiClient::getForwardedPort(QString resource, QByteArray auth)
+Async<QJsonDocument> ApiClient::getForwardedPort(ApiBase &apiBaseUris, QString resource, QByteArray auth)
 {
     // The port forward request doesn't go to the normal web API, it uses a
     // special ApiBase.  The "resource" from PortForwarder is the query string.
     return requestRetry(QNetworkAccessManager::Operation::GetOperation,
-                        *_environment.getPortForwardApi(),
-                        std::move(resource),
+                        apiBaseUris, std::move(resource),
                         ApiRetries::timed(std::chrono::seconds{5},
                                           std::chrono::seconds{30}),
                         {}, std::move(auth))

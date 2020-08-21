@@ -41,8 +41,10 @@ public:
     ApiNetwork();
 
 public:
-    // Set the proxy configuration.
-    void setProxy(const QNetworkProxy &proxy);
+    // Use the specified proxy for future network requests.
+    void setProxy(QNetworkProxy proxy);
+    // Stop using a proxy for future requests.
+    void clearProxy();
 
     // Get the shared QNetworkAccessManager.  This object remains valid until
     // static destruction.

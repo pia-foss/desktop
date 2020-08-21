@@ -33,6 +33,20 @@ QtObject {
   // Boolean determining whether or not the daemon is connected to the client
   readonly property bool connected: NativeDaemon.connected
 
+  // The active connection configuration that we should display, in places like
+  // the region tile, connection tile, etc.
+  //
+  // - When connected, use the current connection state
+  // - When attempting to connect, use the state for the current attempt
+  // - Otherwise, use the current settings
+  readonly property var displayConnectionConfig: {
+    if(Daemon.state.connectionState === "Connected")
+      return Daemon.state.connectedConfig
+    if(Daemon.state.connectingConfig.vpnLocation)
+      return Daemon.state.connectingConfig
+    return Daemon.state.nextConfig
+  }
+
   // The signal connections made to QmlCallResults in call() do not keep the
   // QmlCallResult alive on their own.  We have to put these QmlCallResults
   // somewhere to prevent them from being garbage collected.

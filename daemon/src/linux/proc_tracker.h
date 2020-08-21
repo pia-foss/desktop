@@ -103,7 +103,7 @@ private:
                        QString tunnelDeviceLocalAddres);
     void addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
     void removeRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName);
-    void setupFirewall();
+    void updateFirewall(const FirewallParams &params);
     void teardownFirewall();
     void setupReversePathFiltering();
     void teardownReversePathFiltering();

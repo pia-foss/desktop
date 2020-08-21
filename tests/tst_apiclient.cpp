@@ -182,11 +182,11 @@ private:
 };
 
 // An ApiClient with its own Environment.
-class TestApiClient : public Environment, public ApiClient
+class TestApiClient : public DaemonState, public Environment, public ApiClient
 {
 public:
     TestApiClient()
-        : Environment{}, ApiClient{static_cast<Environment&>(*this)}
+        : Environment{static_cast<DaemonState&>(*this)}
     {}
 };
 
@@ -200,39 +200,6 @@ private slots:
         TestShim::installMock<QNetworkAccessManager, MockNetworkManager>();
     }
 
-    // Test getIpRetry().  This always uses the normal API origin and does use
-    // retries.
-    void testGetIpRetryTimeout()
-    {
-        MockNetworkManager::enqueueReply();
-        TestApiClient client;
-        QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
-
-        // Spy on completion of the request
-        CallbackSpy resultSpy;
-        client.getIpRetry(TestData::status, TestData::passwordAuth())
-            ->notify(&resultSpy, resultSpy.callback());
-        // The reply should be consumed immediately
-        QVERIFY(consumeSpy.wait(100));
-        QVERIFY(!MockNetworkManager::hasNextReply());
-
-        // Set a successful reply and wait for it to be consumed after ~5 sec
-        auto pSuccess = MockNetworkManager::enqueueReply(TestData::success);
-        // Not consumed yet
-        QVERIFY(!consumeSpy.wait(4000));
-        // Consume after ~1 more sec
-        QVERIFY(consumeSpy.wait(2000));
-
-        // The callback shouldn't have been signaled yet, still working on the
-        // successful reply
-        QVERIFY(resultSpy.spy().empty());
-
-        // Signal success, this should complete the request
-        pSuccess->queueFinished();
-        QVERIFY(resultSpy.spy().wait());
-        QVERIFY(TestData::checkSuccess(resultSpy.spy()));
-    }
-
     // Test rate limiting errors.
     // Rate limiting errors still allow retries, but they cause the ultimate
     // error emitted to be a rate limiting error if all retries fail.
@@ -244,7 +211,7 @@ private slots:
 
         // Spy on completion
         CallbackSpy resultSpy;
-        client.getRetry(TestData::status, TestData::passwordAuth())
+        client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&resultSpy, resultSpy.callback());
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
@@ -279,7 +246,7 @@ private slots:
 
         // Spy on completion
         CallbackSpy resultSpy;
-        client.getRetry(TestData::status, TestData::passwordAuth())
+        client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&resultSpy, resultSpy.callback());
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
@@ -312,17 +279,17 @@ private slots:
 
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
-        // Do a HEAD request.  Act as if www.privateinternetaccess.com is not
+        // Do a GET request.  Act as if www.privateinternetaccess.com is not
         // reachable, but piaproxy.net is.
         auto pHeadReply1 = MockNetworkManager::enqueueReply();
         CallbackSpy headSpy;
-        client.headRetry(TestData::status, TestData::passwordAuth())
+        client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&headSpy, headSpy.callback());
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.privateinternetaccess.com")));
         consumeSpy.clear();
 
-        auto pHeadReply2 = MockNetworkManager::enqueueReply(QByteArray{});
+        auto pHeadReply2 = MockNetworkManager::enqueueReply(TestData::success);
         // Host is unreachable
         pHeadReply1->finishNetError();
         QVERIFY(consumeSpy.wait(100));
@@ -337,7 +304,7 @@ private slots:
         // Now, do a GET and verify that it starts on piaproxy.net.
         CallbackSpy getSpy;
         auto pGetReply = MockNetworkManager::enqueueReply(TestData::success);
-        client.getRetry(TestData::status, TestData::passwordAuth())
+        client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&getSpy, getSpy.callback());
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.piaproxy.net")));

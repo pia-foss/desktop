@@ -120,7 +120,7 @@ public:
     DownloaderFixture()
         : _downloader{}, _updateSpy{&_downloader, &UpdateDownloader::updateRefreshed}
     {
-        _pUpdateApi = std::make_shared<ApiBase>(
+        _pUpdateApi = std::make_shared<FixedApiBase>(
                 std::initializer_list<QString>{BRAND_UPDATE_APIS}
             );
         setGaUpdateChannel(TestData::gaChannel);

@@ -394,6 +394,11 @@ public:
     // different DNS address.
     QStringList getModernDnsServers() const;
 
+    // Cryptographic settings for OpenVPN; only captured when method is OpenVPN
+    QString openvpnCipher() const {return _openvpnCipher;}
+    QString openvpnAuth() const {return _openvpnAuth;}
+    QString openvpnServerCertificate() const {return _openvpnServerCertificate;}
+
     quint16 localPort() const {return _localPort;}
     uint mtu() const {return _mtu;}
 
@@ -445,6 +450,8 @@ private:
     // Selected DNS type and custom DNS servers
     DnsType _dnsType;
     QStringList _customDns;
+
+    QString _openvpnCipher, _openvpnAuth, _openvpnServerCertificate;
 
     quint16 _localPort;
     uint _mtu;

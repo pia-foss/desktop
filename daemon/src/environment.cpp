@@ -21,6 +21,7 @@
 
 #include "environment.h"
 #include "path.h"
+#include "metaserviceapibase.h"
 #include "brand.h"
 #include <QSslCertificate>
 #include <QSslKey>
@@ -39,7 +40,8 @@ const QByteArray Environment::defaultRegionsListPublicKey = QByteArrayLiteral(
     "-----END PUBLIC KEY-----"
 );
 
-Environment::Environment()
+Environment::Environment(const DaemonState &state)
+    : _state{state}
 {
     reload();
 }
@@ -47,7 +49,8 @@ Environment::Environment()
 QByteArray Environment::readFile(const QString &path)
 {
     QFile file{path};
-    file.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text);
+    if(!file.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text))
+        return {};
     return file.readAll();
 }
 
@@ -175,7 +178,7 @@ void Environment::applyApiBaseOverride(bool overridePresent,
     }
 
     qInfo() << "Overriding" << resourceName << "with" << overrideBaseStrs;
-    pApiBase = std::make_shared<ApiBase>(overrideBaseStrs);
+    pApiBase = std::make_shared<FixedApiBase>(overrideBaseStrs);
     emit overrideActive(resourceName);
 }
 
@@ -193,7 +196,27 @@ void Environment::loadApiBase(bool overridePresent,
     // If the override wasn't applied, load the default.  applyApiBaseOverride()
     // traces and emits overrideFailed() as appropriate.
     if(!pApiBase)
-        pApiBase = std::make_shared<ApiBase>(defaults);
+        pApiBase = std::make_shared<FixedApiBase>(defaults);
+}
+
+void Environment::loadDynamicApiBase(bool overridePresent,
+                                     const QJsonDocument &apiOverride,
+                                     std::shared_ptr<ApiBase> &pApiBase,
+                                     const QString &jsonKey,
+                                     const QString &resourceName,
+                                     const QString &dynamicBasePath,
+                                     const std::initializer_list<QString> &fixedBases)
+{
+    pApiBase.reset();
+    applyApiBaseOverride(overridePresent, apiOverride, pApiBase, jsonKey,
+                         resourceName);
+    // If it wasn't overridden, use the dynamic API base, which leverages Meta
+    // services and the fixed fallbacks
+    if(!pApiBase)
+    {
+        pApiBase = std::make_shared<MetaServiceApiBase>(_state, dynamicBasePath,
+                                                        _pRsa4096CA, fixedBases);
+    }
 }
 
 void Environment::loadApiBases()
@@ -217,10 +240,15 @@ void Environment::loadApiBases()
     }
 
     // Load each API base
-    loadApiBase(overridePresent, apiOverride, _pPiaApi, QStringLiteral("api"),
-                QStringLiteral("web API"), {
-                    QStringLiteral("https://www.privateinternetaccess.com/"),
-                    QStringLiteral("https://www.piaproxy.net/")
+    loadApiBase(overridePresent, apiOverride, _pApiv1, QStringLiteral("apiv1"),
+                QStringLiteral("API v1"), {
+                    QStringLiteral("https://www.privateinternetaccess.com/api/client"),
+                    QStringLiteral("https://www.piaproxy.net/api/client")
+                });
+    loadDynamicApiBase(overridePresent, apiOverride, _pApiv2, QStringLiteral("apiv2"),
+                QStringLiteral("API v2"), QStringLiteral("/apiv2/"), {
+                    QStringLiteral("https://www.privateinternetaccess.com/api/client/v2/"),
+                    QStringLiteral("https://www.piaproxy.net/api/client/v2/")
                 });
     loadApiBase(overridePresent, apiOverride, _pRegionsListApi, QStringLiteral("regions_list_api"),
                 QStringLiteral("regions list API"), {
@@ -228,8 +256,8 @@ void Environment::loadApiBases()
                     QStringLiteral("https://www.piaproxy.net/")
                 });
 
-    loadApiBase(overridePresent, apiOverride, _pModernRegionsListApi, QStringLiteral("modern_regions_list_api"),
-                QStringLiteral("modern regions list API"), {
+    loadDynamicApiBase(overridePresent, apiOverride, _pModernRegionsListApi, QStringLiteral("modern_regions_list_api"),
+                QStringLiteral("modern regions list API"), QStringLiteral("/"), {
                     QStringLiteral("https://serverlist.piaservers.net")
                 });
 

@@ -195,4 +195,11 @@ QtObject {
     readonly property color pushButtonBackgroundHover: Theme.dark ? "#4b576b" : "#a8a9aa"
 
     readonly property color snoozeTimeDisplayColor: Theme.dark ? "#21252f" : "#fdfdfd"
+
+    readonly property string connectionModuleAuthenticationImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-authentication.png"
+    readonly property string connectionModuleConnectionImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-connection.png"
+    readonly property string connectionModuleEncryptionImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-encryption.png"
+    readonly property string connectionModuleHandshakeImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-handshake.png"
+    readonly property string connectionModulePortImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-port.png"
+    readonly property string connectionModuleSocketImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-socket.png"
 }

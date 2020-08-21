@@ -133,7 +133,8 @@ public:
         // Connectivity errors for multiple VPN methods
         VPNConfigInvalid = 1800,
 
-        LocalSocketConnectionFailed = 1900,
+        LocalSocketNotFound = 1900, // The local socket definitely doesn't exist at all.
+        LocalSocketCannotConnect,   // The local socket might exist, but we couldn't connect.
 
         // Library entry point loaded at runtime is not available
         LibraryUnavailable = 2000,

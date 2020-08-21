@@ -363,6 +363,12 @@ if [ $TASK_PACKAGE -eq 1 ]; then
     # Copy the qt.conf to the same path as all binaries
     cp "$ROOT/extras/installer/linux/linux-qt.conf" "$PIA_FILES/bin/qt.conf"
 
+    # Copy a custom-built copy of libk5crypto as a workaround for incompatible versions
+    # on the OS.  In particular Fedora's libk5crypto links against specific symbols they've
+    # added to OpenSSL, and we have to ship an up-to-date OpenSSL for older distributions.
+    # The QtNetwork module links to libk5crypto.so.
+    cp "$ROOT/extras/installer/linux/libk5crypto.so"* "$PIA_FILES/lib/"
+
     # Copy the version file as package.txt so the installer can use it
     # Also copy all the install files
     cp "$BUILD_PACKAGE/$CONFIG/version/version.txt" "$PKGROOT/package.txt"

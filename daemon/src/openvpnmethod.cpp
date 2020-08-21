@@ -479,16 +479,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     }
     else
     {
-        // Always route this special address through the VPN even when not using
-        // PIA DNS; it's also used for port forwarding in the legacy
-        // infrastructure.
-        out << "route " << piaLegacyDnsPrimary << " 255.255.255.255 vpn_gateway 0" << endl;
-        // Route DNS servers into the VPN (DNS is always sent through the VPN)
-        for(const auto &dnsServer : dnsServers)
-        {
-            if(dnsServer != piaLegacyDnsPrimary)
-                out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
-        }
 
 #ifndef Q_OS_MAC
         // Add a default route with much a worse metric, so traffic can still
@@ -509,6 +499,36 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         out << "pull-filter ignore \"redirect-gateway \"" << endl;
     }
 
+    // Route DNS into the tunnel:
+    // - On Linux - always route DNS into the tunnel, even if the VPN is the
+    //   default.  When not using systemd-resolved, apps will do their own DNS,
+    //   and even bypass apps are currently expected to do DNS through the
+    //   tunnel.  (In particular, the DNS servers might not be reachable on the
+    //   physical interface.)
+    // - On Win/Mac - route DNS into the tunnel if the VPN isn't the default
+    //   route.  On Windows it is possible for bypass apps to do their own DNS
+    //   if the DnsCache service is disabled, but this is not the default (and
+    //   nontrivial to do), more testing is needed to determine the interactions
+    //   between this and the split tunnel callout.
+#if defined(Q_OS_LINUX)
+    bool routeDnsIntoTunnel = true;
+#else
+    bool routeDnsIntoTunnel = !_connectingConfig.defaultRoute();
+#endif
+    if(routeDnsIntoTunnel)
+    {
+        // Always route this special address through the VPN even when not using
+        // PIA DNS; it's also used for port forwarding in the legacy
+        // infrastructure.
+        out << "route " << piaLegacyDnsPrimary << " 255.255.255.255 vpn_gateway 0" << endl;
+        // Route DNS servers into the VPN (DNS is always sent through the VPN)
+        for(const auto &dnsServer : dnsServers)
+        {
+            if(dnsServer != piaLegacyDnsPrimary)
+                out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
+        }
+    }
+
     // Set the local address only for alternate transports
     if(!localAddress.isNull())
     {
@@ -522,9 +542,9 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     else
         out << "lport " << _connectingConfig.localPort() << endl;
 
-    out << "cipher " << sanitize(g_settings.cipher()) << endl;
-    if (!g_settings.cipher().endsWith("GCM"))
-        out << "auth " << sanitize(g_settings.auth()) << endl;
+    out << "cipher " << sanitize(_connectingConfig.openvpnCipher()) << endl;
+    if (!_connectingConfig.openvpnCipher().endsWith("GCM"))
+        out << "auth " << sanitize(_connectingConfig.openvpnAuth()) << endl;
 
     if (_connectingConfig.mtu() > 0)
     {
@@ -575,7 +595,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "pull-filter ignore \"dhcp-option DOMAIN local\"" << endl;
 
     out << "<ca>" << endl;
-    out << g_daemon->environment().getCertificateAuthority(g_settings.serverCertificate()) << endl;
+    out << g_daemon->environment().getCertificateAuthority(_connectingConfig.openvpnServerCertificate()) << endl;
     out << "</ca>" << endl;
 
     return true;

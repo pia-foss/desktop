@@ -173,6 +173,9 @@ Item {
   PerformanceModule {
     moduleData: moduleData
   }
+  ConnectionModule {
+    moduleData: moduleData
+  }
   SettingsModule {
     moduleData: moduleData
   }

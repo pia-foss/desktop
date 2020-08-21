@@ -496,6 +496,10 @@ private:
     void setOverrideActive(const QString &resourceName);
     void setOverrideFailed(const QString &resourceName);
 
+    // Update DaemonState::nextConfig following a property change from
+    // DaemonState, DaemonSettings, or DaemonAccount
+    void updateNextConfig(const QString &changedPropertyName);
+
     void logCommand(const QString &cmd, const QStringList &args);
     // Log the current routing table; used after connecting
     void logRoutingTable();
@@ -512,13 +516,13 @@ protected:
 
     VPNConnection* _connection;
 
-    Environment _environment;
-    ApiClient _apiClient;
-
     DaemonData _data;
     DaemonAccount _account;
     DaemonSettings _settings;
     DaemonState _state;
+
+    Environment _environment;
+    ApiClient _apiClient;
 
     // Latencies are measured for both infrastructures regardless of which one
     // is active, so we are able to switch infrastructures at any time.
@@ -540,6 +544,12 @@ protected:
     QTimer _serializationTimer;
 
     QTimer _accountRefreshTimer;
+
+    // Ongoing login attempt.  If we try to log in again or log out, we need to
+    // abort the prior attempt.  This is an AbortableTask so it'll still
+    // complete with an error when it's aborted - this is an RPC result so it
+    // still needs to return an error.
+    Async<AbortableTask<void>> _pLoginRequest;
 
     // Ongoing attempt to get the VPN IP address.  This can retry for a long
     // time, so we discard it if we leave the Connected state.

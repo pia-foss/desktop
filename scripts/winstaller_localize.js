@@ -113,6 +113,11 @@ function translateStringLine(line, ts) {
   let translated = sourceText
   if(msg && typeof msg.translation[0] === 'string') {
     translated = msg.translation[0]
+
+    // None of the source strings contain quotation marks, but a few of the
+    // translations do.  Despite the resemblance to C string literals, rc.exe
+    // actually escapes quotation marks as double quotation marks.
+    translated = translated.replace(/"/g, "\"\"")
   }
   else {
     // If it's not a plain string, it could be undefined, an object with

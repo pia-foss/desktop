@@ -236,13 +236,19 @@ QDebug operator<<(QDebug debug, const BaseTask* task)
     // Note: Extra debugging stuff like state and listener count can be added
     // here if debugging task lifetimes etc.
     QDebugStateSaver saver(debug);
-    debug.nospace().noquote() << "Task";
-    if (const char* type = task->typeName())
+    debug.nospace().noquote();
+    if(task)
     {
-        debug << '<' << type << '>';
+        debug << "Task";
+        if (const char* type = task->typeName())
+        {
+            debug << '<' << type << '>';
+        }
+        debug << ' ' << '#' << (task->_state & BaseTask::IndexMask);
     }
-    debug << ' ' << '#' << (task->_state & BaseTask::IndexMask);
-    //debug << ' ' << '(' << qEnumToString(task->_state) << ')';
+    else
+        debug << "<nullptr>";
+
     return debug;
 }
 

@@ -39,4 +39,5 @@ QtObject {
     readonly property PopupStyle popup: PopupStyle {}
     readonly property SplashStyle splash: SplashStyle {}
     readonly property OnboardingStyle onboarding: OnboardingStyle{}
+    readonly property ChangelogStyle changelog: ChangelogStyle {}
 }

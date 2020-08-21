@@ -29,7 +29,7 @@ Project {
 
   property string productName: brandName
   property string productVersion: "2.3.0"
-  property string productPrerelease: "beta.1"
+  property string productPrerelease: ""
   property string brandCode: "pia"
   id: piaProject
 

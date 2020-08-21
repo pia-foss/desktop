@@ -173,21 +173,6 @@ PosixDaemon::PosixDaemon()
     connect(&_settings, &DaemonSettings::macStubDnsMethodChanged, this,
             [this](){PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());});
 #endif
-
-#ifdef Q_OS_LINUX
-    // Activate some routing components handled by IpTablesFirewall only when
-    // the daemon is active
-    connect(this, &PosixDaemon::firstClientConnected, this, []()
-        {
-            qInfo() << "Daemon is active, activate Linux routing rules";
-            IpTablesFirewall::activate();
-        });
-    connect(this, &PosixDaemon::lastClientDisconnected, this, []()
-        {
-            qInfo() << "Daemon is inactive, deactivate Linux routing rules";
-            IpTablesFirewall::deactivate();
-        });
-#endif
 }
 
 PosixDaemon::~PosixDaemon()

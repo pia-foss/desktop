@@ -22,6 +22,53 @@
 #include "apinetwork.h"
 #include <testshim.h>
 #include <algorithm>
+#include <QNetworkProxyFactory>
+#include <atomic>
+
+namespace
+{
+    // Counter used to vary the proxy username.
+    //
+    // QNetworkAccessManager caches connections, and we can no longer clear the
+    // cache for every attempt like we did in Qt 5.11 - since 5.12 clearing the
+    // cache terminates in-flight requests, because it kills the worker thread.
+    // (It has to kill the thread, because the caches now are thread-local
+    // objects on that thread.)
+    //
+    // The proxy username is included in the cache key, so we can trick it into
+    // never reusing connections by varying the proxy username, at least when
+    // the proxy is active.
+    //
+    // Clearing the cache when we know we're connecting/disconnecting is also
+    // beneficial, but this is difficult to time sufficiently well to guarantee
+    // that reusing connections is safe, particularly given that some VPN
+    // interface setup is done asynchronously (such as configuring the interface
+    // IP with WireGuard on Windows).
+    //
+    // This is atomic in case it might be used from QNAM's HTTP worker thread.
+    std::atomic<std::uint32_t> proxyUsernameCounter;
+
+    // A QNetworkProxyFactory that always returns the same proxy, but with a
+    // varying username to trick the QNAM connection cache.  See
+    // ApiNetwork::setProxy().
+    class UsernameCounterProxyFactory : public QNetworkProxyFactory
+    {
+    public:
+        UsernameCounterProxyFactory(QNetworkProxy proxy) : _proxy{std::move(proxy)} {}
+
+    public:
+        virtual QList<QNetworkProxy> queryProxy(const QNetworkProxyQuery &) override
+        {
+            QNetworkProxy result{_proxy};
+            std::uint32_t counter = proxyUsernameCounter++;
+            result.setUser(result.user() + QString::number(counter));
+            return {std::move(result)};
+        }
+
+    private:
+        const QNetworkProxy _proxy;
+    };
+}
 
 ApiNetwork::ApiNetwork()
 {
@@ -41,34 +88,39 @@ ApiNetwork::ApiNetwork()
     _pAccessManager.reset(TestShim::create<QNetworkAccessManager>());
 }
 
-void ApiNetwork::setProxy(const QNetworkProxy &proxy)
+void ApiNetwork::setProxy(QNetworkProxy proxy)
 {
-    getAccessManager().setProxy(proxy);
+    // If we were to set the proxy with QNetworkAccessManager::setProxy(), then
+    // it will assume that the proxy can only handle one request at a time.
+    // That means that after connecting, when we try to refresh all regions
+    // lists (as well as PF, login, etc.), only one request will go through at
+    // a time, and the others could time out before they get a chance to use the
+    // proxy.
+    //
+    // Insead, use a proxy factory, which returns a new QNetworkProxy object for
+    // every request (with the same proxy configuration every time).  This
+    // allows all requests to use the proxy at the same time.
+    //
+    // Additionally, this proxy factory varies the username in order to trick
+    // the QNAM connection cache.
+    getAccessManager().setProxyFactory(new UsernameCounterProxyFactory{std::move(proxy)});
+    // Clear the connection cache now.  It's possible that ongoing request might
+    // actually complete in this case, but since we're starting the proxy we
+    // want to abandon them anyway.
+    getAccessManager().clearConnectionCache();
+}
+
+void ApiNetwork::clearProxy()
+{
+    getAccessManager().setProxyFactory(nullptr);
+    // Clear the connection cache now.  This kills any ongoing requests, but
+    // since we're shutting down the proxy, that's fine.
+    getAccessManager().clearConnectionCache();
 }
 
 QNetworkAccessManager &ApiNetwork::getAccessManager() const
 {
     Q_ASSERT(_pAccessManager);  // Class invariant
-
-    // Clear the connection cache for every request.
-    //
-    // QNetworkManager caches connections for reuse, but if we connect or
-    // disconnect from the VPN, these connections break.  If QNetworkManager
-    // uses a cached connection that's broken, we end up waiting the full
-    // 10 seconds before the request is aborted.
-    //
-    // The cost of waiting for a bad cached connection to time out is a lot
-    // higher than the cost of establishing a new connection, so clear them
-    // every time.  (There is no way to disable connection caching in
-    // QNetworkAccessManager.)
-    //
-    // In principle, we could try to do this only when the connection state
-    // changes, but it would have to be cleared any time the OpenVPNProcess
-    // state changes, which doesn't always cause a state transition in
-    // VPNConnection.  The cost of failing to clear the cache is pretty high,
-    // but the cost of clearing it an extra time is pretty small, so such an
-    // optimization probably would be too complex to make sense.
-    _pAccessManager->clearConnectionCache();
 
     // Additionally, Qt 5.15 on Mac added even more network state monitoring
     // beyond the "bearer management" stuff worked around in the constructor.

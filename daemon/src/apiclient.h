@@ -41,7 +41,7 @@ class ApiClient : public QObject
     CLASS_LOGGING_CATEGORY("apiclient")
 
 public:
-    explicit ApiClient(Environment &environment);
+    explicit ApiClient();
 
 private:
     // Create tasks to issue a request with retries and return its body (with
@@ -72,19 +72,12 @@ public:
     // credentials for forward compatibility, but this means a valid response
     // does not necessarily mean that the credentials were valid for all
     // requests.
-    Async<QJsonDocument> get(QString resource, QByteArray auth = {});
-    // GET with retry.
-    Async<QJsonDocument> getRetry(QString resource, QByteArray auth = {});
-    // GET with retry using arbitrary API base.  Usually used for requests that
-    // have to be made to a specific VPN server.
     Async<QJsonDocument> getRetry(ApiBase &apiBaseUris, QString resource,
                                   QByteArray auth = {});
 
     // Do a GET request for a particular API resource that returns the user's
     // IP address.  (Doesn't allow API proxies.)
-    Async<QJsonDocument> getIp(QString resource, QByteArray auth = {});
-    // GET for an IP address with retries.
-    Async<QJsonDocument> getIpRetry(QString resource, QByteArray auth = {});
+    Async<QJsonDocument> getIp(ApiBase &apiBaseUris, QString resource, QByteArray auth = {});
 
     // GET for the VPN IP address - uses a timed retry strategy tuned for the
     // VPN IP address (with the specified max retry time).
@@ -94,18 +87,11 @@ public:
 
     // Do a POST request for a particular resource with optional parameter
     // data in JSON format.
-    Async<QJsonDocument> post(QString resource, const QJsonDocument &data = {}, QByteArray auth = {});
-    // POST with retry.
-    Async<QJsonDocument> postRetry(QString resource, const QJsonDocument &data = {}, QByteArray auth = {});
+    Async<QJsonDocument> postRetry(ApiBase &apiBaseUris, QString resource,
+                                   const QJsonDocument &data = {}, QByteArray auth = {});
 
-    // Do a HEAD request for a particular resource.  This is basically only
-    // useful to validate user credentials.
-    Async<void> head(QString resource, QByteArray auth = {});
-    // HEAD with retry.
-    Async<void> headRetry(QString resource, QByteArray auth = {});
-
-    // Get for the forwarded port - specific API base, and timed retry strategy
-    Async<QJsonDocument> getForwardedPort(QString resource, QByteArray auth = {});
+    // Get for the forwarded port - timed retry strategy
+    Async<QJsonDocument> getForwardedPort(ApiBase &apiBaseUris, QString resource, QByteArray auth = {});
 
     // Generate an authentication header from a username and a password.
     static QByteArray passwordAuth(const QString& username, const QString& password);
@@ -114,10 +100,6 @@ public:
     // Generate an authentication header from a token, or a username and
     // password if a token is not available.
     static QByteArray autoAuth(const QString& username, const QString& password, const QString& token);
-
-private:
-    // Environment used by this ApiClient for API bases (managed by Daemon)
-    Environment &_environment;
 };
 
 

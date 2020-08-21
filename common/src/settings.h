@@ -35,11 +35,12 @@ enum class Service
     OpenVpnUdp,
     WireGuard,
     Shadowsocks,
+    // The "meta" service provides access to servers lists and the web API in
+    // the modern infrastructure.
+    Meta,
     // The "latency" service is a UDP echo service used to measure latency to
-    // a specific server.  The new servers list provides the latency
-    // service on all servers (of any type) to permit measuring per-service
-    // latency (though ports may vary).  The legacy servers list does not
-    // provide latency on all servers.
+    // a specific server.  This is only used in legacy - in modern we use ICMP
+    // echoes, which can be sent to any server.
     Latency
 };
 
@@ -65,6 +66,7 @@ public:
         openvpnUdpPorts(other.openvpnUdpPorts());
         wireguardPorts(other.wireguardPorts());
         shadowsocksPorts(other.shadowsocksPorts());
+        metaPorts(other.metaPorts());
         latencyPorts(other.latencyPorts());
         shadowsocksKey(other.shadowsocksKey());
         shadowsocksCipher(other.shadowsocksCipher());
@@ -78,6 +80,7 @@ public:
             openvpnUdpPorts() == other.openvpnUdpPorts() &&
             wireguardPorts() == other.wireguardPorts() &&
             shadowsocksPorts() == other.shadowsocksPorts() &&
+            metaPorts() == other.metaPorts() &&
             latencyPorts() == other.latencyPorts() &&
             shadowsocksKey() == other.shadowsocksKey() &&
             shadowsocksCipher() == other.shadowsocksCipher();
@@ -99,6 +102,7 @@ public:
     JsonField(std::vector<quint16>, openvpnUdpPorts, {})
     JsonField(std::vector<quint16>, wireguardPorts, {})
     JsonField(std::vector<quint16>, shadowsocksPorts, {})
+    JsonField(std::vector<quint16>, metaPorts, {})
     JsonField(std::vector<quint16>, latencyPorts, {})
 
     // Service-specific additional fields
@@ -122,6 +126,8 @@ public:
     // Default port for a service on this server (first port from list), or 0
     // if that service isn't provided
     quint16 defaultServicePort(Service service) const;
+    // Random port for a service available from this server
+    quint16 randomServicePort(Service service) const;
 };
 
 // Location describes a single location, which can contain any number of servers
@@ -887,6 +893,9 @@ public:
         methodForcedByAuth(other.methodForcedByAuth());
         infrastructure(other.infrastructure());
         dnsType(other.dnsType());
+        openvpnCipher(other.openvpnCipher());
+        openvpnAuth(other.openvpnAuth());
+        openvpnServerCertificate(other.openvpnServerCertificate());
         defaultRoute(other.defaultRoute());
         proxy(other.proxy());
         proxyCustom(other.proxyCustom());
@@ -905,6 +914,9 @@ public:
             methodForcedByAuth() == other.methodForcedByAuth() &&
             infrastructure() == other.infrastructure() &&
             dnsType() == other.dnsType() &&
+            openvpnCipher() == other.openvpnCipher() &&
+            openvpnAuth() == other.openvpnAuth() &&
+            openvpnServerCertificate() == other.openvpnServerCertificate() &&
             defaultRoute() == other.defaultRoute() &&
             proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
@@ -936,6 +948,11 @@ public:
 
     // DNS type used for this connection
     JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "local", "existing", "custom"})
+
+    // OpenVPN cryptographic settings - only meaningful when method is OpenVPN
+    JsonField(QString, openvpnCipher, {})
+    JsonField(QString, openvpnAuth, {})
+    JsonField(QString, openvpnServerCertificate, {})
 
     // Whether the VPN is being used as the default route for this connection.
     // (Not precisely equivalent to DaemonSettings::defaultRoute; the setting is
@@ -1085,6 +1102,9 @@ public:
     // states and represents the last successful connection.
     JsonObjectField(ConnectionInfo, connectingConfig, {})
     JsonObjectField(ConnectionInfo, connectedConfig, {})
+    // The next configuration we would use to connect if we connected right now.
+    // This is set based on the current settings, regions list, etc.
+    JsonObjectField(ConnectionInfo, nextConfig, {})
 
     // The specific server that we have connected to, when connected (only
     // provided in the Connected state)

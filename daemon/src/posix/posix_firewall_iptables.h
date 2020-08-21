@@ -64,11 +64,6 @@ public:
     // Install/uninstall the firewall anchors
     static void install();
     static void uninstall();
-    // Activate/deactivate components that only become active when the daemon is
-    // active.  Currently, this is just a routing rule (the firewall proper is
-    // active even when the daemon is not active).
-    static void activate();
-    static void deactivate();
     static bool isInstalled();
     static void ensureRootAnchorPriority(IPVersion ip = Both);
     static void enableAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);

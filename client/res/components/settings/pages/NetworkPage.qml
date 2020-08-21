@@ -212,7 +212,7 @@ Page {
           // modern infrastructure supports it with any protocol.
           // (reading "enabled" also considers parents' "enabled" flags, use an
           // intermediate property)
-          readonly property bool settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern"
+          readonly property bool settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current"
           enabled: settingEnabled
         }
 

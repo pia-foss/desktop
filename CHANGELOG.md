@@ -1,10 +1,15 @@
 # Changelog
 
 ### v2.3
+* Next Generation network is now the default
+* Added the Connection tile
 * Updated Qt to 5.15.0
+* PIA on macOS now requires 10.13
 * Fixed several issues relating to installation or uninstallation on Windows in Safe Mode
 * Fixed an issue causing a memory leak on some Windows systems when Windows suspends pia-client to save power
 * Fixed an issue preventing split tunnel from working with WireGuard on some newer Linux distributions
+* Fixed DNS routing issues with split tunnel on Linux systems not using systemd-resolved
+* Fixed an issue causing the WireGuard userspace method to occasionally fail to connect on some Linux systems
 * Removed unneeded WireGuard kernel module logging on Linux
 
 ### v2.2.2

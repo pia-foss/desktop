@@ -278,6 +278,8 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
     // always update the routes - as we use 'route replace' so we don't have to worry about adding the same route multiple times
     updateRoutes(params.netScan.gatewayIp(), params.netScan.interfaceName(), tunnelDeviceName);
 
+    updateFirewall(params);
+
     // If we just got a valid network scan (we're connecting) or we lost it
     // (we're disconnected), the subsequent call to updateApps() will add/remove
     // all excluded apps (which are only tracked when we have a network scan).
@@ -330,7 +332,10 @@ void ProcTracker::initiateConnection(const FirewallParams &params,
 
     // Save the socket FD to an ivar
     _sockFd = sock;
-    setupFirewall();
+    // setup cgroups + configure routing rules
+    CGroup::setupNetCls();
+
+    updateFirewall(params);
     updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
                       params.excludeApps, params.vpnOnlyApps);
     setupReversePathFiltering();
@@ -449,12 +454,14 @@ int ProcTracker::subscribeToProcEvents(int sock, bool enabled)
     return 0;
 }
 
-void ProcTracker::setupFirewall()
+void ProcTracker::updateFirewall(const FirewallParams &params)
 {
-    // setup cgroups + configure routing rules
-    CGroup::setupNetCls();
     // Setup the packet tagging rule (this rule is unaffected by network changes)
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), true, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagBypass"), true, IpTablesFirewall::kMangleTable);
+
+    // Only create the vpnOnly tagging rule if the VPN does NOT have the default route
+    // (otherwise the packets will go through VPN anyway)
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagVpnOnly"), !params.defaultRoute, IpTablesFirewall::kMangleTable);
 
     // Enable the masquerading rule - this gets updated with interface changes via replaceAnchor()
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), true, IpTablesFirewall::kNatTable);
@@ -466,13 +473,12 @@ void ProcTracker::setupFirewall()
 void ProcTracker::teardownFirewall()
 {
     // Remove subnet bypass tagging rule
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), true, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), false, IpTablesFirewall::kMangleTable);
     // Remove the masquerading rule
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), false, IpTablesFirewall::kNatTable);
     // Remove the cgroup marking rule
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagPkts"), false, IpTablesFirewall::kMangleTable);
-    // Remove cgroup routing rules
-    CGroup::teardownNetCls();
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagBypass"), false, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagVpnOnly"), false, IpTablesFirewall::kMangleTable);
 }
 
 void ProcTracker::addRoutingPolicyForSourceIp(QString ipAddress, QString routingTableName)
@@ -507,6 +513,8 @@ void ProcTracker::shutdownConnection()
     }
 
     teardownFirewall();
+    // Remove cgroup routing rules
+    CGroup::teardownNetCls();
     removeAllApps();
     removeRoutingPolicyForSourceIp(_previousNetScan.ipAddress(), Routing::bypassTable);
     removeRoutingPolicyForSourceIp(_previousTunnelDeviceLocalAddress, Routing::vpnOnlyTable);

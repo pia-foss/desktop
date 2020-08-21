@@ -33,7 +33,7 @@ namespace
 }
 
 PortForwarder::PortForwarder(ApiClient &apiClient, DaemonAccount &account,
-                             DaemonState &state, const Environment &environment)
+                             DaemonState &state, Environment &environment)
     : _apiClient{apiClient},
       _account{account},
       _state{state},
@@ -123,7 +123,7 @@ void PortForwarder::requestPort()
     // would just default to the modern implementation.
     if(_state.connectedConfig().infrastructure() == QStringLiteral("current"))
     {
-        _pPortForwardRequest.reset(new PortForwardRequestLegacy{_apiClient, _account.clientId()});
+        _pPortForwardRequest.reset(new PortForwardRequestLegacy{_apiClient, _environment, _account.clientId()});
     }
     else
     {

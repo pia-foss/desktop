@@ -276,6 +276,8 @@ void applyModernService(const QJsonObject &serviceObj, Server &groupTemplate,
             knownService = Service::OpenVpnUdp;
         else if(serviceName == QStringLiteral("wireguard"))
             knownService = Service::WireGuard;
+        else if(serviceName == QStringLiteral("meta"))
+            knownService = Service::Meta;
         else if(serviceName == QStringLiteral("latency"))
             knownService = Service::Latency;
         else

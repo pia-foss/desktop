@@ -18,15 +18,117 @@
 
 import QtQuick 2.0
 import QtQuick.Window 2.10
+import QtQuick.Controls 2.4
 import "../core"
 import "../theme"
 import PIA.NativeHelpers 1.0
+import PIA.WindowScaler 1.0
+import PIA.WindowMaxSize 1.0
 
 // Functionality common to all windows in the client that have window
 // decorations (all secondary modeless dialogs as well as the windowed
 // dashboard).
 PiaWindow {
   id: decoratedWindow
+
+  // Set these to the desired logical size of the window.
+  property real windowLogicalWidth
+  property real windowLogicalHeight
+
+  // Whether the window should be resizeable.
+  // If the window is resizeable, changes in windowLogical[Width|Height] will
+  // resize it back to that size.  If these are bound, the bindings must not be
+  // re-evaluated spuriously.  (Constants are OK, any calculated values might
+  // have issues.)
+  property bool resizeable: false
+
+  // The actual logical size of the window
+  readonly property real actualLogicalWidth: maxSize.effectiveSize.width
+  readonly property real actualLogicalHeight: maxSize.effectiveSize.height
+
+  // Properties provided by all top-level windows - see DashboardPopup
+
+  // Content scale - needed for some overlay-layer components.
+  // Although it's possible to scale Overlay.overlay itself, QML Popups have
+  // issues with that:
+  // - They don't apply the window edge limits correctly.  They're applied as if
+  //   the window was not scaled, which can result in the item extending outside
+  //   the edge of the window.
+  // - The drop down animation isn't applied correctly (the expansion starts
+  //   from the wrong place) - this might be an issue on our side, but there
+  //   isn't anything obviously incorrect (and the first issue is a
+  //   dealbreaker anyway).
+  //
+  // As a result, all popups have to scale manually using this contentScale
+  // value.
+  readonly property real contentScale: scaler.scale
+  // Extra popup margins - needed for some popup components.  (Normally 0 for
+  // decorated windows, can be overridden for specific windows.)
+  property real popupAddMargin: 0
+
+  flags: {
+    // Both sizeable and fixed-size windows get minimize and close buttons.
+    var flags = Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint
+    // Resizeable windows also get a maximize button.  On Windows, fixed-size
+    // windows need a fixed-size hint.
+    if(resizeable)
+      flags |= Qt.WindowMaximizeButtonHint
+    else
+      flags |= Qt.MSWindowsFixedSizeDialogHint
+    return flags
+  }
+
+  WindowMaxSize {
+    id: maxSize
+    window: decoratedWindow
+    preferredSize: Qt.size(windowLogicalWidth, windowLogicalHeight)
+  }
+  WindowScaler {
+    id: scaler
+    targetWindow: decoratedWindow
+    logicalSize: maxSize.effectiveSize
+    onCloseClicked: decoratedWindow.hide()
+  }
+
+  // Overlay scale and RTL flip
+  Overlay.overlay.transform: [
+    Scale {
+      origin.x: scaleWrapper.width/2
+      xScale: decoratedWindow.rtlFlip
+    },
+    Scale {
+      xScale: contentScale
+      yScale: contentScale
+    }
+  ]
+
+  // Children of the DecoratedWindow are displayed in its contentItem.
+  default property alias contents: contentItem.data
+
+  Item {
+    id: scaleWrapper
+    x: 0
+    y: 0
+    width: actualLogicalWidth
+    height: actualLogicalHeight
+    // RTL flip and scale
+    transform: [
+      Scale {
+        origin.x: scaleWrapper.width/2
+        xScale: decoratedWindow.rtlFlip
+      },
+      Scale {
+        xScale: contentScale
+        yScale: contentScale
+      }
+    ]
+
+    Item {
+      z: 5
+      id: contentItem
+      anchors.fill: parent
+    }
+  }
 
   // Replacement for show() that additionally positions the window and raises it,
   // which is normally what you want for a secondary modeless dialog window.

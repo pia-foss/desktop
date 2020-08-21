@@ -28,6 +28,7 @@
 #include "openvpnmethod.h"
 #include "wireguardmethod.h"
 #include "configwriter.h"
+#include "apinetwork.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -516,10 +517,10 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     _vpnToken = account.token();
 
     const auto &infrastructureValue = settings.infrastructure();
-    if(infrastructureValue == QStringLiteral("modern"))
-        _infrastructure = Infrastructure::Modern;
-    else    // current or default
+    if(infrastructureValue == QStringLiteral("current"))
         _infrastructure = Infrastructure::Current;
+    else    // modern or default
+        _infrastructure = Infrastructure::Modern;
 
     const auto &methodValue = settings.method();
     if(methodValue == QStringLiteral("openvpn"))
@@ -571,11 +572,14 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     if(settings.splitTunnelEnabled())
         _defaultRoute = settings.defaultRoute();
 
-    // defaultRoute, proxy, automatic transport, and port forwarding all
-    // require OpenVPN.
+    // Capture OpenVPN-specific settings.
     if(_method == Method::OpenVPN)
     {
+        _openvpnCipher = settings.cipher();
+        _openvpnAuth = settings.auth();
+        _openvpnServerCertificate = settings.serverCertificate();
 
+        // Proxy and automatic transport require OpenVPN.
         if(settings.proxy() == QStringLiteral("custom"))
         {
             _proxyType = ProxyType::Custom;
@@ -1051,9 +1055,19 @@ void VPNConnection::doConnect()
         // killswitch blocks DNS resolution.
         if(_connectionAttemptCount == 0 && _state == State::Connecting)
         {
+            // We only get one shot at this, clear the connection cache to make
+            // sure we're not reusing an old bogus connection.  We're about to
+            // connect anyway so it's fine to kill off any in-flight requests at
+            // this point.
+            //
+            // The proxy-username hack in ApiNetwork doesn't apply when we're
+            // not connected, since we don't use a proxy, so if the network
+            // changes it might otherwise take ~2 minutes for stale connections
+            // to die.
+            ApiNetwork::instance()->getAccessManager().clearConnectionCache();
             // We're not retrying this request if it fails - we don't want to hold
             // up the connection attempt; this information isn't critical.
-            g_daemon->apiClient().getIp(QStringLiteral("api/client/status"))
+            g_daemon->apiClient().getIp(*g_daemon->environment().getIpAddrApi(), QStringLiteral("api/client/status"))
                     ->notify(this, [this](const Error& error, const QJsonDocument& json) {
                         if (!error)
                         {

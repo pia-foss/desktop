@@ -40,29 +40,15 @@ DecoratedWindow {
   // The dashboard doesn't have any provision for scrolling horizontally.  This
   // just assumes that the display has a logical width of at least 300px (plus
   // window decoration / taskbar).
-  readonly property real logicalWidth: Theme.dashboard.width
+  windowLogicalWidth: Theme.dashboard.width
+  // The desired client size for the windowed dashboard is just the fixed
+  // width and the height expressed by the content.
+  // WindowMaxSize checks the work area size, scale, window decoration, etc.,
+  // and gives us a smaller size as maxSize if necessary.
+  windowLogicalHeight: content.pageHeight
 
-  WindowMaxSize {
-    id: maxSize
-    window: dashWindow
-    // The desired client size for the windowed dashboard is just the fixed
-    // width and the height expressed by the content.
-    // WindowMaxSize checks the work area size, scale, window decoration, etc.,
-    // and gives us a smaller size as maxSize if necessary.
-    preferredSize: Qt.size(logicalWidth, content.pageHeight)
-  }
-
-  WindowScaler {
-    id: scaler
-    logicalSize: maxSize.effectiveSize
-    targetWindow: dashWindow
-    onCloseClicked: dashWindow.hide()
-  }
-
-  // Properties provided by all top-level windows - see DashboardPopup
-  readonly property real contentScale: scaler.scale
-  readonly property real popupAddMargin: 0
-  readonly property bool slideBlending: false
+  // Properties common to DashboardWindow and DashboardPopup
+  readonly property bool slideBlending: false // Used in DashboardWrapper
 
   // Even with the color set this way, we still get a brief flash of white when
   // expanding the windowed-mode dashboard on Windows.  Qt probably sets a white
@@ -72,53 +58,11 @@ DecoratedWindow {
   // all windows in this app use this color).
   color: Theme.dashboard.backgroundColor
   title: BrandHelper.brandName
-  // The dashboard isn't sizeable.
-  flags: Qt.Dialog|Qt.CustomizeWindowHint|Qt.WindowCloseButtonHint|Qt.WindowTitleHint|Qt.MSWindowsFixedSizeDialogHint
   visible: false
 
-  // Children of the DashboardWindow are displayed in its contentItem.  Like
-  // DashboardPopup, the 'content' properties should be set based on the
-  // content.
-  default property alias contents: contentItem.children
-
+  // Like DashboardPopup, the 'content' properties should be set based on the
+  // content of the dashboard.
   property DashboardContentInterface content: DashboardContentInterface {}
-
-  // Overlay scale and RTL flip - see SecondaryWindow
-  Overlay.overlay.transform: [
-    Scale {
-      origin.x: scaleWrapper.width/2
-      xScale: dashWindow.rtlFlip
-    },
-    Scale {
-      xScale: contentScale
-      yScale: contentScale
-    }
-  ]
-
-  Item {
-    id: scaleWrapper
-    x: 0
-    y: 0
-    width: logicalWidth
-    height: maxSize.effectiveSize.height
-    // RTL flip and scale
-    transform: [
-      Scale {
-        origin.x: scaleWrapper.width/2
-        xScale: dashWindow.rtlFlip
-      },
-      Scale {
-        xScale: contentScale
-        yScale: contentScale
-      }
-    ]
-
-    Item {
-      z: 5
-      id: contentItem
-      anchors.fill: parent
-    }
-  }
 
   function trayClicked() {
     // Show and activate the dashboard.
@@ -158,7 +102,7 @@ DecoratedWindow {
   }
 
   readonly property int contentRadius: 0
-  readonly property int layoutHeight: maxSize.effectiveSize.height
+  readonly property int layoutHeight: actualLogicalHeight
   // For the windowed dashboard, notifications are suppressed only if it's
   // focused, not just when it's visible.  It's frequently visible but obscured
   // by other windows, and there's no great way to figure that out.

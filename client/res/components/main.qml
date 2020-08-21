@@ -27,6 +27,7 @@ import "./theme"
 import "./client"
 import "./daemon"
 import "./onboarding"
+import "./changelog"
 
 QtObject {
   property var wSettings: SettingsWindow {
@@ -92,6 +93,16 @@ QtObject {
     onTriggered: dashboard.window.showDashboard(trayManager.getIconMetrics())
   }
 
+  property var centerChangelogTimer: Timer {
+    interval: 1
+    repeat: false
+    running: false
+    onTriggered: {
+      wChangeLog.show();
+      wChangeLog.centerOnActiveScreen();
+    }
+  }
+
   // Qt has issues when the theme is changed while the dashboard is hidden
   // (usually while connected and with the llvmpipe backend on Windows).  This
   // seems to be a scene graph bug - the next time the dashboard is shown, it
@@ -110,13 +121,17 @@ QtObject {
   Component.onCompleted: {
     TrayIcon.dashboard = dashboard.window
 
-    if(!Client.state.quietLaunch && !Client.state.firstRunFlag) {
+    if(!Client.state.quietLaunch && !Client.state.firstRunFlag || Client.state.clientHasBeenUpdated) {
       // Not a quiet launch or first run - initially show the dashboard near the tray icon
       initialShowTimer.start()
     }
 
     if(Client.state.firstRunFlag) {
       wOnboarding.showOnboarding();
+    }
+
+    if(Client.state.clientHasBeenUpdated) {
+      centerChangelogTimer.start();
     }
 
     // Check location metadata against the server list.  We only do this once at

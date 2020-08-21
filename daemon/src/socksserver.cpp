@@ -203,8 +203,9 @@ namespace
     }
 }
 
-// The username doesn't really matter, brand code is a sane value
-const QByteArray SocksConnection::username = QByteArrayLiteral(BRAND_CODE);
+// The username doesn't really matter, brand code is a sane value.  Underscore
+// added since the username is prefix-matched.
+const QByteArray SocksConnection::username = QByteArrayLiteral(BRAND_CODE "_");
 
 SocksServer::SocksServer(QHostAddress bindAddress, QString bindInterface)
     : _bindAddress{std::move(bindAddress)},
@@ -281,7 +282,7 @@ SocksConnection::SocksConnection(QTcpSocket &socksSocket,
     _abortTimer.setInterval(msec(std::chrono::seconds(5)));
     _abortTimer.callOnTimeout(this, [this]()
     {
-        qWarning() << "Aborting SOCKS connection in state" << traceEnum(_state)
+        qWarning() << "API proxy:" << this << "Aborting SOCKS connection in state" << traceEnum(_state)
             << "due to timeout";
         abortConnection();
     });
@@ -289,14 +290,14 @@ SocksConnection::SocksConnection(QTcpSocket &socksSocket,
     // Time out if initial negotiation isn't completed
     _abortTimer.start();
 
-    qInfo() << "Target socket:" << _targetSocket.socketDescriptor() << "->" << bindAddress;
+    qInfo() << "API proxy:" << this << "Target socket:" << _targetSocket.socketDescriptor() << "->" << bindAddress;
     if(!_targetSocket.bind(bindAddress))
     {
-        qWarning() << "Bind failed on socket:" << _targetSocket.socketDescriptor()
+        qWarning() << "API proxy:" << this << "Bind failed on socket:" << _targetSocket.socketDescriptor()
             << "->" << bindAddress << ":" << traceEnum(_targetSocket.error());
     }
     else
-        qInfo() << "Bind succeeded on socket:" << _targetSocket.socketDescriptor()
+        qInfo() << "API proxy:" << this << "Bind succeeded on socket:" << _targetSocket.socketDescriptor()
             << "->" << bindAddress << "==" << _targetSocket.localAddress();
 
 // Also bind the socket to the interface on Linux, as Linux does not support the "strong host model"
@@ -304,7 +305,7 @@ SocksConnection::SocksConnection(QTcpSocket &socksSocket,
 #ifdef Q_OS_LINUX
     if(setsockopt(_targetSocket.socketDescriptor(), SOL_SOCKET, SO_BINDTODEVICE, qPrintable(bindInterface), bindInterface.size()))
     {
-        qWarning() << QStringLiteral("setsockopt error: %1 (code: %2)").arg(qt_error_string(errno)).arg(errno);
+        qWarning() << "API proxy:" << this << QStringLiteral("setsockopt error: %1 (code: %2)").arg(qt_error_string(errno)).arg(errno);
     }
 #endif
 }
@@ -324,7 +325,7 @@ void SocksConnection::respond(const QByteArray &response)
     auto result = _socksSocket.write(response);
     if(result != response.size())
     {
-        qWarning() << "Failed to write response of" << response.size()
+        qWarning() << "API proxy:" << this << "Failed to write response of" << response.size()
             << "bytes; result was" << result;
         abortConnection();
     }
@@ -353,7 +354,7 @@ bool SocksConnection::checkMessageVersion(const QByteArray &message,
     if(message[0] != version)
     {
         // Bail; this does not support any other version.
-        qWarning() << "Received unsupported" << traceName << "version"
+        qWarning() << "API proxy:" << this << "Received unsupported" << traceName << "version"
             << int(message[0]);
         abortConnection();
         return false;
@@ -384,7 +385,7 @@ void SocksConnection::forwardData(QTcpSocket &source, QTcpSocket &dest,
         auto size = dest.write(data);
         if(size != data.size())
         {
-            qWarning() << "Failed to forward" << data.size()
+            qWarning() << "API proxy:" << this << "Failed to forward" << data.size()
                 << "bytes of" << directionTrace << "data -" << size;
             abortConnection();
         }
@@ -415,7 +416,7 @@ void SocksConnection::onSocksReadyRead()
         // to connect).
         if(newAvailable == lastAvailable)
         {
-            qInfo() << "Buffering" << newAvailable << "bytes";
+            qInfo() << "API proxy:" << this << "Buffering" << newAvailable << "bytes";
             break;
         }
         // Otherwise, some data were consumed; if any data remains, process
@@ -433,7 +434,7 @@ void SocksConnection::processSocksData()
     {
         if(_socksSocket.bytesAvailable() < _nextMessageBytes)
         {
-            qInfo() << "Wait for complete message of" << _nextMessageBytes
+            qInfo() << "API proxy:" << this << "Wait for complete message of" << _nextMessageBytes
                 << "in state" << traceEnum(_state) << "- have"
                 << _socksSocket.bytesAvailable() << "bytes";
             return;
@@ -443,7 +444,7 @@ void SocksConnection::processSocksData()
         // This should not fail since we checked bytesAvailable()
         if(receivedMsg.size() != _nextMessageBytes)
         {
-            qWarning() << "Failed to read expected message of"
+            qWarning() << "API proxy:" << this << "Failed to read expected message of"
                 << _nextMessageBytes << "bytes in state" << traceEnum(_state)
                 << "- got" << receivedMsg.size() << "bytes";
             abortConnection();
@@ -498,7 +499,11 @@ void SocksConnection::processSocksData()
             // This check and response could reveal the username
             // (non-constant-time check, and timing indicates that username
             // failed, not password), but the username is not secret.
-            if(receivedMsg != username)
+            //
+            // This is a prefix check so we can vary the username to hack around
+            // QNetworkAccessManager's broken connection caching, see
+            // ApiNetwork.
+            if(!receivedMsg.startsWith(username))
             {
                 qInfo() << "Reject connection due to incorrect username";
                 QByteArray response{AuthResponseMsg::Length, 0};
@@ -534,7 +539,7 @@ void SocksConnection::processSocksData()
             // would prevent all auth from working
             if(hash.size() != _passwordHash.size())
             {
-                qWarning() << "Can't compare password hashes of different sizes:"
+                qWarning() << "API proxy:" << this << "Can't compare password hashes of different sizes:"
                     << hash.size() << "-" << _passwordHash.size();
                 rejectConnection(response);
             }
@@ -547,7 +552,7 @@ void SocksConnection::processSocksData()
             }
             else
             {
-                qWarning() << "Rejecting connection due to incorrect password";
+                qWarning() << "API proxy:" << this << "Rejecting connection due to incorrect password";
                 rejectConnection(response);
             }
             break;
@@ -567,14 +572,19 @@ void SocksConnection::processSocksData()
             // Ignore any subsquent data and send a rejection now.
             if(receivedMsg.at(ConnectHeaderMsg::Command) != Command::Connect)
             {
-                qInfo() << "Rejecting SOCKS connection, unexpected command"
+                qInfo() << "API proxy:" << this << "Rejecting SOCKS connection, unexpected command"
                     << int(receivedMsg.at(ConnectHeaderMsg::Command));
                 response[ConnectResponseMsg::Reply] = Reply::CommandNotSupported;
                 rejectConnection(response);
             }
+            else if(receivedMsg.at(ConnectHeaderMsg::AddrType) == AddressType::IPv6)
+            {
+                _nextMessageBytes = 18; // IPv6 16 bytes + port 2 bytes
+                _state = State::ReceiveConnectIPv6;
+            }
             else if(receivedMsg.at(ConnectHeaderMsg::AddrType) != AddressType::IPv4)
             {
-                qInfo() << "Rejecting SOCKS connection, unexpected address type"
+                qInfo() << "API proxy:" << this << "Rejecting SOCKS connection, unexpected address type"
                     << int(receivedMsg.at(ConnectHeaderMsg::AddrType));
                 response[ConnectResponseMsg::Reply] = Reply::AddressTypeNotSupported;
                 rejectConnection(response);
@@ -583,23 +593,45 @@ void SocksConnection::processSocksData()
             {
                 // Success, wait for address data
                 _nextMessageBytes = 6;  // IPv4 4 bytes + port 2 bytes
-                _state = State::ReceiveConnect;
+                _state = State::ReceiveConnectIPv4;
             }
             break;
         }
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
         {
             Q_ASSERT(receivedMsg.size() == 6);  // Message size for this state
             quint32 destAddr = readUnsignedBE<quint32>(receivedMsg, 0);
             quint16 port = readUnsignedBE<quint16>(receivedMsg, 4);
             QHostAddress destHost{destAddr};
-            qInfo() << "Connecting to" << destHost << "port" << port;
+            qInfo() << "API proxy:" << this << "Connecting to" << destHost << "port" << port;
             _nextMessageBytes = 0;
             _state = State::Connecting;
             // Negotiation completed, now waiting on the connect - stop the
             // abort timeout
             _abortTimer.stop();
             _targetSocket.connectToHost(destHost, port);
+            break;
+        }
+        case State::ReceiveConnectIPv6:
+        {
+            Q_ASSERT(receivedMsg.size() == 18); // Message size for this state
+            QHostAddress destHost{reinterpret_cast<const quint8*>(receivedMsg.data())};
+            quint16 port = readUnsignedBE<quint16>(receivedMsg, 4);
+            qInfo() << "API proxy:" << this << "Rejecting IPv6 connection to"
+                << destHost << "port" << port;
+            _nextMessageBytes = 0;
+            _state = State::Connecting;
+            _abortTimer.stop();
+
+            // PIA's network doesn't support IPv6, so we can't attempt to
+            // connect to the target.  Reject the connection.
+            //
+            // No need to try connecting and let it fail, just act as if the
+            // target socket was unable to connect.
+            // This sends an empty IPv4 address in the rejection response.  It
+            // should probably be an empty IPv6 address, but this is fine for
+            // the limited use of this SOCKS proxy.
+            onTargetError(QAbstractSocket::SocketError::NetworkError);
             break;
         }
         case State::Connecting:
@@ -627,24 +659,25 @@ void SocksConnection::onSocksError(QAbstractSocket::SocketError socketError)
     // connection normally.  disconnected() will be emitted, ignore the error.
     if(socketError == QAbstractSocket::SocketError::RemoteHostClosedError)
     {
-        qInfo() << "SOCKS connection closed in state" << traceEnum(_state);
+        qInfo() << "API proxy:" << this << "SOCKS connection closed in state" << traceEnum(_state);
         return;
     }
 
-    qWarning() << "SOCKS connection error:" << traceEnum(socketError);
+    qWarning() << "API proxy:" << this << "SOCKS connection error:" << traceEnum(socketError);
     abortConnection();
 }
 
 void SocksConnection::onSocksDisconnected()
 {
-    qInfo() << "SOCKS connection disconnected in state" << traceEnum(_state);
+    qInfo() << "API proxy:" << this << "SOCKS connection disconnected in state" << traceEnum(_state);
     switch(_state)
     {
         default:
         case State::ReceiveAuthMethodsHeader:
         case State::ReceiveAuthMethods:
         case State::ReceiveConnectHeader:
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
+        case State::ReceiveConnectIPv6:
         case State::Connecting:
         case State::TargetDisconnecting:
         case State::Closed:
@@ -652,7 +685,7 @@ void SocksConnection::onSocksDisconnected()
             // SOCKS side disconnects unexpectedly.  Shouldn't occur in
             // TargetDisconnecting/Closed; would indicate that we received
             // more than one disconnect signal.
-            qInfo() << "Aborting connection in state" << traceEnum(_state)
+            qInfo() << "API proxy:" << this << "Aborting connection in state" << traceEnum(_state)
                 << "due to unexpected SOCKS disconnect";
             abortConnection();
             break;
@@ -678,13 +711,14 @@ void SocksConnection::onTargetConnected()
         case State::ReceiveAuthMethodsHeader:
         case State::ReceiveAuthMethods:
         case State::ReceiveConnectHeader:
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
+        case State::ReceiveConnectIPv6:
         case State::Connected:
         case State::SocksDisconnecting:
         case State::TargetDisconnecting:
         case State::Closed:
             // Unexpected, abort
-            qInfo() << "Aborting connection in state" << traceEnum(_state)
+            qInfo() << "API proxy:" << this << "Aborting connection in state" << traceEnum(_state)
                 << "due to unexpected target connect";
             abortConnection();
             break;
@@ -701,11 +735,11 @@ void SocksConnection::onTargetConnected()
             response[ConnectResponseMsg::Addr] = static_cast<quint8>(localAddr >> 24);
             response[ConnectResponseMsg::Addr+1] = static_cast<quint8>(localAddr >> 16);
             response[ConnectResponseMsg::Addr+2] = static_cast<quint8>(localAddr >> 8);
-            response[ConnectResponseMsg::Addr+2] = static_cast<quint8>(localAddr);
+            response[ConnectResponseMsg::Addr+3] = static_cast<quint8>(localAddr);
             quint16 localPort = _targetSocket.localPort();
             response[ConnectResponseMsg::Port] = static_cast<quint8>(localPort >> 8);
             response[ConnectResponseMsg::Port+1] = static_cast<quint8>(localPort);
-            qInfo() << "Connected" << localHostAddr << ":" << localPort << "->"
+            qInfo() << "API proxy:" << this << "Connected" << localHostAddr << ":" << localPort << "->"
                 << _targetSocket.peerAddress() << ":"
                 << _targetSocket.peerPort();
             respond(response);
@@ -729,7 +763,7 @@ void SocksConnection::onTargetError(QAbstractSocket::SocketError socketError)
     // connection normally.  disconnected() will be emitted, ignore the error.
     if(socketError == QAbstractSocket::SocketError::RemoteHostClosedError)
     {
-        qInfo() << "Target closed the connection in state" << traceEnum(_state);
+        qInfo() << "API proxy:" << this << "Target closed the connection in state" << traceEnum(_state);
         return;
     }
 
@@ -739,13 +773,14 @@ void SocksConnection::onTargetError(QAbstractSocket::SocketError socketError)
         case State::ReceiveAuthMethodsHeader:
         case State::ReceiveAuthMethods:
         case State::ReceiveConnectHeader:
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
+        case State::ReceiveConnectIPv6:
         case State::Connected:
         case State::SocksDisconnecting:
         case State::TargetDisconnecting:
         case State::Closed:
             // Unexpected, abort
-            qInfo() << "Aborting connection in state" << traceEnum(_state)
+            qInfo() << "API proxy:" << this << "Aborting connection in state" << traceEnum(_state)
                 << "due to target error" << traceEnum(socketError);
             abortConnection();
             break;
@@ -775,7 +810,7 @@ void SocksConnection::onTargetError(QAbstractSocket::SocketError socketError)
             }
             response[ConnectResponseMsg::Reply] = result;
 
-            qInfo() << "SOCKS connection to" << _targetSocket.peerAddress()
+            qInfo() << "API proxy:" << this << "SOCKS connection to" << _targetSocket.peerAddress()
                 << ":" << _targetSocket.peerPort() << "failed with error"
                 << traceEnum(socketError) << "- respond with code" << result;
             rejectConnection(response);
@@ -793,10 +828,11 @@ void SocksConnection::onTargetReadyRead()
         case State::ReceiveAuthMethodsHeader:
         case State::ReceiveAuthMethods:
         case State::ReceiveConnectHeader:
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
+        case State::ReceiveConnectIPv6:
         case State::Connecting:
             // Not ready to forward data, let the QTcpSocket buffer it
-            qInfo() << "Buffering data from target in state" << traceEnum(_state)
+            qInfo() << "API proxy:" << this << "Buffering data from target in state" << traceEnum(_state)
                 << "- have" << _targetSocket.bytesAvailable() << "bytes";
             break;
         case State::Connected:
@@ -805,7 +841,7 @@ void SocksConnection::onTargetReadyRead()
         case State::SocksDisconnecting:
         case State::TargetDisconnecting:
         case State::Closed:
-            qWarning() << "Discarding" << _targetSocket.bytesAvailable()
+            qWarning() << "API proxy:" << this << "Discarding" << _targetSocket.bytesAvailable()
                 << "from target in state" << traceEnum(_state);
             // No data expected in these states, discard it
             _targetSocket.skip(_targetSocket.bytesAvailable());
@@ -815,14 +851,15 @@ void SocksConnection::onTargetReadyRead()
 
 void SocksConnection::onTargetDisconnected()
 {
-    qInfo() << "Target socket disconnected in state" << traceEnum(_state);
+    qInfo() << "API proxy:" << this << "Target socket disconnected in state" << traceEnum(_state);
     switch(_state)
     {
         default:
         case State::ReceiveAuthMethodsHeader:
         case State::ReceiveAuthMethods:
         case State::ReceiveConnectHeader:
-        case State::ReceiveConnect:
+        case State::ReceiveConnectIPv4:
+        case State::ReceiveConnectIPv6:
         case State::Connecting:
         case State::SocksDisconnecting:
         case State::Closed:
@@ -830,7 +867,7 @@ void SocksConnection::onTargetDisconnected()
             // SOCKS side disconnects unexpectedly.  Shouldn't occur in
             // TargetDisconnecting/Closed; would indicate that we received
             // more than one disconnect signal.
-            qInfo() << "Aborting connection in state" << traceEnum(_state)
+            qInfo() << "API proxy:" << this << "Aborting connection in state" << traceEnum(_state)
                 << "due to unexpected SOCKS disconnect";
             abortConnection();
             break;

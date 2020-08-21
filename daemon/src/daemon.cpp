@@ -88,7 +88,7 @@ namespace
 
     // Resource path for the modern regions list.  This is a placeholder until
     // this actually exists.
-    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/new")};
+    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v4")};
 
     // Old default debug logging setting, 1.0 (and earlier) until 1.2-beta.2
     const QStringList debugLogging10{QStringLiteral("*.debug=true"),
@@ -170,6 +170,88 @@ void restrictAccountJson()
 
     qInfo() << "Successfully applied permissions to account.json";
 }
+
+// Populate a ConnectionInfo in DaemonState from VPNConnection's ConnectionConfig
+void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
+{
+    info.vpnLocation(config.vpnLocation());
+    info.vpnLocationAuto(config.vpnLocationAuto());
+    switch(config.infrastructure())
+    {
+        default:
+        case ConnectionConfig::Infrastructure::Current:
+            info.infrastructure(QStringLiteral("current"));
+            break;
+        case ConnectionConfig::Infrastructure::Modern:
+            info.infrastructure(QStringLiteral("modern"));
+            break;
+    }
+    switch(config.method())
+    {
+        default:
+        case ConnectionConfig::Method::OpenVPN:
+            info.method(QStringLiteral("openvpn"));
+            break;
+        case ConnectionConfig::Method::Wireguard:
+            info.method(QStringLiteral("wireguard"));
+            break;
+    }
+    info.methodForcedByAuth(config.methodForcedByAuth());
+    switch(config.dnsType())
+    {
+        default:
+        case ConnectionConfig::DnsType::Pia:
+            info.dnsType(QStringLiteral("pia"));
+            break;
+        case ConnectionConfig::DnsType::Handshake:
+            info.dnsType(QStringLiteral("handshake"));
+            break;
+        case ConnectionConfig::DnsType::Local:
+            info.dnsType(QStringLiteral("local"));
+            break;
+        case ConnectionConfig::DnsType::Existing:
+            info.dnsType(QStringLiteral("existing"));
+            break;
+        case ConnectionConfig::DnsType::Custom:
+            info.dnsType(QStringLiteral("custom"));
+            break;
+    }
+    info.openvpnCipher(config.openvpnCipher());
+    info.openvpnAuth(config.openvpnAuth());
+    info.openvpnServerCertificate(config.openvpnServerCertificate());
+    info.defaultRoute(config.defaultRoute());
+    switch(config.proxyType())
+    {
+        default:
+        case ConnectionConfig::ProxyType::None:
+            info.proxy(QStringLiteral("none"));
+            info.proxyCustom({});
+            info.proxyShadowsocks({});
+            info.proxyShadowsocksLocationAuto(false);
+            break;
+        case ConnectionConfig::ProxyType::Custom:
+        {
+            info.proxy(QStringLiteral("custom"));
+            QString host = config.customProxy().host();
+            if(config.customProxy().port())
+            {
+                host += ':';
+                host += QString::number(config.customProxy().port());
+            }
+            info.proxyCustom(host);
+            info.proxyShadowsocks({});
+            info.proxyShadowsocksLocationAuto(false);
+            break;
+        }
+        case ConnectionConfig::ProxyType::Shadowsocks:
+            info.proxy(QStringLiteral("shadowsocks"));
+            info.proxyCustom({});
+            info.proxyShadowsocks(config.shadowsocksLocation());
+            info.proxyShadowsocksLocationAuto(config.shadowsocksLocationAuto());
+            break;
+    }
+    info.portForward(config.requestPortForward());
+};
 
 void SubnetBypass::clearAllRoutes()
 {
@@ -257,7 +339,8 @@ Daemon::Daemon(QObject* parent)
     , _methodRegistry(new LocalMethodRegistry(this))
     , _rpc(new RemoteNotificationInterface(this))
     , _connection(new VPNConnection(this))
-    , _apiClient{_environment}
+    , _environment{_state}
+    , _apiClient{}
     , _legacyLatencyTracker{ConnectionConfig::Infrastructure::Current}
     , _modernLatencyTracker{ConnectionConfig::Infrastructure::Modern}
     , _portForwarder{_apiClient, _account, _state, _environment}
@@ -315,6 +398,11 @@ Daemon::Daemon(QObject* parent)
     connectPropertyChanges(_account, &Daemon::_accountChanges);
     connectPropertyChanges(_settings, &Daemon::_settingsChanges);
     connectPropertyChanges(_state, &Daemon::_stateChanges);
+
+    // DaemonState::nextConfig depends on DaemonSettings, DaemonState, and DaemonAccount
+    connect(&_state, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
+    connect(&_settings, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
+    connect(&_account, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
 
     // Set up logging.  Do this before migrating settings so tracing from the
     // migration is written (if debug logging is enabled).
@@ -1089,8 +1177,8 @@ void Daemon::RPC_stopSnooze()
 Async<void> Daemon::RPC_emailLogin(const QString &email)
 {
     qDebug () << "Requesting email login";
-    return _apiClient.postRetry(
-                QStringLiteral("api/client/v2/login_link"),
+    return _apiClient.postRetry(*_environment.getApiv2(),
+                QStringLiteral("login_link"),
                 QJsonDocument(
                     QJsonObject({
                           { QStringLiteral("email"), email},
@@ -1140,8 +1228,19 @@ void Daemon::RPC_checkDriverState()
 
 Async<void> Daemon::RPC_login(const QString& username, const QString& password)
 {
-    return _apiClient.postRetry(
-                QStringLiteral("api/client/v2/token"),
+    // If there's already an attempt, abort it before starting another,
+    // otherwise they could overwrite each other's results.
+    if(_pLoginRequest)
+    {
+        _pLoginRequest->abort({HERE, Error::Code::TaskRejected});
+        // Don't need abandon() here since abort() completes the outer task
+        _pLoginRequest.reset();
+    }
+
+    // Hang on to the login API result in _pLoginRequest so we can abort it if
+    // we log out or log in.  We have to use an AbortableTask,
+    _pLoginRequest = _apiClient.postRetry(
+                *_environment.getApiv2(), QStringLiteral("token"),
                 QJsonDocument({
                     { QStringLiteral("username"), username },
                     { QStringLiteral("password"), password },
@@ -1172,11 +1271,24 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
                 _account.openvpnUsername(username);
                 _account.openvpnPassword(password);
                 _account.loggedIn(true);
-            });
+            })
+            .abortable();
+    return _pLoginRequest;
 }
 
 void Daemon::RPC_logout()
 {
+    // If we were still trying to log in, abort that attempt, otherwise we might
+    // log back in after logging out.  In particular, this could happen if we
+    // weren't able to get a token initially, used credential auth to connect,
+    // then the user logs out while we're obtaining a token through the tunnel.
+    if(_pLoginRequest)
+    {
+        _pLoginRequest->abort({HERE, Error::Code::TaskRejected});
+        // Don't need abandon() here since abort() completes the outer task
+        _pLoginRequest.reset();
+    }
+
     // If the VPN is connected, disconnect before logging out.  We don't wait
     // for this to complete though.
     RPC_disconnectVPN();
@@ -1190,7 +1302,7 @@ void Daemon::RPC_logout()
 
     if(!tokenToExpire.isEmpty())
     {
-        _apiClient.postRetry(QStringLiteral("api/client/v2/expire_token"),
+        _apiClient.postRetry(*_environment.getApiv2(), QStringLiteral("expire_token"),
                              QJsonDocument(), ApiClient::tokenAuth(tokenToExpire))
             ->notify(this, [this](const Error &error, const QJsonDocument &json)
         {
@@ -1602,84 +1714,6 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     _state.chosenTransport(chosenTransport);
     _state.actualTransport(actualTransport);
 
-    // Populate a ConnectionInfo in DaemonState from VPNConnection's ConnectionConfig
-    auto populateConnection = [](ConnectionInfo &info, const ConnectionConfig &config)
-    {
-        info.vpnLocation(config.vpnLocation());
-        info.vpnLocationAuto(config.vpnLocationAuto());
-        switch(config.infrastructure())
-        {
-            default:
-            case ConnectionConfig::Infrastructure::Current:
-                info.infrastructure(QStringLiteral("current"));
-                break;
-            case ConnectionConfig::Infrastructure::Modern:
-                info.infrastructure(QStringLiteral("modern"));
-                break;
-        }
-        switch(config.method())
-        {
-            default:
-            case ConnectionConfig::Method::OpenVPN:
-                info.method(QStringLiteral("openvpn"));
-                break;
-            case ConnectionConfig::Method::Wireguard:
-                info.method(QStringLiteral("wireguard"));
-                break;
-        }
-        info.methodForcedByAuth(config.methodForcedByAuth());
-        switch(config.dnsType())
-        {
-            default:
-            case ConnectionConfig::DnsType::Pia:
-                info.dnsType(QStringLiteral("pia"));
-                break;
-            case ConnectionConfig::DnsType::Handshake:
-                info.dnsType(QStringLiteral("handshake"));
-                break;
-            case ConnectionConfig::DnsType::Local:
-                info.dnsType(QStringLiteral("local"));
-                break;
-            case ConnectionConfig::DnsType::Existing:
-                info.dnsType(QStringLiteral("existing"));
-                break;
-            case ConnectionConfig::DnsType::Custom:
-                info.dnsType(QStringLiteral("custom"));
-                break;
-        }
-        info.defaultRoute(config.defaultRoute());
-        switch(config.proxyType())
-        {
-            default:
-            case ConnectionConfig::ProxyType::None:
-                info.proxy(QStringLiteral("none"));
-                info.proxyCustom({});
-                info.proxyShadowsocks({});
-                info.proxyShadowsocksLocationAuto(false);
-                break;
-            case ConnectionConfig::ProxyType::Custom:
-            {
-                info.proxy(QStringLiteral("custom"));
-                QString host = config.customProxy().host();
-                if(config.customProxy().port())
-                {
-                    host += ':';
-                    host += QString::number(config.customProxy().port());
-                }
-                info.proxyCustom(host);
-                info.proxyShadowsocks({});
-                info.proxyShadowsocksLocationAuto(false);
-                break;
-            }
-            case ConnectionConfig::ProxyType::Shadowsocks:
-                info.proxy(QStringLiteral("shadowsocks"));
-                info.proxyCustom({});
-                info.proxyShadowsocks(config.shadowsocksLocation());
-                info.proxyShadowsocksLocationAuto(config.shadowsocksLocationAuto());
-                break;
-        }
-        info.portForward(config.requestPortForward());
-    };
     populateConnection(_state.connectingConfig(), connectingConfig);
     populateConnection(_state.connectedConfig(), connectedConfig);
     _state.connectedServer(connectedServer);
@@ -1889,7 +1923,7 @@ void Daemon::newLatencyMeasurements(ConnectionConfig::Infrastructure infrastruct
 
     // Determine the active infrastructure from the setting
     ConnectionConfig::Infrastructure activeInfra{ConnectionConfig::Infrastructure::Current};
-    if(_settings.infrastructure() == QStringLiteral("modern"))
+    if(_settings.infrastructure() != QStringLiteral("current"))
         activeInfra = ConnectionConfig::Infrastructure::Modern;
 
     for(const auto &measurement : measurements)
@@ -1987,7 +2021,7 @@ bool Daemon::rebuildLegacyLocations(const QJsonObject &serversObj,
 
     // If the legacy infrastructure is active, apply the new locations -
     // otherwise we're just checking the data to make sure we can cache it.
-    if(_settings.infrastructure() != QStringLiteral("modern"))
+    if(_settings.infrastructure() == QStringLiteral("current"))
         applyBuiltLocations(newLocations);
     return true;
 }
@@ -2009,21 +2043,21 @@ bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
 
     // If the modern infrastructure is active, apply the new locations -
     // otherwise we're just checking the data to make sure we can cache it.
-    if(_settings.infrastructure() == QStringLiteral("modern"))
+    if(_settings.infrastructure() != QStringLiteral("current"))
         applyBuiltLocations(newLocations);
     return true;
 }
 
 void Daemon::rebuildActiveLocations()
 {
-    if(_settings.infrastructure() == QStringLiteral("modern"))
-    {
-        rebuildModernLocations(_data.cachedModernRegionsList(),
-                               _data.cachedLegacyShadowsocksList());
-    }
-    else    // "legacy" or "default"
+    if(_settings.infrastructure() == QStringLiteral("current"))
     {
         rebuildLegacyLocations(_data.cachedLegacyRegionsList(),
+                               _data.cachedLegacyShadowsocksList());
+    }
+    else    // "modern" or "default"
+    {
+        rebuildModernLocations(_data.cachedModernRegionsList(),
                                _data.cachedLegacyShadowsocksList());
     }
 }
@@ -2197,9 +2231,9 @@ void Daemon::refreshAccountInfo()
 //
 Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QString& password, const QString& token)
 {
-    const QString resource = token.isEmpty() ? QStringLiteral("api/client/account") : QStringLiteral("api/client/v2/account");
+    ApiBase &base = token.isEmpty() ? *_environment.getApiv1() : *_environment.getApiv2();
 
-    return _apiClient.getRetry(resource, ApiClient::autoAuth(username, password, token))
+    return _apiClient.getRetry(base, QStringLiteral("account"), ApiClient::autoAuth(username, password, token))
             ->then(this, [=](const QJsonDocument& json) {
                 if (!json.isObject())
                     throw Error(HERE, Error::ApiBadResponseError);
@@ -2481,6 +2515,21 @@ void Daemon::setOverrideFailed(const QString &resourceName)
     _state.overridesFailed(overrides);
 }
 
+void Daemon::updateNextConfig(const QString &changedPropertyName)
+{
+    // Ignore changes in nextConfig itself.  Should theoretically have no effect
+    // anyway since _state.nextConfig() below won't actually cause a change
+    // (nextConfig doesn't depend on itself), but explicitly ignore for
+    // robustness.
+    if(changedPropertyName == QStringLiteral("nextConfig"))
+        return;
+
+    ConnectionConfig connection{_settings, _state, _account};
+    ConnectionInfo info{};
+    populateConnection(info, connection);
+    _state.nextConfig(info);
+}
+
 static QString decryptOldPassword(const QString& bytes)
 {
     static constexpr char key[] = RUBY_MIGRATION;
@@ -2678,7 +2727,7 @@ void Daemon::calculateLocationPreferences()
     // settings with WireGuard too, so these checks will just go away.
     bool portForwardEnabled = false;
     if(_settings.method() == QStringLiteral("openvpn") ||
-        _settings.infrastructure() == QStringLiteral("modern"))
+        _settings.infrastructure() != QStringLiteral("current"))
     {
         portForwardEnabled = _settings.portForward();
     }

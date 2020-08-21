@@ -293,15 +293,16 @@ void IpTablesFirewall::install()
         // Updated at runtime
     }, kMangleTable);
 
-    // Mangle rules
-    installAnchor(Both, QStringLiteral("100.tagPkts"), {
+    installAnchor(Both, QStringLiteral("100.tagBypass"), {
         // Split tunnel
         QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(CGroup::bypassId, Fwmark::excludePacketTag),
+    }, kMangleTable);
 
+    // Mangle rules
+    installAnchor(Both, QStringLiteral("100.tagVpnOnly"), {
         // Inverse split tunnel
         QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(CGroup::vpnOnlyId, Fwmark::vpnOnlyPacketTag)
     }, kMangleTable);
-
 
     // A rule to mitigate CVE-2019-14899 - drop packets addressed to the local
     // VPN IP but that are not actually received on the VPN interface.
@@ -323,11 +324,27 @@ void IpTablesFirewall::install()
 
     // Insert our Raw root chain at the top of the PREROUTING chain.
     linkChain(Both, kRootChain, kPreRoutingChain, true, kRawTable);
+
+    // Ensure LAN traffic is always managed by the 'main' table.  This is needed
+    // to ensure LAN routing for:
+    // - Split tunnel.  Otherwise, split tunnel rules would send LAN traffic via
+    //   the default gateway.
+    // - Wireguard.  Otherwise, LAN traffic would be sent via the Wireguard
+    //   interface.
+    //
+    // This has no effect for OpenVPN without split tunnel, or when disconnected
+    // without split tunnel.  We may need this even if the daemon is not active,
+    // because some split tunnel rules are still applied even when inactive
+    // ("only VPN" rules).
+    //
+    // Note that we use "suppress_prefixlength 1", not 0 as is typical, because
+    // we also suppress the /1 gateway override routes applied by OpenVPN.
+    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 }
 
 void IpTablesFirewall::uninstall()
 {
-    IpTablesFirewall::deactivate();
+    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 
     // Filter chain
     unlinkChain(Both, kRootChain, kOutputChain, kFilterTable);
@@ -371,28 +388,6 @@ void IpTablesFirewall::uninstall()
 
     // Remove Raw anchors
     uninstallAnchor(Both, QStringLiteral("100.vpnTunOnly"), kRawTable);
-}
-
-void IpTablesFirewall::activate()
-{
-    // Ensure LAN traffic is always managed by the 'main' table.  This is needed
-    // to ensure LAN routing for:
-    // - Split tunnel.  Otherwise, split tunnel rules would send LAN traffic via
-    //   the default gateway.
-    // - Wireguard.  Otherwise, LAN traffic would be sent via the Wireguard
-    //   interface.
-    //
-    // This has no effect for OpenVPN without split tunnel, or when disconnected
-    // without split tunnel.
-    //
-    // Note that we use "suppress_prefixlength 1", not 0 as is typical, because
-    // we also suppress the /1 gateway override routes applied by OpenVPN.
-    execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
-}
-
-void IpTablesFirewall::deactivate()
-{
-    execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 }
 
 bool IpTablesFirewall::isInstalled()

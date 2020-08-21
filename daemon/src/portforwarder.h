@@ -65,7 +65,7 @@ public:
     //
     // Port forwarding is initially disabled when PortForwarder is created.
     PortForwarder(ApiClient &apiClient, DaemonAccount &account,
-                  DaemonState &state, const Environment &environment);
+                  DaemonState &state, Environment &environment);
 
 public:
     // Update the current VPN connection state.
@@ -99,7 +99,7 @@ private:
     // Components of Daemon needed by the PF request implementations
     DaemonAccount &_account;
     DaemonState &_state;
-    const Environment &_environment;
+    Environment &_environment;
     // Whether the VPN is connected
     State _connectionState;
     // Whether port forwarding is currently enabled

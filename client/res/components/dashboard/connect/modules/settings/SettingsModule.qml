@@ -86,7 +86,7 @@ MovableModule {
       displayName: uiTr("Port Forwarding")
       setting: DaemonSetting{name: "portForward"}
       iconResourceType: 'port-forwarding'
-      settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern"
+      settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current"
     }
 
     SettingsToggleButton {

@@ -30,7 +30,8 @@
 bool Server::hasNonLatencyService() const
 {
     return !openvpnTcpPorts().empty() || !openvpnUdpPorts().empty() ||
-        !wireguardPorts().empty() || !shadowsocksPorts().empty();
+        !wireguardPorts().empty() || !shadowsocksPorts().empty() ||
+        !metaPorts().empty();
 }
 
 bool Server::hasService(Service service) const
@@ -62,6 +63,8 @@ const std::vector<quint16> &Server::servicePorts(Service service) const
             return wireguardPorts();
         case Service::Shadowsocks:
             return shadowsocksPorts();
+        case Service::Meta:
+            return metaPorts();
         case Service::Latency:
             return latencyPorts();
     }
@@ -86,6 +89,9 @@ void Server::servicePorts(Service service, std::vector<quint16> ports)
         case Service::Shadowsocks:
             shadowsocksPorts(std::move(ports));
             return;
+        case Service::Meta:
+            metaPorts(std::move(ports));
+            return;
         case Service::Latency:
             latencyPorts(std::move(ports));
             return;
@@ -98,6 +104,16 @@ quint16 Server::defaultServicePort(Service service) const
     if(ports.empty())
         return 0;
     return ports.front();
+}
+
+quint16 Server::randomServicePort(Service service) const
+{
+    const auto &ports = servicePorts(service);
+    if(ports.empty())
+        return 0;
+
+    std::size_t idx = QRandomGenerator::global()->bounded(static_cast<quint32>(ports.size()));
+    return ports[idx];
 }
 
 template<class PredicateFuncT>

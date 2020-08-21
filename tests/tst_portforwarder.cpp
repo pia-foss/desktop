@@ -66,12 +66,12 @@ const QByteArray invalidPort{R"(
 
 // PortForwarder and PortRequester with defaulted parameters, so we don't have
 // to repeat this in every test
-class TestPortForwarder : public Environment, public ApiClient,
-    public DaemonAccount, public DaemonState, public PortForwarder
+class TestPortForwarder : public DaemonState, public Environment,
+    public ApiClient, public DaemonAccount,  public PortForwarder
 {
 public:
     TestPortForwarder()
-        : Environment{}, ApiClient{static_cast<Environment&>(*this)},
+        : Environment{static_cast<DaemonState&>(*this)},
           PortForwarder{*this, *this, *this, *this}
     {
         clientId(QStringLiteral("00000000000000000000000000000000000000000000000000"));

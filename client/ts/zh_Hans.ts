@@ -2,383 +2,120 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>ClientNotifications</name>
+    <name>ChangelogWindow</name>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>批准分离通道扩展程序以启用分离通道。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="304"/>
+        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
+        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
+        <translation>WireGuard 功能：坐火箭的机器人</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="35"/>
-        <source>ClientNotifications -- header-title --- ERROR</source>
-        
-        <extracomment>Header bar title used for all &quot;error&quot; statuses - serious installation problems, etc. This means that there is currently an error condition active now.</extracomment>
-        <translation>错误</translation>
-        <comment>header-title</comment>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="445"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
+        <translation>命令行界面功能</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="51"/>
-        <source>ClientNotifications --- UPDATE FAILED</source>
-        <translation>更新失败</translation>
+        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="17"/>
+        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="86"/>
+        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="182"/>
+        <source>ChangelogWindow --- Changelog</source>
+        <translation>更新日志</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="52"/>
-        <source>ClientNotifications --- Download of version %1 failed.</source>
-        <translation>下载 %1 版失败。</translation>
+        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="85"/>
+        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="169"/>
+        <source>ChangelogWindow --- What&apos;s new</source>
+        <translation>新功能</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="103"/>
-        <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
-        <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
-        <translation>未安装 VPN 隧道的 TAP 适配器。您可以从“设置”重新安装。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="92"/>
+        <source>ChangelogWindow --- Try WireGuard® today!</source>
+        <translation>立即试用 WireGuard®！</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="115"/>
-        <source>ClientNotifications --- Restart to complete installation.</source>
-        <translation>重新启动以完成安装。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="102"/>
+        <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
+        <translation>这是更有效的全新 VPN 协议，可提供：</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="116"/>
-        <source>ClientNotifications --- The system must be restarted before you can connect.</source>
-        <translation>必须重新启动系统才能连接。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="25"/>
+        <source>ChangelogWindow --- Checkmark bullet</source>
+        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
+        <translation>选中标记项目符号</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="129"/>
-        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
-        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
-        <translation>未安装 VPN 隧道的 WinTUN 适配器。您可以从“设置”重新安装。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="122"/>
+        <source>ChangelogWindow --- Better performance</source>
+        <translation>更出色的性能</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="142"/>
-        <source>ClientNotifications --- The split tunnel filter is not installed.</source>
-        <translation>未安装分离通道筛选器。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="139"/>
+        <source>ChangelogWindow --- Lower CPU usage</source>
+        <translation>更低的 CPU 使用率</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="143"/>
-        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
-        <translation>App 排除功能需要安装分离通道筛选器。请从设置中重新安装。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="156"/>
+        <source>ChangelogWindow --- Longer battery life</source>
+        <translation>更长的电池寿命</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="154"/>
-        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
-        <source>ClientNotifications --- Reinstall</source>
-        <translation>重新安装</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="184"/>
+        <source>ChangelogWindow --- WireGuard® is enabled</source>
+        <translation>WireGuard® 已启用</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="168"/>
-        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
-        <translation>App 排除功能需要安装分离通道筛选器。请重新启动以完成安装。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="186"/>
+        <source>ChangelogWindow --- Try WireGuard® now</source>
+        <translation>立即试用 WireGuard®</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="183"/>
-        <source>ClientNotifications --- Connection refused.</source>
-        <translation>连接被拒绝。</translation>
+    <source>ChangelogWindow --- Open Settings</source>
+        <translation>打开设置</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="189"/>
-        <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
-        <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
-        <translation>服务器已拒绝连接。请检查您的用户名和密码，并确认您的账户未过期。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="214"/>
+        <source>ChangelogWindow --- Learn more</source>
+        <translation>了解更多</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="198"/>
-        <source>ClientNotifications --- Could not configure DNS.</source>
-        <translation>无法配置 DNS。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="230"/>
+        <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
+        <translation>请重新连接以激活 WireGuard®</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="199"/>
-        <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
-        <translation>启用调试日志记录并检查守护程序日志以获取具体详情。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="359"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>分离通道功能</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="202"/>
-        <source>ClientNotifications --- Daemon Log</source>
-        <translation>守护程序日志</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="376"/>
+        <source>ChangelogWindow --- Control which apps use our VPN!</source>
+        <translation>控制哪些应用程序使用我们的 VPN！</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="204"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="236"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="251"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="315"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="393"/>
-        <source>ClientNotifications --- Settings</source>
-        <translation>设置</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="388"/>
+        <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
+        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
+        <translation>借助我们全面的分离通道功能，您可以控制哪些应用程序使用 VPN 以及何时使用。看看我们的分离通道 [[应用程序示例]]，看看能够实现什么功能。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="212"/>
-        <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
-        <translation>无法运行 /usr/bin/xdg-open。请从以下位置打开守护程序日志文件：</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="459"/>
+        <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
+        <translation>您是否试用过我们的命令行界面 (CLI)？</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="229"/>
-        <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
-        <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
-        <translation>无法连接到 Handshake。</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="475"/>
+        <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
+        <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
+        <translation>PIA 桌面应用程序附带 CLI 以提供更多功能。不妨调用“ piactl”并立即体验！您可以执行下列操作：控制 PIA、集成 PIA 热键、使用脚本实现 PIA 功能自动化，或进行自定义集成等等。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="233"/>
-        <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
-        <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
-        <translation>无法通过 Handshake 设置名称解析。您可以继续等待，或尝试其他的名称服务器设置。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="247"/>
-        <source>ClientNotifications --- There may be a problem with the connection.</source>
-        <translation>连接可能有问题。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="248"/>
-        <source>ClientNotifications --- Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
-        <translation>已连接到 VPN，但无法访问互联网。请检查网络和连接设置。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="267"/>
-        <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
-        <translation>不建议以管理员身份运行 PIA。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="268"/>
-        <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
-        <translation>以管理员身份运行 PIA 可能会使“系统启动时打开”功能无法使用，并可能导致其他问题。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="280"/>
-        <source>ClientNotifications --- KILLSWITCH ENABLED</source>
-        <translation>KILLSWITCH 已启用</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="281"/>
-        <source>ClientNotifications --- Killswitch is enabled.</source>
-        <translation>Killswitch 已启用。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="282"/>
-        <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
-        <translation>互联网连接已被阻止，因为已在“设置”中启用了 Killswitch 功能。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="285"/>
-        <source>ClientNotifications --- Change</source>
-        <translation>更改</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="298"/>
-        <source>ClientNotifications --- RECONNECTING...</source>
-        <translation>正在重新连接...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="299"/>
-        <source>ClientNotifications --- The connection to the VPN server was lost.</source>
-        <translation>与 VPN 服务器的连接已丢失。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="308"/>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="326"/>
-        <source>ClientNotifications --- CONNECTING...</source>
-        <translation>正在连接...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="311"/>
-        <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
-        <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
-        <translation>无法连接到代理。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="312"/>
-        <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
-        <translation>无法访问代理。请检查您的代理设置，并确认代理是否可用。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="327"/>
-        <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
-        <translation>无法接入 VPN 服务器。请检查您的连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="336"/>
-        <source>ClientNotifications --- RECONNECT NEEDED</source>
-        <translation>需要重新连接</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="337"/>
-        <source>ClientNotifications --- Reconnect to apply settings.</source>
-        <translation>重新连接以使设置生效。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="338"/>
-        <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
-        <translation>只有在您下次连接时，一些设置更改才会生效。点击以立即重新连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="347"/>
-        <source>ClientNotifications --- Connected with OpenVPN.</source>
-        <translation>已与 OpenVPN 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="350"/>
-        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
-        <translation>首次登录需要与 OpenVPN 连接。重新连接可使用 WireGuard。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="352"/>
-        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
-        <translation>首次登录需要与 OpenVPN 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="371"/>
-        <source>ClientNotifications --- Connected using %1 port %2.</source>
-        <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
-        <translation>已使用 %1 端口 %2 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="380"/>
-        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
-        <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
-        <translation>已启用“尝试其他设置”。无法在默认 %1 端口上访问服务器，因此使用了 %2 端口 %3。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="388"/>
-        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
-        <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
-        <translation>已启用“尝试其他设置”。无法在 %1 端口 %2 上访问服务器，因此使用了 %3 端口 %4。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="402"/>
-        <source>ClientNotifications --- Subscription expires in %1 days.</source>
-        <translation>订阅将在 %1 天内到期。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="405"/>
-        <source>ClientNotifications --- Renew</source>
-        <translation>续订</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="419"/>
-        <source>ClientNotifications --- Unable to reach login server.</source>
-        <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
-        <translation>无法访问登录服务器。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="423"/>
-        <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
-        <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
-        <translation>您的账户详细信息不可用，但您仍可以连接至 VPN。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="427"/>
-        <source>ClientNotifications --- Retry</source>
-        <translation>重试</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="435"/>
-        <source>ClientNotifications --- Private Internet Access was updated.</source>
-        <translation>Private Internet Access 已等新。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="438"/>
-        <source>ClientNotifications --- See what&apos;s new</source>
-        <translation>查看新特征</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="455"/>
-        <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
-        <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
-        <translation>应用程序意外退出。您的 VPN 连接已保留。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="467"/>
-        <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>除非手动批准，否则分离通道功能会被 macOS 阻止。分离通道规则将不会生效。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Security Preferences</source>
-        <translation>安全首选项</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
-        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
-        <translation>未安装虚拟网络适配器。</translation>
-    </message>
-</context>
-<context>
-    <name>LoginPage</name>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="255"/>
-        <source>LoginPage --- Email Address</source>
-        <translation>电子邮件地址</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="359"/>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="361"/>
-        <source>LoginPage --- Log in with Username</source>
-        <translation>使用用户名登录</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="357"/>
-        <source>LoginPage --- Log in with Email</source>
-        <translation>使用电子邮件登录</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="142"/>
-        <source>LoginPage --- Invalid login</source>
-        <translation>登录无效</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="144"/>
-        <source>LoginPage --- Too many attempts, try again in 1 hour</source>
-        <translation>尝试次数过多，1 小时后方可再次尝试</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="146"/>
-        <source>LoginPage --- Can&apos;t reach the server</source>
-        <translation>无法接入服务器</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="175"/>
-        <source>LoginPage --- Username</source>
-        <translation>用户名</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="184"/>
-        <source>LoginPage --- Use your normal username beginning with &apos;p&apos;.</source>
-        <extracomment>Shown if the user attempts to login with the wrong account type. &apos;p&apos; refers to the letter prefix on the username; the p should be kept in Latin script. (Example user names are &quot;p0123456&quot;, &quot;p5858587&quot;).</extracomment>
-        <translation>使用以 p 开头的普通用户名。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="197"/>
-        <source>LoginPage --- Password</source>
-        <translation>密码</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="234"/>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="316"/>
-        <source>LoginPage --- Something went wrong. Please try again later.</source>
-        <translation>出现问题。请稍后再试。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="236"/>
-        <source>LoginPage --- Please check your email.</source>
-        <translation>请查看您的电子邮件。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="264"/>
-        <source>LoginPage --- SEND EMAIL</source>
-        <translation>发送电子邮件</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="314"/>
-        <source>LoginPage --- Please Wait...</source>
-        <translation>请稍候...</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="329"/>
-        <source>LoginPage --- Forgot Password</source>
-        <translation>忘记密码</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="347"/>
-        <source>LoginPage --- Buy Account</source>
-        <translation>购买账户</translation>
+        <location filename="../../../../../client/res/components/dashboard/WhatsNewContent.qml" line="489"/>
+        <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
+        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
+        <translation>想使用 CLI 搞一些炫酷的操作吗？在 [[PIA Forum]] 好好展示一下吧！</translation>
     </message>
 </context>
 <context>
@@ -529,20 +266,311 @@
     </message>
 </context>
 <context>
-    <name>ChangelogWindow</name>
-    <message>
-        <location filename="../../../../../client/res/components/dashboard/ChangelogWindow.qml" line="16"/>
-        <source>ChangelogWindow --- Changelog</source>
-        <translation>更新日志</translation>
-    </message>
-</context>
-<context>
     <name>Client</name>
     <message>
         <location filename="../../../../../client/res/components/client/Client.qml" line="99"/>
         <source>Client --- %1 - Best</source>
         <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
         <translation>%1 - 最佳</translation>
+    </message>
+</context>
+<context>
+    <name>ClientNotifications</name>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="35"/>
+        <source>ClientNotifications -- header-title --- ERROR</source>
+        
+        <extracomment>Header bar title used for all &quot;error&quot; statuses - serious installation problems, etc. This means that there is currently an error condition active now.</extracomment>
+        <translation>错误</translation>
+        <comment>header-title</comment>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="51"/>
+        <source>ClientNotifications --- UPDATE FAILED</source>
+        <translation>更新失败</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="52"/>
+        <source>ClientNotifications --- Download of version %1 failed.</source>
+        <translation>下载 %1 版失败。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="103"/>
+        <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
+        <translation>未安装 VPN 隧道的 TAP 适配器。您可以从“设置”重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="115"/>
+        <source>ClientNotifications --- Restart to complete installation.</source>
+        <translation>重新启动以完成安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="116"/>
+        <source>ClientNotifications --- The system must be restarted before you can connect.</source>
+        <translation>必须重新启动系统才能连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="129"/>
+        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
+        <translation>未安装 VPN 隧道的 WinTUN 适配器。您可以从“设置”重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="142"/>
+        <source>ClientNotifications --- The split tunnel filter is not installed.</source>
+        <translation>未安装分离通道筛选器。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="143"/>
+        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
+        <translation>App 排除功能需要安装分离通道筛选器。请从设置中重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="154"/>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
+        <source>ClientNotifications --- Reinstall</source>
+        <translation>重新安装</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="168"/>
+        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
+        <translation>App 排除功能需要安装分离通道筛选器。请重新启动以完成安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="183"/>
+        <source>ClientNotifications --- Connection refused.</source>
+        <translation>连接被拒绝。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="189"/>
+        <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
+        <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
+        <translation>服务器已拒绝连接。请检查您的用户名和密码，并确认您的账户未过期。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="198"/>
+        <source>ClientNotifications --- Could not configure DNS.</source>
+        <translation>无法配置 DNS。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="199"/>
+        <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
+        <translation>启用调试日志记录并检查守护程序日志以获取具体详情。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="202"/>
+        <source>ClientNotifications --- Daemon Log</source>
+        <translation>守护程序日志</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="204"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="236"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="251"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="321"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="399"/>
+        <source>ClientNotifications --- Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="212"/>
+        <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
+        <translation>无法运行 /usr/bin/xdg-open。请从以下位置打开守护程序日志文件：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="229"/>
+        <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
+        <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
+        <translation>无法连接到 Handshake。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="233"/>
+        <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
+        <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
+        <translation>无法通过 Handshake 设置名称解析。您可以继续等待，或尝试其他的名称服务器设置。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="247"/>
+        <source>ClientNotifications --- There may be a problem with the connection.</source>
+        <translation>连接可能有问题。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="248"/>
+        <source>ClientNotifications --- Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
+        <translation>已连接到 VPN，但无法访问互联网。请检查网络和连接设置。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="273"/>
+        <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
+        <translation>不建议以管理员身份运行 PIA。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="274"/>
+        <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
+        <translation>以管理员身份运行 PIA 可能会使“系统启动时打开”功能无法使用，并可能导致其他问题。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="286"/>
+        <source>ClientNotifications --- KILLSWITCH ENABLED</source>
+        <translation>KILLSWITCH 已启用</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="287"/>
+        <source>ClientNotifications --- Killswitch is enabled.</source>
+        <translation>Killswitch 已启用。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="288"/>
+        <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
+        <translation>互联网连接已被阻止，因为已在“设置”中启用了 Killswitch 功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="291"/>
+        <source>ClientNotifications --- Change</source>
+        <translation>更改</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="304"/>
+        <source>ClientNotifications --- RECONNECTING...</source>
+        <translation>正在重新连接...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="305"/>
+        <source>ClientNotifications --- The connection to the VPN server was lost.</source>
+        <translation>与 VPN 服务器的连接已丢失。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="314"/>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="332"/>
+        <source>ClientNotifications --- CONNECTING...</source>
+        <translation>正在连接...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="317"/>
+        <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
+        <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
+        <translation>无法连接到代理。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="318"/>
+        <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
+        <translation>无法访问代理。请检查您的代理设置，并确认代理是否可用。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="333"/>
+        <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
+        <translation>无法接入 VPN 服务器。请检查您的连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="342"/>
+        <source>ClientNotifications --- RECONNECT NEEDED</source>
+        <translation>需要重新连接</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="343"/>
+        <source>ClientNotifications --- Reconnect to apply settings.</source>
+        <translation>重新连接以使设置生效。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="344"/>
+        <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
+        <translation>只有在您下次连接时，一些设置更改才会生效。点击以立即重新连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="353"/>
+        <source>ClientNotifications --- Connected with OpenVPN.</source>
+        <translation>已与 OpenVPN 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="356"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
+        <translation>首次登录需要与 OpenVPN 连接。重新连接可使用 WireGuard。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="358"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
+        <translation>首次登录需要与 OpenVPN 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="377"/>
+        <source>ClientNotifications --- Connected using %1 port %2.</source>
+        <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
+        <translation>已使用 %1 端口 %2 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="386"/>
+        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
+        <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
+        <translation>已启用“尝试其他设置”。无法在默认 %1 端口上访问服务器，因此使用了 %2 端口 %3。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="394"/>
+        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
+        <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
+        <translation>已启用“尝试其他设置”。无法在 %1 端口 %2 上访问服务器，因此使用了 %3 端口 %4。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="408"/>
+        <source>ClientNotifications --- Subscription expires in %1 days.</source>
+        <translation>订阅将在 %1 天内到期。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="411"/>
+        <source>ClientNotifications --- Renew</source>
+        <translation>续订</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="425"/>
+        <source>ClientNotifications --- Unable to reach login server.</source>
+        <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
+        <translation>无法访问登录服务器。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="429"/>
+        <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
+        <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
+        <translation>您的账户详细信息不可用，但您仍可以连接至 VPN。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="433"/>
+        <source>ClientNotifications --- Retry</source>
+        <translation>重试</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="441"/>
+        <source>ClientNotifications --- Private Internet Access was updated.</source>
+        <translation>Private Internet Access 已等新。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="444"/>
+        <source>ClientNotifications --- See what&apos;s new</source>
+        <translation>查看新特征</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="461"/>
+        <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
+        <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
+        <translation>应用程序意外退出。您的 VPN 连接已保留。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="472"/>
+        <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
+        <translation>批准分离通道扩展程序以启用分离通道。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="473"/>
+        <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
+        <translation>除非手动批准，否则分离通道功能会被 macOS 阻止。分离通道规则将不会生效。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/ClientNotifications.qml" line="477"/>
+        <source>ClientNotifications --- Security Preferences</source>
+        <translation>安全首选项</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
+        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
+        <translation>未安装虚拟网络适配器。</translation>
     </message>
 </context>
 <context>
@@ -597,6 +625,22 @@
         <source>ConnectPage --- Connect page</source>
         <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
         <translation>连接页面</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionModule</name>
+    <message>
+    <source>ConnectionModule --- Connection tile</source>
+        <extracomment>Screen reader annotation for the Connection tile</extracomment>
+        <translation>连接图块</translation>
+    </message>
+    <message>
+    <source>ConnectionModule --- CONNECTION</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+    <source>ConnectionModule --- Protocol</source>
+        <translation>协议</translation>
     </message>
 </context>
 <context>
@@ -655,27 +699,9 @@
         <translation>WireGuard® 是 Jason A. Donenfeld 个人的商标。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="26"/>
-        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
-        <source>ConnectionPage --- Default</source>
-        <translation>默认</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="64"/>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="72"/>
-        <source>ConnectionPage --- Connection Type</source>
-        <translation>连接类型</translation>
-    </message>
-    <message>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="75"/>
         <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
         <translation>Shadowsocks 代理设置需要 TCP。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="90"/>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="95"/>
-        <source>ConnectionPage --- Remote Port</source>
-        <translation>远程端口</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="101"/>
@@ -713,11 +739,6 @@
         <translation>确定如何在 TAP 适配器上配置地址。如果您在连接时遇到问题，则另一种方法可能更可靠。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
-        <source>ConnectionPage --- Data Encryption</source>
-        <translation>数据加密</translation>
-    </message>
-    <message>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="149"/>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="163"/>
         <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
@@ -730,20 +751,9 @@
         <translation>警告：您正在发送未经加密的流量， 它们很容易遭到窃听。</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="158"/>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
-        <source>ConnectionPage --- Data Authentication</source>
-        <translation>数据验证</translation>
-    </message>
-    <message>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="165"/>
         <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
         <translation>警告：您正在发送未经加密的流量， 它们很容易遭到操控。</translation>
-    </message>
-    <message>
-        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="177"/>
-        <source>ConnectionPage --- Handshake</source>
-        <translation>握手</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="187"/>
@@ -806,6 +816,12 @@
         <translation>端口</translation>
     </message>
     <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="26"/>
+        <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
+        <source>ConnectionPage --- Default</source>
+        <translation>默认</translation>
+    </message>
+    <message>
         <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>用户（可选）</translation>
@@ -814,6 +830,34 @@
         <location filename="../../../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>密码（可选）</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="64"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="72"/>
+        <source>ConnectionPage --- Connection Type</source>
+        <translation>连接类型</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="90"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="95"/>
+        <source>ConnectionPage --- Remote Port</source>
+        <translation>远程端口</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
+        <source>ConnectionPage --- Data Encryption</source>
+        <translation>数据加密</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="158"/>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <source>ConnectionPage --- Data Authentication</source>
+        <translation>数据验证</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="177"/>
+        <source>ConnectionPage --- Handshake</source>
+        <translation>握手</translation>
     </message>
 </context>
 <context>
@@ -862,552 +906,560 @@
 <context>
     <name>DaemonData</name>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="194"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="195"/>
         <source>DaemonData --- AU Melbourne</source>
         <translation>澳大利亚墨尔本</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="195"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="196"/>
         <source>DaemonData --- AU Perth</source>
         <translation>澳大利亚珀斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="196"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="197"/>
         <source>DaemonData --- AU Sydney</source>
         <translation>澳大利亚悉尼</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="197"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="198"/>
         <source>DaemonData --- Albania</source>
         <translation>阿尔巴尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="198"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="199"/>
         <source>DaemonData --- Algeria</source>
         <translation>阿尔及利亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="199"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="200"/>
         <source>DaemonData --- Andorra</source>
         <translation>安道尔</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="200"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="201"/>
         <source>DaemonData --- Argentina</source>
         <translation>阿根廷</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="201"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="202"/>
         <source>DaemonData --- Armenia</source>
         <translation>亚美尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="202"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="203"/>
         <source>DaemonData --- Australia</source>
         <translation>澳大利亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="203"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="204"/>
         <source>DaemonData --- Austria</source>
         <translation>澳大利亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="204"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="205"/>
         <source>DaemonData --- Bahamas</source>
         <translation>巴哈马</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="205"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="206"/>
         <source>DaemonData --- Bangladesh</source>
         <translation>孟加拉国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="206"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="207"/>
         <source>DaemonData --- Belarus</source>
         <translation>白俄罗斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="207"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="208"/>
         <source>DaemonData --- Belgium</source>
         <translation>比利时</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="208"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="209"/>
         <source>DaemonData --- Bosnia and Herzegovina</source>
         <translation>波黑</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="209"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="210"/>
         <source>DaemonData --- Brazil</source>
         <translation>巴西</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="210"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="211"/>
         <source>DaemonData --- Bulgaria</source>
         <translation>保加利亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="211"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="212"/>
         <source>DaemonData --- CA Montreal</source>
         <translation>加拿大蒙特利尔</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="212"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="213"/>
         <source>DaemonData --- CA Ontario</source>
         <translation>加拿大安大略省</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="213"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="214"/>
         <source>DaemonData --- CA Toronto</source>
         <translation>加拿大多伦多</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="214"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="215"/>
         <source>DaemonData --- CA Vancouver</source>
         <translation>加拿大温哥华</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="215"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="216"/>
         <source>DaemonData --- Cambodia</source>
         <translation>柬埔寨</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="216"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="217"/>
         <source>DaemonData --- Canada</source>
         <translation>加拿大</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="217"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="218"/>
         <source>DaemonData --- China</source>
         <translation>中国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="218"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="219"/>
         <source>DaemonData --- Cyprus</source>
         <translation>塞浦路斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="219"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="220"/>
         <source>DaemonData --- Croatia</source>
         <translation>克罗地亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="220"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="221"/>
         <source>DaemonData --- Czech Republic</source>
         <translation>捷克共和国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="221"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="222"/>
         <source>DaemonData --- DE Berlin</source>
         <translation>德国柏林</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="222"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="223"/>
         <source>DaemonData --- DE Frankfurt</source>
         <translation>德国法兰克福</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="223"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="224"/>
         <source>DaemonData --- Denmark</source>
         <translation>丹麦</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="224"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="225"/>
         <source>DaemonData --- Egypt</source>
         <translation>埃及</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="225"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="226"/>
         <source>DaemonData --- Estonia</source>
         <translation>爱沙尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="226"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="227"/>
         <source>DaemonData --- Finland</source>
         <translation>芬兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="227"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="228"/>
         <source>DaemonData --- France</source>
         <translation>法国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="228"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="229"/>
         <source>DaemonData --- Germany</source>
         <translation>德国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="229"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="230"/>
         <source>DaemonData --- Georgia</source>
         <translation>格鲁吉亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="230"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="231"/>
         <source>DaemonData --- Greece</source>
         <translation>希腊</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="231"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="232"/>
         <source>DaemonData --- Greenland</source>
         <translation>格陵兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="232"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="233"/>
         <source>DaemonData --- Hong Kong</source>
         <translation>中国香港</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="233"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="234"/>
         <source>DaemonData --- Hungary</source>
         <translation>匈牙利</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="234"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="235"/>
         <source>DaemonData --- Iceland</source>
         <translation>冰岛</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="235"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="236"/>
         <source>DaemonData --- India</source>
         <translation>印度</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="236"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="237"/>
         <source>DaemonData --- Iran</source>
         <translation>伊朗</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="237"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="238"/>
         <source>DaemonData --- Ireland</source>
         <translation>冰岛</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="238"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="239"/>
         <source>DaemonData --- Isle of Man</source>
         <translation>马恩岛</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="239"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="240"/>
         <source>DaemonData --- Israel</source>
         <translation>以色列</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="240"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="241"/>
         <source>DaemonData --- Italy</source>
         <translation>意大利</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="241"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="242"/>
         <source>DaemonData --- Japan</source>
         <translation>日本</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="242"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="243"/>
         <source>DaemonData --- Kazakhstan</source>
         <translation>哈萨克斯坦</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="243"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="244"/>
         <source>DaemonData --- Latvia</source>
         <translation>拉脱维亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="244"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="245"/>
         <source>DaemonData --- Liechtenstein</source>
         <translation>列支敦士登</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="245"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="246"/>
         <source>DaemonData --- Lithuania</source>
         <translation>立陶宛</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="246"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="247"/>
         <source>DaemonData --- Luxembourg</source>
         <translation>卢森堡</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="247"/>
-        <source>DaemonData --- Macau</source>
+    <source>DaemonData --- Macao</source>
         <translation>澳门地区</translation>
     </message>
     <message>
         <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="248"/>
+        <source>DaemonData --- Macau</source>
+        <translation>澳门地区</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="249"/>
         <source>DaemonData --- Malaysia</source>
         <translation>马来西亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="249"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="250"/>
         <source>DaemonData --- Malta</source>
         <translation>马耳他</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="250"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="251"/>
         <source>DaemonData --- Mexico</source>
         <translation>墨西哥</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="251"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="252"/>
         <source>DaemonData --- Moldova</source>
         <translation>摩尔多瓦</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="252"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="253"/>
         <source>DaemonData --- Monaco</source>
         <translation>摩纳哥</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="253"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="254"/>
         <source>DaemonData --- Mongolia</source>
         <translation>蒙古</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="254"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="255"/>
         <source>DaemonData --- Montenegro</source>
         <translation>黑山</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="255"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="256"/>
         <source>DaemonData --- Morocco</source>
         <translation>摩洛哥</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="256"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="257"/>
         <source>DaemonData --- Netherlands</source>
         <translation>荷兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="257"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="258"/>
         <source>DaemonData --- New Zealand</source>
         <translation>新西兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="258"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="259"/>
         <source>DaemonData --- Nigeria</source>
         <translation>尼日利亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="259"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="260"/>
         <source>DaemonData --- North Macedonia</source>
         <translation>北马其顿</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="260"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="261"/>
         <source>DaemonData --- Norway</source>
         <translation>挪威</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="261"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="262"/>
         <source>DaemonData --- Panama</source>
         <translation>巴拿马</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="262"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="263"/>
         <source>DaemonData --- Philippines</source>
         <translation>菲律宾</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="263"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="264"/>
         <source>DaemonData --- Poland</source>
         <translation>波兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="264"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="265"/>
         <source>DaemonData --- Portugal</source>
         <translation>葡萄牙</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="265"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="266"/>
         <source>DaemonData --- Qatar</source>
         <translation>卡塔尔</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="266"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="267"/>
         <source>DaemonData --- Romania</source>
         <translation>罗马尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="267"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="268"/>
         <source>DaemonData --- Russia</source>
         <translation>俄罗斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="268"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="269"/>
         <source>DaemonData --- Saudi Arabia</source>
         <translation>沙特阿拉伯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="269"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="270"/>
         <source>DaemonData --- Serbia</source>
         <translation>塞尔维亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="270"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="271"/>
         <source>DaemonData --- Singapore</source>
         <translation>新加坡</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="271"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="272"/>
         <source>DaemonData --- Slovakia</source>
         <translation>斯洛伐克</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="272"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="273"/>
         <source>DaemonData --- Slovenia</source>
         <translation>斯洛文尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="273"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="274"/>
         <source>DaemonData --- South Africa</source>
         <translation>南非</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="274"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="275"/>
         <source>DaemonData --- Spain</source>
         <translation>西班牙</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="275"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="276"/>
         <source>DaemonData --- Sri Lanka</source>
         <translation>斯里兰卡</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="276"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="277"/>
         <source>DaemonData --- Sweden</source>
         <translation>瑞典</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="277"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="278"/>
         <source>DaemonData --- Switzerland</source>
         <translation>瑞士</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="278"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="279"/>
         <source>DaemonData --- Taiwan</source>
         <translation>台湾地区</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="279"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="280"/>
         <source>DaemonData --- Turkey</source>
         <translation>土耳其</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="280"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="281"/>
         <source>DaemonData --- UAE</source>
         <translation>阿联酋</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="281"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="282"/>
         <source>DaemonData --- UK London</source>
         <translation>英国伦敦</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="282"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="283"/>
         <source>DaemonData --- UK Manchester</source>
         <translation>英国曼彻斯特</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="283"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="284"/>
         <source>DaemonData --- UK Southampton</source>
         <translation>英国南安普敦</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="284"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="285"/>
         <source>DaemonData --- US Atlanta</source>
         <translation>美国亚特兰大</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="285"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="286"/>
         <source>DaemonData --- US California</source>
         <translation>美国加利佛尼亚</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="286"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="287"/>
         <source>DaemonData --- US Chicago</source>
         <translation>美国芝加哥</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="287"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="288"/>
         <source>DaemonData --- US Denver</source>
         <translation>美国丹佛</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="288"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="289"/>
         <source>DaemonData --- US East</source>
         <translation>美国东部</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="289"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="290"/>
         <source>DaemonData --- US Florida</source>
         <translation>美国佛罗里达</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="290"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="291"/>
         <source>DaemonData --- US Houston</source>
         <translation>美国休斯顿</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="291"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="292"/>
         <source>DaemonData --- US Las Vegas</source>
         <translation>美国拉斯维加斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="292"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="293"/>
         <source>DaemonData --- US New York City</source>
         <translation>美国纽约市</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="293"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="294"/>
         <source>DaemonData --- US New York</source>
         <translation>美国纽约</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="294"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="295"/>
         <source>DaemonData --- US Seattle</source>
         <translation>美国西雅图</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="295"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="296"/>
         <source>DaemonData --- US Silicon Valley</source>
         <translation>美国硅谷</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="296"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="297"/>
         <source>DaemonData --- US Texas</source>
         <translation>美国德克萨斯</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="297"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="298"/>
         <source>DaemonData --- US Washington DC</source>
         <translation>美国华盛顿特区</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="298"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="299"/>
         <source>DaemonData --- US West</source>
         <translation>美国西部</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="299"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="300"/>
         <source>DaemonData --- Ukraine</source>
         <translation>乌克兰</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="300"/>
+    <source>DaemonData --- United Arab Emirates</source>
+        <translation>阿联酋</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="301"/>
         <source>DaemonData --- United Kingdom</source>
         <translation>英国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="301"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="302"/>
         <source>DaemonData --- United States</source>
         <translation>美国</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="302"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="303"/>
         <source>DaemonData --- Venezuela</source>
         <translation>委内瑞拉</translation>
     </message>
     <message>
-        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="303"/>
+        <location filename="../../../../../client/res/components/daemon/DaemonState.qml" line="304"/>
         <source>DaemonData --- Vietnam</source>
         <translation>越南</translation>
     </message>
@@ -1926,6 +1978,87 @@
         <location filename="../../../../../client/res/components/dashboard/login/LoginButton.qml" line="12"/>
         <source>LoginButton --- LOG IN</source>
         <translation>登录</translation>
+    </message>
+</context>
+<context>
+    <name>LoginPage</name>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="153"/>
+        <source>LoginPage --- Invalid login</source>
+        <translation>登录无效</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="155"/>
+        <source>LoginPage --- Too many attempts, try again in 1 hour</source>
+        <translation>尝试次数过多，1 小时后方可再次尝试</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="157"/>
+        <source>LoginPage --- Can&apos;t reach the server</source>
+        <translation>无法接入服务器</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="185"/>
+        <source>LoginPage --- Username</source>
+        <translation>用户名</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="194"/>
+        <source>LoginPage --- Use your normal username beginning with &apos;p&apos;.</source>
+        <extracomment>Shown if the user attempts to login with the wrong account type. &apos;p&apos; refers to the letter prefix on the username; the p should be kept in Latin script. (Example user names are &quot;p0123456&quot;, &quot;p5858587&quot;).</extracomment>
+        <translation>使用以 p 开头的普通用户名。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="207"/>
+        <source>LoginPage --- Password</source>
+        <translation>密码</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="242"/>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="320"/>
+        <source>LoginPage --- Something went wrong. Please try again later.</source>
+        <translation>出现问题。请稍后再试。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="244"/>
+        <source>LoginPage --- Please check your email.</source>
+        <translation>请查看您的电子邮件。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="262"/>
+        <source>LoginPage --- Email Address</source>
+        <translation>电子邮件地址</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="271"/>
+        <source>LoginPage --- SEND EMAIL</source>
+        <translation>发送电子邮件</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="318"/>
+        <source>LoginPage --- Please Wait...</source>
+        <translation>请稍候...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="370"/>
+        <source>LoginPage --- Log in with Email</source>
+        <translation>使用电子邮件登录</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="372"/>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="374"/>
+        <source>LoginPage --- Log in with Username</source>
+        <translation>使用用户名登录</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="390"/>
+        <source>LoginPage --- Forgot Password</source>
+        <translation>忘记密码</translation>
+    </message>
+    <message>
+        <location filename="../../../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
+        <source>LoginPage --- Buy Account</source>
+        <translation>购买账户</translation>
     </message>
 </context>
 <context>
@@ -4181,50 +4314,53 @@
         <translation>WinTUN 卸载失败。</translation>
     </message>
     <message>
-    <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="112"/>
+        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
         <translation>将“安全模式”用于“网络”以安装或卸载 Private Internet Access。</translation>
     </message>
     <message>
-    <source>winstaller --- Installation complete</source>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
+        <source>winstaller --- Installation complete</source>
         <translation>安装完成</translation>
     </message>
     <message>
-    <source>winstaller --- Restart your computer to use Private Internet Access.</source>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="114"/>
+        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
         <translation>重启计算机以使用 Private Internet Access。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="113"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
         <source>winstaller --- The installation will now abort.</source>
         <translation>安装将立即中止。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="114"/>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="118"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="117"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="121"/>
         <source>winstaller --- This is preventing the installation from proceeding.</source>
         <translation>这会阻止安装继续进行。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="115"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="118"/>
         <source>winstaller --- Do you wish to continue the installation anyway?</source>
         <translation>您是否希望继续安装？</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="116"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="119"/>
         <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
         <translation>您可以重试或尝试继续安装。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="117"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="120"/>
         <source>winstaller --- The uninstallation will now abort.</source>
         <translation>卸载将立即中止。</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="119"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="122"/>
         <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
         <translation>您是否希望继续卸载？</translation>
     </message>
     <message>
-        <location filename="../../../../../extras/installer/win/strings.rc" line="120"/>
+        <location filename="../../../../../extras/installer/win/strings.rc" line="123"/>
         <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
         <translation>您可以重试或尝试继续卸载。</translation>
     </message>

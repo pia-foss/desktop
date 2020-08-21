@@ -60,7 +60,6 @@ Page {
             }, {
               "name": "WireGuard®",
               "value": 'wireguard',
-              "preview": true,
               disabled: !Daemon.state.wireguardAvailable
             }]
           onSelected: {

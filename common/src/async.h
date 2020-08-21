@@ -575,6 +575,68 @@ protected:
     virtual const char* typeName() const override;
 };
 
+// Abortable task - wraps an inner task with another task that can be aborted.
+// If the outer task is aborted, the inner task is abandoned and the task chain
+// is freed.
+//
+// Used to implement Async::abortable().
+template<typename Result>
+class AbortableTask : public Task<Result>
+{
+public:
+    explicit AbortableTask(QSharedPointer<Task<Result>> pInnerTask)
+    {
+        Q_ASSERT(pInnerTask);  // Ensured by caller
+        // Use next() (not notify()) so we can abandon the task.  This returns a
+        // new task, hang onto that one and drop the reference if the task is
+        // aborted.
+        _pInnerTask = pInnerTask->next(this, [this](const Error &err, const Result &result)
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                if(err)
+                    this->reject(err);
+                else
+                    this->resolve(result);
+            }
+            else
+            {
+                qInfo() << "Task" << this << "/"
+                    << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                    << "- inner task completed after being aborted";
+            }
+        });
+    }
+
+public:
+    void abort(Error err)
+    {
+        auto keepAlive = this->sharedFromThis();
+        if(this->isPending())
+        {
+            qInfo() << "Aborting task" << this << "/"
+                << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                << "with error" << err;
+            this->reject(std::move(err));
+            if(_pInnerTask)
+            {
+                _pInnerTask->abandon();
+                _pInnerTask.reset();
+            }
+        }
+        else
+        {
+            qInfo() << "Task" << this << "/"
+                << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                << "has already finished, can't abort";
+        }
+    }
+
+private:
+    QSharedPointer<Task<Result>> _pInnerTask;
+};
+
 // Timeout task - wraps an inner task with a timeout.  If the timeout elapses,
 // the task is rejected with Error::Code::TaskTimedOut, and the inner task is
 // abandoned.
@@ -718,6 +780,68 @@ public:
     // timeout, or rejects with Error::Code::TaskTimedOut when the timeout
     // elapses.
     Async<Result> timeout(std::chrono::milliseconds timeout) {return Async<TimeoutTask<Result>>::create(*this, timeout);}
+
+    // Wrap a task in a AbortableTask.  The returned task's abort() method can
+    // be used to abort the task prematurely.
+    Async<AbortableTask<Result>> abortable() {return Async<AbortableTask<Result>>::create(*this);}
+};
+
+// Specialization of AbortableTask for void result
+template<>
+class AbortableTask<void> : public Task<void>
+{
+public:
+    explicit AbortableTask(QSharedPointer<Task<void>> pInnerTask)
+    {
+        Q_ASSERT(pInnerTask);  // Ensured by caller
+        // Use next() (not notify()) so we can abandon the task.  This returns a
+        // new task, hang onto that one and drop the reference if the task is
+        // aborted.
+        _pInnerTask = pInnerTask->next(this, [this](const Error &err)
+        {
+            auto keepAlive = this->sharedFromThis();
+            if(this->isPending())
+            {
+                if(err)
+                    this->reject(err);
+                else
+                    this->resolve();
+            }
+            else
+            {
+                qInfo() << "Task" << this << "/"
+                    << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                    << "- inner task completed after being aborted";
+            }
+        });
+    }
+
+public:
+    void abort(Error err)
+    {
+        auto keepAlive = this->sharedFromThis();
+        if(this->isPending())
+        {
+            qInfo() << "Aborting task" << this << "/"
+                << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                << "with error" << err;
+            this->reject(std::move(err));
+            if(_pInnerTask)
+            {
+                _pInnerTask->abandon();
+                _pInnerTask.reset();
+            }
+        }
+        else
+        {
+            qInfo() << "Task" << this << "/"
+                << (_pInnerTask ? _pInnerTask.get() : nullptr)
+                << "has already finished, can't abort";
+        }
+    }
+
+private:
+    QSharedPointer<Task<void>> _pInnerTask;
 };
 
 // Specialization of TimeoutTask for void result

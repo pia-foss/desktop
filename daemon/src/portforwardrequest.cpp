@@ -33,12 +33,43 @@ namespace
 
     // How often we need to bind the port to keep it alive.
     std::chrono::minutes modernPfBindInterval{15};
+
+    // Wait for the auth token to be available.  If we hadn't obtained a token
+    // before connecting, we need to wait for the token to be obtained before
+    // attempting to use port forwarding in the Modern infrastructure.  This
+    // task never fails, a timeout should be used to abandon it if the token is
+    // never obtained.
+    class AuthTokenTask : public Task<QString>
+    {
+    public:
+        AuthTokenTask(DaemonAccount &account)
+            : _account{account}
+        {
+            checkToken();
+            if(isPending())
+            {
+                connect(&account, &DaemonAccount::tokenChanged, this,
+                        &AuthTokenTask::checkToken);
+            }
+        }
+
+    private:
+        void checkToken()
+        {
+            if(!_account.token().isEmpty())
+                resolve(_account.token());
+        }
+
+    public:
+        DaemonAccount &_account;
+    };
 }
 
 PortForwardRequestLegacy::PortForwardRequestLegacy(ApiClient &apiClient,
+                                                   Environment &environment,
                                                    const QString &clientId)
 {
-    apiClient.getForwardedPort(QStringLiteral("?client_id=%1").arg(clientId))
+    apiClient.getForwardedPort(*environment.getPortForwardApi(), QStringLiteral("?client_id=%1").arg(clientId))
         ->notify(this, [this](const Error &err, const QJsonDocument& json)
         {
             if(err)
@@ -73,10 +104,19 @@ PortForwardRequestModern::PortForwardRequestModern(ApiClient &apiClient,
         _account.portForwardSignature({});
         // Get a new token
         _canRetry = false;  // If the token fails immediately, do not retry
-        QString resource = QStringLiteral("getSignature?token=") +
-            QString::fromLatin1(QUrl::toPercentEncoding(account.token()));
-        apiClient.getRetry(_pfApiBase, resource, {})
+        // Wait for the auth token to become available for up to 1 minute
+        Async<AuthTokenTask>::create(account)
+            .timeout(std::chrono::minutes{1})
+            // Then kick off an API request to get a PF token
+            ->then(this, [this](const QString &token)
+                {
+                    QString resource = QStringLiteral("getSignature?token=") +
+                        QString::fromLatin1(QUrl::toPercentEncoding(token));
+                    return _apiClient.getRetry(_pfApiBase, resource, {});
+                })
             ->then(this, &PortForwardRequestModern::handleGetSigResult)
+            // Then, bind the port.  Fail if we couldn't get the token for any
+            // reason
             ->notify(this, [this](const Error &err, const PfToken &token)
                 {
                     if(err)

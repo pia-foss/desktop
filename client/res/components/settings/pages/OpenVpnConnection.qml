@@ -20,6 +20,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import "."
+import ".."
 import "../inputs"
 import "../stores"
 import "../../client"
@@ -41,7 +42,7 @@ Item {
   // Generates the values for the port selection drop down (either udp/tcp)
   function portSelection(ports) {
     return [
-            { name: uiTranslate("ConnectionPage", "Default"), value: 0 }
+            { name: SettingsMessages.defaultRemotePort, value: 0 }
            ].concat(ports.map(function(x) { return { name: x.toString(), value: x } }));
   }
 
@@ -79,7 +80,7 @@ Item {
         Layout.fillHeight: false
         currentIndex: Daemon.settings.proxy === "shadowsocks" ? 1 : 0
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Connection Type")
+          label: SettingsMessages.connectionTypeSetting
           setting: DaemonSetting { name: "protocol" }
           model: [
             { name: "UDP", value: "udp" },
@@ -87,7 +88,7 @@ Item {
           ]
         }
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Connection Type")
+          label: SettingsMessages.connectionTypeSetting
           enabled: false
           setting: Setting { sourceValue: 0 }
           info: uiTranslate("ConnectionPage", "The Shadowsocks proxy setting requires TCP.")
@@ -105,12 +106,12 @@ Item {
         Layout.fillWidth: false
         Layout.fillHeight: false
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Remote Port")
+          label: SettingsMessages.remotePortSetting
           setting: DaemonSetting { name: "remotePortUDP" }
           model: portSelection(Daemon.state.openvpnUdpPortChoices)
         }
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Remote Port")
+          label: SettingsMessages.remotePortSetting
           setting: DaemonSetting { name: "remotePortTCP" }
           model: portSelection(Daemon.state.openvpnTcpPortChoices)
         }
@@ -157,7 +158,7 @@ Item {
       Layout.alignment: Qt.AlignTop
       spacing: outerGrid.rowSpacing
       DropdownInput {
-        label: uiTranslate("ConnectionPage", "Data Encryption")
+        label: SettingsMessages.dataEncryptionSetting
         setting: DaemonSetting { name: "cipher" }
         model: [
           { name: "AES-128 (GCM)", value: "AES-128-GCM" },
@@ -173,7 +174,7 @@ Item {
         Layout.fillWidth: false
         Layout.fillHeight: false
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Data Authentication")
+          label: SettingsMessages.dataAuthenticationSetting
           setting: DaemonSetting { name: "auth" }
           model: [
             { name: "SHA1", value: "SHA1" },
@@ -183,7 +184,7 @@ Item {
           warning: setting.sourceValue === 'none' ? uiTranslate("ConnectionPage", "Warning: Your traffic is unauthenticated and is vulnerable to manipulation.") : ""
         }
         DropdownInput {
-          label: uiTranslate("ConnectionPage", "Data Authentication")
+          label: SettingsMessages.dataAuthenticationSetting
           enabled: false
           setting: Setting { sourceValue: 0 }
           model: [
@@ -192,7 +193,7 @@ Item {
         }
       }
       DropdownInput {
-        label: uiTranslate("ConnectionPage", "Handshake")
+        label: SettingsMessages.handshakeSetting
         setting: DaemonSetting { name: "serverCertificate" }
         model: [
           { name: "RSA-2048", value: "RSA-2048" },

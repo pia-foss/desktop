@@ -92,8 +92,9 @@ public:
         // Receive the TCP connect request header - everything up to the address
         // type, which determines the length of the rest of the message.
         ReceiveConnectHeader,
-        // Receive the rest of the connect request.
-        ReceiveConnect,
+        // Receive the rest of the connect request, for either IPv4 or IPv6
+        ReceiveConnectIPv4,
+        ReceiveConnectIPv6,
         // We're connecting the outgoing socket; response is sent when this
         // completes.
         Connecting,

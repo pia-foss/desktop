@@ -104,7 +104,10 @@ private:
 //
 // Attempts to connect to the socket immediately.  If this fails, will retry
 // when any change is observed in the containing directory or its ancestors (to
-// detect when the socket may have been created).
+// detect when the socket may have been created).  If the socket exists but the
+// connection is refused, will start short-polling the socket (this happens with
+// WG on some Linux systems, PIA tries to connect so quickly that WG isn't ready
+// yet).
 //
 // Rejected if the timeout elapses.
 class PendingLocalSocketTask : public Task<std::shared_ptr<QLocalSocket>>
@@ -217,7 +220,16 @@ void LocalSocketTask::socketError(QLocalSocket::LocalSocketError err)
     // disconnect signals and delete later.
     _pSocket->disconnect(this);
     _pSocket.release()->deleteLater();
-    reject({HERE, Error::Code::LocalSocketConnectionFailed});
+    // Reject with LocalSocketNotFound only if we are sure that the socket did
+    // not exist.  This means that PendingLocalSocketTask will wait for a
+    // directory change to try to connect again.
+    if(err == QLocalSocket::LocalSocketError::ServerNotFoundError)
+        reject({HERE, Error::Code::LocalSocketNotFound});
+    // Otherwise, reject with LocalSocketCannotConnect, the socket likely exists
+    // but we were still unable to connect.  Since we won't necessarily get
+    // another filesystem change, PendingLocalSocketTask will start polling.
+    else
+        reject({HERE, Error::Code::LocalSocketCannotConnect});
     // May have destroyed *this
 }
 
@@ -300,10 +312,28 @@ void PendingLocalSocketTask::beginAttempt()
                     _alreadyChanged = false;
                     beginAttempt();
                 }
-                else
+                else if(error.code() == Error::Code::LocalSocketNotFound)
                 {
+                    // Socket definitely doesn't exist yet, wait for a directory
+                    // change before trying again
                     qInfo() << "Wait for" << _socketPath
                         << "to be created before trying again";
+                }
+                else
+                {
+                    // The socket likely exists at this point (definitely true
+                    // if we got QLocalSocket::LocalSocketError::ConnectionRefused,
+                    // but might be true with some other ambiguous errors.
+                    // We won't necessarily get another filesystem change, so
+                    // poll again in 100ms.
+                    qInfo() << "Connection failed, but socket" << _socketPath
+                        << "may exist, wait briefly and try again";
+                    QTimer::singleShot(100, this, [this]()
+                    {
+                        qInfo() << "Recheck" << _socketPath
+                            << "now since the socket was present for the last attempt";
+                        directoryChanged();
+                    });
                 }
             });
     // The attempt can complete synchronously, in which case the handler was

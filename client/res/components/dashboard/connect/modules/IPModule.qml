@@ -166,7 +166,7 @@ MovableModule {
         return Daemon.state.connectedConfig.method === "openvpn" || Daemon.state.connectedConfig.infrastructure === "modern"
       else if(Daemon.state.connectingConfig.vpnLocation)
         return Daemon.state.connectingConfig.method === "openvpn" || Daemon.state.connectingConfig.infrastructure === "modern"
-      return Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure === "modern"
+      return Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current"
     }
 
     // PF is "active" when the setting is enabled or if the port forward

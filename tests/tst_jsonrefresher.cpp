@@ -38,7 +38,7 @@ namespace TestData {
 const QByteArray &successJson = R"({"unit_test":true})";
 
 std::shared_ptr<ApiBase> pUnitTestDummyApi =
-    std::make_shared<ApiBase>(
+    std::make_shared<FixedApiBase>(
         std::initializer_list<QString>{QStringLiteral("https://www.privateinternetaccess.com/")}
     );
 

@@ -27,7 +27,7 @@ namespace
     std::chrono::seconds _interval{1};
 
     std::shared_ptr<ApiBase> pTunnelStatusApi =
-        std::make_shared<ApiBase>(
+        std::make_shared<FixedApiBase>(
             std::initializer_list<QString>{QStringLiteral("https://www.privateinternetaccess.com/")}
         );
 }

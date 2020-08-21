@@ -40,6 +40,17 @@ ApiBaseData::ApiBaseData(const QString &uri, std::shared_ptr<PrivateCA> pCA,
     addBaseUri(uri, std::move(pCA), peerVerifyName);
 }
 
+ApiBaseData::ApiBaseData(std::vector<BaseUri> baseUris)
+    : _baseUris{std::move(baseUris)}, _nextStartIndex{0}
+{
+    // Ensure all bases end with '/'
+    for(auto &base : _baseUris)
+    {
+        if(!base.uri.endsWith('/'))
+            base.uri += '/';
+    }
+}
+
 void ApiBaseData::addBaseUri(const QString &uri, std::shared_ptr<PrivateCA> pCA,
                              const QString &peerVerifyName)
 {
@@ -49,7 +60,7 @@ void ApiBaseData::addBaseUri(const QString &uri, std::shared_ptr<PrivateCA> pCA,
         _baseUris.push_back({uri, std::move(pCA), peerVerifyName});
 }
 
-const BaseUri &ApiBaseData::getUri(unsigned index)
+BaseUri ApiBaseData::getUri(unsigned index)
 {
     Q_ASSERT(index < _baseUris.size());   // Guaranteed by caller
     return _baseUris[index];
@@ -61,16 +72,16 @@ void ApiBaseData::attemptSucceeded(unsigned successIndex)
     _nextStartIndex = successIndex;
 }
 
-ApiBaseSequence ApiBase::beginAttempt()
+ApiBaseSequence FixedApiBase::beginAttempt()
 {
     Q_ASSERT(_pData);   // Class invariant
     return {_pData};
 }
 
-unsigned ApiBase::getUriCount() const
+unsigned FixedApiBase::getAttemptCount(unsigned attemptsPerBase)
 {
     Q_ASSERT(_pData);   // Class invariant
-    return _pData->getUriCount();
+    return _pData->getUriCount() * attemptsPerBase;
 }
 
 ApiBaseSequence::ApiBaseSequence(QSharedPointer<ApiBaseData> pData)
@@ -84,7 +95,7 @@ ApiBaseSequence::ApiBaseSequence(QSharedPointer<ApiBaseData> pData)
     _currentBaseUri = startIndex ? startIndex-1 : _pData->getUriCount()-1;
 }
 
-const BaseUri &ApiBaseSequence::getNextUri()
+BaseUri ApiBaseSequence::getNextUri()
 {
     Q_ASSERT(_pData);   // Class invariant
     _currentBaseUri = (_currentBaseUri + 1) % _pData->getUriCount();

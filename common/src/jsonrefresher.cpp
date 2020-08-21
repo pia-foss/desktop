@@ -59,7 +59,7 @@ void JsonRefresher::refreshTimerElapsed()
     Async<QByteArray> pBodyTask = Async<QByteArray>{new NetworkTaskWithRetry{
                                         QNetworkAccessManager::GetOperation,
                                         *_pApiBaseUris, _resource,
-                                        ApiRetries::counted(_pApiBaseUris->getUriCount()),
+                                        ApiRetries::counted(_pApiBaseUris->getAttemptCount(1)),
                                         {}, {}}};
     // Use next() instead of notify() so we can abandon the task (if the
     // JsonRefresher is stopped) by dropping our reference to the outermost

@@ -25,6 +25,7 @@
 #include "util.h"
 #include "apibase.h"
 #include "openssl.h"
+#include "settings.h"
 #include <unordered_map>
 
 // Environment loads constant data defining the production environment, with
@@ -43,7 +44,7 @@ public:
     static const QByteArray defaultRegionsListPublicKey;
 
 public:
-    Environment();
+    Environment(const DaemonState &state);
 
 private:
     // Read a file - can be an actual disk file or a Qt resource.
@@ -66,11 +67,18 @@ private:
                               const QString &jsonKey,
                               const QString &resourceName);
 
-    // Load an API base - applies the override or uses the
+    // Load a fixed API base - applies the override or uses the defaults given
     void loadApiBase(bool overridePresent, const QJsonDocument &apiOverride,
                      std::shared_ptr<ApiBase> &pApiBase, const QString &jsonKey,
                      const QString &resourceName,
                      const std::initializer_list<QString> &defaults);
+    // Load a dynamic API base - applies the override, or uses a
+    // MetaServiceApiBase to utilize both Meta service proxies and fixed
+    // fallbacks
+    void loadDynamicApiBase(bool overridePresent, const QJsonDocument &apiOverride,
+                            std::shared_ptr<ApiBase> &pApiBase, const QString &jsonKey,
+                            const QString &resourceName, const QString &dynamicBasePath,
+                            const std::initializer_list<QString> &defaults);
 
     // Load the API bases
     void loadApiBases();
@@ -94,7 +102,10 @@ public:
 
     // Get the API bases.  These always return a non-nullptr shared_ptr.
     // Base URIs for normal API requests.
-    const std::shared_ptr<ApiBase> &getPiaApi() {Q_ASSERT(_pPiaApi); return _pPiaApi;}
+    const std::shared_ptr<ApiBase> &getApiv1() {Q_ASSERT(_pApiv1); return _pApiv1;}
+    // Base URIs for authv2.  This has the same defaults as the PIA API, but it
+    // also can leverage meta services in next-gen.
+    const std::shared_ptr<ApiBase> &getApiv2() {Q_ASSERT(_pApiv2); return _pApiv2;}
     // Base URIs for the regions list.  (Default is the same as the PIA API, but
     // this is separated so it can be overridden separately.)
     const std::shared_ptr<ApiBase> &getRegionsListApi() {Q_ASSERT(_pRegionsListApi); return _pRegionsListApi;}
@@ -122,13 +133,15 @@ signals:
     void overrideFailed(const QString &resource);
 
 private:
+    const DaemonState &_state;
     std::unordered_map<QString, QByteArray> _authorities;
     std::shared_ptr<PrivateCA> _pRsa4096CA;
     QByteArray _regionsListPublicKey;
     // API bases - these are always valid.  They're in shared_ptrs so callers
     // using them can keep the object alive even if we replace them.
-    std::shared_ptr<ApiBase> _pPiaApi, _pRegionsListApi, _pModernRegionsListApi,
-        _pIpAddrApi, _pIpProxyApi, _pUpdateApi, _pPortForwardApi;
+    std::shared_ptr<ApiBase> _pApiv1, _pApiv2, _pRegionsListApi,
+        _pModernRegionsListApi, _pIpAddrApi, _pIpProxyApi, _pUpdateApi,
+        _pPortForwardApi;
 };
 
 #endif

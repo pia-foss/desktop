@@ -745,17 +745,22 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
             // create it when the network change occurs.
             qInfo() << "Can't create VPN host route yet, original gateway not known";
         }
-        // Always route special address through VPN (used for MACE, port forwarding etc)
-        _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(piaLegacyDnsPrimary, deviceName));
-        // Route virtual server IP (ping endpoint) through VPN
-        _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(_pingEndpointAddress.toString(), deviceName));
+    }
 
-        // Route DNS through the tunnel
-        for(const auto &dnsServer : _dnsServers)
-        {
-            if(dnsServer != piaLegacyDnsPrimary)
-                _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
-        }
+    // Always route the special PIA DNS address and the configured DNS addresses
+    // into the tunnel.  As with OpenVPN, Linux apps may do their own DNS when
+    // not using systemd-resolved, and even bypass apps need to do this through
+    // the tunnel.
+    // Always route special address through VPN (used for MACE, port forwarding etc)
+    _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(piaLegacyDnsPrimary, deviceName));
+    // Route virtual server IP (ping endpoint) through VPN
+    _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(_pingEndpointAddress.toString(), deviceName));
+
+    // Route DNS through the tunnel
+    for(const auto &dnsServer : _dnsServers)
+    {
+        if(dnsServer != piaLegacyDnsPrimary)
+            _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
     }
 
     // DNS
@@ -1238,7 +1243,7 @@ void WireguardMethod::run(const ConnectionConfig &connectingConfig,
     resource += QString::fromLatin1(QUrl::toPercentEncoding(clientKeypair.publicKeyStr()));
     // Don't do DNS resolution while connecting - specify the IP address in the
     // request, and use the host name to verify the certificate.
-    ApiBase hostAuthBase{authHost, g_daemon->environment().getRsa4096CA(), certCommonName};
+    FixedApiBase hostAuthBase{authHost, g_daemon->environment().getRsa4096CA(), certCommonName};
 
     _pAuthRequest = g_daemon->apiClient().getRetry(hostAuthBase, resource, {})
         ->then(this, [this, clientKeypair=std::move(clientKeypair)](const QJsonDocument &result)
