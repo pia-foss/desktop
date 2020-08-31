@@ -271,7 +271,7 @@ namespace
         else if(type == GetSetType::vpnIp)
         {
             const auto &ip = client.connection().state.externalVpnIp();
-            // If the address isn't unknown, print Unknown
+            // If the address isn't known, print Unknown
             if(ip.isEmpty())
                 return QStringLiteral("Unknown");
             return ip;
@@ -279,7 +279,7 @@ namespace
         else if(type == GetSetType::pubIp)
         {
             const auto &ip = client.connection().state.externalIp();
-            // If the address isn't unknown, print Unknown
+            // If the address isn't known, print Unknown
             if(ip.isEmpty())
                 return QStringLiteral("Unknown");
             return ip;
