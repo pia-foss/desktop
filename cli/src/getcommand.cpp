@@ -130,7 +130,7 @@ namespace
         {GetSetType::requestPortForward, {QStringLiteral("Whether a forwarded port will be requested on the next connection attempt"), {}}},
         {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
-        {GetSetType::pubIp, {QStringLiteral("Current Public IP address"), {}}},
+        {GetSetType::pubIp, {QStringLiteral("Current public IP address"), {}}},
         {GetSetType::region, {QStringLiteral("Currently selected region (or \"auto\")"), {}}}
     };
 
@@ -347,6 +347,11 @@ namespace
         else if(_type  == GetSetType::vpnIp)
         {
             QObject::connect(&client.connection().state, &DaemonState::externalVpnIpChanged,
+                             this, func);
+        }
+        else if(_type  == GetSetType::pubIp)
+        {
+            QObject::connect(&client.connection().state, &DaemonState::externalIpChanged,
                              this, func);
         }
         else
