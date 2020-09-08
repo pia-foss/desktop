@@ -29,7 +29,7 @@
 namespace GetSetType
 {
     extern const QString connectionState, debugLogging, portForward, requestPortForward, protocol,
-                         region, regions, vpnIp, daemonState, daemonSettings;
+                         region, regions, vpnIp, pubIp, daemonState, daemonSettings;
 }
 
 namespace GetSetValue
