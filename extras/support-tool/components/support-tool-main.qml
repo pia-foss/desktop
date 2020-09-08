@@ -23,7 +23,7 @@ import PIA.ReportHelper 1.0
 import PIA.PayloadBuilder 1.0
 import "./"
 
-Window {
+ApplicationWindow {
   id: rootWindow
   visible: true
   width: 700
@@ -36,6 +36,22 @@ Window {
     return qsTr(ReportHelper.brandName)
   }
   color: "#efefef"
+  // The Fusion style uses the palette from QGuiApplication, which by default is
+  // based on the system theme.  The support tool is only designed for a light
+  // theme, so we need to override that palette (since we don't theme the
+  // individual controls).
+  //
+  // The Fusion style doc indicates that you can override QGuiApplication's
+  // palette to do this, but of course that doesn't actually work.  The Fusion
+  // style brilliantly inspects the system theme's "window text" color to try
+  // to guess whether the system is using a dark theme, and then overrides the
+  // "button text" colors with hard-coded values based on that guess.  This
+  // happens as the plugin is loaded, and after that the only way to override
+  // the palette is by setting it on the window.
+  //
+  // (see qt_is_dark_system_theme() in qquickstyle.cpp, and
+  // QQuickFusionTheme::initialize() in qquickfusiontheme.cpp)
+  palette: ReportHelper.palette
 
   function makePayload(writeToFile) {
     if (typeof (writeToFile) === "undefined")

@@ -26,6 +26,7 @@
 #include "settings.h"
 #include "processrunner.h"
 #include "vpnstate.h"
+#include "elapsedtime.h"
 
 #include <QDateTime>
 #include <QDeadlineTimer>
@@ -648,6 +649,10 @@ private:
     quint64 _lastReceivedByteCount, _lastSentByteCount;
     // Interval measurements for the current OpenVPN process
     QList<IntervalBandwidth> _intervalMeasurements;
+    // Time since the last bytecount measurement - if it comes in after the
+    // abandon deadline, we assume the connection is lost and terminate it.  See
+    // updateByteCounts().
+    nullable_t<ContinuousElapsedTime> _lastBytecountTime;
     // Cached value if we already determined we need a reconnect to apply settings
     bool _needsReconnect;
 };

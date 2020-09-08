@@ -377,12 +377,12 @@ Item {
 
       Connections {
         target: ReportHelper
-        onUploadSuccess: function (shortcode) {
+        function onUploadSuccess(shortcode) {
           referenceId = shortcode
           formStatus = 2
           wizardLayout.currentIndex = 2
         }
-        onUploadFail: function (msg) {
+        function onUploadFail(msg) {
           if(retryCount <= retryLimit) {
               // Wait a little while and retry sending payload
               console.log("Retrying on failure");

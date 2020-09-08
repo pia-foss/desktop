@@ -485,7 +485,9 @@ Page {
 
       Connections {
         target: NativeHelpers
-        onReinstallWfpCalloutStatusChanged: appExclusionCheckbox.setting.checkInstallStatus()
+        function onReinstallWfpCalloutStatusChanged() {
+          appExclusionCheckbox.setting.checkInstallStatus()
+        }
       }
     }
 

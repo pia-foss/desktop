@@ -1,5 +1,19 @@
 # Changelog
 
+### v2.4.0
+* Windows hardware acceleration now uses Direct3D 11 instead of OpenGL
+* PIA on Windows now requires Windows 8 or later
+* Split tunnel app rules on Linux now also split DNS traffic
+* Routed packets on Linux are now protected by the PIA killswitch (includes most containers and VMs)
+* Split tunnel can now bypass routed packets on Linux
+* Fixed a crash on macOS caused by changing screen layouts
+* Fixed an issue causing installation to hang in some cases on macOS
+
+### v2.3.1
+* Fixed a possible daemon crash on macOS when split tunnel was enabled
+* Fixed dependency issues on some Linux distributions
+* Detect additional graphics drivers for automatic safe graphics mode on Windows
+
 ### v2.3
 * Next Generation network is now the default
 * Added the Connection tile

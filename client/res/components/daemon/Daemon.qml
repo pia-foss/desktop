@@ -154,7 +154,7 @@ QtObject {
   // Returns the location's localized name if possible, otherwise the name
   // provided by the server.
   function getLocationName(loc) {
-    return state.translateName(loc.name)
+    return loc ? state.translateName(loc.name) : ''
   }
 
   // Get the name of a location from a location ID.

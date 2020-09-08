@@ -34,11 +34,6 @@ namespace Files
 class COMMON_EXPORT Path
 {
 public:
-#ifdef _DEBUG
-    // The root source directory the application was compiled from (used to shorten __FILE__ paths)
-    static Path SourceRootDir;
-#endif
-
     // Hard-coded expected installation directory on each platform
     // Windows: C:/Program Files/Private Internet Access
     // macOS: /Applications/Private Internet Access.app

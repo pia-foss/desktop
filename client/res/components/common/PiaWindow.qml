@@ -20,6 +20,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.10
 import "../core"
 import PIA.NativeHelpers 1.0
+import PIA.WindowFormat 1.0
 
 // PiaWindow contains behavior common to all windows in the PIA client - both
 // decorated windows and the popup-mode dashboard.  (The popup-mode dashboard
@@ -28,6 +29,22 @@ import PIA.NativeHelpers 1.0
 // dashboard.)
 Window {
   id: piaWindow
+
+  // On Mac only, the OpenGL context appears to be shared (?) even though we
+  // didn't set the application attribute to indicate that.  As a result, the
+  // first window shown determines whether we get transparency, and we need
+  // transparency to render the popup mode dashboard correctly.
+  //
+  // We have to mark _all_ windows as transparent in order to ensure that we
+  // get an alpha-blended OpenGL context regardless of which window is shown
+  // first.  On Mac, this should have little performance impact since all window
+  // buffers actually get alpha channels anyway.  This isn't needed on other
+  // platforms, so default to false otherwise.
+  //
+  // Note that the popup dashboard overrides this with its own specific behavior
+  // that's needed on Windows/Linux, but it always sets it to true on Mac so the
+  // behavior is still correct.
+  WindowFormat.hasAlpha: Qt.platform.os === 'osx'
 
   // If the window is hidden (from Cmd+W or the close button), check if we need
   // to deactivate the app on Mac.  If no window is focused, deactivate the app

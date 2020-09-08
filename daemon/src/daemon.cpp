@@ -94,14 +94,17 @@ namespace
     const QStringList debugLogging10{QStringLiteral("*.debug=true"),
                                      QStringLiteral("qt*.debug=false"),
                                      QStringLiteral("latency.*=false")};
-    // New value.  Due to an oversight, this is slightly different from the
-    // new default value that is now in DaemonSettings::getDefaultDebugLogging().
-    // Functionally these will behave the same, but any future migrations will
-    // need to look for both old values.
-    const QStringList debugLogging12b2{QStringLiteral("*.debug=true"),
-                                       QStringLiteral("qt.*.debug=false"),
-                                       QStringLiteral("qt.*.info=false"),
-                                       QStringLiteral("qt.scenegraph.general*=true")};
+    // Default from 1.2-beta.2 to 2.4.  Due to an oversight, there are two
+    // slightly different versions of this (one was applied on upgrade, the
+    // other was applied when enabling debug logging).
+    const QStringList debugLogging12b2a{QStringLiteral("*.debug=true"),
+                                        QStringLiteral("qt.*.debug=false"),
+                                        QStringLiteral("qt.*.info=false"),
+                                        QStringLiteral("qt.scenegraph.general*=true")};
+    const QStringList debugLogging12b2b{QStringLiteral("*.debug=true"),
+                                        QStringLiteral("qt*.debug=false"),
+                                        QStringLiteral("latency.*=false"),
+                                        QStringLiteral("qt.scenegraph.general*=true")};
 }
 
 void restrictAccountJson()
@@ -617,6 +620,8 @@ Daemon::Daemon(QObject* parent)
     connect(&_settings, &DaemonSettings::bypassSubnetsChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this, &Daemon::queueApplyFirewallRules);
+    connect(&_settings, &DaemonSettings::routedPacketsOnVPNChanged, this, &Daemon::queueApplyFirewallRules);
+    connect(&_state, &DaemonState::existingDNSServersChanged, this, &Daemon::queueApplyFirewallRules);
     // 'method' causes a firewall rule application because it can toggle split tunnel
     connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
@@ -665,8 +670,8 @@ Daemon::Daemon(QObject* parent)
     if(_pNetworkMonitor)
     {
         connect(_pNetworkMonitor.get(), &NetworkMonitor::networksChanged, this,
-                &Daemon::networksChanged);
-        networksChanged(_pNetworkMonitor->getNetworks());
+                &Daemon::onNetworksChanged);
+        onNetworksChanged(_pNetworkMonitor->getNetworks());
     }
 
     // Check whether the host supports split tunnel and record errors.
@@ -2122,7 +2127,7 @@ void Daemon::modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc)
     _modernRegionRefresher.loadSucceeded();
 }
 
-void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
+void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
 {
     OriginalNetworkScan defaultConnection;
     qInfo() << "Networks changed: currently" << networks.size() << "networks";
@@ -2189,6 +2194,9 @@ void Daemon::networksChanged(const std::vector<NetworkConnection> &networks)
 
     // Relevant only to macOS
     _state.macosPrimaryServiceKey(macosPrimaryServiceKey);
+
+    // Emit this here so it'll run callbacks before firewall rules update
+    emit networksChanged();
 
     queueApplyFirewallRules();
     _connection->updateNetwork(originalNetwork());
@@ -2300,15 +2308,14 @@ void Daemon::reapplyFirewallRules()
             pConnSettings = &_state.connectedConfig();
     }
 
-    bool killswitchEnabled = false;
     // If the daemon is not active (no client is connected) or the user is not
     // logged in to an account, we do not apply the KS.
     if (!isActive() || !_account.loggedIn())
-        killswitchEnabled = false;
+        params.leakProtectionEnabled = false;
     else if (_settings.killswitch() == QLatin1String("on"))
-        killswitchEnabled = true;
+        params.leakProtectionEnabled = true;
     else if (_settings.killswitch() == QLatin1String("auto") && _state.vpnEnabled())
-        killswitchEnabled = params.hasConnected;
+        params.leakProtectionEnabled = params.hasConnected;
 
     const bool vpnActive = _state.vpnEnabled();
 
@@ -2374,15 +2381,22 @@ void Daemon::reapplyFirewallRules()
         params.vpnOnlyApps.push_back(Path::UnboundExecutable);
     }
 
-    params.blockAll = killswitchEnabled && params.defaultRoute;
+    params.blockAll = params.leakProtectionEnabled && params.defaultRoute;
     params.allowVPN = params.allowDHCP = params.blockAll;
-    params.blockIPv6 = (vpnActive || killswitchEnabled) && _settings.blockIPv6();
+    params.blockIPv6 = (vpnActive || params.leakProtectionEnabled) && _settings.blockIPv6();
     params.allowLAN = _settings.allowLAN() && (params.blockAll || params.blockIPv6);
     // Block DNS when:
     // - not using Existing DNS
     // - the VPN connection is enabled, and
     // - we've connected at least once since the VPN was enabled
     params.blockDNS = pConnSettings && pConnSettings->dnsType() != QStringLiteral("existing") && vpnActive && params.hasConnected;
+#ifdef Q_OS_LINUX
+    // We do not block DNS if the VPN does not have the default route, this is
+    // because we want normal apps to use "existing DNS" in this case
+    // Currently restricted to Linux as it supports split tunnel DNS
+    if(!params.defaultRoute)
+        params.blockDNS = false;
+#endif
     params.allowPIA = params.allowLoopback = (params.blockAll || params.blockIPv6 || params.blockDNS);
     params.allowResolver = params.blockDNS && pConnSettings && (pConnSettings->dnsType() == QStringLiteral("handshake") || pConnSettings->dnsType() == QStringLiteral("local"));
 
@@ -2399,7 +2413,7 @@ void Daemon::reapplyFirewallRules()
 
     applyFirewallRules(params);
 
-    _state.killswitchEnabled(killswitchEnabled);
+    _state.killswitchEnabled(params.leakProtectionEnabled);
 }
 
 // Check whether the host supports split tunnel and record errors
@@ -2685,7 +2699,7 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
         const auto &oldFilters = _settings.debugLogging();
         qInfo() << "checking debug upgrade:" << oldFilters;
         if(oldFilters && oldFilters.get() == debugLogging10)
-            _settings.debugLogging(debugLogging12b2);   // This updates Logger too
+            _settings.debugLogging(debugLogging12b2a);   // This updates Logger too
     }
     else
         qInfo() << "not checking debug upgrade";
@@ -2716,6 +2730,19 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     // this setting.
     if(previous < SemVersion{2, 2, 0})
         _settings.macStubDnsMethod(QStringLiteral("NX"));
+
+    // Default debug logging was changed in a prerelease of 2.3.1 released
+    // after 2.3.0 (now includes RHI tracing for Direct3D on Windows).
+    if(previous <= SemVersion{2, 3, 0})
+    {
+        const auto &oldFilters = _settings.debugLogging();
+        if(oldFilters &&
+           (oldFilters.get() == debugLogging12b2a ||
+            oldFilters.get() == debugLogging12b2b))
+        {
+            _settings.debugLogging(DaemonSettings::defaultDebugLogging);
+        }
+    }
 }
 
 void Daemon::calculateLocationPreferences()

@@ -73,7 +73,9 @@ QtObject {
 
   property Connections showDashboardHandler: Connections {
     target: NativeHelpers
-    onDashboardOpenRequested: dashboard.window.showDashboard(trayManager.getIconMetrics())
+    function onDashboardOpenRequested(){
+      dashboard.window.showDashboard(trayManager.getIconMetrics())
+    }
   }
 
   property Component macMenuBarComponent: Component {
@@ -112,7 +114,7 @@ QtObject {
   // force it to be reloaded.
   property var themeChangeHandler: Connections {
     target: Client.settings
-    onThemeNameChanged: {
+    function onThemeNameChanged() {
       if(!dashboard.window.visible)
         dashboard.forceReload()
     }
@@ -121,17 +123,15 @@ QtObject {
   Component.onCompleted: {
     TrayIcon.dashboard = dashboard.window
 
-    if(!Client.state.quietLaunch && !Client.state.firstRunFlag || Client.state.clientHasBeenUpdated) {
-      // Not a quiet launch or first run - initially show the dashboard near the tray icon
-      initialShowTimer.start()
-    }
-
     if(Client.state.firstRunFlag) {
       wOnboarding.showOnboarding();
     }
-
-    if(Client.state.clientHasBeenUpdated) {
+    else if(Client.state.showWhatsNew) {
       centerChangelogTimer.start();
+    }
+    else if(!Client.state.quietLaunch) {
+      // Not a quiet launch or first run - initially show the dashboard near the tray icon
+      initialShowTimer.start()
     }
 
     // Check location metadata against the server list.  We only do this once at

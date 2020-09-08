@@ -161,7 +161,9 @@ Rectangle {
 
         Connections {
           target: scrollViewColumn
-          onImplicitHeightChanged: heightDeferralTimer.start()
+          function onImplicitHeightChanged()  {
+            heightDeferralTimer.start()
+          }
         }
 
         ColumnLayout {

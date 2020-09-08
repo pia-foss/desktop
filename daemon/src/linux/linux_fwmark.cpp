@@ -32,4 +32,5 @@ namespace Fwmark
     const QString excludePacketTag{hexNumberStr(BRAND_LINUX_FWMARK_BASE)};
     const QString vpnOnlyPacketTag{hexNumberStr(BRAND_LINUX_FWMARK_BASE+1)};
     const uint32_t wireguardFwmark{BRAND_LINUX_FWMARK_BASE+2};
+    const QString forwardedPacketTag{hexNumberStr(BRAND_LINUX_FWMARK_BASE+3)};
 }

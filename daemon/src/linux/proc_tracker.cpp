@@ -204,11 +204,8 @@ void ProcTracker::updateMasquerade(QString interfaceName, QString tunnelDeviceNa
 
 void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName)
 {
-    const QString routingTableName = Routing::bypassTable;
-    const QString vpnOnlyRoutingTableName = Routing::vpnOnlyTable;
-
     qInfo() << "Updating the default route in"
-        << routingTableName
+        << Routing::bypassTable
         << "for"
         << gatewayIp
         << "and"
@@ -227,7 +224,7 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
     }
     else
     {
-        auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(gatewayIp, interfaceName, routingTableName);
+        auto cmd = QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(gatewayIp, interfaceName, Routing::bypassTable);
         qInfo() << "Executing:" << cmd;
         _executor.bash(cmd);
     }
@@ -241,7 +238,7 @@ void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString
     }
     else
     {
-        auto cmd = QStringLiteral("ip route replace default dev %1 table %2").arg(tunnelDeviceName, vpnOnlyRoutingTableName);
+        auto cmd = QStringLiteral("ip route replace default dev %1 table %2").arg(tunnelDeviceName, Routing::vpnOnlyTable);
         qInfo() << "Executing:" << cmd;
         _executor.bash(cmd);
     }
@@ -335,12 +332,20 @@ void ProcTracker::initiateConnection(const FirewallParams &params,
     // setup cgroups + configure routing rules
     CGroup::setupNetCls();
 
+    setVpnBlackHole();
     updateFirewall(params);
     updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
                       params.excludeApps, params.vpnOnlyApps);
     setupReversePathFiltering();
     _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
     connect(_readNotifier, &QSocketNotifier::activated, this, &ProcTracker::readFromSocket);
+}
+
+void ProcTracker::setVpnBlackHole()
+{
+    // This fall-back route blocks all traffic that hits the vpnOnly routing table
+    // The tunnel interface route disappears when the tunnel goes down, exposing this route
+    _executor.bash(QStringLiteral("ip route replace blackhole default metric 32000 table %1").arg(Routing::vpnOnlyTable));
 }
 
 void ProcTracker::setupReversePathFiltering()
@@ -373,6 +378,7 @@ void ProcTracker::teardownReversePathFiltering()
     {
         qInfo() << "Restoring rp_filter to: " << _previousRPFilter;
         _executor.bash(QStringLiteral("sysctl -w 'net.ipv4.conf.all.rp_filter=%1'").arg(_previousRPFilter));
+        _previousRPFilter = "";
     }
 }
 
@@ -468,12 +474,14 @@ void ProcTracker::updateFirewall(const FirewallParams &params)
 
     // Setup the packet tagging rule for subnet bypass (tag packets heading to a bypass subnet so they're excluded from VPN)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), true, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("200.tagFwdSubnets"), true, IpTablesFirewall::kMangleTable);
 }
 
 void ProcTracker::teardownFirewall()
 {
     // Remove subnet bypass tagging rule
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.tagSubnets"), false, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("200.tagFwdSubnets"), false, IpTablesFirewall::kMangleTable);
     // Remove the masquerading rule
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), false, IpTablesFirewall::kNatTable);
     // Remove the cgroup marking rule

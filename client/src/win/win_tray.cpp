@@ -26,7 +26,6 @@
 #include <QRect>
 #include <QPoint>
 #include <QGuiApplication>
-#include <QScreen>
 #include <QTimer>
 #include <QRectF>
 #include <QTimer>

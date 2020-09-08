@@ -106,6 +106,7 @@ QtObject {
     readonly property color inputDropdownArrowDisabledBorderColor: "#889099"
     readonly property string inputDropdownArrowImage: Theme.imagePathCommon + "/settings/dropdown-arrow.png"
     readonly property string inputDropdownArrowDisabledImage: Theme.imagePathCommon + "/settings/dropdown-arrow-disabled.png"
+    readonly property string inputDropdownShadowImage: Theme.imagePathCommon + "/settings/shadow-dropdown.png"
 
     readonly property color inputPrivacyBackgroundColor: Theme.dark ? "#22252e" : "#d7d8d9"
     readonly property color inputPrivacyTextColor: Theme.dark ? "#ffffff" : "#323642"
@@ -153,4 +154,6 @@ QtObject {
     readonly property string spinnerImage: Theme.imagePath + "/settings/spinner.png"
 
     readonly property color connectionPageSeparatorColor: "#889099"
+
+    readonly property string reconnectShadowImage: Theme.imagePathCommon + "/settings/shadow-reconnect.png"
 }

@@ -211,7 +211,7 @@ static std::wstring getSystemRoot()
     return {};
 }
 
-static bool uninstallTapDriverInf()
+bool uninstallTapDriverInf()
 {
     // Additionally, search the C:\Windows\inf directory for the installed oem*.inf
     std::wstring infPath = getSystemRoot();
@@ -547,7 +547,7 @@ ServiceStatus startCalloutDriver(int timeoutMs)
     return startService(service, timeoutMs);
 }
 
-static ServiceStatus stopCalloutDriver()
+ServiceStatus stopCalloutDriver()
 {
     ServiceHandle manager{::OpenSCManagerW(nullptr, nullptr, SERVICE_STOP|SERVICE_QUERY_STATUS)};
     if(manager == nullptr)

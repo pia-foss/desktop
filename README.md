@@ -9,7 +9,7 @@ The project uses Qt 5 for cross-platform development, both in the client and dae
 
 The client is intended to be built on the target platform; Windows builds are built on Windows, macOS builds on macOS, and Linux builds on Ubuntu.
 
-The entire product is built using [Qbs](http://doc.qt.io/qbs/) which is part of Qt. Qbs can be invoked from the command line but the recommended way to develop is to use Qt Creator, which has strong built-in support for Qbs projects.
+The entire product is built using rake, using the supporting framework in the `rake/` directory.
 
 Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and the [Windows TAP driver](https://github.com/pia-foss/desktop-tap) are included as precompiled binaries under the `deps` directory in this project for convenience. To recompile any of these, please refer to their corresponding directories and/or repositories for build instructions.
 
@@ -17,24 +17,30 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
 
 - On **all platforms**:
   - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
-  - [Qt 5.11](https://www.qt.io/download) or later (open source edition)
+  - [Qt 5.12](https://www.qt.io/download) or later (open source edition)
+    - Install CMake (under development tools) to use this project in Qt Creator
   - *Optional:* [Node.js](https://nodejs.org) (for auxiliary scripts)
 - On **Windows**:
   - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
+     - Requires VS 16.7 or later
      - The Windows SDK must be at least 10.0.17763.0
      - Install the "Windows 8.1 SDK and UCRT SDK" to get the UCRT redistributable DLLs for 7/8/8.1
   - Debugger: Install Debugging Tools from the [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
      - The VS installer doesn't include the Console Debugger (CDB), which is needed to debug in Qt Creator.  More info: [Setting Up Debugger](https://doc.qt.io/qtcreator/creator-debugger-engines.html)
+  - [Ruby](https://rubyinstaller.org/) - includes Rake
   - [7-zip](https://www.7-zip.org/)
 - On **macOS**:
   - High Sierra or newer
   - Up-to-date version of Xcode
+  - Ruby, can be installed using [Homebrew](https://brew.sh) with `brew install ruby`
 - On **Linux**:
   - Ubuntu 18.04 or newer
   - The following development packages:
     - `build-essential`
+    - `rake`
+    - `clang`
     - `mesa-common-dev`
-    - `clang` (GCC can also be used, but Clang is recommended)
+    - `patchelf`
     - `libnl-3-dev` (PIA can run without the library installed, but the headers are needed to build)
     - `libnl-route-3-dev`
     - `libnl-genl-3-dev`
@@ -60,9 +66,86 @@ After this, cloning the repository normally should also fetch the precompiled bi
 Filtering content: 100% (24/24), 17.13 MiB | 1.89 MiB/s, done.
 ```
 
+### Build system
+
+The following targets can be passed to `rake`.  The default target is `stage`, which stages the built client, daemon, and dependencies for local testing (but does not build installers, tests, etc.)
+
+| Target | Explanation |
+|--------|-------------|
+| (default) | Builds the client and daemon; stages executables with dependencies in `out/pia_debug_x86_64/stage` for local testing. |
+| `test` | Builds and runs unit tests; produces code coverage artifacts if possible on the current platform (requires clang 6+) |
+| `installer` | Builds the final installer artifact, including code signing if configured. |
+| `export` | Builds extra artifacts needed from CI but not part of any deployable artifact (currently translation exports) |
+| `integtest` | Builds the integration test artifact (ZIP file containing deployable integration tests) |
+| `artifacts` | Builds all artifacts and copies to `out/pia_debug_x86_64/artifacts` (depends on most other targets, execpt `test` when coverage measurement isn't possible) |
+| `all` | All targets. |
+
+>>>
+:point_right: In 2.3.0 and earlier, PIA used a qbs-based build system, along with postprocessing to generate final installer artifacts in the various platform build scripts.  This is now all done using Rake, the qbs build system has been removed.
+>>>
+
+#### Configurations
+
+The build system has several properties that can be configured, either in the environment or by passing the appropriate variables to `rake`.
+
+These are implemented in `rake/build.rb`.  The output directory name includes the current brand, variant, and architecture.
+
+| Variable | Values | Default | Explanation |
+|----------|--------|---------|-------------|
+| `VARIANT` | `debug`, `release` | `debug` | Create a debug build (unoptimized, some compression levels reduced for speed), or release build (optimized, maximum compression). |
+| `ARCHITECTURE` | `x86_64`, `x86` | `x86_64` | Select an alternate architecture.  Windows supports `x86` as well as `x86_64`, Mac and Linux only support `x86_64`. |
+| `BRAND` | (directories in `brands/`) | `pia` | Build an alternate brand. |
+
+#### Variables
+
+Some additional environment variables can be configured:
+
+| Variable | Example | Explanation |
+|----------|---------|-------------|
+| `QTROOT` | /opt/Qt/5.12.8 | Path to the installed Qt version, if qt.rb can't find it or you want to force a specific version |
+
+### Qt Creator
+
+To open the project in Qt Creator, open CMakeLists.txt as a project.  This CMake script defines targets for Qt Creator and hooks them up to the appropriate rake tasks, which allows Qt Creator to build, run, and debug targets.
+
+Some specific configuration changes are useful in Qt Creator:
+
+#### File Locator
+
+The file locator (Ctrl+K / Cmd+K) can only locate files referenced by targets by default.  The CMake script allows it to find most C++ source, but it can't find QML source or other ancillary files.  Enable the "Files in All Project Directories" filter by default:
+
+1. Open Qt Creator's Preferences
+2. Go to Environment > Locator
+3. Next to "Files in All Project Directories", check the box for "Default"
+4. Select "Files in All Project Directoreis" and click "Edit..."
+5. Add the exclusion patterns "*/out/*" and "*/node_modules*" (to exclude build outputs and modules installed for ancillary JS utility scripts)
+
+This is a good idea anyway because it also allows you to find files not used by a target, like Rakefile, .gitignore, build scripts, etc.
+
+#### Default Target
+
+Qt Creator's default target is 'all', which is hooked up to rake's default - the staged installation only.  You can also set Qt Creator's default to really build everything (including running tests) or to build the current executable (useful to build specific tests, but not needed to debug them from Qt Creator).
+
+1. Go to the Projects page
+2. Select "Build" under current kit"
+3. Under "Build Steps", expand the CMake build step
+4. Select a different target instead of "all":
+   - "rake-all" will build everything, including running unit tests
+   - "Current executable" will build the current target you have selected in
+     Qt Creator - for client/cli/daemon this builds the staging area, but for
+     integtest or unit tests it will build the test instead
+
+#### Kit and Qt version
+
+Qt Creator will still ask to select a kit, which includes a Qt version, compiler, etc.  This has no effect on the build output - the Rake scripts find Qt and the compiler on their own, which allows them to be run with no prior setup.  Select the same Qt version and compiler in Qt Creator that the rake script uses, so Qt Creator's code model will work.
+
+On Windows, Qt Creator will run rake in an environment set up using vcvarsall.bat, which is not necessary (since the rake scripts run vcvarsall.bat automatically) but may cause stale MSVC variables to remain in the build environment if you update MSVC.  Just do a clean and re-run cmake from Qt Creator, and the environment should be reset.
+
 ### Building for distribution
 
-To make completely signed and distributable builds, use the build-<platform> scripts in the scripts/ directory.  Environment variables need to be set to specify code signing parameters.
+`rake artifacts` (or `rake all`) produces the final artifacts for distribution, including signing if code signing details are provided.  Code signing environment variables are defined below.
+
+Build scripts in the `scripts` directory are also provided that clean, then build for all architectures supported on a given platform.
 
 #### Windows
 
@@ -70,11 +153,12 @@ Set environment variables:
 
 | Variable | Value |
 |----------|-------|
+| BRAND | (Optional) Brand to build (defaults to `pia`) |
 | PIA_SIGNTOOL_CERTFILE | Path to certificate file (if signing with PFX archived cert) |
 | PIA_SIGNTOOL_PASSWORD | Password to decrypt cert file (if signing with encrypted PFX archived cert) |
 | PIA_SIGNTOOL_THUMBRPINT | Thumbprint of certificate - signs with cert from cert store instead of PFX archive |
 
-Then call `scripts/build-windows.bat`, or `scripts/build-windows.bat <brand>` to build a brand other than PIA.
+Then call `scripts/build-windows.bat`
 
 #### Mac
 
@@ -88,7 +172,9 @@ Set environment variables:
 | PIA_APPLE_ID_PASSWORD | Password to Apple ID for notarization. |
 | PIA_APPLE_ID_PROVIDER | (Optional) Provider to use if Apple ID is member of multiple teams. |
 
-Call `scripts/build-macos.sh`.
+Call `scripts/build-macos.sh`
+
+A certificate is required for the Mac build to be installable (even for local builds), see below to generate a self-signed certificate for local use.  Unsigned builds can be manually installed by running the install script with `sudo`.
 
 #### Linux
 
@@ -98,35 +184,7 @@ Set environment variables:
 |----------|-------|
 | BRAND | (Optional) Brand to build (defaults to `pia`) |
 
-Then call `scripts/build-linux.sh --configure --clean --package`.
-
-### Project files
-
-All main parts of the project are buildable from a master build file, `pia_desktop.qbs`, which can be opened directly in Qt Creator or built from the command line. It contains a hierarchy of subprojects:
-
-- `client`: the GUI frontend
-- `daemon`: the background service/daemon
-- `extras`: auxiliary components:
-  - `support-tool`: crash reporter frontend
-  - `translations`: updating and embedding localized strings
-  - `windows`/`macos`/`linux`: platform-specific components such as installers
-- `tests`: unit test suites
-
-To build and package the actual installer packages, use the `build-*` scripts in the `scripts` directory. These scripts have a few extra requirements for using:
-
-- Windows:
-  - Dependencies should be auto-detected if installed in standard paths on the C:\ drive
-  - Specify the `PIA_SIGNTOOL_CERTFILE` and `PIA_SIGNTOOL_PASSWORD` environment variables to produce signed builds
-- macOS:
-  - `qbs` and `macdeployqt` need to be in your `PATH` (or specified via `QBS` and `MACDEPLOYQT`)
-  - A valid Qbs default profile needs to be configured (as [described](http://doc.qt.io/qbs/configuring.html) [here](http://doc.qt.io/qbs/qt-versions.html))
-  - Specify the `PIA_CODESIGN_CERT` environment variable variable to produce signed builds
-    - This must be the full common name of your cert, not a partial match.
-    - See "Mac installation" below to generate a self-signed cert, and remember to unlock your keychain
-- Linux:
-  - Qt 5.11.1 or later needs to be installed, along with packages: `build-essential`, `clang` and `curl`.
-  - You need to add `qbs` and `qmake` to your `PATH`. If you have installed Qt at `$HOME/Qt5.12.0` your `$PATH` can be set as `export PATH=$HOME/Qt5.12.1/5.12.1/gcc_64/bin:$HOME/Qt5.12.1/Tools/QtCreator/bin:$PATH`. Please adjust this depending on where you have Qt installed.
-  - You must run `./scripts/build-linux.sh --configure` once before using the script.
+Then call `scripts/build-linux.sh`.
 
 ### Running and debugging
 

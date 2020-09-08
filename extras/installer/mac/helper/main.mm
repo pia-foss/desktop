@@ -32,8 +32,11 @@
 #include <Security/SecCode.h>
 #include "brand.h"
 #include "version.h"
-#include "vpn-installer_sh.h"
 
+// Linked in from vpn-installer-sh.cpp, generated from xxd -i on branded install
+// script
+extern unsigned char vpn_installer_sh[];
+extern unsigned int vpn_installer_sh_len;
 
 static_assert(__has_feature(objc_arc), "Requires Objective-C ARC");
 

@@ -17,6 +17,9 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "file.h"
+#include <shlobj_core.h>
+#pragma comment(lib, "shell32.lib")
+
 static std::wstring g_rollbackPath;
 
 // Create a directory (deletes any file that may be in the way)

@@ -104,10 +104,12 @@ private:
 };
 
 DriverStatus installTapDriver(LPCWSTR inf, bool alwaysCreateNew, bool forceUpdate, bool nonInteractive = false);
+bool uninstallTapDriverInf();
 DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion);
 
 DriverStatus installCalloutDriver(LPCWSTR inf, bool nonInteractive);
 DriverStatus uninstallCalloutDriver(LPCWSTR inf, bool nonInteractive);
 ServiceStatus startCalloutDriver(int timeoutMs);
+ServiceStatus stopCalloutDriver();
 
 #endif

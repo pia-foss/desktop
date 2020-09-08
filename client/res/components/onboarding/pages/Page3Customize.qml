@@ -40,17 +40,14 @@ Item {
   readonly property bool dark: Client.settings.themeName === 'dark'
   readonly property bool light: Client.settings.themeName === 'light'
 
-  // Stack below the actual image because DropShadow seems to ignore the flip
-  // transformation in RTL.  The image is symmetric so the shadow is still the
-  // same.
-  DropShadow {
+  BorderImage {
     anchors.fill: customizeImage
-    source: customizeImage
-    color: Theme.onboarding.dropShadowColor
-    horizontalOffset: 0
-    verticalOffset: 0
-    radius: 15
-    spread: 0
+    anchors.margins: -15
+
+    border {left: 25; top: 25; right: 25; bottom: 25}
+    horizontalTileMode: BorderImage.Stretch
+    verticalTileMode: BorderImage.Stretch
+    source: Theme.onboarding.customizeShadowImage
   }
 
   StaticImage {

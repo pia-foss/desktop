@@ -399,7 +399,7 @@ Item {
   // Send the user back to the login page if we're logged out
   Connections {
     target: Daemon.account
-    onLoggedInChanged: {
+    function onLoggedInChanged() {
       if (!Daemon.account.loggedIn) {
         pm.setPage('login')
       } else {

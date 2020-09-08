@@ -163,27 +163,27 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
 
     // Read the last used version, and set the current version as the last used version
     QString lastUsedVersion = _settings.lastUsedVersion();
-    QString currentVersion(PIA_VERSION);
-    _settings.lastUsedVersion(currentVersion);
+    _settings.lastUsedVersion(PIA_VERSION);
+    SemVersion currentVersion{QStringLiteral(PIA_VERSION)};
 
+    SemVersion previousVersion = [&]() -> SemVersion {
+        auto actual = SemVersion::tryParse(lastUsedVersion);
+        if(!actual)
+        {
+            // If there was a previous install but it didn't write a version,
+            // assume it was 1.0.  Otherwise, this is a new install, use the
+            // current version.
+            return hasExistingSettingsFile ? SemVersion{1, 0, 0} : currentVersion;
+        }
+        return *actual;
+    }();
 
-    try {
-        // For older versions which don't write 'lastUsedVersion' we can
-        // guess that the client was upgraded if there was indeed an existing settings file
-        // but last used version was empty.
-        //
-        // For fresh installs - hasExistingSettingsFile would be false
-        // For well-behaved upgrades - lastUsedVersion will not be empty and will be handled by checking semantic version
-        //
-        //
-        // Do note that if it doesn't have an existing file, and `lastUsedVersion` is indeed empty
-        // then SemVersion will throw an exception, but this is the expected behaviour and the value
-        // of `clientHasBeenUpdated` will remain `false`.
-        //
-        if((hasExistingSettingsFile && lastUsedVersion.isEmpty()) || (SemVersion(currentVersion).compare(SemVersion(lastUsedVersion)) > 0))
-            _state.clientHasBeenUpdated(true);
-    } catch (...) {
-    }
+    if(previousVersion < currentVersion)
+        _state.clientHasBeenUpdated(true);
+    // The current What's New content was introduced in 2.3.0, show this if
+    // upgrading from an older version
+    if(previousVersion < SemVersion{2, 3, 0})
+        _state.showWhatsNew(true);
 
     // clientMain() already enabled safe mode if necessary, but set the client
     // state and apply the permanent setting if --safe-mode was given.

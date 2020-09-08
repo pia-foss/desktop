@@ -20,41 +20,13 @@
 #line SOURCE_FILE("workspacechange.cpp")
 
 #include "workspacechange.h"
+#include "platformscreens.h"
 #include <QGuiApplication>
 
 WorkspaceChange::WorkspaceChange()
 {
-    Q_ASSERT(qGuiApp);  // Can't create these before the app is created
-
-    // Connect to all the screens already present, and to the screenAdded/
-    // screenRemoved signals
-    connect(qGuiApp, &QGuiApplication::screenAdded, this,
-            [this](QScreen *pNewScreen)
-            {
-                if(!pNewScreen)
-                    return;
-                connectScreen(*pNewScreen);
-                emitWorkspaceChange();
-            });
-    // We don't need to disconnect anything from a screen that's being removed,
-    // it's being destroyed anyway.
-    connect(qGuiApp, &QGuiApplication::screenRemoved, this,
-            &WorkspaceChange::emitWorkspaceChange);
-    for(auto *pScreen : qGuiApp->screens())
-    {
-        if(pScreen)
-            connectScreen(*pScreen);
-    }
-}
-
-void WorkspaceChange::connectScreen(QScreen &screen)
-{
-    // Detect when the available geometry changes.
-    // These signals need to cover the properties used by
-    // WindowMaxSize::calcEffectiveSize().  WorkspaceChange is also used by
-    // DashboardPopup to detect changes in the work area.
-    connect(&screen, &QScreen::availableGeometryChanged, this,
-            &WorkspaceChange::emitWorkspaceChange);
+    connect(&PlatformScreens::instance(), &PlatformScreens::screensChanged,
+            this, &WorkspaceChange::emitWorkspaceChange);
 }
 
 void WorkspaceChange::emitWorkspaceChange()

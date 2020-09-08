@@ -20,6 +20,7 @@
 #line SOURCE_FILE("windowmaxsize.cpp")
 
 #include "windowmaxsize.h"
+#include "platformscreens.h"
 #include <QGuiApplication>
 
 #if defined(Q_OS_MAC)
@@ -85,22 +86,16 @@ QSizeF WindowMaxSize::calcDecorationSize(double screenScale) const
 
 QSizeF WindowMaxSize::calcEffectiveSize() const
 {
-    // For any properties of QScreen that we use here, we need to connect to the
-    // corresponding signals in WorkspaceChange::connectScreen().
-
     QSizeF maxWorkSize{0, 0};
     // The maximum screen size is chosen by the visible area of the window.
     double maxVisibleArea = 0.0;
 
-    for(auto *pScreen : qGuiApp->screens())
+    for(auto &screen : PlatformScreens::instance().getScreens())
     {
-        if(!pScreen)
-            continue;
-
         // Calculate the logical work size for this screen using the work area
         // and scale factor.
-        QSizeF workSize = pScreen->availableSize();
-        double screenScale = _pWindowMetrics->calcScreenScaleFactor(*pScreen);
+        QSizeF workSize = screen.availableGeometry().size();
+        double screenScale = _pWindowMetrics->calcScreenScaleFactor(screen);
         workSize /= screenScale;
 
         // Remove the size of the window decoration.

@@ -46,6 +46,16 @@ void macSetAllWorkspaces(QWindow &window)
 {
     NSWindow *pNativeWindow = macGetNativeWindow(window);
     [pNativeWindow setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
+
+    qInfo() << "window is opaque:" << (pNativeWindow.opaque);
+    if(pNativeWindow.contentView)
+    {
+        qInfo() << "content view is opaque:" << (pNativeWindow.contentView.opaque);
+    }
+    else
+    {
+        qInfo() << "could not find content view";
+    }
 }
 
 void enableShowInDock () {
@@ -59,7 +69,7 @@ void disableShowInDock () {
 class MacWindowMetrics : public NativeWindowMetrics
 {
 public:
-    virtual double calcScreenScaleFactor(QScreen &) const override
+    virtual double calcScreenScaleFactor(const PlatformScreens::Screen &) const override
     {
         // No scaling on OS X.
         return 1.0;

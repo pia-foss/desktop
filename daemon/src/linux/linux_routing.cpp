@@ -27,4 +27,5 @@ namespace Routing
     const QString bypassTable{BRAND_CODE "vpnrt"};
     const QString vpnOnlyTable{BRAND_CODE "vpnOnlyrt"};
     const QString wireguardTable{BRAND_CODE "vpnWgrt"};
+    const QString forwardedTable{BRAND_CODE "vpnFwdrt"};
 }

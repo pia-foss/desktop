@@ -42,17 +42,18 @@ Item {
     enabled: reconnectWarning.Window.window.visible
   }
 
-  DropShadow {
+  BorderImage {
     anchors.fill: reconnectWarningRect
-    cached: false
-    horizontalOffset: 3
-    verticalOffset: 3
-    spread: 0
-    radius: 5
-    samples: 10
-    color: "#60000000"
-    transparentBorder: true
-    source: reconnectWarningRect
+    // Radius 5 with offset 3,3
+    anchors.leftMargin: -2
+    anchors.topMargin: -2
+    anchors.rightMargin: -8
+    anchors.bottomMargin: -8
+
+    border {left: 9; top: 9; right: 9; bottom: 9}
+    horizontalTileMode: BorderImage.Stretch
+    verticalTileMode: BorderImage.Stretch
+    source: Theme.settings.reconnectShadowImage
   }
 
   Rectangle {

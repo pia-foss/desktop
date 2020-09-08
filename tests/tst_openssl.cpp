@@ -29,7 +29,7 @@
 
 namespace
 {
-    DaemonState defaultState;
+    nullable_t<DaemonState> defaultState;
     nullable_t<Environment> defaultEnv;
 
     // Sample regions list payload and signature.
@@ -107,7 +107,8 @@ private slots:
         // We need to initialize the paths, so we can load openssl libs
         Path::initializePreApp();
         Path::initializePostApp();
-        defaultEnv.emplace(defaultState);
+        defaultState.emplace();
+        defaultEnv.emplace(*defaultState);
     }
 
     void testGenCurve25519KeyPair()

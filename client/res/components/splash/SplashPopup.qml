@@ -43,10 +43,10 @@ DashboardFrameLoader {
     Connections {
       target: TrayIcon
 
-      onTrayClicked: function(metrics) {
+      function onTrayClicked(metrics) {
         popup.window.trayClicked(metrics)
       }
-      onItemActivated: {
+      function onItemActivated() {
         if(code === 'quit')
         {
           console.info("Quit from splash dashboard tray menu")

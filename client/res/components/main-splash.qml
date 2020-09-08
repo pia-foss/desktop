@@ -37,7 +37,7 @@ QtObject {
 
   property var showSplashHandler: Connections {
     target: NativeHelpers
-    onDashboardOpenRequested: {
+    function onDashboardOpenRequested() {
       if(splash)  {
         splash.window.trayClicked(TrayIcon.getIconMetrics());
       }

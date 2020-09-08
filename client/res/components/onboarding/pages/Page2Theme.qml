@@ -44,6 +44,36 @@ Item {
   readonly property bool dark: Client.settings.themeName === 'dark'
   readonly property bool light: Client.settings.themeName === 'light'
 
+  BorderImage {
+    anchors.fill: darkThemeButton
+    // 10px shadow radius, with 5 px vertical offset
+    anchors.topMargin: -5
+    anchors.bottomMargin: -15
+    anchors.leftMargin: -10
+    anchors.rightMargin: -10
+
+    visible: dark
+    border {left: 35; top: 34; right: 35; bottom: 34}
+    horizontalTileMode: BorderImage.Stretch
+    verticalTileMode: BorderImage.Stretch
+    source: Theme.onboarding.themeSelectorDropShadowImage
+  }
+
+  BorderImage {
+    anchors.fill: lightThemeButton
+    // 10px shadow radius, with 5 px vertical offset
+    anchors.topMargin: -5
+    anchors.bottomMargin: -15
+    anchors.leftMargin: -10
+    anchors.rightMargin: -10
+
+    visible: light
+    border {left: 35; top: 34; right: 35; bottom: 34}
+    horizontalTileMode: BorderImage.Stretch
+    verticalTileMode: BorderImage.Stretch
+    source: Theme.onboarding.themeSelectorDropShadowImage
+  }
+
   Item {
     id: darkThemeButton
     anchors.top: headline.bottom
@@ -108,30 +138,6 @@ Item {
         Client.applySettings({'themeName':'light'});
       }
     }
-  }
-
-  DropShadow {
-    visible: light
-    anchors.fill: lightThemeButton
-    source: lightThemeButton
-    color: Theme.onboarding.themeSelectorDropShadow
-    horizontalOffset: 0
-    verticalOffset: 5
-    radius: 10
-    spread: 0
-  }
-
-  DropShadow {
-    visible: dark
-    // We cannot change the source/fill dynamically depending on
-    // the theme, because that causes a crash in software mode.
-    anchors.fill: darkThemeButton
-    source: darkThemeButton
-    color: Theme.onboarding.themeSelectorDropShadow
-    horizontalOffset: 0
-    verticalOffset: 5
-    radius: 10
-    spread: 0
   }
 
   StaticImage {

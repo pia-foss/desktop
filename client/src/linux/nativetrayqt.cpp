@@ -23,6 +23,7 @@
 #include "brand.h"
 #include "version.h"
 #include "client.h"
+#include "platformscreens.h"
 #include <QGuiApplication>
 #include <QProcessEnvironment>
 #include <QPainter>
@@ -332,7 +333,7 @@ QRect NativeTrayQt::guessGeometry() const
 
     // Assume the tray is on the primary screen (not necessarily correct, but a
     // reasonable guess).
-    const QScreen *pPrimaryScreen = QGuiApplication::primaryScreen();
+    const PlatformScreens::Screen *pPrimaryScreen = PlatformScreens::instance().getPrimaryScreen();
     if(!pPrimaryScreen)
         return {};  // Can't guess, no screens
 

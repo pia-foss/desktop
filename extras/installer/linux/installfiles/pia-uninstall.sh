@@ -34,6 +34,7 @@ readonly hnsdGroupName="${brandCode}hnsd"         # The group used by the Handsh
 readonly routingTableName="${serviceName}rt"
 readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"
 readonly wireguardRoutingTableName="${serviceName}Wgrt"
+readonly forwardedRoutingTableName="${serviceName}Fwdrt" # For forwarded packets
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
@@ -156,6 +157,7 @@ if [[ "$1" == "startuninstall" ]] ; then
     removeRoutingTable $routingTableName
     removeRoutingTable $vpnOnlyroutingTableName
     removeRoutingTable $wireguardRoutingTableName
+    removeRoutingTable $forwardedRoutingTableName
     removeWireguardUnmanaged
     echoPass "Uninstall finished"
     read -n 1 -s -r -p "Press any key to continue"

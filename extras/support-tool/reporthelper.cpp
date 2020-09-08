@@ -271,6 +271,73 @@ QString ReportHelper::getBrandParam(const QString &code)
     return QStringLiteral("");
 }
 
+QPalette ReportHelper::getPalette() const
+{
+    QPalette appPalette = QGuiApplication::palette();
+    // Fixed light palette, dumped from logging in support_tool_main.cpp
+    appPalette.setColor(QPalette::Active, QPalette::WindowText, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Active, QPalette::Button, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Light, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Midlight, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Dark, {191, 191, 191, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Mid, {169, 169, 169, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Text, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Active, QPalette::BrightText, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::ButtonText, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Base, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Window, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Shadow, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Active, QPalette::Highlight, {179, 215, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::HighlightedText, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Active, QPalette::Link, {0, 104, 218, 255});
+    appPalette.setColor(QPalette::Active, QPalette::LinkVisited, {255, 0, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::AlternateBase, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Active, QPalette::NoRole, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Active, QPalette::ToolTipBase, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Active, QPalette::ToolTipText, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::WindowText, {0, 0, 0, 63});
+    appPalette.setColor(QPalette::Disabled, QPalette::Button, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Light, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Midlight, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Dark, {191, 191, 191, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Mid, {169, 169, 169, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Text, {0, 0, 0, 63});
+    appPalette.setColor(QPalette::Disabled, QPalette::BrightText, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::ButtonText, {148, 148, 148, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Base, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Window, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Shadow, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::Highlight, {220, 220, 220, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, {0, 0, 0, 63});
+    appPalette.setColor(QPalette::Disabled, QPalette::Link, {0, 0, 255, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::LinkVisited, {255, 0, 255, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::AlternateBase, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::NoRole, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::ToolTipBase, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Disabled, QPalette::ToolTipText, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::WindowText, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Inactive, QPalette::Button, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Light, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Midlight, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Dark, {191, 191, 191, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Mid, {169, 169, 169, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Text, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Inactive, QPalette::BrightText, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::ButtonText, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Base, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Window, {236, 236, 236, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Shadow, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::Highlight, {220, 220, 220, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::HighlightedText, {0, 0, 0, 216});
+    appPalette.setColor(QPalette::Inactive, QPalette::Link, {0, 0, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::LinkVisited, {255, 0, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::AlternateBase, {245, 245, 245, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::NoRole, {0, 0, 0, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::ToolTipBase, {255, 255, 255, 255});
+    appPalette.setColor(QPalette::Inactive, QPalette::ToolTipText, {0, 0, 0, 255});
+
+    return appPalette;
+}
 
 QString ReportHelper::getUrl(const QString &path) const
 {
@@ -293,8 +360,9 @@ bool ReportHelper::checkDumpFileAgainstBlacklist(const QString &dmpPath) const
               << "atio6axx.dll"
               << "nvoglv64.dll"
               << "atioglxx.dll"
-              << "atig6txx.dll";
-
+              << "atig6txx.dll"
+              << "atig6pxx.dll"
+              << "ig10umd64.dll";
 
     QFile file(dmpPath);
     file.open(QIODevice::ReadOnly);

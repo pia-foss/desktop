@@ -47,7 +47,7 @@ Row {
     anchors.verticalCenter: parent.verticalCenter
     Connections {
       target: updateChannel
-      onChannelPropValueChanged: {
+      function onChannelPropValueChanged() {
         updateChannelValue.text = updateChannel.channelPropValue
       }
     }

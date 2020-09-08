@@ -218,6 +218,10 @@ public:
     JsonField(ClientLanguage, activeLanguage, {})
 
     JsonField(bool, clientHasBeenUpdated, false)
+    // Show the what's new view only when upgrading from a release prior to the
+    // current what's new view (not for upgrading to another release with the
+    // same what's new view)
+    JsonField(bool, showWhatsNew, false)
     JsonField(bool, firstRunFlag, false)
     JsonField(bool, quietLaunch, false)
     // Whether safe graphics are currently in use right now.  (This only changes

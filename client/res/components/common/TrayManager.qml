@@ -178,7 +178,7 @@ Item {
   // visibility).
   Connections {
     target: dashPopup
-    onSuppressNotificationsChanged: {
+    function onSuppressNotificationsChanged() {
       if (dashPopup.suppressNotifications)
         TrayIcon.hideMessage()
     }
@@ -186,11 +186,11 @@ Item {
 
   Connections {
     target: TrayIcon
-    onTrayClicked: function(metrics) {
+    function onTrayClicked(metrics) {
       dashPopup.trayClicked(metrics)
     }
 
-    onItemActivated: function(code) {
+    function onItemActivated(code) {
       builder.handleSelection(code);
     }
   }

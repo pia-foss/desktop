@@ -87,8 +87,8 @@ namespace
     const QString hnscanSeed = QStringLiteral("ak2hy7feae2o5pfzsdzw3cxkxsu3lxypykcl6iphnup4adf2ply6a@138.68.61.31");
 
     // Fixed arguments for hnsd (some args are also added dynamically)
-    const QStringList &hnsdFixedArgs{"-n", resolverLocalAddress + ":1053",
-                                     "-r", resolverLocalAddress + ":53",
+    const QStringList &hnsdFixedArgs{"-n", resolverLocalAddress() + ":1053",
+                                     "-r", resolverLocalAddress() + ":53",
                                      "--seeds", hnsdSeed + "," + hnscanSeed};
 
     // Restart strategy for local resolver processes
@@ -108,6 +108,11 @@ namespace
 
     // Timeout for preferred transport before starting to try alternate transports
     const std::chrono::seconds preferredTransportTimeout{30};
+
+    // Maximum time between bytecount intervals, if the interval exceeds this
+    // limit we abandon the connection.  This is intended to detect waking from
+    // sleep; see updateByteCounts()
+    const std::chrono::minutes bytecountAbandonLimit{4};
 }
 
 ResolverRunner::ResolverRunner(RestartStrategy::Params restartParams)
@@ -194,7 +199,7 @@ bool ResolverRunner::enable(Resolver resolver, QStringList arguments)
 {
     _activeResolver = resolver;
 #ifdef Q_OS_MACOS
-    Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "alias", ::resolverLocalAddress, "up"});
+    Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "alias", ::resolverLocalAddress(), "up"});
 #endif
     // Invoke the original
     return ProcessRunner::enable(getResolverExecutable(), std::move(arguments));
@@ -213,9 +218,9 @@ void ResolverRunner::disable()
     QString out = Exec::cmdWithOutput(QStringLiteral("ifconfig"), {QStringLiteral("lo0")});
 
     // Only try to remove the alias if it exists
-    if(out.contains(::resolverLocalAddress.toLatin1()))
+    if(out.contains(::resolverLocalAddress().toLatin1()))
     {
-        Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "-alias", resolverLocalAddress});
+        Exec::cmd(QStringLiteral("ifconfig"), {"lo0", "-alias", resolverLocalAddress()});
     }
 #endif
 }
@@ -707,18 +712,18 @@ QStringList ConnectionConfig::getDnsServers(const QStringList &piaLegacyDnsOverr
             switch(infrastructure())
             {
                 case Infrastructure::Modern:
-                    return {requestMace() ? piaModernDnsVpnMace : piaModernDnsVpn};
+                    return {requestMace() ? piaModernDnsVpnMace() : piaModernDnsVpn()};
                 default:
                 case Infrastructure::Current:
                     // MACE is activated separately for the legacy
                     // infrastructure.
                     if(!piaLegacyDnsOverride.isEmpty())
                         return piaLegacyDnsOverride;
-                    return {piaLegacyDnsPrimary, piaLegacyDnsSecondary};
+                    return {piaLegacyDnsPrimary(), piaLegacyDnsSecondary()};
             }
         case DnsType::Handshake:
         case DnsType::Local:
-            return {resolverLocalAddress};
+            return {resolverLocalAddress()};
         case DnsType::Existing:
             return {};
         case DnsType::Custom:
@@ -738,6 +743,7 @@ VPNConnection::VPNConnection(QObject* parent)
     , _sentByteCount(0)
     , _lastReceivedByteCount(0)
     , _lastSentByteCount(0)
+    , _lastBytecountTime{}
     , _needsReconnect(false)
 {
     _shadowsocksRunner.setObjectName("shadowsocks");
@@ -828,7 +834,7 @@ void VPNConnection::activateMACE()
     auto maceActivate1 = new QTcpSocket();
     maceActivate1->setProxy({QNetworkProxy::ProxyType::NoProxy});
     qDebug () << "Sending MACE Packet 1";
-    maceActivate1->connectToHost(piaLegacyDnsPrimary, 1111);
+    maceActivate1->connectToHost(piaLegacyDnsPrimary(), 1111);
     // Tested if error condition is hit by changing the port/invalid IP
     connect(maceActivate1,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
             [maceActivate1](QAbstractSocket::SocketError socketError) {
@@ -846,7 +852,7 @@ void VPNConnection::activateMACE()
         auto maceActivate2 = new QTcpSocket();
         maceActivate2->setProxy({QNetworkProxy::ProxyType::NoProxy});
         qDebug () << "Sending MACE Packet 2";
-        maceActivate2->connectToHost(piaLegacyDnsPrimary, 1111);
+        maceActivate2->connectToHost(piaLegacyDnsPrimary(), 1111);
         connect(maceActivate2,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
             [maceActivate2](QAbstractSocket::SocketError socketError) {
         qError() << "Failed to activate MACE packet 2 " << socketError;
@@ -1224,19 +1230,6 @@ void VPNConnection::doConnect()
     if(_connectingConfig.method() == ConnectionConfig::Method::Wireguard)
         pVpnServer = _connectingConfig.vpnLocation()->randomServerForService(Service::WireGuard);
 
-    if(!pVpnServer)
-    {
-        qWarning() << "Could not find a server in location"
-            << _connectingConfig.vpnLocation()->id() << "for method"
-            << traceEnum(_connectingConfig.method()) << "and transport"
-            << _transportSelector.lastUsed().protocol();
-        raiseError({HERE, Error::Code::VPNConfigInvalid});
-        _connectingServer = {};
-        return;
-    }
-
-    _connectingServer = *pVpnServer;
-
     // Set when the next earliest reconnect attempt is allowed
     if(delayNext)
     {
@@ -1249,6 +1242,24 @@ void VPNConnection::doConnect()
         _timeUntilNextConnectionAttempt.setRemainingTime(0);
 
     updateAttemptCount(_connectionAttemptCount+1);
+
+    if(!pVpnServer)
+    {
+        qWarning() << "Could not find a server in location"
+            << _connectingConfig.vpnLocation()->id() << "for method"
+            << traceEnum(_connectingConfig.method()) << "and transport"
+            << _transportSelector.lastUsed().protocol();
+        if(_connectionAttemptCount % 100 == 1)
+        {
+            qWarning() << "Cached modern regions list:"
+                << QJsonDocument{g_data.cachedModernRegionsList()}.toJson();
+        }
+        _connectingServer = {};
+        scheduleNextConnectionAttempt();
+        return;
+    }
+
+    _connectingServer = *pVpnServer;
 
     switch(_connectingConfig.method())
     {
@@ -1335,7 +1346,7 @@ void VPNConnection::vpnMethodStateChanged()
                     conf << "    max-udp-size: 4096" << conf.endl;
                     conf << "    qname-minimisation: yes" << conf.endl;
                     conf << "    do-ip6: no" << conf.endl;
-                    conf << "    interface: " << resolverLocalAddress << conf.endl;
+                    conf << "    interface: " << resolverLocalAddress() << conf.endl;
                     conf << "    outgoing-interface:" << g_state.tunnelDeviceLocalAddress() << conf.endl;
                     conf << "    verbosity: 1" << conf.endl;
                     // We can't let unbound drop rights, even on Mac/Linux - it
@@ -1504,6 +1515,8 @@ void VPNConnection::setState(State state)
             _resolverRunner.disable();
             // If it was Unbound, delete the old config file
             QFile::remove(Path::UnboundConfigFile);
+            // Don't measure intervals between bytecounts
+            _lastBytecountTime.clear();
         }
 
         _state = state;
@@ -1572,6 +1585,43 @@ void VPNConnection::updateByteCounts(quint64 received, quint64 sent)
     // The interval measurements always change even if the perpetual totals do
     // not (we added a 0,0 entry).
     emit byteCountsChanged();
+
+    if(_state == State::Connected)
+    {
+        // Keep track of the interval between bytecount measurements.
+        // This is mainly to ensure we terminate the connection if we wake from
+        // sleep.
+        // Most of the time, OpenVPN and WG will do this on their own after
+        // waking, because they will see there has been no activity for some
+        // time.
+        // However, it has been observed (at least on Mac) that data from before
+        // sleep can occasionally be queued up and processed right after waking,
+        // meaning the timeout resets and OpenVPN will wait another 60 seconds
+        // to reconnect.  Worse, PIA says it is "connected" at this time.
+        // If we don't receive any bytecounts for 4 minutes, assume the
+        // connection is lost - servers are configured to time out after 1-2
+        // minutes.
+        if(_lastBytecountTime &&
+            _lastBytecountTime->elapsed() >= bytecountAbandonLimit)
+        {
+            qInfo() << "Abandoning connection due to interval"
+                << traceMsec(_lastBytecountTime->elapsed())
+                << "between bytecount measurements (likely woke from sleep)";
+            // Valid in this state; updateByteCounts() is connected to a signal from _method
+            Q_ASSERT(_method);
+            _method->shutdown();
+        }
+        else
+        {
+            // Measure time starting now (restart if already measuring)
+            _lastBytecountTime.emplace();
+        }
+    }
+    else
+    {
+        // Not connected, don't track bytecount deadline
+        _lastBytecountTime.clear();
+    }
 }
 
 void VPNConnection::scheduleNextConnectionAttempt()

@@ -32,9 +32,6 @@ namespace Files
     const QString wireguardGoBasename{QStringLiteral(BRAND_CODE "-wireguard-go")};
 }
 
-#ifdef _DEBUG
-Path Path::SourceRootDir;
-#endif
 Path Path::InstallationDir;
 Path Path::BaseDir;
 Path Path::ExecutableDir;
@@ -181,10 +178,6 @@ void Path::initializePreApp()
 
 void Path::initializePostApp()
 {
-#ifdef _DEBUG
-    SourceRootDir = QStringLiteral(SOURCE_ROOT);
-#endif
-
 #if defined(Q_OS_WIN)
     InstallationDir = getShellFolder(CSIDL_PROGRAM_FILES) / PIA_PRODUCT_NAME;
     BaseDir = getBaseDir();
@@ -213,13 +206,18 @@ void Path::initializePostApp()
     LibraryDir = BaseDir / "lib";
     ResourceDir = InstallationDir / "share";
     InstallationExecutableDir = InstallationDir / "bin";
-    // TODO: Need to find a reliable daemon data dir
     DaemonDataDir = InstallationDir / "var";
-    DaemonSettingsDir = BaseDir / "etc";
+    DaemonSettingsDir = InstallationDir / "etc";
     DaemonExecutable = ExecutableDir / BRAND_CODE "-daemon";
     ClientExecutable = ExecutableDir / BRAND_CODE "-client";
 #endif
     DaemonUpdateDir = DaemonDataDir / "update";
+
+#if defined(UNIT_TEST)
+    auto unitTestLibDir = qEnvironmentVariable("UNIT_TEST_LIB");
+    if(!unitTestLibDir.isEmpty())
+        LibraryDir = unitTestLibDir;
+#endif
 
 #ifdef PIA_CLIENT
     ClientDataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);

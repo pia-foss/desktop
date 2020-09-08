@@ -32,6 +32,7 @@ QtObject {
   readonly property string protocol: NativeDaemon.settings.protocol
   readonly property string killswitch: NativeDaemon.settings.killswitch
   readonly property bool defaultRoute: NativeDaemon.settings.defaultRoute
+  readonly property bool routedPacketsOnVPN: NativeDaemon.settings.routedPacketsOnVPN
   readonly property bool blockIPv6: NativeDaemon.settings.blockIPv6
   readonly property var overrideDNS: NativeDaemon.settings.overrideDNS
   readonly property bool allowLAN: NativeDaemon.settings.allowLAN

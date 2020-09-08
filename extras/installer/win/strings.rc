@@ -112,6 +112,7 @@ IDS_MB_WINTUNUNINSTALLFAILED        QT_TRANSLATE_NOOP("winstaller", "WinTUN unin
 IDS_MB_REQUIRESNETWORKING           QT_TRANSLATE_NOOP("winstaller", "Use Safe Mode with Networking to install or uninstall Private Internet Access.")
 IDS_MB_CAP_INSTALLCOMPLETE          QT_TRANSLATE_NOOP("winstaller", "Installation complete")
 IDS_MB_RESTARTTOUSE                 QT_TRANSLATE_NOOP("winstaller", "Restart your computer to use Private Internet Access.")
+IDS_MB_REQUIRESWIN8                 QT_TRANSLATE_NOOP("winstaller", "Private Internet Access requires Windows 8 or later.")
 
 IDS_MB_SUFFIX_INSTALL_ABORT         QT_TRANSLATE_NOOP("winstaller", "The installation will now abort.")
 IDS_MB_SUFFIX_INSTALL_RETRY         QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")

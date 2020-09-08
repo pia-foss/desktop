@@ -248,7 +248,7 @@ Page {
       visible: NativeHelpers.platform !== NativeHelpers.MacOS
       Connections {
         target:Client.settings
-        onDisableHardwareGraphicsChanged: {
+        function onDisableHardwareGraphicsChanged() {
           // A restart is required to change this setting.  If the setting is
           // toggled again though, it's back to the current state, so we don't
           // need to restart.
@@ -406,7 +406,9 @@ Page {
 
       Connections {
         target: NativeHelpers
-        onReinstallWfpCalloutStatusChanged: reinstallWfpCallout.checkInstallStatus()
+        function onReinstallWfpCalloutStatusChanged() {
+          reinstallWfpCallout.checkInstallStatus()
+        }
       }
     }
 
@@ -425,19 +427,19 @@ Page {
 
   Connections {
     target: ClientNotifications
-    onReinstallTapAdapter: {
+    function onReinstallTapAdapter() {
       var settingsWindow = helpPage.Window.window
       settingsWindow.selectPage(settingsWindow.page.help)
       settingsWindow.showSettings()
       reinstallTap.startReinstall()
     }
-    onReinstallWintun: {
+    function onReinstallWintun() {
       var settingsWindow = helpPage.Window.window
       settingsWindow.selectPage(settingsWindow.page.help)
       settingsWindow.showSettings()
       reinstallWinTun.startReinstall()
     }
-    onReinstallSplitTunnel: {
+    function onReinstallSplitTunnel() {
       var settingsWindow = helpPage.Window.window
       settingsWindow.selectPage(settingsWindow.page.help)
       settingsWindow.showSettings()
@@ -447,7 +449,7 @@ Page {
 
   Connections {
     target: NativeHelpers
-    onTerminalStartFailed: function(cmd) {
+    function onTerminalStartFailed(cmd) {
       wSettings.open();
       //: "Terminal" refers to a terminal emulator in the Linux build, such
       //: as xterm, GNOME Terminal, Konsole, etc.  This should use the

@@ -136,6 +136,36 @@ function removeInstallHelper() {
     fi
 }
 
+function killInstalledProcesses() {
+    CALLING_PID="$1"
+
+    # Kill any existing processes running from the destination directory,
+    # except for CALLING_PID
+    killedProcesses=false
+    searchProcesses=true
+    killAttempts=0
+    killSignal=SIGINT
+    while [ "$searchProcesses" == "true" ]; do
+        searchProcesses=false
+        if [ "$((++killAttempts))" -gt 20 ] ; then
+          killSignal=SIGKILL
+        fi
+        for pid in $(pgrep -f "^$installDir/Contents/MacOS/" 2>> "$logFile"); do
+            if [ -z "$CALLING_PID" ] || [ "$pid" -ne "$CALLING_PID" ]; then
+                searchProcesses=true
+                killedProcesses=true
+                # Failure ignored, process could have died already
+                ps -p "$pid" >> "$logFile" || true
+                kill "-$killSignal" "$pid" 2>> "$logFile" || true
+            fi
+        done
+    done
+
+    if [ "$killedProcesses" == "true" ]; then
+        echoPass "Killed running processes"
+    fi
+}
+
 if [[ "$1" == "check" ]] ; then ################################################
 
     result=0
@@ -268,15 +298,7 @@ elif [[ "$1" == "uninstall" ]] ; then ##########################################
     # Remove the install helper
     removeInstallHelper
 
-    # Stop any other processes (TODO: softer kill for clients?)
-    killedProcesses=false
-    while pkill -f "^$installDir/Contents/MacOS/" 2>> "$logFile" ; do
-        killedProcesses=true
-        sleep 0.5
-    done
-    if "$killedProcesses" ; then
-        echoPass "Killed running processes"
-    fi
+    killInstalledProcesses
 
     # Delete app files
     rm -rf "$installDir" 2>> "$logFile" || echoFail "Failed to remove app directory"
@@ -411,24 +433,7 @@ else ###########################################################################
 
         # Kill any existing processes running from the destination directory,
         # except for CALLING_PID
-        killedProcesses=false
-        searchProcesses=true
-        while "$searchProcesses"; do
-            searchProcesses=false
-            for pid in $(pgrep -f "^$installDir/Contents/MacOS/" 2>> "$logFile"); do
-                if [ -z "$CALLING_PID" ] || [ "$pid" -ne "$CALLING_PID" ]; then
-                    searchProcesses=true
-                    killedProcesses=true
-                    # Failure ignored, process could have died already
-                    ps -p "$pid" >> "$logFile" || true
-                    kill "$pid" 2>> "$logFile" || true
-                fi
-            done
-        done
-
-        if "$killedProcesses" ; then
-            echoPass "Killed running processes"
-        fi
+        killInstalledProcesses "$CALLING_PID"
 
         # Delete the destination directory if it exists
         if [ -d "$installDir" ] ; then

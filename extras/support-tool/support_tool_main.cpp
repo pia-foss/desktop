@@ -20,6 +20,7 @@
 #include <QQmlApplicationEngine>
 #include <QDebug>
 #include <QObject>
+#include <QPalette>
 #include <QCommandLineParser>
 #include <QQuickWindow>
 #include <QStandardPaths>
@@ -125,7 +126,27 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<PayloadBuilder>("PIA.PayloadBuilder", 1, 0, "PayloadBuilder",
         [](auto, auto) -> QObject* {return new PayloadBuilder();});
 
-
+#if !defined(NDEBUG)
+    QPalette appPalette = QGuiApplication::palette();
+    // Dump the system palette - this was used to dump the light theme palette
+    // stored in ReportHelper.  If the color roles change, this can be used to
+    // re-dump the system light palette.
+    qInfo() << "System palette:";
+    for(int group = QPalette::Active; group <= QPalette::Inactive; ++group)
+    {
+        for(int role = QPalette::WindowText; role <= QPalette::ToolTipText; ++role)
+        {
+            const char *groupName = QMetaEnum::fromType<QPalette::ColorGroup>().valueToKey(group);
+            const char *roleName = QMetaEnum::fromType<QPalette::ColorRole>().valueToKey(role);
+            const auto &color = appPalette.color(static_cast<QPalette::ColorGroup>(group),
+                                                 static_cast<QPalette::ColorRole>(role));
+            qInfo().nospace().noquote() << "appPalette.setColor(QPalette::"
+                << groupName << ", QPalette::" << roleName << ", {"
+                << color.red() << ", " << color.green() << ", " << color.blue()
+                << ", " << color.alpha() << "});";
+        }
+    }
+#endif
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/components/support-tool-main.qml")));

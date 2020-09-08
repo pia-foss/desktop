@@ -107,12 +107,16 @@ private:
     void teardownFirewall();
     void setupReversePathFiltering();
     void teardownReversePathFiltering();
+    void setupRouteLocalNet();
+    void setVpnBlackHole();
+    void teardownRouteLocalNet();
     void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
 
 private:
     QPointer<QSocketNotifier> _readNotifier;
     OriginalNetworkScan _previousNetScan;
     QString _previousRPFilter;
+    QString _previousRouteLocalNet;
     AppMap _exclusionsMap;
     AppMap _vpnOnlyMap;
     QString _previousTunnelDeviceLocalAddress;

@@ -22,6 +22,7 @@
 #include "tun_inl.h"
 #include "safemode_inl.h"
 #include "tasks.h"
+#include "version.h"
 #include "tasks/callout.h"
 #include "tasks/file.h"
 #include "tasks/function.h"
@@ -569,8 +570,8 @@ DWORD Installer::workerThreadMain()
 
     #ifdef INSTALLER
         // Check the minimum required Windows version
-        if (!IsWindows7OrGreater()) // or IsWindows7SP1OrGreater?
-            InstallerError::abort(IDS_MB_REQUIRESWIN7);
+        if (!IsWindows8OrGreater())
+            InstallerError::abort(IDS_MB_REQUIRESWIN8);
     #endif
 
     #ifndef _WIN64

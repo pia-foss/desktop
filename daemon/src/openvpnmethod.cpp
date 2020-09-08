@@ -207,10 +207,17 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         // server addresses from the server in either infrastructure; use the
         // defaults.
         const auto &dnsServers = _connectingConfig.getDnsServers({});
+
         if(!dnsServers.isEmpty())
         {
-            updownCmd += " --dns ";
-            updownCmd += dnsServers.join(':');
+#if defined(Q_OS_LINUX)
+            // On Linux only set DNS servers if we have the default route
+            if(_connectingConfig.defaultRoute())
+#endif
+            {
+                updownCmd += " --dns ";
+                updownCmd += dnsServers.join(':');
+            }
         }
 
         // Terminate PIA args with '--' (OpenVPN passes several subsequent
@@ -479,7 +486,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     }
     else
     {
-
 #ifndef Q_OS_MAC
         // Add a default route with much a worse metric, so traffic can still
         // be routed on the tunnel opt-in by binding to the tunnel interface.
@@ -520,11 +526,11 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // Always route this special address through the VPN even when not using
         // PIA DNS; it's also used for port forwarding in the legacy
         // infrastructure.
-        out << "route " << piaLegacyDnsPrimary << " 255.255.255.255 vpn_gateway 0" << endl;
+        out << "route " << piaLegacyDnsPrimary() << " 255.255.255.255 vpn_gateway 0" << endl;
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
         for(const auto &dnsServer : dnsServers)
         {
-            if(dnsServer != piaLegacyDnsPrimary)
+            if(dnsServer != piaLegacyDnsPrimary())
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
         }
     }

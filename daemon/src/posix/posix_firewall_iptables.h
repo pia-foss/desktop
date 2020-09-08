@@ -28,8 +28,48 @@
 #include <QString>
 #include <QStringList>
 #include <QHostAddress>
+#include "daemon.h"
 
 struct FirewallParams;
+
+class SplitDNSInfo
+{
+public:
+    enum class SplitDNSType
+    {
+        Bypass,
+        VpnOnly
+    };
+
+    static QString existingDNS();
+    static SplitDNSInfo infoFor(const FirewallParams &params, SplitDNSType dnsType);
+
+public:
+    SplitDNSInfo() = default;
+    SplitDNSInfo(const QString &dnsServer, const QString &cGroupId, const QString &sourceIp)
+        : _dnsServer{dnsServer}, _cGroupId{cGroupId}, _sourceIp{sourceIp}
+    {
+    }
+
+    bool operator==(const SplitDNSInfo &other) const
+    {
+        return dnsServer() == other.dnsServer() &&
+            cGroupId() == other.cGroupId() &&
+            sourceIp() == other.sourceIp();
+    }
+    bool operator!=(const SplitDNSInfo &other) const {return !(*this == other);}
+
+    const QString &dnsServer() const { return _dnsServer; }
+    const QString &cGroupId() const { return _cGroupId; }
+    const QString &sourceIp() const { return _sourceIp; }
+
+    bool isValid() const;
+
+private:
+    QString _dnsServer;
+    QString _cGroupId;
+    QString _sourceIp;
+};
 
 // Firewall implementation on Linux using iptables.  Note that this also handles
 // some aspects of routing that are closely related to firewall rules.
@@ -50,15 +90,19 @@ public:
 private:
     static int createChain(IPVersion ip, const QString& chain, const QString& tableName = kFilterTable);
     static int deleteChain(IPVersion ip, const QString& chain, const QString& tableName = kFilterTable);
+    static int unlinkAndDeleteChain(IPVersion ip, const QString& chain, const QString &parent, const QString& tableName = kFilterTable);
     static int linkChain(IPVersion ip, const QString& chain, const QString& parent, bool mustBeFirst = false, const QString& tableName = kFilterTable);
     static int unlinkChain(IPVersion ip, const QString& chain, const QString& parent, const QString& tableName = kFilterTable);
-    static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable);
-    static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
+    static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const QString &rootChain = kRootChain);
+    static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable, const QString &rootChain = kRootChain);
+    static QString rootChainFor(const QString &chain);
     static QStringList getDNSRules(const QString &adapterName, const QStringList& servers);
     static int execute(const QString& command, bool ignoreErrors = false);
+    void enableRouteLocalNet();
+    void disableRouteLocalNet();
 private:
     // Chain names
-    static QString kOutputChain, kRootChain, kPostRoutingChain, kPreRoutingChain;
+    static QString kOutputChain, kInputChain, kForwardChain, kRootChain, kPostRoutingChain, kPreRoutingChain;
 
 public:
     // Install/uninstall the firewall anchors
@@ -73,15 +117,19 @@ public:
     static void replaceAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QStringList &newRules, const QString& tableName = kFilterTable);
     void updateRules(const FirewallParams &params);
     void updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion, const QSet<QString> &bypassSubnets, QSet<QString> &oldBypassSubnets);
+    QString existingDNS();
 
 private:
     // Last state used by updateRules(); allows us to detect when the rules must
     // be updated
+    SplitDNSInfo _routedDnsInfo;    // Last behavior applied for routed packet DNS
+    SplitDNSInfo _appDnsInfo;   // Last behavior applied for app DNS (either bypass or VPN only)
     QString _adapterName;
     QStringList _dnsServers;
     QString _ipAddress6;
     QSet<QString> _bypassIpv4Subnets;
     QSet<QString> _bypassIpv6Subnets;
+    QString _previousRouteLocalNet;
 };
 
 #endif

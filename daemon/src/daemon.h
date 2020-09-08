@@ -124,6 +124,7 @@ struct FirewallParams
     // as not needed if there were no block rules preceding it. The rulesets
     // should be thought of as in last-match order.
 
+    bool leakProtectionEnabled; // Apply leak protection (on for KS=always, or for KS=auto when connected)
     bool blockAll;      // Block all traffic by default
     bool allowVPN;      // Exempt traffic through VPN tunnel
     bool allowDHCP;     // Exempt DHCP traffic
@@ -310,6 +311,8 @@ public:
     // Get the _state.original* fields as an OriginalNetworkScan
     OriginalNetworkScan originalNetwork() const;
 
+    bool vpnHasDefaultRoute() { return _settings.splitTunnelEnabled() ?  _settings.defaultRoute() : true; }
+
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
 
@@ -398,6 +401,9 @@ signals:
     // minute initialization the first time this happens.
     void aboutToConnect();
 
+    // Networks have changed
+    void networksChanged();
+
 public slots:
     // Run the core daemon in the current message loop.
     virtual void start();
@@ -461,7 +467,7 @@ private:
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
     void modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc);
-    void networksChanged(const std::vector<NetworkConnection> &networks);
+    void onNetworksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
     void reapplyFirewallRules();

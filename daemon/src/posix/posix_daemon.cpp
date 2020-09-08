@@ -33,6 +33,8 @@
 #include "mac/kext_client.h"
 #elif defined(Q_OS_LINUX)
 #include "linux/proc_tracker.h"
+#include "linux/linux_routing.h"
+#include "linux/linux_fwmark.h"
 #endif
 
 #include <QFileSystemWatcher>
@@ -94,6 +96,7 @@ public:
     virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
 };
 
+
 void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
 #if defined(Q_OS_MACOS)
@@ -113,6 +116,9 @@ void PosixRouteManager::removeRoute(const QString &subnet, const QString &gatewa
 PosixDaemon::PosixDaemon()
     : Daemon{}, _enableSplitTunnel{false},
       _subnetBypass{std::make_unique<PosixRouteManager>()}
+#if defined(Q_OS_LINUX)
+    , _resolvconfWatcher{QStringLiteral("/etc/resolv.conf")}
+#endif
 {
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
     ignoreSignals({ SIGPIPE });
@@ -132,6 +138,10 @@ PosixDaemon::PosixDaemon()
     // Check for the WireGuard kernel module
     connect(&_linuxModSupport, &LinuxModSupport::modulesUpdated, this,
             &PosixDaemon::checkLinuxModules);
+    connect(this, &Daemon::networksChanged, this, &PosixDaemon::updateExistingDNS);
+    connect(&_resolvconfWatcher, &FileWatcher::changed, this, &PosixDaemon::updateExistingDNS);
+    updateExistingDNS();
+
     checkLinuxModules();
 
     prepareSplitTunnel<ProcTracker>();
@@ -210,6 +220,127 @@ void PosixDaemon::handleSignal(int sig) Q_DECL_NOEXCEPT
     }
 }
 
+#ifdef Q_OS_LINUX
+void PosixDaemon::updateExistingDNS()
+{
+    qInfo() << "Networks changed, updating existing DNS";
+    const auto netScan = originalNetwork();
+    const QString linkTarget = QFile::symLinkTarget(QStringLiteral("/etc/resolv.conf"));
+    const QString resolvBackup = Path::DaemonDataDir / QStringLiteral("pia.resolv.conf");
+    auto match = QRegularExpression{"systemd"}.match(linkTarget);
+
+    // Connected or disconnected
+    QStringList rawDnsList;
+    if(match.hasMatch())
+    {
+        // systemd-resolve was replaced with resolvectl in newer versions of
+        // systemd
+        if(0 == Exec::bash(QStringLiteral("which resolvectl"), true))
+        {
+            qInfo() << "Saving existingDNS for systemd using resolvectl";
+            QString output = Exec::bashWithOutput(QStringLiteral("resolvectl dns | grep %1 | cut -d ':' -f 2-").arg(netScan.interfaceName()));
+            rawDnsList = output.split(' ');
+        }
+        else
+        {
+            qInfo() << "Saving existingDNS for systemd using systemd-resolve";
+            QString output = Exec::bashWithOutput(QStringLiteral("systemd-resolve --status"));
+            auto outputLines = output.split('\n');
+            // Find the section for this interface
+            QString interfaceSectRegex = QStringLiteral(R"(^Link \d+ \()") + netScan.interfaceName() + R"(\)$)";
+            int lineIdx = outputLines.indexOf(QRegularExpression{interfaceSectRegex});
+            if(lineIdx < 0)
+                lineIdx = outputLines.size();
+            qInfo() << "Interface" << netScan.interfaceName() << "starts on line"
+                << lineIdx << "/" << outputLines.size();
+            // Look for the "DNS Servers:" line, then capture the first DNS
+            // server from that line and all subsequent DNS servers.
+            QRegularExpression dnsServerLine{R"(^( *DNS Servers: )(.*)$)"};
+            QString valueIndent;
+            while(++lineIdx < outputLines.size())
+            {
+                // If the line starts with "Link ", it's the next link section,
+                // we're done.
+                if(outputLines[lineIdx].startsWith("Link "))
+                {
+                    qInfo() << "Done on line" << lineIdx << "- starts next link";
+                    break;
+                }
+
+                // If we previously found the "DNS Servers:" line, look for
+                // subsequent servers by checking if the line is indented to the
+                // "value" column.  Otherwise, it's the next field.  (DNS server
+                // values contain colons if they're IPv6 addresses, so looking
+                // for a line starting with "   <name>:" wouldn't work.)
+                if(!valueIndent.isEmpty())
+                {
+                    if(outputLines[lineIdx].startsWith(valueIndent))
+                    {
+                        qInfo() << "Found additional DNS server line:" << outputLines[lineIdx];
+                        rawDnsList.push_back(outputLines[lineIdx].mid(valueIndent.size()));
+                    }
+                    else
+                    {
+                        qInfo() << "Done on line" << lineIdx << "- starts next value";
+                        break;
+                    }
+                }
+                else
+                {
+                    auto dnsServerMatch = dnsServerLine.match(outputLines[lineIdx]);
+                    if(dnsServerMatch.hasMatch())
+                    {
+                        // It's the "DNS Servers:" line - capture the indent
+                        // level and the first value.
+                        valueIndent = QString{dnsServerMatch.captured(1).size(), ' '};
+                        rawDnsList.push_back(dnsServerMatch.captured(2));
+                        qInfo() << "Found first DNS server line:"
+                            << outputLines[lineIdx] << "- value indent length is"
+                            << valueIndent.size();
+                    }
+                }
+            }
+        }
+    }
+
+    // When connected
+    else if(QFile::exists(resolvBackup))
+    {
+        qInfo() << "Saving existing DNS non-systemd";
+        QString output = Exec::bashWithOutput(QStringLiteral("cat %1 | awk '$1==\"nameserver\" { printf \"%s \", $2; }'").arg(resolvBackup));
+        rawDnsList = output.split(' ');
+    }
+
+    // When not yet connected
+    else
+    {
+        qInfo() << "Saving existing DNS non-systemd";
+        QString output = Exec::bashWithOutput(QStringLiteral("cat /etc/resolv.conf | awk '$1==\"nameserver\" { printf \"%s \", $2; }'"));
+        rawDnsList = output.split(' ');
+    }
+
+    std::vector<quint32> dnsIps;
+
+    for (auto dnsServer : rawDnsList)
+    {
+        bool ok{ false };
+        quint32 address = QHostAddress{ dnsServer }.toIPv4Address(&ok);
+
+        if (ok)
+            dnsIps.push_back(address);
+    }
+
+    qInfo() << "Existing DNS ips";
+
+    for (auto i : dnsIps)
+    {
+        qInfo() << QHostAddress{ i }.toString();
+    }
+
+    _state.existingDNSServers(dnsIps);
+}
+#endif
+
 #if defined(Q_OS_LINUX)
 // Update the 100.vpnTunOnly rule with the current tunnel device name and local
 // address.  If it's updated and the anchor should be enabled, returns true.
@@ -240,6 +371,38 @@ static bool updateVpnTunOnlyAnchor(bool hasConnected, QString tunnelDeviceName, 
     }
 
     return false;
+}
+
+static void updateForwardedRoutes(const FirewallParams &params, const QString &tunnelDeviceName, bool shouldBypassVpn)
+{
+    const auto &netScan = params.netScan;
+
+    // If routed traffic is configured to bypass, create the default gateway
+    // route in this table all the time, which ensures that it isn't briefly
+    // routed into the VPN while the connection is coming up.
+    if(shouldBypassVpn)
+        Exec::bash(QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(netScan.gatewayIp(), netScan.interfaceName(), Routing::forwardedTable));
+    // Otherwise, create the VPN route for this traffic once connected.  This
+    // doesn't need to be active while disconnected - the "use VPN" mode of
+    // routed traffic intentionally permits traffic when disconnected, setting
+    // KS=Always blocks it correctly with the blackhole route if desired.
+    else if(params.hasConnected)
+        Exec::bash(QStringLiteral("ip route replace default dev %1 table %2").arg(tunnelDeviceName, Routing::forwardedTable));
+    // Routed = Use VPN, and not connected
+    else
+        Exec::bash(QStringLiteral("ip route delete default table %2").arg(Routing::forwardedTable));
+
+    // Add blackhole fall-back route to block all forwarded traffic if killswitch is on (and disconnected)
+    if(params.leakProtectionEnabled)
+        Exec::bash(QStringLiteral("ip route replace blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
+    else
+        Exec::bash(QStringLiteral("ip route delete blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
+
+    // Blackhole IPv6 for forwarded connections too, for IPv6 leak protection and killswitch
+    if(params.blockIPv6)
+        Exec::bash(QStringLiteral("ip -6 route replace blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
+    else
+        Exec::bash(QStringLiteral("ip -6 route delete blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
 }
 #endif
 
@@ -274,6 +437,7 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     PFFirewall::setFilterEnabled(QStringLiteral("100.blockAll"), params.blockAll);
     PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
     PFFirewall::setFilterEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
+
     PFFirewall::setFilterEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
     PFFirewall::setFilterEnabled(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
     PFFirewall::setAnchorTable(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN, QStringLiteral("ipv6prefix"), {
@@ -358,6 +522,11 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
 
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), params.blockDNS);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("100.protectLoopback"), true);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("80.splitDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("80.fwdSplitDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.fwdSnatDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
 
     // block VpnOnly packets when the VPN is not connected
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
@@ -372,6 +541,9 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("390.allowWg"), params.allowPIA);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("400.allowPIA"), params.allowPIA);
 
+    // Mark forwarded packets in all cases (so we can block when KS is on)
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagFwd"), true, IpTablesFirewall::kMangleTable);
+
     // Update and apply our rules to ensure VPN packets are only accepted on the
     // tun interface, mitigates CVE-2019-14899: https://seclists.org/oss-sec/2019/q4/122
     bool enableVpnTunOnly = updateVpnTunOnlyAnchor(params.hasConnected,
@@ -384,6 +556,11 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     // Update dynamic rules that depend on info such as the adapter name and/or DNS servers
     _firewall.updateRules(params);
+
+    // Update routes for forwarded packets (i.e docker)
+    updateForwardedRoutes(params, _state.tunnelDeviceName(),
+        params.enableSplitTunnel && !_settings.routedPacketsOnVPN());
+
 #endif
 
 #ifdef Q_OS_MACOS
@@ -395,7 +572,6 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     updateBoundRoute(params);
     toggleSplitTunnel(params);
 }
-
 
 QJsonValue PosixDaemon::RPC_installKext()
 {
@@ -449,11 +625,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (000.stubDNS)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.stubDNS")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary()), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary(),
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
     file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
@@ -490,11 +666,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("iptables --version", "iptables", QStringList{QStringLiteral("--version")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary()), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary,
+    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary(),
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("resolv.conf", "cat", QStringList{QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("ls -l resolv.conf", "ls", QStringList{QStringLiteral("-l"), QStringLiteral("/etc/resolv.conf")});
@@ -529,6 +705,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("ip route show table " BRAND_CODE "vpnrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnrt"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnWgrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnWgrt"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnOnlyrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnOnlyrt"});
+    file.writeCommand("ip route show table " BRAND_CODE "vpnFwdrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnFwdrt"});
     file.writeCommand("WireGuard Kernel Logs", "bash", QStringList{"-c", "dmesg | grep -i wireguard | tail -n 200"});
     // Info about the wireguard kernel module (whether it is loaded and/or available)
     file.writeCommand("ls -ld /sys/modules/wireguard", "ls", {"-ld", "/sys/modules/wireguard"});

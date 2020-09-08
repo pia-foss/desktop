@@ -213,7 +213,7 @@ DecoratedWindow {
 
   Connections {
     target: ClientNotifications
-    onShowChangelog: {
+    function onShowChangelog() {
       open();
     }
   }

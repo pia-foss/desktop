@@ -27,6 +27,7 @@ namespace Routing
     extern const QString bypassTable;
     extern const QString vpnOnlyTable;
     extern const QString wireguardTable;
+    extern const QString forwardedTable;
 
     // Priorities for our routing policies. Lower values mean higher priority.
     // - suppressedMain -> from all lookup main suppress_prefixlength 1
@@ -37,7 +38,8 @@ namespace Routing
     namespace Priorities
     {
         enum {
-            suppressedMain = 99,
+            suppressedMain = 50,
+            forwarded = 70,
             vpnOnly = 100,
             bypass = 101,
             sourceIp = 102,

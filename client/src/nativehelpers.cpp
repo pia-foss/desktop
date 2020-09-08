@@ -170,6 +170,9 @@ void NativeHelpers::initDashboardPopup(QWindow *pDashboard)
     // but they might be used by window switchers, etc.
     initDecoratedWindow(pDashboard);
 
+    qInfo() << "requested alpha:" << pDashboard->requestedFormat().alphaBufferSize()
+        << "- actual alpha:" << pDashboard->format().alphaBufferSize();
+
 #if defined(Q_OS_MACOS)
     macSetAllWorkspaces(*pDashboard);
 #endif

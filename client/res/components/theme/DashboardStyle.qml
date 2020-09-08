@@ -37,6 +37,7 @@ QtObject {
     readonly property color backgroundColor: Theme.dark ? '#323642' : '#eeeeee'
     readonly property color textColor: Theme.dark ? '#ffffff' : '#323642'
     readonly property color disabledTextColor: "#889099"
+    readonly property string shadowImage: Theme.imagePathCommon + "/dashboard/shadow-dashboard.png"
 
     readonly property color scrollBarColor: Theme.dark ? '#5c6370' : '#889099'
     readonly property color scrollBarPressedColor: Theme.dark ? '#889099' : '#5c6370'

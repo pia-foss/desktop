@@ -23,6 +23,7 @@ QtObject {
   readonly property var languages: NativeClient.state.languages
   readonly property var activeLanguage: NativeClient.state.activeLanguage
   readonly property bool clientHasBeenUpdated: NativeClient.state.clientHasBeenUpdated
+  readonly property bool showWhatsNew: NativeClient.state.showWhatsNew
   readonly property bool firstRunFlag: NativeClient.state.firstRunFlag
   readonly property bool quietLaunch: NativeClient.state.quietLaunch
   readonly property bool usingSafeGraphics: NativeClient.state.usingSafeGraphics

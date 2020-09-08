@@ -300,7 +300,7 @@ FocusScope {
     // and then be presented with an already-expanded connect page.  However,
     // going to the regions list from an expanded connect page should preserve
     // the expanded state, so we don't do this on a page transition.
-    onLoggedInChanged: {
+    function onLoggedInChanged() {
       if (!Daemon.account.loggedIn)
         pageExpanded = false;
     }

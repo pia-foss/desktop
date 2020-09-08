@@ -60,6 +60,7 @@ void dummyClientMain() {}
 #include "win/win_scaler.h"
 #include "win/win_messagereceiver.h"
 #include "win/win_util.h"
+#include "win/win_d3d11support.h"
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 #endif
@@ -273,31 +274,70 @@ int clientMain(int argc, char *argv[])
         gfxMode = GraphicsMode::Safe;
 
 #if defined(Q_OS_WIN)
-    if (gfxMode == GraphicsMode::Normal && winShouldUseSoftwareBackend())
-    {
-        // Use software graphics due to Windows-specific constraints.  (Don't
-        // enable the permanent setting though.)
-        gfxMode = GraphicsMode::Safe;
-    }
-
-    // On Windows, Qt provides this application attribute to load an
-    // app-provided software OpenGL implementation.  We ship Qt's Mesa-llvmpipe
-    // build as opengl32sw.dll.
+    qunsetenv("QSG_RHI");
+    // On Windows, use the RHI D3D11 renderer.  To implement software mode, use
+    // that renderer with the D3D11 WARP backend, which supports D3D feature
+    // level 11 in Windows 8 and later.
+    //
+    // Qt Quick has a number of rendering backends, and the most important
+    // factor on Windows is driver support for the relevant APIs.
+    //
+    // The RHI D3D11 backend is the most stable D3D backend in Qt; the RHI
+    // backends are being used for future Qt development (all direct backends
+    // are being removed in Qt 6.)  All the other backends either have poor
+    // driver support on Windows or are not fully implemented in Qt.
+    //
+    // - Direct OpenGL renderer - PIA used this from 1.0 to 2.4.  This is
+    //   passable, but many graphics drivers have issues with OpenGL
+    //   which necessitated a number of mitigations in PIA to fall back to
+    //   software graphics mode.
+    // - OpenGL via ANGLE - Not a good option, Qt variously disables either
+    //   ANGLE or OpenGL on various cards/drivers due to compatibility issues.
+    //   There's no single preference order that works reliably, and shipping a
+    //   card/driver list is fragile at best.
+    // - Direct D3D12 renderer - This was a stopgap implementation to render
+    //   Qt Quick directly using D3D12, it was never fully supported and is
+    //   being removed in Qt 6.
+    //
+    // Finally, the D3D11 WARP backend is used for the software backend because:
+    // - We don't have to ship any dependencies to use it (unlike LLVMpipe)
+    // - It's consistent with the hardware renderer
+    nullable_t<WinD3dAdapters> d3dAdapters;
     if(gfxMode != GraphicsMode::Normal)
-        QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
+    {
+        // Just tell RHI to use WARP
+        qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", "1");
+        qunsetenv("QT_D3D_ADAPTER_INDEX");
+    }
     else
     {
-        // Disable shader disk cache as this causes crashes on Intel HD Graphics 620
-        // This is fixed in Qt 5.12 where the driver is blacklisted
-        // Since we don't use a lot of shaders we shouldn't see a very significant
-        // performance impact
-        //
-        // https://bugreports.qt.io/browse/QTBUG-64697
-        // https://codereview.qt-project.org/#/c/238651/
-        // https://codereview.qt-project.org/#/c/242235/
-
-        QGuiApplication::setAttribute(Qt::AA_DisableShaderDiskCache, true);
+        // Check whether hardware support at feature level 11 is actually
+        // available.  If it is, tell RHI to use the adapter we found.  Qt
+        // requires feature level 11, but many VM hypervisors provide D3D
+        // acceleration at lower levels.  Qt isn't smart enough to actually
+        // state its required feature version, it just fails if the API falls
+        // back to a lower version.
+        d3dAdapters.emplace();
+        int bestAdapter = d3dAdapters->getPreferredAdapter();
+        if(bestAdapter >= 0)
+        {
+            // Tell Qt to use this adapter, in the rare event that there might
+            // be a preceding adapter with a lower feature level.
+            qputenv("QT_D3D_ADAPTER_INDEX", QByteArray::number(bestAdapter));
+            qunsetenv("QSG_RHI_PREFER_SOFTWARE_RENDERER");
+        }
+        else
+        {
+            // There is no 11.0 adapter available.  Use WARP instead.
+            qInfo() << "Using WARP (software renderer), no feature level 11.0 adapter found";
+            qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", "1");
+            qunsetenv("QT_D3D_ADAPTER_INDEX");
+        }
     }
+    // The environment variables above must be set before setting the scene
+    // graph backend, this causes Qt Quick to create the RHI interface, which
+    // checks the environment then.
+    QQuickWindow::setSceneGraphBackend(QSGRendererInterface::GraphicsApi::Direct3D11Rhi);
 #endif
 
 #ifdef Q_OS_MACOS
@@ -345,6 +385,7 @@ int clientMain(int argc, char *argv[])
 #endif
 
     Logger logSingleton{Path::ClientLogFile};
+
     QGuiApplication::setApplicationDisplayName(QStringLiteral(PIA_PRODUCT_NAME));
     QGuiApplication::setQuitOnLastWindowClosed(false);
 
@@ -370,6 +411,18 @@ int clientMain(int argc, char *argv[])
     qInfo() << "Current launch-on-login:" << NativeHelpers::getStartOnLoginSetting();
 
 #if defined(Q_OS_WIN)
+    // It's not possible to emit D3D adapter info in the log file when we
+    // detect it - the detection has to be done before the QGuiApplication is
+    // created, and logging can't be initialized until after it's created.  This
+    // info is really important, so WinD3DAdapters stores the adapter info to
+    // trace here.
+    if(d3dAdapters)
+        d3dAdapters->traceAdapters();
+    else
+    {
+        qInfo() << "Software graphics are enabled, did not check D3D adapters";
+    }
+
     // Exit if the uninstaller tells us to
     MessageReceiver messageReceiver;
 #endif
@@ -381,7 +434,7 @@ int clientMain(int argc, char *argv[])
             #if defined(Q_OS_MACOS)
                 ".." / "Resources" /
             #elif defined(Q_OS_LINUX)
-                ".." / "etc" /
+                ".." / "share" /
             #endif
                 QStringLiteral("translations.rcc")
                 );

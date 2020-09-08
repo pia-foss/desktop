@@ -95,8 +95,8 @@ PiaWindow {
   //: product.
   title: uiTr("PIA Dashboard")
   // The shadow provided by default on OS X doesn't animate properly when the
-  // dashboard expands/collapses.  Disable it and use a DropShadow in
-  // DashboardWindow to provide the shadow when in popup mode.
+  // dashboard expands/collapses.  Disable it and use a pre-rendered shadow to
+  // provide the shadow when in popup mode.
   flags: {
     var flags = Qt.FramelessWindowHint|Qt.NoDropShadowWindowHint
     // On Windows, the icon by default will be in the tray overflow area, which
@@ -345,28 +345,20 @@ PiaWindow {
       visible: true
       opacity: calculatingLayouts ? 0 : slideAnimator.dashOpacity
 
-      DropShadow {
-        id: trayShadow
-        anchors.fill: shadowWrapper
-
-        cached: false
-        horizontalOffset: 0
-        verticalOffset: 0
-        spread: 0.0
-        radius: Theme.dashboard.windowPadding
-        samples: 10
-        color: "#80000000"
-        transparentBorder: true
-        z: 0
-        source: shadowWrapper
-        visible: true
-      }
-
       // Wrap the content and the tray arrow in an Item so the shadow takes both
       // into account.
       Item {
         id: shadowWrapper
         anchors.fill: parent
+
+        BorderImage {
+          anchors.fill: contentItem
+          anchors.margins: -10
+          border {left: 22; top: 22; right: 22; bottom: 22}
+          horizontalTileMode: BorderImage.Stretch
+          verticalTileMode: BorderImage.Stretch
+          source: Theme.dashboard.shadowImage
+        }
 
         Item {
           z: 5
@@ -544,7 +536,9 @@ PiaWindow {
 
   Connections {
     target: NativeHelpers
-    onAppFocusLost: animHide()
+    function onAppFocusLost() {
+      animHide()
+    }
   }
 
   Shortcut {

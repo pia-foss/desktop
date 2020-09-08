@@ -17,11 +17,10 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "tap.h"
+#include "tap_inl.h"
+
 bool TapDriverTask::_rollbackNeedsUninstall = false;
 bool TapDriverTask::_rollbackNeedsReinstall = false;
-
-#define TAP_LOG LOG
-#include "tap.inl"
 
 std::wstring TapDriverTask::getInfPath()
 {
@@ -74,7 +73,7 @@ void InstallTapDriverTask::execute()
 {
     LOG("Installing TAP driver");
     _listener->setCaption(IDS_CAPTION_INSTALLINGADAPTER);
-    
+
 retry_uninstall:
     // If a different version of the TAP adapter is installed, uninstall it
     // before installing the new one.
@@ -97,7 +96,7 @@ retry_uninstall:
         // If this failure is ignored, we'll still try to update the TAP adapter
         break;
     }
-    
+
 retry:
     DriverStatus status = installTapDriver(getInfPath().c_str(), false, false);
     switch (status)

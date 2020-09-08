@@ -377,7 +377,7 @@ LinuxWindowMetrics::LinuxWindowMetrics()
                      this, &LinuxWindowMetrics::displayChanged);
 }
 
-double LinuxWindowMetrics::calcScreenScaleFactor(QScreen &screen) const
+double LinuxWindowMetrics::calcScreenScaleFactor(const PlatformScreens::Screen &) const
 {
     return LinuxWindowScaler::getScaleFactor();
 }

@@ -23,6 +23,7 @@
 #define NATIVEACC_INTERFACES_H
 
 #include <QAccessibleObject>
+#include <QAccessibleInterface>
 
 namespace NativeAcc {
 

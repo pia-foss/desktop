@@ -293,7 +293,7 @@ WinWindowMetrics::WinWindowMetrics()
 {
 }
 
-double WinWindowMetrics::calcScreenScaleFactor(QScreen &screen) const
+double WinWindowMetrics::calcScreenScaleFactor(const PlatformScreens::Screen &screen) const
 {
     // On Windows, layout occurs in physical pixels.  Although QScreen actually
     // has devicePixelRatio, it always returns 1.0 since we are not having Qt

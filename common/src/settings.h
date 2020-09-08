@@ -689,6 +689,7 @@ public:
     // setting was renamed when it was implemented properly to avoid unexpected
     // behavior on downgrades.
     JsonField(bool, defaultRoute, true)
+    JsonField(bool, routedPacketsOnVPN, true)
     JsonField(bool, blockIPv6, true) // block IPv6 traffic
     JsonField(DNSSetting, overrideDNS, QStringLiteral("pia"), validateDNSSetting) // use PIA DNS servers (symbolic name, array with 1-2 IPs, or empty string to use existing DNS)
     JsonField(bool, allowLAN, true) // permits LAN traffic when connected/killswitched
@@ -1292,23 +1293,25 @@ public:
     // Whether a kernel implementation of Wireguard is available (only possible
     // on Linux).
     JsonField(bool, wireguardKernelSupport, false)
+    // The DNS servers prior to connecting
+    JsonField(std::vector<quint32>, existingDNSServers, {})
 };
 
 
 #if defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 // The 127/8 loopback address used for local DNS.
-extern COMMON_EXPORT const QString resolverLocalAddress;
+COMMON_EXPORT const QString resolverLocalAddress();
 
 // The IP used for PIA DNS and MACE activation in the legacy infrastructure.
-extern COMMON_EXPORT const QString piaLegacyDnsPrimary;
+COMMON_EXPORT const QString piaLegacyDnsPrimary();
 // The IP used for the secondary PIA DNS address in the legacy infrastructure.
-extern COMMON_EXPORT const QString piaLegacyDnsSecondary;
+COMMON_EXPORT const QString piaLegacyDnsSecondary();
 
 // The IP used for PIA DNS in the modern infrastructure - on-VPN, and with MACE.
-extern COMMON_EXPORT const QString piaModernDnsVpnMace;
+COMMON_EXPORT const QString piaModernDnsVpnMace();
 // The IP used for PIA DNS in the modern infrastructure - on-VPN (no MACE).
-extern COMMON_EXPORT const QString piaModernDnsVpn;
+COMMON_EXPORT const QString piaModernDnsVpn();
 
 #endif
 

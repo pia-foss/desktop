@@ -21,7 +21,6 @@
 
 #include "windowscaler.h"
 #include <QGuiApplication>
-#include <QScreen>
 
 void WindowScaler::setTargetWindow(QQuickWindow *pTargetWindow)
 {

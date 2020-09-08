@@ -158,6 +158,19 @@ Rectangle {
           }
         }
 
+        SplitTunnelRoutedRow {
+          id: routedPacketsRow
+          Layout.fillWidth: true
+          showAppIcons: false
+          visible: Qt.platform.os == 'linux'
+          highlightColumn: {
+            if(splitTunnelSettings.keyboardRow.type === 'routed')
+              return splitTunnelSettings.highlightColumn
+            return -1
+          }
+          onFocusCell: mouseFocusCell({type: 'other', value: ''}, column)
+        }
+
         SplitTunnelDefaultRow {
           id: defaultBehaviourRow
           Layout.fillWidth: true
@@ -211,6 +224,12 @@ Rectangle {
 
       table.push({type: 'app', value: appRowItem.appPath,
                   name: appRowItem.appName, item: appRowItem})
+    }
+
+    // 'Routed packets' row
+    if(routedPacketsRow.visible) {
+      table.push({type: 'routed', value: '', name: routedPacketsRow.displayName,
+                  item: routedPacketsRow})
     }
 
     // 'Other apps' row

@@ -43,6 +43,7 @@ readonly hnsdGroupName="${brandCode}hnsd"                # The group used by the
 readonly routingTableName="${serviceName}rt"             # for split tunnel
 readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"  # for inverse split tunnel
 readonly wireguardRoutingTableName="${serviceName}Wgrt"
+readonly forwardedRoutingTableName="${serviceName}Fwdrt" # For forwarded packets
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
@@ -214,10 +215,10 @@ function installDependencies() {
 
     if hash yum 2>/dev/null; then
         # Fedora and relatives put all xcb libs in libxcb
-        sudo yum -y install net-tools libxkbcommon-x11 libxcb libnl3
+        sudo yum -y install net-tools libxkbcommon-x11 libxcb libnl3 xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil
     elif hash pacman 2>/dev/null; then
         # Arch puts all xcb libs in the libxcb package.
-        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libxcb libnl
+        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libxcb libnl xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil
     elif hash zypper 2>/dev/null; then
         # openSUSE splits up xcb
         sudo zypper install libxkbcommon-x11-0 libxcb1 libxcb-xkb1 libxcb-xinerama0 libnl3-200 \
@@ -330,6 +331,7 @@ function installPia() {
     addRoutingTable $routingTableName
     addRoutingTable $vpnOnlyroutingTableName
     addRoutingTable $wireguardRoutingTableName
+    addRoutingTable $forwardedRoutingTableName
 
     # Instruct NetworkManager not to interfere with DNS on the wireguard interface
     wireguardUnmanaged

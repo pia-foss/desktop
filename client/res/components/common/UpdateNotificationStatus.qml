@@ -209,7 +209,7 @@ NotificationStatus {
   }
   property var stateConnections: Connections {
     target: Daemon.state
-    onAvailableVersionChanged: {
+    function onAvailableVersionChanged() {
       if(Daemon.state.availableVersion !== dismissedVersion)
         dismissedVersion = ""
     }

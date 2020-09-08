@@ -143,6 +143,8 @@ Logger::Logger(const Path &logFilePath)
 
     Q_D(Logger);
 
+    // QFileSystemWatcher requires a QCoreApplication to exist, so Logger can't
+    // be initialized until QCoreApplication is up.
     if (!QCoreApplication::instance())
         qCritical() << "Instantiated Logging singleton before QCoreApplication";
 
@@ -341,6 +343,7 @@ void LoggerPrivate::removeDebugFile()
 
 bool LoggerPrivate::openLogFile(bool newSession)
 {
+    logFilePath.mkparent();
     logFile.setFileName(logFilePath);
     if (logFile.open(QFile::WriteOnly | QFile::Append | QFile::Text))
     {
@@ -432,12 +435,7 @@ static void renderLocation(QTextStream& s, const char* file, int line)
     if (file)
     {
         s << '[';
-    #ifdef QT_DEBUG
-        static QRegExp re("^(common|client|daemon)/src/");
-        s << QDir(Path::SourceRootDir).relativeFilePath(QLatin1String(file)).replace(re, {});
-    #else
         s << QLatin1String(file);
-    #endif
         if (line)
             s << ':' << line;
         s << ']';

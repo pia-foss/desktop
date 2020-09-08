@@ -108,7 +108,7 @@ public:
 
     // NativeWindowMetrics interface
 public:
-    double calcScreenScaleFactor(QScreen &screen) const override;
+    double calcScreenScaleFactor(const PlatformScreens::Screen &) const override;
     QMarginsF calcDecorationSize(const QWindow &window, double screenScale) const override;
 };
 

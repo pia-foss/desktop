@@ -246,23 +246,23 @@ SecondaryWindow {
 
   Connections {
     target: ClientNotifications
-    onShowPrivacyPage: {
+    function onShowPrivacyPage(){
       selectPage(page.privacy)
       showSettings()
     }
-    onShowNetworkPage: {
+    function onShowNetworkPage() {
       selectPage(page.network)
       showSettings()
     }
-    onShowConnectionPage: {
+    function onShowConnectionPage() {
       selectPage(page.connection)
       showSettings()
     }
-    onShowHelpPage: {
+    function onShowHelpPage() {
       selectPage(page.help)
       showSettings()
     }
-    onShowHelpAlert: {
+    function onShowHelpAlert() {
       selectPage(page.help)
       showSettings()
       alert(msg, title, level)

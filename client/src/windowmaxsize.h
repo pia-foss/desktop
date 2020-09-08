@@ -23,8 +23,8 @@
 #define WINDOWMAXSIZE_H
 
 #include <QWindow>
-#include <QScreen>
 #include <QQuickWindow>
+#include "platformscreens.h"
 #include "workspacechange.h"
 
 // Platform dependent parts of this algorithm
@@ -35,7 +35,7 @@ class NativeWindowMetrics : public QObject
 public:
     // Determine a screen's logical scale factor.  (This logic is
     // platform-dependent since QScreen doesn't directly indicate this.)
-    virtual double calcScreenScaleFactor(QScreen &screen) const = 0;
+    virtual double calcScreenScaleFactor(const PlatformScreens::Screen &screen) const = 0;
     // Calculate the logical size of a window decoration on one possible screen,
     // which will be removed from the work area size.  The given window's style
     // is used to determine this size, but its size/position/etc. don't affect

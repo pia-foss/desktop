@@ -105,6 +105,7 @@ skipped in silent or passive mode.
 #include "tasks/payload.h"
 #include "tasks.h"
 #include "installer.h"
+#include "version.h"
 
 int main();
 

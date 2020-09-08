@@ -49,7 +49,7 @@ private slots:
 
         settings.overrideDNS(QStringLiteral("handshake"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress});
+        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress()});
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Handshake);
     }
 
@@ -62,7 +62,7 @@ private slots:
 
         settings.overrideDNS(QStringLiteral("local"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress});
+        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress()});
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Local);
     }
 

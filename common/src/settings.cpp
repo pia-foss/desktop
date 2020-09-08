@@ -353,8 +353,9 @@ const QStringList DaemonSettings::defaultDebugLogging
 {
     QStringLiteral("*.debug=true"),
     QStringLiteral("qt*.debug=false"),
-    QStringLiteral("latency.*=false"),
-    QStringLiteral("qt.scenegraph.general*=true")
+    QStringLiteral("qt*.info=false"),
+    QStringLiteral("qt.scenegraph.general*=true"),
+    QStringLiteral("qt.rhi.general*=true")
 };
 
 QJsonValue DaemonSettings::getDefaultDebugLogging()
@@ -401,10 +402,30 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 
 // Local 127/8 address used by a local resolver.  We can't put this on 127.0.0.1
 // because port 53 may already be in use on that address.
-const QString resolverLocalAddress{QStringLiteral("127.80.73.65")};
-const QString piaLegacyDnsPrimary{QStringLiteral("209.222.18.222")};
-const QString piaLegacyDnsSecondary{QStringLiteral("209.222.18.218")};
-const QString piaModernDnsVpnMace{QStringLiteral("10.0.0.241")};
-const QString piaModernDnsVpn{QStringLiteral("10.0.0.243")};
+const QString resolverLocalAddress()
+{
+    static QString value{QStringLiteral("127.80.73.65")};
+    return value;
+}
+const QString piaLegacyDnsPrimary()
+{
+    static QString value{QStringLiteral("209.222.18.222")};
+    return value;
+}
+const QString piaLegacyDnsSecondary()
+{
+    static QString value{QStringLiteral("209.222.18.218")};
+    return value;
+}
+const QString piaModernDnsVpnMace()
+{
+    static QString value{QStringLiteral("10.0.0.241")};
+    return value;
+}
+const QString piaModernDnsVpn()
+{
+    static QString value{QStringLiteral("10.0.0.243")};
+    return value;
+}
 
 #endif

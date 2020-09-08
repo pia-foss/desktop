@@ -25,6 +25,7 @@
 
 #include "daemon.h"
 #include "posix/unixsignalhandler.h"
+#include "filewatcher.h"
 
 #if defined(Q_OS_MAC)
 #include "mac/kext_client.h"
@@ -57,6 +58,9 @@ protected:
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
 
 private:
+#if defined(Q_OS_LINUX)
+    void updateExistingDNS();
+#endif
     // On Mac, update the bound route on the physical interface; used for split
     // tunnel and DNS leak protection
     void updateBoundRoute(const FirewallParams &params);
@@ -96,6 +100,7 @@ private:
     SubnetBypass _subnetBypass;
 
 #ifdef Q_OS_LINUX
+    FileWatcher _resolvconfWatcher;
     IpTablesFirewall _firewall;
     LinuxModSupport _linuxModSupport;
 #endif

@@ -433,13 +433,17 @@ FocusScope {
   // credentials in the login page
   Connections {
     target: Daemon.account
-    onUsernameChanged: resetCreds()
-    onPasswordChanged: resetCreds()
+    function onUsernameChanged() {
+      resetCreds()
+    }
+    function onPasswordChanged() {
+      resetCreds()
+    }
   }
 
   Connections {
     target: NativeHelpers
-    onUrlOpenRequested: function(path, query) {
+    function onUrlOpenRequested(path, query) {
       if(path === "login" && query.token && query.token.length > 0 && !Daemon.account.loggedIn) {
         mode = modes.token
         tokenError = errors.none
@@ -463,7 +467,7 @@ FocusScope {
 
   Connections {
     target: Daemon.account
-    onLoggedInChanged: {
+    function onLoggedInChanged() {
       if(Daemon.account.loggedIn) {
         resetLoginPage();
       }

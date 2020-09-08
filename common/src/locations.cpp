@@ -414,6 +414,7 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
     // Now read the locations and use the group templates to build servers
     LocationsById newLocations;
     const auto &regionsArray = regionsObj["regions"].toArray();
+    int regionsLackingWireguard = 0;    // For tracing
     for(const auto &regionValue : regionsArray)
     {
         const auto &regionObj = regionValue.toObject();
@@ -430,9 +431,20 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
                 // left unset.)
                 pLocation->latency(itLatency->second);
             }
+
+            if(!pLocation->hasService(Service::WireGuard))
+                ++regionsLackingWireguard;
+
             newLocations[pLocation->id()] = std::move(pLocation);
         }
         // Failure to load the location is traced by readModernLocation()
+    }
+
+    if(regionsLackingWireguard > 0)
+    {
+        qWarning() << "Found" << regionsLackingWireguard
+            << "regions with no WireGuard endpoints:"
+            << QJsonDocument{regionsObj}.toJson();
     }
 
     return newLocations;

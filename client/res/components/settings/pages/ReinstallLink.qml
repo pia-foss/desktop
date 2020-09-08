@@ -106,7 +106,7 @@ TextLink {
   Connections {
     target: Daemon.state
     enabled: reinstallLink.waitingForDisconnect
-    onConnectionStateChanged: {
+    function onConnectionStateChanged() {
       if (Daemon.state.connectionState === 'Disconnected') {
         reinstallLink.waitingForDisconnect = false;
         reinstallLink.reinstallAction()

@@ -47,5 +47,5 @@ cd ${scriptsDir}
 # these in debug installer builds.
 # Use SHIFTJIS_CHARSET so the katakana test character will render.  This uses
 # a system font, since Roboto doesn't have Japanese.
-./winstaller_localize.js ro      LANG_ROMANIAN            SUBLANG_ROMANIAN_ROMANIA     SHIFTJIS_CHARSET
-./winstaller_localize.js ps      LANG_PASHTO              SUBLANG_PASHTO_AFGHANISTAN   SHIFTJIS_CHARSET --mirror
+./winstaller_localize.js ro      LANG_ROMANIAN            SUBLANG_ROMANIAN_ROMANIA     SHIFTJIS_CHARSET --debug
+./winstaller_localize.js ps      LANG_PASHTO              SUBLANG_PASHTO_AFGHANISTAN   SHIFTJIS_CHARSET --mirror --debug

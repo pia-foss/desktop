@@ -19,6 +19,7 @@
 #include "registry.h"
 #include "file.h"
 #include "brand.h"
+#include "version.h"
 #include <cassert>
 
 namespace

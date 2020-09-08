@@ -106,6 +106,7 @@
 #define IDS_MB_REQUIRESNETWORKING           2545
 #define IDS_MB_CAP_INSTALLCOMPLETE          2546
 #define IDS_MB_RESTARTTOUSE                 2547
+#define IDS_MB_REQUIRESWIN8                 2548
 
 #define IDS_MB_SUFFIX_INSTALL_ABORT         2601
 #define IDS_MB_SUFFIX_INSTALL_RETRY         2602

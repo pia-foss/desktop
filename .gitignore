@@ -1,7 +1,7 @@
 /qbs/
 /out/
 build-*/
-*.qbs.user*
+*.user
 .DS_Store
 *.qm
 node_modules

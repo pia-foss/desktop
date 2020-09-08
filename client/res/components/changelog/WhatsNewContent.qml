@@ -25,6 +25,7 @@ import "../common"
 import "../core"
 import "../daemon"
 import "../theme"
+import "../settings"
 import PIA.NativeHelpers 1.0
 import PIA.NativeAcc 1.0 as NativeAcc
 import "qrc:/javascript/util.js" as Util
@@ -38,7 +39,7 @@ Item {
   readonly property int subheadingImageWidth: 120
 
   implicitHeight: callingCardRoot.height
-            
+
   //: Screen reader annotation for the "checkmark" bullets used in
   //: the What's New view
   readonly property string checkBulletLabel: uiTranslate("ChangelogWindow", "Checkmark bullet")
@@ -88,6 +89,43 @@ Item {
           source: Theme.changelog.wireguardBgImage
           rtlMirror: true
           opacity: Theme.light ? 0.25 : 1.0
+        }
+
+        // Most shadows and glows in PIA use pre-rendered border images, since
+        // they're generally simple shapes that don't change - this should be
+        // much more efficient to render on low-end machines.
+        //
+        // This shadow though has to be rendered dynamically, since it depends
+        // on the text.  It's pretty important for the dark theme to separate
+        // the text from the background, too.
+        //
+        // We can't use a DropShadow or GaussianBlur - these don't work on the
+        // RHI backend used on Windows.  Instead, we can approximate the same
+        // shadow with a FastBlur and LevelAdjust, which use fixed shaders, and
+        // replace the GLSL shader sources with the RHI shader archives from
+        // Qt 6.  The fast blur is virtually indistinguishible anyway and should
+        // also be much less intensive to render than the true GaussianBlur.
+        //
+        // In this case, we just want a black shadow with up to half opacity,
+        // but this technique would also work for any color by clamping both
+        // minimumOutput and maximumOutput in the LevelAdjust.
+        FastBlur {
+          id: textBlurred
+          visible: false // Never shown directly, just input for LevelAdjust
+          width: wireguardTextContainer.width
+          height: wireguardTextContainer.height
+          source: wireguardTextContainer
+          radius: 4
+        }
+
+        LevelAdjust {
+          visible: Theme.dark
+          x: wireguardTextContainer.x
+          y: wireguardTextContainer.y + 2
+          width: wireguardTextContainer.width
+          height: wireguardTextContainer.height
+          maximumOutput: "#80000000"
+          source: textBlurred
         }
 
         // This is kept as a rectangle, so we can add a border to debug the bounding box
@@ -259,42 +297,10 @@ Item {
               font.pixelSize: 12
               opacity: Theme.dark ? 0.6 : 0.9
               color: Theme.changelog.wireguardWarningColor
-              visible: {
-                return !Daemon.state.wireguardAvailable
-              }
-              linkColor: color
-              text: {
-                let src = uiTranslate(
-                      "ChangelogWindow",
-                      "Please [[click Here]] to re-install WireGuard Network Adapter")
-                src = src.replace("[[", "<a href='#'>")
-                src = src.replace("]]", "</a>")
-                return src
-              }
-              MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-              }
-              onLinkActivated: {
-                wSettings.selectPage(wSettings.page.help)
-                wSettings.showSettings()
-              }
+              visible: !Daemon.state.wireguardAvailable
+              text: SettingsMessages.wgRequiresWindows8
             }
           }
-        }
-
-        DropShadow {
-          visible: Theme.dark
-          // We cannot change the source/fill dynamically depending on
-          // the theme, because that causes a crash in software mode.
-          anchors.fill: wireguardTextContainer
-          source: wireguardTextContainer
-          color: Qt.rgba(0, 0, 0, 0.5)
-          horizontalOffset: 0
-          verticalOffset: 2
-          radius: 4
-          spread: 0
         }
 
         Item {

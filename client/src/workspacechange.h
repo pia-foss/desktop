@@ -22,11 +22,7 @@
 #ifndef WORKSPACECHANGE_H
 #define WORKSPACECHANGE_H
 
-#include <QScreen>
-
-// WorkspaceChange connects to all existing screens to notify when the available
-// work area for any screen changes (including when a screen is added or
-// removed).
+// WorkspaceChange bridges the PlatformScreens::screensChanged() signal to QML.
 class WorkspaceChange : public QObject
 {
     Q_OBJECT
@@ -35,8 +31,6 @@ public:
     WorkspaceChange();
 
 private:
-    // Connect to the signals from QScreen that indicate a work area change.
-    void connectScreen(QScreen &screen);
     void emitWorkspaceChange();
 
 signals:

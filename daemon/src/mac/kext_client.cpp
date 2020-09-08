@@ -513,15 +513,17 @@ void applyExtraRules(QVector<QString> &paths)
         paths.push_back(stagedWebkitFrameworkPath);
     }
 
-    for(const auto &path: paths)
+    // Adding elements to paths may cause it to reallocate (invalidating all
+    // iterators); iterate using an index.
+    for(int i=0; i<paths.size(); ++i)
     {
-        if(path.contains(QStringLiteral("/App Store.app"), Qt::CaseInsensitive)) {
+        if(paths[i].contains(QStringLiteral("/App Store.app"), Qt::CaseInsensitive)) {
             paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/AppStoreDaemon.framework/Support/appstoreagent"));
         }
-        if(path.contains(QStringLiteral("/Calendar.app"), Qt::CaseInsensitive)) {
+        else if(paths[i].contains(QStringLiteral("/Calendar.app"), Qt::CaseInsensitive)) {
             paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/CalendarAgent.framework/Executables/CalendarAgent"));
         }
-        if(path.contains(QStringLiteral("/Safari.app"), Qt::CaseInsensitive)) {
+        else if(paths[i].contains(QStringLiteral("/Safari.app"), Qt::CaseInsensitive)) {
             paths.push_back(QStringLiteral("/System/Library/CoreServices/SafariSupport.bundle/Contents/MacOS/SafariBookmarksSyncAgent"));
             paths.push_back(QStringLiteral("/System/Library/StagedFrameworks/Safari/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc"));
             paths.push_back(QStringLiteral("/System/Library/PrivateFrameworks/SafariSafeBrowsing.framework/Versions/A/com.apple.Safari.SafeBrowsing.Service"));

@@ -17,6 +17,7 @@
 #include "service_inl.h"
 #include "tap_inl.h"
 #include "brand.h"
+#include "version.h"
 
 #pragma comment(lib, "advapi32.lib")
 

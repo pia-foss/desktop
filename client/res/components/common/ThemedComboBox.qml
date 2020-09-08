@@ -69,6 +69,20 @@ Item {
     return iconPath || ""
   }
 
+  BorderImage {
+    anchors.fill: control
+    // Margin 5 with Y offset 1
+    anchors.leftMargin: -5
+    anchors.topMargin: -4
+    anchors.rightMargin: -5
+    anchors.bottomMargin: -6
+
+    border {left: 10; top: 10; right: 10; bottom: 10}
+    horizontalTileMode: BorderImage.Stretch
+    verticalTileMode: BorderImage.Stretch
+    source: Theme.settings.inputDropdownShadowImage
+  }
+
   ComboBox {
     id: control
     anchors.fill: parent
@@ -310,15 +324,6 @@ Item {
     }
 
     background: Item {
-      RectangularGlow {
-        x: 0
-        y: 1
-        width: background.width
-        height: background.height
-        cornerRadius: background.radius
-        glowRadius: 1
-        color: "#33000000"
-      }
       Rectangle {
         id: background
         width: parent.width

@@ -153,7 +153,7 @@ public:
     WinWindowMetrics();
 
 public:
-    virtual double calcScreenScaleFactor(QScreen &screen) const override;
+    virtual double calcScreenScaleFactor(const PlatformScreens::Screen &screen) const override;
     virtual QMarginsF calcDecorationSize(const QWindow &window,
                                          double screenScale) const override;
 

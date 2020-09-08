@@ -33,6 +33,7 @@ namespace Fwmark
 {
     extern const QString excludePacketTag;
     extern const QString vpnOnlyPacketTag;
+    extern const QString forwardedPacketTag;
     extern const uint32_t wireguardFwmark;
 }
 

@@ -63,6 +63,7 @@ QtObject {
   readonly property string themePreviewImage: obImagePath + "/preview.png"
 
   readonly property string customizeImage: obImagePath + "/preview_customization.png"
+  readonly property string customizeShadowImage: obImagePath + "/shadow-customize.png"
   readonly property string platformsImage: obImagePath + "/content-platforms.png"
 
 
@@ -71,6 +72,7 @@ QtObject {
 
   readonly property color dropShadowColor: dark ? Qt.rgba(0,0,0,0.5) : "#22252E40"
   readonly property color themeSelectorDropShadow: dark ? Qt.rgba(0,0,0,0.4) : "#22252E20"
+  readonly property string themeSelectorDropShadowImage: obImagePath + "/shadow-theme.png"
 
   // Footer/navigation
   readonly property color skipTourColor: primaryColor

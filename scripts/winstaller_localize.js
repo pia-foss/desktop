@@ -171,20 +171,21 @@ function localize(enrc, tspath, lang, sublang, charset, mirror) {
     })
 }
 
-if(process.argv.length < 6 || process.argv.length > 7 || (process.argv.length === 7 && process.argv[6] !== '--mirror')) {
-  console.log(`usage: ${process.argv0} ${process.argv[1]} [lang_file_base] [win_lang_id] [win_sublang_id] [win_charset] [--mirror]`)
+if(process.argv.length < 6 || process.argv.length > 8) {
+  console.log(`usage: ${process.argv0} ${process.argv[1]} [lang_file_base] [win_lang_id] [win_sublang_id] [win_charset] [--mirror] [--debug]`)
   console.log(` - lang_file_base - name of .ts file in <pia_desktop>/client/ts/`)
   console.log(` - win_lang_id / win_sublang_id - Language code (https://docs.microsoft.com/en-us/windows/desktop/Intl/language-identifier-constants-and-strings)`)
   console.log(` - win_charset - Character set for this language: (https://msdn.microsoft.com/en-us/library/cc194829.aspx)`)
   console.log(` - --mirror - If present, mirrors the UI for this language`)
+  console.log(` - --debug - If present, places the generated file in translations/debug (for pseudotranslations)`)
   console.log(``)
   console.log(`Generates <pia_desktop>/extras/installer/win/translations/<lang_file_base>.rc`)
   console.log(``)
   console.log(`lang_file_base does not need to match the language IDs - for`)
   console.log(`example, pseudolocalized resources can be tested with:`)
   console.log(`  ./scripts/pseudolocalize.js <path/to/build/en_US.ts>`)
-  console.log(`  ./scripts/winstaller_localize.js ro LANG_ROMANIAN SUBLANG_ROMANIAN_ROMANIA SHIFTJIS_CHARSET`)
-  console.log(`Then, rebuild the installer, set your OS locale to fr_CA and test`)
+  console.log(`  ./scripts/winstaller_localize.js ro LANG_ROMANIAN SUBLANG_ROMANIAN_ROMANIA SHIFTJIS_CHARSET --debug`)
+  console.log(`Then, rebuild the installer, set your OS locale to ro and test`)
 }
 else {
   // The repo dir is the parent of the scripts dir that this script is in
@@ -197,12 +198,28 @@ else {
 
   // If argv[6] is present, we already know it's --mirror, checked in validation
   // above
-  const winUiMirror = !!process.argv[6]
+  var winUiMirror = false
+  var debug = false
+  for(var i=6; i<process.argv.length; ++i) {
+    switch(process.argv[i])
+    {
+      case '--mirror':
+        winUiMirror = true
+        break
+      case '--debug':
+        debug = true
+        break
+      default:
+        console.log('Unknown option: ' + process.argv[i])
+        process.exit(1)
+        break
+    }
+  }
 
   // Path to the en_US.rc template
   const enUSpath = repoDir + '/extras/installer/win/strings.rc'
   // Path to the translations directory - create it if needed
-  const translationsDir = repoDir + '/extras/installer/win/translations'
+  const translationsDir = repoDir + '/extras/installer/win/translations' + (debug ? '/debug' : '')
   // Path to the resource to generate
   const outRcPath = translationsDir + `/${langFileBase}.rc`
   // Path to the localized TS file

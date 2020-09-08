@@ -32,12 +32,57 @@
 
 #include <QProcess>
 
+QString SplitDNSInfo::existingDNS()
+{
+    auto existingDNSServers = g_daemon->state().existingDNSServers();
+    if (existingDNSServers.empty())
+    {
+        return QStringLiteral("");
+    }
+    else
+    {
+        return QHostAddress{existingDNSServers.front()}.toString();
+    }
+}
+
+SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, SplitDNSType splitType)
+{
+    QString dnsServer, cGroupId, sourceIp;
+
+    if (splitType == SplitDNSType::Bypass)
+    {
+        dnsServer = existingDNS();
+        cGroupId = CGroup::bypassId;
+        sourceIp = params.netScan.ipAddress();
+    }
+    else
+    {
+        const auto servers = params.effectiveDnsServers;
+        dnsServer = servers.isEmpty() ? QStringLiteral("") : servers.front();
+        cGroupId = CGroup::vpnOnlyId;
+        sourceIp = g_daemon->state().tunnelDeviceLocalAddress();
+    }
+
+    // Deal with loopback dns server special case - if dnsServer is loopback then sourceIp must be too
+    if(QHostAddress{dnsServer}.isLoopback())
+        sourceIp = QStringLiteral("127.0.0.1");
+
+    return {dnsServer, cGroupId, sourceIp};
+}
+
+bool SplitDNSInfo::isValid() const
+{
+    return !_dnsServer.isEmpty() && !_cGroupId.isEmpty() && !_sourceIp.isEmpty();
+}
+
 namespace
 {
     const QString kAnchorName{BRAND_CODE "vpn"};
 }
 
 QString IpTablesFirewall::kOutputChain = QStringLiteral("OUTPUT");
+QString IpTablesFirewall::kInputChain = QStringLiteral("INPUT");
+QString IpTablesFirewall::kForwardChain = QStringLiteral("FORWARD");
 QString IpTablesFirewall::kPostRoutingChain = QStringLiteral("POSTROUTING");
 QString IpTablesFirewall::kPreRoutingChain = QStringLiteral("PREROUTING");
 QString IpTablesFirewall::kRootChain = QStringLiteral("%1.anchors").arg(kAnchorName);
@@ -47,6 +92,14 @@ QString IpTablesFirewall::kRawTable = QStringLiteral("raw");
 QString IpTablesFirewall::kMangleTable = QStringLiteral("mangle");
 QString IpTablesFirewall::kVpnGroupName = BRAND_CODE "vpn";
 QString IpTablesFirewall::kHnsdGroupName = BRAND_CODE "hnsd";
+
+QString IpTablesFirewall::rootChainFor(const QString &chain)
+{
+    if(chain == QStringLiteral("OUTPUT"))
+        return kRootChain;
+    else
+        return QStringLiteral("%1.%2").arg(kAnchorName, chain);
+}
 
 static QString getCommand(IpTablesFirewall::IPVersion ip)
 {
@@ -113,19 +166,39 @@ int IpTablesFirewall::unlinkChain(IpTablesFirewall::IPVersion ip, const QString&
     return execute(QStringLiteral("if %1 -w -C %2 -j %3 -t %4 2> /dev/null ; then %1 -w -D %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
 }
 
-void IpTablesFirewall::ensureRootAnchorPriority(IpTablesFirewall::IPVersion ip)
+int IpTablesFirewall::unlinkAndDeleteChain(IpTablesFirewall::IPVersion ip, const QString& chain, const QString& parent, const QString& tableName)
 {
-    linkChain(ip, kRootChain, kOutputChain, true);
+    unlinkChain(ip, chain, parent, tableName);
+    return deleteChain(ip, chain, tableName);
 }
 
-void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName)
+void IpTablesFirewall::ensureRootAnchorPriority(IpTablesFirewall::IPVersion ip)
+{
+    // Filter table
+    linkChain(ip, rootChainFor("OUTPUT"), kOutputChain, true, kFilterTable);
+    linkChain(ip, rootChainFor("FORWARD"), kForwardChain, true, kFilterTable);
+    linkChain(ip, rootChainFor("INPUT"), kInputChain, true, kFilterTable);
 
+    // Nat table
+    linkChain(ip, rootChainFor("OUTPUT"), kOutputChain, true, kNatTable);
+    linkChain(ip, rootChainFor("PREROUTING"), kPreRoutingChain, true, kNatTable);
+    linkChain(ip, rootChainFor("POSTROUTING"), kPostRoutingChain, true, kNatTable);
+
+    // Mangle table
+    linkChain(ip, rootChainFor("OUTPUT"), kOutputChain, true, kMangleTable);
+    linkChain(ip, rootChainFor("PREROUTING"), kPreRoutingChain, true, kMangleTable);
+
+    // Raw table
+    linkChain(ip, rootChainFor("PREROUTING"), kPreRoutingChain, true, kRawTable);
+}
+
+void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName, const QString &rootChain)
 {
 
     if (ip == Both)
     {
-        installAnchor(IPv4, anchor, rules, tableName);
-        installAnchor(IPv6, anchor, rules, tableName);
+        installAnchor(IPv4, anchor, rules, tableName, rootChain);
+        installAnchor(IPv6, anchor, rules, tableName, rootChain);
         return;
     }
 
@@ -137,7 +210,7 @@ void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QStri
     // in the root chain without being removed or recreated, ensuring the
     // intended precedence order.
     createChain(ip, anchorChain, tableName);
-    linkChain(ip, anchorChain, kRootChain, false, tableName);
+    linkChain(ip, anchorChain, rootChain, false, tableName);
 
     // Create the actual rule chain, which we'll insert or remove from the
     // placeholder anchor when needed.
@@ -146,12 +219,12 @@ void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QStri
         execute(QStringLiteral("%1 -w -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
 }
 
-void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QString& tableName)
+void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QString& tableName, const QString &rootChain)
 {
     if (ip == Both)
     {
-        uninstallAnchor(IPv4, anchor, tableName);
-        uninstallAnchor(IPv6, anchor, tableName);
+        uninstallAnchor(IPv4, anchor, tableName, rootChain);
+        uninstallAnchor(IPv6, anchor, tableName, rootChain);
         return;
     }
 
@@ -159,7 +232,7 @@ void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QSt
     const QString anchorChain = QStringLiteral("%1.a.%2").arg(kAnchorName, anchor);
     const QString actualChain = QStringLiteral("%1.%2").arg(kAnchorName, anchor);
 
-    unlinkChain(ip, anchorChain, kRootChain, tableName);
+    unlinkChain(ip, anchorChain, rootChain, tableName);
     deleteChain(ip, anchorChain, tableName);
     deleteChain(ip, actualChain, tableName);
 }
@@ -188,15 +261,20 @@ void IpTablesFirewall::install()
 
     // Create a root filter chain to hold all our other anchors in order.
     createChain(Both, kRootChain, kFilterTable);
+    createChain(Both, rootChainFor("FORWARD"), kFilterTable);
+    createChain(Both, rootChainFor("INPUT"), kFilterTable);
 
-    // Create a root raw chain
-    createChain(Both, kRootChain, kRawTable);
+    // Create root raw chains
+    createChain(Both, rootChainFor("PREROUTING"), kRawTable);
 
-    // Create a root NAT chain
+    // Create root NAT chains
     createChain(Both, kRootChain, kNatTable);
+    createChain(Both, rootChainFor("PREROUTING"), kNatTable);
+    createChain(Both, rootChainFor("POSTROUTING"), kNatTable);
 
-    // Create a root Mangle chain
+    // Create root Mangle chains
     createChain(Both, kRootChain, kMangleTable);
+    createChain(Both, rootChainFor("PREROUTING"), kMangleTable);
 
     // Install our filter rulesets in each corresponding anchor chain.
     installAnchor(Both, QStringLiteral("000.allowLoopback"), {
@@ -276,9 +354,30 @@ void IpTablesFirewall::install()
     });
 
     // NAT rules
+    installAnchor(Both, QStringLiteral("80.splitDNS"), {
+        // Updated dynamically (see updateRules)
+    }, kNatTable, rootChainFor("OUTPUT"));
+
+    installAnchor(Both, QStringLiteral("80.fwdSplitDNS"), {
+        // Updated dynamically (see updateRules)
+    }, kNatTable, rootChainFor("PREROUTING"));
+
+    installAnchor(Both, QStringLiteral("90.snatDNS"), {
+        // Updated dynamically (see updateRules)
+    }, kNatTable, rootChainFor("POSTROUTING"));
+
+    installAnchor(Both, QStringLiteral("90.fwdSnatDNS"), {
+        // Updated dynamically (see updateRules)
+    }, kNatTable, rootChainFor("POSTROUTING"));
+
     installAnchor(Both, QStringLiteral("100.transIp"), {
         // This anchor is set at run-time by split-tunnel ProcTracker class
-    }, kNatTable);
+    }, kNatTable, rootChainFor("POSTROUTING"));
+
+    // Protect our loopback ips from outside access (since we may have route_local activated)
+    installAnchor(IPv4, QStringLiteral("100.protectLoopback"), {
+        QStringLiteral("! -i lo -o lo -j REJECT")
+    }, kFilterTable, rootChainFor("INPUT"));
 
     // Mangle rules
     // This rule is for "bypass subnets". The approach we use for
@@ -304,26 +403,43 @@ void IpTablesFirewall::install()
         QStringLiteral("-m cgroup --cgroup %1 -j MARK --set-mark %2").arg(CGroup::vpnOnlyId, Fwmark::vpnOnlyPacketTag)
     }, kMangleTable);
 
+    // Marks all forwarded packets
+    installAnchor(Both, QStringLiteral("100.tagFwd"), {
+        QStringLiteral("-j MARK --set-mark %1").arg(Fwmark::forwardedPacketTag)
+    }, kMangleTable, rootChainFor("PREROUTING"));
+
+    // Mark forwarded packets to bypass IPs as "bypass" packets instead
+    installAnchor(Both, QStringLiteral("200.tagFwdSubnets"), {
+        // Updated at runtime
+    }, kMangleTable, rootChainFor("PREROUTING"));
+
     // A rule to mitigate CVE-2019-14899 - drop packets addressed to the local
     // VPN IP but that are not actually received on the VPN interface.
     // See here: https://seclists.org/oss-sec/2019/q4/122
     installAnchor(Both, QStringLiteral("100.vpnTunOnly"), {
         // To be replaced at runtime
         QStringLiteral("-j ACCEPT")
-    }, kRawTable);
+    }, kRawTable, rootChainFor("PREROUTING"));
 
+    // Insert our output filter root chain at the top of the OUTPUT chain.
+    linkChain(Both, rootChainFor("OUTPUT"), kOutputChain, true, kFilterTable);
 
-    // Insert our filter root chain at the top of the OUTPUT chain.
-    linkChain(Both, kRootChain, kOutputChain, true, kFilterTable);
+    // Insert our forward filter root chain at the top of the FORWARD chain
+    linkChain(Both, rootChainFor("FORWARD"), kForwardChain, true, kFilterTable);
 
     // Insert our NAT root chain at the top of the POSTROUTING chain.
-    linkChain(Both, kRootChain, kPostRoutingChain, true, kNatTable);
+    linkChain(Both, rootChainFor("OUTPUT"), kOutputChain, true, kNatTable);
+    linkChain(Both, rootChainFor("POSTROUTING"), kPostRoutingChain, true, kNatTable);
+    linkChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, true, kNatTable);
 
     // Insert our Mangle root chain at the top of the OUTPUT chain.
-    linkChain(Both, kRootChain, kOutputChain, true, kMangleTable);
+    linkChain(Both, rootChainFor("OUTPUT"), kOutputChain, true, kMangleTable);
+    linkChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, true, kMangleTable);
 
     // Insert our Raw root chain at the top of the PREROUTING chain.
-    linkChain(Both, kRootChain, kPreRoutingChain, true, kRawTable);
+    linkChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, true, kRawTable);
+
+    linkChain(Both, rootChainFor("INPUT"), kInputChain, true, kFilterTable);
 
     // Ensure LAN traffic is always managed by the 'main' table.  This is needed
     // to ensure LAN routing for:
@@ -340,27 +456,39 @@ void IpTablesFirewall::install()
     // Note that we use "suppress_prefixlength 1", not 0 as is typical, because
     // we also suppress the /1 gateway override routes applied by OpenVPN.
     execute(QStringLiteral("ip rule add lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
+    execute(QStringLiteral("ip -6 rule add lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
+
+    // Route forwarded packets
+    execute(QStringLiteral("ip rule add from all fwmark %1 lookup %2 prio %3").arg(Fwmark::forwardedPacketTag).arg(Routing::forwardedTable).arg(Routing::Priorities::forwarded));
+    execute(QStringLiteral("ip -6 rule add from all fwmark %1 lookup %2 prio %3").arg(Fwmark::forwardedPacketTag).arg(Routing::forwardedTable).arg(Routing::Priorities::forwarded));
 }
 
 void IpTablesFirewall::uninstall()
 {
+
     execute(QStringLiteral("ip rule del lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
+    execute(QStringLiteral("ip -6 rule del lookup main suppress_prefixlength 1 prio %1").arg(Routing::Priorities::suppressedMain));
 
-    // Filter chain
-    unlinkChain(Both, kRootChain, kOutputChain, kFilterTable);
-    deleteChain(Both, kRootChain, kFilterTable);
+    // Remove forwarded packets policy
+    execute(QStringLiteral("ip rule del from all fwmark %1 lookup %2 prio %3").arg(Fwmark::forwardedPacketTag).arg(Routing::forwardedTable).arg(Routing::Priorities::forwarded));
+    execute(QStringLiteral("ip -6 rule del from all fwmark %1 lookup %2 prio %3").arg(Fwmark::forwardedPacketTag).arg(Routing::forwardedTable).arg(Routing::Priorities::forwarded));
 
-    // Raw chain
-    unlinkChain(Both, kRootChain, kPreRoutingChain, kRawTable);
-    deleteChain(Both, kRootChain, kRawTable);
+    // Filter table
+    unlinkAndDeleteChain(Both, rootChainFor("OUTPUT"), kOutputChain, kFilterTable);
+    unlinkAndDeleteChain(Both, rootChainFor("FORWARD"), kForwardChain, kFilterTable);
+    unlinkAndDeleteChain(Both, rootChainFor("INPUT"), kInputChain, kFilterTable);
 
-    // NAT chain
-    unlinkChain(Both, kRootChain, kPostRoutingChain, kNatTable);
-    deleteChain(Both, kRootChain, kNatTable);
+    // NAT table
+    unlinkAndDeleteChain(Both, rootChainFor("OUTPUT"), kOutputChain, kNatTable);
+    unlinkAndDeleteChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, kNatTable);
+    unlinkAndDeleteChain(Both, rootChainFor("POSTROUTING"), kPostRoutingChain, kNatTable);
 
-    // Mangle chain
-    unlinkChain(Both, kRootChain, kOutputChain, kMangleTable);
-    deleteChain(Both, kRootChain, kMangleTable);
+    // Mangle table
+    unlinkAndDeleteChain(Both, rootChainFor("OUTPUT"), kOutputChain, kMangleTable);
+    unlinkAndDeleteChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, kMangleTable);
+
+    // Raw table
+    unlinkAndDeleteChain(Both, rootChainFor("PREROUTING"), kPreRoutingChain, kRawTable);
 
     // Remove filter anchors
     uninstallAnchor(Both, QStringLiteral("000.allowLoopback"));
@@ -378,16 +506,24 @@ void IpTablesFirewall::uninstall()
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
+    uninstallAnchor(Both, QStringLiteral("100.protectLoopback"));
 
     // Remove Nat anchors
-    uninstallAnchor(Both, QStringLiteral("100.transIp"), kNatTable);
+    uninstallAnchor(Both, QStringLiteral("90.snatDNS"), kNatTable, rootChainFor("POSTROUTING"));
+    uninstallAnchor(Both, QStringLiteral("100.transIp"), kNatTable, rootChainFor("POSTROUTING"));
+    uninstallAnchor(Both, QStringLiteral("90.fwdSnatDNS"), kNatTable, rootChainFor("POSTROUTING"));
+    uninstallAnchor(Both, QStringLiteral("80.fwdSplitDNS"), kNatTable, rootChainFor("PREROUTING"));
+    uninstallAnchor(Both, QStringLiteral("80.splitDNS"), kNatTable, rootChainFor("OUTPUT"));
 
     // Remove Mangle anchors
-    uninstallAnchor(Both, QStringLiteral("90.tagSubnets"), kMangleTable);
-    uninstallAnchor(Both, QStringLiteral("100.tagPkts"), kMangleTable);
+    uninstallAnchor(Both, QStringLiteral("90.tagSubnets"), kMangleTable, rootChainFor("OUTPUT"));
+    uninstallAnchor(Both, QStringLiteral("100.tagBypass"), kMangleTable, rootChainFor("OUTPUT"));
+    uninstallAnchor(Both, QStringLiteral("100.tagVpnOnly"), kMangleTable, rootChainFor("OUTPUT"));
+    uninstallAnchor(Both, QStringLiteral("200.tagFwdSubnets"), kMangleTable, rootChainFor("PREROUTING"));
+    uninstallAnchor(Both, QStringLiteral("100.tagFwd"), kMangleTable, rootChainFor("PREROUTING"));
 
     // Remove Raw anchors
-    uninstallAnchor(Both, QStringLiteral("100.vpnTunOnly"), kRawTable);
+    uninstallAnchor(Both, QStringLiteral("100.vpnTunOnly"), kRawTable, rootChainFor("PREROUTING"));
 }
 
 bool IpTablesFirewall::isInstalled()
@@ -455,6 +591,47 @@ void IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPVersion ip, const QS
         disableAnchor(ip, anchor, tableName);
 }
 
+// Ensure we can route 127.* so that we can rewrite source ips for DNS
+void IpTablesFirewall::enableRouteLocalNet()
+{
+    if(!_previousRouteLocalNet.isEmpty())
+        return; // Already enabled and stored the prior value
+
+    _previousRouteLocalNet = Exec::bashWithOutput(QStringLiteral("sysctl -n 'net.ipv4.conf.all.route_localnet'"));
+    if(!_previousRouteLocalNet.isEmpty())
+    {
+        if(_previousRouteLocalNet.toInt() != 1)
+        {
+            qInfo() << "Storing old net.ipv4.conf.all.route_localnet value:" << _previousRouteLocalNet;
+            qInfo() << "Setting route_localnet to 1";
+            execute(QStringLiteral("sysctl -w 'net.ipv4.conf.all.route_localnet=1'"));
+        }
+        else
+        {
+            qInfo() << "route_localnet already 1; nothing to do!";
+        }
+    }
+    else
+    {
+        qWarning() << "Unable to store old net.ipv4.conf.all.route_localnet value";
+    }
+}
+
+void IpTablesFirewall::disableRouteLocalNet()
+{
+    if(_previousRouteLocalNet.toInt() == 1)
+    {
+        qInfo() << "Previous route_localnet was" << _previousRouteLocalNet
+            << "- nothing to restore";
+    }
+    else if(!_previousRouteLocalNet.isEmpty())
+    {
+        qInfo() << "Restoring route_localnet to: " << _previousRouteLocalNet;
+        execute(QStringLiteral("sysctl -w 'net.ipv4.conf.all.route_localnet=%1'").arg(_previousRouteLocalNet));
+    }
+    _previousRouteLocalNet = "";
+}
+
 void IpTablesFirewall::updateRules(const FirewallParams &params)
 {
     const QString &adapterName = params.adapter ? params.adapter->devNode() : QString{};
@@ -471,6 +648,10 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         {
             execute(QStringLiteral("iptables -w -A %1.320.allowDNS %2").arg(kAnchorName, rule));
         }
+        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::vpnOnlyId));
+        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::bypassId));
+        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::vpnOnlyId));
+        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::bypassId));
     }
 
     // These rules only depend on the adapter name
@@ -499,28 +680,149 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         if(ipAddress6.isEmpty())
         {
             qInfo() << "Clearing out allowIPv6Prefix rule, no global IPv6 addresses found";
-            replaceAnchor(IpTablesFirewall::IPv6, QStringLiteral("299.allowIPv6Prefix"), {});
+            replaceAnchor(IPv6, QStringLiteral("299.allowIPv6Prefix"), {});
+            replaceAnchor(IPv6, QStringLiteral("299.blockFwdIPv6Prefix"), {});
         }
         else
         {
-            IpTablesFirewall::replaceAnchor(
-                IpTablesFirewall::IPv6,
-                QStringLiteral("299.allowIPv6Prefix"),
-                {
-                    // First 64 bits is the IPv6 Network Prefix. This prefix is shared by all IPv6 hosts on the LAN,
-                    // so whitelisting it allows those hosts to communicate
-                    QStringLiteral("-d %2/64 -j ACCEPT").arg(ipAddress6)
-                }
-            );
+            // First 64 bits is the IPv6 Network Prefix. This prefix is shared by all IPv6 hosts on the LAN,
+            // so whitelisting it allows those hosts to communicate
+            replaceAnchor(IPv6, QStringLiteral("299.allowIPv6Prefix"),
+                          {QStringLiteral("-d %2/64 -j ACCEPT").arg(ipAddress6)});
+            replaceAnchor(IPv6, QStringLiteral("299.blockFwdIPv6Prefix"),
+                          {QStringLiteral("-d %2/64 -j REJECT").arg(ipAddress6)});
         }
     }
 
     updateBypassSubnets(IpTablesFirewall::IPv4, params.bypassIpv4Subnets, _bypassIpv4Subnets);
     updateBypassSubnets(IpTablesFirewall::IPv6, params.bypassIpv6Subnets, _bypassIpv6Subnets);
 
+
+    // Manage DNS for forwarded packets
+    SplitDNSInfo::SplitDNSType routedDns = SplitDNSInfo::SplitDNSType::VpnOnly;
+    if(params.enableSplitTunnel && !g_daemon->settings().routedPacketsOnVPN())
+        routedDns = SplitDNSInfo::SplitDNSType::Bypass;
+    SplitDNSInfo routedDnsInfo = SplitDNSInfo::infoFor(params, routedDns);
+
+    // Since we can't control where routed DNS is addressed, always create rules
+    // to force it to the DNS server specified.
+    if(routedDnsInfo != _routedDnsInfo)
+    {
+        if(routedDnsInfo.isValid())
+        {
+            qInfo() << "Sending routed DNS to DNS server"
+                << routedDnsInfo.dnsServer() << "via source IP" << routedDnsInfo.sourceIp();
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.fwdSnatDNS"), {
+                QStringLiteral("-p udp --match mark --mark %1 -m udp --dport 53 -j SNAT --to-source %2").arg(Fwmark::forwardedPacketTag).arg(routedDnsInfo.sourceIp()),
+                QStringLiteral("-p tcp --match mark --mark %1 -m tcp --dport 53 -j SNAT --to-source %2").arg(Fwmark::forwardedPacketTag).arg(routedDnsInfo.sourceIp())
+                },
+                kNatTable);
+
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("80.fwdSplitDNS"), {
+                QStringLiteral("-p udp --match mark --mark %1 -m udp --dport 53 -j DNAT --to-destination %2:53").arg(Fwmark::forwardedPacketTag).arg(routedDnsInfo.dnsServer()),
+                QStringLiteral("-p tcp --match mark --mark %1 -m tcp --dport 53 -j DNAT --to-destination %2:53").arg(Fwmark::forwardedPacketTag).arg(routedDnsInfo.dnsServer()),
+                },
+                kNatTable);
+        }
+        else
+        {
+            qInfo() << QStringLiteral("Not creating routed packet DNS rules, received empty value dnsServer: %1, sourceIp: %2").arg(routedDnsInfo.dnsServer(), routedDnsInfo.sourceIp());
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.fwdSnatDNS"),
+                          {}, kNatTable);
+
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("80.fwdSplitDNS"),
+                          {}, kNatTable);
+        }
+
+        _routedDnsInfo = routedDnsInfo;
+    }
+
+    // Manage split tunnel DNS.
+    SplitDNSInfo appDnsInfo;
+    // When disconnected or set to Use Existing DNS, we don't create any
+    // DNS-binding rules.
+    // - VPN-only apps are blocked when disconnected
+    // - When connected with Use Existing DNS, all apps go to the existing DNS
+    //   anyway.
+    //   * Note that if the DNS server is on Internet and the system is
+    //     not using systemd-resolved (or any other local DNS cache), non-Bypass
+    //     apps will still send DNS through the tunnel (but to the existing
+    //     configured DNS servers).  In rare cases, the DNS server may be an
+    //     Internet address that isn't actually reachable through the tunnel
+    //     (Cox ISP DNS for example); in that case the user would need to also
+    //     add an IP split tunnel rule since DNS to that server won't work
+    //     through the tunnel (and we don't have a good way to identify this).
+    //     It's unlikely that users would actually want to use such a DNS server
+    //     anyway though.
+    if(params.effectiveDnsServers.isEmpty())
+    {
+        qInfo() << "Not connected or using existing DNS, don't create app DNS rules";
+    }
+    else
+    {
+        // We have configured DNS, so create DNS split tunnel rules.
+        //
+        // We can control where local apps send DNS, so we only create rules for
+        // apps using the opposite of the host's default behavior.  (If the host
+        // uses VPN by default, we force bypass apps to the existing DNS server; if
+        // the host bypasses by default, we force VPN-only apps to the VPN DNS
+        // server.)
+        SplitDNSInfo::SplitDNSType oppositeApps = SplitDNSInfo::SplitDNSType::VpnOnly;
+        if(params.defaultRoute)
+            oppositeApps = SplitDNSInfo::SplitDNSType::Bypass;
+        qInfo() << "Connected with default route" << params.defaultRoute
+            << "- determine DNS rules for"
+            << (oppositeApps == SplitDNSInfo::SplitDNSType::Bypass ? "Bypass" : "VpnOnly")
+            << "apps";
+        appDnsInfo = SplitDNSInfo::infoFor(params, oppositeApps);
+    }
+
+    if(appDnsInfo != _appDnsInfo)
+    {
+        if(appDnsInfo.isValid())
+        {
+            qInfo() << QStringLiteral("Updating split tunnel DNS due to network change: dnsServer: %1, cgroupId %2, sourceIp %3, defaultRoute %4")
+                .arg(appDnsInfo.dnsServer(), appDnsInfo.cGroupId(),
+                     appDnsInfo.sourceIp(), g_daemon->vpnHasDefaultRoute() ? "true" : "false");
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"), {
+                QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j SNAT --to-source %2").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.sourceIp()),
+                QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j SNAT --to-source %2").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.sourceIp()),
+            },
+            kNatTable);
+
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("80.splitDNS"), {
+                QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j DNAT --to-destination %2:53").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.dnsServer()),
+                QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j DNAT --to-destination %2:53").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.dnsServer()),
+            },
+            kNatTable);
+        }
+        else
+        {
+            qInfo() << QStringLiteral("Clear split tunnel DNS rules, don't have all information: dnsServer: %1, cgroupId %2, sourceIp %3, defaultRoute %4")
+                .arg(appDnsInfo.dnsServer(), appDnsInfo.cGroupId(),
+                     appDnsInfo.sourceIp(), g_daemon->vpnHasDefaultRoute() ? "true" : "false");
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"),
+                          {}, kNatTable);
+
+            replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("80.splitDNS"),
+                          {}, kNatTable);
+        }
+
+        _appDnsInfo = appDnsInfo;
+    }
+
+    // Enable localhost routing
+    // Without this option we cannot route our DNS packet if the source IP was
+    // originally localhost, this is because the routing decision
+    // i.e localhost vs routable ip is made BEFORE we rewrite the source IP in POSTROUTING
+    if(params.enableSplitTunnel)
+        enableRouteLocalNet();
+    else
+        disableRouteLocalNet();
+
+    _adapterName = adapterName;
     _ipAddress6 = ipAddress6;
     _dnsServers = params.effectiveDnsServers;
-    _adapterName = adapterName;
 }
 
 void IpTablesFirewall::updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion, const QSet<QString> &bypassSubnets, QSet<QString> &oldBypassSubnets)
@@ -539,36 +841,43 @@ void IpTablesFirewall::updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion
                 qInfo() << "Clearing out 90.tagSubnets";
                 replaceAnchor(ipVersion, QStringLiteral("90.tagSubnets"), {}, kMangleTable);
             }
+            qInfo() << "Clearing out 200.tagFwdSubnets";
+            replaceAnchor(ipVersion, QStringLiteral("200.tagFwdSubnets"), {}, kMangleTable);
         }
         else
         {
-            QStringList subnetRules;
+            QStringList subnetAcceptRules;
             for(const auto &subnet : bypassSubnets)
-                subnetRules << QStringLiteral("-d %1 -j ACCEPT").arg(subnet);
+                subnetAcceptRules << QStringLiteral("-d %1 -j ACCEPT").arg(subnet);
 
 
             // If there's any IPv6 addresses then we also need to whitelist link-local and broadcast
             // as these address ranges are needed for IPv6 Neighbor Discovery.
             if(ipVersion == IPv6)
             {
-                subnetRules << QStringLiteral("-d fe80::/10 -j ACCEPT");
-                subnetRules << QStringLiteral("-d ff00::/8 -j ACCEPT");
+                subnetAcceptRules << QStringLiteral("-d fe80::/10 -j ACCEPT");
+                subnetAcceptRules << QStringLiteral("-d ff00::/8 -j ACCEPT");
             }
 
             IpTablesFirewall::replaceAnchor(ipVersion,
-                                            QStringLiteral("305.allowSubnets"), subnetRules);
+                                            QStringLiteral("305.allowSubnets"), subnetAcceptRules);
 
+            QStringList subnetMarkRules;
+            for(const auto &subnet : bypassSubnets)
+               subnetMarkRules << QStringLiteral("-d %1 -j MARK --set-mark %2").arg(subnet).arg(Fwmark::excludePacketTag);
             // We tag all packets heading towards a bypass subnet. This tag (excludePacketTag) is
             // used by our routing policies to route traffic outside the VPN.
             if(ipVersion == IPv4)
             {
-                qInfo() << "Should be setting 90.tagSubnets";
-                QStringList subnetRules;
-                for(const auto &subnet : bypassSubnets)
-                   subnetRules << QStringLiteral("-d %1 -j MARK --set-mark %2").arg(subnet).arg(Fwmark::excludePacketTag);
+                qInfo() << "Setting 90.tagSubnets";
 
-                replaceAnchor(ipVersion, QStringLiteral("90.tagSubnets"), subnetRules, kMangleTable);
+                replaceAnchor(ipVersion, QStringLiteral("90.tagSubnets"), subnetMarkRules, kMangleTable);
             }
+
+            // For routed connections to bypassed subnets, apply the
+            // bypass mark so they will always be routed to the original
+            // gateway, regardless of the routed connection setting.
+            replaceAnchor(ipVersion, QStringLiteral("200.tagFwdSubnets"), subnetMarkRules, kMangleTable);
         }
     }
     oldBypassSubnets = bypassSubnets;

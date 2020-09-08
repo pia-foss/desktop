@@ -1,0 +1,12 @@
+## Building libk5crypto.so
+
+Built against krb5-1.18.2.tar.gz on Ubuntu 16.04
+
+Download on https://web.mit.edu/kerberos/dist/
+
+
+```
+$ ./configure --prefix=/home/steve/krb5/out/
+$ make
+$ make install
+```

@@ -23,9 +23,9 @@
 #include "version.h"
 #include "client.h"
 #include "clientsettings.h"
+#include "platformscreens.h"
 #include <QDebug>
 #include <QRect>
-#include <QScreen>
 #include <QGuiApplication>
 
 TrayMetrics::TrayMetrics(const QRect &trayIconBound, const QRect &screenBound,
@@ -109,22 +109,24 @@ auto TrayIconManager::buildIconMetrics(const QRect &iconBound,
                                        qreal screenScale) const
     -> std::unique_ptr<TrayMetrics>
 {
-    // Qt owns the QScreen objects referred to by these pointers; do not clean
-    // them up.
-    QList<QScreen *> screens{QGuiApplication::screens()};
+    const auto &screens = PlatformScreens::instance().getScreens();
 
     auto itIconScreen = std::find_if(screens.begin(), screens.end(),
-        [&iconBound](auto pScreen)
+        [&iconBound](const auto &screen)
         {
-            return pScreen && pScreen->geometry().contains(iconBound);
+            return screen.geometry().contains(iconBound);
         });
     // Default to the primary screen if no match was found.
-    QScreen *pIconScreen = (itIconScreen != screens.end()) ? *itIconScreen : nullptr;
-    if(!pIconScreen)
+    const PlatformScreens::Screen *pIconScreen = nullptr;
+    if(itIconScreen == screens.end())
     {
         qWarning() << "Can't find screen containing icon bound"
             << iconBound << "- using primary screen";
-        pIconScreen = QGuiApplication::primaryScreen();
+        pIconScreen = PlatformScreens::instance().getPrimaryScreen();
+    }
+    else
+    {
+        pIconScreen = &*itIconScreen;
     }
 
     // If there are no screens at all, use default values
