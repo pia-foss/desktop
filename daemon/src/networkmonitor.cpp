@@ -35,6 +35,31 @@ Ipv4Address::Ipv4Address(const QString &address)
     }
 }
 
+bool Ipv4Address::inSubnet(quint32 netAddress, unsigned prefixLen) const
+{
+    // Convert the prefix length to a mask
+    quint32 mask = 0;
+    while(prefixLen)
+    {
+        mask >>= 1;
+        mask |= 0x80000000u;
+        --prefixLen;
+    }
+    return (_address & mask) == netAddress;
+}
+
+unsigned Ipv4Address::getSubnetMaskPrefix() const
+{
+    quint32 remainingBits = _address;
+    unsigned prefixLength = 0;
+    while(remainingBits & 0x80000000)
+    {
+        ++prefixLength;
+        remainingBits <<= 1;
+    }
+    return prefixLength;
+}
+
 Ipv6Address::Ipv6Address(const AddressValue &address)
 {
     std::copy(std::begin(address), std::end(address), std::begin(_address));
@@ -77,8 +102,8 @@ NetworkConnection::NetworkConnection(const QString &networkInterface,
                                      bool defaultIpv4, bool defaultIpv6,
                                      const Ipv4Address &gatewayIpv4,
                                      const Ipv6Address &gatewayIpv6,
-                                     std::vector<Ipv4Address> addressesIpv4,
-                                     std::vector<Ipv6Address> addressesIpv6)
+                                     std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
+                                     std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6)
     : _networkInterface{networkInterface},
       _defaultIpv4{defaultIpv4}, _defaultIpv6{defaultIpv6},
       _gatewayIpv4{gatewayIpv4}, _gatewayIpv6{gatewayIpv6},
@@ -90,7 +115,7 @@ NetworkConnection::NetworkConnection(const QString &networkInterface,
     std::sort(_addressesIpv4.begin(), _addressesIpv4.end());
     // Ignore link-local addresses since we don't get them for all platforms
     _addressesIpv6.erase(std::remove_if(_addressesIpv6.begin(), _addressesIpv6.end(),
-                                        [](const auto &addr){return addr.isLinkLocal();}),
+                                        [](const auto &addr){return addr.first.isLinkLocal();}),
                          _addressesIpv6.end());
     std::sort(_addressesIpv6.begin(), _addressesIpv6.end());
 }

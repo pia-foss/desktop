@@ -272,6 +272,10 @@ Page {
         // can't test if the kext is installed until either the setting is
         // checked or we try to connect with it enabled.
 
+        var splitTunnelException = Daemon.state.splitTunnelSupportErrors
+        if(splitTunnelException.length)
+          return SettingsMessages.getSplitTunnelErrorDesc(splitTunnelException)
+
         return "";
       }
       descLinks: {

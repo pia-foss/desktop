@@ -24,9 +24,11 @@
 #pragma once
 
 #include "daemon.h"
+#include "networkmonitor.h"
 #include "win_appmonitor.h"
 #include "win_firewall.h"
 #include "win_interfacemonitor.h"
+#include "win_dnscachecontrol.h"
 #include "win/win_messagewnd.h"
 #include "win/servicemonitor.h"
 #include "win/win_servicestate.h"
@@ -90,8 +92,79 @@ protected:
         // Filter to block IPv6 traffic from app, used for only-VPN apps in all
         // connection states
         WfpFilterObject blockAppIpv6;
-        WfpFilterObject splitAppBind; // Filter to invoke callout for app in bind layer
-        WfpFilterObject splitAppConnect; // Filter to invoke callout for app in connect layer
+        // Filter to invoke callout for app in bind layer.  Used to force UDP
+        // sockets to particular interfaces.
+        WfpFilterObject splitAppBind;
+        // Filter to invoke callout for app in connect layer.  Used to force
+        // TCP sockets to particular interfaces, and to capture DNS flow
+        // information (DNS packets are rewritten in the IP packet layers, which
+        // are not in an application context.)
+        WfpFilterObject splitAppConnect;
+        // Filter to permit any DNS address for this app - applied if DNS
+        // rewriting is active for this type of app, since we will rewrite these
+        // DNS queries to the correct address, which also provides leak
+        // protection.
+        WfpFilterObject appPermitAnyDns;
+        // Filter to invoke callout for app in flow established layer.  This is
+        // used to inspect DNS flows, which has to be done in this layer in
+        // order to attach a flow context and cause WFP to notify us when the
+        // flow is removed.
+        WfpFilterObject splitAppFlowEstablished;
+    };
+
+    struct SplitTunnelFirewallParams : public DebugTraceable<SplitTunnelFirewallParams>
+    {
+        // Local IP and prefix length of the non-VPN network interface
+        QString _physicalIp;
+        unsigned _physicalNetPrefix;
+        // Local IP of the VPN tunnel device
+        QString _tunnelIp;
+        // Whether we are connected to the VPN right now.
+        bool _isConnected;
+        // Whether we have connected since enabling the VPN (FirewallParams::hasConnected)
+        // NOTE: _not_ whether we are currently connected right now
+        bool _hasConnected;
+        // Whether the VPN gets the default route (affects which DNS rewriting
+        // rules become active)
+        bool _vpnDefaultRoute;
+        // Whether DNS leak protection is active
+        bool _blockDNS;
+        // Whether we need to force "VPN only" apps to use PIA's configured DNS.
+        bool _forceVpnOnlyDns;
+        // Whether we need to force "bypass" apps to use the existing DNS.
+        bool _forceBypassDns;
+        // Existing DNS servers on the physical interface
+        std::vector<quint32> _existingDnsServers;
+        // Effective DNS servers configured in PIA (empty = use existing)
+        std::vector<quint32> _effectiveDnsServers;
+
+    public:
+        bool operator==(const SplitTunnelFirewallParams &other)
+        {
+            return _physicalIp == other._physicalIp &&
+                _tunnelIp == other._tunnelIp &&
+                _isConnected == other._isConnected &&
+                _hasConnected == other._hasConnected &&
+                _vpnDefaultRoute == other._vpnDefaultRoute &&
+                _blockDNS == other._blockDNS &&
+                _forceVpnOnlyDns == other._forceVpnOnlyDns &&
+                _forceBypassDns == other._forceBypassDns &&
+                _existingDnsServers == other._existingDnsServers &&
+                _effectiveDnsServers == other._effectiveDnsServers;
+        }
+
+        void trace(QDebug &dbg) const
+        {
+            dbg << "- physical IP known:" << !_physicalIp.isEmpty()
+                << "- tunnel IP known:" << !_tunnelIp.isEmpty()
+                << "- have connected:" << _hasConnected
+                << "- VPN default route:" << _vpnDefaultRoute
+                << "- block DNS:" << _blockDNS
+                << "- force VPN-only DNS:" << _forceVpnOnlyDns
+                << "- force bypass DNS:" << _forceBypassDns
+                << "- existing DNS server count:" << _existingDnsServers.size()
+                << "- effective DNS server count:" << _effectiveDnsServers.size();
+        }
     };
 
 private:
@@ -99,6 +172,8 @@ private:
     // (Daemon::adapterValid()).
     void checkNetworkAdapter();
     void onAboutToConnect();
+
+    std::vector<quint32> findExistingDNS(const std::vector<quint32> &piaDNSServers);
 
     void doVpnExclusions(std::set<const AppIdKey*, PtrValueLess> newExcludedApps, bool hasConnected);
     void doVpnOnly(std::set<const AppIdKey*, PtrValueLess> newVpnOnlyApps, bool hasConnected);
@@ -130,17 +205,15 @@ private:
                                      const QString &traceType);
     void createBypassAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
                                 const WfpProviderContextObject &context,
-                                const AppIdKey &appId);
+                                const AppIdKey &appId, bool rewriteDns);
     void createOnlyVPNAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
                                  const WfpProviderContextObject &context,
-                                 const AppIdKey &appId);
+                                 const AppIdKey &appId, bool rewriteDns);
     void createBlockAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
                                const AppIdKey &appId);
-    void reapplySplitTunnelFirewall(const QString &newSplitTunnelIp,
-                                    const QString &newTunnelIp,
+    void reapplySplitTunnelFirewall(const SplitTunnelFirewallParams &params,
                                     const std::set<const AppIdKey*, PtrValueLess> &newExcludedApps,
-                                    const std::set<const AppIdKey*, PtrValueLess> &newVpnOnlyApps,
-                                    bool hasConnected);
+                                    const std::set<const AppIdKey*, PtrValueLess> &newVpnOnlyApps);
 
     // Other Daemon overrides and supporting methods
 protected:
@@ -190,6 +263,9 @@ protected:
         WfpFilterObject permitDHCP[2];
         WfpFilterObject permitLAN[10];
         WfpFilterObject blockDNS[2];
+        WfpFilterObject permitInjectedDns;
+        WfpFilterObject ipInbound;
+        WfpFilterObject ipOutbound;
         WfpFilterObject permitDNS[2];
         WfpFilterObject blockAll[2];
         WfpFilterObject permitResolvers[ResolverFilterCount];
@@ -199,6 +275,10 @@ protected:
         // so we store it here for simplicity and so we can re-use the filter-related code
         WfpCalloutObject splitCalloutBind;
         WfpCalloutObject splitCalloutConnect;
+        WfpCalloutObject splitCalloutFlowEstablished;
+        WfpCalloutObject splitCalloutConnectAuth;
+        WfpCalloutObject splitCalloutIpInbound;
+        WfpCalloutObject splitCalloutIpOutbound;
 
         WfpProviderContextObject providerContextKey;
         WfpProviderContextObject vpnOnlyProviderContextKey;
@@ -226,13 +306,12 @@ protected:
     AppIdKey _hnsdAppId;
 #endif
 
-    // The last 'hasConnected' state and local VPN IP address used to create the
-    // VPN-only split tunnel rules - the rules are recreated if they change
-    bool _lastConnected;
-    QString _lastTunnelIp;
-    // The last local IP address we used to create split tunnel rules - causes
-    // us to recreate the rules if it changes.
-    QString _lastSplitTunnelIp;
+    // Inputs to reapplySplitTunnelFirewall() - the last set of inputs used is
+    // stored so we know when to recreate the firewall rules.
+    SplitTunnelFirewallParams _lastSplitParams;
+    // Controller used to disable/restore the Dnscache service as needed for
+    // split tunnel DNS
+    WinDnsCacheControl _dnsCacheControl;
 
     // This is contextual information we need to detect invalidation of some of
     // the WFP filters.

@@ -89,8 +89,9 @@ Item {
     // Center vertically on the first line of text
     // Round just so the image renders crisply
     y: Math.round(Theme.dashboard.notificationVertMarginPx + Theme.dashboard.notificationTextLinePx / 2 - height / 2)
-    width: sourceSize.width / 2
+    width: notification.status.displayIcon ? sourceSize.width / 2 : 0
     height: sourceSize.height / 2
+    visible: notification.status.displayIcon
 
     label: severityNames[notification.status.severity]
 
@@ -170,6 +171,15 @@ Item {
       // For clickable notifications, the whole-item button is the main
       // accessibility element instead of the message
       messageAccessible: !status.clickable
+    }
+
+    RatingControl {
+      visible: status.ratingEnabled
+      width: parent.width
+      height: Theme.dashboard.ratingImageHeightPx
+      function onRatingFinished (value) {
+        status.ratingFinished(value);
+      }
     }
 
     // Progress controls - the progress bar and stop button.

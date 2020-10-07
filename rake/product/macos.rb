@@ -328,6 +328,8 @@ module PiaMacOS
             installerBundle = installerBuild.artifact("#{version.productName} Installer.app")
             FileUtils.rm_rf(installerBundle)
             FileUtils.mv(bundle, installerBundle)
+            # Clean all zips so they don't accumulate as commits are made
+            FileUtils.rm(Dir.glob(installerBuild.artifact('*.zip')), force: true)
             Archive.zipDirectory(installerBundle, installerPackage)
             FileUtils.mv(installerBundle, bundle)
         end

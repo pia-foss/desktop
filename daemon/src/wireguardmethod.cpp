@@ -142,7 +142,6 @@ private:
         wg_key _serverPubkey;
         QHostAddress _serverIp;
         quint16 _serverPort;
-        QStringList _piaDnsServers;
         QHostAddress _serverVirtualIp;
     };
 
@@ -302,17 +301,8 @@ bool WireguardMethod::setupPosixDNS(const QString &deviceName, const QStringList
     env.insert("script_type", "up");
     QStringList argList;
 
-
-    if(!dnsServers.isEmpty())
-    {
-#if defined(Q_OS_LINUX)
-        // On Linux only set DNS servers if we have the default route
-        if(_connectionConfig.defaultRoute())
-#endif
-        {
-            argList = QStringList{"--dns", dnsServers.join(':')};
-        }
-    }
+    if(!dnsServers.isEmpty() && _connectionConfig.setDefaultDns())
+        argList = QStringList{"--dns", dnsServers.join(':')};
 
     // process status codes are 0 for success and non-zero for failure
     // so we need to flip it
@@ -426,33 +416,10 @@ auto WireguardMethod::parseAuthResult(const QJsonDocument &result)
         throw Error{HERE, Error::Code::WireguardAddKeyFailed};
     }
 
-    QStringList piaDnsServers;
-    // DNS servers are only provided in the legacy infrastructure.  Leave
-    // piaDnsServers empty for the modern infrastructure,
-    // ConnectionConfig::getDnsServers() will ignore it.
-    if(_connectionConfig.infrastructure() == ConnectionConfig::Infrastructure::Current)
-    {
-        const auto &piaDnsServersArray = result[QStringLiteral("dns_servers")].toArray();
-        piaDnsServers.reserve(piaDnsServersArray.size());
-        for(const auto &address : piaDnsServersArray)
-        {
-            const auto &addressStr = address.toString();
-            if(!addressStr.isEmpty())
-                piaDnsServers.push_back(addressStr);
-        }
-        if(piaDnsServers.isEmpty())
-        {
-            qWarning().noquote() << "Invalid DNS server addresses:"
-                << QJsonDocument{piaDnsServersArray}.toJson();
-            throw Error{HERE, Error::Code::WireguardAddKeyFailed};
-        }
-    }
-
     AuthResult authResult;
     authResult._serverIp = std::move(serverIp);
     authResult._serverPort = static_cast<quint16>(serverPort);
     authResult._serverVirtualIp = std::move(serverVip);
-    authResult._piaDnsServers = std::move(piaDnsServers);
 
     authResult._peerIpNet = QHostAddress::parseSubnet(peerIpStr);
     if(authResult._peerIpNet.first.isNull() ||
@@ -711,7 +678,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     const OriginalNetworkScan &netScan = originalNetwork();
 
     const auto &peerIpNet = authResult._peerIpNet;
-    _dnsServers = _connectionConfig.getDnsServers(authResult._piaDnsServers);
+    _dnsServers = _connectionConfig.getDnsServers();
 
 // OS specific interface config (including DNS and routing)
 #if defined(Q_OS_LINUX)
@@ -764,18 +731,21 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     // Route virtual server IP (ping endpoint) through VPN
     _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(_pingEndpointAddress.toString(), deviceName));
 
-    // Route DNS through the tunnel
-    for(const auto &dnsServer : _dnsServers)
+    // If we're setting the default DNS, route those servers through the tunnel,
+    // and then apply the DNS servers.
+    if(_connectionConfig.setDefaultDns())
     {
-        if(dnsServer != piaLegacyDnsPrimary())
-            _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
-    }
+        for(const auto &dnsServer : _dnsServers)
+        {
+            if(dnsServer != piaLegacyDnsPrimary())
+                _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
+        }
 
-    // DNS
-    if(!setupPosixDNS(deviceName, _dnsServers))
-    {
-        // Only Linux has support for DNS config errors
-        raiseError(Error(HERE, Error::OpenVPNDNSConfigError));
+        if(!setupPosixDNS(deviceName, _dnsServers))
+        {
+            // Only Linux has support for DNS config errors
+            raiseError(Error(HERE, Error::OpenVPNDNSConfigError));
+        }
     }
 
 #elif defined(Q_OS_MACOS)
@@ -786,6 +756,10 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     // MTU
     unsigned mtu = determinePosixMtu(authResult._serverIp);
     _executor.bash(QStringLiteral("ifconfig %1 mtu %2").arg(deviceName).arg(mtu));
+
+    // We don't support split tunnel DNS on Mac yet - we always set the system
+    // DNS servers
+    Q_ASSERT(_connectionConfig.setDefaultDns());
 
     // Routing
     if(vpnHasDefaultRoute())
@@ -866,6 +840,9 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
 
     // Routing
     WinRouteManager routeManager;
+    // A zero gateway indicates an on-link route
+    QString onLink = QStringLiteral("0.0.0.0");
+    QString luidStr = QString::number(pWinAdapter->luid());
 
     if(vpnHasDefaultRoute())
     {
@@ -875,10 +852,6 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     // VPN does not have default route
     else
     {
-        // A zero gateway indicates an on-link route
-        QString onLink = QStringLiteral("0.0.0.0");
-        QString luidStr = QString::number(pWinAdapter->luid());
-
         // Remove VPN routes created by the service backend (as we don't want VPN to be the default)
         routeManager.removeRoute(QStringLiteral("0.0.0.0/1"), onLink, luidStr);
         routeManager.removeRoute(QStringLiteral("128.0.0.0/1"), onLink, luidStr);
@@ -891,23 +864,23 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
 
         // Always route special address through VPN (used for MACE, port forwarding etc)
         routeManager.addRoute(piaLegacyDnsPrimary(), onLink, luidStr);
+    }
 
+    // Reset DNS on this interface (even if we're not overriding the system
+    // DNS; in case some DNS servers had stuck around for some reason)
+    QString nameParam{QStringLiteral("name=%1").arg(pWinAdapter->indexIpv4())};
+    _executor.cmd(QStringLiteral("netsh"), {"interface", "ipv4", "set",
+        "dnsservers", nameParam, "source=static", "address=none", "validate=no",
+        "register=both"});
+
+    if(_connectionConfig.setDefaultDns())
+    {
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
         {
             if(dnsServer != piaLegacyDnsPrimary())
                 routeManager.addRoute(dnsServer, onLink, luidStr);
         }
-    }
-
-    // DNS
-    if(!_dnsServers.isEmpty())
-    {
-        // Reset DNS on this interface
-        QString nameParam{QStringLiteral("name=%1").arg(pWinAdapter->indexIpv4())};
-        _executor.cmd(QStringLiteral("netsh"), {"interface", "ipv4", "set",
-            "dnsservers", nameParam, "source=static", "address=none", "validate=no",
-            "register=both"});
         // Add each DNS server
         for(const auto &dns : _dnsServers)
         {
@@ -922,8 +895,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     _routesUp = true;
 
     emitTunnelConfiguration(deviceName, peerIpNet.first.toString(),
-                            authResult._serverVirtualIp.toString(),
-                            _dnsServers);
+                            authResult._serverVirtualIp.toString());
 }
 
 auto WireguardMethod::getWireguardDevice() -> Async<WireguardBackend::WgDevPtr>

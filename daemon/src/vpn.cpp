@@ -500,7 +500,8 @@ ConnectionConfig::ConnectionConfig()
     : _infrastructure{Infrastructure::Current}, _method{Method::OpenVPN},
       _methodForcedByAuth{false},
       _vpnLocationAuto{false}, _dnsType{DnsType::Pia}, _localPort{0}, _mtu{0},
-      _defaultRoute{true}, _proxyType{ProxyType::None},
+      _defaultRoute{true}, _setDefaultDns{true}, _forceVpnOnlyDns{false},
+      _forceBypassDns{false}, _proxyType{ProxyType::None},
       _shadowsocksLocationAuto{false}, _automaticTransport{false},
       _requestPortForward{false}, _requestMace{false},
       _wireguardUseKernel{false}
@@ -567,7 +568,11 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     else if(dnsSetting.get(_customDns) && !_customDns.isEmpty())
         _dnsType = DnsType::Custom;
     else
+    {
         _dnsType = DnsType::Existing;
+        // Don't set the default DNS, since we're using existing DNS.
+        _setDefaultDns = false;
+    }
 
     _localPort = static_cast<quint16>(settings.localPort());
     _mtu = settings.mtu();
@@ -575,7 +580,27 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     _requestMace = settings.enableMACE();
 
     if(settings.splitTunnelEnabled())
+    {
         _defaultRoute = settings.defaultRoute();
+
+        // Do we want to split DNS too?
+        // (Not currently available on Mac)
+#if !defined(Q_OS_MAC)
+        if(_dnsType != DnsType::Existing && settings.splitTunnelDNS())
+        {
+            // Yes - set the default DNS only if the VPN has the default route
+            _setDefaultDns = _defaultRoute;
+            // Force VPN-only apps to use PIA's configured DNS if the VPN does
+            // not have the default route
+            _forceVpnOnlyDns = !_defaultRoute;
+            // Force bypass apps to use existing DNS if the VPN has the default
+            // route
+            _forceBypassDns = _defaultRoute;
+        }
+#endif
+        // Otherwise, not splitting DNS - either split tunnel DNS is disabled,
+        // or we're using existing DNS anyway.
+    }
 
     // Capture OpenVPN-specific settings.
     if(_method == Method::OpenVPN)
@@ -692,6 +717,9 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         localPort() != other.localPort() ||
         mtu() != other.mtu() ||
         defaultRoute() != other.defaultRoute() ||
+        setDefaultDns() != other.setDefaultDns() ||
+        forceVpnOnlyDns() != other.forceVpnOnlyDns() ||
+        forceBypassDns() != other.forceBypassDns() ||
         proxyType() != other.proxyType() ||
         socksHost() != other.socksHost() ||
         customProxy() != other.customProxy() ||
@@ -703,7 +731,7 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         ssLocationId != otherSsLocationId;
 }
 
-QStringList ConnectionConfig::getDnsServers(const QStringList &piaLegacyDnsOverride) const
+QStringList ConnectionConfig::getDnsServers() const
 {
     switch(dnsType())
     {
@@ -717,8 +745,6 @@ QStringList ConnectionConfig::getDnsServers(const QStringList &piaLegacyDnsOverr
                 case Infrastructure::Current:
                     // MACE is activated separately for the legacy
                     // infrastructure.
-                    if(!piaLegacyDnsOverride.isEmpty())
-                        return piaLegacyDnsOverride;
                     return {piaLegacyDnsPrimary(), piaLegacyDnsSecondary()};
             }
         case DnsType::Handshake:

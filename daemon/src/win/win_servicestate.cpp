@@ -165,8 +165,9 @@ void CALLBACK WinServiceState::serviceNotifyCallback(void *pParam)
         }, Qt::ConnectionType::QueuedConnection);
 }
 
-WinServiceState::WinServiceState(std::wstring serviceName)
-    : _lastState{State::Deleted}, _serviceName{std::move(serviceName)}
+WinServiceState::WinServiceState(std::wstring serviceName, DWORD startStopRights)
+    : _startStopRights{startStopRights}, _lastState{State::Deleted},
+      _serviceName{std::move(serviceName)}
 {
     startNotifications();
 }
@@ -175,7 +176,7 @@ WinServiceState::~WinServiceState()
 {
     // Make sure any connected start/stop tasks are resolved
     qInfo() << "Shutting down service state monitor for" << _serviceName;
-    updateState(State::Deleted);
+    updateState(State::Deleted, 0);
 }
 
 void WinServiceState::startNotifications()
@@ -192,8 +193,9 @@ void WinServiceState::startNotifications()
         return;
     }
 
-    _service.reset(::OpenServiceW(_scm, _serviceName.c_str(),
-                                  SERVICE_QUERY_STATUS|SERVICE_START|SERVICE_STOP));
+    DWORD accessRights = SERVICE_QUERY_STATUS|_startStopRights;
+
+    _service.reset(::OpenServiceW(_scm, _serviceName.c_str(), accessRights));
     if(!_service)
     {
         WinErrTracer error{::GetLastError()};
@@ -302,7 +304,7 @@ void WinServiceState::serviceChanged(const WinServiceNotify &notify)
                 << WinErrTracer{notify.dwNotificationStatus} << "in state"
                 << traceEnum(_lastState);
         }
-        updateState(State::Deleted);
+        updateState(State::Deleted, 0);
         _service.close();
         _scm.close();
         return;
@@ -348,7 +350,7 @@ void WinServiceState::serviceChanged(const WinServiceNotify &notify)
         qInfo() << "Service reported state"
             << notify.ServiceStatus.dwCurrentState << "-"
             << traceEnum(_lastState) << "->" << traceEnum(newState);
-        updateState(newState);
+        updateState(newState, notify.ServiceStatus.dwProcessId);
     }
 
     // Resume notifications.  If this fails due to the client lagging, we can
@@ -360,7 +362,7 @@ void WinServiceState::serviceChanged(const WinServiceNotify &notify)
         startNotifications();
         // This updates the state to either Deleted or Initializing, emit the
         // change
-        emit stateChanged(_lastState);
+        emit stateChanged(_lastState, 0);
     }
     // Otherwise, if requestNotifications() wasn't able to start a notification
     // we're hosed, go to the Deleted state
@@ -368,18 +370,20 @@ void WinServiceState::serviceChanged(const WinServiceNotify &notify)
     {
         qWarning() << "Couldn't request notifications for" << _serviceName
             << "- assuming service is lost";
-        updateState(State::Deleted);
+        updateState(State::Deleted, 0);
     }
 }
 
-void WinServiceState::updateState(State newState)
+void WinServiceState::updateState(State newState, DWORD newPid)
 {
-    if(newState != _lastState)
+    if(newState != _lastState || newPid != _lastPid)
     {
         qInfo() << "Service" << _serviceName << "updated from"
-            << traceEnum(_lastState) << "to" << traceEnum(newState);
+            << traceEnum(_lastState) << "(pid" << _lastPid << ") to"
+            << traceEnum(newState) << "(pid" << newPid << ")";
         _lastState = newState;
-        emit stateChanged(_lastState);
+        _lastPid = newPid;
+        emit stateChanged(_lastState, _lastPid);
     }
 }
 
@@ -397,6 +401,10 @@ Async<void> WinServiceState::startService()
         WinErrTracer error{::GetLastError()};
         qWarning() << "Can't start service" << _serviceName
             << "-" << error;
+        // This error is known to occur in some cases when attempting to restart
+        // Dnscache and must be handled specifically by WinDnsCacheControl
+        if(error.code() == ERROR_INCOMPATIBLE_SERVICE_SID_TYPE)
+            return Async<void>::reject({HERE, Error::Code::WinServiceIncompatibleSidType});
         return Async<void>::reject({HERE, Error::Code::TaskRejected});
     }
 
@@ -407,6 +415,12 @@ Async<void> WinServiceState::waitForStart()
 {
     return Async<WinServiceStateTask>::create(*this, State::StartPending,
                                               State::Running);
+}
+
+Async<void> WinServiceState::waitForStop()
+{
+    return Async<WinServiceStateTask>::create(*this, State::StopPending,
+                                              State::Stopped);
 }
 
 Async<void> WinServiceState::stopService()
@@ -427,8 +441,7 @@ Async<void> WinServiceState::stopService()
         return Async<void>::reject({HERE, Error::Code::TaskRejected});
     }
 
-    return Async<WinServiceStateTask>::create(*this, State::StopPending,
-                                              State::Stopped);
+    return waitForStop();
 }
 
 Async<void> WinServiceState::stopIfRunning()

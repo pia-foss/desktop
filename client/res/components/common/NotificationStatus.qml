@@ -38,6 +38,10 @@ QtObject {
   // The severity to use when this notification is active (use a value from
   // ClientNotifications.severities)
   property int severity
+
+  // Display a corresponding icon for the severity
+  property bool displayIcon: true
+
   // Whether the notification can be dismissed - false by default
   property bool dismissible: false
   // The entire notification is clickable and will emit the clicked signal.
@@ -70,6 +74,9 @@ QtObject {
 
   // Signal emitted for clickable notifications
   signal clicked()
+
+  property bool ratingEnabled: false
+  signal ratingFinished(int value)
 
   // Whether the notification's message should be shown (it is active and hasn't
   // been dismissed)

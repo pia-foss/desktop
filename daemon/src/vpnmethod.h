@@ -165,8 +165,7 @@ protected:
     // On Windows, deviceName and deviceRemoteAddress are not required.
     void emitTunnelConfiguration(const QString &deviceName,
                                  const QString &deviceLocalAddress,
-                                 const QString &deviceRemoteAddress,
-                                 const QStringList &effectiveDnsServers);
+                                 const QString &deviceRemoteAddress);
 
     // Emit new byte counts.  This should be provided every 5 seconds once
     // bytecounts become available (usually sometime in the Connecting state).
@@ -192,8 +191,7 @@ private:
 signals:
     void stateChanged();
     void tunnelConfiguration(QString deviceName, QString deviceLocalAddress,
-                             QString deviceRemoteAddress,
-                             const QStringList &effectiveDnsServers);
+                             QString deviceRemoteAddress);
     void bytecount(quint64 received, quint64 sent);
     void firewallParamsChanged();
     void error(const Error &err);

@@ -251,7 +251,7 @@ namespace
     public:
         WinTunInterfaceTask()
         {
-            connect(&WinInterfaceMonitor::instance(), &WinInterfaceMonitor::changed,
+            connect(&WinInterfaceMonitor::instance(), &WinInterfaceMonitor::configChanged,
                     this, &WinTunInterfaceTask::checkInterface);
             checkInterface();
         }

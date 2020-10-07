@@ -123,28 +123,38 @@ void WINAPI WinInterfaceMonitor::ipChangeCallback(PVOID callerContext,
                                                   PMIB_IPINTERFACE_ROW pRow,
                                                   MIB_NOTIFICATION_TYPE notificationType)
 {
-    // Signal any add/delete notification.  In principle, we could try to figure
-    // out whether the notification actually affects any relevant adapter, but
-    // re-checking for any change is straightforward and adapter adds/deletes
-    // are not common.
-    //
-    // Signal the initial notification too - it's unlikely that anything is
-    // connected to the signal at this point, but it does not hurt anything.
-    //
     // Note that pRow only has a few fields filled in; the doc explains how you
     // would use it to actually get a full MIB_IPINTERFACE_ROW:
     // https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-notifyipinterfacechange
     Q_UNUSED(pRow)
+
+    // This callback occurs on a worker thread specifically for this
+    // purpose.  Queue a call over to WinInterfaceMonitor on the service
+    // thread.
+    WinInterfaceMonitor *pThis = reinterpret_cast<WinInterfaceMonitor*>(callerContext);
+    Q_ASSERT(pThis);    // Ensured by ctor
+
+    // Signal all changes with configChanged().  This is used to detect DNS
+    // configuration changes due to changing networks; there's no way to be
+    // notified about DNS changes specifically.  We don't know what changes may
+    // have affected DNS, so indicate any change.
+    QMetaObject::invokeMethod(pThis, &WinInterfaceMonitor::configChanged,
+                              Qt::QueuedConnection);
+
+    // Signal any add/delete notification with interfacesChanged().  This is
+    // used to indicate that the TAP adapter is missing.
+    //
+    // In principle, we could try to figure out whether the notification
+    // actually affects any relevant adapter, but re-checking for any change is
+    // straightforward and adapter adds/deletes are not common.
+    //
+    // Signal the initial notification too - it's unlikely that anything is
+    // connected to the signal at this point, but it does not hurt anything.
     if(notificationType == MibAddInstance ||
         notificationType == MibDeleteInstance ||
         notificationType == MibInitialNotification)
     {
-        // This callback occurs on a worker thread specifically for this
-        // purpose.  Queue a call over to WinInterfaceMonitor on the service
-        // thread.
-        WinInterfaceMonitor *pThis = reinterpret_cast<WinInterfaceMonitor*>(callerContext);
-        Q_ASSERT(pThis);    // Ensured by ctor
-        QMetaObject::invokeMethod(pThis, &WinInterfaceMonitor::changed,
+        QMetaObject::invokeMethod(pThis, &WinInterfaceMonitor::interfacesChanged,
                                   Qt::QueuedConnection);
     }
 }

@@ -79,6 +79,7 @@ namespace libnl
 
         // Entry points from libnl-3.so
         loadLibnl(nl_addr_get_binary_addr);
+        loadLibnl(nl_addr_get_prefixlen);
         loadLibnl(nl_addr_get_family);
         loadLibnl(nl_addr_get_len);
         loadLibnl(nl_cache_alloc_name);
@@ -148,6 +149,7 @@ namespace libnl
 #define LIBNL_FUNC(name)    auto name = runtimeFunc(decltype(&::name){}, #name)
     // Entry points from libnl-3.so
     LIBNL_FUNC(nl_addr_get_binary_addr);
+    LIBNL_FUNC(nl_addr_get_prefixlen);
     LIBNL_FUNC(nl_addr_get_family);
     LIBNL_FUNC(nl_addr_get_len);
     LIBNL_FUNC(nl_cache_alloc_name);

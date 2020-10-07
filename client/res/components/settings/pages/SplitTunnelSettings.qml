@@ -182,6 +182,20 @@ Rectangle {
           }
           onFocusCell: mouseFocusCell({type: 'other', value: ''}, column)
         }
+
+        SplitTunnelNameServersRow {
+          id: nameServersRow
+          Layout.fillWidth: true
+          showAppIcons: Qt.platform.os !== 'linux'
+          // Split tunnel DNS is not supported on Mac yet.
+          visible: Qt.platform.os !== 'osx'
+          highlightColumn: {
+            if(splitTunnelSettings.keyboardRow.type === 'nameservers')
+              return splitTunnelSettings.highlightColumn
+            return -1
+          }
+          onFocusCell: mouseFocusCell({type: 'nameservers', value: ''}, column)
+        }
       }
     }
   }

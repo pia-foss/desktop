@@ -65,9 +65,11 @@ Path Path::WireguardInterfaceFile;
 Path Path::LegacyRegionOverride;
 Path Path::LegacyShadowsocksOverride;
 Path Path::ModernRegionOverride;
+Path Path::ModernRegionMetaOverride;
 Path Path::LegacyRegionBundle;
 Path Path::LegacyShadowsocksBundle;
 Path Path::ModernRegionBundle;
+Path Path::ModernRegionMetaBundle;
 #ifdef Q_OS_WIN
 Path Path::TapDriverDir;
 Path Path::WfpCalloutDriverDir;
@@ -185,7 +187,7 @@ void Path::initializePostApp()
     LibraryDir = BaseDir;
     ResourceDir = BaseDir;
     InstallationExecutableDir = InstallationDir;
-    DaemonSettingsDir = DaemonDataDir = BaseDir / "data";
+    DaemonSettingsDir = DaemonDataDir = InstallationDir / "data";
     DaemonExecutable = ExecutableDir / BRAND_CODE "-service.exe";
     ClientExecutable = ExecutableDir / BRAND_CODE "-client.exe";
 #elif defined(Q_OS_MACOS)
@@ -267,9 +269,11 @@ void Path::initializePostApp()
     LegacyRegionOverride = DaemonSettingsDir / "region_override.json";
     LegacyShadowsocksOverride = DaemonSettingsDir / "shadowsocks_override.json";
     ModernRegionOverride = DaemonSettingsDir / "modern_regions_override.json";
+    ModernRegionMetaOverride = DaemonSettingsDir / "modern_region_meta_override.json";
     LegacyRegionBundle = ResourceDir / "servers.json";
     LegacyShadowsocksBundle = ResourceDir / "shadowsocks.json";
     ModernRegionBundle = ResourceDir / "modern_servers.json";
+    ModernRegionMetaBundle = ResourceDir / "modern_region_meta.json";
 
 #ifdef Q_OS_MAC
     // launch support tool from the bundle

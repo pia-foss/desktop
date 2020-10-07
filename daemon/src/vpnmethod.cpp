@@ -58,11 +58,10 @@ void VPNMethod::advanceState(State newState)
 
 void VPNMethod::emitTunnelConfiguration(const QString &deviceName,
                                         const QString &deviceLocalAddress,
-                                        const QString &deviceRemoteAddress,
-                                        const QStringList &effectiveDnsServers)
+                                        const QString &deviceRemoteAddress)
 {
     emit tunnelConfiguration(deviceName, deviceLocalAddress,
-                             deviceRemoteAddress, effectiveDnsServers);
+                             deviceRemoteAddress);
 }
 
 void VPNMethod::emitBytecounts(quint64 received, quint64 sent)

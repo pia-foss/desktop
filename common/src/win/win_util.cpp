@@ -23,6 +23,8 @@
 #include <Windows.h>
 
 #pragma comment(lib, "User32.lib")
+// RegCloseKey() used by WinHKey
+#pragma comment(lib, "Advapi32.lib")
 
 const wchar_t *qstringWBuf(const QString &value)
 {

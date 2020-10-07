@@ -15,8 +15,6 @@ module PiaWindows
     # Base setup for uninstaller/installer; these are built from the same source
     # with either INSTALLER or UNINSTALLER defined
     def self.winstaller(name, version)
-        # TODO - qbs uses `optimization: "small"`
-        # TODO - qbs has '/Gw /Gs-' in release
         target = Executable.new(name, :executable)
             .gui
             .define('_STATIC_CPPLIB')
@@ -141,7 +139,7 @@ module PiaWindows
         files = files.map {|f| File.absolute_path(f).gsub!('/', '\\')}
 
         signtool(files, true, 'sha1', useTimestamp, description)
-        signtool(files, true, 'sha256', useTimestamp, description)
+        signtool(files, false, 'sha256', useTimestamp, description)
     end
 
     # Define additional installable artifacts and targets for Windows.
@@ -160,6 +158,17 @@ module PiaWindows
             .sourceFile('common/src/win/win_util.cpp')
             .source('extras/winrtsupport/src')
             .useQt(nil) # Core only
+            .install(stage, '/')
+
+        # Service stub used to replace the Dnscache service for split tunnel
+        # DNS; see win_dnscachecontrol.cpp
+        winsvcstub = Executable.new("#{Build::Brand}-winsvcstub")
+            .include('common/src/builtin')
+            .include('common/src/win')
+            .headerFile('common/src/win/win_util.h')
+            .sourceFile('common/src/win/win_util.cpp')
+            .source('extras/winsvcstub/src')
+            .useQt(nil)
             .install(stage, '/')
 
         # MSVC and UCRT runtime file - enumerate the files and add install targets
@@ -240,8 +249,8 @@ module PiaWindows
                 unnamedExes = []
                 unnamedDlls = []
 
-                FileList[stage.dir].each do |f|
-                    if(fileDescriptions.include?(f))
+                FileList[File.join(stage.dir, '*')].each do |f|
+                    if(fileDescriptions.include?(File.basename(f)))
                         namedFiles << f
                     elsif(File.extname(f) == '.exe')
                         unnamedExes << f
@@ -251,7 +260,7 @@ module PiaWindows
                 end
 
                 namedFiles.each do |f|
-                    doubleSign([f], true, fileDescriptions[f])
+                    doubleSign([f], true, fileDescriptions[File.basename(f)])
                 end
                 doubleSign(unnamedExes, true, nil) unless unnamedExes.empty?
                 doubleSign(unnamedDlls, false, nil) unless unnamedDlls.empty?

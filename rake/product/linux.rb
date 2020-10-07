@@ -173,6 +173,8 @@ module PiaLinux
         installer = installerBuild.artifact("#{version.packageName}.run")
         file installer => [:linuxdeploy, installerBuild.componentDir] do |t|
             puts "package: #{installer}"
+            # Clean all installers so they don't accumulate as commits are made
+            FileUtils.rm(Dir.glob(installerBuild.artifact('*.run')), force: true)
             # Don't embed a timestamp when gzipping
             ENV['GZIP'] = '-n'
             sh('extras/installer/linux/makeself/makeself.sh', '--tar-quietly',

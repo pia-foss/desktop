@@ -131,6 +131,7 @@ namespace libnl
 #define LIBNL_FUNC(name)    extern decltype(runtimeFunc(decltype(&::name){}, #name)) name;
     // Entry points from libnl-3.so
     LIBNL_FUNC(nl_addr_get_binary_addr);
+    LIBNL_FUNC(nl_addr_get_prefixlen);
     LIBNL_FUNC(nl_addr_get_family);
     LIBNL_FUNC(nl_addr_get_len);
     LIBNL_FUNC(nl_cache_alloc_name);

@@ -225,13 +225,19 @@ void PosixDaemon::updateExistingDNS()
 {
     qInfo() << "Networks changed, updating existing DNS";
     const auto netScan = originalNetwork();
-    const QString linkTarget = QFile::symLinkTarget(QStringLiteral("/etc/resolv.conf"));
+    // Use realpath, not QFile::symlinkTarget(), to match the updown script -
+    // resolvconf usually uses 2 or more symlinks to reach the actual file from
+    // /etc/resolv.conf.
+    QString linkTarget = Exec::bashWithOutput(QStringLiteral("realpath /etc/resolv.conf"));
+    if(linkTarget.endsWith('\n'))
+        linkTarget.remove(linkTarget.size()-1, 1);
     const QString resolvBackup = Path::DaemonDataDir / QStringLiteral("pia.resolv.conf");
-    auto match = QRegularExpression{"systemd"}.match(linkTarget);
 
-    // Connected or disconnected
+    qInfo() << "realpath /etc/resolv.conf ->" << linkTarget;
+
+    // systemd-resolve: connected or disconnected
     QStringList rawDnsList;
-    if(match.hasMatch())
+    if(linkTarget.contains("systemd"))
     {
         // systemd-resolve was replaced with resolvectl in newer versions of
         // systemd
@@ -302,19 +308,37 @@ void PosixDaemon::updateExistingDNS()
             }
         }
     }
-
-    // When connected
+    // resolvconf - connected or disconnected
+    else if(linkTarget == "/run/resolvconf/resolv.conf")
+    {
+        qInfo() << "Saving existing DNS - resolvconf";
+        // Get the list of resolvconf interfaces according to the priority in
+        // interface-order.  Use that to look for 'nameserver' lines while
+        // excluding tun interfaces.
+        QString interfaceOrder = Exec::bashWithOutput(QStringLiteral("cd /run/resolvconf/interface && /lib/resolvconf/list-records"));
+        auto interfaces = interfaceOrder.split('\n');
+        for(const auto &itf : interfaces)
+        {
+            // Ignore tun devices, otherwise look for 'nameserver' lines just
+            // like resolv.conf
+            if(!itf.startsWith("tun"))
+            {
+                QString output = Exec::bashWithOutput(QStringLiteral("cat '/run/resolvconf/interface/%1' | awk '$1==\"nameserver\" { printf \"%s \", $2; }'").arg(itf));
+                rawDnsList += output.split(' ');
+            }
+        }
+    }
+    // resolv.conf - connected
     else if(QFile::exists(resolvBackup))
     {
-        qInfo() << "Saving existing DNS non-systemd";
+        qInfo() << "Saving existing DNS - resolv.conf, connected";
         QString output = Exec::bashWithOutput(QStringLiteral("cat %1 | awk '$1==\"nameserver\" { printf \"%s \", $2; }'").arg(resolvBackup));
         rawDnsList = output.split(' ');
     }
-
-    // When not yet connected
+    // resolv.conf - disconnected
     else
     {
-        qInfo() << "Saving existing DNS non-systemd";
+        qInfo() << "Saving existing DNS - resolv.conf, disconnected";
         QString output = Exec::bashWithOutput(QStringLiteral("cat /etc/resolv.conf | awk '$1==\"nameserver\" { printf \"%s \", $2; }'"));
         rawDnsList = output.split(' ');
     }
@@ -474,7 +498,10 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
        !_state.macosPrimaryServiceKey().isEmpty())
     {
         macBlockDNS = params.blockDNS;
-        for(const auto &address : params.effectiveDnsServers)
+        QStringList effectiveDnsServers;
+        if(params._connectionSettings)
+            effectiveDnsServers = params._connectionSettings->getDnsServers();
+        for(const auto &address : effectiveDnsServers)
         {
             QHostAddress parsed{address};
             if(isModernInfraDns(parsed) || !isIpv4Local(parsed))

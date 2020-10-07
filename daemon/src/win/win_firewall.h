@@ -222,6 +222,42 @@ struct Condition
     static constexpr FWP_DATA_TYPE _dataType = dataType;
 };
 
+struct CalloutFilter : public FirewallFilter
+{
+    CalloutFilter(const GUID &calloutKey, const GUID &layerKey, uint8_t weight = 10)
+    {
+        this->layerKey = layerKey;
+        this->action.type = FWP_ACTION_CALLOUT_TERMINATING;
+        this->action.calloutKey = calloutKey;
+        this->subLayerKey = g_wfpSublayer.subLayerKey;
+        this->weight.uint8 = weight;
+    }
+};
+
+struct IpInboundFilter : public CalloutFilter
+{
+    IpInboundFilter(const GUID &calloutKey, const GUID &provCtxt, uint8_t weight = 10) : CalloutFilter(calloutKey, FWPM_LAYER_INBOUND_IPPACKET_V4, weight)
+    {
+        if(provCtxt != zeroGuid)
+        {
+            flags |= FWPM_FILTER_FLAG_HAS_PROVIDER_CONTEXT;
+            providerContextKey = provCtxt;
+        }
+    }
+};
+
+struct IpOutboundFilter : public CalloutFilter
+{
+    IpOutboundFilter(const GUID &calloutKey, const GUID &provCtxt, uint8_t weight = 10) : CalloutFilter(calloutKey, FWPM_LAYER_OUTBOUND_IPPACKET_V4, weight)
+    {
+        if(provCtxt != zeroGuid)
+        {
+            flags |= FWPM_FILTER_FLAG_HAS_PROVIDER_CONTEXT;
+            providerContextKey = provCtxt;
+        }
+    }
+};
+
 // Base class for a block/allow incoming/outgoing IPv4/IPv6 filter
 template<FWP_ACTION_TYPE actionType, FWP_DIRECTION direction, FWP_IP_VERSION ipVersion>
 struct BasicFirewallFilter : public FirewallFilter
@@ -385,6 +421,21 @@ struct DNSFilter : public ConditionalFirewallFilter<1, action, FWP_DIRECTION_OUT
     }
 };
 
+// Filter to invoke a callout for DNS traffic
+template<FWP_IP_VERSION ipVersion>
+struct CalloutDNSFilter : public DNSFilter<FWP_ACTION_CALLOUT_TERMINATING, ipVersion>
+{
+    CalloutDNSFilter(const GUID &calloutKey, const GUID &layerKey, uint8_t weight = 10)
+        : DNSFilter{weight}
+    {
+        this->layerKey = layerKey;
+        this->action.type = FWP_ACTION_CALLOUT_TERMINATING;
+        this->action.calloutKey = calloutKey;
+        this->subLayerKey = g_wfpSublayer.subLayerKey;
+        this->weight.uint8 = weight;
+    }
+};
+
 // Filter to allow or block an interface
 template<FWP_ACTION_TYPE action, FWP_DIRECTION direction, FWP_IP_VERSION ipVersion>
 struct InterfaceFilter : public ConditionalFirewallFilter<1, action, direction, ipVersion>
@@ -511,6 +562,19 @@ inline QDebug &operator<<(QDebug &dbg, const AppIdKey &appId)
     return dbg;
 }
 
+// Filter to allow or block an application
+template<FWP_ACTION_TYPE action, FWP_DIRECTION direction, FWP_IP_VERSION ipVersion>
+struct AppDNSFilter : public ConditionalFirewallFilter<2, action, direction, ipVersion>
+{
+    template <typename...ConditionTypes>
+    AppDNSFilter(const AppIdKey &appId, uint8_t weight = 10, ConditionTypes&& ...inlineConditions) : ConditionalFirewallFilter(weight, std::forward<ConditionTypes>(inlineConditions)...)
+    {
+        Q_ASSERT(!appId.empty());
+        setCondition<FWP_UINT16>(FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53);
+        setCondition<FWP_BYTE_BLOB_TYPE>(FWPM_CONDITION_ALE_APP_ID, FWP_MATCH_EQUAL, appId.data());
+    }
+};
+
 template<FWP_IP_VERSION ipVersion, FWP_ACTION_TYPE action=FWP_ACTION_PERMIT>
 struct AppIdFilter : public ConditionalFirewallFilter<1, action, FWP_DIRECTION_OUTBOUND, ipVersion>
 {
@@ -528,11 +592,12 @@ struct SplitFilter : public AppIdFilter<ipVersion>
     // The split filter rule causes the callout to be invoked for the specified
     // app.  Provide the GUID of the callout object that will be invoked.
     SplitFilter(const AppIdKey &appId, const GUID &calloutKey,
-                const GUID &layerKey, const GUID &provCtxt, uint8_t weight = 10)
+                const GUID &layerKey, const GUID &provCtxt,
+                FWP_ACTION_TYPE action, uint8_t weight)
         : AppIdFilter(appId, weight)
     {
         this->layerKey = layerKey;
-        this->action.type = FWP_ACTION_CALLOUT_TERMINATING;
+        this->action.type = action;
         this->action.calloutKey = calloutKey;
         this->subLayerKey = g_wfpSublayer.subLayerKey;
         this->flags |= FWPM_FILTER_FLAG_HAS_PROVIDER_CONTEXT;

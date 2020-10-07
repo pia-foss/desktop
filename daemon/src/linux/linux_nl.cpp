@@ -310,22 +310,22 @@ void LinuxNl::Worker::readCaches()
         if(pItfLink)
             itfName = QString::fromUtf8(libnl::rtnl_link_get_name(pItfLink.get()));
 
-        std::vector<Ipv4Address> addressesIpv4;
+        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
         addressesIpv4.reserve(itfAddrs.second._addrs4.size());
         for(const auto &pNlAddr4 : itfAddrs.second._addrs4)
         {
             Ipv4Address addr4 = readNlAddr4(pNlAddr4);
             if(addr4 != Ipv4Address{})
-                addressesIpv4.push_back(addr4);
+                addressesIpv4.push_back({addr4, libnl::nl_addr_get_prefixlen(pNlAddr4)});
         }
 
-        std::vector<Ipv6Address> addressesIpv6;
+        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
         addressesIpv6.reserve(itfAddrs.second._addrs6.size());
         for(const auto &pNlAddr6 : itfAddrs.second._addrs6)
         {
             Ipv6Address addr6 = readNlAddr6(pNlAddr6);
             if(addr6 != Ipv6Address{})
-                addressesIpv6.push_back(addr6);
+                addressesIpv6.push_back({addr6, libnl::nl_addr_get_prefixlen(pNlAddr6)});
         }
 
         connections.push_back(NetworkConnection{itfName,

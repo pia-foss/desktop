@@ -23,7 +23,7 @@
 
 namespace
 {
-    QStringList piaDummyDnsServers{QStringLiteral("1.1.1.1"), QStringLiteral("2.2.2.2")};
+    QStringList piaDummyDnsServers{QStringLiteral("209.222.18.222"), QStringLiteral("209.222.18.218")};
 }
 
 class tst_connectionconfig : public QObject
@@ -36,7 +36,7 @@ private slots:
     void testGetDnsServers()
     {
         ConnectionConfig config1;
-        QVERIFY(config1.getDnsServers(piaDummyDnsServers) == piaDummyDnsServers);
+        QVERIFY(config1.getDnsServers() == piaDummyDnsServers);
         QVERIFY(config1.dnsType() == ConnectionConfig::DnsType::Pia);
     }
 
@@ -49,7 +49,7 @@ private slots:
 
         settings.overrideDNS(QStringLiteral("handshake"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress()});
+        QVERIFY(config.getDnsServers() == QStringList{resolverLocalAddress()});
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Handshake);
     }
 
@@ -62,7 +62,7 @@ private slots:
 
         settings.overrideDNS(QStringLiteral("local"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == QStringList{resolverLocalAddress()});
+        QVERIFY(config.getDnsServers() == QStringList{resolverLocalAddress()});
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Local);
     }
 
@@ -76,7 +76,7 @@ private slots:
         auto customDns = QStringList{"1.1.1.1", "8.8.8.8"};
         settings.overrideDNS(customDns);
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == customDns);
+        QVERIFY(config.getDnsServers() == customDns);
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Custom);
         // special getter only for customDns
         QVERIFY(config.customDns() == customDns);
@@ -92,7 +92,7 @@ private slots:
         auto emptyList = QStringList{};
         settings.overrideDNS(""); // Empty string indicates Existing DNS
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers(piaDummyDnsServers) == emptyList);
+        QVERIFY(config.getDnsServers() == emptyList);
         QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Existing);
     }
 

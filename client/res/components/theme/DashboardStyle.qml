@@ -203,4 +203,8 @@ QtObject {
     readonly property string connectionModuleHandshakeImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-handshake.png"
     readonly property string connectionModulePortImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-port.png"
     readonly property string connectionModuleSocketImage: Theme.imagePathCommon + "/dashboard/connect/connection-tile/icon-socket.png"
+
+    readonly property string ratingStarFilled: Theme.imagePath + "/dashboard/connect/rating-star-filled.png"
+    readonly property string ratingStarEmpty: Theme.imagePath + "/dashboard/connect/rating-star-empty.png"
+    readonly property int ratingImageHeightPx: 25
 }

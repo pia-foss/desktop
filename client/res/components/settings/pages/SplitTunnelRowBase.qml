@@ -40,8 +40,19 @@ Item {
     {name: uiTr("Bypass VPN")},
     {name: uiTr("Only VPN")}
   ]
+
   readonly property var otherAppModeChoices: [
     {name: uiTr("Bypass VPN")},
     {name: uiTr("Use VPN")}
+  ]
+
+  readonly property var nameServersChoices: [
+    //: Indicates that name servers will match app rules - bypass apps will
+    //: also bypass the VPN DNS to use the existing name servers, and VPN apps
+    //: will use VPN DNS.
+    {name: uiTr("Follow App Rules")},
+    //: Indicates that all apps will use VPN DNS, regardless of whether the app
+    //: is set to bypass or use the VPN.
+    {name: uiTr("VPN DNS Only")}
   ]
 }

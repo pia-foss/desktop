@@ -246,5 +246,7 @@ template<>
 inline CFTypeID macCfTypeId<CFStringRef>() {return ::CFStringGetTypeID();}
 template<>
 inline CFTypeID macCfTypeId<CFArrayRef>() {return ::CFArrayGetTypeID();}
+template<>
+inline CFTypeID macCfTypeId<CFNumberRef>() {return ::CFNumberGetTypeID();}
 
 #endif

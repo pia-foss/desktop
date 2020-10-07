@@ -195,20 +195,34 @@ Item {
         }
         Row {
           spacing: 5
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "RatingSessionCount: <b>" + Daemon.settings.sessionCount + "</b>"
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "RatingEnabled: <b>" + Daemon.settings.ratingEnabled + "</b>"
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "RatingFlag: " + (Daemon.data.flags.includes("ratings_1") ? "<b>yes</b>" : "<b>no</b>")
+          }
+
           Button {
-            text: "Snooze 30 sec"
+            text: "Reset: 0 Sessions"
             onClicked: {
-              Daemon.startSnooze(10);
+              Daemon.applySettings({"sessionCount": 0, "ratingEnabled": true})
             }
           }
           Button {
-            text: "Stop snooze"
+            text: "Reset: 8 Sessions"
             onClicked: {
-              Daemon.stopSnooze();
+              Daemon.applySettings({"sessionCount": 8, "ratingEnabled": true})
             }
           }
           Text {
-            text: "End time: " + Daemon.state.snoozeEndTime
+            anchors.verticalCenter: parent.verticalCenter
+            text: "<b>Restart Client after reset</b>"
           }
         }
 

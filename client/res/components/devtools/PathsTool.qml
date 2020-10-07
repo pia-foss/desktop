@@ -37,6 +37,8 @@ Item {
             { name: "Legacy Bundled Regions", path: PathInterface.legacyRegionBundle() },
             { name: "Modern Region Override", path: PathInterface.modernRegionOverride() },
             { name: "Modern Bundled Regions", path: PathInterface.modernRegionBundle() },
+            { name: "Region Meta Override", path: PathInterface.modernRegionMetaOverride() },
+            { name: "Bundled Region meta", path: PathInterface.modernRegionMetaBundle() },
             { name: "Daemon Settings Dir",  path: PathInterface.daemonSettingsDir() },
             { name: "Client Settings Dir",  path: PathInterface.clientSettingsDir() },
             { name: "Daemon Data Dir",      path: PathInterface.daemonDataDir() },

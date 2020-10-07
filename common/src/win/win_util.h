@@ -71,8 +71,15 @@ struct COMMON_EXPORT WinCloseHandle
     void operator()(HANDLE handle){::CloseHandle(handle);}
 };
 
+struct COMMON_EXPORT WinCloseHKey
+{
+    void operator()(HKEY handle){::RegCloseKey(handle);}
+};
+
 // HANDLE owner using ::CloseHandle()
 using WinHandle = WinGenericHandle<HANDLE, WinCloseHandle>;
+// HKEY owner using ::RegCloseKey()
+using WinHKey = WinGenericHandle<HKEY, WinCloseHKey>;
 
 // ProcAddress wraps up an HMODULE and a function pointer retrieved with
 // ::GetProcAddress().  Like ::GetProcAddress(), it can be used to call an API

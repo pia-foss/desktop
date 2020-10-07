@@ -108,6 +108,8 @@ public:
     // last entered by the user using the Snooze module.
     // Value is number of seconds. Default is 5 min
     JsonField(int, snoozeDuration, 300);
+
+    JsonField(bool, ratingRequestDisabled, false)
 };
 
 // A language (potentially) supported by the client

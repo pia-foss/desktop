@@ -154,8 +154,10 @@ class OriginalNetworkScan
 public:
     OriginalNetworkScan() = default;    // Required by Q_DECLARE_METATYPE
     OriginalNetworkScan(const QString &gatewayIp, const QString &interfaceName,
-                        const QString &ipAddress, const QString &ipAddress6)
-        : _gatewayIp{gatewayIp}, _interfaceName{interfaceName}, _ipAddress{ipAddress},
+                        const QString &ipAddress, unsigned prefixLength,
+                        const QString &ipAddress6)
+        : _gatewayIp{gatewayIp}, _interfaceName{interfaceName},
+          _ipAddress{ipAddress}, _prefixLength{prefixLength},
           _ipAddress6{ipAddress6}
     {
     }
@@ -164,7 +166,9 @@ public:
     {
         return gatewayIp() == rhs.gatewayIp() &&
             interfaceName() == rhs.interfaceName() &&
-            ipAddress() == rhs.ipAddress();
+            ipAddress() == rhs.ipAddress() &&
+            prefixLength() == rhs.prefixLength() &&
+            ipAddress6() == rhs.ipAddress6();
     }
 
     bool operator!=(const OriginalNetworkScan& rhs) const
@@ -183,11 +187,13 @@ public:
     void gatewayIp(const QString &value) {_gatewayIp = value;}
     void interfaceName(const QString &value) {_interfaceName = value;}
     void ipAddress(const QString &value) {_ipAddress = value;}
+    void prefixLength(unsigned value) {_prefixLength = value;}
     void ipAddress6(const QString &value) {_ipAddress6 = value;}
 
     const QString &gatewayIp() const {return _gatewayIp;}
     const QString &interfaceName() const {return _interfaceName;}
     const QString &ipAddress() const {return _ipAddress;}
+    unsigned prefixLength() const {return _prefixLength;}
 
     // An IP address from the default IPv6 interface.  This may not be the same
     // interface as the default IPv4 interface reported above.
@@ -195,6 +201,7 @@ public:
 
 private:
     QString _gatewayIp, _interfaceName, _ipAddress, _ipAddress6;
+    unsigned _prefixLength;
 };
 
 // Custom logging for OriginalNetworkScan instances
@@ -385,10 +392,8 @@ public:
     // For the modern infrastructure, this applies MACE (by selecting a
     // different PIA DNS address).  (piaLegacyDnsOverride is not used.)
     //
-    // For the legacy infrastructure, MACE is not applied, and the PIA DNS
-    // server list may optionally be overridden with piaLegacyDnsOverride (if
-    // the method provides DNS server addresses from the server - WireGuard).
-    QStringList getDnsServers(const QStringList &piaLegacyDnsOverride) const;
+    // For the legacy infrastructure, MACE is not applied.
+    QStringList getDnsServers() const;
 
     // Get the effective DNS server addresses to use for the modern
     // infrastructure.  This does depend on MACE, which simply selects a
@@ -408,6 +413,19 @@ public:
     // connecting, this will be true.  Split tunnel is only permitted with
     // OpenVPN.
     bool defaultRoute() const {return _defaultRoute;}
+
+    // Whether to change the default DNS to PIA's DNS.  Usually true, false if:
+    //  - "Use Existing DNS" is selected
+    // ==or==
+    //  - The VPN does not have the default route, and split tunnel DNS is
+    //    enabled (PIA DNS is applied to VPN only apps using split tunnel DNS)
+    bool setDefaultDns() const {return _setDefaultDns;}
+
+    // Whether we need to force "VPN only" apps to use PIA's configured DNS.
+    bool forceVpnOnlyDns() const {return _forceVpnOnlyDns;}
+
+    // Whether we need to force "bypass" apps to use the existing DNS.
+    bool forceBypassDns() const {return _forceBypassDns;}
 
     // Proxy information.  canConnect() checks requirements of these fields
     // based on the selected proxy type.  Proxies are only permitted with
@@ -464,6 +482,9 @@ private:
     // toggle that while connected, but if it changes the defaultRoute value,
     // we will require a reconnect.
     bool _defaultRoute;
+    // Whether to set the default system DNS, and whether to use split tunnel
+    // DNS to force VPN-only or bypass apps to use a specific DNS.
+    bool _setDefaultDns, _forceVpnOnlyDns, _forceBypassDns;
 
     // The proxy type used for this connection
     ProxyType _proxyType;
@@ -528,7 +549,6 @@ public:
     // specified by the VPN method.  If a valid method is returned, it remains
     // valid at least until any mutating member of VPNConnection is called.
     VPNMethod *vpnMethod() const {return _method;}
-    const QStringList &effectiveDnsServers() const {return _effectiveDnsServers;}
 
     // Update the current network in the VPNMethod when it has changed.
     void updateNetwork(const OriginalNetworkScan &newNetwork);
@@ -580,8 +600,7 @@ signals:
     void hnsdSyncFailure(bool failing);
     void usingTunnelConfiguration(const QString &deviceName,
                                   const QString &deviceLocalAddress,
-                                  const QString &deviceRemoteAddress,
-                                  const QStringList &effectiveDnsServers);
+                                  const QString &deviceRemoteAddress);
 
 private:
     void updateAttemptCount(int newCount);
@@ -613,8 +632,6 @@ private:
     // state, they are the settings that will be used for the next connection
     // (even in the Connected state; they'll be applied when a reconnect occurs)
     QJsonObject _connectionSettings;
-    // The effective DNS servers once they've been applied by the VPN method
-    QStringList _effectiveDnsServers;
     // The configuration we are currently attempting to connect with.
     ConnectionConfig _connectingConfig;
     // The configuration that we last connected with.

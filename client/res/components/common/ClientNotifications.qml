@@ -137,6 +137,11 @@ Item {
     active: Daemon.settings.method === "openvpn" && NativeHelpers.reinstallTapStatus === 'reboot'
   }
 
+  RatingRequestNotificationStatus {
+    id: ratingRequest
+  }
+
+
   // The WinTUN adapter is missing (Windows only)
   //
   // Similar to the TAP adapter error, but for WinTUN, which is used for WireGuard.
@@ -562,7 +567,8 @@ Item {
     accountExpiring,
     accountTokenNotAvailable,
     changelogAvailable,
-    invalidClientExit
+    invalidClientExit,
+    ratingRequest
   ]
 
   // This is the worst severity among any active notification.  If no

@@ -117,7 +117,6 @@ private:
                             const Server &vpnServer,
                             const Transport &transport,
                             const QHostAddress &localAddress,
-                            const QStringList &dnsServers,
                             const QHostAddress &shadowsocksServerAddress,
                             quint16 shadowsocksProxyPort);
 

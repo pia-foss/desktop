@@ -114,8 +114,10 @@ struct FirewallParams
     // These parameters are specified by VPNConnection (some are passed through
     // from the VPNMethod)
 
-    // DNS servers to permit through firewall - set once DNS has been applied
-    QStringList effectiveDnsServers;
+    // When connecting or connected, these are the connection settings we're
+    // using.  (Empty when neither connecting nor connected.)
+    nullable_t<ConnectionConfig> _connectionSettings;
+
     // VPN network interface - see VPNMethod::getNetworkAdapter()
     std::shared_ptr<NetworkAdapter> adapter;
 
@@ -135,6 +137,9 @@ struct FirewallParams
     bool allowLoopback; // Exempt loopback traffic
     bool allowResolver; // Exempt local DNS resolver traffic
 
+    // Whether we are connected to the VPN right now.  Note that this differs
+    // from 'hasConnected'.
+    bool isConnected;
     // Have we connected to the VPN since it was enabled?  (Some rules are only
     // activated once we successfully connect, but remain active even if we lose
     // the connection while reconnecting.)
@@ -350,6 +355,7 @@ protected:
     void RPC_stopSnooze();
     Async<void> RPC_emailLogin(const QString &email);
     Async<void> RPC_setToken(const QString& token);
+    Async<void> RPC_submitRating(int rating);
     Async<void> RPC_login(const QString& username, const QString& password);
     void RPC_logout();
     // Refresh update metadata (asynchronously)
@@ -467,6 +473,7 @@ private:
     void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
     void modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc);
+    void modernRegionsMetaLoaded(const QJsonDocument &modernRegionsJsonDoc);
     void onNetworksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
@@ -522,6 +529,22 @@ protected:
 
     VPNConnection* _connection;
 
+    // TODO - We have two representations of basically the same information
+    // (the connection configuration derived from the current settings):
+    // - ConnectionConfig (vpn.h) - this is a proper model of the connection
+    //   configuration with strong invariants
+    // - ConnectionInfo (settings.h) - this is a NativeJsonObject model of the
+    //   same information with much weaker invariants (most values converted to
+    //   strings, etc.)
+    //
+    // We should get rid of the ConnectionInfo and instead implement specific
+    // JSON conversions for ConnectionConfig so we don't need an explicit
+    // NativeJsonObject representation, and we can put ConnectionConfig values
+    // in DaemonState.  In the meantime, the ConnectionConfigs are held here for
+    // internal use, and DaemonState holds the derived ConnectionInfos.
+    ConnectionConfig _connectingConfig;
+    ConnectionConfig _connectedConfig;
+
     DaemonData _data;
     DaemonAccount _account;
     DaemonSettings _settings;
@@ -535,7 +558,7 @@ protected:
     LatencyTracker _legacyLatencyTracker;
     LatencyTracker _modernLatencyTracker;
     PortForwarder _portForwarder;
-    JsonRefresher _regionRefresher, _shadowsocksRefresher, _modernRegionRefresher;
+    JsonRefresher _regionRefresher, _shadowsocksRefresher, _modernRegionRefresher, _modernRegionMetaRefresher;
     SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;

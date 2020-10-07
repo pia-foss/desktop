@@ -55,12 +55,15 @@ QtObject {
   readonly property string betaUpdateChannel: NativeDaemon.settings.betaUpdateChannel
   readonly property bool offerBetaUpdates: NativeDaemon.settings.offerBetaUpdates
   readonly property bool splitTunnelEnabled: NativeDaemon.settings.splitTunnelEnabled
+  readonly property bool splitTunnelDNS: NativeDaemon.settings.splitTunnelDNS
   readonly property var splitTunnelRules: NativeDaemon.settings.splitTunnelRules
   readonly property var bypassSubnets: NativeDaemon.settings.bypassSubnets
   readonly property bool wireguardUseKernel: NativeDaemon.settings.wireguardUseKernel
   readonly property int wireguardPingTimeout: NativeDaemon.settings.wireguardPingTimeout
   readonly property bool persistDaemon: NativeDaemon.settings.persistDaemon
   readonly property string macStubDnsMethod: NativeDaemon.settings.macStubDnsMethod
+  readonly property int sessionCount: NativeDaemon.settings.sessionCount
+  readonly property bool ratingEnabled: NativeDaemon.settings.ratingEnabled
 
   // Deprecated settings aren't passed through to QML, they're migrated by
   // ClientInterface

@@ -323,14 +323,15 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
     connections.reserve(2);
     if(pBestIpv4Gateway)
     {
-        std::vector<Ipv4Address> addresses;
+        std::vector<std::pair<Ipv4Address, unsigned>> addresses;
         for(unsigned long i=0; i<pAddrTable.get()->NumEntries; ++i)
         {
             const auto &addr = pAddrTable.get()->Table[i];
             if(addr.InterfaceLuid.Value == pBestIpv4Gateway->InterfaceLuid.Value &&
                addr.Address.si_family == AF_INET)
             {
-                addresses.push_back({ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)});
+                addresses.push_back({Ipv4Address{ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)},
+                                     addr.OnLinkPrefixLength});
             }
         }
         Ipv4Address gateway4{ntohl(pBestIpv4Gateway->NextHop.Ipv4.sin_addr.S_un.S_addr)};
@@ -343,16 +344,17 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
     // NetworkConnection
     if(pBestIpv6Gateway)
     {
-        std::vector<Ipv6Address> addresses;
+        std::vector<std::pair<Ipv6Address, unsigned>> addresses;
         for(unsigned long i=0; i<pAddrTable.get()->NumEntries; ++i)
         {
             const auto &addr = pAddrTable.get()->Table[i];
             if(addr.InterfaceLuid.Value == pBestIpv6Gateway->InterfaceLuid.Value &&
                addr.Address.si_family == AF_INET6)
             {
-                addresses.push_back({addr.Address.Ipv6.sin6_addr.u.Byte});
+                addresses.push_back({Ipv6Address{addr.Address.Ipv6.sin6_addr.u.Byte},
+                                     addr.OnLinkPrefixLength});
                 // Ignore link-local
-                if(addresses.back().isLinkLocal())
+                if(addresses.back().first.isLinkLocal())
                     addresses.pop_back();
             }
         }

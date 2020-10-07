@@ -460,6 +460,8 @@ public:
     // Cached region list content for the modern infrastructure.
     JsonField(QJsonObject, cachedModernRegionsList, {})
 
+    JsonField(QJsonObject, modernRegionMeta, {})
+
     // Persistent caches of the version advertised by update channel(s).  This
     // is mainly provided to provide consistent UX if the client/daemon are
     // restarted while an update is available (they restore the same "update
@@ -480,9 +482,23 @@ public:
     JsonField(QString, betaChannelVersion, {})
     JsonField(QString, betaChannelVersionUri, {})
 
-
     // Flags published in the release channel that we are currently loading
     JsonField(QJsonArray, flags, {})
+
+#if defined(Q_OS_WINDOWS)
+    // Original service command for the Dnscache service on Windows.  PIA must
+    // temporarily override this in order to suppress the service for split
+    // tunnel DNS.
+    //
+    // Although PIA attempts to restore the original value as soon as possible,
+    // it's persisted in case the daemon would crash or for whatever reason be
+    // unable to restore the service.  The daemon then recovers if it starts up
+    // again.
+    //
+    // This should only change with an OS update, so we keep the last detected
+    // value once it is found for resiliency (we never clear this).
+    JsonField(QString, winDnscacheOriginalPath, {})
+#endif
 };
 
 
@@ -756,6 +772,8 @@ public:
 
     // Whether split tunnel is enabled
     JsonField(bool, splitTunnelEnabled, false)
+    // Whether to also split DNS traffic
+    JsonField(bool, splitTunnelDNS, true)
     // Rules for excluding/including apps from VPN
     JsonField(QVector<SplitTunnelRule>, splitTunnelRules, {})
 
@@ -787,6 +805,12 @@ public:
     JsonField(bool, persistDaemon, false)
 
     JsonField(QString, macStubDnsMethod, QStringLiteral("NX"), {"NX", "Refuse", "0.0.0.0"})
+
+    // Store the number of attempted sessions used for various metrics
+    JsonField(int, sessionCount, 0)
+
+    // Set to false when user opts out, or finishes rating successfully.
+    JsonField(bool, ratingEnabled, true)
 };
 
 // Compare QSharedPointer<Location>s by value; used by ServiceLocations
@@ -1255,8 +1279,9 @@ public:
     // The original gateway IP address before we activated the VPN
     JsonField(QString, originalGatewayIp, {})
 
-    // The original interface IP before we activated the VPN
+    // The original interface IP and network prefix before we activated the VPN
     JsonField(QString, originalInterfaceIp, {})
+    JsonField(unsigned, originalInterfaceNetPrefix, {})
 
     // The original gateway interface before we activated the VPN
     JsonField(QString, originalInterface, {})
@@ -1284,9 +1309,6 @@ public:
     JsonField(QString, tunnelDeviceName, {})
     JsonField(QString, tunnelDeviceLocalAddress, {})
     JsonField(QString, tunnelDeviceRemoteAddress, {})
-    // The addresses of the DNS servers that have been configured for this
-    // connection.
-    JsonField(QStringList, effectiveDnsServers, {})
 
     // Whether WireGuard is available at all on this OS.  (False on Windows 7.)
     JsonField(bool, wireguardAvailable, true)

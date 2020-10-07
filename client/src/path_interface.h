@@ -35,7 +35,9 @@ public:
     Q_INVOKABLE QString legacyRegionOverride() { return Path::LegacyRegionOverride; }
     Q_INVOKABLE QString legacyRegionBundle() { return Path::LegacyRegionBundle; }
     Q_INVOKABLE QString modernRegionOverride() { return Path::ModernRegionOverride; }
+    Q_INVOKABLE QString modernRegionMetaOverride() { return Path::ModernRegionMetaOverride; }
     Q_INVOKABLE QString modernRegionBundle() { return Path::ModernRegionBundle; }
+    Q_INVOKABLE QString modernRegionMetaBundle() { return Path::ModernRegionMetaBundle; }
     Q_INVOKABLE QString daemonSettingsDir() { return Path::DaemonSettingsDir; }
     Q_INVOKABLE QString clientSettingsDir() { return Path::ClientSettingsDir; }
     Q_INVOKABLE QString resourceDir() { return Path::ResourceDir; }

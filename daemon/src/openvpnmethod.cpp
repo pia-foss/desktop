@@ -203,21 +203,15 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         updownCmd += escapeArg(_helperIpcServer.fullServerName());
 #endif
 
-        // Pass DNS server addresses.  The OpenVPN method does not get DNS
-        // server addresses from the server in either infrastructure; use the
-        // defaults.
-        const auto &dnsServers = _connectingConfig.getDnsServers({});
+        QStringList dnsServers;
+
+        if(_connectingConfig.setDefaultDns())
+            dnsServers = _connectingConfig.getDnsServers();
 
         if(!dnsServers.isEmpty())
         {
-#if defined(Q_OS_LINUX)
-            // On Linux only set DNS servers if we have the default route
-            if(_connectingConfig.defaultRoute())
-#endif
-            {
-                updownCmd += " --dns ";
-                updownCmd += dnsServers.join(':');
-            }
+            updownCmd += " --dns ";
+            updownCmd += dnsServers.join(':');
         }
 
         // Terminate PIA args with '--' (OpenVPN passes several subsequent
@@ -258,7 +252,7 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         QFile configFile(Path::OpenVPNConfigFile);
         if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text) ||
             !writeOpenVPNConfig(configFile, vpnServer, transport, localAddress,
-                                dnsServers, shadowsocksServerAddress,
+                                shadowsocksServerAddress,
                                 shadowsocksProxyPort))
         {
             throw Error(HERE, Error::OpenVPNConfigFileWriteError);
@@ -320,7 +314,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
                                        const Server &vpnServer,
                                        const Transport &transport,
                                        const QHostAddress &localAddress,
-                                       const QStringList &dnsServers,
                                        const QHostAddress &shadowsocksServerAddress,
                                        quint16 shadowsocksProxyPort)
 {
@@ -505,30 +498,17 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         out << "pull-filter ignore \"redirect-gateway \"" << endl;
     }
 
-    // Route DNS into the tunnel:
-    // - On Linux - always route DNS into the tunnel, even if the VPN is the
-    //   default.  When not using systemd-resolved, apps will do their own DNS,
-    //   and even bypass apps are currently expected to do DNS through the
-    //   tunnel.  (In particular, the DNS servers might not be reachable on the
-    //   physical interface.)
-    // - On Win/Mac - route DNS into the tunnel if the VPN isn't the default
-    //   route.  On Windows it is possible for bypass apps to do their own DNS
-    //   if the DnsCache service is disabled, but this is not the default (and
-    //   nontrivial to do), more testing is needed to determine the interactions
-    //   between this and the split tunnel callout.
-#if defined(Q_OS_LINUX)
-    bool routeDnsIntoTunnel = true;
-#else
-    bool routeDnsIntoTunnel = !_connectingConfig.defaultRoute();
-#endif
-    if(routeDnsIntoTunnel)
+    // Always route this special address through the VPN even when not using
+    // PIA DNS; it's also used for port forwarding in the legacy
+    // infrastructure.
+    out << "route " << piaLegacyDnsPrimary() << " 255.255.255.255 vpn_gateway 0" << endl;
+    // If we're setting the system default DNS, route the DNS servers through
+    // the tunnel.  This is important if split tunnel DNS is disabled (or not
+    // available - macOS) and the VPN isn't getting the default route.
+    if(_connectingConfig.setDefaultDns())
     {
-        // Always route this special address through the VPN even when not using
-        // PIA DNS; it's also used for port forwarding in the legacy
-        // infrastructure.
-        out << "route " << piaLegacyDnsPrimary() << " 255.255.255.255 vpn_gateway 0" << endl;
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
-        for(const auto &dnsServer : dnsServers)
+        for(const auto &dnsServer : _connectingConfig.getDnsServers())
         {
             if(dnsServer != piaLegacyDnsPrimary())
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
@@ -710,9 +690,9 @@ void OpenVPNMethod::checkForMagicStrings(const QString& line)
         if(!_networkAdapter)
             _networkAdapter.reset(new NetworkAdapter{tunDeviceNameRegex.cap(1)});
 
-        const auto &dnsServers = _connectingConfig.getDnsServers({});
+        const auto &dnsServers = _connectingConfig.getDnsServers();
         emitTunnelConfiguration(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2),
-                                tunDeviceNameRegex.cap(3), dnsServers);
+                                tunDeviceNameRegex.cap(3));
     }
 
     // TODO: extract this out into a more general error mechanism, where the "!!!" prefix

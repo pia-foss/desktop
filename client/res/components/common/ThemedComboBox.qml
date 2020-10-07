@@ -45,6 +45,10 @@ Item {
 
   property bool focusOnTab: true
 
+  // The popup can be allowed to extend to fit the items' text (often relevant
+  // for French/Italian/Polish/Russian), but this isn't the default.
+  property int popupMaxWidth: width
+
   // Manually show the popup (used to handle table keyboard and accessibility
   // events for drop-down cells)
   function showPopup() {
@@ -90,6 +94,32 @@ Item {
     font.pixelSize: 13
     activeFocusOnTab: themedComboBox.focusOnTab
     displayText: (model && model[currentIndex] && model[currentIndex].name) || ""
+
+    // Some translations have very long text that just can't fit in the
+    // un-expanded combo box, so we expand the popup to show the full text
+    // there.
+    //
+    // Ideally, we'd check the width of each item here and use the maximum
+    // width to resize the popup, but this doesn't seem to be possible with the
+    // ListModel, there seems to be no way to get all the way through the popup
+    // from here to the instantiated delegates' properties.  This probably would
+    // be better off using a Repeater in a Column instead.
+    //
+    // For now, since the only place this currently happens is the Name Servers
+    // setting for Split Tunnel, and the first item is much longer, we just have
+    // the first item report its width here whenever it resizes and use that.
+    property int item0Width: 0
+
+    readonly property int actualPopupWidth: {
+      var w = width
+      if(w < item0Width) {
+        w = item0Width
+      }
+      if(w > themedComboBox.popupMaxWidth) {
+        w = themedComboBox.popupMaxWidth;
+      }
+      return w
+    }
 
     property real unhighlightedItemOpacity: 1.0
 
@@ -157,7 +187,7 @@ Item {
     delegate: ItemDelegate {
       id: choiceDelegate
 
-      width: control.width
+      width: control.actualPopupWidth
       height: 22
 
       NativeAcc.DropDownMenuItem.name: itemText.text
@@ -210,6 +240,15 @@ Item {
           horizontalAlignment: Text.AlignLeft
           verticalAlignment: Text.AlignVCenter
           opacity: highlighted ? 1.0 : control.unhighlightedItemOpacity
+
+          // Hack property to report item 0's width back up to the popup, see
+          // item0Width above
+          readonly property int reportItem0Width: {
+            var w = implicitWidth + x + choiceDelegate.leftPadding + choiceDelegate.rightPadding
+            if(index === 0)
+              control.item0Width = w
+            return w
+          }
         }
       }
     }
@@ -346,6 +385,7 @@ Item {
       y: Util.popupYBindingFixup(popup, popup.parent.Window.window,
                                  popup.parent.Overlay.overlay,
                                  -popupShowInitialIndex * 22)
+      width: control.actualPopupWidth
       padding: 1
 
       contentItem: ListView {

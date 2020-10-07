@@ -133,16 +133,5 @@ QtObject {
       // Not a quiet launch or first run - initially show the dashboard near the tray icon
       initialShowTimer.start()
     }
-
-    // Check location metadata against the server list.  We only do this once at
-    // startup, this could be a relatively expensive check if we applied it
-    // every time the location list changed, and there's no sense repeating
-    // these logs over and over anyway.
-    //
-    // Do this here because we know the locations have been loaded from the
-    // daemon at this point (although it's also possible that the daemon itself
-    // has not loaded the locations yet, the point of this is mainly to see
-    // which locations are missing for devs).
-    Daemon.state.checkLocationMetadata(Daemon.state.groupedLocations)
   }
 }

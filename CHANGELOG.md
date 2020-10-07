@@ -1,5 +1,13 @@
 # Changelog
 
+### v2.5.0
+* Split tunnel on Windows now also splits DNS traffic
+* Added "Name Servers" setting to Split Tunnel on Windows and Linux
+* Region locations and translations are now updated automatically
+* Split tunnel is disabled on macOS 11.0 due to removal of network kernel extensions
+* Added `pubip` type to `piactl get/monitor` (thanks Chase Wright!)
+* Fixed executable signing on Windows
+
 ### v2.4.0
 * Windows hardware acceleration now uses Direct3D 11 instead of OpenGL
 * PIA on Windows now requires Windows 8 or later

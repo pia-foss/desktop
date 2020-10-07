@@ -27,6 +27,7 @@ QtObject {
   readonly property string gaChannelVersionUri: NativeDaemon.data.gaChannelVersionUri
   readonly property string betaChannelVersion: NativeDaemon.data.betaChannelVersion
   readonly property string betaChannelVersionUri: NativeDaemon.data.betaChannelVersionUri
+  readonly property var modernRegionMeta: NativeDaemon.data.modernRegionMeta
 
   readonly property var flags: NativeDaemon.data.flags
 }

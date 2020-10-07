@@ -57,8 +57,10 @@ SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, SplitDNSType sp
     }
     else
     {
-        const auto servers = params.effectiveDnsServers;
-        dnsServer = servers.isEmpty() ? QStringLiteral("") : servers.front();
+        QStringList servers;
+        if(params._connectionSettings)
+            servers = params._connectionSettings->getDnsServers();
+        dnsServer = servers.isEmpty() ? QString{} : servers.front();
         cGroupId = CGroup::vpnOnlyId;
         sourceIp = g_daemon->state().tunnelDeviceLocalAddress();
     }
@@ -640,11 +642,14 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
     // DNS rules depend on both adapters and DNS servers, update if either has
     // changed
-    if(params.effectiveDnsServers != _dnsServers || adapterName != _adapterName)
+    QStringList effectiveDnsServers;
+    if(params._connectionSettings)
+        effectiveDnsServers = params._connectionSettings->getDnsServers();
+    if(effectiveDnsServers != _dnsServers || adapterName != _adapterName)
     {
         execute(QStringLiteral("iptables -w -F %1.320.allowDNS").arg(kAnchorName));
         // If the adapter name isn't set, getDNSRules() returns an empty list
-        for (const QString& rule : getDNSRules(adapterName, params.effectiveDnsServers))
+        for (const QString& rule : getDNSRules(adapterName, effectiveDnsServers))
         {
             execute(QStringLiteral("iptables -w -A %1.320.allowDNS %2").arg(kAnchorName, rule));
         }
@@ -739,42 +744,23 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
     // Manage split tunnel DNS.
     SplitDNSInfo appDnsInfo;
-    // When disconnected or set to Use Existing DNS, we don't create any
-    // DNS-binding rules.
-    // - VPN-only apps are blocked when disconnected
-    // - When connected with Use Existing DNS, all apps go to the existing DNS
-    //   anyway.
-    //   * Note that if the DNS server is on Internet and the system is
-    //     not using systemd-resolved (or any other local DNS cache), non-Bypass
-    //     apps will still send DNS through the tunnel (but to the existing
-    //     configured DNS servers).  In rare cases, the DNS server may be an
-    //     Internet address that isn't actually reachable through the tunnel
-    //     (Cox ISP DNS for example); in that case the user would need to also
-    //     add an IP split tunnel rule since DNS to that server won't work
-    //     through the tunnel (and we don't have a good way to identify this).
-    //     It's unlikely that users would actually want to use such a DNS server
-    //     anyway though.
-    if(params.effectiveDnsServers.isEmpty())
+    // If we have to force either bypass or VPN-only apps to the correct DNS,
+    // set up appDnsInfo appropriately so we can update the rules.
+    if(params._connectionSettings)
     {
-        qInfo() << "Not connected or using existing DNS, don't create app DNS rules";
-    }
-    else
-    {
-        // We have configured DNS, so create DNS split tunnel rules.
-        //
-        // We can control where local apps send DNS, so we only create rules for
-        // apps using the opposite of the host's default behavior.  (If the host
-        // uses VPN by default, we force bypass apps to the existing DNS server; if
-        // the host bypasses by default, we force VPN-only apps to the VPN DNS
-        // server.)
-        SplitDNSInfo::SplitDNSType oppositeApps = SplitDNSInfo::SplitDNSType::VpnOnly;
-        if(params.defaultRoute)
-            oppositeApps = SplitDNSInfo::SplitDNSType::Bypass;
-        qInfo() << "Connected with default route" << params.defaultRoute
-            << "- determine DNS rules for"
-            << (oppositeApps == SplitDNSInfo::SplitDNSType::Bypass ? "Bypass" : "VpnOnly")
-            << "apps";
-        appDnsInfo = SplitDNSInfo::infoFor(params, oppositeApps);
+        // We never have to force _both_ kinds of apps' DNS
+        Q_ASSERT(!(params._connectionSettings->forceVpnOnlyDns() && params._connectionSettings->forceBypassDns()));
+
+        if(params._connectionSettings->forceVpnOnlyDns())
+        {
+            qInfo() << "Forcing VPN-only apps to our DNS";
+            appDnsInfo = SplitDNSInfo::infoFor(params, SplitDNSInfo::SplitDNSType::VpnOnly);
+        }
+        else if(params._connectionSettings->forceBypassDns())
+        {
+            qInfo() << "Forcing bypass apps to existing DNS";
+            appDnsInfo = SplitDNSInfo::infoFor(params, SplitDNSInfo::SplitDNSType::Bypass);
+        }
     }
 
     if(appDnsInfo != _appDnsInfo)
@@ -822,7 +808,7 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
     _adapterName = adapterName;
     _ipAddress6 = ipAddress6;
-    _dnsServers = params.effectiveDnsServers;
+    _dnsServers = effectiveDnsServers;
 }
 
 void IpTablesFirewall::updateBypassSubnets(IpTablesFirewall::IPVersion ipVersion, const QSet<QString> &bypassSubnets, QSet<QString> &oldBypassSubnets)

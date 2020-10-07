@@ -66,7 +66,17 @@ private:
     static void CALLBACK serviceNotifyCallback(void *pParam);
 
 public:
-    WinServiceState(std::wstring serviceName);
+    // Open and monitor the service specified by serviceName.
+    //
+    // The start/stop rights desired can be specified; by default both start and
+    // stop are requested.  Occasionally, some rights may need to be omitted to
+    // watch a service that prevents LOCAL SYSTEM from obtaining those rights
+    // (like Dnscache).  The start/stop actions won't work if those rights are
+    // omitted, but the service can still be monitored.
+    //
+    // WinServiceState always requests the SERVICE_QUERY_INFORMATION right.
+    WinServiceState(std::wstring serviceName,
+                    DWORD startStopRights = (SERVICE_START|SERVICE_STOP));
     // When destroyed, WinServiceState emits a change to the Deleted state, if
     // it wasn't already in this state.  This ensures that any connected tasks
     // reject instead of hanging indefinitely.
@@ -86,10 +96,11 @@ private:
 
     void serviceChanged(const WinServiceNotify &notify);
 
-    void updateState(State newState);
+    void updateState(State newState, DWORD newPid);
 
 public:
     State lastState() const {return _lastState;}
+    DWORD lastPid() const {return _lastPid;}
 
     // Start the service, and return a task that resolves when the service
     // reaches the Running state.  If the service can't be started, returns a
@@ -99,6 +110,10 @@ public:
     // Wait for a service to start.  This doesn't attempt to start the service,
     // it just resolves if the service is started.
     Async<void> waitForStart();
+
+    // Wait for a service to stop.  Like waitForStart(), doesn't attempt to stop
+    // the service, just resolves when the service is stopped.
+    Async<void> waitForStop();
 
     // Stop the service, and return a task that resolves when the service
     // reaches the Stopped state.  If the service can't be stopped, returns a
@@ -131,10 +146,12 @@ public:
     Async<void> stopIfRunning();
 
 signals:
-    void stateChanged(State newState);
+    void stateChanged(State newState, DWORD newPid);
 
 private:
+    DWORD _startStopRights;
     State _lastState;
+    DWORD _lastPid;
     std::wstring _serviceName;
     ServiceHandle _scm;
     ServiceHandle _service;

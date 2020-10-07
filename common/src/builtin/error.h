@@ -138,6 +138,10 @@ public:
 
         // Library entry point loaded at runtime is not available
         LibraryUnavailable = 2000,
+
+        // Starting a service on Windows failed with ERROR_INCOMPATIBLE_SERVICE_SID_TYPE
+        // (see win_servicestate.cpp / win_dnscachecontrol.cpp)
+        WinServiceIncompatibleSidType = 2100,
     };
     Q_ENUM(Code)
 

@@ -113,7 +113,12 @@ private:
     ~WinInterfaceMonitor();
 
 signals:
-    void changed();
+    // Any interface change has occurred; including add/delete/configuration
+    // changed.
+    void configChanged();
+    // An interface has been added or deleted (config changes do not cause this
+    // signal.)
+    void interfacesChanged();
 
 private:
     HANDLE _ipNotificationHandle;

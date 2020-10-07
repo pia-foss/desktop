@@ -26,6 +26,7 @@ namespace
     QString gatewayIp{"192.168.1.1"};
     QString interfaceName{"eth0"};
     QString ipAddress{"192.168.1.50"};
+    unsigned prefixLen{24};
     QString ipAddress6{"2001:db8::123"};
 }
 
@@ -37,15 +38,15 @@ private slots:
 
     void testEquality()
     {
-        OriginalNetworkScan scan1{gatewayIp, interfaceName, ipAddress, ipAddress6};
-        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, ipAddress6};
+        OriginalNetworkScan scan1{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6};
+        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6};
         QVERIFY(scan1 == scan2);
     }
 
     void testInequality()
     {
-        OriginalNetworkScan scan1{gatewayIp, "eth1", ipAddress, ipAddress6};
-        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, ipAddress6};
+        OriginalNetworkScan scan1{gatewayIp, "eth1", ipAddress, prefixLen, ipAddress6};
+        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6};
         QVERIFY(scan1 != scan2);
     }
 
@@ -54,11 +55,11 @@ private slots:
         OriginalNetworkScan emptyScan{};
         QVERIFY(emptyScan.ipv4Valid() == false);
 
-        OriginalNetworkScan completeScan{gatewayIp, interfaceName, ipAddress, ipAddress6};
+        OriginalNetworkScan completeScan{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6};
         QVERIFY(completeScan.ipv4Valid() == true);
 
         // An empty ipAddress6 does not impact Ipv4 validity
-        OriginalNetworkScan withoutIPv6{gatewayIp, interfaceName, ipAddress, ""};
+        OriginalNetworkScan withoutIPv6{gatewayIp, interfaceName, ipAddress, prefixLen, ""};
         QVERIFY(withoutIPv6.ipv4Valid() == true);
     }
 };

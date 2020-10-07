@@ -189,28 +189,58 @@ void MacNetworks::readConnections()
     {
         auto &ipConfig = ipConfigEntry.second;
         MacArray ipv4Addrs = ipConfig._ipv4.getValueObj(CFSTR("Addresses")).as<CFArrayRef>();
+        MacArray ipv4SubnetMasks = ipConfig._ipv4.getValueObj(CFSTR("SubnetMasks")).as<CFArrayRef>();
         MacString ipv4ServiceRouterIp = ipConfig._ipv4.getValueObj(CFSTR("Router")).as<CFStringRef>();
 
         MacArray ipv6Addrs = ipConfig._ipv6.getValueObj(CFSTR("Addresses")).as<CFArrayRef>();
+        MacArray ipv6PrefixLengths = ipConfig._ipv6.getValueObj(CFSTR("PrefixLength")).as<CFArrayRef>();
         MacString ipv6ServiceRouterIp = ipConfig._ipv6.getValueObj(CFSTR("Router")).as<CFStringRef>();
 
-        std::vector<Ipv4Address> addressesIpv4;
+        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
         addressesIpv4.reserve(ipv4Addrs.getCount());
         for(CFIndex i=0; i<ipv4Addrs.getCount(); ++i)
         {
             MacString addrStr{ipv4Addrs.getObjAtIndex(i).as<CFStringRef>()};
             Ipv4Address addr{addrStr.toQString()};
+
+            // The subnet masks are supposed to correspond to the addresses.
+            Ipv4Address mask{};
+            if(i<ipv4SubnetMasks.getCount())
+            {
+                MacString maskStr{ipv4SubnetMasks.getObjAtIndex(i).as<CFStringRef>()};
+                mask = Ipv4Address{addrStr.toQString()};
+            }
+            // If we fail to get a subnet mask for some reason, use /32, so the
+            // local address is still known.
+            if(mask == Ipv4Address{})
+                mask = Ipv4Address{0xFFFFFFFF};
+
             if(addr != Ipv4Address{})
-                addressesIpv4.push_back(addr);
+                addressesIpv4.push_back({addr, mask.getSubnetMaskPrefix()});
         }
-        std::vector<Ipv6Address> addressesIpv6;
+        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
         addressesIpv6.reserve(ipv6Addrs.getCount());
         for(CFIndex i=0; i<ipv6Addrs.getCount(); ++i)
         {
             MacString addrStr{ipv6Addrs.getObjAtIndex(i).as<CFStringRef>()};
             Ipv6Address addr{addrStr.toQString()};
+
+            // Prefix lengths correspond to the addresses array.  If we can't
+            // find it for some reason, use /128.
+            unsigned prefix = 128;
+            if(i<ipv6PrefixLengths.getCount())
+            {
+                auto prefixCfNum{ipv6PrefixLengths.getObjAtIndex(i).as<CFNumberRef>()};
+                int prefixSigned = 128;
+                if(prefixCfNum &&
+                   CFNumberGetValue(prefixCfNum.get(), kCFNumberIntType, &prefixSigned))
+                {
+                    prefix = static_cast<unsigned>(prefixSigned);
+                }
+            }
+
             if(addr != Ipv6Address{})
-                addressesIpv6.push_back(addr);
+                addressesIpv6.push_back({addr, prefix});
         }
 
         // On some versions of macOS Catalina the "Router" field is not present in the service data

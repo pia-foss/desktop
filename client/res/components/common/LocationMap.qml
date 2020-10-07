@@ -22,6 +22,7 @@ import "../client"
 import "../core"
 import "../daemon"
 import "../theme"
+import "qrc:/javascript/util.js" as Util
 
 Item {
   id: worldMap
@@ -42,7 +43,22 @@ Item {
   }
 
   Item {
-    readonly property var locationMeta: location ? Daemon.state.locationCoords[location.id] : undefined
+    readonly property var locationGeo: {
+      var geo
+      if(location)
+        geo = Daemon.state.locationCoords[location.id]
+      if(geo) {
+        // Tolerate numbers passed as strings in JSON
+        // If either value is missing or not parseable as a float, this results
+        // in NaN(s).
+        geo = [parseFloat(geo[0]), parseFloat(geo[1])]
+      }
+      // Verify that both coordinates are numbers - if we get any placeholder
+      // like undefined / "None", ignore it.
+      if(geo && Util.isFiniteNumber(geo[0]) && Util.isFiniteNumber(geo[1]))
+        return geo
+      return undefined;
+    }
 
     // Top and bottom latitudes of map graphic
     readonly property real topLat: 83.65
@@ -64,11 +80,11 @@ Item {
     }
 
     readonly property real locationX: {
-      if(!locationMeta)
+      if(!locationGeo)
         return -1.0
 
-      // Longitude is locationMeta.long -> range [-180, 180]
-      var x = locationMeta.long
+      // Longitude is locationGeo[1] -> range [-180, 180]
+      var x = locationGeo[1]
       // Adjust for actual left edge of graphic -> range [-168, 192]
       if(x < leftLong)
         x += 360.0
@@ -76,11 +92,11 @@ Item {
       return (x - leftLong) / (rightLong - leftLong + 360.0) * worldMap.width
     }
     readonly property real locationY: {
-      if(!locationMeta)
+      if(!locationGeo)
         return -1.0
 
       // Project the latitude -> range [-2.3034..., 2.3034...]
-      var millerLat = millerProjectLat(locationMeta.lat)
+      var millerLat = millerProjectLat(locationGeo[0])
       // Map to the actual range shown by the map.  (If this point is outside
       // the map bound, it returns a negative value or a value greater than
       // height.)

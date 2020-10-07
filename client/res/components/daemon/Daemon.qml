@@ -110,6 +110,9 @@ QtObject {
   function emailLogin(email) {
     call("emailLogin", arguments);
   }
+  function submitRating(rating) {
+    call("submitRating", arguments);
+  }
   function setToken(token) {
     call("setToken", arguments);
   }

@@ -35,6 +35,7 @@ QtObject {
   readonly property string splitTunnelInstallError: uiTr("The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.")
   // Messages for platforms where split tunnel isn't supported
   readonly property var splitTunnelSupportErrors: {
+    "osx_version_invalid": uiTr("This feature requires macOS 10.15 or earlier."),
     "win_version_invalid": uiTr("This feature requires Windows 7 Service Pack 1 or later."),
     "iptables_invalid": uiTr("This feature requires iptables 1.6.1 or later."),
     //: Message for Linux indicating that specific system libraries are needed

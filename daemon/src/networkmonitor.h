@@ -50,6 +50,18 @@ public:
     QString toString() const {return QHostAddress{_address}.toString();}
     operator QHostAddress() const {return QHostAddress{_address};}
 
+    // Test if the address is in a particular subnet.  For example to test if it
+    // is 10/8:
+    //   addr.inSubnet(0x0A000000, 8)
+    bool inSubnet(quint32 netAddress, unsigned prefixLen) const;
+
+    // Test if the address is a loopback address (127/8)
+    bool isLoopback() const {return inSubnet(0x7F000000, 8);}
+
+    // Get a prefix length from an IPv4 subnet mask (counts consecutive leading
+    // 1 bits - i.e. 255.255.128.0 -> 17)
+    unsigned getSubnetMaskPrefix() const;
+
     void trace(QDebug &dbg) const {dbg << toString();}
 
 private:
@@ -103,8 +115,8 @@ public:
                       bool defaultIpv4, bool defaultIpv6,
                       const Ipv4Address &gatewayIpv4,
                       const Ipv6Address &gatewayIpv6,
-                      std::vector<Ipv4Address> addressesIpv4,
-                      std::vector<Ipv6Address> addressesIpv6);
+                      std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
+                      std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6);
 
 public:
     bool operator==(const NetworkConnection &other) const
@@ -150,13 +162,14 @@ public:
     void gatewayIpv6(const Ipv6Address &gatewayIpv6) {_gatewayIpv6 = gatewayIpv6;}
 
     // The local IPv4 address(es) of this network connection - zero or more.
+    // Provides both the local address and the network prefix length.
     // It's unusual for a connection to have more than one IPv4 address, but
     // platforms don't guarantee this; it's possible.
-    const std::vector<Ipv4Address> &addressesIpv4() const {return _addressesIpv4;}
-    void addressesIpv4(std::vector<Ipv4Address> addressesIpv4) {_addressesIpv4 = std::move(addressesIpv4);}
+    const std::vector<std::pair<Ipv4Address, unsigned>> &addressesIpv4() const {return _addressesIpv4;}
+    void addressesIpv4(std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4) {_addressesIpv4 = std::move(addressesIpv4);}
 
     // The globally-routable IPv6 address(es) of this network connection - zero
-    // or more.
+    // or more.  Like addressesIpv4(), includes network prefix lengths also.
     //
     // Link-local addresses are excluded, because we don't get these on all
     // platforms (the Mac implementation does not have them since they're not in
@@ -165,16 +178,16 @@ public:
     // Unlike IPv4, it's common to have more than one IPv6 address (there is
     // usually at least a link-local address and a globally routable address,
     // and there may be additional global addresses that rotate).
-    const std::vector<Ipv6Address> &addressesIpv6() const {return _addressesIpv6;}
-    void addressesIpv6(std::vector<Ipv6Address> addressesIpv6) {_addressesIpv6 = std::move(addressesIpv6);}
+    const std::vector<std::pair<Ipv6Address, unsigned>> &addressesIpv6() const {return _addressesIpv6;}
+    void addressesIpv6(std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6) {_addressesIpv6 = std::move(addressesIpv6);}
 
 private:
     QString _networkInterface;
     bool _defaultIpv4, _defaultIpv6;
     Ipv4Address _gatewayIpv4;
     Ipv6Address _gatewayIpv6;
-    std::vector<Ipv4Address> _addressesIpv4;
-    std::vector<Ipv6Address> _addressesIpv6;
+    std::vector<std::pair<Ipv4Address, unsigned>> _addressesIpv4;
+    std::vector<std::pair<Ipv6Address, unsigned>> _addressesIpv6;
     QString _macosPrimaryServiceKey;
 };
 
