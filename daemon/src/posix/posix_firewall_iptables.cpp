@@ -49,7 +49,7 @@ SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, SplitDNSType sp
 {
     QString dnsServer, cGroupId, sourceIp;
 
-    if (splitType == SplitDNSType::Bypass)
+    if(splitType == SplitDNSType::Bypass)
     {
         dnsServer = existingDNS();
         cGroupId = CGroup::bypassId;
@@ -205,20 +205,41 @@ void IpTablesFirewall::installAnchor(IpTablesFirewall::IPVersion ip, const QStri
     }
 
     const QString cmd = getCommand(ip);
+
+    // iptables anchors in PIA are constructed from three chains, because we
+    // need two "links" that we can replace or delete:
+    // - The "anchor"-"actual" link is created or deleted to enable or disable
+    //   this anchor
+    // - The "actual"-"rules" link is replaced in order to atomically pivot the
+    //   contents of the anchor
+    //
+    // The three chains are:
+    // - The "anchor" chain (.a.) - stays locked into place in the root chain.
+    //   The anchor is enabled or disabled by clearing or adding an anchor in
+    //   this chain to the "actual" chain.  Maintaining fixed anchors preserves
+    //   our desired precedence among rules.
+    // - The "actual" chain (no infix) - acts as the linkage between the anchor
+    //   and rule chains
+    // - The "rule" chain (.r.) - contains the actual rules active at this point
+    //   in time, renamed and then deleted if we pivot to a new set of rules
     const QString anchorChain = QStringLiteral("%1.a.%2").arg(kAnchorName, anchor);
     const QString actualChain = QStringLiteral("%1.%2").arg(kAnchorName, anchor);
+    const QString ruleChain = QStringLiteral("%1.r.%2").arg(kAnchorName, anchor);
 
-    // Start by defining a placeholder chain, which stays locked into place
-    // in the root chain without being removed or recreated, ensuring the
-    // intended precedence order.
+    // Define the anchor chain and link it into the parent chain
     createChain(ip, anchorChain, tableName);
     linkChain(ip, anchorChain, rootChain, false, tableName);
 
-    // Create the actual rule chain, which we'll insert or remove from the
-    // placeholder anchor when needed.
+    // Define the actual chain - don't link it to the anchor chain yet, that
+    // happens if this anchor is enabled
     createChain(ip, actualChain, tableName);
+
+    // Define the rule chain, link it into the actual chain, and populate the
+    // initial rules
+    createChain(ip, ruleChain, tableName);
+    linkChain(ip, ruleChain, actualChain, false, tableName);
     for (const QString& rule : rules)
-        execute(QStringLiteral("%1 -w -A %2 %3 -t %4").arg(cmd, actualChain, rule, tableName));
+        execute(QStringLiteral("%1 -w -A %2 %3 -t %4").arg(cmd, ruleChain, rule, tableName));
 }
 
 void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QString& anchor, const QString& tableName, const QString &rootChain)
@@ -279,8 +300,23 @@ void IpTablesFirewall::install()
     createChain(Both, rootChainFor("PREROUTING"), kMangleTable);
 
     // Install our filter rulesets in each corresponding anchor chain.
+
+    // Don't allow unfettered loopback traffic - in particular do not just
+    // permit loopback DNS traffic. This is due to an obscure iptables issue
+    // where a vpnOnly app which re-uses a port previously used by a non vpnOnly
+    // (within the conntrack timeout) has its traffic routed the same way
+    // as that non vpnOnly app - outside the VPN.
+    // This is an issue generally for UDP, but in paricular for DNS traffic.
+    // If the non vpnOnly app was on loopback and DNS uses loopback (as in the case of systemd)
+    // then just allowing all loopback traffic would also allow the incorrectly routed vpnOnly DNS packets.
+    // To work around this, we only allow non DNS loopback traffic and have the DNS traffic fall back
+    // to the DNS rules found in 320.allowDNS.
     installAnchor(Both, QStringLiteral("000.allowLoopback"), {
-        QStringLiteral("-o lo+ -j ACCEPT"),
+        // Use -j RETURN so that the port 53 packets are handled by
+        // later chains. Allow everything else.
+        QStringLiteral("-o lo+ -p udp -m udp --dport 53 -j RETURN"),
+        QStringLiteral("-o lo+ -p tcp -m tcp --dport 53 -j RETURN"),
+        QStringLiteral("-o lo+ -j ACCEPT")
     });
     installAnchor(Both, QStringLiteral("400.allowPIA"), {
         QStringLiteral("-m owner --gid-owner %1 -j ACCEPT").arg(kVpnGroupName),
@@ -558,12 +594,28 @@ void IpTablesFirewall::replaceAnchor(IpTablesFirewall::IPVersion ip, const QStri
     const QString cmd = getCommand(ip);
     const QString ipStr = ip == IPv6 ? QStringLiteral("(IPv6)") : QStringLiteral("(IPv4)");
 
+    // To replace the anchor atomically:
+    // 1. Rename the old "rule" chain (see model in installAnchor())
+    // 2. Define a new "rule" chain and populate it
+    // 3. Replace the anchor in the "actual" chain to point to the new rule chain
+    //    ^ This is key, this atomically pivots from one rule set to the other.
+    // 4. Flush and delete the old chain
 
-    execute(QStringLiteral("%1 -w -F %2.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
+    // Rename the old chain
+    execute(QStringLiteral("%1 -w -E %2.r.%3 %2.o.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
+    // Create a new rule chain
+    createChain(ip, QStringLiteral("%2.r.%3").arg(kAnchorName, anchor), tableName);
+    // Populate the new chain
     for(const auto &rule : newRules)
     {
-        execute(QStringLiteral("%1 -w -A %2.%3 %4 -t %5").arg(cmd, kAnchorName, anchor, rule, tableName));
+        execute(QStringLiteral("%1 -w -A %2.r.%3 %4 -t %5").arg(cmd, kAnchorName, anchor, rule, tableName));
     }
+    // Pivot the actual chain to the new rule chain.  The actual chain should always have
+    // exactly 1 rule (the anchor to the rule chain).
+    execute(QStringLiteral("%1 -w -R %2.%3 1 -j %2.r.%3 -t %4").arg(cmd, kAnchorName, anchor, tableName));
+
+    // Clean up - flush and delete the old chain
+    deleteChain(ip, QStringLiteral("%2.o.%3").arg(kAnchorName, anchor), tableName);
 }
 
 void IpTablesFirewall::disableAnchor(IpTablesFirewall::IPVersion ip, const QString &anchor, const QString& tableName)
@@ -639,25 +691,6 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     const QString &adapterName = params.adapter ? params.adapter->devNode() : QString{};
     qInfo() << "VPN interface:" << adapterName;
     const QString &ipAddress6 = params.netScan.ipAddress6();
-
-    // DNS rules depend on both adapters and DNS servers, update if either has
-    // changed
-    QStringList effectiveDnsServers;
-    if(params._connectionSettings)
-        effectiveDnsServers = params._connectionSettings->getDnsServers();
-    if(effectiveDnsServers != _dnsServers || adapterName != _adapterName)
-    {
-        execute(QStringLiteral("iptables -w -F %1.320.allowDNS").arg(kAnchorName));
-        // If the adapter name isn't set, getDNSRules() returns an empty list
-        for (const QString& rule : getDNSRules(adapterName, effectiveDnsServers))
-        {
-            execute(QStringLiteral("iptables -w -A %1.320.allowDNS %2").arg(kAnchorName, rule));
-        }
-        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::vpnOnlyId));
-        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::bypassId));
-        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::vpnOnlyId));
-        execute(QStringLiteral("iptables -w -A piavpn.320.allowDNS -p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::bypassId));
-    }
 
     // These rules only depend on the adapter name
     if(adapterName != _adapterName)
@@ -795,6 +828,58 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         }
 
         _appDnsInfo = appDnsInfo;
+    }
+
+    // DNS rules depend on both adapters and DNS servers, update if either has
+    // changed
+    QStringList effectiveDnsServers;
+    if(params._connectionSettings)
+        effectiveDnsServers = params._connectionSettings->getDnsServers();
+    if(effectiveDnsServers != _dnsServers || adapterName != _adapterName)
+    {
+        // If the adapter name isn't set, getDNSRules() returns an empty list
+        QStringList ruleList = getDNSRules(adapterName, effectiveDnsServers);
+
+        if(!ruleList.isEmpty() && params.enableSplitTunnel)
+        {
+            const auto vpnOnlyServersStr = (params.defaultRoute ? effectiveDnsServers : QStringList{appDnsInfo.dnsServer()}).join(",");
+            const auto bypassServersStr = (params.defaultRoute ? QStringList{appDnsInfo.dnsServer()} : effectiveDnsServers).join(",");
+
+            // No DNS leak protection required for bypass traffic - at worst it'll go over the VPN which isn't a leak
+            ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
+            ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
+
+            // DNS leak protection for vpnOnly apps.
+            if(!params.defaultRoute)
+            {
+                // When the VPN does not have the default route, allow
+                // the vpnOnly DNS servers
+                ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -d %2 -j ACCEPT").arg(CGroup::vpnOnlyId, vpnOnlyServersStr);
+                ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -d %2 -j ACCEPT").arg(CGroup::vpnOnlyId, vpnOnlyServersStr);
+                // And block everything else
+                ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j REJECT").arg(CGroup::vpnOnlyId);
+                ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j REJECT").arg(CGroup::vpnOnlyId);
+            }
+            else
+            {
+                // When the VPN does have the default route vpnOnly apps use the default DNS.
+                // However, vpnOnly apps could still leak if a DNS request re-uses the route used by
+                // by a prior bypass app. This happens when a vpnOnly app re-uses the source port of a bypass app within the UDP conntrack timeout.
+                // To guard against this we block bypass DNS servers for any packet that is not part of the bypass cgroup.
+                // NOTE: we cannot use the vpnOnly cgroup here as no apps are added to the vpnOnly cgroup when the VPN has
+                // the default route.
+                ruleList << QStringLiteral("-p udp -m cgroup ! --cgroup %1 -m udp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
+                ruleList << QStringLiteral("-p tcp -m cgroup ! --cgroup %1 -m tcp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
+            }
+        }
+
+        // Re-allow localhost DNS now we've plugged the leaks.
+        // localhost DNS is important for systemd which uses a 127.0.0.53 DNS proxy
+        // for all DNS traffic.
+        ruleList << QStringLiteral("-o lo+ -p udp -m udp --dport 53 -j ACCEPT");
+        ruleList << QStringLiteral("-o lo+ -p tcp -m tcp --dport 53 -j ACCEPT");
+
+        replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), ruleList);
     }
 
     // Enable localhost routing

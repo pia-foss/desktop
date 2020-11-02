@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.5.1
+* Fixed a crash that occurred when geo-located regions were disabled in Settings
+* Fixed an issue preventing the crash reporter from starting for client crashes
+
 ### v2.5.0
 * Split tunnel on Windows now also splits DNS traffic
 * Added "Name Servers" setting to Split Tunnel on Windows and Linux

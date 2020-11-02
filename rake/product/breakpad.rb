@@ -60,7 +60,7 @@ module PiaBreakpad
     def self.add(executable)
         # Define PIA_CRASH_REPORTING and export it (so pia-clientlib exports
         # the definition to client)
-        executable.define(Macro, true)
+        executable.define(Macro, :export)
         executable.include(Include)
         executable.sourceFiles(WindowsSources) if Build.windows?
         executable.sourceFiles(MacSources) if Build.macos?

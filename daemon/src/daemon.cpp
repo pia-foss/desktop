@@ -693,6 +693,12 @@ Daemon::Daemon(QObject* parent)
         onNetworksChanged(_pNetworkMonitor->getNetworks());
     }
 
+    // Only keep the last 5 daemon crash dumps.
+    // This is important as in rare circumstances the daemon could go into a
+    // cycling crash loop and the dumps generated could fill up the user's available HD.
+    auto daemonCrashDir = Path::DaemonDataDir / QStringLiteral("crashes");
+    daemonCrashDir.cleanDirFiles(5);
+
     // Check whether the host supports split tunnel and record errors.
     // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist.
     checkSplitTunnelSupport();
@@ -2024,9 +2030,9 @@ void Daemon::applyBuiltLocations(const LocationsById &newLocations)
     // - favorites/recents for geo locations are ignored
     // - piactl does not display or accept them
     // - the regions lists (both VPN and Shadowsocks) do not display them
+    LocationsById nonGeoLocations;
     if(!_settings.includeGeoOnly())
     {
-        LocationsById nonGeoLocations;
         nonGeoLocations.reserve(newLocations.size());
         for(const auto &locEntry : newLocations)
         {
@@ -2034,13 +2040,15 @@ void Daemon::applyBuiltLocations(const LocationsById &newLocations)
                 nonGeoLocations[locEntry.first] = locEntry.second;
         }
         locationsToApply = &nonGeoLocations;
-        _state.availableLocations(nonGeoLocations);
     }
 
-    if(!_state.availableLocations().empty()) {
+    if(!_state.availableLocations().empty())
+    {
         // Check if any new locations were added, in order to trigger
-        for (auto loc: *locationsToApply) {
-            if(_state.availableLocations().find(loc.first) == _state.availableLocations().end()) {
+        for(const auto &loc: *locationsToApply)
+        {
+            if(_state.availableLocations().count(loc.first) == 0)
+            {
                 qWarning() << "Detected a new region " << loc.first;
                 qWarning() << "Region metadata needs to be refreshed";
                 break;

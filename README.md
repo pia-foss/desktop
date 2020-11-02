@@ -17,7 +17,7 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
 
 - On **all platforms**:
   - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
-  - [Qt 5.12](https://www.qt.io/download) or later (open source edition)
+  - [Qt 5.15](https://www.qt.io/download) or later (open source edition)
     - Install CMake (under development tools) to use this project in Qt Creator
   - *Optional:* [Node.js](https://nodejs.org) (for auxiliary scripts)
 - On **Windows**:
