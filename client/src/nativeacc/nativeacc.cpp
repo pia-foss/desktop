@@ -78,6 +78,7 @@ void init()
     qmlRegisterType<TableCellButton>("PIA.NativeAcc", 1, 0, "TableCellButton");
     qmlRegisterType<TableCellDropDownButton>("PIA.NativeAcc", 1, 0, "TableCellDropDownButton");
     qmlRegisterType<TableCellCheckButton>("PIA.NativeAcc", 1, 0, "TableCellCheckButton");
+    qmlRegisterType<TableCellValueText>("PIA.NativeAcc", 1, 0, "TableCellValueText");
     qmlRegisterType<TableColumn>("PIA.NativeAcc", 1, 0, "TableColumn");
     qmlRegisterType<TableRow>("PIA.NativeAcc", 1, 0, "TableRow");
 

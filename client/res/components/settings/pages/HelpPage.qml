@@ -37,6 +37,7 @@ Page {
   ColumnLayout {
     anchors.fill: parent
     anchors.leftMargin: Theme.settings.narrowPageLeftMargin
+    anchors.rightMargin: Theme.settings.narrowPageLeftMargin
     spacing: 6
 
     // This text is treated as a static even though its text does label a
@@ -177,51 +178,6 @@ Page {
       color: Theme.settings.inputLabelColor
       font.pixelSize: Theme.settings.inputLabelTextPx
       font.bold: true
-    }
-
-    // Radio buttons size themselves really tall for whatever reason, cut off
-    // some of that extra height
-    Item {
-      id: networkInputLayout
-
-      Layout.fillWidth: true
-      Layout.preferredHeight: networkInput.height - 12
-
-      ThemedRadioGroup {
-        id: networkInput
-        anchors.top: parent.top
-        anchors.topMargin: -3
-        anchors.left: parent.left
-
-        // Internally this is a three-valued setting to distinguish users that
-        // have never changed it - we intend to eventually change the default
-        // value, and this way we won't affect any users that have changed the
-        // setting and changed it back.
-        function effectiveValue(currentValue) {
-          if(currentValue === "default")
-            return "modern"
-          return currentValue
-        }
-
-        readonly property DaemonSetting daemonInfra: DaemonSetting {
-          name: "infrastructure"
-          onCurrentValueChanged: networkInput.setSelection(networkInput.effectiveValue(currentValue))
-        }
-
-        verticalOrientation: false
-        columnSpacing: 10
-        model: [{
-            "name": uiTr("Current"),
-            "value": "current"
-          }, {
-            "name": uiTr("Next Generation"),
-            "value": "modern"
-          }]
-        onSelected: {
-          daemonInfra.currentValue = value;
-        }
-        Component.onCompleted: setSelection(effectiveValue(daemonInfra.currentValue))
-      }
     }
 
     CheckboxInput {
@@ -429,19 +385,19 @@ Page {
     target: ClientNotifications
     function onReinstallTapAdapter() {
       var settingsWindow = helpPage.Window.window
-      settingsWindow.selectPage(settingsWindow.page.help)
+      settingsWindow.selectPage("help")
       settingsWindow.showSettings()
       reinstallTap.startReinstall()
     }
     function onReinstallWintun() {
       var settingsWindow = helpPage.Window.window
-      settingsWindow.selectPage(settingsWindow.page.help)
+      settingsWindow.selectPage("help")
       settingsWindow.showSettings()
       reinstallWinTun.startReinstall()
     }
     function onReinstallSplitTunnel() {
       var settingsWindow = helpPage.Window.window
-      settingsWindow.selectPage(settingsWindow.page.help)
+      settingsWindow.selectPage("help")
       settingsWindow.showSettings()
       reinstallWfpCallout.startReinstall()
     }

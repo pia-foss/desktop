@@ -25,264 +25,316 @@ namespace samples
 {
     const auto locationsNoPF = QJsonDocument::fromJson(R"(
 {
-  "austria": {
-    "name": "Austria",
-    "country": "AT",
-    "dns": "austria.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "185.216.34.231:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "185.216.34.231:8080"
-    },
-    "openvpn_tcp": {
-      "best": "185.216.34.231:500"
-    },
-    "serial": "d329be7d4c45f7394f31dd4c24b03d2a"
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "czech": {
-    "name": "Czech Republic",
-    "country": "CZ",
-    "dns": "czech.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "89.238.186.229:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "89.238.186.229:8080"
+  "regions": [
+    {
+      "id": "austria",
+      "name": "Austria",
+      "country": "AT",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
     },
-    "openvpn_tcp": {
-      "best": "89.238.186.229:500"
-    },
-    "serial": "2e77cf933e02b1e5f67e942f0c72c956"
-  },
-  "info": {
-    "auto_regions": [
-      "austria",
-      "czech"
-    ]
-  }
+    {
+      "id": "czech",
+      "name": "Czech Republic",
+      "country": "HU",
+      "auto_region": true,
+      "dns": "hungary.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
+        "ikev2": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "wg": [{ "ip": "217.138.192.222", "cn": "budapest401" }]
+      }
+    }
+  ]
 }
 )").object();
 
     const auto locationsNoAutoRegions = QJsonDocument::fromJson(R"(
 {
-  "aus_melbourne": {
-    "name": "AU Melbourne",
-    "country": "AU",
-    "dns": "au-melbourne.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "168.1.99.210:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "168.1.99.210:8080"
-    },
-    "openvpn_tcp": {
-      "best": "168.1.99.210:500"
-    },
-    "serial": "cbb82586514d9a229a9afbec18e9a8b5"
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "aus_perth": {
-    "name": "AU Perth",
-    "country": "AU",
-    "dns": "au-perth.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "103.231.89.4:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "103.231.89.4:8080"
+  "regions": [
+    {
+      "id": "aus_melbourne",
+      "name": "AU Melbourne",
+      "country": "US",
+      "auto_region": false,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
     },
-    "openvpn_tcp": {
-      "best": "103.231.89.4:500"
-    },
-    "serial": "8491c86f848f8933d5f6f1194b2fe6a4"
-  },
-  "info": {
-    "auto_regions": [
-    ]
-  }
+    {
+      "id": "aus_perth",
+      "name": "AU Perth",
+      "country": "HU",
+      "auto_region": false,
+      "dns": "hungary.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
+        "ikev2": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "wg": [{ "ip": "217.138.192.222", "cn": "budapest401" }]
+      }
+    }
+  ]
 }
 )").object();
 
     const auto locations = QJsonDocument::fromJson(R"(
 {
-  "us_california": {
-    "name": "US California",
-    "country": "US",
-    "dns": "us-california.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "198.8.80.174:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "198.8.80.174:8080"
-    },
-    "openvpn_tcp": {
-      "best": "198.8.80.174:500"
-    },
-    "ips": []
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "us2": {
-    "name": "US East",
-    "country": "US",
-    "dns": "us-east.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "209.222.23.59:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "209.222.23.59:8080"
+  "regions": [
+    {
+      "id": "us2",
+      "name": "US New York",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
     },
-    "openvpn_tcp": {
-      "best": "209.222.23.59:500"
+    {
+      "id": "hungary",
+      "name": "Hungary",
+      "country": "HU",
+      "auto_region": false,
+      "dns": "hungary.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
+        "ikev2": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
+        "wg": [{ "ip": "217.138.192.222", "cn": "budapest401" }]
+      }
     },
-    "ips": []
-  },
-  "poland": {
-    "name": "Poland",
-    "country": "PL",
-    "dns": "poland.privateinternetaccess.com",
-    "port_forward": true,
-    "ping": "185.244.214.14:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "185.244.214.14:8080"
+    {
+      "id": "us_california",
+      "name": "US California",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-california.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.107.242", "cn": "losangeles405" }],
+        "ovpntcp": [{ "ip": "37.235.107.213", "cn": "losangeles405" }],
+        "ikev2": [{ "ip": "37.235.107.214", "cn": "losangeles405" }],
+        "wg": [{ "ip": "37.235.107.214", "cn": "losangeles405" }]
+      }
     },
-    "openvpn_tcp": {
-      "best": "185.244.214.14:500"
+    {
+      "id": "ro",
+      "name": "Romania",
+      "country": "RO",
+      "auto_region": true,
+      "dns": "ro.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "143.244.54.160", "cn": "romania407" }],
+        "ovpntcp": [{ "ip": "143.244.54.140", "cn": "romania407" }],
+        "ikev2": [{ "ip": "143.244.54.131", "cn": "romania407" }],
+        "wg": [{ "ip": "143.244.54.140", "cn": "romania407" }]
+      }
     },
-    "serial": "6d1e672185ccc54d184b8c212c0ecf2a"
-  },
-  "ro": {
-    "name": "Romania",
-    "country": "RO",
-    "dns": "ro.privateinternetaccess.com",
-    "port_forward": true,
-    "ping": "89.33.8.42:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "89.33.8.42:8080"
-    },
-    "openvpn_tcp": {
-      "best": "89.33.8.42:500"
-    },
-    "serial": "7f714703f7f4fae7391271ecf4bebce8"
-   },
-  "hungary": {
-    "name": "Hungary",
-    "country": "HU",
-    "dns": "hungary.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "185.128.26.18:8888",
-    "geo": false,
-    "openvpn_udp": {
-      "best": "185.128.26.18:8080"
-    },
-    "openvpn_tcp": {
-      "best": "185.128.26.18:500"
-    },
-    "serial": "150f4e24540e431092227d119a13d396"
-  },
-  "info": {
-    "auto_regions": [
-      "us_california",
-      "us2",
-      "poland",
-      "ro"
-    ]
-  }
+    {
+      "id": "poland",
+      "name": "Poland",
+      "country": "PL",
+      "auto_region": true,
+      "dns": "poland.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "217.138.209.245", "cn": "warsaw401" }],
+        "ovpntcp": [{ "ip": "217.138.209.246", "cn": "warsaw401" }],
+        "ikev2": [{ "ip": "217.138.209.246", "cn": "warsaw401" }],
+        "wg": [{ "ip": "217.138.209.242", "cn": "warsaw401" }]
+      }
+    }
+  ]
 }
 )").object();
 
-    const auto locationsGeo = QJsonDocument::fromJson(R"(
+const auto locationsGeo = QJsonDocument::fromJson(R"(
 {
-  "pf_auto_ng": {
-    "name": "has PF, auto safe, not geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": true,
-    "geo": false
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "pf_auto_g": {
-    "name": "has PF, auto safe, is geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": true,
-    "geo": true
-  },
-  "pf_nauto_ng": {
-    "name": "has PF, not auto safe, not geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": true,
-    "geo": false
-  },
-  "pf_nauto_g": {
-    "name": "has PF, not auto safe, is geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": true,
-    "geo": true
-  },
-  "npf_auto_ng": {
-    "name": "no PF, auto safe, not geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": false,
-    "geo": false
-  },
-  "npf_auto_g": {
-    "name": "no PF, auto safe, is geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": false,
-    "geo": true
-  },
-  "npf_nauto_ng": {
-    "name": "no PF, not auto safe, not geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": false,
-    "geo": false
-  },
-  "npf_nauto_g": {
-    "name": "no PF, not auto safe, is geo",
-    "country": "us",
-    "ping": "0.0.0.0:1",
-    "openvpn_udp":{"best":"0.0.0.0:1"},
-    "openvpn_tcp":{"best":"0.0.0.0:1"},
-    "serial":"na",
-    "port_forward": false,
-    "geo": true
-  },
-  "info": {
-    "auto_regions": [
-      "pf_auto_ng",
-      "pf_auto_g",
-      "npf_auto_ng",
-      "npf_auto_g"
-    ]
-  }
+  "regions": [
+    {
+      "id": "pf_auto_ng",
+      "name": "has PF, auto safe, not geo",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "pf_auto_g",
+      "name": "has PF, auto safe, is geo",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": true,
+      "geo": true,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "pf_nauto_ng",
+      "name": "has PF, not auto safe, not geo",
+      "country": "US",
+      "auto_region": false,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "pf_nauto_g",
+      "name": "has PF, not auto safe, is geo",
+      "country": "US",
+      "auto_region": false,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": true,
+      "geo": true,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "npf_auto_ng",
+      "name": "no PF, auto safe, not geo",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "npf_auto_g",
+      "name": "no PF, auto safe, is geo",
+      "country": "US",
+      "auto_region": true,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": true,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "npf_nauto_ng",
+      "name": "no PF, not auto safe, not geo",
+      "country": "US",
+      "auto_region": false,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    },
+    {
+      "id": "npf_nauto_g",
+      "name": "no PF, not auto safe, is geo",
+      "country": "US",
+      "auto_region": false,
+      "dns": "us-newyorkcity.privacy.network",
+      "port_forward": false,
+      "geo": true,
+      "servers": {
+        "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
+        "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
+        "ikev2": [{ "ip": "37.235.106.21", "cn": "newyork404" }],
+        "wg": [{ "ip": "37.235.106.35", "cn": "newyork404" }]
+      }
+    }
+  ]
 }
 )").object();
 
@@ -321,10 +373,10 @@ class tst_nearestlocations : public QObject
 
 public:
     tst_nearestlocations(QObject *parent = NULL) : QObject(parent)
-      , locs{buildLegacyLocations({}, samples::locations, samples::emptyShadowsocks)}
-      , locsNoPF{buildLegacyLocations({}, samples::locationsNoPF, samples::emptyShadowsocks)}
-      , locsNoAutoRegions{buildLegacyLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks)}
-      , locsGeo{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)} {
+      , locs{buildModernLocations({}, samples::locations, samples::emptyShadowsocks, {})}
+      , locsNoPF{buildModernLocations({}, samples::locationsNoPF, samples::emptyShadowsocks, {})}
+      , locsNoAutoRegions{buildModernLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks, {})}
+      , locsGeo{buildModernLocations({}, samples::locationsGeo, samples::emptyShadowsocks, {})} {
 
     }
 
@@ -377,7 +429,7 @@ private slots:
         QVERIFY(nearest.id() == "aus_melbourne");
     }
 
-    // Further constrain the output with a predicate function
+    // // Further constrain the output with a predicate function
     void testGetNearestSafeServiceLocation()
     {
         setLatencies();
@@ -398,11 +450,11 @@ private slots:
         QVERIFY(!nearest2);
     }
 
-    // Test all combinations of preferences with geo, auto, and port forwarding.
-    //
+    // // Test all combinations of preferences with geo, auto, and port forwarding.
+    // //
     void testGeoPreferences()
     {
-        LocationsById testLocations{buildLegacyLocations({}, samples::locationsGeo, samples::emptyShadowsocks)};
+        LocationsById testLocations{locsGeo};
 
         // Set latencies in reverse precedence order.  This follows the table
         // in NearestLocations (port forwarding is the "context" requirement

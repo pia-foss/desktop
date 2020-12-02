@@ -24,42 +24,21 @@
 
 namespace
 {
-    QString addressHost(const QString &address)
-    {
-        // Returns the entire string if there is no colon for some reason
-        return address.left(address.indexOf(':'));
-    }
-
-    quint16 addressPort(const QString &address)
-    {
-        auto colonIdx = address.indexOf(':');
-        // Return 0 if the address didn't have a valid port somehow
-        if(colonIdx < 0)
-            return 0;
-
-        // If the text after the colon isn't a valid uint16 (including if it's
-        // empty), return 0.
-        uint port = address.midRef(colonIdx+1).toUInt();
-        if(port <= std::numeric_limits<quint16>::max())
-            return static_cast<quint16>(port);
-        return 0;
-    }
-
     // The "geo" flag was added in legacy regions list v1002 and isn't yet
     // available in the modern regions list.  Tolerate issues when parsing this
     // - a missing flag is fine and defaults to false, any unexpected value is
     // also treated as false (with a warning).
-    bool getGeoFlag(const QJsonObject &region, const QString &regionIdTrace)
+    bool getOptionalFlag(const QString &flagName, const QJsonObject &region, const QString &regionIdTrace)
     {
-        if(region.contains("geo"))
+        if(region.contains(flagName))
         {
             try
             {
-                return JsonCaster{region.value(QStringLiteral("geo"))};
+                return json_cast<bool>(region.value(flagName), HERE);
             }
             catch(const Error &ex)
             {
-                qWarning() << "Unable to read 'geo' flag of region"
+                qWarning() << QStringLiteral("Unable to read %1 flag of region").arg(flagName)
                     << regionIdTrace << "-" << ex;
             }
         }
@@ -68,29 +47,6 @@ namespace
     }
 }
 
-Server buildLegacyServer(const QString &address, const QString &serial,
-                         Service service,
-                         const std::vector<quint16> &allServicePorts)
-{
-    Server legacyServer;
-    legacyServer.ip(addressHost(address));
-    legacyServer.commonName(serial);
-
-    // Build the service ports vector using the port from "address" as the
-    // default, and all other ports from the global list (if any)
-    std::vector<quint16> servicePorts;
-    servicePorts.reserve(allServicePorts.size() + 1);
-    quint16 defaultPort{addressPort(address)};
-    if(defaultPort)
-        servicePorts.push_back(defaultPort);
-    for(quint16 port : allServicePorts)
-    {
-        if(port && port != defaultPort)
-            servicePorts.push_back(port);
-    }
-    legacyServer.servicePorts(service, std::move(servicePorts));
-    return legacyServer;
-}
 
 // If the location ID given is present in the Shadowsocks region data, add a
 // Shadowsocks server to the list of servers for this location.
@@ -103,17 +59,32 @@ void addLegacyShadowsocksServer(std::vector<Server> &servers,
                                 const QJsonObject &shadowsocksObj)
 {
     // Look for Shadowsocks info for this region
-    const auto &shadowsocksServer = shadowsocksObj.value(locationId).toObject();
+    QJsonObject shadowsocksServer = shadowsocksObj.value(locationId).toObject();
+
+    // The Shadowsocks region list still uses legacy location IDs, map some of
+    // the next-gen location IDs to legacy IDs where they differ
+    if(shadowsocksServer.isEmpty())
+    {
+        if(locationId == QStringLiteral("us_south_west"))
+            shadowsocksServer = shadowsocksObj.value("us_dal").toObject();
+        else if(locationId == QStringLiteral("us_seattle"))
+            shadowsocksServer = shadowsocksObj.value("us_sea").toObject();
+        else if(locationId == QStringLiteral("us-newjersey"))   // "US East"
+            shadowsocksServer = shadowsocksObj.value("us_nyc").toObject();
+        else if(locationId == QStringLiteral("japan"))
+            shadowsocksServer = shadowsocksObj.value("jp").toObject();
+    }
+
     if(!shadowsocksServer.isEmpty())
     {
         try
         {
             Server shadowsocks;
-            shadowsocks.ip(JsonCaster{shadowsocksServer.value(QStringLiteral("host"))});
+            shadowsocks.ip(json_cast<QString>(shadowsocksServer.value(QStringLiteral("host")), HERE));
             // No serial, not provided (or used) for Shadowsocks
-            shadowsocks.shadowsocksKey(JsonCaster{shadowsocksServer.value(QStringLiteral("key"))});
-            shadowsocks.shadowsocksCipher(JsonCaster{shadowsocksServer.value(QStringLiteral("cipher"))});
-            shadowsocks.shadowsocksPorts({json_cast<quint16>(shadowsocksServer.value(QStringLiteral("port")))});
+            shadowsocks.shadowsocksKey(json_cast<QString>(shadowsocksServer.value(QStringLiteral("key")), HERE));
+            shadowsocks.shadowsocksCipher(json_cast<QString>(shadowsocksServer.value(QStringLiteral("cipher")), HERE));
+            shadowsocks.shadowsocksPorts({json_cast<quint16>(shadowsocksServer.value(QStringLiteral("port")), HERE)});
             servers.push_back(std::move(shadowsocks));
         }
         catch(const Error &ex)
@@ -124,151 +95,12 @@ void addLegacyShadowsocksServer(std::vector<Server> &servers,
     }
 }
 
-LocationsById buildLegacyLocations(const LatencyMap &latencies,
-                                   const QJsonObject &serversObj,
-                                   const QJsonObject &shadowsocksObj)
-{
-    LocationsById newLocations;
-
-    // The safe regions to be used with 'connect auto'
-    std::vector<QString> safeAutoRegions{};
-    try
-    {
-        safeAutoRegions = json_cast<std::vector<QString>>(serversObj["info"].toObject()["auto_regions"]);
-    }
-    catch (const Error &ex)
-    {
-        qWarning() << "Error loading json field auto_regions. Error:" << ex;
-    }
-
-    // The legacy servers list provides one global set of VPN ports, although
-    // defaults are given for each server's endpoint.
-    std::vector<quint16> ovpnUdpPorts, ovpnTcpPorts;
-
-    try
-    {
-        const auto &portInfo = serversObj["info"].toObject()["vpn_ports"].toObject();
-        ovpnUdpPorts = json_cast<std::vector<quint16>>(portInfo["udp"]);
-        ovpnTcpPorts = json_cast<std::vector<quint16>>(portInfo["tcp"]);
-    }
-    catch (const Error &ex)
-    {
-        qWarning() << "Could not find supported vpn_ports from region data -"
-            << ex;
-    }
-
-
-    // Each location is an attribute of the top-level JSON object.
-    // Note that we can't use a range-based for loop over serversObj, since we
-    // need its keys and values.  QJsonObject's iterator dereferences to just the
-    // value, and the iterator itself has a key() method (unlike
-    // std::map::iterator, for example, which dereferences to a pair).
-    for(auto itAttr = serversObj.begin(); itAttr != serversObj.end(); ++itAttr)
-    {
-        // Ignore a few known extra fields to avoid spurious warnings, these are
-        // not locations.
-        if(itAttr.key() == QStringLiteral("web_ips") ||
-           itAttr.key() == QStringLiteral("vpn_ports") ||
-           itAttr.key() == QStringLiteral("info"))
-        {
-            continue;
-        }
-
-        // Create a ServerLocation and attempt to set all of its attributes.
-        // If any attribute isn't present, isn't the right type, etc., JsonCaster
-        // throws an exception.
-        //
-        // (We end up getting an Undefined QJsonValue when accessing the
-        // attribute, and that can't be converted to the expected type of the
-        // attribute in ServerLocation.  If the ServerLocation attribute is
-        // Optional, an Undefined is fine and becomes a null.)
-        try
-        {
-            QSharedPointer<Location> pLocation{new Location{}};
-
-            // Is there a latency measurement for this location?
-            auto itLatency = latencies.find(itAttr.key());
-            if(itLatency != latencies.end())
-            {
-                // Apply the latency measurement.  (Otherwise, the latency is
-                // left unset.)
-                pLocation->latency(itLatency->second);
-            }
-
-            const auto &serverObj = itAttr.value().toObject();
-
-            // The 'id' is actually the name of the attribute in the original data,
-            // since they're stored as attributes of an object, not an array.
-            pLocation->id(itAttr.key());
-            pLocation->name(JsonCaster{serverObj.value(QStringLiteral("name"))});
-            pLocation->country(JsonCaster{serverObj.value(QStringLiteral("country"))});
-            pLocation->portForward(JsonCaster{serverObj.value(QStringLiteral("port_forward"))});
-            pLocation->geoOnly(getGeoFlag(serverObj, itAttr.key()));
-            // Set autoSafe from the list of auto regions.  Note that if all
-            // regions have autoSafe() == false, we'll still be able to connect
-            // automatically - NearestLocations::getNearestSafeVpnLocation()
-            // will instead just take the nearest location since there were no
-            // safe locations.
-            pLocation->autoSafe(std::find(safeAutoRegions.begin(), safeAutoRegions.end(), pLocation->id()) != safeAutoRegions.end());
-
-            // The legacy servers list just gives us one address (and default
-            // port) per service.  Currently, the IP addresses are all the same,
-            // but there's no need to rely on this when adapting to the new
-            // model.  Create one Server per service endpoint.
-            //
-            // Latency is handled the same way, we create one Server object just
-            // for the ping endpoint given.  This differs from the new servers
-            // list, which provides latency on all servers to permit
-            // per-server measurements, so Desktop handles both possibilities.
-            std::vector<Server> servers;
-            QString serial = JsonCaster{serverObj.value(QStringLiteral("serial"))};
-            servers.push_back(buildLegacyServer(JsonCaster{serverObj.value(QStringLiteral("ping"))},
-                                                serial, Service::Latency, {}));
-            servers.push_back(buildLegacyServer(JsonCaster{serverObj.value(QStringLiteral("openvpn_udp")).toObject().value(QStringLiteral("best"))},
-                                                serial, Service::OpenVpnUdp,
-                                                ovpnUdpPorts));
-            servers.push_back(buildLegacyServer(JsonCaster{serverObj.value(QStringLiteral("openvpn_tcp")).toObject().value(QStringLiteral("best"))},
-                                                serial, Service::OpenVpnTcp,
-                                                ovpnTcpPorts));
-            const auto &wireguardServer = serverObj.value(QStringLiteral("wireguard")).toObject();
-            if(!wireguardServer.isEmpty())
-            {
-                servers.push_back(buildLegacyServer(JsonCaster{wireguardServer.value(QStringLiteral("host"))},
-                                                    JsonCaster{wireguardServer.value(QStringLiteral("serial"))},
-                                                    Service::WireGuard, {}));
-            }
-            else
-            {
-                // This is tolerated but not completely supported by the client,
-                // automatic region selection / UI / etc. won't handle this
-                // fully correctly.
-                qWarning() << "Region does not support WireGuard -" << pLocation->id();
-            }
-
-            // Look for Shadowsocks info for this region
-            addLegacyShadowsocksServer(servers, pLocation->id(), shadowsocksObj);
-
-            pLocation->servers(servers);
-
-            // This location is good, store it
-            newLocations[itAttr.key()] = std::move(pLocation);
-        }
-        catch(const Error &ex)
-        {
-            qWarning() << "Can't load location" << itAttr.key()
-                << "due to error" << ex;
-        }
-    }
-
-    return newLocations;
-}
-
 void applyModernService(const QJsonObject &serviceObj, Server &groupTemplate,
                         const QString &groupTrace)
 {
     try
     {
-        const auto &serviceName = json_cast<QString>(serviceObj["name"]);
+        const auto &serviceName = json_cast<QString>(serviceObj["name"], HERE);
         Service knownService = Service::Latency;
         if(serviceName == QStringLiteral("openvpn_tcp"))
             knownService = Service::OpenVpnTcp;
@@ -289,7 +121,7 @@ void applyModernService(const QJsonObject &serviceObj, Server &groupTemplate,
         }
         // Don't load "ports" until we know it's a service we use, some future
         // services might not have ports in the same way.
-        auto servicePorts = json_cast<std::vector<quint16>>(serviceObj["ports"]);
+        auto servicePorts = json_cast<std::vector<quint16>>(serviceObj["ports"], HERE);
         groupTemplate.servicePorts(knownService, servicePorts);
     }
     catch(const Error &ex)
@@ -305,8 +137,8 @@ void readModernServer(const Server &groupTemplate, std::vector<Server> &servers,
     try
     {
         Server newServer{groupTemplate};
-        newServer.ip(JsonCaster{serverObj["ip"]});
-        newServer.commonName(JsonCaster{serverObj["cn"]});
+        newServer.ip(json_cast<QString>(serverObj["ip"], HERE));
+        newServer.commonName(json_cast<QString>(serverObj["cn"], HERE));
         // TODO - Need Shadowsocks key/cipher for servers with Shadowsocks
         // service
         servers.push_back(newServer);
@@ -326,14 +158,16 @@ QSharedPointer<Location> readModernLocation(const QJsonObject &regionObj,
     QString id; // For tracing, if we get an ID and the read fails, this will be traced
     try
     {
-        pLocation->id(JsonCaster{regionObj["id"]});
+        pLocation->id(json_cast<QString>(regionObj["id"], HERE));
         id = pLocation->id();   // Found an id, trace it if the location fails
-        pLocation->name(JsonCaster{regionObj["name"]});
-        pLocation->country(JsonCaster{regionObj["country"]});
-        pLocation->geoOnly(getGeoFlag(regionObj, pLocation->id()));
-        pLocation->autoSafe(JsonCaster{regionObj["auto_region"]});
-        pLocation->portForward(JsonCaster{regionObj["port_forward"]});
-
+        pLocation->name(json_cast<QString>(regionObj["name"], HERE));
+        pLocation->country(json_cast<QString>(regionObj["country"], HERE));
+        pLocation->geoOnly(getOptionalFlag(QStringLiteral("geo"), regionObj, pLocation->id()));
+        pLocation->autoSafe(json_cast<bool>(regionObj["auto_region"], HERE));
+        pLocation->portForward(json_cast<bool>(regionObj["port_forward"], HERE));
+        pLocation->autoSafe(json_cast<bool>(regionObj["auto_region"], HERE));
+        pLocation->portForward(json_cast<bool>(regionObj["port_forward"], HERE));
+        pLocation->offline(getOptionalFlag("offline", regionObj, pLocation->id()));
         // Build servers
         std::vector<Server> servers;
         const auto &serverGroupsObj = regionObj["servers"].toObject();
@@ -373,20 +207,112 @@ QSharedPointer<Location> readModernLocation(const QJsonObject &regionObj,
         return {};
     }
 
-    // If the location was loaded but has no servers, treat that as an error
-    // too.
+    // If the location was loaded but has no servers, treat that as if the location
+    // is offline
     if(pLocation && pLocation->servers().empty())
     {
-        qWarning() << "Location" << pLocation->id() << "has no servers, ignored";
-        return {};
+        pLocation->offline(true);
+        qWarning() << "Location" << pLocation->id() << "has no servers, setting as offline";
     }
 
     return pLocation;
 }
 
+// Build a Location from a dedicated IP.  Location metadata (name, country,
+// geo, PF, etc.) are taken from the corresponding normal location.
+QSharedPointer<Location> buildDedicatedIpLocation(const LocationsById &modernLocations,
+                                                  const std::unordered_map<QString, Server> &groupTemplates,
+                                                  const AccountDedicatedIp &dip)
+{
+    QSharedPointer<Location> pLocation{new Location{}};
+
+    // Set up the essential parts (ID and servers) of the location that we know
+    // even if the corresponding location is not found for some reason.
+    pLocation->id(dip.id());
+    // DIP locations are never selected automatically
+    pLocation->autoSafe(false);
+    pLocation->dedicatedIp(dip.ip());
+    pLocation->dedicatedIpExpire(dip.expire());
+    pLocation->dedicatedIpCorrespondingRegion(dip.regionId());
+    std::vector<Server> servers;
+    for(const auto &group : dip.serviceGroups())
+    {
+        // Find the group template
+        auto itTemplate = groupTemplates.find(group);
+        if(itTemplate == groupTemplates.end())
+        {
+            qWarning() << "Group" << group << "not known in location"
+                << pLocation->id();
+            // Skip this group
+        }
+        // Ignore groups that have no services used by Desktop, this can be
+        // normal if it had other services that we don't care about
+        else if(itTemplate->second.hasNonLatencyService())
+        {
+            // Create a server for this group using the DIP IP/CN
+            Server newServer{itTemplate->second};
+            newServer.ip(dip.ip());
+            newServer.commonName(dip.cn());
+            servers.push_back(std::move(newServer));
+        }
+    }
+
+    // Try to find the corresponding location for metadata
+    auto itCorrespondingLocation = modernLocations.find(dip.regionId());
+    if(itCorrespondingLocation == modernLocations.end())
+    {
+        // Couldn't find the location - set defaults.  The DIP region will still
+        // be available, but without country/name info
+        pLocation->name({});
+        pLocation->country({});
+        pLocation->portForward(false);
+        pLocation->geoOnly(false);
+    }
+    else
+    {
+        pLocation->name(itCorrespondingLocation->second->name());
+        pLocation->country(itCorrespondingLocation->second->country());
+        pLocation->portForward(itCorrespondingLocation->second->portForward());
+        pLocation->geoOnly(itCorrespondingLocation->second->geoOnly());
+
+        // Use the 'meta' service from server(s) in the corresponding location,
+        // but not any other services
+        for(const auto &correspondingServer : itCorrespondingLocation->second->servers())
+        {
+            if(correspondingServer.hasService(Service::Meta))
+            {
+                // Create a new server and copy over just the 'meta' info; do
+                // not take any other services that might be offered on this
+                // server.
+                Server metaServer{};
+                metaServer.ip(correspondingServer.ip());
+                metaServer.commonName(correspondingServer.commonName());
+                metaServer.metaPorts(correspondingServer.metaPorts());
+                servers.push_back(std::move(metaServer));
+            }
+        }
+    }
+
+    pLocation->servers(std::move(servers));
+    return pLocation;
+}
+
+void applyLatency(Location &location, const LatencyMap &latencies)
+{
+    // Is there a latency measurement for this location?
+    auto itLatency = latencies.find(location.id());
+    if(itLatency != latencies.end())
+    {
+        // Apply the latency measurement.  (Otherwise, the latency is
+        // left unset.)
+        location.latency(itLatency->second);
+    }
+}
+
 LocationsById buildModernLocations(const LatencyMap &latencies,
                                    const QJsonObject &regionsObj,
-                                   const QJsonObject &legacyShadowsocksObj)
+                                   const QJsonObject &legacyShadowsocksObj,
+                                   const std::vector<AccountDedicatedIp> &dedicatedIps)
 {
     // Build template Server objects for each "group" given in the regions list.
     // These will be used later to construct the actual servers by filling in
@@ -423,14 +349,7 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
 
         if(pLocation)
         {
-            // Is there a latency measurement for this location?
-            auto itLatency = latencies.find(pLocation->id());
-            if(itLatency != latencies.end())
-            {
-                // Apply the latency measurement.  (Otherwise, the latency is
-                // left unset.)
-                pLocation->latency(itLatency->second);
-            }
+            applyLatency(*pLocation, latencies);
 
             if(!pLocation->hasService(Service::WireGuard))
                 ++regionsLackingWireguard;
@@ -445,6 +364,17 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
         qWarning() << "Found" << regionsLackingWireguard
             << "regions with no WireGuard endpoints:"
             << QJsonDocument{regionsObj}.toJson();
+    }
+
+    // Build dedicated IP regions
+    for(const auto &dip : dedicatedIps)
+    {
+        auto pLocation = buildDedicatedIpLocation(newLocations, groupTemplates, dip);
+        if(pLocation)
+        {
+            applyLatency(*pLocation, latencies);
+            newLocations[pLocation->id()] = std::move(pLocation);
+        }
     }
 
     return newLocations;
@@ -480,44 +410,58 @@ bool compareEntries(const Location &first, const Location &second)
     return first.id().compare(second.id(), Qt::CaseSensitivity::CaseInsensitive) < 0;
 }
 
-std::vector<CountryLocations> buildGroupedLocations(const LocationsById &locations)
+void buildGroupedLocations(const LocationsById &locations,
+                           std::vector<CountryLocations> &groupedLocations,
+                           std::vector<QSharedPointer<Location>> &dedicatedIpLocations)
 {
     // Group the locations by country
     std::unordered_map<QString, std::vector<QSharedPointer<Location>>> countryGroups;
+    dedicatedIpLocations.clear();
 
     for(const auto &locationEntry : locations)
     {
         Q_ASSERT(locationEntry.second);
-        countryGroups[locationEntry.second->country().toLower()].push_back(locationEntry.second);
+        if(locationEntry.second->isDedicatedIp())
+            dedicatedIpLocations.push_back(locationEntry.second);
+        else
+        {
+            const auto &countryCode = locationEntry.second->country().toLower();
+            countryGroups[countryCode].push_back(locationEntry.second);
+        }
     }
 
     // Sort each countries' locations by latency, then id
+    auto sortLocations = [](const QSharedPointer<Location> &pFirst,
+                            const QSharedPointer<Location> &pSecond)
+    {
+        Q_ASSERT(pFirst);
+        Q_ASSERT(pSecond);
+
+        return compareEntries(*pFirst, *pSecond);
+    };
+
     for(auto &group : countryGroups)
     {
-        std::sort(group.second.begin(), group.second.end(),
-            [](const auto &pFirst, const auto &pSecond)
-            {
-                Q_ASSERT(pFirst);
-                Q_ASSERT(pSecond);
-
-                return compareEntries(*pFirst, *pSecond);
-            });
+        std::sort(group.second.begin(), group.second.end(), sortLocations);
     }
 
+    // Sort dedicated IP locations in the same way
+    std::sort(dedicatedIpLocations.begin(), dedicatedIpLocations.end(), sortLocations);
+
     // Create country groups from the sorted lists
-    std::vector<CountryLocations> countries;
-    countries.reserve(countryGroups.size());
+    groupedLocations.clear();
+    groupedLocations.reserve(countryGroups.size());
     for(const auto &group : countryGroups)
     {
-        countries.push_back({});
-        countries.back().locations(group.second);
+        groupedLocations.push_back({});
+        groupedLocations.back().locations(group.second);
     }
 
     // Sort the countries by their lowest latency
-    std::sort(countries.begin(), countries.end(),
+    std::sort(groupedLocations.begin(), groupedLocations.end(),
         [](const auto &first, const auto &second)
         {
-            // Consequence of above; countries created with at least 1 location
+            // Consequence of above; groupedLocations created with at least 1 location
             Q_ASSERT(!first.locations().empty());
             Q_ASSERT(!second.locations().empty());
             // Sort by the lowest latency for each country, then country code if
@@ -529,8 +473,6 @@ std::vector<CountryLocations> buildGroupedLocations(const LocationsById &locatio
             Q_ASSERT(pSecondNearest);
             return compareEntries(*pFirstNearest, *pSecondNearest);
         });
-
-    return countries;
 }
 
 NearestLocations::NearestLocations(const LocationsById &allLocations)

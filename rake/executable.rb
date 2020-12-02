@@ -402,10 +402,10 @@ class Executable
     # - To build a dynamic module and use it from another module:
     #   speak = Executable.new('speak', :dynamiclib)
     #       ... # sources, etc.
-    #       .exportDef('SPEAK_LIB')
+    #       .define('SPEAK_LIB', :export)
     #   reader = Executable.new('reader', :executable)
     #       ... # sources, etc.
-    #       .use(speak.export) # reference speak module
+    #       .use(speak.export) # reference speak module, also defines SPEAK_LIB
     #
     # - To use a module found on the system
     #   qt = Qt.new(...) # find Qt

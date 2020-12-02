@@ -10,7 +10,7 @@
         <translation>WireGuard 功能插圖：搭乘火箭的機器人</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="440"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
         <source>ChangelogWindow --- Command-line interface feature</source>
         <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
         <translation>命令列介面功能示意圖</translation>
@@ -95,24 +95,24 @@
         <translation>管控哪些應用程式要使用 VPN！</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="398"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="400"/>
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>透過全方位的通道分割功能，您可以管控哪些應用程式要使用 VPN，以及其使用的時間。查看我們的通道分割 [[應用程式範例]]，見證所有可能性。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="455"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
         <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
         <translation>您體驗過命令列介面 (CLI) 了嗎？</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="472"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="474"/>
         <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
         <translation>PIA 桌面應用程式的命令列介面 (CLI) 可用於新增功能。立即叫用「piactl」並開始體驗！您可以使用多種功能，如管控 PIA、整合 PIA 快速鍵，還可以使用指令碼自動化 PIA 功能，或自訂整合。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="485"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="489"/>
         <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>想用命令列介面 (CLI) 做些很酷的事嗎？在 [[PIA 論壇]] 上大顯身手吧！</translation>
@@ -121,13 +121,13 @@
 <context>
     <name>SplitTunnelRoutedRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="89"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
         <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
 <source>SplitTunnelRoutedRow --- Routed Packets</source>
         <translation>路由封包</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="99"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
         <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
 <source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
         <translation>包含最多容器和虛擬機器</translation>
@@ -656,7 +656,7 @@
 <context>
     <name>SplitTunnelNameServersRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="81"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
         <source>SplitTunnelNameServersRow --- Name Servers</source>
         <translation>名稱伺服器</translation>
     </message>
@@ -664,192 +664,64 @@
 <context>
     <name>SplitTunnelRowBase</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="36"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
         <source>SplitTunnelRowBase --- Follow App Rules</source>
         <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
         <translation>遵循應用程式規則</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="39"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
         <source>SplitTunnelRowBase --- VPN DNS Only</source>
         <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
         <translation>僅限 VPN DNS</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="23"/>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="28"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
         <source>SplitTunnelRowBase --- Bypass VPN</source>
         <translation>略過 VPN</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="24"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
         <source>SplitTunnelRowBase --- Only VPN</source>
         <translation>僅限 VPN</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="29"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
         <source>SplitTunnelRowBase --- Use VPN</source>
         <translation>使用 VPN</translation>
     </message>
 </context>
 <context>
-    <name>AccountModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
-        <source>AccountModule --- Subscription tile</source>
-        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
-        <translation>訂購計劃區塊</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
-        <source>AccountModule --- SUBSCRIPTION</source>
-        <translation>訂購計劃</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
-        <source>AccountModule --- Subscription</source>
-        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
-        <translation>訂購計劃</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
-        <source>AccountModule --- Expired</source>
-        <translation>已過期</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
-        <source>AccountModule --- (%1 days left)</source>
-        <translation>(剩下 %1 日)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Expired on</source>
-        <translation>於以下日子過期</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Renews on</source>
-        <translation>於以下日子續約</translation>
-    </message>
-</context>
-<context>
-    <name>AccountPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="24"/>
-        <source>AccountPage --- Username</source>
-        <translation>使用者名稱</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="41"/>
-        <source>AccountPage --- Subscription</source>
-        <translation>訂購計劃</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="48"/>
-        <source>AccountPage --- Expired</source>
-        <translation>已過期</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="55"/>
-        <source>AccountPage --- (expired on %1)</source>
-        <translation>(於 %1 過期)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="57"/>
-        <source>AccountPage --- (renews on %1)</source>
-        <translation>(於 %1 續約)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="59"/>
-        <source>AccountPage --- (expires on %1)</source>
-        <translation>(將於 %1 過期)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
-        <source>AccountPage --- Renews in %1 days</source>
-        <translation>%1 日後續約</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
-        <source>AccountPage --- Expires in %1 days</source>
-        <translation>%1 日後過期</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>購買訂購計劃</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>管理訂購計劃</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>續約</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="90"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>管理我的帳戶</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="95"/>
-        <source>AccountPage --- Logout / Switch Account</source>
-        <translation>登出 / 切換帳戶</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="108"/>
-        <source>AccountPage --- Not logged in</source>
-        <translation>尚未登入</translation>
-    </message>
-</context>
-<context>
-    <name>BelowFold</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
-        <source>BelowFold --- DEFAULT DISPLAY</source>
-        <translation>預設顯示</translation>
-    </message>
-</context>
-<context>
-    <name>BetaAgreementDialog</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
-        <source>BetaAgreementDialog --- Agreement</source>
-        <translation>協議</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
-        <source>BetaAgreementDialog --- Accept</source>
-        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
-        <translation>接受</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
-        <source>BetaAgreementDialog --- Decline</source>
-        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
-        <translation>拒絕</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
-        <source>BetaAgreementDialog --- Agreement text</source>
-        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
-        <translation>協議文本</translation>
-    </message>
-</context>
-<context>
-    <name>Client</name>
-    <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="99"/>
-        <source>Client --- %1 - Best</source>
-        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
-        <translation>%1 - 最佳</translation>
-    </message>
-</context>
-<context>
     <name>ClientNotifications</name>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="430"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>您的專屬 IP 將於 %1 天內到期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>取得新 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="458"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>您的專屬 IP 已更新。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="436"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>您的專屬 IP 將於 1 天內到期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="441"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>您的專屬 IP 將於今天到期。</translation>
+    </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
@@ -1093,50 +965,50 @@
         <translation>續約</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="430"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="474"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
         <translation>無法連結登入伺服器。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="434"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="478"/>
         <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
         <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
         <translation>無法存取您的帳戶資料，但您仍然可以連線到 VPN。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="438"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="482"/>
         <source>ClientNotifications --- Retry</source>
         <translation>重試</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="490"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Access 已更新。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="449"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="493"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>查看最新消息</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>應用程式無預警關閉。您的 VPN 連結得以保留。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="477"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="521"/>
         <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
         <translation>核准通道分割擴充程式以啟用通道分割。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="478"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="522"/>
         <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
         <translation>在手動核准通道分割功能前，macOS 將會封鎖此功能。通道分割規則將不會生效。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="482"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="526"/>
         <source>ClientNotifications --- Security Preferences</source>
         <translation>安全喜好設定</translation>
     </message>
@@ -1144,6 +1016,614 @@
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
         <source>ClientNotifications --- The virtual network adapter is not installed.</source>
         <translation>未安裝虛擬網路介面卡。</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpAddRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="22"/>
+        <source>DedicatedIpAddRow --- Activate Dedicated IP</source>
+        <translation>啟用專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="99"/>
+        <source>DedicatedIpAddRow --- Dedicated IP Token</source>
+        <translation>專屬 IP 權杖</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="110"/>
+        <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
+        <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
+        <translation>請在下方貼上權杖。若您近期有購買專屬 IP，即可前往 [[我的帳戶]] 頁面產生權杖。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="160"/>
+        <source>DedicatedIpAddRow --- Your token has expired.</source>
+        <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
+        <translation>您的權杖已到期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="161"/>
+        <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
+        <translation>您可從「我的帳戶」頁面中購買新權杖。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="173"/>
+        <source>DedicatedIpAddRow --- Your token is invalid.</source>
+        <translation>您的權杖無效。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="174"/>
+        <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
+        <translation>請確保輸入的權杖正確無誤。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="186"/>
+        <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
+        <translation>無法確認權杖。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="187"/>
+        <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
+        <translation>無法連線到伺服器確認權杖。請稍後再試。</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpList</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="18"/>
+        <source>DedicatedIpList --- Dedicated IPs</source>
+        <extracomment>Screen reader label for the list of Dedicated IPs.</extracomment>
+        <translation>專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="61"/>
+        <source>DedicatedIpList --- Region</source>
+        <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays region names.</extracomment>
+        <translation>區域</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="75"/>
+        <source>DedicatedIpList --- Remove</source>
+        <extracomment>Screen reader annotation for the column in the Dedicated IP list that removes a dedicated IP.</extracomment>
+        <translation>移除</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="34"/>
+        <source>DedicatedIpPage --- Dedicated IP</source>
+        <translation>專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="43"/>
+        <source>DedicatedIpPage --- Secure your remote connections to any asset with a dedicated IP from a country of your choice.  During your subscription, this IP will be yours and yours alone, protecting your data transfers with the strongest encryption out there.</source>
+        <translation>使用所選國家的專屬 IP 以維護與任何資產的遠端連線安全。訂閱期間此 IP 將僅供您本人使用，並會透過最強而有力的加密來保護您的資料傳輸。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="45"/>
+        <source>DedicatedIpPage --- Get Your Dedicated IP</source>
+        <translation>取得您的專屬 IP</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpRegion</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/DedicatedIpRegion.qml" line="57"/>
+        <source>DedicatedIpRegion --- %1 (Dedicated IP)</source>
+        <extracomment>Screen reader annotation for the &quot;detail&quot; line of a Dedicated IP row, which displays the IP address and the &quot;Dedicated IP&quot; tag. %1 is an IPv4 address, such as 100.200.100.200.</extracomment>
+        <translation>%1（專屬 IP）</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="27"/>
+        <source>DedicatedIpRow --- Remove</source>
+        <extracomment>&quot;Remove&quot; button label - used as the screen reader annotation for the &quot;X&quot; button next to a dedicated IP, and for the confirmation button on the prompt presented when removing a dedicated IP.</extracomment>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="80"/>
+        <source>DedicatedIpRow --- Remove Dedicated IP</source>
+        <translation>移除專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="87"/>
+        <source>DedicatedIpRow --- Remove %1 - %2?</source>
+        <extracomment>Confirmation prompt to remove a dedicated IP. %1 is the translated region name, %2 is an IP address, such as 100.200.100.200.</extracomment>
+        <translation>要移除 %1 - %2 嗎？</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRowBase.qml" line="23"/>
+        <source>DedicatedIpRowBase --- IP Address</source>
+        <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays the IP address for that dedicated IP.</extracomment>
+        <translation>IP 位址</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpSubtitle</name>
+    <message>
+        <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
+        <source>DedicatedIpSubtitle --- DEDICATED IP</source>
+        <translation>專屬 IP</translation>
+    </message>
+</context>
+<context>
+    <name>RegionListView</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>詳細資料</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
+        <source>RegionListView --- Region</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
+        <translation>區域</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
+        <source>RegionListView --- Latency</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
+        <translation>延遲</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
+        <source>RegionListView --- Favorite</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
+        <translation>我的最愛</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/region/RegionPage.qml" line="34"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>區域清單</translation>
+    </message>
+</context>
+<context>
+    <name>RegionRowLabels</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>離線</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>專屬 IP 喜好設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>一般</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>帳戶</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>私隱</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>網路</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>連線</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Proxy</source>
+        
+        <translation>代理伺服器</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>幫助</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>一般設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>帳戶資料</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>私隱設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>網路設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>連線設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
+        
+        <translation>代理伺服器喜好設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>幫助</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="143"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>提示</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="177"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>設定</translation>
+    </message>
+</context>
+<context>
+    <name>TrayMenuBuilder</name>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="137"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>連線到專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="159"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>連線到區域</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
+        <source>TrayMenuBuilder --- Help</source>
+        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
+        <translation>幫助</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+        <source>TrayMenuBuilder --- Show Window</source>
+        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
+        <translation>顯示視窗</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <source>TrayMenuBuilder --- Resume Connection</source>
+        <translation>恢復連線</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <source>TrayMenuBuilder --- Connect (Auto)</source>
+        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
+        <translation>連線 (自動)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+        <source>TrayMenuBuilder --- Connect (%1)</source>
+        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
+        <translation>連線 (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+        <source>TrayMenuBuilder --- Disconnect</source>
+        <extracomment>Menu command to disconnect from the VPN.</extracomment>
+        <translation>解除連線</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+        <source>TrayMenuBuilder --- Snooze</source>
+        <translation>暫停</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+        <source>TrayMenuBuilder --- 5 Minutes</source>
+        <translation>5 分鐘</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+        <source>TrayMenuBuilder --- 10 Minutes</source>
+        <translation>10 分鐘</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+        <source>TrayMenuBuilder --- 15 Minutes</source>
+        <translation>15 分鐘</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+        <source>TrayMenuBuilder --- 30 Minutes</source>
+        <translation>30 分鐘</translation>
+    </message>
+    <message>
+    <source>TrayMenuBuilder --- Connect to</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>連線至</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="165"/>
+        <source>TrayMenuBuilder --- Log In</source>
+        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
+        <translation>登入</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="176"/>
+        <source>TrayMenuBuilder --- Settings...</source>
+        <extracomment>Menu command to open the settings dialog.</extracomment>
+        <translation>設定……</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="180"/>
+        <source>TrayMenuBuilder --- Enable Debug Logging</source>
+        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
+        <translation>啟用錯誤偵測記錄</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="182"/>
+        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
+        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
+        <translation>提交錯誤偵測記錄……</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="185"/>
+        <source>TrayMenuBuilder --- Changelog</source>
+        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
+        <translation>更新日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+        <source>TrayMenuBuilder --- Support Portal</source>
+        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
+        <translation>支援入口網站</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <source>TrayMenuBuilder --- Blog</source>
+        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
+        <translation>部落格</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
+        <translation>複製公開 IP (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="204"/>
+        <source>TrayMenuBuilder --- Copy Public IP</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
+        <translation>複製公開 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
+        <translation>複製已轉送連接埠 (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
+        <translation>複製已轉送連接埠</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="226"/>
+        <source>TrayMenuBuilder --- Quit</source>
+        <extracomment>Menu command to quit the application.</extracomment>
+        <translation>離開</translation>
+    </message>
+</context>
+<context>
+    <name>AccountModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
+        <source>AccountModule --- Subscription tile</source>
+        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
+        <translation>訂購計劃區塊</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
+        <source>AccountModule --- SUBSCRIPTION</source>
+        <translation>訂購計劃</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
+        <source>AccountModule --- Subscription</source>
+        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
+        <translation>訂購計劃</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
+        <source>AccountModule --- Expired</source>
+        <translation>已過期</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
+        <source>AccountModule --- (%1 days left)</source>
+        <translation>(剩下 %1 日)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Expired on</source>
+        <translation>於以下日子過期</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Renews on</source>
+        <translation>於以下日子續約</translation>
+    </message>
+</context>
+<context>
+    <name>AccountPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <source>AccountPage --- Username</source>
+        <translation>使用者名稱</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <source>AccountPage --- Subscription</source>
+        <translation>訂購計劃</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <source>AccountPage --- Expired</source>
+        <translation>已過期</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <source>AccountPage --- (expired on %1)</source>
+        <translation>(於 %1 過期)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <source>AccountPage --- (renews on %1)</source>
+        <translation>(於 %1 續約)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <source>AccountPage --- (expires on %1)</source>
+        <translation>(將於 %1 過期)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Renews in %1 days</source>
+        <translation>%1 日後續約</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Expires in %1 days</source>
+        <translation>%1 日後過期</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>購買訂購計劃</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>管理訂購計劃</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>續約</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>管理我的帳戶</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
+        <source>AccountPage --- Logout / Switch Account</source>
+        <translation>登出 / 切換帳戶</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
+        <source>AccountPage --- Not logged in</source>
+        <translation>尚未登入</translation>
+    </message>
+</context>
+<context>
+    <name>BelowFold</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
+        <source>BelowFold --- DEFAULT DISPLAY</source>
+        <translation>預設顯示</translation>
+    </message>
+</context>
+<context>
+    <name>BetaAgreementDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
+        <source>BetaAgreementDialog --- Agreement</source>
+        <translation>協議</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
+        <source>BetaAgreementDialog --- Accept</source>
+        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
+        <translation>接受</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
+        <source>BetaAgreementDialog --- Decline</source>
+        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
+        <translation>拒絕</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
+        <source>BetaAgreementDialog --- Agreement text</source>
+        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
+        <translation>協議文本</translation>
+    </message>
+</context>
+<context>
+    <name>Client</name>
+    <message>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+        <source>Client --- %1 - Best</source>
+        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
+        <translation>%1 - 最佳</translation>
     </message>
 </context>
 <context>
@@ -1239,38 +1719,38 @@
         <translation>最新推出的高效通訊協定，讓你體驗更佳效能。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="93"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
         <source>ConnectionPage --- OpenVPN® Settings</source>
         <translation>OpenVPN® 設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="95"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
         <source>ConnectionPage --- WireGuard® Settings</source>
         <translation>WireGuard® 設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="132"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
         <source>ConnectionPage --- Trademarks</source>
         <translation>商標</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="146"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="147"/>
         <source>ConnectionPage --- What do these settings mean?</source>
         <translation>這些設定代表甚麼？</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="164"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
         <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
         <translation>所有產品及公司名稱均屬於其所有者的商標（™）或註冊商標（®）。使用這些商標並不代表與相關商標所有者有任何關係或獲他們認可。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="166"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="167"/>
         <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
         <translation>OpenVPN® 是 OpenVPN Technologies,Inc. 的商標。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="167"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
         <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
         <translation>WireGuard® 是 Jason A. Donenfeld 的個人擁有商標。</translation>
     </message>
@@ -1436,42 +1916,42 @@
 <context>
     <name>DaemonAccount</name>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
         <source>DaemonAccount --- Deactivated</source>
         <translation>停用</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
         <source>DaemonAccount --- One Month Plan</source>
         <translation>一個月計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
         <source>DaemonAccount --- Three Month Plan</source>
         <translation>三個月計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="32"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
         <source>DaemonAccount --- Six Month Plan</source>
         <translation>六個月計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="33"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
         <source>DaemonAccount --- One Year Plan</source>
         <translation>一年計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="34"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
         <source>DaemonAccount --- Two Year Plan</source>
         <translation>兩年計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="35"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
         <source>DaemonAccount --- Three Year Plan</source>
         <translation>三年計劃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="36"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
         <source>DaemonAccount --- Trial</source>
         <translation>試用版</translation>
     </message>
@@ -1993,116 +2473,116 @@
 <context>
     <name>GeneralPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="21"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="22"/>
         <source>GeneralPage --- Launch on System Startup</source>
         <translation>系統開機時啟動</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="37"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="38"/>
         <source>GeneralPage --- Connect on Launch</source>
         <translation>啟動時進行連線</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="41"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="42"/>
         <source>GeneralPage --- Show Desktop Notifications</source>
         <translation>顯示桌面通知</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="47"/>
         <source>GeneralPage --- Language</source>
         <translation>語言</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="63"/>
         <source>GeneralPage --- Theme</source>
         <translation>主題</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="66"/>
         <source>GeneralPage --- Dark</source>
         <translation>黑色</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="67"/>
         <source>GeneralPage --- Light</source>
         <translation>明亮</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="73"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="74"/>
         <source>GeneralPage --- Tray Icon Style</source>
         <extracomment>This setting allows the user to choose a style for the icon shown in the system tray / notification area. It should use the typical desktop terminology for the &quot;tray&quot;.</extracomment>
         <translation>工具列圖示風格</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="79"/>
         <source>GeneralPage --- The &apos;Auto&apos; setting chooses an icon based on your desktop theme.</source>
         <translation>「自動」設定將依據您的桌面主題選擇圖示。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="83"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Auto</source>
         
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Light</source>
         
         <translation>明亮</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Dark</source>
         
         <translation>黑色</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Colored</source>
         
         <translation>彩色</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="88"/>
         <extracomment>icon-theme</extracomment>
 <source>GeneralPage -- icon-theme --- Classic</source>
         
         <translation>經典</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="104"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="105"/>
         <source>GeneralPage --- Dashboard Appearance</source>
         <extracomment>Setting controlling how the dashboard is displayed - either as a popup attached to the system tray or as an ordinary window.</extracomment>
         <translation>控制台外觀</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="109"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="110"/>
         <source>GeneralPage --- Attached to Tray</source>
         <extracomment>Setting value indicating that the dashboard is a popup attached to the system tray.</extracomment>
         <translation>連接著工具列</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="111"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="112"/>
         <source>GeneralPage --- Window</source>
         <extracomment>Setting value indicating that the dashboard is an ordinary window</extracomment>
         <translation>視窗</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="116"/>
         <source>GeneralPage --- Attached mode may not work with all desktop environments, and it requires a system tray. If you can&apos;t find the dashboard, start Private Internet Access again to show it, and switch back to Window mode in Settings.</source>
         <translation>連接模式可能無法在所有桌面環境中使用，並且您需要顯示工具列。如果找不到控制台，請再次啟動 Private Internet Access 以顯示它，然後在「設定」中切換回視窗模式。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="129"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="130"/>
         <source>GeneralPage --- Reset All Settings</source>
         <translation>重設所有設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="132"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="133"/>
         <source>GeneralPage --- Reset all settings to their default values?</source>
         <translation>要將所有設定重設為預設值嗎？</translation>
     </message>
@@ -2196,159 +2676,157 @@
 <context>
     <name>HelpPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="31"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="32"/>
         <source>HelpPage --- Version</source>
         <translation>版本</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="58"/>
         <source>HelpPage --- Client:</source>
         <translation>客戶端 :</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="72"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="73"/>
         <source>HelpPage --- Daemon:</source>
         <translation>Daemon：</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="87"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="88"/>
         <source>HelpPage --- Changelog</source>
         <translation>變更記錄</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="96"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="97"/>
         <source>HelpPage --- Quick Tour</source>
         <extracomment>This link displays the tour that users see initially after installation.</extracomment>
         <translation>快速導覽</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="106"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="107"/>
         <source>HelpPage --- Receive Beta Updates</source>
         <translation>接收 Beta 更新</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="107"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="108"/>
         <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
         <translation>加入我們的 Beta 計畫，幫助我們測試新功能及提供意見回饋。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="158"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="159"/>
         <source>HelpPage --- Network</source>
         <translation>網路</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="196"/>
-        <source>HelpPage --- Current</source>
+    <source>HelpPage --- Current</source>
         <translation>目前</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="199"/>
-        <source>HelpPage --- Next Generation</source>
+    <source>HelpPage --- Next Generation</source>
         <translation>下一代</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="210"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="166"/>
         <source>HelpPage --- Include Geo-Located Regions</source>
         <translation>包括地理定位區域</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="221"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="177"/>
         <source>HelpPage --- Support</source>
         <translation>支援</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="229"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="185"/>
         <source>HelpPage --- Disable Accelerated Graphics</source>
         <translation>停用圖形加速</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="238"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="194"/>
         <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
         <translation>重新啟動 Private Internet Access 以套用此設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="246"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="202"/>
         <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
         <translation>圖形加速功能可降低 CPU 使用率及使圖形效果得以呈現，不過可能會引起部分顯示卡或驅動程式發生問題。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="250"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
         <source>HelpPage --- Enable Debug Logging</source>
         <translation>啟用錯誤偵測記錄</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="207"/>
         <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
         <translation>儲存錯誤偵測記錄，然後提交到技術支援可幫助解決問題。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="267"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="223"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>提交錯誤偵測記錄</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="273"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="229"/>
         <source>HelpPage --- Support Portal</source>
         <translation>支援中心</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="244"/>
         <source>HelpPage --- Maintenance</source>
         <translation>維護</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="254"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>重新安裝 OpenVPN 網路介面卡</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>正在重新安裝 OpenVPN 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="309"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>重新安裝 WireGuard 網路介面卡</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="310"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>正在重新安裝 WireGuard 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="333"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="289"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>正在重新安裝通道分割篩選器…</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="334"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="290"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>重新安裝通道分割篩選器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="373"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="329"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>已重新安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="398"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="354"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>移除 Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="395"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>無法在虛擬終端機中執行指令。請安裝與 x-terminal-emulator 相容的虛擬終端機。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="441"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="397"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>無法開啟虛擬終端機</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="450"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -2418,13 +2896,13 @@
         <translation>連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="175"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="163"/>
         <source>IPModule --- Failed</source>
         <extracomment>Port forward - label used in IP widget when request fails</extracomment>
         <translation>失敗</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="178"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="166"/>
         <source>IPModule --- Not Available</source>
         <extracomment>Port forward - label used in IP widget when not available for this region</extracomment>
         <translation>無法使用</translation>
@@ -2570,13 +3048,13 @@
 <context>
     <name>NativeAcc::TableCellCheckButtonImpl</name>
     <message>
-        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="133"/>
+        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="122"/>
         <source>NativeAcc::TableCellCheckButtonImpl --- checked</source>
         <extracomment>Value indicator for a toggle button in the &quot;checked&quot; state. Should use normal terminology for a check box or toggle button. (Screen reader annotation for &quot;Favorite region&quot; table cell button on Windows.)</extracomment>
         <translation>已勾選</translation>
     </message>
     <message>
-        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="141"/>
+        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="130"/>
         <source>NativeAcc::TableCellCheckButtonImpl --- unchecked</source>
         <extracomment>Value indicator for a toggle button in the &quot;unchecked&quot; state. Should use normal terminology for a check box or toggle button. (Screen reader annotation for &quot;Favorite region&quot; table cell button on Windows.)</extracomment>
         <translation>未勾選</translation>
@@ -2585,13 +3063,13 @@
 <context>
     <name>NativeAcc::ValueTextAttached</name>
     <message>
-        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="65"/>
+        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="21"/>
         <source>NativeAcc::ValueTextAttached --- Copies the value</source>
         <extracomment>Screen reader description of the &quot;copy&quot; action for IP address/port fields, etc. &quot;Copies&quot; refers to copying to the system clipboard and should use the OS&apos;s normal terminology. Grammatically, the implied subject is the accessibility action, &quot;[This action] copies the value [to the clipboard]&quot;.</extracomment>
         <translation>複製數值</translation>
     </message>
     <message>
-        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="78"/>
+        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="30"/>
         <source>NativeAcc::ValueTextAttached --- Copy</source>
         <extracomment>Screen reader annotation to describe the &quot;copy&quot; action on the IP address and port fields, etc. Copies the text to the clipboard, should be a verb or short verb phrase.</extracomment>
         <translation>複製</translation>
@@ -2695,72 +3173,72 @@
         <translation>由 VPN IP 轉送連接埠至您的電腦。請選擇所需的連接埠。注意，並非所有地區都支援轉送連接埠。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="193"/>
         <source>NetworkPage --- Allow LAN Traffic</source>
         <translation>允許 LAN 傳輸</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="203"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="194"/>
         <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
         <translation>即使您正在使用 VPN 切斷開關，請始終允許本地網路內的裝置進行傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="216"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="207"/>
         <source>NetworkPage --- Choose which applications use the VPN.</source>
         <extracomment>Description for the split tunnel setting.</extracomment>
         <translation>選擇使用 VPN 的應用程式。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="211"/>
         <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
         <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
         <translation>略過 VPN：永遠能直接連接到網際網路的應用程式</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="225"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="216"/>
         <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
         <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
         <translation>僅限 VPN - 只有在 PIA 開啟並連線 VPN 時，應用程式才能連線</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="231"/>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="324"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="222"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="315"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>通道分割</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="251"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="242"/>
         <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
         <translation>核准通道分割擴充程式以啟用此功能。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="266"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="257"/>
         <source>NetworkPage --- Security Preferences</source>
         <translation>安全喜好設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="379"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="370"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>正在安裝通道分割篩選器…</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="388"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="379"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>若啟用此功能，系統將會安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="395"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="386"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>尚未安裝通道分割篩選器。請在「幫助」頁面中重新安裝。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="456"/>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="461"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="447"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="452"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>排除應用程式</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="504"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="495"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>可能需要重新啟動應用程式才能套用變更。</translation>
     </message>
@@ -2815,120 +3293,120 @@
 <context>
     <name>OverlayDialog</name>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="42"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="68"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- OK</source>
         
         <translation>確認</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="43"/>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="45"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="69"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="71"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Cancel</source>
         
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="44"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="70"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Save</source>
         
         <translation>儲存</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="46"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="72"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Close</source>
         
         <translation>關閉</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="47"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="73"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Discard</source>
         
         <translation>捨棄</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="48"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="74"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Apply</source>
         
         <translation>套用</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="49"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="75"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Reset</source>
         
         <translation>重設</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="50"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="76"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Restore Defaults</source>
         
         <translation>還原預設值</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="51"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="77"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Help</source>
         
         <translation>幫助</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="52"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="78"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Save All</source>
         
         <translation>全部儲存</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="53"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="79"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Yes</source>
         
         <translation>是</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="54"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="80"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Yes to All</source>
         
         <translation>所有皆是</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="55"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="81"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- No</source>
         
         <translation>否</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="56"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="82"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- No to All</source>
         
         <translation>所有皆否</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="57"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="83"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Abort</source>
         
         <translation>中止</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="58"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="84"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Retry</source>
         
         <translation>重試</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="59"/>
+        <location filename="../../../client/res/components/common/OverlayDialog.qml" line="85"/>
         <extracomment>dialog button</extracomment>
 <source>OverlayDialog -- dialog button --- Ignore</source>
         
@@ -3174,76 +3652,76 @@
 <context>
     <name>PrivacyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="26"/>
         <source>PrivacyPage --- VPN Killswitch</source>
         <extracomment>Label for the setting that controls the VPN killswitch, a privacy feature that prevents network traffic from leaving the user&apos;s computer unless it is going through the VPN. The term &quot;killswitch&quot; is a recognizable term in the VPN industry that gets used in marketing and can be left unlocalized if there is no clear translation for the concept.</extracomment>
         <translation>VPN 切斷開關</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="27"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="28"/>
         <source>PrivacyPage --- Prevent leaks by blocking traffic outside the VPN</source>
         <extracomment>Descriptive label for the VPN killswitch setting.</extracomment>
         <translation>封鎖 VPN 以外的傳輸以防止資料外洩。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="35"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="36"/>
         <source>PrivacyPage --- Off: Don&apos;t block any traffic</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Off&quot;. No network traffic is blocked and the user&apos;s privacy can potentially be compromised if the VPN connection unexpectedly drops.</extracomment>
         <translation>關閉：不要封鎖任何傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="40"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="41"/>
         <source>PrivacyPage --- Auto: Block outside traffic when the VPN is on</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Auto&quot;. Network traffic that tries to go outside the VPN is blocked as long as the user has turned on the VPN, including if the actual VPN connection itself unexpectedly drops.</extracomment>
         <translation>自動：當 VPN 啟用時封鎖外來傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="45"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="46"/>
         <source>PrivacyPage --- Always: Also block all traffic when the VPN is off</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Always&quot;. Network traffic that tries to go outside the VPN is always blocked, even when the user has switched off the VPN. This effectively disables the user&apos;s internet connection whenever they are not connected to the VPN.</extracomment>
         <translation>永遠：當 VPN 停用時封鎖所有傳輸。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage -- privacy-killswitch --- Off</source>
         
         <extracomment>These values are used for the Killswitch setting.</extracomment>
         <translation>停用</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage --- Auto</source>
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage --- Always</source>
         <translation>永遠</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="68"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>PIA MACE 需要 PIA DNS 來運作。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="71"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>PIA MACE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="73"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>鎖封用作廣告、追蹤器及惡意程式的域名。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="79"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
         <translation>停用</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="79"/>
         <source>PrivacyPage --- On</source>
         <translation>啟用</translation>
     </message>
@@ -3278,13 +3756,13 @@
 <context>
     <name>QuickConnectButton</name>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="115"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="157"/>
         <source>QuickConnectButton --- Connect to favorite %1</source>
         <extracomment>Screen reader annotation for a Quick Connect button with a heart icon, which is used for a favorite region. %1 is a region name.</extracomment>
         <translation>連接至最愛區域%1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="120"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="162"/>
         <source>QuickConnectButton --- Connect to %1</source>
         <extracomment>Screen reader annotation for a Quick Connect button without a heart icon, which is for a recently-used or nearby location. %1 is a region name.</extracomment>
         <translation>連接至%1</translation>
@@ -3323,41 +3801,14 @@
 <context>
     <name>RegionDelegate</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionDelegate.qml" line="47"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="26"/>
         <source>RegionDelegate --- Port forwarding is not available for this location.</source>
         <translation>連接埠轉送功能不適用於此區域。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionDelegate.qml" line="48"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="27"/>
         <source>RegionDelegate --- Port forwarding is not available for this country.</source>
         <translation>連接埠轉送功能不適用於此國家。</translation>
-    </message>
-</context>
-<context>
-    <name>RegionListView</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="603"/>
-        <source>RegionListView --- Region</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
-        <translation>區域</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="609"/>
-        <source>RegionListView --- Latency</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
-        <translation>延遲</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="615"/>
-        <source>RegionListView --- Favorite</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
-        <translation>我的最愛</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/region/RegionPage.qml" line="34"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>區域清單</translation>
     </message>
 </context>
 <context>
@@ -3373,34 +3824,34 @@
         <translation>自動 (%1)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="20"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="27"/>
         <source>RegionModule --- Region tile</source>
         <extracomment>Screen reader annotation for the Region tile, which users can click to go to the Region page and choose a region.</extracomment>
         <translation>區域區塊</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="50"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="70"/>
         <source>RegionModule --- VPN SERVER</source>
         <translation>VPN 伺服器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="139"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="179"/>
         <source>RegionModule --- VIA SOCKS5 PROXY</source>
         <translation>經由 SOCKS5 代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="141"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="181"/>
         <source>RegionModule --- VIA SHADOWSOCKS</source>
         <translation>經由 SHADOWSOCKS</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="185"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="225"/>
         <source>RegionModule --- Select region</source>
         <extracomment>Screen reader annotation for the button that makes up the Region tile, which users can click to go to the Region page and select a region. Should be a short description of the &quot;select region&quot; action.</extracomment>
         <translation>選取區域</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="190"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="236"/>
         <source>RegionModule --- Select region, %1 is selected</source>
         <extracomment>Screen reader description for the Region tile button. Should begin with the &quot;Select region&quot; translation, since that&apos;s what the button does. This also includes the currently-selected region, which the button displays. %1 is a region name.</extracomment>
         <translation>選取區域，已選取%1</translation>
@@ -3409,17 +3860,17 @@
 <context>
     <name>RegionPage</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="69"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="71"/>
         <source>RegionPage --- Search...</source>
         <translation>搜尋...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="92"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="94"/>
         <source>RegionPage --- Name</source>
         <translation>名稱</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="96"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="98"/>
         <source>RegionPage --- Latency</source>
         <translation>延遲</translation>
     </message>
@@ -3439,31 +3890,31 @@
 <context>
     <name>RegionRowBase</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="131"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="71"/>
         <source>RegionRowBase --- %1, geo-located region, does not support port forwarding</source>
         <extracomment>Screen reader annotation used for a region that is a geo-only region and does not support port forwarding. Corresponds to the two badges shown in the regions list. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
         <translation>%1，地理定位區域不支援連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="138"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="78"/>
         <source>RegionRowBase --- %1, geo-located region</source>
         <extracomment>Screen reader annotation used for a region that is a geo-only region. Corresponds to the globe badge shown in the regions list. %1 is a translated region name. The region name should come first</extracomment>
         <translation>%1，地理定位區域</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="146"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="86"/>
         <source>RegionRowBase --- %1, does not support port forwarding</source>
         <extracomment>Screen reader annotation used for a region that does not support port forwarding when the feature is enabled. Corresponds to the &quot;slashed-arrow&quot; indicator and &quot;Port forwarding is not supported by this region/country.&quot; tips. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
         <translation>%1，不支援連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="165"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="119"/>
         <source>RegionRowBase --- Favorite region</source>
         <extracomment>Screen reader annotation for the &quot;favorite&quot; button (heart icon) next to regions in the regions list. (The screen reader will indicate whether the button is &quot;on&quot; or &quot;off&quot;.)</extracomment>
         <translation>最愛區域</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="320"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ms</translation>
     </message>
@@ -3497,135 +3948,24 @@
         <translation>連接埠轉送</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="75"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="74"/>
         <source>SettingsModule --- Allow LAN</source>
         <translation>允許 LAN</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="82"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="81"/>
         <source>SettingsModule --- Debug Logging</source>
         <translation>正在記錄錯誤偵測</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="100"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="99"/>
         <source>SettingsModule --- Light Theme</source>
         <translation>明亮主題</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="111"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>檢閱所有設定...</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>一般</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>帳戶</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>私隱</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>網路</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="54"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>連線</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="55"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Proxy</source>
-        
-        <translation>代理伺服器</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>幫助</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>一般設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>帳戶資料</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>私隱設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>網路設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>連線設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        
-        <translation>代理伺服器喜好設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>幫助</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="130"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>提示</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="164"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>設定</translation>
     </message>
 </context>
 <context>
@@ -3719,7 +4059,7 @@
 <context>
     <name>SplitTunnelAddAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddAppRow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddAppRow.qml" line="57"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>新增應用程式</translation>
     </message>
@@ -3727,17 +4067,17 @@
 <context>
     <name>SplitTunnelAddIpRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="61"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="59"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>添加 IP 位址</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="108"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="106"/>
         <source>SplitTunnelAddIpRow --- IP Address or Subnet</source>
         <translation>IP 位址或子網絡</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAddIpRow.qml" line="113"/>
         <source>SplitTunnelAddIpRow --- You can enter an IPv4/IPv6 address, or a subnet in CIDR notation:</source>
         <translation>你可輸入 IPv4/IPv6 位址，或以無類別域間路由(CIDR)方式輸入子網絡：</translation>
     </message>
@@ -3801,18 +4141,18 @@
 <context>
     <name>SplitTunnelAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="120"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="115"/>
         <source>SplitTunnelAppRow --- Remove</source>
         <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel app rule. (Should be labeled like a normal command button.)</extracomment>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="161"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="156"/>
         <source>SplitTunnelAppRow --- Microsoft Store app</source>
         <translation>Microsoft Store 應用程式</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="170"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="165"/>
         <source>SplitTunnelAppRow --- App Store, Mail, Safari and others</source>
         <translation>App Store、郵件、Safari 和其他應用程式</translation>
     </message>
@@ -3820,7 +4160,7 @@
 <context>
     <name>SplitTunnelDefaultRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelDefaultRow.qml" line="84"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelDefaultRow.qml" line="79"/>
         <source>SplitTunnelDefaultRow --- All Other Apps</source>
         <translation>所有其他的應用程式</translation>
     </message>
@@ -3828,7 +4168,7 @@
 <context>
     <name>SplitTunnelIpRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelIpRow.qml" line="73"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelIpRow.qml" line="68"/>
         <source>SplitTunnelIpRow --- Remove</source>
         <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel ip rule. (Should be labeled like a normal command button.)</extracomment>
         <translation>移除</translation>
@@ -3837,30 +4177,29 @@
 <context>
     <name>SplitTunnelSettings</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="55"/>
-        <source>SplitTunnelSettings --- Applications</source>
+    <source>SplitTunnelSettings --- Applications</source>
         <translation>應用程式</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="359"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
         <source>SplitTunnelSettings --- App</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app names.</extracomment>
         <translation>應用程式</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="367"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="185"/>
         <source>SplitTunnelSettings --- Path</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app file paths. (These are visually placed below the app names, but they&apos;re annotated as a separate column.)</extracomment>
         <translation>路徑</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="374"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="192"/>
         <source>SplitTunnelSettings --- Behavior</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays the behavior selected for a specific app.</extracomment>
         <translation>行為</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="381"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="199"/>
         <source>SplitTunnelSettings --- Remove</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that removes a selected app.</extracomment>
         <translation>移除</translation>
@@ -3878,37 +4217,37 @@
 <context>
     <name>ThemedTextField</name>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="74"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="116"/>
         <source>ThemedTextField --- Undo</source>
         <translation>復原</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="82"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="124"/>
         <source>ThemedTextField --- Redo</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="93"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="135"/>
         <source>ThemedTextField --- Cut</source>
         <translation>剪下</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="101"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="143"/>
         <source>ThemedTextField --- Copy</source>
         <translation>複製</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="109"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="151"/>
         <source>ThemedTextField --- Paste</source>
         <translation>貼上</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="117"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="159"/>
         <source>ThemedTextField --- Delete</source>
         <translation>刪除</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="126"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="168"/>
         <source>ThemedTextField --- Select All</source>
         <translation>全選</translation>
     </message>
@@ -4032,147 +4371,6 @@
         <location filename="../../../client/res/components/common/TrayManager.qml" line="145"/>
         <source>TrayManager --- Disconnecting...</source>
         <translation>正在解除連線…</translation>
-    </message>
-</context>
-<context>
-    <name>TrayMenuBuilder</name>
-    <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
-        <source>TrayMenuBuilder --- Help</source>
-        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
-        <translation>幫助</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="47"/>
-        <source>TrayMenuBuilder --- Show Window</source>
-        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
-        <translation>顯示視窗</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="54"/>
-        <source>TrayMenuBuilder --- Resume Connection</source>
-        <translation>恢復連線</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="57"/>
-        <source>TrayMenuBuilder --- Connect (Auto)</source>
-        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
-        <translation>連線 (自動)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="59"/>
-        <source>TrayMenuBuilder --- Connect (%1)</source>
-        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
-        <translation>連線 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="71"/>
-        <source>TrayMenuBuilder --- Disconnect</source>
-        <extracomment>Menu command to disconnect from the VPN.</extracomment>
-        <translation>解除連線</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
-        <source>TrayMenuBuilder --- Snooze</source>
-        <translation>暫停</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="75"/>
-        <source>TrayMenuBuilder --- 5 Minutes</source>
-        <translation>5 分鐘</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="76"/>
-        <source>TrayMenuBuilder --- 10 Minutes</source>
-        <translation>10 分鐘</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
-        <source>TrayMenuBuilder --- 15 Minutes</source>
-        <translation>15 分鐘</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="78"/>
-        <source>TrayMenuBuilder --- 30 Minutes</source>
-        <translation>30 分鐘</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="123"/>
-        <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>連線至</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="129"/>
-        <source>TrayMenuBuilder --- Log In</source>
-        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
-        <translation>登入</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="140"/>
-        <source>TrayMenuBuilder --- Settings...</source>
-        <extracomment>Menu command to open the settings dialog.</extracomment>
-        <translation>設定……</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="144"/>
-        <source>TrayMenuBuilder --- Enable Debug Logging</source>
-        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
-        <translation>啟用錯誤偵測記錄</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="146"/>
-        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
-        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
-        <translation>提交錯誤偵測記錄……</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="149"/>
-        <source>TrayMenuBuilder --- Changelog</source>
-        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
-        <translation>更新日誌</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="152"/>
-        <source>TrayMenuBuilder --- Support Portal</source>
-        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
-        <translation>支援入口網站</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="154"/>
-        <source>TrayMenuBuilder --- Blog</source>
-        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
-        <translation>部落格</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="162"/>
-        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
-        <translation>複製公開 IP (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="168"/>
-        <source>TrayMenuBuilder --- Copy Public IP</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
-        <translation>複製公開 IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="176"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
-        <translation>複製已轉送連接埠 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
-        <translation>複製已轉送連接埠</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
-        <source>TrayMenuBuilder --- Quit</source>
-        <extracomment>Menu command to quit the application.</extracomment>
-        <translation>離開</translation>
     </message>
 </context>
 <context>

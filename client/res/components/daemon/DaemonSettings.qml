@@ -26,7 +26,6 @@ QtObject {
   // Settings
   readonly property string lastUsedVersion: NativeDaemon.settings.lastUsedVersion
   readonly property string location: NativeDaemon.settings.location
-  readonly property string infrastructure: NativeDaemon.settings.infrastructure
   readonly property bool includeGeoOnly: NativeDaemon.settings.includeGeoOnly
   readonly property string method: NativeDaemon.settings.method
   readonly property string protocol: NativeDaemon.settings.protocol

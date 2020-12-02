@@ -44,8 +44,7 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
     // If we're connected check which infra we're using
     if(_state.connectionState() == QStringLiteral("Connected"))
     {
-        if(_state.connectedConfig().infrastructure() == QStringLiteral("modern") &&
-           _state.connectedServer())
+        if(_state.connectedServer())
         {
             // Use a fixed address for the internal meta sevice available in
             // the modern infrastructure.  This is provided by the VPN server,
@@ -55,15 +54,6 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
                 QString("https://10.0.0.1:443") + _dynamicBasePath,
                 _pDynamicBaseCA,
                 _state.connectedServer()->commonName()}};
-            return {pBaseData};
-        }
-        else
-        {
-            // Not in next-gen, meta is not available on the server.  Legacy
-            // doesn't provide meta services from other regions anyway, just use
-            // fixed bases.
-            qInfo() << "Connected to legacy infra, using fixed API bases only";
-            QSharedPointer<ApiBaseData> pBaseData{new ApiBaseData{_fixedBaseUris}};
             return {pBaseData};
         }
     }

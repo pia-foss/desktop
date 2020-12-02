@@ -18,6 +18,8 @@
 # along with the Private Internet Access Desktop Client.  If not, see
 # <https://www.gnu.org/licenses/>.
 
+set -e
+
 if [ $# -lt 1 ]; then
     echo "usage: $0 <img-size>"
     echo "run inside icons-updated directory (with all the original SVG files)"
@@ -32,27 +34,22 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-rm -rf png_$1 svg_processed
-mkdir -p png_$1
+SIZE="$1"
+
+rm -rf "png_$SIZE" svg_processed
+mkdir -p "png_$SIZE"
 mkdir -p svg_processed
 mkdir svg_processed/light
 mkdir svg_processed/dark
 mkdir svg_processed/common
 
-# Light/dark variations - remove the background circles, render these in the app
-# This includes removing the 'disabled' background circles; the stroke on these
-# is too small to see at ~60 px anyway
-for type in dark light; do
-    for state in disabled inactive active; do
-        for icon in icon-$type-$state-*.svg; do
-            sed 's|<circle.*r="50"></circle>||' $icon > ./svg_processed/$type/$icon
-        done
-    done
-done
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
-# 'color' is the same for light and dark
-for icon in icon-light-color-*.svg; do
-    sed 's|<circle.*r="50"></circle>||' $icon > ./svg_processed/common/$icon
+# Process the original "dark active" SVG, this is the only SVG currently used to
+# render icons, all other shades are generated from this one.
+# Remove the background circles, these are rendered in-app.
+for icon in icon-dark-active-*.svg; do
+    sed 's|<circle.*r="50".*></circle>||' "$icon" > "./svg_processed/dark/$icon"
 done
 
 # Call with:
@@ -62,32 +59,49 @@ done
 #
 # Call from the original working directory
 function generate_shade {
+    NEWCOLOR="$1"
+    NEWNAME="$2"
+    THEME="$3"
     # Custom shades are always generated from dark-active, doesn't really matter
-    cd ./svg_processed/dark
+    pushd ./svg_processed/dark >/dev/null
     for icon in icon-dark-active-*.svg; do
-        icon_name=`echo $icon | sed -n 's/^icon-[a-z]*-[a-z]*-\(.*\)\.svg/\1/p'`
-        sed "s|fill=\"#323642\"|fill=\"#$1\"|" $icon > ../$3/icon-$3-$2-$icon_name.svg
+        icon_name="$(echo "$icon" | sed -n 's/^icon-[a-z]*-[a-z]*-\(.*\)\.svg/\1/p')"
+        sed -e "s|fill=\"#323642\"|fill=\"#$NEWCOLOR\"|" -e "s|fill:#323642\([;\"]\)|fill:#$NEWCOLOR\1|" "$icon" > "../$THEME/icon-$THEME-$NEWNAME-$icon_name.svg"
     done
-    cd ../..
+    popd
 }
 
-# Generate a #889099 version for the inactive dark-theme settings tabs
+
+# FFFFFF - selected settings tab and selected quick settings button, both themes
+generate_shade FFFFFF color common
+# 889099 - inactive settings tab, dark theme
 generate_shade 889099 tabinactive dark
-
-# Generate a #eeeeee version for the inactive light-theme settings tabs
+# EEEEEE - inactive settings tab, light theme
 generate_shade EEEEEE tabinactive light
+# "active dark" is generated above from the original source SVG
+# 5B6370 - active quick settings button, light theme
+generate_shade 5B6370 active light
+# 323642 - inactive quick settings button, dark theme
+generate_shade 323642 inactive dark
+# 889099 - inactive quick settings button, light theme
+generate_shade 889099 inactive light
+# 5B6370 - disabled (not currently used), dark theme
+generate_shade 5B6370 disabled dark
+# D7D8D9 - disabled (not currently used), light theme
+generate_shade D7D8D9 disabled light
 
-cd svg_processed
+pushd svg_processed >/dev/null
 for type in *; do
-    cd $type
-    mkdir -p ../../png_$1/$type
+    pushd "$type" >/dev/null
+    mkdir -p "../../png_$SIZE/$type"
     for img in *.svg; do
-        echo $img
-	img_name=`echo $img | sed -n 's/^icon-[a-z]*-[a-z]*-\(.*\)\.svg/\1/p'`
-        img_type=`echo $img | sed -n 's/^icon-[a-z]*-\([a-z]*\)-.*\.svg/\1/p'`
+        echo "$img"
+	img_name="$(echo "$img" | sed -n 's/^icon-[a-z]*-[a-z]*-\(.*\)\.svg/\1/p')"
+        img_type="$(echo "$img" | sed -n 's/^icon-[a-z]*-\([a-z]*\)-.*\.svg/\1/p')"
         # Inkscape really wants absolute paths here, it probably changes its
         # working directory or something
-        /Applications/Inkscape.app/Contents/Resources/bin/inkscape -z -e `pwd`/../../png_$1/$type/$img_name-$img_type.png -w $1 -h $1 `pwd`/$img
+        /Applications/Inkscape.app/Contents/Resources/bin/inkscape -z -e "$(pwd)/../../png_$SIZE/$type/$img_name-$img_type.png" -w "$SIZE" -h "$SIZE" "$(pwd)/$img"
     done
-    cd ..
+    popd
 done
+popd

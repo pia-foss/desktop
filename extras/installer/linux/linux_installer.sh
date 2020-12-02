@@ -91,9 +91,9 @@ function startClient() {
     # The PIA client doesn't really care, but some of the programs it starts
     # might (in particular, Terminator does, and it might be the user's
     # preferred terminal emulator for updates / installation)
-    pushd "$installDir/bin/" > /dev/null 2>&1
-    "$installDir/bin/${brandCode}-client" > /dev/null 2>&1 & disown
-    popd > /dev/null 2>&1
+    pushd "$installDir/bin/" >/dev/null 2>&1
+    nohup "$installDir/bin/${brandCode}-client" >/dev/null 2>&1 &
+    popd >/dev/null 2>&1
     true
 }
 

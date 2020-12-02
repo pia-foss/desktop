@@ -21,13 +21,20 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import "../../../../javascript/app.js" as App
 import "../../../daemon"
+import "../../../client"
 import "../../../theme"
 import "../../../common"
 import "../../../core"
 
 MovableModule {
   id: regionModule
-  implicitHeight: proxyVia.visible ? 130 : 80
+  implicitHeight: {
+    if(proxyVia.visible)
+      return proxyVia.y + 40
+    if(dipSubtitle.visible)
+      return dipSubtitle.y + 36 // This text is a little smaller
+    return regionValue.y + 40
+  }
   moduleKey: 'region'
 
   // RegionModule doesn't need a group since the whole region is one button, but
@@ -44,6 +51,19 @@ MovableModule {
     if(Daemon.state.connectionState === "Connected")
       return Daemon.state.connectedConfig.vpnLocation
     return Daemon.state.vpnLocations.bestLocation
+  }
+  // Lock-in the displayed location when already connected.
+  // Otherwise a region list update might result in the incorrect location being shown.
+  // This could happen if the 'chosen' location (which was offline
+  // when we connected) was to come back online.
+  readonly property var chosenLocation: {
+    if(Daemon.state.connectionState === "Connected")
+    {
+        return !Daemon.state.connectedConfig.vpnLocationAuto ?
+            Daemon.state.connectedConfig.vpnLocation : null
+    }
+
+    return Daemon.state.vpnLocations.chosenLocation
   }
 
   LocationMap {
@@ -87,10 +107,8 @@ MovableModule {
 
   Text {
     id: regionValue
-    text: {
-      return Messages.displayLocationSelection(Daemon.state.vpnLocations.chosenLocation,
-                                               regionModule.autoLocation)
-    }
+    text: Messages.displayLocationSelection(regionModule.chosenLocation,
+                                            regionModule.autoLocation)
 
     color: Theme.dashboard.moduleTextColor
     font.pixelSize: Theme.dashboard.moduleValueTextPx
@@ -98,6 +116,27 @@ MovableModule {
     y: 40
     width: rightChevron.x - 5 - x
     elide: Text.ElideRight
+  }
+
+  DedicatedIpSubtitle {
+    id: dipSubtitle
+    x: 20
+    y: 60
+    visible: {
+      if(regionModule.chosenLocation)
+        return regionModule.chosenLocation.dedicatedIpExpire > 0
+      return false
+    }
+    dedicatedIp: {
+      if(regionModule.chosenLocation)
+        return regionModule.chosenLocation.dedicatedIp
+      return ""
+    }
+    // Fill the DIP tag with the background color if it's shown, since it may
+    // otherwise allow part of the map to show though.  This ignores the
+    // background change when the module is moved, but that's fine, the result
+    // is that this looks like a label stuck on the module, which it is.
+    dipTagBackground: Theme.dashboard.backgroundColor
   }
 
   function displayConnectionProxy(config) {
@@ -151,6 +190,7 @@ MovableModule {
   }
 
   StaticText {
+    id: proxyLabelText
     text: {
       switch(proxyLabels.type) {
         case 'custom':
@@ -165,7 +205,7 @@ MovableModule {
     color: Theme.dashboard.moduleTitleColor
     font.pixelSize: Theme.dashboard.moduleLabelTextPx
     x: 20
-    y: 70
+    y: (dipSubtitle.visible ? dipSubtitle.y : regionValue.y) + 30
     visible: proxyVia.visible
   }
 
@@ -176,7 +216,7 @@ MovableModule {
     color: Theme.dashboard.moduleTextColor
     font.pixelSize: Theme.dashboard.moduleValueTextPx
     x: 20
-    y: 90
+    y: proxyLabelText.y + 20
     visible: !!text
   }
 
@@ -201,11 +241,18 @@ MovableModule {
     //: which users can click to go to the Region page and select a region.
     //: Should be a short description of the "select region" action.
     name: uiTr("Select region")
-    //: Screen reader description for the Region tile button.  Should begin with
-    //: the "Select region" translation, since that's what the button does.
-    //: This also includes the currently-selected region, which the button
-    //: displays.  %1 is a region name.
-    description: uiTr("Select region, %1 is selected").arg(regionValue.text)
+    description: {
+      // regionValue handles "auto" choices, but if we're displaying a chosen
+      // location, we want the detailed description to cover the possibility of
+      // a dedicated IP region being chosen.
+      var descRegion = regionModule.chosenLocation ?
+        Client.getDetailedLocationName(chosenLocation) : regionValue.text
+      //: Screen reader description for the Region tile button.  Should begin with
+      //: the "Select region" translation, since that's what the button does.
+      //: This also includes the currently-selected region, which the button
+      //: displays.  %1 is a region name.
+      uiTr("Select region, %1 is selected").arg(descRegion)
+    }
 
     cursorShape: Qt.PointingHandCursor
     // Show this focus cue on the inside, since it fills the full module

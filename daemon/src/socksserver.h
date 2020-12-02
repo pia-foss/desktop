@@ -126,8 +126,7 @@ public:
     // SocksConnection also destroys the QTcpSocket (and consequently, itself)
     // if the connection is closed.
     SocksConnection(QTcpSocket &socksSocket, QByteArray passwordHash,
-                    const QHostAddress &bindAddress,
-                    QString bindInterface);
+                    QHostAddress bindAddress, QString bindInterface);
 
 private:
     // Close the TCP connection(s) immediately without sending any failure
@@ -173,6 +172,8 @@ private:
     // exists.
     QTcpSocket &_socksSocket;
     QByteArray _passwordHash;
+    QHostAddress _bindAddress;
+    QString _bindInterface;
     State _state;
     // In states other than Connecting and Connected, we set a 5-second timer
     // that will abort the connection.  This means that:

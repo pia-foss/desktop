@@ -60,20 +60,16 @@ FocusScope {
     visible: root.labelHeight > 0
   }
 
-  ThemedTextField {
+  SettingsTextField {
     id: control
     anchors.fill: parent
     anchors.topMargin: root.labelHeight
     enabled: root.enabled
-    focus: true
-    font.pixelSize: 13
-    color: root.enabled ? Theme.settings.inputTextboxTextColor : Theme.settings.inputTextboxTextDisabledColor
-    topPadding: 0
-    bottomPadding: 0
-    leftPadding: 7
-    rightPadding: 7
-
     label: root.label
+
+    borderColor: !control.acceptableInput && !control.activeFocus ?
+      Theme.settings.inputTextboxInvalidBorderColor :
+      control.defaultBorderColor
 
     onEditingFinished: {
       if (acceptableInput && setting.currentValue !== control.text) {
@@ -81,15 +77,6 @@ FocusScope {
       }
     }
     onAccepted: root.accepted()
-
-    background: Rectangle {
-      radius: 3
-      color: Theme.settings.inputTextboxBackgroundColor
-      border.width: control.activeFocus ? 2 : 1
-      border.color: !control.acceptableInput && !control.activeFocus ? Theme.settings.inputTextboxInvalidBorderColor : Theme.settings.inputTextboxBorderColor
-      implicitWidth: 100
-      implicitHeight: 24
-    }
   }
 
   Component.onCompleted: {

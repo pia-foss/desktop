@@ -36,28 +36,6 @@ namespace
         {GetSetType::requestPortForward, QStringLiteral("Whether to request a forwarded port on the next connection attempt")}
     };
 
-    // Match the location specified on the command line to the daemon's location
-    // list.  Returns the location ID if a match is found (or "auto").
-    //
-    // If no match is found, returns an empty string.
-    QString matchSpecifiedLocation(const DaemonState &state, const QString &location)
-    {
-        if(location == GetSetValue::locationAuto)
-            return GetSetValue::locationAuto;
-
-        // This an O(N) lookup, but since we just run once there's no point to
-        // building a better representation of the data just to use it once and
-        // throw it away.
-        for(const auto &knownLocation : state.availableLocations())
-        {
-            if(knownLocation.second && location == GetSetValue::getRegionCliName(knownLocation.second))
-                return knownLocation.second->id();
-        }
-
-        qWarning() << "No match found for specified location:" << location;
-        return {};
-    }
-
     QJsonArray buildRpcArgs(CliClient &client, const QStringList &params)
     {
         Q_ASSERT(params.length() == 3); // Ensured by exec()
@@ -65,7 +43,7 @@ namespace
         if(params[1] == GetSetType::region)
         {
             // Figure out the actual location ID
-            const auto &id = matchSpecifiedLocation(client.connection().state, params[2]);
+            const auto &id = GetSetValue::matchSpecifiedLocation(client.connection().state, params[2]);
             if(id.isEmpty())
             {
                 errln() << "Unknown region:" << params[2];

@@ -187,6 +187,26 @@ void JsonRefresher::start(std::shared_ptr<ApiBase> pApiBaseUris)
     _refreshTimer.start();
 }
 
+bool JsonRefresher::processOverrideFile(const QString &overridePath)
+{
+    QFile overrideRegionFile{overridePath};
+
+    if(overrideRegionFile.open(QFile::ReadOnly))
+    {
+        qInfo() << "Loading" << _name << "from override file";
+        QJsonParseError parseError;
+        const auto &jsonDoc = QJsonDocument::fromJson(overrideRegionFile.readAll(), &parseError);
+        if(parseError.error == QJsonParseError::NoError)
+        {
+            emit contentLoaded(jsonDoc);
+            qInfo() << "Override for" << _name << "loaded successfully";
+            emit overrideActive();
+            return true; // Don't start refreshes since regions are overridden
+        }
+    }
+    return false;
+}
+
 void JsonRefresher::startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
                                     const QString &overridePath,
                                     const QString &bundledPath,
@@ -201,31 +221,16 @@ void JsonRefresher::startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
 
     _signatureKey = signatureKey;
 
-    QFile overrideRegionFile{overridePath};
-
-    // an override file exists, use it instead of the endpoint
-    if (overrideRegionFile.open(QFile::ReadOnly))
+    if(processOverrideFile(overridePath))
     {
-        qInfo() << "Loading" << _name << "from override file";
-        QJsonParseError parseError;
-        const auto &jsonDoc = QJsonDocument::fromJson(overrideRegionFile.readAll(), &parseError);
-        if(parseError.error == QJsonParseError::NoError)
-        {
-            emit contentLoaded(jsonDoc);
-            qInfo() << "Override for" << _name << "loaded successfully";
-            emit overrideActive();
-            return; // Don't start refreshes since regions are overridden
-        }
-
-        // The parse error is traced as a numeric code.
-        // QJsonParseError::ParseError can't be bothered to provide Q_ENUM()...
-        // This is just meant for internal use anyway.
-        qInfo() << "Could not parse" << overrideRegionFile.fileName() << "for"
-            << _name << "- error" << parseError.error << "at offset"
-            << parseError.offset;
-        // Regions are not overridden, so do normal initialization with the
-        // servers.json and refreshes below.
-        emit overrideFailed();
+        _pOverrideFileWatcher.emplace(overridePath);
+        connect(_pOverrideFileWatcher.ptr(), &FileWatcher::changed, this, [&, this]() {
+            if(processOverrideFile(overridePath))
+                qInfo() << overridePath << "changed, reprocessing";
+            else
+                qWarning() << "Could not process override file" << overridePath;
+        });
+        return;
     }
 
     // No override.  Try to find initial data from the cache or bundled file,

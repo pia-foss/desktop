@@ -257,7 +257,7 @@ public:
 #endif
 
     // Write a text blob as a file part
-    void writeText(const QString &title, const QString &text);
+    void writeText(const QString &title, QString text);
 
 private:
     QFile _diagFile;
@@ -341,29 +341,65 @@ protected:
 protected:
     // RPC functions
 
-    QString RPC_handshake(const QString& version);
+    // Settings
     void RPC_applySettings(const QJsonObject& settings, bool reconnectIfNeeded = false);
     void RPC_resetSettings();
+    // Dedicated IPs aren't actually stored in settings (due to the token being
+    // treated as a password), but they're used by the client in mostly the same
+    // way.
+    // Add a dedicated IP by specifying a dedicated IP token.  The request
+    // succeeds if the token is valid and not expired (and the API can be
+    // reached to confirm this).
+    Async<void> RPC_addDedicatedIp(const QString &token);
+    // Remove a dedicated IP by specifying the generated region ID for the DIP
+    // region (since the client can't see dedicated IP tokens).
+    void RPC_removeDedicatedIp(const QString &dipRegionId);
+    // If one or more dedicated IPs have changed IP address (triggering a client
+    // notification), clear that notification by dismissing the change.  This
+    // resets AccountDedicatedIp::lastIpChange() for all dedicated IPs.
+    void RPC_dismissDedicatedIpChange();
+    // Refresh dedicated IPs now (usually done automatically every 10 minutes,
+    // used by dev tools)
+    void RPC_refreshDedicatedIps();
+
+    // Connection
     void RPC_connectVPN();
+    void RPC_disconnectVPN();
+    void RPC_startSnooze(qint64 seconds);
+    void RPC_stopSnooze();
+
+    // Diagnostics
     QJsonValue RPC_writeDiagnostics();
     void RPC_writeDummyLogs();
     void RPC_crash();
-    void RPC_disconnectVPN();
-    void RPC_notifyClientActivate();
-    void RPC_notifyClientDeactivate();
-    void RPC_startSnooze(qint64 seconds);
-    void RPC_stopSnooze();
-    Async<void> RPC_emailLogin(const QString &email);
-    Async<void> RPC_setToken(const QString& token);
-    Async<void> RPC_submitRating(int rating);
-    Async<void> RPC_login(const QString& username, const QString& password);
-    void RPC_logout();
     // Refresh update metadata (asynchronously)
     void RPC_refreshUpdate();
+
+    // Client activation
+    void RPC_notifyClientActivate();
+    void RPC_notifyClientDeactivate();
+
+    // Login
+    // Request an email login link
+    Async<void> RPC_emailLogin(const QString &email);
+    // Apply a token recieved client-side via a piavpn:login URI
+    Async<void> RPC_setToken(const QString& token);
+    Async<void> RPC_login(const QString& username, const QString& password);
+    // Retry a login after we were unable to reach the API (in the "API
+    // unreachable" state).  The client can't access the stored account password
+    // in this state, so it must explicitly ask the daemon to retry with the
+    // stored credentials.
+    Async<void> RPC_retryLogin();
+    void RPC_logout();
+
+    // Updates
     // Download an update advertised in DaemonData::availableVersion.
     Async<QJsonValue> RPC_downloadUpdate();
     // Cancel an update download that is ongoing
     void RPC_cancelDownloadUpdate();
+
+    // Misc.
+    Async<void> RPC_submitRating(int rating);
 
     // These RPCs are platform-specific; platform daemons override them with
     // implementation.
@@ -429,28 +465,13 @@ private:
                          const nullable_t<Transport> &actualTransport);
     void vpnError(const Error& error);
     void vpnByteCountsChanged();
-    void newLatencyMeasurements(ConnectionConfig::Infrastructure infrastructure,
-                                const LatencyTracker::Latencies &measurements);
+    void newLatencyMeasurements(const LatencyTracker::Latencies &measurements);
     void portForwardUpdated(int port);
 
     // Store new locations built from one of the regions lists and update
     // dependent properties - used by rebuild*Location().
     void applyBuiltLocations(const LocationsById &newLocations);
 
-    // Build the locations list from the legacy regions and Shadowsocks lists.
-    // Returns true if the resulting location list is not empty (indicating that
-    // the data is valid and should be cached).
-    //
-    // If the legacy infrastructure is selected, the new locations are applied,
-    // and all dependent properties are rebuilt.  (If it is not active, the new
-    // locations list is just discarded, it's just used to make sure the new
-    // data are valid before we cache it.)
-    //
-    // serversObj and shadowsocksObj can be the cached objects from DaemonData,
-    // or new data retrieved (which should then be cached if successfully
-    // loaded).  Latencies from DaemonData are used.
-    bool rebuildLegacyLocations(const QJsonObject &serversObj,
-                                const QJsonObject &shadowsocksObj);
     // Build the locations list from the modern regions list.  Like
     // rebuildLegacyLocations(), returns true if the new locations list is not
     // empty, meaning the new data can be cached.
@@ -470,13 +491,16 @@ private:
     void rebuildActiveLocations();
 
     // Handle region list results from JsonRefresher
-    void regionsLoaded(const QJsonDocument &regionsJsonDoc);
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
     void modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc);
     void modernRegionsMetaLoaded(const QJsonDocument &modernRegionsJsonDoc);
     void onNetworksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
+    void applyDedicatedIpJson(const QJsonObject &tokenData, AccountDedicatedIp &dipInfo);
+    void applyRefreshedDedicatedIp(const QJsonObject &tokenData, int traceIdx,
+                                   std::vector<AccountDedicatedIp> &dedicatedIps);
+    void refreshDedicatedIps();
     void reapplyFirewallRules();
 
 
@@ -553,12 +577,9 @@ protected:
     Environment _environment;
     ApiClient _apiClient;
 
-    // Latencies are measured for both infrastructures regardless of which one
-    // is active, so we are able to switch infrastructures at any time.
-    LatencyTracker _legacyLatencyTracker;
     LatencyTracker _modernLatencyTracker;
     PortForwarder _portForwarder;
-    JsonRefresher _regionRefresher, _shadowsocksRefresher, _modernRegionRefresher, _modernRegionMetaRefresher;
+    JsonRefresher _shadowsocksRefresher, _modernRegionRefresher, _modernRegionMetaRefresher;
     SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;
@@ -573,6 +594,7 @@ protected:
     QTimer _serializationTimer;
 
     QTimer _accountRefreshTimer;
+    QTimer _dedicatedIpRefreshTimer;
 
     // Ongoing login attempt.  If we try to log in again or log out, we need to
     // abort the prior attempt.  This is an AbortableTask so it'll still

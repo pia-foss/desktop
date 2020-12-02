@@ -90,6 +90,7 @@ int WatchCommand::exec(const QStringList &params, QCoreApplication &app)
     JsonChangePrinter data{client.connection().data, QStringLiteral("data")};
     JsonChangePrinter settings{client.connection().settings, QStringLiteral("settings")};
     JsonChangePrinter state{client.connection().state, QStringLiteral("state")};
+    JsonChangePrinter account{client.connection().account, QStringLiteral("account")};
 
     return app.exec();
 }

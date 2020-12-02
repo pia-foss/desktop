@@ -41,88 +41,6 @@ namespace
     RegisterMetaType<std::chrono::milliseconds> rxChronoMilliseconds;
     RegisterMetaType<LatencyTracker::Latencies> rxLatencies;
 
-    // Implementation of BatchPinger using UDP echoes.
-    class UdpBatchPinger : public BatchPinger
-    {
-        Q_OBJECT
-        CLASS_LOGGING_CATEGORY("latency");
-
-    public:
-        // Create UdpBatchPinger with the locations to be pinged.
-        // UdpBatchPinger will insert all locations that were successfully pinged
-        // into pendingReplies (values are the location IDs)
-        UdpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
-                       PendingRepliesMap &pendingReplies);
-
-    private:
-        // Select a ping address for a location.  A server for the Latency
-        // service is selected randomly.  If no server can be selected,
-        // this returns a HostPortKey with an empty address/port.
-        HostPortKey selectPingAddress(const QSharedPointer<Location> &pLocation) const;
-        void onDatagramReady();
-
-    private:
-        // This UDP socket is used to send pings and receive echoes.
-        QUdpSocket _udpSocket;
-    };
-
-    UdpBatchPinger::UdpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
-                                   PendingRepliesMap &pendingReplies)
-    {
-        //Receive echo responses in this slot
-        connect(&_udpSocket, &QUdpSocket::readyRead, this,
-                &UdpBatchPinger::onDatagramReady);
-
-        //Bind a port so we can receive the echoes.  This binds on all interfaces.
-        _udpSocket.bind();
-
-        //Ping each address.
-        for(const auto &pLocation : locations)
-        {
-            HostPortKey echoAddr = selectPingAddress(pLocation);
-            if(echoAddr.first.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol &&
-               echoAddr.second)
-            {
-                // This address is valid, so put it in the pending replies.
-                pendingReplies[echoAddr] = pLocation->id();
-
-                // Send a one-byte datagram to this address
-                _udpSocket.writeDatagram({1, 0x61}, echoAddr.first, echoAddr.second);
-            }
-        }
-    }
-
-    HostPortKey UdpBatchPinger::selectPingAddress(const QSharedPointer<Location> &pLocation) const
-    {
-        const Server *pLatencyServer{nullptr};
-        if(pLocation)
-            pLatencyServer = pLocation->randomServerForService(Service::Latency);
-        if(!pLatencyServer)
-            return {{}, {}};
-
-        // Just use the default latency port, multiple ports aren't supported yet.
-        return {QHostAddress{pLatencyServer->ip()}, pLatencyServer->defaultServicePort(Service::Latency)};
-    }
-
-    void UdpBatchPinger::onDatagramReady()
-    {
-        QHostAddress senderHost;
-        quint16 senderPort;
-        //Read the datagram that we were told about.  An echo isn't expected to
-        //contain any data, so read up to 0 bytes.  We're just looking at the sender
-        //host and port.
-        auto dgramSize = _udpSocket.readDatagram(nullptr, 0, &senderHost,
-                                                 &senderPort);
-
-        //If the read failed, there's nothing else to do.
-        if(dgramSize < 0)
-            return;
-        //If the datagram was read successfully but contained more than 0 bytes,
-        //this is fine, the data are ignored.
-
-        emit receivedResponse(senderHost, senderPort);
-    }
-
     // Select a ping address for a location when using ICMP pings.  A server is
     // selected randomly.  If no server can be selected, this returns a
     // PingLocation with an empty echoIp/echoPort.
@@ -246,8 +164,7 @@ std::chrono::milliseconds LatencyHistory::updateLatency(std::chrono::millisecond
     return sum / _lastMeasurements.size();
 }
 
-LatencyTracker::LatencyTracker(ConnectionConfig::Infrastructure infrastructure)
-    : _infrastructure{infrastructure}
+LatencyTracker::LatencyTracker()
 {
     _measureTrigger.setInterval(std::chrono::milliseconds(latencyRefreshInterval).count());
     connect(&_measureTrigger, &QTimer::timeout, this,
@@ -289,7 +206,7 @@ void LatencyTracker::onNewMeasurements(const Latencies &measurements)
     }
 
     if(!aggregatedMeasurements.empty())
-        emit newMeasurements(_infrastructure, aggregatedMeasurements);
+        emit newMeasurements(aggregatedMeasurements);
 }
 
 void LatencyTracker::measureNewLocations()
@@ -330,7 +247,7 @@ void LatencyTracker::beginMeasurement(const std::vector<QSharedPointer<Location>
         {
             //Create a LatencyBatch; parent it to this object so it is cleaned up if
             //LatencyTracker is destroyed
-            LatencyBatch *pNewBatch = new LatencyBatch{_infrastructure, locations,
+            LatencyBatch *pNewBatch = new LatencyBatch{locations,
                                                        &_measurementThread.objectOwner()};
             //Forward newMeasurements signals from this new batch
             connect(pNewBatch, &LatencyBatch::newMeasurements, this,
@@ -387,10 +304,9 @@ void LatencyTracker::stop()
     _measureTrigger.stop();
 }
 
-LatencyBatch::LatencyBatch(ConnectionConfig::Infrastructure infrastructure,
-                           const std::vector<QSharedPointer<Location>> &locations,
+LatencyBatch::LatencyBatch(const std::vector<QSharedPointer<Location>> &locations,
                            QObject *pParent)
-    : QObject{pParent}, _infrastructure{infrastructure}
+    : QObject{pParent}
 {
     _batchTimer.setInterval(std::chrono::milliseconds(latencyBatchInterval).count());
     _batchTimer.setSingleShot(true);
@@ -400,19 +316,11 @@ LatencyBatch::LatencyBatch(ConnectionConfig::Infrastructure infrastructure,
     //Start the timer before sending the ping packets
     _timeSincePing.start();
 
-    if(infrastructure == ConnectionConfig::Infrastructure::Modern)
-    {
 #if defined(Q_OS_WIN)
-        _pPinger.reset(new WinIcmpBatchPinger{locations, _pendingReplies, latencyEchoTimeout});
+    _pPinger.reset(new WinIcmpBatchPinger{locations, _pendingReplies, latencyEchoTimeout});
 #else
-        _pPinger.reset(new PosixIcmpBatchPinger{locations, _pendingReplies});
+    _pPinger.reset(new PosixIcmpBatchPinger{locations, _pendingReplies});
 #endif
-    }
-    else
-    {
-        // Legacy infra - UDP echoes
-        _pPinger.reset(new UdpBatchPinger{locations, _pendingReplies});
-    }
 
     connect(_pPinger.get(), &BatchPinger::receivedResponse, this,
             &LatencyBatch::onReceivedResponse);
@@ -500,13 +408,12 @@ void LatencyBatch::onTimeoutElapsed()
     if(_pendingReplies.size() > 0)
     {
         qDebug() << "Did not receive echoes from" << _pendingReplies.size()
-                 << "addresses in infra" << traceEnum(_infrastructure);
+                 << "addresses";
     }
 
     for(const auto &replyEntry : _pendingReplies)
     {
-        qInfo() << "Location" << replyEntry.second << "in infra"
-                << traceEnum(_infrastructure)
+        qInfo() << "Location" << replyEntry.second
                 << "did not respond to latency ping";
     }
 

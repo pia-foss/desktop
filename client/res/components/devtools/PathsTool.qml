@@ -33,8 +33,6 @@ Item {
           var paths = [
             { name: "Daemon Log File",      path: PathInterface.daemonLogFile() },
             { name: "Client Log File",      path: PathInterface.clientLogFile() },
-            { name: "Legacy Region Override", path: PathInterface.legacyRegionOverride() },
-            { name: "Legacy Bundled Regions", path: PathInterface.legacyRegionBundle() },
             { name: "Modern Region Override", path: PathInterface.modernRegionOverride() },
             { name: "Modern Bundled Regions", path: PathInterface.modernRegionBundle() },
             { name: "Region Meta Override", path: PathInterface.modernRegionMetaOverride() },

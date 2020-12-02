@@ -31,104 +31,140 @@ const auto arrayJson = QJsonDocument::fromJson(R"(["foo", 2, false])").object();
 
 const auto twoLocations = QJsonDocument::fromJson(R"(
 {
-  "us_california": {
-    "name": "US California",
-    "country": "US",
-    "dns": "us-california.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "198.8.80.174:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "198.8.80.174:8080"
-    },
-    "openvpn_tcp": {
-      "best": "198.8.80.174:500"
-    },
-    "ips": []
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "us2": {
-    "name": "US East",
-    "country": "US",
-    "dns": "us-east.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "209.222.23.59:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "209.222.23.59:8080"
+  "regions": [
+    {
+      "id": "al",
+      "name": "Albania",
+      "country": "AL",
+      "auto_region": true,
+      "dns": "al.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
+        "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
+        "ikev2": [{ "ip": "31.171.154.135", "cn": "tirana401" }],
+        "wg": [{ "ip": "31.171.154.131", "cn": "tirana401" }]
+      }
     },
-    "openvpn_tcp": {
-      "best": "209.222.23.59:500"
-    },
-    "ips": []
-  }
+    {
+      "id": "ad",
+      "name": "Andorra",
+      "country": "AD",
+      "auto_region": true,
+      "dns": "ad.privacy.network",
+      "port_forward": true,
+      "geo": true,
+      "servers": {
+        "ovpnudp": [{ "ip": "45.139.49.245", "cn": "andorra401" }],
+        "ovpntcp": [{ "ip": "45.139.49.249", "cn": "andorra401" }],
+        "ikev2": [{ "ip": "45.139.49.247", "cn": "andorra401" }],
+        "wg": [{ "ip": "45.139.49.247", "cn": "andorra401" }]
+      }
+    }
+  ]
 }
 )").object();
 
 const auto oneLocation = QJsonDocument::fromJson(R"(
 {
-  "ca": {
-    "name": "CA Montreal",
-    "country": "CA",
-    "dns": "ca.privateinternetaccess.com",
-    "port_forward": true,
-    "ping": "173.199.65.36:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "173.199.65.36:8080"
-    },
-    "openvpn_tcp": {
-      "best": "173.199.65.36:500"
-    },
-    "ips": []
-  }
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
+  },
+  "regions": [
+    {
+      "id": "al",
+      "name": "Albania",
+      "country": "AL",
+      "auto_region": true,
+      "dns": "al.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
+        "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
+        "ikev2": [{ "ip": "31.171.154.135", "cn": "tirana401" }],
+        "wg": [{ "ip": "31.171.154.131", "cn": "tirana401" }]
+      }
+    }
+  ]
 }
 )").object();
 
-//The CA Montreal location again with new IP addresses
+//The Albania location again with new IP addresses
 const auto oneLocationNewIps = QJsonDocument::fromJson(R"(
 {
-  "ca": {
-    "name": "CA Montreal",
-    "country": "CA",
-    "dns": "ca.privateinternetaccess.com",
-    "port_forward": true,
-    "ping": "173.199.65.59:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "173.199.65.59:8080"
-    },
-    "openvpn_tcp": {
-      "best": "173.199.65.59:500"
-    },
-    "ips": []
-  }
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
+  },
+  "regions": [
+    {
+      "id": "al",
+      "name": "Albania",
+      "country": "AL",
+      "auto_region": true,
+      "dns": "al.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "31.171.154.42", "cn": "tirana401" }],
+        "ovpntcp": [{ "ip": "31.171.154.42", "cn": "tirana401" }],
+        "ikev2": [{ "ip": "31.171.154.42", "cn": "tirana401" }],
+        "wg": [{ "ip": "31.171.154.42", "cn": "tirana401" }]
+      }
+    }
+  ]
 }
 )").object();
 
 const auto partialInvalid = QJsonDocument::fromJson(R"(
 {
-  "nz": {
-    "name": "New Zealand",
-    "country": "NZ",
-    "dns": "nz.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "103.231.91.35:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "103.231.91.35:8080"
-    },
-    "openvpn_tcp": {
-      "best": "103.231.91.35:500"
-    },
-    "ips": []
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "missing_everything": {
-  }
+  "regions": [
+    {
+      "id": "al",
+      "name": "Albania",
+      "country": "AL",
+      "auto_region": true,
+      "dns": "al.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
+        "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
+        "ikev2": [{ "ip": "31.171.154.135", "cn": "tirana401" }],
+        "wg": [{ "ip": "31.171.154.131", "cn": "tirana401" }]
+      }
+    },
+    {
+      "id": "missing_everything"
+    }
+  ]
 }
 )").object();
 
@@ -297,6 +333,7 @@ namespace
         return pMatchingServer;
     }
 }
+#define COMMA ,
 
 class tst_settings : public QObject
 {
@@ -306,56 +343,50 @@ private slots:
     //Verify that valid locations can be loaded.
     void testTwoValid()
     {
-        LocationsById locs{buildLegacyLocations({}, sample_docs::twoLocations,
-                           sample_docs::emptyJson)};
+        LocationsById locs{buildModernLocations({}, sample_docs::twoLocations,
+                           sample_docs::emptyJson, {})};
         QVERIFY(locs.size() == 2);
 
         //The locations don't have to be in the same order as the original
         //JSON, QJsonDocument might re-order them since they're object
         //attributes.
-        QSharedPointer<Location> pUsCal, pUs2;
+        QSharedPointer<Location> pAd, pAl;
         const Server *pServer{nullptr};
 
-        pUsCal = locs.at(QStringLiteral("us_california"));
-        pUs2 = locs.at(QStringLiteral("us2"));
+        pAl = locs.at(QStringLiteral("al"));
+        pAd = locs.at(QStringLiteral("ad"));
 
         //Both locations must have been found
-        QVERIFY(pUsCal);
-        QVERIFY(pUs2);
+        QVERIFY(pAd);
+        QVERIFY(pAl);
 
-        QVERIFY(pUsCal);
-        QCOMPARE(pUsCal->name(), "US California");
-        QCOMPARE(pUsCal->country(), "US");
-        QCOMPARE(pUsCal->portForward(), false);
-        pServer = getServerForService(*pUsCal, Service::Latency);
+        QVERIFY(pAl);
+        QCOMPARE(pAl->name(), "Albania");
+        QCOMPARE(pAl->country(), "AL");
+        QCOMPARE(pAl->portForward(), true);
+        pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "198.8.80.174");
-        QCOMPARE(pServer->latencyPorts(), std::vector<quint16>{8888});
-        pServer = getServerForService(*pUsCal, Service::OpenVpnUdp);
-        QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "198.8.80.174");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080});
-        pServer = getServerForService(*pUsCal, Service::OpenVpnTcp);
-        QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "198.8.80.174");
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{500});
+        QCOMPARE(pServer->ip(), "31.171.154.136");
+        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
 
-        QVERIFY(pUs2);
-        QCOMPARE(pUs2->name(), "US East");
-        QCOMPARE(pUs2->country(), "US");
-        QCOMPARE(pUs2->portForward(), false);
-        pServer = getServerForService(*pUs2, Service::Latency);
+        pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "209.222.23.59");
-        QCOMPARE(pServer->latencyPorts(), std::vector<quint16>{8888});
-        pServer = getServerForService(*pUs2, Service::OpenVpnUdp);
+        QCOMPARE(pServer->ip(), "31.171.154.138");
+        qDebug () << pServer->openvpnTcpPorts();
+        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
+
+        QVERIFY(pAd);
+        QCOMPARE(pAd->name(), "Andorra");
+        QCOMPARE(pAd->country(), "AD");
+        QCOMPARE(pAd->portForward(), true);
+        pServer = getServerForService(*pAd, Service::OpenVpnUdp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "209.222.23.59");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080});
-        pServer = getServerForService(*pUs2, Service::OpenVpnTcp);
+        QCOMPARE(pServer->ip(), "45.139.49.245");
+        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+        pServer = getServerForService(*pAd, Service::OpenVpnTcp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "209.222.23.59");
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{500});
+        QCOMPARE(pServer->ip(), "45.139.49.249");
+        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
     //Loading JSON data with no valid locations should fail without changing
@@ -365,88 +396,81 @@ private slots:
         LocationsById locs;
 
         //Attempt to load empty JSON
-        locs = buildLegacyLocations({}, sample_docs::emptyJson, sample_docs::emptyJson);
+        locs = buildModernLocations({}, sample_docs::emptyJson, sample_docs::emptyJson, {});
         QCOMPARE(locs.empty(), true);
         //Attempt to load non-object JSON
-        locs = buildLegacyLocations({}, sample_docs::arrayJson, sample_docs::emptyJson);
-        QCOMPARE(locs.empty(), true);
-        //Attempt to load JSON with all invalid locations
-        locs = buildLegacyLocations({}, sample_docs::invalidLocations, sample_docs::emptyJson);
+        locs = buildModernLocations({}, sample_docs::arrayJson, sample_docs::emptyJson, {});
         QCOMPARE(locs.empty(), true);
     }
 
     //Load one valid location
     void testOneValid()
     {
-        LocationsById locs{buildLegacyLocations({}, sample_docs::oneLocation, sample_docs::emptyJson)};
+        LocationsById locs{buildModernLocations({}, sample_docs::oneLocation, sample_docs::emptyJson, {})};
         QVERIFY(locs.size() == 1);
 
-        const auto &pMontreal = locs.at(QStringLiteral("ca"));
+        const auto &pAl = locs.at(QStringLiteral("al"));
         const Server *pServer{nullptr};
-        QVERIFY(pMontreal);
-        QCOMPARE(pMontreal->id(), "ca");
-        QCOMPARE(pMontreal->name(), "CA Montreal");
-        QCOMPARE(pMontreal->country(), "CA");
-        QCOMPARE(pMontreal->portForward(), true);
-        pServer = getServerForService(*pMontreal, Service::Latency);
+
+        QVERIFY(pAl);
+        QCOMPARE(pAl->name(), "Albania");
+        QCOMPARE(pAl->country(), "AL");
+        QCOMPARE(pAl->portForward(), true);
+        pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "173.199.65.36");
-        QCOMPARE(pServer->latencyPorts(), std::vector<quint16>{8888});
-        pServer = getServerForService(*pMontreal, Service::OpenVpnUdp);
+        QCOMPARE(pServer->ip(), "31.171.154.136");
+        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+
+        pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "173.199.65.36");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080});
-        pServer = getServerForService(*pMontreal, Service::OpenVpnTcp);
-        QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "173.199.65.36");
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{500});
+        QCOMPARE(pServer->ip(), "31.171.154.138");
+        qDebug () << pServer->openvpnTcpPorts();
+        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
-    //Invalid locations should be ignored when loaded, but any valid locations
-    //should still be returned
+    // //Invalid locations should be ignored when loaded, but any valid locations
+    // //should still be returned
     void testPartialInvalid()
     {
         //Load one valid location.  The invalid location should be ignored.
-        LocationsById locs{buildLegacyLocations({}, sample_docs::partialInvalid, sample_docs::emptyJson)};
+        LocationsById locs{buildModernLocations({}, sample_docs::partialInvalid, sample_docs::emptyJson, {})};
         QVERIFY(locs.size() == 1);
 
-        const auto &pNz = locs.at(QStringLiteral("nz"));
-        const Server *pServer;
-        QVERIFY(pNz);
-        QCOMPARE(pNz->id(), "nz");
-        QCOMPARE(pNz->name(), "New Zealand");
-        QCOMPARE(pNz->country(), "NZ");
-        QCOMPARE(pNz->portForward(), false);
-        pServer = getServerForService(*pNz, Service::Latency);
+        const auto &pAl = locs.at(QStringLiteral("al"));
+        const Server *pServer{nullptr};
+
+        QVERIFY(pAl);
+        QCOMPARE(pAl->name(), "Albania");
+        QCOMPARE(pAl->country(), "AL");
+        QCOMPARE(pAl->portForward(), true);
+        pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "103.231.91.35");
-        QCOMPARE(pServer->latencyPorts(), std::vector<quint16>{8888});
-        pServer = getServerForService(*pNz, Service::OpenVpnUdp);
+        QCOMPARE(pServer->ip(), "31.171.154.136");
+        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+
+        pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "103.231.91.35");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080});
-        pServer = getServerForService(*pNz, Service::OpenVpnTcp);
-        QVERIFY(pServer);
-        QCOMPARE(pServer->ip(), "103.231.91.35");
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{500});
+        QCOMPARE(pServer->ip(), "31.171.154.138");
+        qDebug () << pServer->openvpnTcpPorts();
+        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
-    // Building locations with a set of latency measurements should apply those
-    // measurements
+    // // Building locations with a set of latency measurements should apply those
+    // // measurements
     void preserveLatency()
     {
-        double montrealLatency{121.0};
+        double alLatency{121.0};
         LatencyMap latencies;
-        latencies["ca"] = montrealLatency;
+        latencies["al"] = alLatency;
 
-        LocationsById updatedLocs{buildLegacyLocations(latencies, sample_docs::oneLocationNewIps, sample_docs::emptyJson)};
+        LocationsById updatedLocs{buildModernLocations(latencies, sample_docs::oneLocationNewIps, sample_docs::emptyJson, {})};
         QVERIFY(updatedLocs.size() == 1);
 
-        const auto &pMontrealUpd = updatedLocs.at(QStringLiteral("ca"));
-        QVERIFY(pMontrealUpd);
-        QCOMPARE(pMontrealUpd->latency().get(), montrealLatency);
+        const auto &pAlUpd = updatedLocs.at(QStringLiteral("al"));
+        QVERIFY(pAlUpd);
+        QCOMPARE(pAlUpd->latency().get(), alLatency);
     }
 };
-
+#undef COMMA
 QTEST_GUILESS_MAIN(tst_settings)
 #include TEST_MOC

@@ -73,18 +73,6 @@ var isFiniteNumber = function (val) {
   return typeof val === 'number' && isFinite(val);
 }
 
-// Compare two strings, ignoring case.
-// TODO: Should take language setting into account
-var compareNoCase = function(first, second) {
-  var firstLower = first.toLowerCase()
-  var secondLower = second.toLowerCase()
-  if(firstLower < secondLower)
-    return -1
-  if(secondLower < firstLower)
-    return 1
-  return 0
-}
-
 // V4 does not support Sets.  This is a crude approximation used to hold
 // references to objects to keep them from being garbage collected (see
 // Daemon.pendingResults).
@@ -113,11 +101,21 @@ function shortVersion(version) {
 }
 
 // Extract plain text from HTML by stripping HTML tags and entities.
-// This is very crude, it just strips <...> and &...;.  It's used to generate
-// accessibility annotations for some controls which use HTML for basic
-// formatting.
+// This is very crude, it just:
+// - replaces <br> with a space
+// - strips <...>
+// - strips &...;
+// It's used to generate accessibility annotations for some controls which use
+// HTML for basic formatting.
 function stripHtml(markup) {
-  var text = markup.replace(/<[^>]+>/g, '')
+  // Replace <br> tags with a space.  Don't smash the adjacent text right
+  // together since they're supposed to be separate paragraphs.  (This makes a
+  // big difference, VoiceOver for example reads "... has expired.You can..." as
+  // "... has expired dot you can ..." with no pause at all, like a URI.  It
+  // reads "... has expired. You can ..." correctly.)
+  var text = markup.replace(/<br[ \/]*>/g, ' ')
+  // Strip other HTML tags and entities.
+  text = text.replace(/<[^>]+>/g, '')
   text = text.replace(/&[^;]+;/g, '')
   return text
 }
@@ -382,4 +380,16 @@ function calculatePopupActualPos(popup, window, overlay) {
   var overlayCoords = window.contentItem.mapFromItem(popup.parent, popup.x, popup.y)
   // Map the overlay coordinates to the correct parent item coordinates
   return popup.parent.mapFromItem(overlay, overlayCoords.x, overlayCoords.y)
+}
+
+// Convert a color component to a 2-digit hex string (used by colorToStr())
+function compToStr(comp) {
+  var comp8bit = Math.round(comp * 255)
+  var leadingZero = comp8bit < 16 ? '0' : ''
+  return leadingZero + comp8bit.toString(16)
+}
+
+// Convert a color to an HTML color string ("#RRGGBB")
+function colorToStr(c) {
+  return '#' + compToStr(c.r) + compToStr(c.g) + compToStr(c.b)
 }

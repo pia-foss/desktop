@@ -189,11 +189,15 @@ void *TableCellImpl::interface_cast(QAccessible::InterfaceType type)
     switch(type)
     {
         default:
-        case QAccessible::TextInterface:
-        case QAccessible::ValueInterface:
-        case QAccessible::ActionInterface:
-        case QAccessible::TableInterface:
             return nullptr;
+        case QAccessible::InterfaceType::ActionInterface:
+            return reinterpret_cast<void*>(actionInterface());
+        case QAccessible::InterfaceType::TableInterface:
+            return reinterpret_cast<void*>(tableInterface());
+        case QAccessible::InterfaceType::TextInterface:
+            return reinterpret_cast<void*>(textInterface());
+        case QAccessible::InterfaceType::ValueInterface:
+            return reinterpret_cast<void*>(valueInterface());
         case QAccessible::TableCellInterface:
         {
             QAccessibleTableCellInterface *pThisItf = this;

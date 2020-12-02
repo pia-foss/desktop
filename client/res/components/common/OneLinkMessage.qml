@@ -17,7 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.10
-import "../common"
 import "../core"
 import "../theme"
 import PIA.NativeHelpers 1.0
@@ -34,6 +33,8 @@ Item {
   id: oneLinkMessage
 
   property string text
+  property color color
+  property color linkColor
   signal linkActivated()
 
   implicitWidth: messageText.implicitWidth
@@ -43,7 +44,7 @@ Item {
     id: messageText
     width: parent.width
 
-    linkColor: color
+    linkColor: oneLinkMessage.linkColor
     text: {
       let markup = oneLinkMessage.text.replace("[[", "<a href='#'>")
       markup = markup.replace("]]", "</a>")
@@ -51,7 +52,7 @@ Item {
     }
 
     wrapMode: Text.WordWrap
-    color: Theme.dashboard.textColor
+    color: oneLinkMessage.color
     font.pixelSize: 13
 
     // Annotate the text as a static element, without indicating the link

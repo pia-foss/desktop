@@ -20,7 +20,7 @@ import QtQuick 2.0
 QtObject {
     readonly property bool horizontal: Qt.platform.os !== 'windows'
 
-    readonly property int contentWidth: 460
+    readonly property int contentWidth: 520
     readonly property int contentHeight: Theme.settings.horizontal ? 390 : 430
 
     readonly property color backgroundColor: Theme.dark ? "#323642" : "#eeeeee"
@@ -50,6 +50,7 @@ QtObject {
       'network': [ Theme.imagePathCommon + "/settings/network-active.png", Theme.imagePath + "/settings/network-inactive.png" ],
       'connection': [ Theme.imagePathCommon + "/settings/connection-active.png", Theme.imagePath + "/settings/connection-inactive.png" ],
       'proxy': [ Theme.imagePathCommon + "/settings/proxy-active.png", Theme.imagePath + "/settings/proxy-inactive.png" ],
+      'dedicatedip': [ Theme.imagePathCommon + "/settings/dedicatedip-active.png", Theme.imagePath + "/settings/dedicatedip-inactive.png" ],
       'help': [ Theme.imagePathCommon + "/settings/help-active.png", Theme.imagePath + "/settings/help-inactive.png" ],
     })
     readonly property color pageIconBgInactiveColor: Theme.dark ? "#323642" : "#9a9da5"
@@ -69,7 +70,7 @@ QtObject {
     readonly property int vbarContentBottomMargin: 30
 
     // Extra left margin for pages with relatively narrow content
-    readonly property int narrowPageLeftMargin: horizontal ? 75 : 0
+    readonly property int narrowPageLeftMargin: horizontal ? 80 : 0
 
     readonly property int headingHeight: 90
     readonly property color headingLineColor: Theme.dark ? "#484a55" : "#d7d8d9"
@@ -91,6 +92,7 @@ QtObject {
     readonly property color inputTextboxBackgroundColor: Theme.dark ? "#22252e" : "#ffffff"
     readonly property color inputTextboxBorderColor: Theme.dark ? "#5c6370" : "#d7d8d9"
     readonly property color inputTextboxInvalidBorderColor: '#f24458'
+    readonly property color inputTextboxWarningBorderColor: '#e6b400'
     readonly property color inputTextboxTextColor: Theme.dark ? "#ffffff" : "#323642"
     readonly property color inputTextboxTextDisabledColor: inputLabelDisabledColor
 
@@ -107,6 +109,9 @@ QtObject {
     readonly property string inputDropdownArrowImage: Theme.imagePathCommon + "/settings/dropdown-arrow.png"
     readonly property string inputDropdownArrowDisabledImage: Theme.imagePathCommon + "/settings/dropdown-arrow-disabled.png"
     readonly property string inputDropdownShadowImage: Theme.imagePathCommon + "/settings/shadow-dropdown.png"
+
+    readonly property color inputListItemPrimaryTextColor: Theme.dark ? "#ffffff" : "#22252e"
+    readonly property color inputListItemSecondaryTextColor: "#889099"
 
     readonly property color inputPrivacyBackgroundColor: Theme.dark ? "#22252e" : "#d7d8d9"
     readonly property color inputPrivacyTextColor: Theme.dark ? "#ffffff" : "#323642"
@@ -156,4 +161,6 @@ QtObject {
     readonly property color connectionPageSeparatorColor: "#889099"
 
     readonly property string reconnectShadowImage: Theme.imagePathCommon + "/settings/shadow-reconnect.png"
+
+    readonly property string dedicatedIpPageImage: Theme.imagePath + "/settings/dedicatedip-page.png"
 }

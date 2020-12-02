@@ -42,15 +42,12 @@ SplitTunnelRowBase {
 
   property bool showAppIcons: true
 
-  // Column index of cell to highlight within this row - -1 for none.
-  property int highlightColumn: -1
-
   function keyboardShowModePopup() {
     modeDropDown.showPopup()
   }
 
   // Select a cell in this row with the keyboard.
-  function keyboardSelect(keyboardColumn) {
+  keyboardSelect: function(keyboardColumn) {
     switch(keyboardColumn) {
       default:
         break // Nothing to do for these columns
@@ -61,14 +58,12 @@ SplitTunnelRowBase {
   }
 
   // Effective column (this row does not have a 'remove' cell)
-  function effectiveColumnFor(column) {
+  effectiveColumnFor: function(column) {
     return Math.min(keyColumns.mode, column)
   }
 
-  signal focusCell(int column)
-
   // Screen reader row annotation
-  readonly property NativeAcc.TableRow accRow: NativeAcc.TableRow {
+  accRow: NativeAcc.TableRow {
     name: displayName
     item: routedRow
     selected: false
@@ -77,12 +72,12 @@ SplitTunnelRowBase {
   }
 
   // Screen reader cell annotations
-  readonly property NativeAcc.TableCellText accAppCell: NativeAcc.TableCellText {
+  accAppCell: NativeAcc.TableCellText {
     name: displayName
     item: routedPacketsText
   }
-  readonly property NativeAcc.TableCellText accPathCell: null
-  readonly property NativeAcc.TableCellDropDownButton accModeCell: NativeAcc.TableCellDropDownButton {
+  accPathCell: null
+  accModeCell: NativeAcc.TableCellDropDownButton {
     name: modeDropDown.displayText
     item: modeDropDown
     onActivated: {
@@ -90,7 +85,7 @@ SplitTunnelRowBase {
       keyboardShowModePopup()
     }
   }
-  readonly property NativeAcc.TableCellButton accRemoveCell: null
+  accRemoveCell: null
 
   // Localized display name (used in list's accessibility table)
   readonly property string displayName: routedPacketsText.text
@@ -105,7 +100,7 @@ SplitTunnelRowBase {
     anchors.right: modeDropDown.left
     anchors.rightMargin: 5
     text: uiTr("Routed Packets")
-    color: Theme.settings.hbarTextColor
+    color: Theme.settings.inputListItemPrimaryTextColor
     font.pixelSize: 16
     elide: Text.ElideRight
   }
@@ -115,21 +110,12 @@ SplitTunnelRowBase {
     y: 25
     font.pixelSize: 11
     text: uiTr("Includes most containers and virtual machines")
-    color: Theme.settings.inputDropdownTextDisabledColor
+    color: Theme.settings.inputListItemSecondaryTextColor
     elide: Text.ElideRight
     wrapMode: Text.WordWrap
     anchors.right: modeDropDown.left
     anchors.rightMargin: 5
     anchors.left: routedPacketsText.left
-  }
-
-  Rectangle {
-    anchors.bottom: parent.bottom
-    height: 1
-    color: Theme.settings.splitTunnelItemSeparatorColor
-    opacity: 0.5
-    anchors.left: parent.left
-    anchors.right: parent.right
   }
 
   ThemedComboBox {
@@ -142,7 +128,6 @@ SplitTunnelRowBase {
     anchors.rightMargin: 45
 
     // Not a tabstop, navigation occurs in table
-    focusOnTab: false
     focusOnDismissFunc: function() { routedRow.focusCell(keyColumns.mode) }
 
     currentIndex: {

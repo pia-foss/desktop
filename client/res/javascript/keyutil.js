@@ -390,3 +390,76 @@ function handleScrollKeyEvent(keyEvent, scrollView, horzScrollBar,
   return handleHorzScrollKeyEvent(keyEvent, scrollView, horzScrollBar, focusCue) ||
          handleVertScrollKeyEvent(keyEvent, scrollView, vertScrollBar, focusCue)
 }
+
+// Lists in PIA Desktop use an "accessibility table" model for keyboard
+// navigation and accessibility.  The accessibility table consists of row
+// objects that describe each row in the list.  The row objects themselves are
+// defined by the specific list (and vary based on the content in the list).
+//
+// The current keyboard cell is described by a "keyboard row" and "keyboard
+// column".  The keyboard row is a row object like those in the accessibility
+// table.  The keyboard column is an integer index in the range of columns in
+// the table.
+//
+// The keyboard row is described with a row object, not an index, in order to
+// handle changes to the list - the selection is preserved if other items in the
+// list are added or removed, or if the order of items in the list changes (like
+// re-sorting the regions list).
+
+// Detect a new selected row index in an accessibility table in the event that
+// the currently-selected row is removed.
+//
+// Parameters:
+// - accTable - the list's current accessibility table
+// - lastAccTable - the prior version of the accessibility table
+// - lastKeyboardRow - row ID describing the last-selected keyboard row
+//
+// Returns a row ID describing the new selected row, which may be the same as
+// the old one if it is still a valid selection.  Always returns a valid
+// selection as long as accTable is not an empty array.
+function updateAccKeyboardRow(accTable, lastAccTable, lastKeyboardRow) {
+  // Find the index of a keyboard row in an acc table, or -1 if it's not there.
+  function findAccKeyboardIndex(accTable, keyboardRow) {
+    return accTable.findIndex(function(row){return row.row === keyboardRow})
+  }
+
+  // The new table shouldn't be empty - all accessibilty tables currently have
+  // at least an "add" row - but if it is, bail out.
+  if(accTable.length <= 0)
+    return
+
+  var oldKeyboardIdx = findAccKeyboardIndex(lastAccTable, lastKeyboardRow)
+
+  // There should always be a selection - if there aren't any other rows to
+  // select, select the first row (typically 'add') default.
+  //
+  // If there's no selection now, start looking for a new one from the last
+  // selected item.  (If there was no selected item before, then
+  // oldKeyboardIdx is -1 and we start looking from the beginning of the
+  // list - the 'add' row.)
+  //
+  // If we can't find an item after the item that was removed (the last
+  // item(s) in the list were removed), look for a prior item that exists.
+  var nextDir = 1
+  var nextKeyboardIdx = oldKeyboardIdx
+  var keyboardRow = lastKeyboardRow
+  while(findAccKeyboardIndex(accTable, keyboardRow) < 0) {
+    nextKeyboardIdx += nextDir
+    // If we're past the end of the list, switch to looking for prior items
+    if(nextKeyboardIdx >= lastAccTable.length) {
+      nextDir = -1
+      nextKeyboardIdx = oldKeyboardIdx-1
+    }
+    // If we're past the beginning of the list, select the first row.  This
+    // doesn't normally happen since the 'add' row should almost always be
+    // in both tables.  It can happen at startup when the tables are first
+    // built.
+    if(nextKeyboardIdx < 0) {
+      keyboardRow = accTable[0].row
+      break
+    }
+    keyboardRow = lastAccTable[nextKeyboardIdx].row
+  }
+
+  return keyboardRow
+}

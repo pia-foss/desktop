@@ -157,8 +157,8 @@ public:
                         const QString &ipAddress, unsigned prefixLength,
                         const QString &ipAddress6)
         : _gatewayIp{gatewayIp}, _interfaceName{interfaceName},
-          _ipAddress{ipAddress}, _prefixLength{prefixLength},
-          _ipAddress6{ipAddress6}
+          _ipAddress{ipAddress}, _ipAddress6{ipAddress6},
+          _prefixLength{prefixLength}
     {
     }
 
@@ -280,6 +280,8 @@ private:
     bool _useAlternateNext;
     // Timeout for preferred transport before starting to try alternate transports
     std::chrono::seconds  _transportTimeout;
+    std::size_t _serverIndex;
+    bool _triedAllServers;
 };
 
 // Holds the configuration details that we provide via DaemonState for the
@@ -299,12 +301,6 @@ class ConnectionConfig
     Q_GADGET
 
 public:
-    enum class Infrastructure
-    {
-        Current,
-        Modern,
-    };
-    Q_ENUM(Infrastructure);
     enum class Method
     {
         OpenVPN,
@@ -351,9 +347,6 @@ public:
     // ID only - other location metadata changes are not considered a change.
     bool hasChanged(const ConnectionConfig &other) const;
 
-    // The effective infrastructure.  Derived from the infrastructure() setting;
-    // "default" is replaced with an actual value.
-    Infrastructure infrastructure() const {return _infrastructure;}
 
     // The effective VPN method.  Normally the method() setting; may be forced
     // to OpenVPN if an auth token is not available for WireGuard.
@@ -450,9 +443,6 @@ public:
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
 
 private:
-    // The infrastructure in use.  This affects the way MACE, port forwarding,
-    // etc. are applied.
-    Infrastructure _infrastructure;
     // The method used to connect to the VPN
     Method _method;
     bool _methodForcedByAuth;
@@ -552,7 +542,7 @@ public:
 
     // Update the current network in the VPNMethod when it has changed.
     void updateNetwork(const OriginalNetworkScan &newNetwork);
-    void scheduleMaceDnsCacheFlush();
+    void scheduleDnsCacheFlush();
 
 public slots:
     void connectVPN(bool force);

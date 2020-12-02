@@ -52,7 +52,27 @@ Item {
       content.push({separator: true})
     }
     function flag(country) {
-      return country ? ":/img/flags/" + country.toLowerCase() + ".png" : undefined
+      var flagName =  country.toLowerCase()
+      return country ? ":/img/flags/" + flagName + ".png" : undefined
+    }
+    function offline_flag(country) {
+      var flagName =  country.toLowerCase() + "-offline"
+      return country ? ":/img/flags/" + flagName + ".png" : undefined
+    }
+    function buildRegionMenuItem(region) {
+      return {
+        text: Daemon.getLocationName(region),
+        code: "loc/" + region.id,
+        icon: (!region.offline ? flag(region.country) : offline_flag(region.country)),
+        enabled: !region.offline
+      }
+    }
+    function isOffline(loc) {
+      // Convert a possible auto/<countryCode> ("favorite country")
+      // to a real location name (i.e 'best' for that country)
+      var realLocationName = Client.realLocation(loc)
+      var l = Daemon.state.availableLocations[realLocationName]
+      return !l || l.offline;
     }
 
     // On Linux, we can't be sure that the user has any way to 'activate' the
@@ -82,7 +102,7 @@ Item {
           addMenuItem(connectAutoStr, 'connect', Daemon.state.connectionState === "Disconnected")
         }
         else {
-          addMenuItem(connectServerStr.arg(Daemon.getLocationName(Daemon.state.vpnLocations.chosenLocation)),
+          addMenuItem(connectServerStr.arg(Client.getDetailedLocationName(Daemon.state.vpnLocations.chosenLocation)),
                       'loc/' + Daemon.state.vpnLocations.chosenLocation.id, Daemon.state.connectionState === "Disconnected", flag(Daemon.state.vpnLocations.chosenLocation.country))
         }
         //: Menu command to disconnect from the VPN.
@@ -109,36 +129,60 @@ Item {
           var key = favs[i]
           if (key === chosenLocationId) continue
           var name = Client.getFavoriteLocalizedName(key)
-          addMenuItem(connectServerStr.arg(name), "loc/" + key, true, flag(Client.countryFromLocation(key)))
+          if(isOffline(key))
+          {
+            // If the region is offline, show a greyed out flag
+            // and make it unclickable
+            addMenuItem(connectServerStr.arg(name), "loc/" + key, false, offline_flag(Client.countryFromLocation(key)))
+          }
+          else {
+            addMenuItem(connectServerStr.arg(name), "loc/" + key, true, flag(Client.countryFromLocation(key)))
+          }
         }
         if (Daemon.state.vpnLocations.chosenLocation || favs.length > 0) {
           addSeparator()
         }
+        //: Menu label for a submenu containing a list of dedicated IP regions.
+        var dipMenuItemText = uiTr("Connect to dedicated IP")
+        if(Daemon.state.dedicatedIpLocations.length > 0) {
+          var dips = []
+          for (i=0; i < Daemon.state.dedicatedIpLocations.length; ++i) {
+            var dipLoc = Daemon.state.dedicatedIpLocations[i]
+            dips.push({
+                        text: Client.getDetailedLocationName(dipLoc),
+                        code: "loc/" + dipLoc.id,
+                        icon: flag(dipLoc.country)
+                      })
+          }
+          content.push({ text: dipMenuItemText, code: 'dedicatedip', children: dips.sort(function(a,b) { return a.text.localeCompare(b.text) }) })
+        }
+        else if(Daemon.data.flags.includes("dedicated_ip")) {
+          // There aren't any Dedicated IP regions, create a disabled menu item
+          // instead.
+          addMenuItem(dipMenuItemText, 'dedicatedip', false)
+        }
         var regions = []
-        for (var i = 0; i < Daemon.state.groupedLocations.length; i++) {
+        for (i=0; i < Daemon.state.groupedLocations.length; i++) {
           var country = Daemon.state.groupedLocations[i]
           // Note: the Ubuntu 18 tray menu implementation doesn't support multiple
           // nested submenus, so flatten the region list on Linux.
           if (country.locations.length === 1 || Qt.platform.os === 'linux') {
             for (var j = 0; j < country.locations.length; j++) {
-              regions.push({
-                             text: Daemon.getLocationName(country.locations[j]),
-                             code: "loc/" + country.locations[j].id,
-                             icon: flag(country.locations[j].country)
-                           })
+              regions.push(buildRegionMenuItem(country.locations[j]))
             }
           } else {
+            var allLocationsOffline = country.locations.every(loc => loc.offline);
             regions.push({
                            text: Daemon.getCountryName(country.locations[0].country),
                            code: 'country/' + country.locations[0].country,
-                           icon: flag(country.locations[0].country),
-                           children: country.locations.map(function(l) {
-                             return { text: Daemon.getLocationName(l), code: "loc/" + l.id, icon: flag(l.country) } }).sort(function(a,b) { return a.text.localeCompare(b.text) })
+                           icon: (!allLocationsOffline ? flag(country.locations[0].country) : offline_flag(country.locations[0].country)),
+                           children: country.locations.map(loc => buildRegionMenuItem(loc)).sort((a,b) => a.text.localeCompare(b.text)),
+                           enabled: !allLocationsOffline
                          })
           }
         }
         //: Menu label for a submenu containing a list of regions to connect to.
-        content.push({ text: uiTr("Connect to"), code: 'locations', children: regions.sort(function(a,b) { return a.text.localeCompare(b.text) }) })
+        content.push({ text: uiTr("Connect to region"), code: 'locations', children: regions.sort(function(a,b) { return a.text.localeCompare(b.text) }) })
         addSeparator()
       }
     } else if(!showWindowInMenu) {

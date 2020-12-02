@@ -39,6 +39,8 @@ namespace GetSetType
     const QString pubIp{QStringLiteral("pubip")};
     const QString daemonState{QStringLiteral("daemon-state")};
     const QString daemonSettings{QStringLiteral("daemon-settings")};
+    const QString daemonData{QStringLiteral("daemon-data")};
+    const QString daemonAccount{QStringLiteral("daemon-account")};
 }
 
 namespace GetSetValue
@@ -70,7 +72,14 @@ namespace GetSetValue
         if(!pLocation)
             return locationAuto;
 
-        QString name = pLocation->name();
+        QString name;
+        if(pLocation->isDedicatedIp())
+        {
+            name = QStringLiteral("dedicated-") + pLocation->name() +
+                QStringLiteral("-") + pLocation->dedicatedIp();
+        }
+        else
+            name = pLocation->name();
         // Avoid an empty name, just in case
         if(name.isEmpty())
             name = pLocation->id();
@@ -86,6 +95,28 @@ namespace GetSetValue
         qInfo() << "Location" << pLocation->id() << "/" << pLocation->name()
             << "->" << name;
         return name;
+    }
+
+    // Match the location specified on the command line to the daemon's location
+    // list.  Returns the location ID if a match is found (or "auto").
+    //
+    // If no match is found, returns an empty string.
+    QString matchSpecifiedLocation(const DaemonState &state, const QString &location)
+    {
+        if(location == GetSetValue::locationAuto)
+            return GetSetValue::locationAuto;
+
+        // This an O(N) lookup, but since we just run once there's no point to
+        // building a better representation of the data just to use it once and
+        // throw it away.
+        for(const auto &knownLocation : state.availableLocations())
+        {
+            if(knownLocation.second && location == GetSetValue::getRegionCliName(knownLocation.second))
+                return knownLocation.second->id();
+        }
+
+        qWarning() << "No match found for specified location:" << location;
+        return {};
     }
 }
 
@@ -137,9 +168,10 @@ namespace
 
     const std::map<QString, SupportedType> _dumpSupportedTypes
     {
-
         {GetSetType::daemonState, {QStringLiteral("Internal state of the daemon"), {}}},
-        {GetSetType::daemonSettings, {QStringLiteral("Internal settings of the daemon"), {}}}
+        {GetSetType::daemonSettings, {QStringLiteral("Internal settings of the daemon"), {}}},
+        {GetSetType::daemonData, {QStringLiteral("Cached data of the daemon"), {}}},
+        {GetSetType::daemonAccount, {QStringLiteral("Account status"), {}}}
     };
 
     // 'regions' is only supported by 'get', not 'monitor'.
@@ -284,14 +316,28 @@ namespace
                 return QStringLiteral("Unknown");
             return ip;
         }
-        else if(type == GetSetType::daemonSettings) {
+        else if(type == GetSetType::daemonSettings)
+        {
             QJsonDocument document;
             document.setObject(client.connection().settings.toJsonObject());
             return document.toJson(QJsonDocument::Indented);
         }
-        else if(type == GetSetType::daemonState) {
+        else if(type == GetSetType::daemonState)
+        {
             QJsonDocument document;
             document.setObject(client.connection().state.toJsonObject());
+            return document.toJson(QJsonDocument::Indented);
+        }
+        else if(type == GetSetType::daemonData)
+        {
+            QJsonDocument document;
+            document.setObject(client.connection().data.toJsonObject());
+            return document.toJson(QJsonDocument::Indented);
+        }
+        else if(type == GetSetType::daemonAccount)
+        {
+            QJsonDocument document;
+            document.setObject(client.connection().account.toJsonObject());
             return document.toJson(QJsonDocument::Indented);
         }
         else
@@ -400,9 +446,18 @@ int GetCommand::exec(const QStringList &params, QCoreApplication &app)
         if(params[1] == GetSetType::regions)
         {
             // Print locations in the default order they're listed in the
-            // client - by country and latency
-            const auto &groupedLocations = client.connection().state.groupedLocations();
+            // client - DIP locations by latency, then normal locations by
+            // country and latency
             outln() << ValuePrinter::renderLocation({});  // Auto
+
+            const auto &dedicatedIpLocations = client.connection().state.dedicatedIpLocations();
+            for(const auto &pDip : dedicatedIpLocations)
+            {
+                if(pDip)
+                    outln() << ValuePrinter::renderLocation(pDip);
+            }
+
+            const auto &groupedLocations = client.connection().state.groupedLocations();
             for(const auto &country : groupedLocations)
             {
                 for(const auto &pLocation : country.locations())

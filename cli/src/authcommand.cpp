@@ -22,15 +22,36 @@
 #include "settings.h"
 #include "brand.h"
 
-#include <QFileInfo>
-
-QString LoginCommand::trimEndCR(const QString &target)
+namespace
 {
-    QString result(target);
-    if(result.endsWith(QStringLiteral("\r"))) {
-        result.chop(1);
+    QString trimEndCR(QString target)
+    {
+        if(target.endsWith(QStringLiteral("\r")))
+            target.chop(1);
+        return target;
     }
-    return result;
+}
+
+QStringList readCredentialFile(const QString &fileName)
+{
+    QFile credsFile(fileName);
+    if(!credsFile.open(QIODevice::ReadOnly))
+    {
+        errln() << "Could not open file: " << fileName;
+        throw Error{HERE, Error::Code::CliInvalidArgs};
+    }
+
+    // Read a max of 1000 bytes to prevent loading very large file into memory
+    QString credsFileContent = credsFile.read(1000);
+    QStringList parts = credsFileContent.split("\n");
+
+    for(int i=0; i<parts.size(); ++i)
+    {
+        const auto &valueTrimmed = trimEndCR(parts[i]);
+        parts[i] = valueTrimmed;
+    }
+
+    return parts;
 }
 
 void LoginCommand::printHelp(const QString &name)
@@ -52,29 +73,11 @@ int LoginCommand::exec(const QStringList &params, QCoreApplication &app)
         return CliExitCode::InvalidArgs;
     }
 
-    QString fileName = params[1];
-    QFileInfo fileInfo(fileName);
-
-    QFile loginFile(params[1]);
-    if(!loginFile.open(QIODevice::ReadOnly)) {
-        errln() << "Could not open file: " << params[1];
-        return CliExitCode::InvalidArgs;
-    }
-
-    // Read a max of 1000 bytes to prevent loading very large file into memory
-    QString loginFileContent = loginFile.read(1000);
-    QStringList parts = loginFileContent.split("\n");
+    QStringList parts = readCredentialFile(params[1]);
     if(parts.count() < 2) {
         errln () << "Invalid file format.";
         return CliExitCode::InvalidArgs;
     }
-
-    QJsonArray loginParams;
-    loginParams << trimEndCR(parts[0]);
-    loginParams << trimEndCR(parts[1]);
-
-    Async<void> daemonRpcResult;
-    QJsonValue rpcValue;
 
     QObject localConnState{};
 
@@ -88,8 +91,8 @@ int LoginCommand::exec(const QStringList &params, QCoreApplication &app)
             app.exit(CliExitCode::OtherError);
         }
 
-        daemonRpcResult = client.connection().call("login", loginParams)
-                        ->next(&localConnState, [&](const Error &error, const QJsonValue &result)
+        client.connection().call("login", QJsonArray{parts[0], parts[1]})
+                        ->notify(&localConnState, [&](const Error &error, const QJsonValue &result)
         {
             Q_UNUSED(result);
             if(error)

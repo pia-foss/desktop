@@ -36,7 +36,7 @@ RowLayout {
   // used to align additional controls to the text
   property alias textIndent: content.x
 
-  implicitWidth: (source ? image.sourceSize.width / 2 + 10 : 0) + content.contentWidth
+  implicitWidth: (source ? image.sourceSize.width / 2 + 10 : 0) + content.implicitWidth
   implicitHeight: Math.max(source ? image.sourceSize.height / 2 : 0, content.contentHeight)
 
   readonly property var iconImages: ({

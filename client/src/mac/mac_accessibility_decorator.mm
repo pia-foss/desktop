@@ -593,9 +593,7 @@ void macInitElementSubclass()
 
         baseAccessibilityRole = subclassMethod(macElementSubclass,
             macElementBaseClass, @selector(accessibilityRole),
-            &accessibilityRole, "i@:");
-        qInfo() << "check NSAccessibilityRole - should be i:"
-            << QLatin1String(@encode(NSAccessibilityRole));
+            &accessibilityRole, "@@:");
 
         // The remaining attributes are not implemented by Qt, so they do not
         // have base implementations.

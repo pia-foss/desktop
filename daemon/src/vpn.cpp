@@ -113,6 +113,10 @@ namespace
     // limit we abandon the connection.  This is intended to detect waking from
     // sleep; see updateByteCounts()
     const std::chrono::minutes bytecountAbandonLimit{4};
+
+    // Length of the random suffix added to Dedicated IP region usernames; see
+    // ConnectionConfig::ConnectionConfig()
+    const int dipUsernameRandSuffixChars{8};
 }
 
 ResolverRunner::ResolverRunner(RestartStrategy::Params restartParams)
@@ -326,7 +330,9 @@ TransportSelector::TransportSelector(const std::chrono::seconds &transportTimeou
     : _selected{QStringLiteral("udp"), 0},
       _lastPreferred{QStringLiteral("udp"), 0},
       _lastUsed{QStringLiteral("udp"), 0}, _alternates{},
-      _nextAlternate{0}, _startAlternates{-1}, _transportTimeout{transportTimeout}
+      _nextAlternate{0}, _startAlternates{-1}, _transportTimeout{transportTimeout},
+      _serverIndex{0},
+      _triedAllServers{false}
 {
 }
 
@@ -367,6 +373,8 @@ void TransportSelector::reset(const QString &protocol, uint port,
     // Reset the local address; doesn't really matter since we redetect it for
     // each beginAttempt()
     _lastLocalAddress.clear();
+    _serverIndex = 0;
+    _triedAllServers = false;
 
     if(useAlternates)
     {
@@ -428,16 +436,36 @@ const Server *TransportSelector::beginAttempt(const Location &location,
 
     delayNext = true;
 
+    const Server *pSelectedServer{nullptr};
+
+    // The number of servers for this location (constrained by port and protocol)
+    const std::size_t serverCount{_selected.countServersForLocation(location)};
+
     // Always use the preferred transport if:
+    // - We haven't yet tried all servers (if there's > 1 server)
     // - there are no alternates
     // - the preferred transport interval hasn't elapsed
     // - we failed to detect a local IP address for the connection (this means
     //   we are not connected to a network right now, and we don't want to
     //   attempt an alternate transport with "any" local address)
-    if(_alternates.empty() || !_startAlternates.hasExpired() ||
-        _lastLocalAddress.isNull())
+    if((!_triedAllServers && serverCount > 1) || _alternates.empty() || !_startAlternates.hasExpired() ||
+       _lastLocalAddress.isNull())
     {
         _lastUsed = _selected;
+        // Attempt to connect to the next server for this location
+        pSelectedServer = _lastUsed.selectServerPortWithIndex(location, _serverIndex);
+
+        if(_serverIndex + 1 == serverCount)
+            // We've tried every server for this location
+            _triedAllServers = true;
+
+        // Only turn off connection delays if we haven't yet
+        // tried every server. Otherwise successive connection
+        // attempts will be delayed.
+        if(!_triedAllServers)
+            delayNext = false;
+
+        _serverIndex = (_serverIndex + 1) % serverCount;
     }
     // After a few failures, start trying alternates.  After each retry delay,
     // we try the preferred settings, then immediately try one alternate if that
@@ -466,7 +494,9 @@ const Server *TransportSelector::beginAttempt(const Location &location,
 
     _lastPreferred = _selected;
 
-    const Server *pSelectedServer = _lastUsed.selectServerPort(location);
+    if(!pSelectedServer)
+        pSelectedServer = _lastUsed.selectServerPort(location);
+
     _lastPreferred.resolveDefaultPort(_lastUsed.protocol(), pSelectedServer);
     return pSelectedServer;
 }
@@ -497,7 +527,7 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 }
 
 ConnectionConfig::ConnectionConfig()
-    : _infrastructure{Infrastructure::Current}, _method{Method::OpenVPN},
+    : _method{Method::OpenVPN},
       _methodForcedByAuth{false},
       _vpnLocationAuto{false}, _dnsType{DnsType::Pia}, _localPort{0}, _mtu{0},
       _defaultRoute{true}, _setDefaultDns{true}, _forceVpnOnlyDns{false},
@@ -517,36 +547,11 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         _pVpnLocation.reset(new Location{*state.vpnLocations().nextLocation()});
     _vpnLocationAuto = !state.vpnLocations().chosenLocation();
 
-    // Get the credentials that will be used to authenticate
-    _vpnUsername = account.openvpnUsername();
-    _vpnPassword = account.openvpnPassword();
-    _vpnToken = account.token();
-
-    const auto &infrastructureValue = settings.infrastructure();
-    if(infrastructureValue == QStringLiteral("current"))
-        _infrastructure = Infrastructure::Current;
-    else    // modern or default
-        _infrastructure = Infrastructure::Modern;
-
     const auto &methodValue = settings.method();
     if(methodValue == QStringLiteral("openvpn"))
         _method = Method::OpenVPN;
     else if(methodValue == QStringLiteral("wireguard"))
-    {
-        // WireGuard auth requires a token.  If we haven't been able to obtain a
-        // token, use OpenVPN.
-        if(_vpnToken.isEmpty())
-        {
-            qInfo() << "Using OpenVPN instead of WireGuard for this connection, auth token is not available";
-            _method = Method::OpenVPN;
-            _methodForcedByAuth = true;
-        }
-        else
-        {
-            _method = Method::Wireguard;
-            _wireguardUseKernel = settings.wireguardUseKernel();
-        }
-    }
+        _method = Method::Wireguard;
     // Any other value is treated as "openvpn"; the setting values are validated
     // by the daemon so invalid values should not occur.
     else
@@ -554,6 +559,48 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         _method = Method::OpenVPN;
         qWarning() << "Unexpected method setting" << methodValue
             << "- using OpenVPN";
+    }
+
+    // Get the credentials that will be used to authenticate
+    // For dedicated IP regions, use the DIP token
+    if(_pVpnLocation && _pVpnLocation->isDedicatedIp())
+    {
+        // Dedicated IP region, use DIP token credentials.  Find the DIP token
+        // from the account information
+        const auto &accountDips = account.dedicatedIps();
+        auto itAccountDip = std::find_if(accountDips.begin(), accountDips.end(),
+            [this](const AccountDedicatedIp &accountDip)
+            {
+                return accountDip.id() == _pVpnLocation->id();
+            });
+        if(itAccountDip != accountDips.end())
+        {
+            // The random identifier at the end of the username just allows the
+            // server to accept multiple simultaneous connections on the same
+            // dedicated IP, as some auth backends can't handle more than one
+            // connection using the same username.
+            _vpnUsername = QStringLiteral("dedicated_ip_") +
+                itAccountDip->dipToken() +
+                QStringLiteral("_%1").arg(QRandomGenerator::global()->generate(),
+                               dipUsernameRandSuffixChars, 16, QChar{'0'});
+            _vpnPassword = itAccountDip->ip();
+        }
+    }
+    else
+    {
+        // Normal region, use account authentication (credentials or token)
+        _vpnUsername = account.openvpnUsername();
+        _vpnPassword = account.openvpnPassword();
+        _vpnToken = account.token();
+
+        // WireGuard auth requires a token.  If we haven't been able to obtain a
+        // token, use OpenVPN.
+        if(_method == Method::Wireguard && _vpnToken.isEmpty())
+        {
+            qInfo() << "Using OpenVPN instead of WireGuard for this connection, auth token is not available";
+            _method = Method::OpenVPN;
+            _methodForcedByAuth = true;
+        }
     }
 
     // Read the DNS setting
@@ -636,31 +683,29 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         if(_proxyType == ProxyType::None)
             _automaticTransport = settings.automaticTransport();
     }
+    // Capture WireGuard-specific settings
+    else if(_method == Method::Wireguard)
+        _wireguardUseKernel = settings.wireguardUseKernel();
 
-    // The port forwarding setting requires OpenVPN in the current
-    // infrastructure.  In the modern infrastructure, both methods support it.
-    if(_infrastructure == Infrastructure::Modern || _method == Method::OpenVPN)
-    {
-        // The port forwarding setting is more complex, because changes are
-        // applied on the fly in some cases, but require reconnects in others.
-        //
-        // When connected to a region that supports PF using a connection that
-        // supports PF, any change requires a reconnect.  We have to reconnect
-        // to start a new PF request, or when disabling PF, we keep the port
-        // that we got until we reconnect.
-        //
-        // When connected to a region that doesn't support it, changing the
-        // setting just toggles between Inactive and Unavailable.  This doesn't
-        // require a reconnect.
-        //
-        // As a result, the connection config only captures the PF setting when
-        // connecting to a region that has PF.  Otherwise, the connection config
-        // does not depend on PF (changes will not trigger a reconnect notice),
-        // and the daemon allows PortForwarder to track the real setting as it's
-        // updated to toggle between Inactive/Unavailable.
-        if(_pVpnLocation && _pVpnLocation->portForward())
-            _requestPortForward = settings.portForward();
-    }
+    // The port forwarding setting is more complex, because changes are
+    // applied on the fly in some cases, but require reconnects in others.
+    //
+    // When connected to a region that supports PF using a connection that
+    // supports PF, any change requires a reconnect.  We have to reconnect
+    // to start a new PF request, or when disabling PF, we keep the port
+    // that we got until we reconnect.
+    //
+    // When connected to a region that doesn't support it, changing the
+    // setting just toggles between Inactive and Unavailable.  This doesn't
+    // require a reconnect.
+    //
+    // As a result, the connection config only captures the PF setting when
+    // connecting to a region that has PF.  Otherwise, the connection config
+    // does not depend on PF (changes will not trigger a reconnect notice),
+    // and the daemon allows PortForwarder to track the real setting as it's
+    // updated to toggle between Inactive/Unavailable.
+    if(_pVpnLocation && _pVpnLocation->portForward())
+        _requestPortForward = settings.portForward();
 }
 
 bool ConnectionConfig::canConnect() const
@@ -669,6 +714,15 @@ bool ConnectionConfig::canConnect() const
     {
         qWarning() << "No VPN location found, cannot connect";
         return false;   // Always required for any connection
+    }
+
+    // If we weren't able to get any credentials, we can't connect.
+    // This shouldn't happen, but if something goes wrong with DIP regions, it
+    // might occur.
+    if(vpnUsername().isEmpty() && vpnToken().isEmpty())
+    {
+        qWarning() << "No VPN credentials found, cannot connect";
+        return false;
     }
 
     switch(proxyType())
@@ -706,10 +760,26 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
     QString otherVpnLocationId = other.vpnLocation() ? other.vpnLocation()->id() : QString{};
     QString otherSsLocationId = other.shadowsocksLocation() ? other.shadowsocksLocation()->id() : QString{};
 
-    return infrastructure() != other.infrastructure() ||
-        method() != other.method() ||
+    // For dedicated IP locations, the "username" used to authenticate has
+    // random data on the end of it since some auth backends can't handle more
+    // than one simultaneous connection with the same username.  Ignore this; it
+    // doesn't indicate settings have changed.
+    QString userFixedPart{vpnUsername()};
+    if(userFixedPart.size() >= dipUsernameRandSuffixChars && vpnLocation() &&
+        vpnLocation()->isDedicatedIp())
+    {
+        userFixedPart = userFixedPart.left(userFixedPart.size() - dipUsernameRandSuffixChars);
+    }
+    QString otherUserFixedPart{vpnUsername()};
+    if(otherUserFixedPart.size() >= dipUsernameRandSuffixChars && other.vpnLocation() &&
+        other.vpnLocation()->isDedicatedIp())
+    {
+        otherUserFixedPart = otherUserFixedPart.left(otherUserFixedPart.size() - dipUsernameRandSuffixChars);
+    }
+
+    return method() != other.method() ||
         methodForcedByAuth() != other.methodForcedByAuth() ||
-        vpnUsername() != other.vpnUsername() ||
+        userFixedPart != otherUserFixedPart ||
         vpnPassword() != other.vpnPassword() ||
         vpnToken() != other.vpnToken() ||
         dnsType() != other.dnsType() ||
@@ -728,6 +798,7 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         requestMace() != other.requestMace() ||
         wireguardUseKernel() != other.wireguardUseKernel() ||
         vpnLocationId != otherVpnLocationId ||
+        vpnLocationAuto() != other.vpnLocationAuto() ||
         ssLocationId != otherSsLocationId;
 }
 
@@ -737,16 +808,7 @@ QStringList ConnectionConfig::getDnsServers() const
     {
         default:
         case DnsType::Pia:
-            switch(infrastructure())
-            {
-                case Infrastructure::Modern:
-                    return {requestMace() ? piaModernDnsVpnMace() : piaModernDnsVpn()};
-                default:
-                case Infrastructure::Current:
-                    // MACE is activated separately for the legacy
-                    // infrastructure.
-                    return {piaLegacyDnsPrimary(), piaLegacyDnsSecondary()};
-            }
+            return {requestMace() ? piaModernDnsVpnMace() : piaModernDnsVpn()};
         case DnsType::Handshake:
         case DnsType::Local:
             return {resolverLocalAddress()};
@@ -829,11 +891,12 @@ VPNConnection::VPNConnection(QObject* parent)
     cleanupWireguard();
 }
 
-void VPNConnection::scheduleMaceDnsCacheFlush()
+void VPNConnection::scheduleDnsCacheFlush()
 {
+    qInfo() << "Scheduling DNS cache flush";
     QTimer::singleShot(1000, this, [this]()
     {
-        qInfo() << "Flushing DNS cache due to activating MACE";
+        qInfo() << "Flushing DNS cache";
 #if defined(Q_OS_LINUX)
         Exec::bash(QStringLiteral("if [[ $(realpath /etc/resolv.conf) =~ systemd ]]; then systemd-resolve --flush-caches; fi"));
 #elif defined(Q_OS_MAC)
@@ -845,51 +908,6 @@ void VPNConnection::scheduleMaceDnsCacheFlush()
 #elif defined(Q_OS_WIN)
         Exec::cmd(QStringLiteral("ipconfig"), {QStringLiteral("/flushdns")});
 #endif
-    });
-}
-
-void VPNConnection::activateMACE()
-{
-    // To activate MACE, we need to send a TCP packet to 209.222.18.222 port 1111.
-    // This sets the DNS servers to block queries for known tracking domains
-    // As a fallback, we also need to send another packet 5 seconds later
-    // (see pia_manager's openvpn_manager.rb for original implementation)
-    //
-    // We can later test if we need a second packet, but it might be used to mitigate
-    // issues occured by sending a packet immediately.
-    auto maceActivate1 = new QTcpSocket();
-    maceActivate1->setProxy({QNetworkProxy::ProxyType::NoProxy});
-    qDebug () << "Sending MACE Packet 1";
-    maceActivate1->connectToHost(piaLegacyDnsPrimary(), 1111);
-    // Tested if error condition is hit by changing the port/invalid IP
-    connect(maceActivate1,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
-            [maceActivate1](QAbstractSocket::SocketError socketError) {
-        qError() << "Failed to activate MACE packet 1 " << socketError;
-        maceActivate1->deleteLater();
-    });
-    connect(maceActivate1, &QAbstractSocket::connected, this, [this, maceActivate1]() {
-        qDebug () << "MACE Packet 1 connected succesfully";
-        maceActivate1->close();
-        maceActivate1->deleteLater();
-        scheduleMaceDnsCacheFlush();
-    });
-
-    QTimer::singleShot(std::chrono::milliseconds(5000).count(), this, [this]() {
-        auto maceActivate2 = new QTcpSocket();
-        maceActivate2->setProxy({QNetworkProxy::ProxyType::NoProxy});
-        qDebug () << "Sending MACE Packet 2";
-        maceActivate2->connectToHost(piaLegacyDnsPrimary(), 1111);
-        connect(maceActivate2,QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this,
-            [maceActivate2](QAbstractSocket::SocketError socketError) {
-        qError() << "Failed to activate MACE packet 2 " << socketError;
-        maceActivate2->deleteLater();
-        });
-        connect(maceActivate2, &QAbstractSocket::connected, this, [this, maceActivate2]() {
-        qDebug () << "MACE Packet 2 connected succesfully";
-        maceActivate2->close();
-        maceActivate2->deleteLater();
-        scheduleMaceDnsCacheFlush();
-        });
     });
 }
 
@@ -1254,7 +1272,13 @@ void VPNConnection::doConnect()
     // transport" notifications).  We still need to really find a WireGuard
     // server.
     if(_connectingConfig.method() == ConnectionConfig::Method::Wireguard)
-        pVpnServer = _connectingConfig.vpnLocation()->randomServerForService(Service::WireGuard);
+    {
+        const auto location = _connectingConfig.vpnLocation();
+        const auto serverCount{location->countServersForService(Service::WireGuard)};
+        const auto index{_connectionAttemptCount % serverCount};
+        // Attempt to connect to the next server for this location
+        pVpnServer = location->serverWithIndexForService(index, Service::WireGuard);
+    }
 
     // Set when the next earliest reconnect attempt is allowed
     if(delayNext)
@@ -1392,6 +1416,25 @@ void VPNConnection::vpnMethodStateChanged()
                 }
                 _resolverRunner.enable(ResolverRunner::Resolver::Unbound, {"-c", Path::UnboundConfigFile});
             }
+
+            // For any DNS method other than "Use Existing DNS", schedule a
+            // DNS cache flush.
+            //
+            // Changing the DNS configuration typically causes the system to
+            // flush DNS caches on its own (and the DNS helper scripts also
+            // trigger it when needed), but we've observed that on some systems
+            // it's still possible to get non-VPN DNS entries cached after the
+            // connection is established (notably with systemd-resolv on
+            // Ubuntu 20.04.1).
+            //
+            // This can't be reproduced reliabily and likely involves races
+            // between in-flight DNS requests and the DNS configuration change.
+            // Scheduling a deferred DNS cache wipe improves this.  (This is
+            // mostly noticeable with MACE, but DNS resolution can differ in
+            // other circumstances too, so we do this even if MACE is not
+            // enabled.)
+            if(_connectedConfig.dnsType() != ConnectionConfig::DnsType::Existing)
+                scheduleDnsCacheFlush();
 
             newState = State::Connected;
             break;
@@ -1694,7 +1737,10 @@ bool VPNConnection::copySettings(State successState, State failureState)
 
     // Reset to the first attempt; settings have changed
     if(changed)
+    {
+        qInfo() << "Reset to first attempt, settings have changed";
         updateAttemptCount(0);
+    }
 
     // If we failed to load any required data, fail
     if(!_connectingConfig.canConnect())

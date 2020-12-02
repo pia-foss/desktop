@@ -69,7 +69,9 @@ signals:
 
 private:
     int _icmpSocket;
-    QSocketNotifier _readNotifier;
+    // Have to delay construction of this notifier until we have set up the
+    // ICMP socket.
+    nullable_t<QSocketNotifier> _pReadNotifier;
     quint16 _identifier;
     quint16 _nextSequence;
 };

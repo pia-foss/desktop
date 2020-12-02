@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="44px"
+   height="44px"
+   viewBox="0 0 44 44"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="dip-icon-badge-bg.svg"
+   inkscape:export-filename="/Users/jhall/workspace/pia2_desktop/graphics/quick-connect/dip-icon-badge.png"
+   inkscape:export-xdpi="40.91"
+   inkscape:export-ydpi="40.91">
+  <metadata
+     id="metadata17">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs15" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1649"
+     inkscape:window-height="836"
+     id="namedview13"
+     showgrid="false"
+     inkscape:object-nodes="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:zoom="15.170655"
+     inkscape:cx="17.605393"
+     inkscape:cy="22.788997"
+     inkscape:window-x="2727"
+     inkscape:window-y="150"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2">
+    <sodipodi:guide
+       position="27.834613,36.052982"
+       orientation="1,0"
+       id="guide4145" />
+    <sodipodi:guide
+       position="33.6,31.874843"
+       orientation="0,1"
+       id="guide4147" />
+  </sodipodi:namedview>
+  <title
+     id="title4">Group 2</title>
+  <path
+     d="M 33.6,12.125156 C 33.6,8.9686671 31.014604,6.4 27.834613,6.4 c -3.178606,0 -5.765271,2.5672924 -5.765271,5.725156 0,0.01887 0.0029,0.03773 0.0029,0.0566 -0.290823,-0.02322 -0.581653,-0.03628 -0.87246,-0.03628 -5.445395,0 -10.093902,3.687655 -11.3056937,8.967431 -0.6883158,3.001193 -0.1592951,6.089619 1.4906647,8.695847 1.649968,2.605002 4.223501,4.41777 7.247182,5.101 0.850558,0.193017 1.721597,0.290251 2.586762,0.290251 5.445394,0 10.093901,-3.686205 11.305693,-8.965944 0.683939,-2.979422 0.166602,-6.044665 -1.457031,-8.63789 C 32.36071,15.687768 33.6,13.669177 33.6,12.124759 Z"
+     id="Fill-1"
+     style="fill:#323642;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="csscscccscccc"
+     inkscape:export-xdpi="75"
+     inkscape:export-ydpi="75" />
+</svg>

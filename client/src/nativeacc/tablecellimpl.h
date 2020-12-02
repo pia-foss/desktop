@@ -94,6 +94,14 @@ public:
     // Reattach to a new TableCellBase.  Used by TableCellBase::attachImpl().
     void reattach(TableCellBase &definition);
 
+    // Additional accessibility interfaces.  Like AccessibleItem, these can be
+    // overridden to return role-specific interfaces, which are used in the
+    // interface_cast<>() implementation.
+    virtual QAccessibleTableInterface *tableInterface() {return nullptr;}
+    virtual QAccessibleTextInterface *textInterface() {return nullptr;}
+    virtual QAccessibleValueInterface *valueInterface() {return nullptr;}
+    virtual QAccessibleActionInterface *actionInterface() {return nullptr;}
+
     // Set the cell's row/column indices and extents.  These are the values
     // returned by [row|column]Index() and [row|column]Extent().
     // TableCellImpl doesn't really care about these otherwise.

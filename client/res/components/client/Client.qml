@@ -32,6 +32,35 @@ QtObject {
   // Valid recent locations (filters out any locations that no longer exist)
   readonly property var validRecentLocations: settings.recentLocations.filter(function(f) { return Daemon.state.availableLocations[f]; })
 
+  // Display favorites in the following order:
+  // 1. Dedicated IPs (sorted by region name)
+  // 2. Country "best" favorites (sorted by country name)
+  // 3. Normal regions (sorted by region name)
+  //
+  // Prior versions of PIA were (accidentally) comparing the "auto/<country>"
+  // favorite code with display names for other regions, which mostly
+  // sorted country groups first, except for countries like "Andorra", which
+  // would sort before "auto".
+  readonly property var favoriteSortGroups: ({
+    dedicatedIps: 0,
+    countryGroups: 1,
+    regions: 2,
+    invalid: 3
+  })
+
+  function determineFavoriteSortGroup(id, loc) {
+    if(isValidAutoCountry(id))
+      return favoriteSortGroups.countryGroups
+
+    if(!loc)
+      return favoriteSortGroups.invalid
+
+    if(loc.dedicatedIpExpire > 0)
+      return favoriteSortGroups.dedicatedIps
+
+    return favoriteSortGroups.regions // Normal region
+  }
+
   // Favorite locations sorted by alphabetically by display name
   // The user could control their order theoretically, but the interaction
   // for this would be cumbersome (re-favorite the regions in the desired
@@ -41,8 +70,41 @@ QtObject {
     // a location that starts with "auto/" is an "auto country" location, e.g "auto/us" - represents the server with lowest ping in the US.
     var favorites = (settings.favoriteLocations || []).filter(function(f) {  return Daemon.state.availableLocations[f] || isValidAutoCountry(f) })
     favorites.sort(function (first, second) {
-      return Util.compareNoCase(Daemon.getLocationIdName(first),
-                                Daemon.getLocationIdName(second))
+      // Find location objects - these could be null if the region is a country
+      // group
+      var firstLoc = Daemon.state.availableLocations[first]
+      var secondLoc = Daemon.state.availableLocations[second]
+      // Determine each region's sort group
+      var firstGroup = determineFavoriteSortGroup(first, firstLoc)
+      var secondGroup = determineFavoriteSortGroup(second, secondLoc)
+
+      if(firstGroup != secondGroup)
+        return firstGroup - secondGroup
+
+      // Names to compare initially - either region names or country names
+      var firstName, secondName
+      // Details to compare if the names are identical - currently only used for
+      // DIPs, this is the IP address
+      var firstDetail, secondDetail
+
+      if(firstGroup === favoriteSortGroups.countryGroups) {
+        firstName = Daemon.getCountryName(countryFromAutoCountryLocation(first))
+        secondName = Daemon.getCountryName(countryFromAutoCountryLocation(second))
+      }
+      else {
+        firstName = Daemon.getLocationName(firstLoc)
+        secondName = Daemon.getLocationName(secondLoc)
+
+        if(firstGroup === favoriteSortGroups.dedicatedIps) {
+          firstDetail = firstLoc.dedicatedIp
+          secondDetail = secondLoc.dedicatedIp
+        }
+      }
+
+      var nameComp = firstName.localeCompare(secondName, state.activeLanguage.locale)
+      if(nameComp !== 0)
+        return nameComp
+      return firstDetail.localeCompare(secondDetail, state.activeLanguage.locale)
     })
     return favorites
   }
@@ -60,7 +122,7 @@ QtObject {
       if(countries[i].locations.length <= 0)
         continue
 
-      if(countries[i].locations[0].country.toUpperCase() == country.toUpperCase()) {
+      if(countries[i].locations[0].country.toUpperCase() === country.toUpperCase()) {
         return countries[i].locations.length
       }
     }
@@ -110,13 +172,36 @@ QtObject {
     return location.substring(5, location.length).toUpperCase()
   }
 
-  function getFavoriteLocalizedName(location) {
-    if(location.startsWith("auto/"))
+  function getFavoriteLocalizedName(locId) {
+    if(locId.startsWith("auto/")) {
       //: Text that indicates the best (lowest ping) region is being used for a given country.
       //: The %1 placeholder contains the name of the country, e.g "UNITED STATES - BEST"
-      return uiTr("%1 - Best").arg(Daemon.getCountryName(countryFromAutoCountryLocation(location)))
-    else
-      return Daemon.getLocationIdName(location)
+      return uiTr("%1 - Best").arg(Daemon.getCountryName(countryFromAutoCountryLocation(locId)))
+    }
+
+    var loc = Daemon.state.availableLocations[locId]
+    if(loc)
+      return getDetailedLocationName(loc)
+
+    // If all else fails, display the location ID - these should generally have
+    // been filtered out though.
+    return locId
+  }
+
+  // Get a "detailed" name for a location, for use in context like the tray menu
+  // when additional details can't be represented in any other way than by
+  // adding them to the name.  This includes enough detail to distinguish the
+  // location by the name returned.
+  //
+  // Currently, this just adds the dedicated IP for dedicated IP locations.
+  //
+  // In most contexts, prefer to represent this information contextually when
+  // possible (like in the regions list, etc.)
+  function getDetailedLocationName(loc) {
+    if(loc.dedicatedIp)
+      return Daemon.getLocationName(loc) + " - " + loc.dedicatedIp
+
+    return Daemon.getLocationName(loc)
   }
 
   // Start the log uploader.  If the daemon connection is up, asks the daemon to

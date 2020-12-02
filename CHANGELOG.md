@@ -1,5 +1,19 @@
 # Changelog
 
+### v2.6.0
+* Removed support for the legacy PIA network
+* Added support for upcoming Dedicated IP feature
+* Temporarily unavailable regions are displayed in the regions list and ignored by automatic selection
+* Regions now report multiple servers per region for improved connection resiliency
+* Minor improvements to regions list UI and accessibility
+* Improved word breaking in Thai translation
+* Fixed some Shadowsocks servers not appearing with next-gen network
+* Fixed an issue preventing OpenVPN from connecting on Fedora 33
+* Fixed an issue occasionally allowing domains that should be blocked by MACE to remain cached on the system
+* Fixed accessibility focus indications for drop-down buttons
+* Fixed launching client after install, and launching downloaded updates on some Linux environments
+* Fixed missing accessibility annotations on Shadowsocks proxy region list
+
 ### v2.5.1
 * Fixed a crash that occurred when geo-located regions were disabled in Settings
 * Fixed an issue preventing the crash reporter from starting for client crashes

@@ -24,11 +24,28 @@
 
 namespace NativeAcc {
 
-namespace
+// This is the action identifier passed to Qt.  It's not displayed; the
+// display string is in localizedActionNames().
+const QString ValueTextAttached::copyActionName = QStringLiteral("ValueTextCopy");
+
+// Localized description string for the copy action.
+QString ValueTextAttached::copyActionLocalizedDescription()
 {
-    // This is the action identifier passed to Qt.  It's not displayed; the
-    // display string is in localizedActionNames().
-    const QString copyActionName = QStringLiteral("ValueTextCopy");
+    //: Screen reader description of the "copy" action for IP address/port
+    //: fields, etc.  "Copies" refers to copying to the system clipboard and
+    //: should use the OS's normal terminology.  Grammatically, the implied
+    //: subject is the accessibility action, "[This action] copies the value
+    //: [to the clipboard]".
+    return tr("Copies the value");
+}
+
+// Localized name string for the copy action.
+QString ValueTextAttached::copyActionLocalizedName()
+{
+    //: Screen reader annotation to describe the "copy" action on the IP
+    //: address and port fields, etc.  Copies the text to the clipboard,
+    //: should be a verb or short verb phrase.
+    return tr("Copy");
 }
 
 ValueTextAttached::ValueTextAttached(QQuickItem &item)
@@ -75,12 +92,7 @@ QString ValueTextAttached::localizedActionDescription(const QString &actionName)
 {
     if(actionName == copyActionName)
     {
-        //: Screen reader description of the "copy" action for IP address/port
-        //: fields, etc.  "Copies" refers to copying to the system clipboard and
-        //: should use the OS's normal terminology.  Grammatically, the implied
-        //: subject is the accessibility action, "[This action] copies the value
-        //: [to the clipboard]".
-        return tr("Copies the value");
+        return copyActionLocalizedDescription();
     }
 
     return AccessibleItem::localizedActionDescription(actionName);
@@ -90,10 +102,7 @@ QString ValueTextAttached::localizedActionName(const QString &actionName) const
 {
     if(actionName == copyActionName)
     {
-        //: Screen reader annotation to describe the "copy" action on the IP
-        //: address and port fields, etc.  Copies the text to the clipboard,
-        //: should be a verb or short verb phrase.
-        return tr("Copy");
+        return copyActionLocalizedName();
     }
 
     return AccessibleItem::localizedActionName(actionName);

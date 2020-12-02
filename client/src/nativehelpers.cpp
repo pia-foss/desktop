@@ -100,8 +100,10 @@ namespace
             return false;
         }
 
-        // Run the app bundle with 'open'.
-        QStringList openArgs{updateDir.absoluteFilePath(bundleList[0])};
+        // Run the app bundle with 'open -n'.  The new installer likely has the
+        // same bundle identifier as this app, so '-n' tells macOS to open the
+        // new app even if it thinks it's already open.
+        QStringList openArgs{QStringLiteral("-n"), updateDir.absoluteFilePath(bundleList[0])};
         auto execResult = QProcess::execute(QStringLiteral("open"), openArgs);
         if(execResult != 0)
         {

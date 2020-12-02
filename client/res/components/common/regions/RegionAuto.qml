@@ -26,63 +26,46 @@ import "../../theme"
 import "../../vpnconnection"
 import PIA.NativeAcc 1.0 as NativeAcc
 
-Item {
+RegionRowConstants {
   id: regionAuto
 
   // RegionListView needs the translated display text to implement keyboard
   // seeking
   readonly property string displayText: uiTr("Choose automatically")
 
-  // Provide a highlightColumn property similar to that of RegionRowBase.
-  // RegionAuto can't be favorited, so the specific column here doesn't matter
-  // when it's not -1.
-  property int highlightColumn
-
   // Service locations for this region list
   property var serviceLocations
-
-  // The auto region was selected
-  signal regionSelected()
-
-  // The regions list should take focus due to a mouse event
-  // Like RegionRowBase, includes the column that was selected (always 0 for
-  // RegionAuto)
-  // Emitted for any click on the row
-  signal focusCell(int keyColumn)
 
   // The 'auto' region only has one column, so the effective column is always
   // that one.
   function effectiveColumnFor(column) {
-    return 0 // RegionRowBase.keyColumns.region
+    return keyColumns.region
   }
 
   function keyboardSelect() {
-    regionSelected()
+    clicked()
   }
 
   readonly property bool selected: !regionAuto.serviceLocations.chosenLocation
 
-  // Screen reader row annotation - corresponds to RegionRowBase.accRow.
-  readonly property NativeAcc.TableRow accRow: NativeAcc.TableRow {
+  accRow: NativeAcc.TableRow {
     name: displayText
     item: regionAuto
     selected: regionAuto.selected
     outlineExpanded: false
     outlineLevel: 0
   }
-  // Screen reader cell annotations - correspond to RegionRowBase properties.
-  readonly property NativeAcc.TableCellButton accRegionCell: NativeAcc.TableCellButton {
-    name: displayText
-    item: chooseAutomaticallyText
-    onActivated: regionAuto.clicked()
+  accRegionCell: labels.accRegionCell
+  accDetailCell: NativeAcc.TableCellText {
+    name: currentAutoRegionText.text
+    item: currentAutoRegionText
   }
-  // RegionAuto does not have latency or favorite cells.
-  readonly property NativeAcc.TableCellText accLatencyCell: null
-  readonly property NativeAcc.TableCellCheckButton accFavoriteCell: null
+  accLatencyCell: labels.accLatencyCell
+  accFavoriteCell: labels.accFavoriteCell
 
-  function clicked() {
-    focusCell(0)
-    regionSelected()
+  function regionClicked() {
+    focusCell(keyColumns.region)
+    clicked()
   }
 
   Rectangle {
@@ -100,16 +83,30 @@ Item {
     countryCode: regionAuto.serviceLocations.bestLocation ? regionAuto.serviceLocations.bestLocation.country : ''
   }
 
-  Text {
-    id: chooseAutomaticallyText
-    x: 56
-    y: 14
-    text: displayText
-    font.pixelSize: Theme.regions.labelTextPx
-    color: regionAuto.selected ? Theme.regions.itemSelectedTextColor : Theme.regions.itemTextColor
+  RegionRowLabels {
+    id: labels
+    width: parent.width
+    height: 46
+    label: displayText
+    labelTextPx: Theme.regions.labelTextPx
+    showLatency: true
+    latency: regionAuto.serviceLocations.bestLocation ? regionAuto.serviceLocations.bestLocation.latency : -1
+    selected: regionAuto.selected
+    canFavorite: false
+    // N/A, auto region never shows this warning (only PF regions are chosen
+    // automatically when PF is enabled)
+    lacksPortForwarding: false
+    pfWarningTipText: ""
+    // N/A, auto regions never show this (only non-geo regions are chosen automatically)
+    geoLocation: false
+    // N/A, auto can't be favorited
+    isFavorite: false
+    highlightFavorite: false
+    onRegionClicked: regionAuto.regionClicked()
   }
 
   Text {
+    id: currentAutoRegionText
     x: 56
     y: 34
     text: Daemon.getLocationName(regionAuto.serviceLocations.bestLocation)
@@ -121,7 +118,7 @@ Item {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 4
+    height: 1
     color: Theme.regions.itemSeparatorColor
   }
 
@@ -129,7 +126,7 @@ Item {
     id: mouseArea
     anchors.fill: parent
     hoverEnabled: true
-    onClicked: regionAuto.clicked()
+    onClicked: regionAuto.regionClicked()
   }
 
   HighlightCue {

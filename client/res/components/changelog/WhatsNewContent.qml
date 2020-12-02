@@ -412,6 +412,8 @@ Item {
             id: splitTunnelFeatureText
             Layout.topMargin: 10
             Layout.fillWidth: true
+            color: Theme.dashboard.textColor
+            linkColor: color
             //: The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.
             text: uiTranslate(
                     "ChangelogWindow",
@@ -499,6 +501,8 @@ Item {
             Layout.topMargin: 10
             Layout.fillWidth: true
 
+            color: Theme.dashboard.textColor
+            linkColor: color
             //: The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.
             text: uiTranslate(
                     "ChangelogWindow",

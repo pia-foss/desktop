@@ -32,8 +32,27 @@ import PIA.NativeAcc 1.0 as NativeAcc
 // actualLogicalWidth and actualLogicalHeight properties to center itself
 Dialog {
 
-  // The buttons at the bottom of the dialog. An array of either standard buttons
-  // (see Dialog constants), or objects with the following
+  // The buttons at the bottom of the dialog. Each button in the array can be
+  // described in three ways:
+  // 1. A standard button - a button identifier, like Dialog.Ok, Dialog.Cancel,
+  //    etc.
+  // 2. A custom button - use an object with the following properties:
+  //   - text: Translated text for the button
+  //   - role: A DialogButtonBox role.  This determines:
+  //     - the button's position in the box (DialogButtonBox orders
+  //       appropriately for the current platform by role)
+  //     - whether the button causes the dialog to take a default action after
+  //       emitting clicked() - accept(), reject(), etc.
+  //     - whether the button is enabled (determines the corresponding can*
+  //       property below)
+  //   - clicked: An optional function to call before emitting clicked() and the
+  //     standard Dialog signals (accepted(), rejected(), etc.)
+  //   - suppressDefault: If true, prevents the default action from being taken-
+  //     the dialog is not automatically closed, and default action signals
+  //     (accepted()/rejected/applied()/etc.) are not emitted.
+  // 3. A customized standard button - use an object with the "code" property
+  //    set to the standard button identifier, and define additional custom
+  //    properties to override specific aspects of the button individually
   property var buttons
 
   // Boolean properties to enable/disable categories of buttons
@@ -45,14 +64,21 @@ Dialog {
   property bool canReset: true
   property bool canApply: true
 
-  // Signal when a dialog button is clicked. The argument is a button
-  // descriptor object of the same format that 'button' accepts, with
-  // the following key fields:
+  // When a button is clicked, OverlayDialog takes the following actions in
+  // order:
+  // 1. Calls the button's clicked() function (if present)
+  // 2. Emits OverlayDialog.clicked(), with the button object as its argument
+  // 3. For AcceptRole or RejectRole, closes the dialog (handled by
+  //    QQuickDialog::done()/accept()/reject(), skipped if the button has
+  //    suppressDefault)
+  // 4. Emits a role-specific signal from the dialog (QQuickDialog::accepted()/
+  //    rejected()/applied()/etc., skipped if the button has suppressDefault)
   //
-  // - index: the index of the button in the 'buttons' array
-  // - role: the button role (e.g. DialogButtonBox.AcceptRole)
-  // - code: the standard button code if present (e.g. Dialog.Ok)
-  //
+  // The button argument is the button object - it has the properties described
+  // above for custom buttons, as well as an 'index' property indicating the
+  // button's original index.  (Note that standard buttons are replaced by a
+  // complete button object here; the 'code' property indicates standard button
+  // role if applicable.)
   signal clicked(var button)
 
   readonly property var defaultButtons: {
@@ -159,70 +185,136 @@ Dialog {
     border.width: 1
     border.color: Theme.popup.dialogFrameColor
   }
-  footer: DialogButtonBox {
+  // Setting a DialogButtonBox as the 'footer' implicitly connects the button
+  // box's accepted(), rejected() and clicked() signals to handlers in the
+  // Dialog, which close the dialog (for accept/reject).
+  //
+  // In some cases, the "accept" button must take an asynchronous action and
+  // only close the dialog if the action is successful (DedicatedIpAddRow).
+  // The button must still have the Accept role, so it is sorted correctly by
+  // the button box, but we don't want the default action.
+  //
+  // Wrap the DialogButtonBox in an Item to prevent its signals from being
+  // connected automatically, then recreate that connection manually if desired.
+  footer: Item {
     width: parent.width
-    alignment: Qt.AlignRight
-    background: null
-    padding: 20
-    topPadding: 15
-    spacing: 5
-    Repeater {
-      model: dialog.actualButtons
-      delegate: Button {
-        id: dialogButton
-        text: modelData.text
-        property int standardButton: modelData.code !== undefined ? modelData.code : DialogButtonBox.NoButton
-        DialogButtonBox.buttonRole: modelData.role !== undefined ? modelData.role : DialogButtonBox.AcceptRole
-        enabled: !buttonsDisabled[DialogButtonBox.buttonRole]
-        leftPadding: 20
-        rightPadding: 20
-        background: Rectangle {
-          color: {
-            if (!enabled)
-              Theme.settings.inputButtonDisabledBackgroundColor
-            else if (parent.down)
-              Theme.settings.inputButtonPressedBackgroundColor
-            else
-              Theme.settings.inputButtonBackgroundColor
+    implicitHeight: dialogButtonBox.height
+
+    DialogButtonBox {
+      id: dialogButtonBox
+      width: parent.width
+      alignment: Qt.AlignRight
+      background: null
+      padding: 20
+      topPadding: 15
+      spacing: 5
+      Repeater {
+        model: dialog.actualButtons
+        delegate: Button {
+          id: dialogButton
+
+          readonly property var buttonModel: modelData
+
+          text: modelData.text
+          property int standardButton: modelData.code !== undefined ? modelData.code : DialogButtonBox.NoButton
+          DialogButtonBox.buttonRole: modelData.role !== undefined ? modelData.role : DialogButtonBox.AcceptRole
+          enabled: !buttonsDisabled[DialogButtonBox.buttonRole]
+          leftPadding: 20
+          rightPadding: 20
+          background: Rectangle {
+            color: {
+              if (!enabled)
+                Theme.settings.inputButtonDisabledBackgroundColor
+              else if (parent.down)
+                Theme.settings.inputButtonPressedBackgroundColor
+              else
+                Theme.settings.inputButtonBackgroundColor
+            }
+            radius: 3
+            border.width: 2
+            border.color: {
+              if (!enabled)
+                Theme.settings.inputButtonDisabledBorderColor
+              else if (parent.activeFocus)
+                Theme.settings.inputButtonFocusBorderColor
+              else
+                color
+            }
           }
-          radius: 3
-          border.width: 2
-          border.color: {
-            if (!enabled)
-              Theme.settings.inputButtonDisabledBorderColor
-            else if (parent.activeFocus)
-              Theme.settings.inputButtonFocusBorderColor
-            else
-              color
+          contentItem: Text {
+            text: parent.text
+            font: parent.font
+            color: parent.enabled ? Theme.settings.inputButtonTextColor : Theme.settings.inputButtonDisabledTextColor
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
           }
+
+          OutlineFocusCue {
+            id: focusCue
+            anchors.fill: parent
+            control: dialogButton
+          }
+          // For some reason Enter doesn't count as activating a button...
+          Keys.onPressed: {
+            if(KeyUtil.handlePartialButtonKeyEvent(event, focusCue))
+              clicked()
+          }
+
+          NativeAcc.Button.name: text
+          NativeAcc.Button.onActivated: clicked()
         }
-        contentItem: Text {
-          text: parent.text
-          font: parent.font
-          color: parent.enabled ? Theme.settings.inputButtonTextColor : Theme.settings.inputButtonDisabledTextColor
-          horizontalAlignment: Text.AlignHCenter
-          verticalAlignment: Text.AlignVCenter
+      }
+
+      onClicked: {
+        var buttonModel = button.buttonModel
+
+        // The 'clicked' property seems to be lost on buttonModel, probably the
+        // Repeater's data model can't handle a function-valued property (?)
+        var origButtonModel = actualButtons[button.buttonModel.index]
+
+        // Invoke the button's handler if specified
+        if(origButtonModel.clicked) {
+          origButtonModel.clicked(origButtonModel)
         }
 
-        OutlineFocusCue {
-          id: focusCue
-          anchors.fill: parent
-          control: dialogButton
-        }
-        // For some reason Enter doesn't count as activating a button...
-        Keys.onPressed: {
-          if(KeyUtil.handlePartialButtonKeyEvent(event, focusCue))
-            clicked()
-        }
+        // Emit the general clicked() signal
+        dialog.clicked(origButtonModel)
 
-        NativeAcc.Button.name: text
-        NativeAcc.Button.onActivated: clicked()
+        // If default actions aren't wanted, quit here
+        if(origButtonModel.suppressDefault)
+          return
 
-        onClicked: {
-          if (modelData.clicked) {
-            modelData.clicked(modelData);
-          }
-          dialog.clicked(modelData);
+        switch(origButtonModel.role)
+        {
+          // Call accept()/reject() like the normal connection to
+          // DialogButtonBox::accepted(), this closes the dialog and emits a
+          // signal
+          case DialogButtonBox.AcceptRole:
+            dialog.accept()
+            break
+          case DialogButtonBox.RejectRole:
+            dialog.reject()
+            break
+          // Emit signals like Dialog::handleClick()
+          case DialogButtonBox.ApplyRole:
+            dialog.applied()
+            break
+          case DialogButtonBox.ResetRole:
+            dialog.reset()
+            break
+          case DialogButtonBox.DestructiveRole:
+            dialog.discarded()
+            break
+          case DialogButtonBox.HelpRole:
+            dialog.helpRequested()
+            break
+          // There's no default action signal for YesRole/NoRole (should be
+          // handled by a callback), but they still close the dialog by default,
+          // which is important for the "Reset All Settings" alert.
+          case DialogButtonBox.YesRole:
+          case DialogButtonBox.NoRole:
+            dialog.close()
+            break
         }
       }
     }

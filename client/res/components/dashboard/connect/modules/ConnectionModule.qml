@@ -80,7 +80,7 @@ MovableModule {
         var proto = ""
         // When connected, show the actual transport used, otherwise show the
         // setting
-        if(Daemon.state.connectionState === "Connected")
+        if(Daemon.state.connectionState === "Connected" && Daemon.state.actualTransport)
           proto = Daemon.state.actualTransport.protocol
         else
           proto = Daemon.settings.protocol
@@ -98,7 +98,7 @@ MovableModule {
         if(showWireguard)
           return "1337"
         // When connected, show the actual transport used
-        if(Daemon.state.connectionState === "Connected")
+        if(Daemon.state.connectionState === "Connected" && Daemon.state.actualTransport)
           return Daemon.state.actualTransport.port.toString()
         // Otherwise, show the setting value
         var port = 0

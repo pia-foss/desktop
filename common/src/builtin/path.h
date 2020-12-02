@@ -173,13 +173,11 @@ public:
     static Path WireguardInterfaceFile;
 
     // Region override files
-    static Path LegacyRegionOverride;
     static Path LegacyShadowsocksOverride;
     static Path ModernRegionOverride;
     static Path ModernRegionMetaOverride;
 
     // Bundled region files
-    static Path LegacyRegionBundle;
     static Path LegacyShadowsocksBundle;
     static Path ModernRegionBundle;
     static Path ModernRegionMetaBundle;

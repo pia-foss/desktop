@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="44px"
+   height="44px"
+   viewBox="0 0 44 44"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="dip-icon-badge.svg"
+   inkscape:export-filename="/Users/jhall/workspace/pia2_desktop/graphics/quick-connect/dip-icon-badge.png"
+   inkscape:export-xdpi="40.91"
+   inkscape:export-ydpi="40.91">
+  <metadata
+     id="metadata17">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs15" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2279"
+     inkscape:window-height="1124"
+     id="namedview13"
+     showgrid="false"
+     inkscape:object-nodes="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:zoom="10.727273"
+     inkscape:cx="-9.7665267"
+     inkscape:cy="23.785452"
+     inkscape:window-x="143"
+     inkscape:window-y="83"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="-">
+    <sodipodi:guide
+       position="27.834613,36.052982"
+       orientation="1,0"
+       id="guide4145" />
+    <sodipodi:guide
+       position="33.6,31.874843"
+       orientation="0,1"
+       id="guide4147" />
+  </sodipodi:namedview>
+  <title
+     id="title4">Group 2</title>
+  <g
+     id="Page-1"
+     stroke="none"
+     stroke-width="1"
+     fill="none"
+     fill-rule="evenodd">
+    <g
+       id="-"
+       transform="translate(-2798.000000, -2184.000000)">
+      <g
+         id="Group-2"
+         transform="translate(2798.000000, 2184.000000)">
+        <rect
+           id="Rectangle"
+           stroke="#DCDDDD"
+           stroke-width="1.12"
+           fill="#232633"
+           x="0.559999999"
+           y="0.559999999"
+           width="42.8800007"
+           height="42.8800007"
+           rx="21.4400003"
+           style="fill:#eeeeee;fill-opacity:1" />
+        <g
+           id="Group"
+           transform="translate(9.600000, 6.400000)"
+           fill="#FFFFFF"
+           inkscape:export-filename="/Users/jhall/workspace/pia2_desktop/client/res/img/light/dashboard/connect/dip-icon-badge.png"
+           inkscape:export-xdpi="75"
+           inkscape:export-ydpi="75"
+           style="fill:#323640;fill-opacity:1">
+          <path
+             d="M24,5.72515651 C24,2.56866707 21.4146036,0 18.2346131,0 C15.0560069,0 12.4693418,2.56729244 12.4693418,5.72515651 C12.4693418,5.7440224 12.4722638,5.7628883 12.4722638,5.78175419 C12.1814412,5.75853406 11.8906111,5.74547134 11.5998035,5.74547134 C6.15440937,5.74547134 1.50590219,9.43312601 0.294110263,14.7129018 C-0.394205512,17.7140949 0.134815182,20.8025215 1.78477521,23.4087495 C3.43474272,26.0137514 6.00827602,27.8265195 9.0319569,28.5097487 C9.88249342,28.7027656 10.753532,28.8000004 11.6186968,28.8000004 C17.0640909,28.8000004 21.7125981,25.1137947 22.92439,19.8340561 C23.6083286,16.8546341 23.0909918,13.7893905 21.467359,11.1961659 C22.7607102,9.28776796 24,7.2691766 24,5.72475898 L24,5.72515651 Z M18.2346131,1.54701828 C20.5538908,1.54701828 22.4420265,3.42060454 22.4420265,5.72515651 C22.4420265,7.05015315 20.8286111,9.39103998 19.5323416,11.2719824 C19.0062466,12.0367979 18.5692682,12.675333 18.2360722,13.2195759 C17.9014059,12.6753702 17.4658978,12.035349 16.9398028,11.2719824 C15.6435333,9.39115144 14.030117,7.05037606 14.030117,5.72515651 C14.028655,3.42201632 15.9153728,1.54701828 18.2345383,1.54701828 L18.2346131,1.54701828 Z M21.4059238,19.488938 C20.3580736,24.0590321 16.3331585,27.2504075 11.6188053,27.2504075 C10.8690956,27.2504075 10.1150086,27.1662354 9.37697154,26.9993403 C8.2209991,26.7381156 7.1424332,26.2853118 6.17352343,25.6685479 C6.70111497,25.289781 7.35583429,24.405967 7.50342673,24.162137 C7.68026081,23.8660784 7.5238839,22.9517921 7.56042098,22.7863532 C7.59841715,22.6223596 6.86914962,21.2465796 6.65870412,21.0259698 C6.44825862,20.8053599 6.90422387,19.9578436 7.03720671,19.3758913 C7.17165987,18.7939389 5.919208,18.1785868 5.49831701,17.7374042 C5.07596693,17.2962217 4.62731584,18.49204 4.10410157,18.1147221 C3.58092471,17.7374042 3.85273425,16.9333931 3.92142366,16.2571113 C3.97549599,15.7056238 2.39716225,15.2238339 1.81113234,15.0641908 C1.81113234,15.0612892 1.81259143,15.0598366 1.81259143,15.056935 C2.7406093,11.0121732 5.99830558,8.05039855 9.99957594,7.42029696 C9.7145972,7.7250603 9.46031169,8.16768809 9.37699398,8.91946319 C9.21623607,10.3678052 8.84794336,10.9744266 9.83002234,11.4083644 C10.8106422,11.8423023 11.2461615,11.675396 11.9388546,11.8843586 C12.6301259,12.0933399 12.1858371,13.8377479 12.34074,13.9059593 C12.34074,13.9059593 12.6856386,16.6372417 15.2241239,17.9696687 C15.7633881,18.2541135 14.3253626,19.1596914 13.4338594,19.3295142 C12.5409345,19.4993109 11.7736782,19.378856 11.4697014,20.2104303 C11.1642618,21.0434573 12.523388,20.8199496 12.8127365,21.0449063 C13.102085,21.2698629 14.3808454,22.1144814 15.1349324,21.457073 C15.8875603,20.7996645 18.1717825,21.5978464 18.1498588,20.7082329 C18.1118626,19.175704 20.4019062,18.7838596 21.6470701,17.6910643 C21.6222281,18.290441 21.5433101,18.8912666 21.4059351,19.4891572 L21.4059238,19.488938 Z"
+             id="Fill-1"
+             style="fill:#323640;fill-opacity:1" />
+          <path
+             d="m 21.034613,5.725157 c 0,1.5469504 -1.25305,2.8 -2.8,2.8 -1.545461,0 -2.8,-1.2530496 -2.8,-2.8 0,-1.5469504 1.254577,-2.8 2.8,-2.8 1.54695,0 2.8,1.2530496 2.8,2.8"
+             id="Fill-2"
+             inkscape:connector-curvature="0"
+             style="fill:#323640;fill-opacity:1" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

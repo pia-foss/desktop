@@ -64,6 +64,48 @@ TextField {
     control.persistentSelection = false
   }
 
+  // Despite the fact that the doc for the textEdited signal specifically says
+  // that it's not invoked due to programmatic changes in the text, it actually
+  // is invoked by remove().
+  //
+  // This handler just deletes line breaks, but we'd still have to be really
+  // careful to handle reentrancy correctly - instead, just flag that we're
+  // altering the text and ignore reentrant signals.
+  property bool handlingEdit: false
+  onTextEdited: {
+    if(handlingEdit)
+      return
+    try {
+      handlingEdit = true
+
+      // Despite the fact that TextField is always single-line, it will still
+      // paste line break characters, which are often copied accidentally (it
+      // definitely happens when copying DIP tokens from a code block on a GitLab
+      // wiki page, probably happens in many other circumstances).
+      //
+      // Clean line break characters after pasting.  This works fine for pasting a
+      // single line.  Pasting multiple lines might would probably be better off
+      // inserting spaces for line breaks that weren't at the end of the text, but
+      // Qt doesn't give us a chance to intercept the clipboard text, we have to
+      // fix it up later.
+      //
+      // Since these edits are always single-line, we can safely clean line breaks
+      // in the whole control, they're never supposed to be there. Explicitly
+      // delete characters rather than replacing the whole string to preserve the
+      // cursor position, etc.
+      var newText = control.text
+      for(var i=newText.length-1; i>=0; --i) {
+        var c = newText.charAt(i)
+        if(c === '\r' || c === '\n') {
+          control.remove(i, i+1)
+        }
+      }
+    }
+    finally {
+      handlingEdit = false
+    }
+  }
+
   // There's no way to get to the context menu from screen readers - the QML
   // Accessible type doesn't allow adding custom actions.
   // The 'menu' key and Ctrl+click (on Mac) also aren't handled right now.

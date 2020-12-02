@@ -29,13 +29,17 @@ import "../theme"
 // is not valid, etc.), this displays a default placeholder.
 Image {
   property string countryCode
+  property bool offline: false
 
   source: flagFileFromCountry(countryCode)
   height: 16
   width: 24
 
   function flagFileFromCountry(country) {
-    var flagFile = "qrc:/img/flags/" + country.toLowerCase() + ".png"
+    if(!offline)
+        var flagFile = "qrc:/img/flags/" + country.toLowerCase() + ".png"
+    else
+        var flagFile = "qrc:/img/flags/" + country.toLowerCase() + "-offline.png"
     if(NativeHelpers.resourceExists(flagFile))
       return flagFile
     // TODO: Need an "unknown" flag/symbol; use this one instead for now

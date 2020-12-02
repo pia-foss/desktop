@@ -201,19 +201,10 @@ Page {
           //: support forwarding. The string contains embedded linebreaks to prevent
           //: it from being displayed too wide on the user's screen - such breaks
           //: should be preserved at roughly the same intervals.
-          info: enabled ? uiTr("Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.") : ""
-          warning: enabled ? "" : SettingsMessages.requiresOpenVpnMessage
+          info: uiTr("Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.")
           setting: DaemonSetting {
-            override: !portForwardCheckbox.settingEnabled
-            overrideValue: false
             name: "portForward"
           }
-          // The legacy infrastructure only supports PF with OpenVPN.  The
-          // modern infrastructure supports it with any protocol.
-          // (reading "enabled" also considers parents' "enabled" flags, use an
-          // intermediate property)
-          readonly property bool settingEnabled: Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current"
-          enabled: settingEnabled
         }
 
         CheckboxInput {

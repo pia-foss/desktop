@@ -37,7 +37,8 @@
 #include <QThread>
 
 #include <cstdlib>
-
+#include <unordered_map>
+#include <cstring>
 
 #if defined(QT_DEBUG) && defined(Q_OS_WIN)
 extern "C" Q_DECL_IMPORT void __stdcall OutputDebugStringW(const wchar_t *str);
@@ -47,12 +48,118 @@ extern "C" Q_DECL_IMPORT void __stdcall OutputDebugStringW(const wchar_t *str);
 namespace
 {
     QMutex g_logMutex(QMutex::Recursive);
-    QDateTime g_startTime;
     bool g_logToStdErr = false;
+    // Log redactions - maps redact strings to replacements (which now include
+    // the angle brackets).  All redactions are applied sequentially when
+    // redacting text, but they're stored in a map so that adding the same
+    // redaction again doesn't accumulate.
+    std::unordered_map<QString, QString> g_redactions;
+
+    QString redactTextNoLock(QString text)
+    {
+        for(const auto &redaction : g_redactions)
+        {
+            text.replace(redaction.first, redaction.second);
+        }
+        return text;
+    }
+
+    QByteArray redactTextNoLock(QByteArray text)
+    {
+        for(const auto &redaction : g_redactions)
+        {
+            text.replace(redaction.first.toLocal8Bit(), redaction.second.toLocal8Bit());
+        }
+        return text;
+    }
+
+    // Automatically strip the repo path from file paths in CodeLocation.  This
+    // object is used to determine the prefix length and strip it; it's a
+    // function-local static to ensure that its initialization is thread-safe.
+    class RepoPathPrefix
+    {
+    public:
+        RepoPathPrefix()
+            : _pathPrefix{__FILE__}, _prefixLen{0}, _pathPrefixAlt{_pathPrefix}
+        {
+            // Switch _pathPrefixAlt to the alternate slash.  (Paths can freely
+            // mix slashes and backslashes on Windows, but we're assuming that
+            // the prefix only contains one or the other.)
+            char nativeSlash = '/';
+            char altSlash = '\\';
+            if(_pathPrefixAlt.find('\\') != std::string::npos)
+                std::swap(nativeSlash, altSlash);
+            for(auto &c : _pathPrefixAlt)
+            {
+                if(c == nativeSlash)
+                    c = altSlash;
+            }
+
+            // Figure out the prefix using the known location of this file in
+            // the source repo.
+            const char *thisFile{"common/src/builtin/logging.cpp"};
+
+            std::size_t thisFileLen = std::strlen(thisFile);
+            std::size_t pathLen = std::strlen(_pathPrefix);
+            std::size_t expectPrefix = pathLen - thisFileLen;
+            // Sanity check - the path should end with the file location above
+            if(thisFileLen <= pathLen &&
+                (std::strncmp(_pathPrefix + expectPrefix, thisFile, thisFileLen) == 0 ||
+                std::strncmp(_pathPrefixAlt.c_str() + expectPrefix, thisFile, thisFileLen) == 0))
+            {
+                _prefixLen = expectPrefix;
+            }
+            // Otherwise, something is wrong, but we can't trace anything as
+            // this is used by the tracing implementation.  Just avoid
+            // destroying file paths.
+            else
+            {
+                _pathPrefix = nullptr;
+                _pathPrefixAlt = {};
+            }
+        }
+
+    public:
+        // Strip the repo prefix from 'path' if it begins with that prefix.
+        // Returns the relevant tail part of 'path' if it does, or 'path'
+        // unmodified otherwise.
+        const char *strip(const char *path) const
+        {
+            if(!path || !_pathPrefix || _pathPrefixAlt.empty())
+                return path;
+            if(std::strncmp(path, _pathPrefix, _prefixLen) == 0 ||
+                std::strncmp(path, _pathPrefixAlt.c_str(), _prefixLen) == 0)
+            {
+                return path + _prefixLen;
+            }
+            return path;
+        }
+
+    private:
+        // The path prefix that we strip is the first _prefixLen characters of
+        // _pathPrefix.  (_pathPrefix is _not_ null-terminated at that position,
+        // it's actually the complete file path of this file.)
+        const char *_pathPrefix;
+        std::size_t _prefixLen;
+        // Path prefix with the opposite type of slashes; we accept either.
+        // This is for Windows but is applied on all platforms.
+        std::string _pathPrefixAlt;
+    };
+
+    const char *stripRepoPath(const char *path)
+    {
+        static const RepoPathPrefix _repoPathPrefix;
+        return _repoPathPrefix.strip(path);
+    }
 }
 
 // The log limit in bytes
 const qint64 logFileLimit = 4000000;
+
+CodeLocation::CodeLocation(const char *file, int line, const QLoggingCategory &category)
+    : category{&category}, file{stripRepoPath(file)}, line{line}
+{
+}
 
 class LoggerPrivate
 {
@@ -119,7 +226,6 @@ void Logger::initialize(bool logToStdErr)
 {
     g_logMutex.lock();
 
-    g_startTime = QDateTime::currentDateTimeUtc();
     g_logToStdErr = logToStdErr;
     qInstallMessageHandler(loggingHandler);
 
@@ -130,6 +236,24 @@ void Logger::enableStdErr(bool logToStdErr)
 {
     QMutexLocker lock{&g_logMutex};
     g_logToStdErr = logToStdErr;
+}
+
+void Logger::addRedaction(const QString &redact, const QString &replace)
+{
+    QMutexLocker lock{&g_logMutex};
+    g_redactions[redact] = QStringLiteral("<<%1>>").arg(replace);
+}
+
+QString Logger::redactText(QString text)
+{
+    QMutexLocker lock{&g_logMutex};
+    return redactTextNoLock(std::move(text));
+}
+
+QByteArray Logger::redactText(QByteArray text)
+{
+    QMutexLocker lock{&g_logMutex};
+    return redactTextNoLock(std::move(text));
 }
 
 Logger::Logger(const Path &logFilePath)
@@ -435,7 +559,7 @@ static void renderLocation(QTextStream& s, const char* file, int line)
     if (file)
     {
         s << '[';
-        s << QLatin1String(file);
+        s << QLatin1String(stripRepoPath(file));
         if (line)
             s << ':' << line;
         s << ']';
@@ -467,34 +591,6 @@ static QString buildLogFilePrefix(QDateTime now, QtMsgType type,
     return prefix;
 }
 
-static QString buildDebugOutputPrefix(QDateTime now, QtMsgType type,
-                                      const QMessageLogContext &context)
-{
-    QString prefix;
-    QTextStream s{&prefix, QIODevice::WriteOnly};
-
-    // Log time since start of process instead of clock time
-    qint64 time = g_startTime.msecsTo(now);
-    int milliseconds = time % 1000; time /= 1000;
-    int seconds = time % 60; time /= 60;
-    int minutes = time % 60; time /= 60;
-    int hours = time;
-
-    if (hours)
-        s << '[' << '+' << hours << ':' << right << qSetPadChar('0') << qSetFieldWidth(2) << minutes << qSetFieldWidth(0) << ':' << qSetFieldWidth(2) << seconds << qSetFieldWidth(0) << '.' << qSetFieldWidth(3) << milliseconds << reset << ']';
-    else if (minutes)
-        s << '[' << '+' << minutes << ':' << right << qSetPadChar('0') << qSetFieldWidth(2) << seconds << qSetFieldWidth(0) << '.' << qSetFieldWidth(3) << milliseconds << reset << ']';
-    else
-        s << '[' << '+' << seconds << '.' << right << qSetPadChar('0') << qSetFieldWidth(3) << milliseconds << reset << ']';
-
-    if (context.category)
-        s << '[' << QLatin1String(context.category) << ']';
-    renderLocation(s, context.file, context.line);
-    renderMsgType(s, type);
-
-    return prefix;
-}
-
 void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // Override with simpler endl; gets converted by text file handling anyway
@@ -502,17 +598,13 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
 
     QDateTime now{QDateTime::currentDateTimeUtc()};
     QString logPrefix{buildLogFilePrefix(now, type, context)};
-    QString outputPrefix{buildDebugOutputPrefix(now, type, context)};
 
-    QString logLines;
-    QString outputLines;
+    QString logLinesUnredacted;
     {
-        QTextStream logStream(&logLines, QIODevice::WriteOnly);
-        QTextStream outputStream(&outputLines, QIODevice::WriteOnly);
+        QTextStream logStream(&logLinesUnredacted, QIODevice::WriteOnly);
         for (const auto& line : msg.splitRef('\n'))
         {
             logStream << logPrefix << ' ' << line << endl;
-            outputStream << outputPrefix << ' ' << line << endl;
         }
     }
 
@@ -521,16 +613,18 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
 
     g_logMutex.lock();
 
+    QString logLines = redactTextNoLock(std::move(logLinesUnredacted));
+
 #if defined(QT_DEBUG) && defined(Q_OS_WIN)
     if (isDebuggerPresent())
     {
-        ::OutputDebugStringW(qUtf16Printable(outputLines));
+        ::OutputDebugStringW(qUtf16Printable(logLines));
     }
     else
 #endif
     {
         if(g_logToStdErr)
-            QTextStream(stderr, QIODevice::WriteOnly) << outputLines;
+            QTextStream(stderr, QIODevice::WriteOnly) << logLines;
     }
     if (d)
     {

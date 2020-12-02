@@ -37,6 +37,11 @@ import PIA.NativeAcc 1.0 as NativeAcc
 // - Favorite region buttons
 // - Port forwarding hints
 // - What the 'Auto' region displays
+//
+// Although this has quite a bit in common with TableBase, it is somewhat
+// different since the country groups can be expanded/collapsed - this affects
+// keyboard navigation, and there are differences in the accessibility
+// annotations since the rows are annotated with outline levels.
 Rectangle {
   id: regionListView
 
@@ -86,6 +91,8 @@ Rectangle {
   // to figure out what row an index refers to.
   //
   // The 'auto' row is treated as country='auto', location='auto'.
+  //
+  // Dedicated IP rows are treated as country='dip', location='<id>'.
   //
   // Any invalid row choice behaves as if no row is highlighted (including
   // cases like:
@@ -172,8 +179,12 @@ Rectangle {
           spacing: 0
           RegionAuto {
             id: regionAuto
-            visible: searchTerm === ""
-            height: 68
+            // As in other cases, reading 'visible' isn't the same as reading
+            // the value it's bound too; avoid spurious dependencies in the
+            // separator's visible binding
+            readonly property bool show: searchTerm === ""
+            visible: show
+            height: 65
             Layout.fillWidth: true
             highlightColumn: {
               if(keyboardRow.country === 'auto' && keyboardRow.location === 'auto') {
@@ -182,8 +193,35 @@ Rectangle {
               return -1
             }
             serviceLocations: regionListView.serviceLocations
-            onRegionSelected: regionListView.regionSelected('auto')
+            onClicked: regionListView.regionSelected('auto')
             onFocusCell: mouseFocusCell({country: 'auto', location: 'auto'}, keyColumn)
+          }
+          Repeater {
+            id: dedicatedIpsRepeater
+            model: displayDedicatedIpsArray
+            delegate: DedicatedIpRegion {
+              Layout.fillWidth: true
+              region: modelData
+              serviceLocations: regionListView.serviceLocations
+              portForwardEnabled: regionListView.portForwardEnabled
+              canFavorite: regionListView.canFavorite
+              highlightColumn: {
+                if(keyboardRow.country === "dip" && keyboardRow.location === region.id) {
+                  return regionListView.highlightColumn
+                }
+                return -1
+              }
+              onClicked: regionListView.regionSelected(modelData.id)
+              onFocusCell: mouseFocusCell({country: "dip", location: region.id}, keyColumn)
+            }
+          }
+          // Separator between the "auto" + dedicated regions and the normal
+          // regions.  Show if any region above the separator would be shown.
+          Rectangle {
+            Layout.fillWidth: true
+            height: 3
+            visible: regionAuto.show || displayDedicatedIpsArray.length > 0
+            color: Theme.regions.itemSeparatorColor
           }
           Repeater {
             id: regionsRepeater
@@ -230,14 +268,9 @@ Rectangle {
   // scroll it into view and to select it.
   // Returns undefined if there isn't one.
   function findKeyboardRow() {
-    if(keyboardRow.country === 'auto' && keyboardRow.location === 'auto')
-      return regionAuto
-
-    for(var i=0; i<regionsRepeater.count; ++i) {
-      var row = regionsRepeater.itemAt(i).findKeyboardRow(keyboardRow)
-      if(row)
-        return row
-    }
+    var idx = findKeyboardRowIndex(accessibilityTable)
+    if(idx >= 0)
+      return accessibilityTable[idx].regionItem
   }
 
   function findKeyboardRowIndex(accTable) {
@@ -397,6 +430,31 @@ Rectangle {
     return value.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0
   }
 
+  // Filter the 'dedicatedIpLocations' array from DaemonState, which is an array
+  // of Locations representing dedicated IP regions.
+  // These are not grouped, so they're just filtered by the region names.
+  function filterDedicatedIps() {
+    var dedicatedIps = Daemon.state.dedicatedIpLocations
+
+    if(!searchTerm && !regionFilter)
+      return dedicatedIps
+
+    var filteredDedicatedIps = dedicatedIps
+
+    // Filter with the region filter if there is one
+    if(regionFilter)
+      filteredDedicatedIps = filteredDedicatedIps.filter(regionFilter)
+
+    // Filter by the search term if present
+    if(searchTerm) {
+      filteredDedicatedIps = filteredDedicatedIps.filter(function(dip) {
+        return matchesSearchTerm(Daemon.getLocationName(dip))
+      })
+    }
+
+    return filteredDedicatedIps
+  }
+
   // Filter the 'countries' object from DaemonState.groupedLocations,
   // which is an array of CountryLocations (which has a 'locations' property,
   // which is an array of locations).
@@ -458,6 +516,25 @@ Rectangle {
     return Daemon.getCountryName(country.locations[0].country).toLowerCase()
   }
 
+  function sortLocations(locations) {
+    var sortedLocations = locations.slice()
+    sortedLocations.sort(function(first, second) {
+      var nameComp = localeCompareRegions(Daemon.getLocationName(first).toLowerCase(),
+                            Daemon.getLocationName(second).toLowerCase())
+      if(nameComp !== 0)
+        return nameComp
+      // For dedicated IP regions, the names could be exactly the same if the
+      // user has more than one dedicated IP.  Sort by IP next.  This is a
+      // lexical sort - a numeric sort by IP might be nice, but it really
+      // doesn't make that much difference, we just need a consistent order.
+      //
+      // If this somehow happens for regions that aren't dedicated IP regions,
+      // this won't do anything (both will be empty strings).
+      return localeCompareRegions(first.dedicatedIp, second.dedicatedIp)
+    })
+    return sortedLocations
+  }
+
   // Sort the (possibly filtered) country locations by name.
   function sortCountriesByName(countries) {
     // Sort the country groups by either the country name or single-region name.
@@ -470,13 +547,10 @@ Rectangle {
 
     // Sort each country's regions
     for(var i=0; i<countries.length; ++i) {
-      // Again, duplicate the array we're about to slice, and here we have to
-      // create a new country object too
-      countries[i] = {locations: countries[i].locations.slice()}
-      countries[i].locations.sort(function(first, second) {
-        return localeCompareRegions(Daemon.getLocationName(first).toLowerCase(),
-                              Daemon.getLocationName(second).toLowerCase())
-      })
+      // Create new country objects, because these could still be the actual
+      // objects from DaemonState.  sortLocations() creates a new array with the
+      // sorted locations.
+      countries[i] = {locations: sortLocations(countries[i].locations)}
     }
 
     return countries
@@ -515,6 +589,25 @@ Rectangle {
     return result
   }
 
+  property var displayDedicatedIpsArray: {
+    // Get the filtered dedicated IP locations
+    var dedicatedIps = filterDedicatedIps()
+
+    // If sorting by name, re-sort the locations by name
+    if(sortKey.currentValue === "name")
+      dedicatedIps = sortLocations(dedicatedIps)
+
+    return dedicatedIps
+  }
+
+  // The array of country groups and single regions used as the model for the
+  // regions repeater.
+  //
+  // This consists of objects with the following properties:
+  // - region: null for a country group, or a Location object for a single region
+  // - regionCountry: country code for the group or location
+  // - regionChildren: array of {subregion: <Location>} objects for a country
+  //   group, or empty array for a single region
   property var displayRegionsArray: {
     // Get the filtered country locations
     var countries = filterCountryLocations()
@@ -558,6 +651,7 @@ Rectangle {
     // This calculation depends on regionRepeater.children - itemAt() does not
     // add this dependency.
     var childrenDependency = regionsRepeater.children
+    var dipDependency = dedicatedIpsRepeater.children
 
     var table = []
 
@@ -575,7 +669,21 @@ Rectangle {
     // the 'expanded' state, although this should probably move out of the items
     // themselves eventually, since this causes it to reset whenever the array
     // is rebuilt.
-    for(var i=0; i<regionsRepeater.count; ++i) {
+
+    var i;
+    for(i=0; i<dedicatedIpsRepeater.count; ++i) {
+      var dipItem = dedicatedIpsRepeater.itemAt(i)
+      if(!dipItem)
+        continue
+
+      // DIPs are all single locations
+      table.push({country: "dip", location: dipItem.region.id, level: 0,
+                  expanded: false, buried: false,
+                  display: Daemon.getLocationName(dipItem.region),
+                  regionItem: dipItem})
+    }
+
+    for(i=0; i<regionsRepeater.count; ++i) {
       var regionItem = regionsRepeater.itemAt(i)
       if(!regionItem)
         continue
@@ -591,21 +699,24 @@ Rectangle {
 
         for(var j=0; j<regionItem.regionChildren.length; ++j) {
           var subregion = regionItem.regionChildren[j].subregion
+          var subregionLoc = Daemon.state.availableLocations[subregion.id]
           table.push({country: regionItem.regionCountry,
                       location: subregion.id,
                       level: 1,
                       expanded: false,
                       buried: countryCollapsed,
-                      display: Daemon.getLocationIdName(subregion.id),
+                      display: subregionLoc ? Daemon.getLocationName(subregionLoc) : subregion.id,
                       regionItem: regionItem.getSubregionItem(j)})
         }
       }
       else {
         // Single location
+        var regionId = regionItem.region.id
+        var regionLoc = Daemon.state.availableLocations[regionId]
         table.push({country: regionItem.regionCountry,
-                    location: regionItem.region.id,
+                    location: regionId,
                     level: 0, expanded: false, buried: false,
-                    display: Daemon.getLocationIdName(regionItem.region.id),
+                    display: regionLoc ? Daemon.getLocationName(regionLoc) : regionId,
                     regionItem: regionItem.getRegionItem()})
       }
     }
@@ -619,6 +730,15 @@ Rectangle {
     //: Screen reader annotation for the column in the region list that displays
     //: the region names and flags.
     name: uiTr("Region")
+    item: regionListView
+  }
+
+  property NativeAcc.TableColumn detailColumn: NativeAcc.TableColumn {
+    //: Screen reader annotation for the column in the region list that displays
+    //: additional details about the region, when present.  This includes
+    //: the IP address for "dedicated IP" regions, and the current nearest
+    //: region for the "auto" row.
+    name: uiTr("Detail")
     item: regionListView
   }
   property NativeAcc.TableColumn latencyColumn: NativeAcc.TableColumn {
@@ -635,13 +755,14 @@ Rectangle {
   }
   NativeAcc.Table.columns: {
     var cols = [
-      { property: "region", column: regionColumn },
-      { property: "latency", column: latencyColumn }
+      { property: "accRegionCell", column: regionColumn },
+      { property: "accDetailCell", column: detailColumn },
+      { property: "accLatencyCell", column: latencyColumn }
     ]
     // Only provide the favorite column when enabled.  Row objects will still
     // have the "favorite" property, but it'll be ignored by NativeAcc.Table
     if(regionListView.canFavorite)
-      cols.push({ property: "favorite", column: favoriteColumn })
+      cols.push({ property: "accFavoriteCell", column: favoriteColumn })
     return cols
   }
   NativeAcc.Table.rows: {
@@ -656,9 +777,10 @@ Rectangle {
 
         tblRows.push({id: rowId,
                       row: accRow.regionItem.accRow,
-                      region: accRow.regionItem.accRegionCell,
-                      latency: accRow.regionItem.accLatencyCell,
-                      favorite: accRow.regionItem.accFavoriteCell})
+                      accRegionCell: accRow.regionItem.accRegionCell,
+                      accDetailCell: accRow.regionItem.accDetailCell,
+                      accLatencyCell: accRow.regionItem.accLatencyCell,
+                      accFavoriteCell: accRow.regionItem.accFavoriteCell})
       }
     }
 
@@ -670,8 +792,7 @@ Rectangle {
     return findKeyboardRowIndex(accTable)
   }
   NativeAcc.Table.navigateCol: {
-    var accTable = accessibilityTable
-    var keyboardRowObj = findKeyboardRow(accTable)
+    var keyboardRowObj = findKeyboardRow()
     if(!keyboardRowObj)
       return -1
     var actualKeyColIdx = keyboardRowObj.effectiveColumnFor(keyboardColumn)
@@ -682,7 +803,7 @@ Rectangle {
         return 0
       // RegionRowBase.keyColumns.favorite
       case 1:
-        return 2
+        return 3
     }
     return -1
   }

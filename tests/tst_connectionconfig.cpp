@@ -36,7 +36,6 @@ private slots:
     void testGetDnsServers()
     {
         ConnectionConfig config1;
-        QVERIFY(config1.getDnsServers() == piaDummyDnsServers);
         QVERIFY(config1.dnsType() == ConnectionConfig::DnsType::Pia);
     }
 

@@ -27,6 +27,7 @@
 #include <QVector>
 #include <QHostAddress>
 #include <set>
+#include <unordered_set>
 
 // These are the services advertised by the regions list that are used by Desktop.
 enum class Service
@@ -118,6 +119,8 @@ public:
     bool hasNonLatencyService() const;
     // Check whether this server has a given service.
     bool hasService(Service service) const;
+    // Check whether this server has any VPN service (any OpenVPN or WireGuard)
+    bool hasVpnService() const;
     // Check whether this server offers a specific port for the given service.
     bool hasPort(Service service, quint16 port) const;
     // Get/set the given service - returns or sets one of the vectors above
@@ -154,7 +157,12 @@ public:
         portForward(other.portForward());
         geoOnly(other.geoOnly());
         autoSafe(other.autoSafe());
+        latency(other.latency());
         servers(other.servers());
+        dedicatedIpExpire(other.dedicatedIpExpire());
+        dedicatedIp(other.dedicatedIp());
+        dedicatedIpCorrespondingRegion(other.dedicatedIpCorrespondingRegion());
+        offline(other.offline());
         return *this;
     }
 
@@ -163,7 +171,11 @@ public:
         return id() == other.id() && name() == other.name() &&
             country() == other.country() && portForward() == other.portForward() &&
             geoOnly() == other.geoOnly() && autoSafe() == other.autoSafe() &&
-            servers() == other.servers();
+            latency() == other.latency() && servers() == other.servers() &&
+            dedicatedIpExpire() == other.dedicatedIpExpire() &&
+            dedicatedIp() == other.dedicatedIp() &&
+            dedicatedIpCorrespondingRegion() == other.dedicatedIpCorrespondingRegion() &&
+            offline() == other.offline();
     }
     bool operator!=(const Location &other) const {return !(*this == other);}
 
@@ -211,22 +223,51 @@ public:
     // both services, though.
     JsonField(std::vector<Server>, servers, {})
 
+    // For a dedicated IP region, the expiration time and dedicated IP address
+    // are both provided.  These are 0/{} for normal regions.
+    //
+    // This is used when connecting to handle authentication properly, which is
+    // different for a dedicated IP region.  Detect dedicated IP regions with
+    // isDedicatedIp() (which tests dedicatedIpExpire(); we don't validate
+    // the IP address from the server so we can't guarantee that dedicatedIp()
+    // is non-empty).
+    //
+    // Dedicated IP regions are stored alongside regular regions in
+    // DaemonState::availableLocations (or in general in LocationsById maps),
+    // but are not included in DaemonState::groupedLocations (as that is used
+    // for UI display, and dedicated IP regions are displayed differently; they
+    // are provided in sort order in in DaemonState::dedicatedIpLocations).
+    JsonField(quint64, dedicatedIpExpire, 0)
+    JsonField(QString, dedicatedIp, {})
+    // The "corresponding region" ID is just used to get geo coords for the
+    // location maps.  The geo coords currently aren't folded into the location
+    // objects, because they are fetched separately from the region metadata
+    // API.
+    JsonField(QString, dedicatedIpCorrespondingRegion, {})
+
+    // Some regions might be marked offline in the servers list
+    // This indicates the region should not be used and should be designated
+    // as unavailable in the UI
+    JsonField(bool, offline, false)
+
 private:
     // Count the servers that satisfy a predicate
     template<class PredicateFuncT>
     std::size_t countServersFor(const PredicateFuncT &predicate) const;
-    // Count the servers that support a given service; used to implement
-    // randomServerForService() and allServersForService()
-    std::size_t countServersForService(Service service) const;
-
     // Get a random server that satisfies a predicate
     template<class PredicateFuncT>
     const Server *randomServerFor(const PredicateFuncT &predicate) const;
+
+    template<class PredicateFuncT>
+    const Server *serverWithIndexFor(std::size_t desiredIndex, const PredicateFuncT &predicate) const;
 
 public:
     // Check if a given service is available in this location (whether any
     // server has the service)
     bool hasService(Service service) const;
+
+    // Check whether this is a dedicated IP location.
+    bool isDedicatedIp() const {return dedicatedIpExpire() > 0;}
 
     // Get any random server in the location suitable for measuring latency with
     // ICMP pings (for the modern infrastructure).
@@ -262,6 +303,15 @@ public:
     // rather than returning a new set (used by Daemon to find the global set of
     // all ports)
     void allPortsForService(Service service, DescendingPortSet &ports) const;
+
+    const Server *serverWithIndex(std::size_t index, Service service, quint16 tryPort) const;
+    const Server *serverWithIndexForPort(std::size_t index, Service service, quint16 port) const;
+    const Server *serverWithIndexForService(std::size_t index, Service service) const;
+
+    // Count the servers that support a given service; used to implement
+    // randomServerForService() and allServersForService()
+    std::size_t countServersForService(Service service) const;
+    std::size_t countServersForPort(Service service, quint16 port) const;
 };
 
 using LocationsById = std::unordered_map<QString, QSharedPointer<Location>>;
@@ -374,6 +424,8 @@ public:
     // Returns the appropriate server for this transport's protocol (regardless
     // of whether a port is found).
     const Server *selectServerPort(const Location &location);
+    const Server *selectServerPortWithIndex(const Location &location, size_t index);
+    std::size_t countServersForLocation(const Location &location) const;
 };
 
 // Definition of a custom SOCKS proxy (see DaemonSettings::customProxy)
@@ -415,6 +467,94 @@ public:
     JsonField(QString, password, {})
 };
 
+// Information for a Dedicated IP stored in DaemonAccount.  The daemon uses
+// this to populate "dedicated IP regions" in the regions list, and to refresh
+// the dedicated IP information periodically.
+class COMMON_EXPORT AccountDedicatedIp : public NativeJsonObject
+{
+    Q_OBJECT
+public:
+    AccountDedicatedIp() {}
+    AccountDedicatedIp(const AccountDedicatedIp &other) {*this = other;}
+    AccountDedicatedIp &operator=(const AccountDedicatedIp &other)
+    {
+        dipToken(other.dipToken());
+        expire(other.expire());
+        id(other.id());
+        regionId(other.regionId());
+        serviceGroups(other.serviceGroups());
+        ip(other.ip());
+        cn(other.cn());
+        lastIpChange(other.lastIpChange());
+        return *this;
+    }
+
+    bool operator==(const AccountDedicatedIp &other) const
+    {
+        return dipToken() == other.dipToken() &&
+            expire() == other.expire() &&
+            id() == other.id() &&
+            regionId() == other.regionId() &&
+            serviceGroups() == other.serviceGroups() &&
+            ip() == other.ip() &&
+            cn() == other.cn() &&
+            lastIpChange() == other.lastIpChange();
+    }
+    bool operator!=(const AccountDedicatedIp &other) const {return !(*this == other);}
+
+    // This is the DIP token.  The token is functionally a password - it must
+    // not be exposed in the region information provided in DaemonState.
+    JsonField(QString, dipToken, {})
+
+    // This is the expiration timestamp - UTC Unix time in milliseconds.
+    // Note that the API returns this in seconds; it's stored in milliseconds
+    // to match all other timestamps in Desktop.
+    JsonField(quint64, expire, 0)
+
+    // The "ID" created by the client to represent this region in the region
+    // list - of the form "dip-###", where ### is a random number.
+    //
+    // A random identifier is used rather than the token or IP address to meet
+    // the following requirements:
+    // * DIP tokens can't be exposed in the region information in DaemonState
+    //   (they're functionally passwords)
+    // * The region ID must remain the same even in the rare event that the
+    //   dedicated IP changes (we can't use the IP address itself)
+    // * The region ID should not be likely to duplicate a prior region ID that
+    //   was added and expired/removed (could cause minor oddities like a
+    //   favorite reappearing, etc.)
+    //
+    // This is not the 'id' field from the DIP API, that's regionId.
+    JsonField(QString, id, {})
+
+    // The ID of the corresponding PIA region where this server is.  We get the
+    // country code, region name, geo flag, and PF flag from the corresponding
+    // PIA region.  We also pull auxiliary service servers from this region,
+    // like meta and Shadowsocks.
+    JsonField(QString, regionId, {})
+
+    // These are the server groups (from the server list) provided by the DIP
+    // server.  Note that like the server list, the client does not attribute
+    // any significance to the group names themselves, which can be freely
+    // changed by Ops.  This is just used to find the service and port
+    // information from the servers list.
+    JsonField(QStringList, serviceGroups, {})
+
+    // The dedicated IP itself.  This is both the VPN endpoint and the VPN IP.
+    // It provides all services identified by serviceGroups.
+    JsonField(QString, ip, {})
+
+    // The common name for certificates corresponding to this server.
+    JsonField(QString, cn, {})
+
+    // If the daemon observes a change in the dedicated IP's IP address, this
+    // field is set to the most recent change timestamp.  This triggers a
+    // notification in the client.  It's important to keep track of this
+    // individually for each dedicated IP to ensure that the notification is
+    // cleared if the changed dedicated IP is removed.
+    JsonField(quint64, lastIpChange, 0)
+};
+
 // Class encapsulating 'data' properties of the daemon; these are cached
 // and persist between daemon instances.
 //
@@ -438,23 +578,8 @@ public:
     // Latency measurements (by location ID).  These are restored when the
     // daemon is started, but any new measurements will replace the cached
     // values.
-    //
-    // Measurements are maintained for both infrastructures, so we can switch at
-    // any time.  'latencies' are the measurements for the legacy infrastructure
-    // (name was maintained to preserve measurements from prior versions of
-    // Desktop).
-    JsonField(LatencyMap, latencies, {})
     JsonField(LatencyMap, modernLatencies, {})
 
-    // Region list content - for each region list that's fetched.  This is the
-    // original JSON from the regions list, not the digested form stored in
-    // DaemonState.
-    //
-    // This is only used to cache the last known regions list; Daemon loads
-    // these caches into DaemonState on startup or when changing infrastructure.
-    // Everything else should use the locations map or grouped locations from
-    // DaemonState.
-    JsonField(QJsonObject, cachedLegacyRegionsList, {})
     JsonField(QJsonObject, cachedLegacyShadowsocksList, {})
 
     // Cached region list content for the modern infrastructure.
@@ -510,6 +635,12 @@ public:
 class COMMON_EXPORT DaemonAccount : public NativeJsonObject
 {
     Q_OBJECT
+
+public:
+    // Several properties are sensitive (passwords, etc.) and are not needed by
+    // clients.  Daemon does not send these properties to clients at all.
+    static const std::unordered_set<QString> &sensitiveProperties();
+
 public:
     DaemonAccount();
 
@@ -538,24 +669,22 @@ public:
     JsonField(quint64, expirationTime, 0)
     JsonField(bool, expireAlert, false)
     JsonField(bool, expired, false)
-    JsonField(QString, email, {})
 
     // These two fields denote what is passed to OpenVPN authentication.
     JsonField(QString, openvpnUsername, {})
     JsonField(QString, openvpnPassword, {})
-
-    // ClientId is a random identifier used for legacy port forward requests.
-    //
-    // Although it's not directly tied to the user's account, it does identify
-    // the computer, and it makes sense to wipe it with the account credentials.
-    // This is a 256-bit number encoded in base36.
-    JsonField(QString, clientId, {})
 
     // Port forwarding token and signature used for port forward requests in the
     // modern infrastructure.  Collectively, these are the "port forwarding
     // token".
     JsonField(QString, portForwardPayload, {})
     JsonField(QString, portForwardSignature, {})
+
+    // Dedicated IP tokens and the information most recently fetched from the
+    // API for those tokens.  These are in DaemonAccount because the token is
+    // functionally a password and should be protected like account information,
+    // but they are not erased on a logout.
+    JsonField(std::vector<AccountDedicatedIp>, dedicatedIps, {})
 };
 
 class COMMON_EXPORT SplitTunnelSubnetRule : public NativeJsonObject
@@ -682,15 +811,6 @@ public:
     // values expressed in DaemonState.  (The client should only use this to set
     // a new choice.)
     JsonField(QString, location, QStringLiteral("auto"))
-    // Which infrastructure is being used.  This determines which regions are
-    // used in availableLocations, groupedLocations, and the service locations.
-    //
-    // Although this is displayed with two choices in the UI, it is internally a
-    // three-valued setting so we can later change the "default" behavior
-    // without affecting users that have ever changed the setting, even if they
-    // have changed it back.  The intent is to eventually make the modern infra
-    // the default, then eventually remove the legacy infra.
-    JsonField(QString, infrastructure, QStringLiteral("default"), { "default", "current", "modern" })
     // Whether to include geo-only locations.
     JsonField(bool, includeGeoOnly, true)
     // The method used to connect to the VPN
@@ -916,7 +1036,6 @@ public:
         vpnLocationAuto(other.vpnLocationAuto());
         method(other.method());
         methodForcedByAuth(other.methodForcedByAuth());
-        infrastructure(other.infrastructure());
         dnsType(other.dnsType());
         openvpnCipher(other.openvpnCipher());
         openvpnAuth(other.openvpnAuth());
@@ -937,7 +1056,6 @@ public:
             vpnLocationAuto() == other.vpnLocationAuto() &&
             method() == other.method() &&
             methodForcedByAuth() == other.methodForcedByAuth() &&
-            infrastructure() == other.infrastructure() &&
             dnsType() == other.dnsType() &&
             openvpnCipher() == other.openvpnCipher() &&
             openvpnAuth() == other.openvpnAuth() &&
@@ -962,14 +1080,6 @@ public:
     JsonField(QString, method, QStringLiteral("openvpn"), {"openvpn", "wireguard"})
     // Whether the VPN method was forced to OpenVPN due to lack of an auth token
     JsonField(bool, methodForcedByAuth, false)
-
-    // Which infrastructure is in use for this connection.  This affects the
-    // behavior for port forwarding, MACE, etc., which are implemented
-    // differently on the new infrastructure.
-    //
-    // Note that "default" is not a choice here (unlike DaemonSettings::infrastructure),
-    // this is a concrete value.
-    JsonField(QString, infrastructure, QStringLiteral("current"), {"current", "modern"})
 
     // DNS type used for this connection
     JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "local", "existing", "custom"})
@@ -1039,6 +1149,12 @@ public:
 
 public:
     DaemonState();
+
+    // Let the client know whether we currently have an auth token; the client
+    // uses this to detect the "logged in, but API unreachable" state (where we
+    // will try to connect to the VPN server using credential auth).  The client
+    // can't access the actual auth token.
+    JsonField(bool, hasAccountToken, false)
 
     // Boolean indicating whether the user wants to be connected or not.
     // This specifically tracks the user's intent - this should _only_ ever be
@@ -1136,12 +1252,19 @@ public:
     JsonField(Optional<Server>, connectedServer, {})
 
     // Available regions, mapped by region ID.  These are from either the
-    // current or new regions list.
+    // current or new regions list.  This includes both dedicated IP regions and
+    // regular regions, which are treated the same way by most logic referring
+    // to regions.
     JsonField(LocationsById, availableLocations, {})
 
     // Locations grouped by country and sorted by latency.  The locations are
     // chosen from the active infrastructure specified by the "infrastructure"
     // setting.
+    //
+    // This is used for display purposes - in regions lists, in the CLI
+    // "get regions", etc.  It does _not_ include dedicated IP regions, which
+    // are handled differently in display contexts (those are in
+    // dedicatedIpLocations)
     //
     // This is provided by the daemon to ensure that the client and daemon
     // handle these in exactly the same way.  Although Daemon itself only
@@ -1152,6 +1275,11 @@ public:
     // country (which ensures that the lowest-latency location's country is
     // first).  Ties are broken by country code.
     JsonField(std::vector<CountryLocations>, groupedLocations, {})
+
+    // Dedicated IP locations sorted by latency with the same tie-breaking logic
+    // as groupedLocations().  This is used in display contexts alongside
+    // groupedLocations(), as dedicated IP regions are displayed differently.
+    JsonField(std::vector<QSharedPointer<Location>>, dedicatedIpLocations, {})
 
     // All supported ports for the OpenVpnUdp and OpenVpnTcp services in the
     // active infrastructure (union of the supported ports among all advertised
@@ -1254,6 +1382,13 @@ public:
     // the connection is not working, this will be set, and the client will show
     // a warning.
     JsonField(bool, connectionProblem, false)
+    // A dedicated IP will expire soon.  When active, the number of days until
+    // the next expiration is also given.
+    JsonField(quint64, dedicatedIpExpiring, 0)
+    JsonField(int, dedicatedIpDaysRemaining, 0)
+    // A dedicated IP has changed (as observed by the daemon when refreshing
+    // DIP info).  Cleared if the notification is dismissed.
+    JsonField(quint64, dedicatedIpChanged, 0)
 
     // We failed to configure DNS on linux
     JsonField(qint64, dnsConfigFailed, 0)

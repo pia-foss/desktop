@@ -39,6 +39,12 @@ bool Server::hasService(Service service) const
     return !servicePorts(service).empty();
 }
 
+bool Server::hasVpnService() const
+{
+    return hasService(Service::OpenVpnTcp) || hasService(Service::OpenVpnUdp) ||
+        hasService(Service::WireGuard);
+}
+
 bool Server::hasPort(Service service, quint16 port) const
 {
     const auto &ports = servicePorts(service);
@@ -133,6 +139,11 @@ std::size_t Location::countServersForService(Service service) const
     return countServersFor([service](const Server &server){return server.hasService(service);});
 }
 
+std::size_t Location::countServersForPort(Service service, quint16 port) const
+{
+    return countServersFor([service, port](const Server &server){return server.hasPort(service, port);});
+}
+
 template<class PredicateFuncT>
 const Server *Location::randomServerFor(const PredicateFuncT &predicate) const
 {
@@ -163,6 +174,36 @@ const Server *Location::randomServerFor(const PredicateFuncT &predicate) const
     return nullptr;
 }
 
+template<class PredicateFuncT>
+const Server *Location::serverWithIndexFor(std::size_t desiredIndex, const PredicateFuncT &predicate) const
+{
+    // This implementation is O(N) in the number of servers in the region.  It
+    // could be O(1) if we kept separate lists of the servers that have each
+    // service / port, but the number of servers offered per region isn't very
+    // large.
+
+    // Count the matching servers
+    std::size_t matches = countServersFor(predicate);
+
+    if(matches >= 1)
+    {
+        std::size_t idx = 0;
+        // Count off that index among the matching servers
+        for(const auto &server : servers())
+        {
+            if(predicate(server))
+            {
+                if(idx == desiredIndex)
+                    return &server;
+                ++idx;
+            }
+        }
+    }
+
+    // No servers match
+    return nullptr;
+}
+
 bool Location::hasService(Service service) const
 {
     for(const auto &server : servers())
@@ -177,9 +218,7 @@ const Server *Location::randomIcmpLatencyServer() const
 {
     return randomServerFor([](const Server &server)
     {
-        return server.hasService(Service::OpenVpnTcp) ||
-            server.hasService(Service::OpenVpnUdp) ||
-            server.hasService(Service::WireGuard);
+        return server.hasVpnService();
     });
 }
 
@@ -193,6 +232,16 @@ const Server *Location::randomServerForPort(Service service, quint16 port) const
     return randomServerFor([service, port](const Server &server){return server.hasPort(service, port);});
 }
 
+const Server *Location::serverWithIndexForService(std::size_t index, Service service) const
+{
+    return serverWithIndexFor(index, [service](const Server &server){return server.hasService(service);});
+}
+
+const Server *Location::serverWithIndexForPort(std::size_t index, Service service, quint16 port) const
+{
+    return serverWithIndexFor(index, [service, port](const Server &server){return server.hasPort(service, port);});
+}
+
 const Server *Location::randomServer(Service service, quint16 tryPort) const
 {
     const Server *pSelected{nullptr};
@@ -204,6 +253,23 @@ const Server *Location::randomServer(Service service, quint16 tryPort) const
     // server for this service.
     if(!pSelected)
         pSelected = randomServerForService(service);
+    return pSelected;
+}
+
+const Server *Location::serverWithIndex(std::size_t index, Service service, quint16 tryPort) const
+{
+    const Server *pSelected{nullptr};
+
+    // If a port was requested, try to find that port.
+    if(tryPort)
+        pSelected = serverWithIndexForPort(index, service, tryPort);
+    // If that port was not available (or no port was requested), select any
+    // server for this service.
+    if(!pSelected)
+    {
+        pSelected = serverWithIndexForService(index, service);
+    }
+
     return pSelected;
 }
 
@@ -270,10 +336,64 @@ const Server *Transport::selectServerPort(const Location &location)
     return pSelectedServer;
 }
 
+std::size_t Transport::countServersForLocation(const Location &location) const
+{
+    Service service{Service::OpenVpnUdp};
+    if(protocol() == QStringLiteral("tcp"))
+        service = Service::OpenVpnTcp;
+
+    if(port())
+        // If a port is specified limit our servers to those with that port
+        return location.countServersForPort(service, port());
+    else
+        // Otherwise, all servers for that service are game
+        return location.countServersForService(service);
+}
+
+const Server *Transport::selectServerPortWithIndex(const Location &location, size_t index)
+{
+    Service selectedService{Service::OpenVpnUdp};
+    if(protocol() == QStringLiteral("tcp"))
+        selectedService = Service::OpenVpnTcp;
+
+    // Select a server.  If a port has been selected, try to get that port,
+    // otherwise take any server for this service.
+    const Server *pSelectedServer = location.serverWithIndex(index, selectedService, port());
+
+    // If no connection is possible, set port to 0
+    if(!pSelectedServer)
+        port(0);
+    // Otherwise, if the default port was selected, or if the selected port is
+    // not available, use the default
+    else if(port() == 0 || !pSelectedServer->hasPort(selectedService, port()))
+        port(pSelectedServer->defaultServicePort(selectedService));
+    return pSelectedServer;
+}
+
+
 DaemonData::DaemonData()
     : NativeJsonObject(DiscardUnknownProperties)
 {
 
+}
+
+const std::unordered_set<QString> &DaemonAccount::sensitiveProperties()
+{
+    static const std::unordered_set<QString> _sensitiveProperties
+    {
+        QStringLiteral("password"),
+        QStringLiteral("token"),
+        QStringLiteral("openvpnUsername"),
+        QStringLiteral("openvpnPassword"),
+        QStringLiteral("clientId"),
+        QStringLiteral("portForwardPayload"),
+        QStringLiteral("portForwardSignature"),
+        // Clients don't need the dedicated IPs object at all, they observe
+        // these through the DIP regions.  This protects the tokens (the other
+        // information is present in the DIP regions).
+        QStringLiteral("dedicatedIps")
+    };
+    return _sensitiveProperties;
 }
 
 DaemonAccount::DaemonAccount()

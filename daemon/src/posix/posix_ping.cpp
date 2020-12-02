@@ -21,6 +21,7 @@
 
 #include "posix_ping.h"
 #include <QRandomGenerator>
+#include <QTimer>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -38,18 +39,24 @@ namespace
 }
 
 PosixPing::PosixPing()
-    : _icmpSocket{::socket(PF_INET, sockType, IPPROTO_ICMP)},
-      _readNotifier{_icmpSocket, QSocketNotifier::Type::Read},
+    : _icmpSocket{-1},
       _identifier{static_cast<quint16>(QRandomGenerator::global()->bounded(std::numeric_limits<quint16>::max()))},
       _nextSequence{0}
 {
+    // Unit tests don't run as root, so we can't actually do the ICMP pings.  We
+    // still want to test the bulk of LatencyTracker, so mimic the pings just by
+    // triggering phony measurements in unit tests.
+#ifndef UNIT_TEST
+    _icmpSocket = ::socket(PF_INET, sockType, IPPROTO_ICMP);
     if(_icmpSocket < 0)
     {
         qWarning() << "Failed to open ICMP socket:" << errno;
     }
 
-    connect(&_readNotifier, &QSocketNotifier::activated, this,
+    _pReadNotifier.emplace(_icmpSocket, QSocketNotifier::Type::Read);
+    connect(_pReadNotifier.ptr(), &QSocketNotifier::activated, this,
             &PosixPing::onReadyRead);
+#endif
 }
 
 PosixPing::~PosixPing()
@@ -85,6 +92,18 @@ quint16 PosixPing::calcChecksum(const quint8 *data, std::size_t len) const
 
 bool PosixPing::sendEchoRequest(quint32 address)
 {
+#ifdef UNIT_TEST
+    // Fake this in unit tests since we can't send real ICMP pings when not run
+    // as root.
+    // Unit tests use the IPv4 documentation range to test a lack of response,
+    // so check for that too (but act like a request was sent with no reply).
+    if((address & 0xFFFFFF00) != 0xC0000200)    // 192.0.2.0/24
+    {
+        qInfo() << "Mocking ping to" << QHostAddress{address};
+        QTimer::singleShot(30, this, [this, address]{emit receivedReply(address);});
+    }
+    return true;
+#endif
     if(_icmpSocket < 0)
         return false; // Can't do anything, failed to open raw socket - traced earlier
 

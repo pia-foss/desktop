@@ -40,16 +40,13 @@ SplitTunnelRowBase {
   // Subnet displayed in the cell
   property string subnet
 
-  // Column index of cell to highlight within this row - -1 for none.
-  property int highlightColumn: -1
-
   function removeFromSplitTunnelRules() {
     var updatedRules = Daemon.settings.bypassSubnets.filter(subnetRule => subnetRule.subnet !== subnet)
     Daemon.applySettings({bypassSubnets: updatedRules});
   }
 
   // Select a cell in this row with the keyboard.
-  function keyboardSelect(keyboardColumn) {
+  keyboardSelect: function(keyboardColumn) {
     switch(keyboardColumn) {
     case keyColumns.remove:
       removeFromSplitTunnelRules();
@@ -58,14 +55,12 @@ SplitTunnelRowBase {
   }
 
   // Effective column (app rows have all columns)
-  function effectiveColumnFor(column) {
+  effectiveColumnFor: function(column) {
     return column
   }
 
-  signal focusCell(int column)
-
   // Screen reader row annotation
-  readonly property NativeAcc.TableRow accRow: NativeAcc.TableRow {
+  accRow: NativeAcc.TableRow {
     name: subnet
     item: ipRow
     selected: false
@@ -74,17 +69,17 @@ SplitTunnelRowBase {
   }
 
   // Screen reader cell annotations
-  readonly property NativeAcc.TableCellText accAppCell: NativeAcc.TableCellText {
+  accAppCell: NativeAcc.TableCellText {
     name: subnet
     item: subnetText
   }
 
-  readonly property NativeAcc.TableCellText accModeCell: NativeAcc.TableCellText {
+  accModeCell: NativeAcc.TableCellText {
     name: bypassText.text
     item: bypassText
   }
 
-  readonly property NativeAcc.TableCellButton accRemoveCell: NativeAcc.TableCellButton {
+  accRemoveCell: NativeAcc.TableCellButton {
     //: Screen reader annotation for the "remove" button ("X" icon) next to a
     //: split tunnel ip rule.  (Should be labeled like a normal command
     //: button.)
@@ -122,7 +117,7 @@ SplitTunnelRowBase {
     anchors.right: bypassText.left
     anchors.rightMargin: 5
     text: ipRow.subnet
-    color: Theme.settings.hbarTextColor
+    color: Theme.settings.inputListItemPrimaryTextColor
     font.pixelSize: 16
     elide: Text.ElideRight
   }
@@ -138,17 +133,8 @@ SplitTunnelRowBase {
     anchors.rightMargin: 69
 
     text: appModeChoices[0].name // Corresponds to "Bypass VPN" text
-    color: Theme.settings.hbarTextColor
+    color: Theme.settings.inputListItemPrimaryTextColor
     font.pixelSize: 13
-  }
-
-  Rectangle {
-    anchors.bottom: parent.bottom
-    height: 1
-    anchors.left: parent.left
-    anchors.right: parent.right
-    color: Theme.settings.splitTunnelItemSeparatorColor
-    opacity: 0.5
   }
 
   Image {

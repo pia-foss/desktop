@@ -30,6 +30,7 @@ Page {
   ColumnLayout {
     anchors.fill: parent
     anchors.leftMargin: Theme.settings.narrowPageLeftMargin
+    anchors.rightMargin: Theme.settings.narrowPageLeftMargin
     spacing: 12
 
     PrivacyInput {

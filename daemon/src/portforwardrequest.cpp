@@ -65,27 +65,6 @@ namespace
     };
 }
 
-PortForwardRequestLegacy::PortForwardRequestLegacy(ApiClient &apiClient,
-                                                   Environment &environment,
-                                                   const QString &clientId)
-{
-    apiClient.getForwardedPort(*environment.getPortForwardApi(), QStringLiteral("?client_id=%1").arg(clientId))
-        ->notify(this, [this](const Error &err, const QJsonDocument& json)
-        {
-            if(err)
-            {
-                qWarning() << "Couldn't request port forward due to error:" << err;
-                emit stateUpdated(State::Failed, 0);
-                return;
-            }
-
-            const auto &port = json[QStringLiteral("port")].toInt();
-            if(port)
-                emit stateUpdated(State::Success, port);
-            else
-                emit stateUpdated(State::Failed, 0);
-        });
-}
 
 PortForwardRequestModern::PortForwardRequestModern(ApiClient &apiClient,
                                                    DaemonAccount &account,

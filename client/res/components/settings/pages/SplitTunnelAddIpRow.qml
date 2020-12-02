@@ -41,22 +41,20 @@ SplitTunnelRowBase {
   id: addIpRow
 
   // Shows the cell highlight (this row only has one cell)
-  property bool showHighlight
+  readonly property bool showHighlight: highlightColumn >= 0
 
   // Select this row (the column is ignored since this row only has one cell)
-  function keyboardSelect() {
+  keyboardSelect: function() {
     ipSubnetDialog.setSubnets()
   }
 
   // Effective column (always 0, this row only has one cell)
-  function effectiveColumnFor() {
+  effectiveColumnFor: function() {
     return keyColumns.app
   }
 
-  signal focusCell(int column)
-
   // Screen reader row annotation
-  readonly property NativeAcc.TableRow accRow: NativeAcc.TableRow {
+  accRow: NativeAcc.TableRow {
     name: displayName
     item: addIpRow
     selected: false
@@ -65,15 +63,15 @@ SplitTunnelRowBase {
   }
 
   // Screen reader cell annotations
-  readonly property NativeAcc.TableCellButton accAppCell: NativeAcc.TableCellButton {
+  accAppCell: NativeAcc.TableCellButton {
     name: displayName
     item: addIpText
     onActivated: addIpRow.clicked()
   }
   // There is no path or remove cell.
-  readonly property NativeAcc.TableCellText accPathCell: null
-  readonly property NativeAcc.TableCellDropDownButton accModeCell: null
-  readonly property NativeAcc.TableCellButton accRemoveCell: null
+  accPathCell: null
+  accModeCell: null
+  accRemoveCell: null
 
   // Localized display name (used in list's accessibility table)
   readonly property string displayName: uiTr("Add IP Address")
@@ -172,25 +170,16 @@ SplitTunnelRowBase {
     source: Theme.settings.splitTunnelAddApplicationButtonHover
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
-    anchors.leftMargin: 10
+    anchors.leftMargin: 13
   }
 
   Text {
     id: addIpText
     text: addIpRow.displayName
-    color: Theme.settings.hbarTextColor
+    color: Theme.settings.inputListItemPrimaryTextColor
     font.pixelSize: 12
     x: 40
     anchors.verticalCenter: parent.verticalCenter
-  }
-
-  Rectangle {
-    anchors.bottom: parent.bottom
-    height: 1
-    color: Theme.settings.splitTunnelItemSeparatorColor
-    opacity: 0.5
-    anchors.left: parent.left
-    anchors.right: parent.right
   }
 
   MouseArea {

@@ -21,47 +21,67 @@
 #include "src/mocknetwork.h"
 #include <QtTest>
 #include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
-namespace Responses
+namespace
 {
+    // Response:
+    // - status - OK / error
+    // - payload - Base64 JSON
+    //   - expires_at - ISO date with ms
+    //   - port
+    // - signature - whatever
+    QByteArray buildPfPayload(quint16 port, std::chrono::milliseconds validity)
+    {
+        QJsonDocument payloadDoc
+        {
+            QJsonObject
+            {
+                {QStringLiteral("port"), port},
+                {QStringLiteral("expires_at"), QDateTime::currentDateTimeUtc()
+                                                .addMSecs(msec(validity))
+                                                .toString(Qt::DateFormat::ISODateWithMs)}
+            }
+        };
+        return payloadDoc.toJson().toBase64();
+    }
 
-const int successPort = 55947;
-const QByteArray success{R"(
-{
-    "port": 55947
-}
-)"};
+    const QString mockSignature{QStringLiteral("abcdefghijkl")};
 
-// Success again, different port
-const int successPort2 = 53511;
-const QByteArray success2{R"(
-{
-    "port": 53511
-}
-)"};
+    QByteArray buildPfResponse(const QString &status, const QByteArray &payload)
+    {
+        QJsonDocument responseDoc
+        {
+            QJsonObject
+            {
+                {QStringLiteral("status"), status},
+                {QStringLiteral("payload"), QString::fromUtf8(payload)},
+                {QStringLiteral("signature"), mockSignature}
+            }
+        };
+        return responseDoc.toJson();
+    }
 
-const QByteArray error{R"(
-{
-    "error": "Mock unit test error"
-}
-)"};
+    QByteArray buildSuccessResponse(quint16 port)
+    {
+        return buildPfResponse(QStringLiteral("OK"), buildPfPayload(port, std::chrono::hours{24*30}));
+    }
 
-// Completely invalid JSON
-const QByteArray invalidJson{R"(fhqwgads)"};
-// No port attribute
-const QByteArray missingPort{R"({})"};
-// Port is 0
-const QByteArray zeroPort{R"(
-{
-    "port": 0
-}
-)"};
-// Port is a string, not an integer
-const QByteArray invalidPort{R"(
-{
-    "port": "harbor"
-}
-)"};
+    QByteArray buildBindResponse(const QString &status)
+    {
+        return QJsonDocument
+        {
+            QJsonObject
+            {
+                {QStringLiteral("status"), status},
+                {QStringLiteral("message"), QStringLiteral("unit test")}
+            }
+        }.toJson();
+    }
+
+    const auto bindSuccess{buildBindResponse(QStringLiteral("OK"))};
 }
 
 // PortForwarder and PortRequester with defaulted parameters, so we don't have
@@ -69,12 +89,17 @@ const QByteArray invalidPort{R"(
 class TestPortForwarder : public DaemonState, public Environment,
     public ApiClient, public DaemonAccount,  public PortForwarder
 {
+    CLASS_LOGGING_CATEGORY("TestPortForwarder");
 public:
     TestPortForwarder()
         : Environment{static_cast<DaemonState&>(*this)},
           PortForwarder{*this, *this, *this, *this}
     {
-        clientId(QStringLiteral("00000000000000000000000000000000000000000000000000"));
+        // A token is needed for the port forward request to proceed
+        token(QStringLiteral("abcdef"));
+        // A remote address is needed to form the PF request URIs, it can be
+        // anything since we mock the network requests
+        tunnelDeviceRemoteAddress(QStringLiteral("10.0.0.1"));
     }
 };
 
@@ -82,46 +107,10 @@ class tst_portforwarder : public QObject
 {
     Q_OBJECT
 
-private:
-    using IdBits = ClientId::IdBits;
-
-    void checkId(const QString &name, const IdBits &idNum, const QString &expected)
-    {
-        ClientId id{idNum};
-        qInfo() << name << "-" << id.id();
-        QCOMPARE(id.id(), expected);
-    }
-
 private slots:
     void init()
     {
         TestShim::installMock<QNetworkAccessManager, MockNetworkManager>();
-    }
-
-    // Test a few ClientId values to ensure that the encoding works correctly
-    // Nontrivial expected results were computed with Wolfram Alpha
-    void testClientIds()
-    {
-        checkId("Zero", {},
-                "00000000000000000000000000000000000000000000000000");
-
-        checkId("Ten", {{0, 0, 0, 0, 0, 0, 0, 10}},
-                "0000000000000000000000000000000000000000000000000a");
-
-        checkId("36", {{0, 0, 0, 0, 0, 0, 0, 36}},
-                "00000000000000000000000000000000000000000000000010");
-
-        checkId("Carry-1", {{0, 0, 0, 0, 0, 0, 1, 0}},
-                "00000000000000000000000000000000000000000001z141z4");
-
-        // Arbitrary value, SHA256("pia")
-        checkId("Arbitrary", {{0xFA9918F9, 0x94901C08, 0x7ECA14CA, 0x42E8A54C,
-                               0xFF9B4D8E, 0x04DC0593, 0xAEE58A9F, 0x6833F772}},
-                "68uo21fd3panj4on3hjs8zxy6opt52uvte1z9d5bdab05x8sj6");
-
-        checkId("Max-256", {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
-                             0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF}},
-                "6dp5qcb22im238nr3wvp0ic7q99w035jmy2iw7i6n43d37jtof");
     }
 
     // Verify that PortForwarder requests a port when the feature is enabled,
@@ -132,7 +121,9 @@ private slots:
 
         QSignalSpy resultSpy(&forwarder, &PortForwarder::portForwardUpdated);
 
-        auto pReply = MockNetworkManager::enqueueReply(Responses::success);
+        enum { MockPort = 59901 };
+
+        auto pReply = MockNetworkManager::enqueueReply(buildSuccessResponse(MockPort));
 
         forwarder.enablePortForwarding(true);
         QVERIFY(MockNetworkManager::hasNextReply()); // Not requested yet
@@ -144,9 +135,14 @@ private slots:
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
         QVERIFY(consumeSpy.wait(1000));
         QVERIFY(!MockNetworkManager::hasNextReply());
+        auto pBindReply = MockNetworkManager::enqueueReply(bindSuccess);
+        consumeSpy.clear();
         pReply->queueFinished();
+        QVERIFY(consumeSpy.wait(1000));
+        QVERIFY(!MockNetworkManager::hasNextReply());
+        pBindReply->queueFinished();
         QVERIFY(resultSpy.wait());
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), Responses::successPort);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), MockPort);
     }
 
     // Verify that if PF is enabled after having connected, PortForwarder does
@@ -157,7 +153,8 @@ private slots:
 
         QSignalSpy resultSpy(&forwarder, &PortForwarder::portForwardUpdated);
 
-        auto pReply = MockNetworkManager::enqueueReply(Responses::success);
+        auto pReply = MockNetworkManager::enqueueReply(buildSuccessResponse(59902));
+        auto replyCleanup = raii_sentinel([]{MockNetworkManager::clearQueuedReplies();});
 
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         QVERIFY(MockNetworkManager::hasNextReply()); // Not requested yet
@@ -178,7 +175,7 @@ private slots:
         // indicate that the forwarded port is not set.
         QSignalSpy resultSpy(&forwarder, &PortForwarder::portForwardUpdated);
         // No requests should be made during this test.
-        auto pReply = MockNetworkManager::enqueueReply(Responses::success);
+        auto pReply = MockNetworkManager::enqueueReply(buildSuccessResponse(59903));
         auto replyCleanup = raii_sentinel([]{MockNetworkManager::clearQueuedReplies();});
 
         forwarder.enablePortForwarding(true);
@@ -205,26 +202,40 @@ private slots:
         TestPortForwarder forwarder;
 
         QSignalSpy resultSpy(&forwarder, &PortForwarder::portForwardUpdated);
-        auto pSuccess1 = MockNetworkManager::enqueueReply(Responses::success);
+
+        enum { MockPort = 59904 };
+        auto pSuccess1 = MockNetworkManager::enqueueReply(buildSuccessResponse(MockPort));
 
         forwarder.enablePortForwarding(true);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+
+        QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
+        QVERIFY(consumeSpy.wait(1000));
+        QVERIFY(!MockNetworkManager::hasNextReply());
+        auto pBindReply1 = MockNetworkManager::enqueueReply(bindSuccess);
+        consumeSpy.clear();
         pSuccess1->queueFinished();
+        QVERIFY(consumeSpy.wait(1000));
+        QVERIFY(!MockNetworkManager::hasNextReply());
+        pBindReply1->queueFinished();
+
         QVERIFY(resultSpy.wait());
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), Responses::successPort);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), MockPort);
 
         forwarder.updateConnectionState(PortForwarder::State::Disconnected);
         // This signal occurs synchronously, so there's no wait needed here
         QVERIFY(!resultSpy.empty());
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Inactive);
 
-        auto pSuccess2 = MockNetworkManager::enqueueReply(Responses::success2);
+        // Only a bind is sent when we reconnect, because the PF payload is
+        // still valid
+        auto pBindReply2 = MockNetworkManager::enqueueReply(bindSuccess);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
-        pSuccess2->queueFinished();
+        pBindReply2->queueFinished();
         QVERIFY(resultSpy.wait());
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), Responses::successPort2);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), MockPort);
     }
 
     // Toggling the feature off and on while connected does *not* change the
@@ -234,17 +245,29 @@ private slots:
         TestPortForwarder forwarder;
 
         QSignalSpy resultSpy(&forwarder, &PortForwarder::portForwardUpdated);
-        auto pReply = MockNetworkManager::enqueueReply(Responses::success);
+
+        enum { MockPort = 59905 };
+
+        auto pReply = MockNetworkManager::enqueueReply(buildSuccessResponse(MockPort));
 
         forwarder.enablePortForwarding(true);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+
+        QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
+        QVERIFY(consumeSpy.wait(1000));
+        QVERIFY(!MockNetworkManager::hasNextReply());
+        auto pBindReply = MockNetworkManager::enqueueReply(bindSuccess);
+        consumeSpy.clear();
         pReply->queueFinished();
+        QVERIFY(consumeSpy.wait(1000));
+        QVERIFY(!MockNetworkManager::hasNextReply());
+        pBindReply->queueFinished();
         QVERIFY(resultSpy.wait());
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), Responses::successPort);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), MockPort);
 
         // This reply will *not* be consumed
-        auto pExtraReply = MockNetworkManager::enqueueReply(Responses::success2);
+        auto pExtraReply = MockNetworkManager::enqueueReply(buildSuccessResponse(MockPort));
         auto replyCleanup = raii_sentinel([]{MockNetworkManager::clearQueuedReplies();});
 
         forwarder.enablePortForwarding(false);

@@ -46,9 +46,6 @@ SplitTunnelRowBase {
   // Index of app in the list
   property string appIndex
 
-  // Column index of cell to highlight within this row - -1 for none.
-  property int highlightColumn: -1
-
   function removeFromSplitTunnelRules() {
     var updatedRules = Daemon.settings.splitTunnelRules.filter(function(rule) {
       return rule.path !== appPath
@@ -72,7 +69,7 @@ SplitTunnelRowBase {
   }
 
   // Select a cell in this row with the keyboard.
-  function keyboardSelect(keyboardColumn) {
+  keyboardSelect: function(keyboardColumn) {
     switch(keyboardColumn) {
       case keyColumns.app:
         break // Nothing to do for these columns
@@ -86,14 +83,12 @@ SplitTunnelRowBase {
   }
 
   // Effective column (app rows have all columns)
-  function effectiveColumnFor(column) {
+  effectiveColumnFor: function(column) {
     return column
   }
 
-  signal focusCell(int column)
-
   // Screen reader row annotation
-  readonly property NativeAcc.TableRow accRow: NativeAcc.TableRow {
+  accRow: NativeAcc.TableRow {
     name: appName
     item: appRow
     selected: false
@@ -111,7 +106,7 @@ SplitTunnelRowBase {
   ]
 
   // Screen reader cell annotations
-  readonly property NativeAcc.TableCellText accAppCell: NativeAcc.TableCellText {
+  accAppCell: NativeAcc.TableCellText {
     name: appName
     item: appNameText
   }
@@ -119,11 +114,11 @@ SplitTunnelRowBase {
   // second column.  Annotating the whole name+path as one column would generate
   // really long annotations that are hard to navigate.  This approach is used
   // by most of the similar tables in the Mac OS system tools.
-  readonly property NativeAcc.TableCellText accPathCell: NativeAcc.TableCellText {
+  accPathCell: NativeAcc.TableCellText {
     name: appPath
     item: appPathText
   }
-  readonly property NativeAcc.TableCellDropDownButton accModeCell: NativeAcc.TableCellDropDownButton {
+  accModeCell: NativeAcc.TableCellDropDownButton {
     name: modeDropDown.displayText
     item: modeDropDown
     onActivated: {
@@ -131,7 +126,7 @@ SplitTunnelRowBase {
       keyboardShowModePopup()
     }
   }
-  readonly property NativeAcc.TableCellButton accRemoveCell: NativeAcc.TableCellButton {
+  accRemoveCell: NativeAcc.TableCellButton {
     //: Screen reader annotation for the "remove" button ("X" icon) next to a
     //: split tunnel app rule.  (Should be labeled like a normal command
     //: button.)
@@ -163,7 +158,7 @@ SplitTunnelRowBase {
     anchors.right: modeDropDown.left
     anchors.rightMargin: 5
     text: appRow.appName
-    color: Theme.settings.hbarTextColor
+    color: Theme.settings.inputListItemPrimaryTextColor
     font.pixelSize: 16
     elide: Text.ElideRight
   }
@@ -191,20 +186,11 @@ SplitTunnelRowBase {
 
       return appPath
     }
-    color: Theme.settings.inputDropdownTextDisabledColor
+    color: Theme.settings.inputListItemSecondaryTextColor
     elide: Text.ElideLeft
     anchors.right: modeDropDown.left
     anchors.rightMargin: 5
     anchors.left: appNameText.left
-  }
-
-  Rectangle {
-    anchors.bottom: parent.bottom
-    height: 1
-    anchors.left: parent.left
-    anchors.right: parent.right
-    color: Theme.settings.splitTunnelItemSeparatorColor
-    opacity: 0.5
   }
 
   ThemedComboBox {
@@ -217,7 +203,6 @@ SplitTunnelRowBase {
     anchors.rightMargin: 45
 
     // Not a tabstop, navigation occurs in table
-    focusOnTab: false
     focusOnDismissFunc: function() { appRow.focusCell(keyColumns.mode) }
 
     currentIndex: {

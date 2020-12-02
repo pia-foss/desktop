@@ -255,10 +255,12 @@ void SocksServer::onNewConnection()
 
 SocksConnection::SocksConnection(QTcpSocket &socksSocket,
                                  QByteArray passwordHash,
-                                 const QHostAddress &bindAddress,
+                                 QHostAddress bindAddress,
                                  QString bindInterface)
     : QObject{&socksSocket}, _socksSocket{socksSocket},
       _passwordHash{std::move(passwordHash)},
+      _bindAddress{std::move(bindAddress)},
+      _bindInterface{std::move(bindInterface)},
       _state{State::ReceiveAuthMethodsHeader}, _nextMessageBytes{2}
 {
     // By default QTcpSocket will try to use a system proxy, if configured.
@@ -289,25 +291,6 @@ SocksConnection::SocksConnection(QTcpSocket &socksSocket,
 
     // Time out if initial negotiation isn't completed
     _abortTimer.start();
-
-    qInfo() << "API proxy:" << this << "Target socket:" << _targetSocket.socketDescriptor() << "->" << bindAddress;
-    if(!_targetSocket.bind(bindAddress))
-    {
-        qWarning() << "API proxy:" << this << "Bind failed on socket:" << _targetSocket.socketDescriptor()
-            << "->" << bindAddress << ":" << traceEnum(_targetSocket.error());
-    }
-    else
-        qInfo() << "API proxy:" << this << "Bind succeeded on socket:" << _targetSocket.socketDescriptor()
-            << "->" << bindAddress << "==" << _targetSocket.localAddress();
-
-// Also bind the socket to the interface on Linux, as Linux does not support the "strong host model"
-// meaning the packets won't be routed through our preferred interface based on source ip alone
-#ifdef Q_OS_LINUX
-    if(setsockopt(_targetSocket.socketDescriptor(), SOL_SOCKET, SO_BINDTODEVICE, qPrintable(bindInterface), bindInterface.size()))
-    {
-        qWarning() << "API proxy:" << this << QStringLiteral("setsockopt error: %1 (code: %2)").arg(qt_error_string(errno)).arg(errno);
-    }
-#endif
 }
 
 void SocksConnection::abortConnection()
@@ -609,6 +592,43 @@ void SocksConnection::processSocksData()
             // Negotiation completed, now waiting on the connect - stop the
             // abort timeout
             _abortTimer.stop();
+            // Bind to the VPN interface if the target isn't loopback.
+            // Loopback targets generally only occur if an API is overridden,
+            // this is common when using a mock API for testing.
+            if(!destHost.isLoopback())
+            {
+                qInfo() << "API proxy:" << this << "Target socket:"
+                    << _targetSocket.socketDescriptor() << "->" << _bindAddress;
+                if(!_targetSocket.bind(_bindAddress))
+                {
+                    qWarning() << "API proxy:" << this
+                        << "Bind failed on socket:"
+                        << _targetSocket.socketDescriptor()
+                        << "->" << _bindAddress << ":"
+                        << traceEnum(_targetSocket.error());
+                }
+                else
+                {
+                    qInfo() << "API proxy:" << this
+                        << "Bind succeeded on socket:"
+                        << _targetSocket.socketDescriptor()
+                        << "->" << _bindAddress << "=="
+                        << _targetSocket.localAddress();
+                }
+
+                // Also bind the socket to the interface on Linux, as Linux does not support the "strong host model"
+                // meaning the packets won't be routed through our preferred interface based on source ip alone
+#ifdef Q_OS_LINUX
+                if(setsockopt(_targetSocket.socketDescriptor(), SOL_SOCKET,
+                              SO_BINDTODEVICE, qPrintable(_bindInterface),
+                              _bindInterface.size()))
+                {
+                    qWarning() << "API proxy:" << this
+                        << QStringLiteral("setsockopt error: %1 (code: %2)")
+                            .arg(qt_error_string(errno)).arg(errno);
+                }
+#endif
+            }
             _targetSocket.connectToHost(destHost, port);
             break;
         }

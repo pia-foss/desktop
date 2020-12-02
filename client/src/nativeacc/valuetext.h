@@ -38,11 +38,18 @@ namespace NativeAcc {
 // ValueText provides QAccessibleTextInterface because that's the only way to
 // provide a value on Linux for the text field role.  On Mac and Windows, this
 // isn't used because the field isn't actually editable; it just uses
-// textValue() to get the value.  (This is normal for Qt on Windows, on Mac it
+// textValue() to get the value.  (This is normal for Qt on Windows, on Mac it's
 // fixed by the fixup layer.)
 class ValueTextAttached : public TextFieldBase
 {
     Q_OBJECT
+
+public:
+    // "Copy" action name and localized description - shared by
+    // TableCellValueText
+    static const QString copyActionName;
+    static QString copyActionLocalizedDescription();
+    static QString copyActionLocalizedName();
 
     // Whether the control is copiable.  Enables the "copy" action, which
     // becomes the default.  The copy() signal is emitted if the user takes the

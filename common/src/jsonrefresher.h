@@ -25,6 +25,7 @@
 #include "apibase.h"
 #include "async.h"
 #include "testshim.h"
+#include "filewatcher.h"
 #include <QObject>
 #include <QJsonDocument>
 #include <QByteArray>
@@ -62,6 +63,7 @@ private:
     // Read a reply, and emit it to contentLoaded() if successful.
     void emitReply(QByteArray responsePayload);
 
+    bool processOverrideFile(const QString &overridePath);
 public:
     // Start trying to load the resource.
     void start(std::shared_ptr<ApiBase> pApiBaseUris);
@@ -133,6 +135,7 @@ public:
     // abandons the task.
     Async<void> _pFetchTask;
     QByteArray _signatureKey;
+    nullable_t<FileWatcher> _pOverrideFileWatcher;
 };
 
 #endif

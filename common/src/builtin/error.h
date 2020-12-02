@@ -116,6 +116,8 @@ public:
         DaemonRPCDaemonInactive,    // RPC rejected because no active client is connected
         DaemonRPCNotLoggedIn,   // RPC rejected because the user has not logged in
         DaemonRPCUnknownSetting,    // RPC rejected due to unknown setting property
+        DaemonRPCDedicatedIpTokenExpired, // RPC rejected due to adding a DIP token that's expired
+        DaemonRPCDedicatedIpTokenInvalid, // RPC rejected due to adding a DIP token that's invalid
 
         // Network adapter errors (can be thrown by Daemon implementations)
         NetworkAdapterNotFound = 1600,
@@ -154,11 +156,11 @@ public:
 public:
     Error()
         : _location(nullptr, 0, *QLoggingCategory::defaultCategory()), _code(Success), _systemCode(0) {}
-    Error(ErrorLocation&& location, Code code, QStringList params)
-        : _location(location), _code(code), _systemCode(0), _params(std::move(params)) {}
+    Error(ErrorLocation location, Code code, QStringList params)
+        : _location(std::move(location)), _code(code), _systemCode(0), _params(std::move(params)) {}
     template<typename... Args>
-    Error(ErrorLocation&& location, Code code, Args&&... args)
-        : _location(location), _code(code), _systemCode(0), _params{ std::forward<Args>(args)... } {}
+    Error(ErrorLocation location, Code code, Args&&... args)
+        : _location(std::move(location)), _code(code), _systemCode(0), _params{ std::forward<Args>(args)... } {}
     Error(const QJsonObject& errorObject);
 
     Q_INVOKABLE Code code() const { return _code; }

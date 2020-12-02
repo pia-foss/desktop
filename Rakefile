@@ -306,10 +306,14 @@ task :debug_collect => [debugSymbols.componentDir, stage.target,
     end
 
     binPath = Build.selectPlatform('', 'Contents/MacOS', 'bin')
+    libPath = Build.selectPlatform('', 'Contents/MacOS', 'lib')
     clientBin = Build.selectPlatform("#{Build::Brand}-client.exe", version.productName, "#{Build::Brand}-client")
+    clientLib = "#{Build::Brand}-clientlib.#{Build::selectPlatform('dll', 'dylib', 'so')}"
+
     dumpSyms(stage, File.join(binPath, clientBin), debugSymbols, 'client')
     daemonBin = "#{Build::Brand}-#{Build::selectPlatform('service.exe', 'daemon', 'daemon')}"
     dumpSyms(stage, File.join(binPath, daemonBin), debugSymbols, 'daemon')
+    dumpSyms(stage, File.join(libPath, clientLib), debugSymbols, 'clientlib')
 
     FileUtils.copy_entry(version.artifact('version.txt'),
                          debugSymbols.artifact('version.txt'))

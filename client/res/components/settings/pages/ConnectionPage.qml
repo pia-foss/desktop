@@ -69,7 +69,7 @@ Page {
         }
 
         InfoTip {
-          Layout.leftMargin: 10
+          Layout.leftMargin: 2
           showBelow: true
           //: Description for OpenVPN shown as tip describing available protocols.
           readonly property string openvpnTipText: uiTr("Reliable, stable and secure protocol with 18+ years of open source development.")
@@ -87,6 +87,7 @@ Page {
             else
               return SettingsMessages.wgRequiresWindows8
           }
+          icon: icons.settings
         }
       }
     }

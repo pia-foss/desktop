@@ -51,7 +51,7 @@ module Util
     def self.hostArchitecture
         if(hostPlatform == :windows)
             archProbe = `wmic os get OSArchitecture /value`.strip
-            if(archProbe.match?(/^OSArchitecture=64-bit$/))
+            if(archProbe.match?(/^OSArchitecture=64-bit$/i))
                 :x86_64
             elsif(archProbe.match(/^OSArchitecture=32-bit$/))
                 :x86

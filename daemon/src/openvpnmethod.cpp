@@ -179,11 +179,20 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
 
         QString updownCmd;
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
         updownCmd += escapeArg(QString::fromLocal8Bit(qgetenv("WINDIR")) + "\\system32\\cmd.exe");
         updownCmd += QStringLiteral(" /C call ");
 #endif
         updownCmd += escapeArg(Path::OpenVPNUpDownScript);
+#if defined(Q_OS_LINUX)
+        // OpenVPN invokes our up/down script without PATH (the environment is
+        // empty other than the values OpenVPN specifically adds).  Add PATH
+        // back in to ensure we can find `ip` if it's somewhere like /usr/sbin
+        // (Fedora 33).  We can't apply environment variables with OpenVPN's
+        // interface, so the script accepts --path <PATH> on the command line.
+        updownCmd += QStringLiteral(" --path ");
+        updownCmd += escapeArg(QString::fromLocal8Bit(qgetenv("PATH")));
+#endif
 
 #ifdef Q_OS_WIN
         // Only the Windows updown script supports logging right now.  Enable it
@@ -690,7 +699,6 @@ void OpenVPNMethod::checkForMagicStrings(const QString& line)
         if(!_networkAdapter)
             _networkAdapter.reset(new NetworkAdapter{tunDeviceNameRegex.cap(1)});
 
-        const auto &dnsServers = _connectingConfig.getDnsServers();
         emitTunnelConfiguration(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2),
                                 tunDeviceNameRegex.cap(3));
     }

@@ -39,8 +39,10 @@ struct COMMON_EXPORT CodeLocation
     int line;
 
     CodeLocation() : category(nullptr), file(nullptr), line(0) {}
-    CodeLocation(const char* file, int line, const QLoggingCategory& category)
-        : category(&category), file(file), line(line) {}
+    CodeLocation(const char* file, int line, const QLoggingCategory& category);
+
+    explicit operator bool() const {return category && file && line;}
+    bool operator!() const {return !operator bool();}
 
     const char* categoryName() const { return category ? category->categoryName() : ""; }
 
@@ -234,6 +236,37 @@ public:
     // logToStdErr.
     static void initialize(bool logToStdErr);
     static void enableStdErr(bool logToStdErr);
+
+    // Add a log redaction.  If the redact text occurs within a logging line, it
+    // is replaced with "<<replace>>" (angle brackets added automatically).
+    // This occurs before the trace is written to stderr or to log files, so the
+    // sensitive value is never exposed.
+    //
+    // The redact text is matched exactly currently, but this could be expanded
+    // to regex matching in the future if needed.  Both the redact and replace
+    // texts should generally be ASCII only, due to encoding issues in
+    // command-output redactions on Windows (shell commands on Windows normally
+    // provide output in the current code page, but it's not 100% consistent).
+    //
+    // Adding the same redaction again updates the replacement text (the
+    // duplicate redactions do not accumulate).
+    //
+    // Replacement texts should generally have some semantic meaning, so (for
+    // example) different values can be differentiated, and so issues/warnings
+    // could still be detected (for example, dedicated IP addresses and tokens
+    // are replaced with <<DIP IP {region}>>, <<DIP token {{region}>>).
+    //
+    // There is no way to remove a redaction.  This is intentional, as in the
+    // daemon it is difficult to be sure when a redaction could never occur
+    // after the relevant value is removed (consider removing a dedicated IP
+    // while still connected to that IP, etc.; OpenVPN might still trace the IP
+    // at some point until the connection is completely torn down).
+    static void addRedaction(const QString &redact, const QString &replace);
+    // Redact a piece of text with the current redactions in Logger.  (Used when
+    // generating a diagnostics file for a debug report.)
+    static QString redactText(QString text);
+    // Redact a piece of text in the default 8-bit encoding.
+    static QByteArray redactText(QByteArray text);
 
     // Instantiate the singleton in the main thread after QCoreApplication has been created.
     explicit Logger(const Path &logFilePath);

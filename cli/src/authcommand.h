@@ -25,10 +25,13 @@
 #include "clicommand.h"
 #include "settings.h"
 
+// Read a credential file consisting of newline-delimited credential components
+// (user/password, tokens, etc.).  Trailing CRs are trimmed if present.  If the
+// file can't be opened, throws CliInvalidArgs.
+QStringList readCredentialFile(const QString &filePath);
+
 class LoginCommand : public CliCommand
 {
-private:
-    QString trimEndCR(const QString &target);
 public:
     virtual void printHelp(const QString &name) override;
     virtual int exec(const QStringList &params, QCoreApplication &app) override;

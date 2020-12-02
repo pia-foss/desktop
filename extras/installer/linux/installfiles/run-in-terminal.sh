@@ -35,4 +35,4 @@ fi
 # Start the terminal with the specified command
 # $1 must be an absolute path to an executable/script, it cannot be a command
 # with arguments (some terminals interpret it as a command but some do not)
-nohup $TERMCMD -e "$1" &
+nohup $TERMCMD -e "$1" >/dev/null 2>&1 &

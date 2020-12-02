@@ -41,18 +41,9 @@ FocusScope {
     id: regionList
     anchors.fill: parent
     anchors.bottomMargin: Theme.dashboard.windowRadius
-    //: Screen reader annotation for the "Name / Latency" heading above the
-    //: region list, which sorts by either name or latency.  The screen
-    //: reader will indicate that this is a group of controls.
-    sortGroupName: uiTr("Region list sort")
-
-    //: Screen reader annotation for the region list on the regions page, where
-    //: users can choose a region and mark regions as favorites.  (Also used to
-    //: describe the scroll bar for the region list.)
-    regionListLabel: uiTranslate("RegionListView", "Region list")
 
     serviceLocations: Daemon.state.vpnLocations
-    portForwardEnabled: Daemon.settings.portForward && (Daemon.settings.method === "openvpn" || Daemon.settings.infrastructure !== "current")
+    portForwardEnabled: Daemon.settings.portForward
     canFavorite: true
     collapsedCountriesSettingName: "vpnCollapsedCountries"
     onRegionSelected: {

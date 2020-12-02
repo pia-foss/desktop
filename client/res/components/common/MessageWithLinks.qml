@@ -22,6 +22,7 @@ import PIA.FocusCue 1.0
 import "../client"
 import "../core"
 import "../theme"
+import "qrc:/javascript/util.js" as Util
 import "qrc:/javascript/keyutil.js" as KeyUtil
 import PIA.NativeAcc 1.0 as NativeAcc
 
@@ -83,20 +84,10 @@ FocusScope {
   // element.
   property bool messageAccessible: true
 
-  function compToStr(comp) {
-    var comp8bit = Math.round(comp * 255)
-    var leadingZero = comp8bit < 16 ? '0' : ''
-    return leadingZero + comp8bit.toString(16)
-  }
-
-  function colorToStr(c) {
-    return '#' + compToStr(c.r) + compToStr(c.g) + compToStr(c.b)
-  }
-
-  readonly property string linkColorStr: colorToStr(linkColor)
-  readonly property string linkHoverColorStr: colorToStr(linkHoverColor)
-  readonly property string linkFocusColorStr: colorToStr(linkFocusColor)
-  readonly property string linkFocusBgColorStr: colorToStr(linkFocusBgColor)
+  readonly property string linkColorStr: Util.colorToStr(linkColor)
+  readonly property string linkHoverColorStr: Util.colorToStr(linkHoverColor)
+  readonly property string linkFocusColorStr: Util.colorToStr(linkFocusColor)
+  readonly property string linkFocusBgColorStr: Util.colorToStr(linkFocusBgColor)
 
   // Link displaying keyboard focus cues, if any (-1 otherwise).  See
   // linkTabstopRepeater below

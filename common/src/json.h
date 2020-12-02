@@ -272,11 +272,16 @@ COMMON_EXPORT bool json_cast(const NativeJsonObject& from, QJsonValue& to);
 // if the stored value is not a compatible type. Add additional conversions
 // for custom types with extra json_cast(from, to) function overloads.
 //
-template<typename To, typename From> static inline To json_cast(const From& from)
+// Pass HERE additionally to improve error diagnostics, this causes any thrown
+// error to reference the json_cast() call rather than a line in this function.
+// (Important for parsing JSON data from APIs, indicates which field was invalid
+// if an error occurs.)
+template<typename To, typename From> static inline To json_cast(const From& from,
+                                                                const CodeLocation &loc = {})
 {
     To to;
     if (!json_cast(from, to))
-        throw Error{HERE, Error::Code::JsonCastError};
+        throw Error{loc ? loc : HERE, Error::Code::JsonCastError};
     return to;
 }
 
@@ -472,36 +477,6 @@ inline bool NativeJsonObject::validate(const T& value, const std::initializer_li
     }
     return false;
 }
-
-//Contextually convert a QJsonValue to a type expected as a function parameter.
-//
-//For example:
-//    //myObj.name() expects a QString:
-//    myObj.name(JsonCaster{jsonObj.value(QStringLiteral("name"))});  //Or some QJsonValue
-//
-//    //myObj.counter() expects an integer:
-//    myObj.counter(JsonCaster{jsonObj.value(QStringLiteral("counter"))});
-//
-//JsonCaster converts the QJsonValue to the expected type using json_cast().  If
-//the conversion is not possible, it throws a json_cast_exception.
-class COMMON_EXPORT JsonCaster
-{
-public:
-    JsonCaster(const QJsonValue &jsonValue)
-        : jsonValue{jsonValue}
-    {}
-
-public:
-    template<class DestType>
-    operator DestType() const
-    {
-        return json_cast<DestType>(jsonValue);
-    }
-
-private:
-    const QJsonValue &jsonValue;
-};
-
 
 namespace impl {
     template<size_t Size, size_t Align, typename... Types>

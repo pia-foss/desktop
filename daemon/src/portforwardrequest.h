@@ -60,20 +60,6 @@ signals:
     void stateUpdated(State state, int port);
 };
 
-// This is the legacy infrastructure implementation of PortForwardRequest.
-// - This uses the clientId from DaemonAccount.
-// - This never changes state after reaching State::Success; loss of the port
-//   cannot be detected.
-// - State::Retry is not used, there is no situation in which the request can be
-//   meaningfully retried.
-class PortForwardRequestLegacy : public PortForwardRequest
-{
-    Q_OBJECT
-
-public:
-    PortForwardRequestLegacy(ApiClient &apiClient, Environment &environment,
-                             const QString &clientId);
-};
 
 // This is the modern infrastructure implementation of PortForwardRequest.
 // - This uses the portForwardPayload and portForwardSignature from

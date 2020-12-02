@@ -43,7 +43,11 @@ Item {
   property alias currentIndex: control.currentIndex
   property alias displayText: control.displayText
 
-  property bool focusOnTab: true
+  // Whether the combo box is accessible (focusable with Tab and provides an
+  // accessibility annotation), and its accessible name if so.  This is turned
+  // off for table cells, since navigation and annotations are provided by the
+  // table.  Other contexts should set a name so the control is accessible.
+  property string accessibleName
 
   // The popup can be allowed to extend to fit the items' text (often relevant
   // for French/Italian/Polish/Russian), but this isn't the default.
@@ -92,8 +96,12 @@ Item {
     anchors.fill: parent
 
     font.pixelSize: 13
-    activeFocusOnTab: themedComboBox.focusOnTab
+    activeFocusOnTab: !!themedComboBox.accessibleName
     displayText: (model && model[currentIndex] && model[currentIndex].name) || ""
+
+    NativeAcc.DropDownButton.name: themedComboBox.accessibleName
+    NativeAcc.DropDownButton.value: displayText
+    NativeAcc.DropDownButton.onActivated: themedComboBox.showPopup()
 
     // Some translations have very long text that just can't fit in the
     // un-expanded combo box, so we expand the popup to show the full text

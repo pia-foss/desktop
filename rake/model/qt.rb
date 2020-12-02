@@ -48,7 +48,7 @@ class Qt
                 v = getQtPathVersion(p)
                 (v == nil) ? 0 : getQtVersionScore(v[0], v[1])
             end
-            if(!File.directory?(qtVersion))
+            if(qtVersion == nil || !File.directory?(qtVersion))
                 raise "Unable to find Qt installation in #{searchPatterns}\n" +
                     "Install Qt and/or set QTROOT to the preferred Qt build, such as:\n" +
                     "QTROOT=#{File.join(searchRoots[0], "Qt/5.#{PreferredQtMinorVersion}.#{PreferredQtPatchVersion}")}"

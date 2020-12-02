@@ -27,17 +27,6 @@ namespace NativeAcc {
 
 /*** Button base ***/
 
-void *TableCellButtonBaseImpl::interface_cast(QAccessible::InterfaceType type)
-{
-    if(type == QAccessible::InterfaceType::ActionInterface)
-    {
-        QAccessibleActionInterface *pThisItf = this;
-        return reinterpret_cast<void*>(pThisItf);
-    }
-
-    return TableCellImpl::interface_cast(type);
-}
-
 TableCellButtonBase *TableCellButtonBaseImpl::buttonBaseDef() const
 {
     TableCellBase *pBaseDef = definition();
@@ -225,6 +214,259 @@ void TableCellCheckButton::setChecked(bool checked)
     {
         _checked = checked;
         emit checkedChanged();
+    }
+}
+
+/*** TableCellValueText ***/
+
+TableCellValueTextImpl::TableCellValueTextImpl(QAccessible::Role role,
+                                               TableAttached &parentTable,
+                                               TableCellValueText &definition,
+                                               AccessibleElement &accParent)
+    : TableCellButtonBaseImpl{role, parentTable, definition, accParent}
+{
+    setState(StateField::readOnly, true);
+    connect(&definition, &TableCellValueText::valueChanged, this,
+            &TableCellValueTextImpl::onValueChanged);
+    connect(&definition, &TableCellValueText::copiableChanged, this,
+            &TableCellValueTextImpl::onCopiableChanged);
+    _value = definition.value();
+    _copiable = definition.copiable();
+}
+
+TableCellValueText *TableCellValueTextImpl::valueTextDef() const
+{
+    TableCellBase *pBaseDef = definition();
+    if(!pBaseDef)
+        return nullptr;
+
+    TableCellValueText *pValueTextDef = dynamic_cast<TableCellValueText*>(pBaseDef);
+    Q_ASSERT(pValueTextDef);    // Should be a value text
+    return pValueTextDef;
+}
+
+void TableCellValueTextImpl::onValueChanged()
+{
+    TableCellValueText *pValueTextDef = valueTextDef();
+    if(!pValueTextDef)
+        return;
+
+    // No need to check if this has actually changed, TableCellValueText already
+    // does that
+    QString previousText{std::move(_value)};
+    _value = pValueTextDef->value();
+
+    // Since value texts can't actually be edited, just emit a complete change
+    // for the entire value.  (Normally for editable texts, this is supposed to
+    // report precisely what was inserted/deleted/replaced; see
+    // TextFieldBase::setValue().)
+    QAccessibleTextUpdateEvent change{pValueTextDef->item(), 0, previousText,
+                                      _value};
+    QAccessible::updateAccessibility(&change);
+}
+
+void TableCellValueTextImpl::onCopiableChanged()
+{
+    TableCellValueText *pValueTextDef = valueTextDef();
+    if(!pValueTextDef)
+        return;
+
+    _copiable = pValueTextDef->copiable();
+
+    // Emit an action change event since the Copy action has changed (either
+    // added or removed)
+    QAccessibleEvent event{pValueTextDef->item(), QAccessible::Event::ActionChanged};
+    QAccessible::updateAccessibility(&event);
+}
+
+QString TableCellValueTextImpl::text(QAccessible::Text t) const
+{
+    if(t == QAccessible::Text::Value)
+    {
+        return _value;
+    }
+    return TableCellButtonBaseImpl::text(t);
+}
+
+QStringList TableCellValueTextImpl::actionNames() const
+{
+    if(_copiable)
+        return TableCellButtonBaseImpl::actionNames();
+    return {};  // Copy action isn't possible
+}
+
+QString TableCellValueTextImpl::localizedActionDescription(const QString &actionName) const
+{
+    if(actionName == ValueTextAttached::copyActionName ||
+       actionName == ValueTextAttached::copyActionName)
+    {
+        return ValueTextAttached::copyActionLocalizedDescription();
+    }
+
+    return TableCellButtonBaseImpl::localizedActionDescription(actionName);
+}
+
+QString TableCellValueTextImpl::localizedActionName(const QString &actionName) const
+{
+    if(actionName == ValueTextAttached::copyActionName ||
+       actionName == ValueTextAttached::copyActionName)
+    {
+        return ValueTextAttached::copyActionLocalizedName();
+    }
+
+    return TableCellButtonBaseImpl::localizedActionName(actionName);
+}
+
+void TableCellValueTextImpl::addSelection(int, int)
+{
+}
+
+QString TableCellValueTextImpl::attributes(int offset, int *startOffset, int *endOffset) const
+{
+    // No support for attributes
+    if(startOffset)
+        *startOffset = offset;
+    if(endOffset)
+        *endOffset = offset;
+    return {};
+}
+
+int TableCellValueTextImpl::characterCount() const
+{
+    return _value.size();
+}
+
+QRect TableCellValueTextImpl::characterRect(int offset) const
+{
+    TableCellValueText *pValueTextDef = valueTextDef();
+    if(!pValueTextDef)
+        return QRect{};
+
+    // Just returning the item bound, as this isn't used for a read-only text
+    return pValueTextDef->item() ? itemScreenRect(*pValueTextDef->item()) : QRect{};
+}
+
+int TableCellValueTextImpl::cursorPosition() const
+{
+    return 0;   // No cursor supported
+}
+
+int TableCellValueTextImpl::offsetAtPoint(const QPoint &point) const
+{
+    return 0;   // Not implemented
+}
+
+void TableCellValueTextImpl::removeSelection(int)
+{
+}
+
+void TableCellValueTextImpl::scrollToSubstring(int, int)
+{
+}
+
+void TableCellValueTextImpl::selection(int, int *startOffset, int *endOffset) const
+{
+    if(startOffset)
+        *startOffset = 0;
+    if(endOffset)
+        *endOffset = 0;
+}
+
+int TableCellValueTextImpl::selectionCount() const
+{
+    return 0;
+}
+
+void TableCellValueTextImpl::setCursorPosition(int)
+{
+}
+
+void TableCellValueTextImpl::setSelection(int, int, int)
+{
+}
+
+QString TableCellValueTextImpl::text(int startOffset, int endOffset) const
+{
+    if(endOffset <= startOffset)
+        return {};
+    return _value.mid(startOffset, endOffset-startOffset);
+}
+
+void TableCellValueTextImpl::reattach(TableCellValueText &definition)
+{
+    // Disconnect old signals if needed
+    TableCellValueText *pOldDef = valueTextDef();
+    if(pOldDef)
+        disconnect(pOldDef, nullptr, this, nullptr);
+
+    // Change to new base definition
+    TableCellButtonBaseImpl::reattach(definition);
+
+    // Attach new signals
+    connect(&definition, &TableCellValueText::valueChanged, this,
+            &TableCellValueTextImpl::onValueChanged);
+    connect(&definition, &TableCellValueText::copiableChanged, this,
+            &TableCellValueTextImpl::onCopiableChanged);
+
+    // Check for changes
+    if(definition.value() != _value)
+        onValueChanged();
+    if(definition.copiable() != _copiable)
+        onCopiableChanged();
+}
+
+const QString &TableCellValueText::activateAction()
+{
+#ifdef Q_OS_WIN
+    // Like TableCellCheckButton, the action has to be "press" on Windows, due
+    // to backend limitations.
+    return QAccessibleActionInterface::pressAction();
+#else
+    // On all other platforms, use the correct action, "copy".
+    return ValueTextAttached::copyActionName;
+#endif
+
+}
+
+TableCellValueText::TableCellValueText()
+    : TableCellButtonBase{QAccessible::Role::EditableText, activateAction()},
+      _copiable{false}
+{
+}
+
+bool TableCellValueText::attachImpl(TableCellImpl &cellImpl)
+{
+    if(typeid(cellImpl) == typeid(TableCellValueTextImpl))
+    {
+        TableCellValueTextImpl &valueTextImpl = static_cast<TableCellValueTextImpl&>(cellImpl);
+        valueTextImpl.reattach(*this);
+        return true;
+    }
+
+    return false;
+}
+
+TableCellImpl *TableCellValueText::createInterface(TableAttached &table,
+                                                   AccessibleElement &accParent)
+{
+    return new TableCellValueTextImpl{role(), table, *this, accParent};
+}
+
+void TableCellValueText::setValue(const QString &value)
+{
+    if(value != _value)
+    {
+        _value = value;
+        emit valueChanged();
+    }
+}
+
+void TableCellValueText::setCopiable(bool copiable)
+{
+    if(copiable != _copiable)
+    {
+        _copiable = copiable;
+        emit copiableChanged();
     }
 }
 

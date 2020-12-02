@@ -149,6 +149,8 @@ QtObject {
     readonly property string quickConnectingImage: Theme.imagePath + "/dashboard/connect/quick-connect-connecting.png"
     readonly property string quickConnectedImage: Theme.imagePath + "/dashboard/connect/quick-connect-connected.png"
     readonly property string quickConnectFavoriteImage: Theme.imagePath + "/dashboard/connect/quick-connect-favorite.png"
+    readonly property string quickConnectDipBadgeImage: Theme.imagePath + "/dashboard/connect/dip-icon-badge.png"
+    readonly property string quickConnectDipBackgroundImage: Theme.imagePath + "/dashboard/connect/dip-icon-bg.png"
 
     readonly property color settingOnHoverBorderColor: Theme.dark ? "#4cb649" : "#5ddf5a"
     readonly property color settingOnPressBorderColor: Theme.dark ? "#5ddf5a" : "#5ddf5a"

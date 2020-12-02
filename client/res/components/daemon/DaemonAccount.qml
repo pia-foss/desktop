@@ -22,7 +22,6 @@ import PIA.NativeDaemon 1.0
 QtObject {
   readonly property bool loggedIn: NativeDaemon.account.loggedIn
   readonly property string username: NativeDaemon.account.username
-  readonly property string password: NativeDaemon.account.password
   readonly property string token: NativeDaemon.account.token
   readonly property string plan: NativeDaemon.account.plan
   readonly property bool active: NativeDaemon.account.active
@@ -35,14 +34,10 @@ QtObject {
   readonly property double expirationTime: NativeDaemon.account.expirationTime
   readonly property bool expireAlert: NativeDaemon.account.expireAlert
   readonly property bool expired: NativeDaemon.account.expired
-  readonly property string email: NativeDaemon.account.email
-  readonly property string openvpnUsername: NativeDaemon.account.openvpnUsername
-  readonly property string openvpnPassword: NativeDaemon.account.openvpnPassword
-  readonly property string clientId: NativeDaemon.account.clientId
 
   // Human readable plan name
   readonly property string planName: {
-    if (!loggedIn || !username || !token) return '';
+    if (!loggedIn || !username || !NativeDaemon.state.hasAccountToken) return '';
     if (!active) return uiTr("Deactivated");
     switch (plan) {
     case 'monthly': return uiTr("One Month Plan");

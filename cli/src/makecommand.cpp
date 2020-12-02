@@ -27,6 +27,7 @@
 #include "brand.h"
 #include "watchcommand.h"
 #include "authcommand.h"
+#include "dedicatedipcommand.h"
 #include "brand.h"
 #include "backgroundcommand.h"
 
@@ -47,14 +48,15 @@ const QString checkDriverDescription =
 using CommandMap = std::map<QString, std::shared_ptr<CliCommand>>;
 const CommandMap stableCommands
 {
+    {"dedicatedip", std::make_shared<DedicatedIpCommand>()},
+    {"background", std::make_shared<BackgroundCommand>()},
     {"connect", std::make_shared<TrivialRpcCommand>("connectVPN", connectDescription)},
     {"disconnect", std::make_shared<TrivialRpcCommand>("disconnectVPN", disconnectDescription)},
     {"get", std::make_shared<GetCommand>()},
+    {"login", std::make_shared<LoginCommand>()},
+    {"logout", std::make_shared<TrivialRpcCommand>("logout", logoutDescription)},
     {"monitor", std::make_shared<MonitorCommand>()},
     {"resetsettings", std::make_shared<TrivialRpcCommand>("resetSettings", resetSettingsDescription)},
-    {"background", std::make_shared<BackgroundCommand>()},
-    {"logout", std::make_shared<TrivialRpcCommand>("logout", logoutDescription)},
-    {"login", std::make_shared<LoginCommand>()},
     {"set", std::make_shared<SetCommand>()}
 };
 

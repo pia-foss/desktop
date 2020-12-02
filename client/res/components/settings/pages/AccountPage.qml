@@ -35,6 +35,7 @@ Page {
     visible: Daemon.account.loggedIn
     anchors.fill: parent
     anchors.leftMargin: Theme.settings.narrowPageLeftMargin
+    anchors.rightMargin: Theme.settings.narrowPageLeftMargin
     spacing: 6
 
     InputLabel {

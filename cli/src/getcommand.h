@@ -29,7 +29,8 @@
 namespace GetSetType
 {
     extern const QString connectionState, debugLogging, portForward, requestPortForward, protocol,
-                         region, regions, vpnIp, pubIp, daemonState, daemonSettings;
+                         region, regions, vpnIp, pubIp, daemonState, daemonSettings,
+                         daemonData, daemonAccount;
 }
 
 namespace GetSetValue
@@ -38,6 +39,7 @@ namespace GetSetValue
     bool parseBooleanParam(const QString &param);
     extern const QString locationAuto;
     QString getRegionCliName(const QSharedPointer<Location> &pLocation);
+    QString matchSpecifiedLocation(const DaemonState &state, const QString &location);
 }
 
 // Implements the "get" command - gets a value from daemon state/settings

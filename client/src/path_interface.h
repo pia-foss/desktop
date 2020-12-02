@@ -32,8 +32,6 @@ class PathInterface : public QObject
 public:
     Q_INVOKABLE QString daemonLogFile() { return Path::DaemonLogFile; }
     Q_INVOKABLE QString clientLogFile() { return Path::ClientLogFile; }
-    Q_INVOKABLE QString legacyRegionOverride() { return Path::LegacyRegionOverride; }
-    Q_INVOKABLE QString legacyRegionBundle() { return Path::LegacyRegionBundle; }
     Q_INVOKABLE QString modernRegionOverride() { return Path::ModernRegionOverride; }
     Q_INVOKABLE QString modernRegionMetaOverride() { return Path::ModernRegionMetaOverride; }
     Q_INVOKABLE QString modernRegionBundle() { return Path::ModernRegionBundle; }

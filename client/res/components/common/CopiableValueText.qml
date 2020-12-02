@@ -39,9 +39,23 @@ Item {
   property alias text: valueText.text
   property alias label: valueText.label
   property alias color: valueText.color
+  property alias elide: valueText.elide
+
+  // Force the "copy" icon to appear in the keyboard-focus state - used in table
+  // cells when the ordinary keyboard navigation is replaced with table cell
+  // navigation.  Note that the cell must still draw a HighlightCue, this does
+  // not show a focus cue.
+  property bool showKeyboardHighlight: false
 
    // When in a key press, the key that was pressed
   property var inKeyPress: null
+
+  // Take the copy action - invoked directly when this is used in a table cell
+  // by the table cell annotations
+  function copyClicked() {
+    if (copiable)
+      Clipboard.setText(valueText.text)
+  }
 
   implicitWidth: valueText.implicitWidth
   implicitHeight: valueText.implicitHeight
@@ -51,7 +65,10 @@ Item {
     anchors.fill: parent
     NativeAcc.ValueText.copiable: copiable
     rightPadding: image.width + 3
-    activeFocusOnTab: true
+    // Focus only if the accessibility annotation is also present.  (When inside
+    // a table, these annotations are disabled in lieu of the table cell
+    // navigation and annotations.)
+    activeFocusOnTab: !!label
 
     Keys.onPressed: {
       if (KeyUtil.handleButtonKeyEvent(event)) {
@@ -64,7 +81,7 @@ Item {
       if (inKeyPress && inKeyPress === event.key) {
         event.accepted = true
         inKeyPress = null
-        if (copiable) Clipboard.setText(valueText.text)
+        copiableValueText.copyClicked()
       }
     }
   }
@@ -75,14 +92,12 @@ Item {
     hoverEnabled: true
     cursorShape: copiable && containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-    onClicked: {
-      if (copiable) Clipboard.setText(valueText.text)
-    }
+    onClicked: copiableValueText.copyClicked()
   }
 
   Image {
     id: image
-    visible: copiable && (mouseArea.containsMouse || focusCue.show)
+    visible: copiable && (mouseArea.containsMouse || focusCue.show || showKeyboardHighlight)
     source: Theme.dashboard.clipboardImage
     opacity: (mouseArea.containsPress || inKeyPress) ? 1.0 : 0.4
 

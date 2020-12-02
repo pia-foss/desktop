@@ -202,24 +202,12 @@
 #endif
 
 
-// These macros, when placed at the beginning of a file together with
-// a #line directive lets us keep only limited path information in the
-// __FILE__ macro for partial debugging information in release builds.
-//
-// Example:
-// #include "common.h"
-// #line SOURCE_FILE("myfile.cpp")
-//
-// Note: As a practical limitation, the above line must be placed near
-// the beginning of the file.
-//
-#ifdef QT_NO_DEBUG
-#define HEADER_FILE(name) NEXT_LINE(__LINE__) name
-#define SOURCE_FILE(name) NEXT_LINE(__LINE__) name
-#else
+// HEADER_FILE() and SOURCE_FILE() macros were historically used to trim down
+// file paths manually in release builds (to reduce logging verbosity).  These
+// are obsolete, paths are now trimmed by the logger, any instances of these can
+// be deleted on sight.
 #define HEADER_FILE(name) NEXT_LINE(__LINE__) __FILE__
 #define SOURCE_FILE(name) NEXT_LINE(__LINE__) __FILE__
-#endif
 
 #define NEXT_LINE_1 2
 #define NEXT_LINE_2 3

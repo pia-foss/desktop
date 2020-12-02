@@ -22,6 +22,7 @@ import PIA.NativeHelpers 1.0
 import "../client"
 
 QtObject {
+  readonly property bool hasAccountToken: NativeDaemon.state.hasAccountToken
   readonly property bool vpnEnabled: NativeDaemon.state.vpnEnabled
   readonly property string connectionState: NativeDaemon.state.connectionState
   readonly property int usingSlowInterval: NativeDaemon.state.usingSlowInterval
@@ -41,6 +42,7 @@ QtObject {
   readonly property var connectedServer: NativeDaemon.state.connectedServer
   readonly property var availableLocations: NativeDaemon.state.availableLocations
   readonly property var groupedLocations: NativeDaemon.state.groupedLocations
+  readonly property var dedicatedIpLocations: NativeDaemon.state.dedicatedIpLocations
   readonly property var openvpnUdpPortChoices: NativeDaemon.state.openvpnUdpPortChoices
   readonly property var openvpnTcpPortChoices: NativeDaemon.state.openvpnTcpPortChoices
   readonly property var intervalMeasurements: NativeDaemon.state.intervalMeasurements
@@ -61,6 +63,9 @@ QtObject {
   readonly property bool wintunMissing: NativeDaemon.state.wintunMissing
   readonly property string netExtensionState: NativeDaemon.state.netExtensionState
   readonly property bool connectionProblem: NativeDaemon.state.connectionProblem
+  readonly property double dedicatedIpExpiring: NativeDaemon.state.dedicatedIpExpiring
+  readonly property int dedicatedIpDaysRemaining: NativeDaemon.state.dedicatedIpDaysRemaining
+  readonly property double dedicatedIpChanged: NativeDaemon.state.dedicatedIpChanged
   readonly property bool invalidClientExit: NativeDaemon.state.invalidClientExit
   readonly property bool killedClient: NativeDaemon.state.killedClient
   readonly property double hnsdFailing: NativeDaemon.state.hnsdFailing

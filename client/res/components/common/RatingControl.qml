@@ -29,8 +29,7 @@ Item {
   readonly property var uiState: {
     'pending': 0,
     'loading': 1,
-    'success': 2,
-    'error_unknown': 3
+    'error_unknown': 2
   }
 
   property int currentState: uiState.pending
@@ -46,7 +45,11 @@ Item {
         }
         resetRatingTimer.start();
       } else {
-        currentState = uiState.success;
+        // Go back to the pending state, since the rating control will be hidden
+        // once the rating logic handles onRatingFinished().  This really only
+        // matters though if the rating request ends up being shown again due
+        // to a reset for testing.
+        currentState = uiState.pending;
         onRatingFinished(value)
       }
     });

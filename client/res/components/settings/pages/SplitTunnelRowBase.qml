@@ -17,7 +17,10 @@
 // <https://www.gnu.org/licenses/>.
 
 import QtQuick 2.9
-Item {
+import "../../common"
+import "../../theme"
+
+TableRowBase {
   // Indices of the keyboard navigation columns in this row.
   //
   // The keyboard navigation model has three columns: 'app', 'mode', and 'remove':
@@ -55,4 +58,18 @@ Item {
     //: is set to bypass or use the VPN.
     {name: uiTr("VPN DNS Only")}
   ]
+
+  property var accAppCell
+  property var accPathCell
+  property var accModeCell
+  property var accRemoveCell
+
+  Rectangle {
+    anchors.bottom: parent.bottom
+    height: 1
+    color: Theme.settings.splitTunnelItemSeparatorColor
+    opacity: 0.5
+    anchors.left: parent.left
+    anchors.right: parent.right
+  }
 }

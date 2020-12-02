@@ -36,6 +36,14 @@ Item {
   readonly property bool hovered: connectMouseArea.containsMouse
   readonly property string locationName: Client.getFavoriteLocalizedName(location)
 
+  function isOffline(loc) {
+    // Convert a possible auto/<countryCode>
+    // to a real location name (i.e 'best' for that country)
+    var realLocationName = Client.realLocation(loc)
+    var l = Daemon.state.availableLocations[realLocationName]
+    return !l || l.offline;
+  }
+
   width: 43
   height: 40
 
@@ -77,6 +85,7 @@ Item {
     id: flag
     anchors.centerIn: parent
     countryCode: Client.countryFromLocation(location)
+    offline: isOffline(location)
 
     opacity: {
       // Stay 100% opaque when connected or connecting to this location.
@@ -97,6 +106,39 @@ Item {
   property ClientSetValueSetting favoriteSetting: ClientSetValueSetting {
     name: 'favoriteLocations'
     settingValue: location
+  }
+
+  readonly property bool isDedicatedIp: {
+    var loc = Daemon.state.availableLocations[location]
+    return !!(loc && loc.dedicatedIpExpire > 0)
+  }
+
+  // This is the silhouette of the DIP badge rendered in the background color of
+  // the dashboard.  This prevents the flag from showing through the badge when
+  // they're <100% opaque.
+  //
+  // We could alternately group these into a layer and alpha-blend the layer,
+  // but this tweak works well enough to avoid the need to allocate layers for
+  // these buttons.
+  Image {
+    anchors.horizontalCenter: flag.right
+    anchors.verticalCenter: flag.top
+    visible: isDedicatedIp
+    source: Theme.dashboard.quickConnectDipBackgroundImage
+    width: sourceSize.width / 2
+    height: sourceSize.height / 2
+  }
+
+  // DIP badge itself.  Rendered with flag's opacity so it appears to be part
+  // of the flag (changes with hover / select).
+  Image {
+    anchors.horizontalCenter: flag.right
+    anchors.verticalCenter: flag.top
+    visible: isDedicatedIp
+    opacity: flag.opacity
+    source: Theme.dashboard.quickConnectDipBadgeImage
+    width: sourceSize.width / 2
+    height: sourceSize.height / 2
   }
 
   Image {
@@ -147,7 +189,9 @@ Item {
     focusCueForceRound: true
 
     onClicked: {
-      VpnConnection.connectLocation(Client.realLocation(location))
+      if(!isOffline(location)) {
+        VpnConnection.connectLocation(Client.realLocation(location))
+      }
     }
   }
 }

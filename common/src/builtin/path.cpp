@@ -62,11 +62,9 @@ Path Path::UnboundConfigFile;
 Path Path::UnboundDnsStubConfigFile;
 Path Path::WireguardGoExecutable;
 Path Path::WireguardInterfaceFile;
-Path Path::LegacyRegionOverride;
 Path Path::LegacyShadowsocksOverride;
 Path Path::ModernRegionOverride;
 Path Path::ModernRegionMetaOverride;
-Path Path::LegacyRegionBundle;
 Path Path::LegacyShadowsocksBundle;
 Path Path::ModernRegionBundle;
 Path Path::ModernRegionMetaBundle;
@@ -266,11 +264,9 @@ void Path::initializePostApp()
     DaemonHelperIpcSocket = DaemonDataDir / "helper_ipc.sock";
 #endif
 
-    LegacyRegionOverride = DaemonSettingsDir / "region_override.json";
     LegacyShadowsocksOverride = DaemonSettingsDir / "shadowsocks_override.json";
     ModernRegionOverride = DaemonSettingsDir / "modern_regions_override.json";
     ModernRegionMetaOverride = DaemonSettingsDir / "modern_region_meta_override.json";
-    LegacyRegionBundle = ResourceDir / "servers.json";
     LegacyShadowsocksBundle = ResourceDir / "shadowsocks.json";
     ModernRegionBundle = ResourceDir / "modern_servers.json";
     ModernRegionMetaBundle = ResourceDir / "modern_region_meta.json";

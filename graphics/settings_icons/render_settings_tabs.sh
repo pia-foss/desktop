@@ -34,6 +34,6 @@ function copy_tab_icon
     cp ./png_$size/light/$1-tabinactive.png ../../client/res/img/light/settings/$2-inactive.png
 }
 
-for type in connection general help privacy proxy network; do
+for type in connection general help privacy proxy dedicatedip network; do
     copy_tab_icon $type $type
 done

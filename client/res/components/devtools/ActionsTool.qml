@@ -30,64 +30,6 @@ Item {
     anchors.fill: parent
     anchors.margins: 10
     GroupBox {
-      title: "Connect Actions"
-      Layout.fillWidth: true
-      Layout.preferredHeight: 120
-      ColumnLayout {
-        anchors.fill: parent
-        spacing: 2
-        Row {
-          spacing: 5
-          Button {
-            text: "Connect"
-            onClicked:  {
-              Daemon.connectVPN()
-            }
-          }
-          Button {
-            text: "Disconnect"
-            onClicked:  {
-              Daemon.disconnectVPN()
-            }
-          }
-          ComboBox {
-            textRole: "name"
-            currentIndex: {
-
-              switch(Daemon.settings.killswitch) {
-              case 'off': return 0
-              case 'auto': return 1
-              case 'on': return 2
-              }
-            }
-            model: ListModel {
-              ListElement { value: "off"; name: "Killswitch - Off" }
-              ListElement { value: "auto"; name: "Killswitch - Auto" }
-              ListElement { value: "on"; name: "Killswitch - On" }
-            }
-            onActivated: function(index){
-              var key = model.get(index).value
-              console.log("Current Key", key)
-              Daemon.applySettings({'killswitch': key});
-            }
-
-          }
-          Button {
-            text: "Clear recents"
-            onClicked: {
-              Client.applySettings({recentLocations: []})
-            }
-          }
-        }
-        Row {
-          Text {
-            text: "State: " + Daemon.state.connectionState + "  |   Traffic: U " + Daemon.state.bytesSent + " D " + Daemon.state.bytesReceived + "  |  Protocol: " + Daemon.settings.protocol
-          }
-        }
-      }
-    }
-
-    GroupBox {
       title: "Misc"
       Layout.fillWidth: true
       Layout.fillHeight: true
@@ -97,16 +39,6 @@ Item {
         spacing: 2
         Row {
           spacing: 5
-          Text {
-            text: "User: " + Daemon.account.username
-            anchors.verticalCenter: parent.verticalCenter
-          }
-          Button {
-            text: "Reset User"
-            onClicked: {
-              // TODO: Read default user from filesystem and
-            }
-          }
           Button {
             text: "Crash Client(!)"
             onClicked: {
@@ -131,6 +63,12 @@ Item {
             onClicked: {
               Daemon.writeDummyLogs();
               NativeHelpers.writeDummyLogs();
+            }
+          }
+          Button {
+            text: "Refresh Dedicated IPs"
+            onClicked: {
+              Daemon.refreshDedicatedIps()
             }
           }
         }
@@ -175,14 +113,6 @@ Item {
         }
         Row {
           spacing: 5
-          visible: Qt.platform.os === 'osx'
-          Button {
-            text: "Open Security Prefs"
-            onClicked: NativeHelpers.openSecurityPreferencesMac()
-          }
-        }
-        Row {
-          spacing: 5
           Text {
             Layout.fillHeight: true
             visible: Qt.platform.os === 'windows'
@@ -219,10 +149,6 @@ Item {
             onClicked: {
               Daemon.applySettings({"sessionCount": 8, "ratingEnabled": true})
             }
-          }
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: "<b>Restart Client after reset</b>"
           }
         }
 

@@ -77,6 +77,9 @@ module PiaWindows
 
     # Invoke windeployqt on Windows
     def self.winDeploy(qmlDirs, binaryFilePaths)
+        # Sometimes we do need the windeployqt output to see what libraries it
+        # found, etc., but the verbose output also spews a line for every
+        # qml/qmlc file it copies so it's off by default :-/
         args = [Executable::Qt.tool('windeployqt'), '-verbose', '0']
         args += qmlDirs.flat_map{|d| ['--qmldir', File.absolute_path(d)]}
         args += [
@@ -206,7 +209,12 @@ module PiaWindows
 
         # Deploy Qt for the integration tests
         task :integtest_deploy => integtestStage.target do |t|
-            winDeploy([], [File.join(integtestStage.dir, "#{Build::Brand}-integtest.exe")])
+            # clientlib has Qt dependencies of its own, include it here to make
+            # sure we pick those up.  The doc doesn't really indicate that
+            # windeployqt is intended to work on DLLs, but it does work (and
+            # EXEs/DLLs are both just PE executables of course)
+            winDeploy([], [File.join(integtestStage.dir, "#{Build::Brand}-integtest.exe"),
+                           File.join(integtestStage.dir, "#{Build::Brand}-clientlib.dll")])
         end
 
         # Create a ZIP containing the deployed integ tests as the final artifact

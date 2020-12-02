@@ -30,6 +30,8 @@
 #include "brand.h"
 
 #if defined(Q_OS_MACOS)
+#include <sys/types.h>
+#include <sys/sysctl.h>
 #include "mac/kext_client.h"
 #elif defined(Q_OS_LINUX)
 #include "linux/proc_tracker.h"
@@ -520,7 +522,7 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     {
         // Schedule a DNS cache flush since the DNS stub was disabled; important
         // if the user disables the VPN while in this state.
-        _connection->scheduleMaceDnsCacheFlush();
+        _connection->scheduleDnsCacheFlush();
     }
     PFFirewall::setFilterEnabled(QStringLiteral("310.blockDNS"), macBlockDNS, { {"interface", _state.tunnelDeviceName()} });
     PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), macBlockDNS, QStringLiteral("localdns"), localDnsServers);
@@ -614,6 +616,29 @@ QJsonValue PosixDaemon::RPC_installKext()
 }
 
 #ifdef Q_OS_MAC
+QString translationDiagnostic()
+{
+    int syscallRet{0};
+    size_t syscallRetSize{sizeof(syscallRet)};
+    if(sysctlbyname("sysctl.proc_translated", &syscallRet, &syscallRetSize,
+                    nullptr, 0) == -1)
+    {
+        if(errno == ENOENT) // No such syscall, definitely not translated
+            return QStringLiteral("Not translated (ENOENT)");
+        return QStringLiteral("Unknown (errno %1)").arg(errno); // Some other error
+    }
+
+    switch(syscallRet)
+    {
+        case 0:
+            return QStringLiteral("Not translated");
+        case 1:
+            return QStringLiteral("Translated");
+        default:
+            return QStringLiteral("Unknown (returned %1)").arg(syscallRet);
+    }
+}
+
 void scutilDNSDiagnostics(DiagnosticsFile &file)
 {
     QString primaryService = Exec::bashWithOutput("echo 'get State:/Network/Global/IPv4\nd.show' | scutil | awk '/PrimaryService/{print $3}'");
@@ -637,6 +662,10 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 #if defined(Q_OS_MAC)
     file.writeCommand("OS Version", "sw_vers", emptyArgs);
     file.writeText("Overview", diagnosticsOverview());
+    file.writeText("Translation status", translationDiagnostic());
+    // Write uname -a, but it's only of limited use - it lies when executed
+    // under Rosetta 2 and still says the system is x86_64.
+    file.writeCommand("uname -a", "uname", {QStringLiteral("-a")});
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("Routes (netstat -nr)", "netstat", QStringList{QStringLiteral("-nr")});
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});

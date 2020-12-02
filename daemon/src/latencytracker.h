@@ -104,16 +104,13 @@ public:
 public:
     // LatencyTracker begins with measurements stopped - call start() to enable
     // them.
-    // Specify the infrastructure type to determine what type of measurements
-    // are used; this is used for tracing and emitted with newMeasurements().
-    explicit LatencyTracker(ConnectionConfig::Infrastructure infrastructure);
+    LatencyTracker();
 
 signals:
     // This signal is emitted whenever new measurements have been taken.
     //
     // (Note that moc requires redundant qualifications of nested types)
-    void newMeasurements(ConnectionConfig::Infrastructure infrastructure,
-                         const LatencyTracker::Latencies &measurements);
+    void newMeasurements(const LatencyTracker::Latencies &measurements);
 
 private slots:
     //Trigger a new latency measurement
@@ -152,7 +149,6 @@ public:
     void stop();
 
 private:
-    ConnectionConfig::Infrastructure _infrastructure;
     // Measurement batches are executed on this thread.
     RunningWorkerThread _measurementThread;
     //This QTimer triggers when we need to refresh the measurements for all
@@ -217,8 +213,7 @@ public:
 
 public:
     //Create LatencyBatch with the locations that will be checked.
-    LatencyBatch(ConnectionConfig::Infrastructure infrastructure,
-                 const std::vector<QSharedPointer<Location>> &locations,
+    LatencyBatch(const std::vector<QSharedPointer<Location>> &locations,
                  QObject *pParent);
 
 signals:
@@ -241,7 +236,6 @@ private:
     void onBatchElapsed();
 
 private:
-    ConnectionConfig::Infrastructure _infrastructure;
     //This timer measures the elapsed time since the pings were sent, which is
     //used to calculate latency when the echoes are received.
     QElapsedTimer _timeSincePing;

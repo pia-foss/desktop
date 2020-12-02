@@ -104,20 +104,17 @@ QtObject {
   function resetSettings(settings) {
     call("resetSettings", arguments);
   }
-  function login(username, password) {
-    call("login", arguments);
+  function addDedicatedIp(token) {
+    call("addDedicatedIp", arguments);
   }
-  function emailLogin(email) {
-    call("emailLogin", arguments);
+  function removeDedicatedIp(id) {
+    call("removeDedicatedIp", arguments);
   }
-  function submitRating(rating) {
-    call("submitRating", arguments);
+  function dismissDedicatedIpChange() {
+    call("dismissDedicatedIpChange", arguments);
   }
-  function setToken(token) {
-    call("setToken", arguments);
-  }
-  function logout() {
-    call("logout", arguments);
+  function refreshDedicatedIps() {
+    call("refreshDedicatedIps", arguments);
   }
   function connectVPN() {
     call("connectVPN", arguments);
@@ -125,17 +122,14 @@ QtObject {
   function disconnectVPN() {
     call("disconnectVPN", arguments);
   }
+  function startSnooze(timeout) {
+    call ("startSnooze", arguments);
+  }
+  function stopSnooze() {
+    call ("stopSnooze", arguments);
+  }
   function writeDiagnostics () {
     call("writeDiagnostics", arguments);
-  }
-  function refreshUpdate() {
-    call("refreshUpdate", arguments)
-  }
-  function downloadUpdate() {
-    call("downloadUpdate", arguments);
-  }
-  function cancelDownloadUpdate() {
-    call("cancelDownloadUpdate", arguments);
   }
   function writeDummyLogs() {
     call("writeDummyLogs", arguments);
@@ -143,27 +137,51 @@ QtObject {
   function crash() {
     call ("crash", arguments);
   }
+  function refreshUpdate() {
+    call("refreshUpdate", arguments)
+  }
+  function emailLogin(email) {
+    call("emailLogin", arguments);
+  }
+  function setToken(token) {
+    call("setToken", arguments);
+  }
+  function login(username, password) {
+    call("login", arguments);
+  }
+  function retryLogin() {
+    call("retryLogin", arguments);
+  }
+  function logout() {
+    call("logout", arguments);
+  }
+  function downloadUpdate() {
+    call("downloadUpdate", arguments);
+  }
+  function cancelDownloadUpdate() {
+    call("cancelDownloadUpdate", arguments);
+  }
+  function submitRating(rating) {
+    call("submitRating", arguments);
+  }
   function installKext() {
     call ("installKext", arguments);
   }
-  function startSnooze(timeout) {
-    call ("startSnooze", arguments);
-  }
-  function stopSnooze() {
-    call ("stopSnooze", arguments);
-  }
 
-  // Get the name of a location.
+  // Get the translated name of a location.
   // Returns the location's localized name if possible, otherwise the name
-  // provided by the server.
+  // provided by the server list.
+  //
+  // Note that this is not always sufficient to distinguish a location, such as
+  // for Dedicated IP locations, which will have the same name as a normal
+  // location and may have the same name as other Dedicated IP locations.
+  //
+  // When possible, additional details (like dedicated IPs) should be
+  // presented as context in the UI.  If a complete text name is the only
+  // option, Client.getDetailedLocationName() can be used to get a complete text
+  // name uniquely identifying the location.
   function getLocationName(loc) {
     return loc ? state.translateName(loc.name) : ''
-  }
-
-  // Get the name of a location from a location ID.
-  function getLocationIdName(locId) {
-    var loc = state.availableLocations[locId]
-    return loc ? getLocationName(loc) : locId
   }
 
   // Get the localized name of a country by country code.

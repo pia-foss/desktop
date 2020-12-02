@@ -426,7 +426,7 @@ FocusScope {
 
   function resetCreds() {
     loginInput.text = Daemon.account.username
-    passwordInput.text = Daemon.account.password
+    passwordInput.text = ""
   }
 
   // If the daemon updates its credentials (mainly for a logout), reset the
@@ -434,9 +434,6 @@ FocusScope {
   Connections {
     target: Daemon.account
     function onUsernameChanged() {
-      resetCreds()
-    }
-    function onPasswordChanged() {
       resetCreds()
     }
   }

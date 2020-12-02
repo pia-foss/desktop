@@ -26,25 +26,33 @@ namespace samples
 {
     const auto locationJson = QJsonDocument::fromJson(R"(
 {
-  "nz": {
-    "name": "New Zealand",
-    "country": "NZ",
-    "dns": "nz.privateinternetaccess.com",
-    "port_forward": false,
-    "ping": "103.231.91.35:8888",
-    "geo": false,
-    "serial": "dummy",
-    "openvpn_udp": {
-      "best": "103.231.91.35:8080"
-    },
-    "openvpn_tcp": {
-      "best": "103.231.91.35:500"
-    },
-    "ips": []
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [500, 1003,1004] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 1001,1002] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
   },
-  "info":{"vpn_ports":{"udp":[1001,1002],"tcp":[1003,1004]}}
+  "regions": [
+    {
+      "id": "nz",
+      "name": "New Zealand",
+      "country": "NZ",
+      "auto_region": true,
+      "dns": "nz.privacy.network",
+      "port_forward": true,
+      "geo": false,
+      "servers": {
+        "ovpnudp": [{ "ip": "43.250.207.86", "cn": "newzealand403" }],
+        "ovpntcp": [{ "ip": "43.250.207.85", "cn": "newzealand403" }],
+        "ikev2": [{ "ip": "43.250.207.85", "cn": "newzealand403" }],
+        "wg": [{ "ip": "43.250.207.85", "cn": "newzealand403" }]
+      }
+    }
+  ]
 }
-   )").object();
+)").object();
 
     const auto emptyJson = QJsonDocument::fromJson("{}").object();
 }
@@ -77,7 +85,7 @@ private slots:
 
     void testPreferred()
     {
-        LocationsById locs{buildLegacyLocations({}, samples::locationJson, samples::emptyJson)};
+        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {})};
         Location &location = *locs.at(QStringLiteral("nz"));
 
         TransportSelector transportSelector;
@@ -103,7 +111,7 @@ private slots:
         QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
 
-        LocationsById locs{buildLegacyLocations({}, samples::locationJson, samples::emptyJson)};
+        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {})};
         Location &location = *locs.at(QStringLiteral("nz"));
 
         // We don't want to wait before trying an alternate transport

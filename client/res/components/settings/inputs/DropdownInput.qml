@@ -51,6 +51,7 @@ FocusScope {
   property string warning
   // Show the info tip popup below (true, default), or above (false)
   property bool tipBelow: true
+  property alias popupMaxWidth: control.popupMaxWidth
 
   readonly property var currentValue: setting ? setting.currentValue : undefined
   readonly property int labelHeight: label === "" ? 0 : text.contentHeight + 5
@@ -109,12 +110,10 @@ FocusScope {
     // change), recalculate the current selection
     onModelChanged: control.currentIndex = mapValueToIndex(currentValue)
 
-    implicitWidth: 200
+    implicitWidth: 230
     implicitHeight: 24
 
-    NativeAcc.DropDownButton.name: label
-    NativeAcc.DropDownButton.value: displayText
-    NativeAcc.DropDownButton.onActivated: control.showPopup()
+    accessibleName: label
 
     enabled: root.enabled
 

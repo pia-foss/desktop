@@ -24,6 +24,7 @@
 
 #include "tablecellbase.h"
 #include "tablecellimpl.h"
+#include "valuetext.h"  // Shared "copy" action name and description
 
 namespace NativeAcc {
 
@@ -51,8 +52,9 @@ public:
 private:
     TableCellButtonBase *buttonBaseDef() const;
 
-    // Overrides of QAccessibleInterface
-    virtual void *interface_cast(QAccessible::InterfaceType type) override;
+public:
+    // Overrides of TableCellImpl
+    QAccessibleActionInterface *actionInterface() override {return this;}
 
     // Implementation of QAccessibleActionInterface
     virtual QStringList actionNames() const override;
@@ -176,6 +178,100 @@ signals:
 
 private:
     bool _checked;
+};
+
+// Table value text.  Because this provides the "copy" action, it's implemented
+// with TableCellButtonBase in order to handle the action.  It's not a button
+// in any other way, it uses the EditableText role.
+//
+// This has some limitations on the Windows UIA backend like
+// TableCellCheckButton; in particular we have to use the "press" action instead
+// of the custom "copy" action.
+class TableCellValueText;
+class TableCellValueTextImpl : public TableCellButtonBaseImpl,
+                               public QAccessibleTextInterface
+{
+    Q_OBJECT
+
+public:
+    TableCellValueTextImpl(QAccessible::Role role,
+                           TableAttached &parentTable,
+                           TableCellValueText &definition,
+                           AccessibleElement &accParent);
+
+private:
+    TableCellValueText *valueTextDef() const;
+    void onValueChanged();
+    void onCopiableChanged();
+
+public:
+    // QAccessibleInterface overrides
+    virtual QString text(QAccessible::Text t) const override;
+    virtual QAccessibleTextInterface *textInterface() override {return this;}
+
+    // QAccessibleActionInterface overrides
+    virtual QStringList actionNames() const override;
+    virtual QString localizedActionDescription(const QString &actionName) const override;
+    virtual QString localizedActionName(const QString &actionName) const override;
+
+    // Implementation of QAccessibleTextInterface
+    virtual void addSelection(int startOffset, int endOffset) override;
+    virtual QString attributes(int offset, int *startOffset, int *endOffset) const override;
+    virtual int characterCount() const override;
+    virtual QRect characterRect(int offset) const override;
+    virtual int cursorPosition() const override;
+    virtual int offsetAtPoint(const QPoint &point) const override;
+    virtual void removeSelection(int selectionIndex) override;
+    virtual void scrollToSubstring(int startIndex, int endIndex) override;
+    virtual void selection(int selectionIndex, int *startOffset, int *endOffset) const override;
+    virtual int selectionCount() const override;
+    virtual void setCursorPosition(int position) override;
+    virtual void setSelection(int selectionIndex, int startOffset, int endOffset) override;
+    virtual QString text(int startOffset, int endOffset) const override;
+    // text[After|At|Before]Offset() provided by QAccessibleTextInterface
+
+public:
+    void reattach(TableCellValueText &definition);
+
+private:
+    // The last value is needed to report "text update" events.
+    QString _value;
+    // Needed to report actions and check for a change when a new definition is
+    // reattached
+    bool _copiable;
+};
+
+class TableCellValueText : public TableCellButtonBase
+{
+    Q_OBJECT
+    Q_PROPERTY(QString value READ value WRITE setValue NOTIFY valueChanged)
+    Q_PROPERTY(bool copiable READ copiable WRITE setCopiable NOTIFY copiableChanged)
+
+private:
+    static const QString &activateAction();
+
+public:
+    TableCellValueText();
+
+protected:
+    virtual bool attachImpl(TableCellImpl &cellImpl) override;
+
+public:
+    virtual TableCellImpl *createInterface(TableAttached &table,
+                                           AccessibleElement &accParent) override;
+
+    QString value() const {return _value;}
+    void setValue(const QString &value);
+    bool copiable() const {return _copiable;}
+    void setCopiable(bool copiable);
+
+signals:
+    void valueChanged();
+    void copiableChanged();
+
+private:
+    QString _value;
+    bool _copiable;
 };
 
 /*** Column ***/

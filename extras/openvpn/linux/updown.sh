@@ -86,6 +86,18 @@ while [ "$#" -gt 0 ] && [ -z "$pia_args_done" ]; do
       shift
       dns_servers="$(echo $1 | tr : \ )"
       ;;
+    "--path")
+      shift
+      # OpenVPN discards PATH when invoking this script, due to setting up a
+      # "clean" environment and then applying its own variables.  This seems to
+      # be an oversight, but it prevents us from finding executables like 'ip'
+      # when they aren't in the default PATH that bash guesses.
+      #
+      # We can't easily set variables in the script environment through
+      # OpenVPN's interface, so instead this is explicitly passed to the script
+      # as an argument.
+      export PATH="$1"
+      ;;
     "--")
       pia_args_done=1
       ;;

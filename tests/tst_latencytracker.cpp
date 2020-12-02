@@ -20,6 +20,7 @@
 #include "common/src/locations.h"
 #include <QtTest>
 #include <cassert>
+#include <unordered_set>
 
 namespace
 {
@@ -31,60 +32,6 @@ namespace
     const QHostAddress localhost{QHostAddress::SpecialAddress::LocalHost};
 }
 
-//ReceivedPing describes a ping received by MockPingServers.  The
-//receivedPing signal is emitted with a ReceivedPing object, which can be
-//used to send the echo for the ping.
-//
-//ReceivedPing references a QUdpSocket owned by MockPingServers, so it must
-//not outlive the MockPingServers.
-class ReceivedPing
-{
-public:
-    //QMetaType requires the type to have a default constructor.  However,
-    //this constructor would violate ReceivedPing's invariants that
-    //_pServerSocket and _pLocation are set, so it always throws.  It
-    //shouldn't ever be called by these tests.
-    ReceivedPing()
-    {
-        throw std::logic_error{"ReceivedPing can't be default-constructed"};
-    }
-
-    ReceivedPing(QUdpSocket *pServerSocket, QHostAddress remoteAddress,
-                 quint16 remotePort,
-                 QSharedPointer<Location> pLocation)
-        : _pServerSocket{pServerSocket},
-          _remoteAddress{std::move(remoteAddress)},
-          _remotePort{remotePort},
-          _pLocation{std::move(pLocation)}
-    {
-        Q_ASSERT(_pServerSocket);
-        Q_ASSERT(_pLocation);
-    }
-
-public:
-    //Get the server address that was pinged
-    HostPortKey getServerAddress() const
-    {
-        return {_pServerSocket->localAddress(), _pServerSocket->localPort()};
-    }
-
-    //Echo this ping back to the sender
-    void echo() const {_pServerSocket->writeDatagram({1, 0x61}, _remoteAddress, _remotePort);}
-
-    //Get the location ID of the server that was pinged
-    QString getLocationId() const {return _pLocation->id();}
-
-private:
-    //The UDP socket (owned by MockPingServers) that was pinged.  Always valid
-    QUdpSocket *_pServerSocket;
-    //The remote address where the ping originated
-    QHostAddress _remoteAddress;
-    //The remote port where the ping originated
-    quint16 _remotePort;
-    //The ServerLocation that describes this mock server.  Always valid
-    QSharedPointer<Location> _pLocation;
-};
-
 class MockPingServers : public QObject
 {
     Q_OBJECT
@@ -92,103 +39,57 @@ class MockPingServers : public QObject
 public:
     MockPingServers()
     {
-        //Create some mock servers to listen for pings from LatencyTracker
-        _mockPingServers.reserve(MockPingServerCount);
+        // Create some mock servers to listen for pings from LatencyTracker
         _mockServerList.reserve(MockPingServerCount);
-        while(_mockPingServers.size() < MockPingServerCount)
+        while(_mockPingLocations.size() < MockPingServerCount)
         {
-            auto pServerSocket = new QUdpSocket{this};
-            _mockPingServers.push_back(pServerSocket);
-            pServerSocket->bind(localhost);
-
             QSharedPointer<Location> pLocation{new Location{}};
 
-            //Fill in the mock ServerLocaiton - most of these fields do not
-            //matter, but the ping address must be the actual address of the
-            //socked opened above.
+            // Fill in the mock ServerLocation - most of these fields do not
+            // matter, just add any VPN server with the loopback address so it
+            // will be selected for ICMP latency measurements.
             auto serverId = QStringLiteral("mock-server-%1").arg(_mockServerList.size());
             pLocation->id(serverId);
             pLocation->name(serverId);
             pLocation->country(QStringLiteral("US"));
             pLocation->portForward(false);
-            pLocation->servers({buildLegacyServer(QStringLiteral("127.0.0.1"),
-                                                  QStringLiteral("n/a"),
-                                                  Service::Latency,
-                                                  {pServerSocket->localPort()})});
+            Server mockServer;
+            mockServer.ip(QStringLiteral("127.0.0.%1").arg(_mockServerList.size()+1));
+            mockServer.commonName("n/a");
+            mockServer.wireguardPorts({1337});  // Indicates this has the WireGuard service
+            pLocation->servers({std::move(mockServer)});
 
             _mockServerList[pLocation->id()] = pLocation;
             _mockPingLocations.push_back(pLocation);
-
-            connect(pServerSocket, &QUdpSocket::readyRead, this,
-                    [=](){onDatagramReady(pServerSocket, pLocation);});
         }
     }
 
-signals:
-    void receivedPing(ReceivedPing ping);
-
-private slots:
-    void onDatagramReady(QUdpSocket *pServerSocket,
-                         QSharedPointer<Location> pLocation)
-    {
-        QHostAddress remoteHost;
-        quint16 remotePort;
-        if(pServerSocket->readDatagram(nullptr, 0, &remoteHost, &remotePort) < 0)
-            return; //Read failed, nothing to do
-
-        emit receivedPing({pServerSocket, remoteHost, remotePort,
-                           std::move(pLocation)});
-    }
-
 public:
-    //Get a ServerLocationList describing the mock servers.  (Used to pass the
-    //mock servers to LatencyTracker.)
+    // Get a ServerLocationList describing the mock servers.  (Used to pass the
+    // mock servers to LatencyTracker.)
     const LocationsById &mockServerList() const {return _mockServerList;}
 
     // Get a vector of locations from the mock servers.  (Used to pass the mock
     // servers to LatencyBatch.)
     const std::vector<QSharedPointer<Location>> &mockPingLocations() const {return _mockPingLocations;}
 
-    //Get a set of the the server socket addresses - used by unit tests to
-    //verify that each server was pinged, etc.
-    QSet<HostPortKey> getServerAddresses() const
+    // Get a set of all mock location IDs - used by unit tests to keep track
+    // of the measurements that have been emitted
+    std::unordered_set<QString> mockLocationIds() const
     {
-        QSet<HostPortKey> serverAddresses;
-        serverAddresses.reserve(_mockPingServers.size());
-        for(const auto &pServerSocket : _mockPingServers)
+        std::unordered_set<QString> ids;
+        for(const auto &pLoc : _mockPingLocations)
         {
-            serverAddresses.insert({pServerSocket->localAddress(),
-                                    pServerSocket->localPort()});
+            Q_ASSERT(pLoc); // Class invariant
+            ids.emplace(pLoc->id());
         }
-
-        return serverAddresses;
+        return ids;
     }
 
 private:
-    QVector<QUdpSocket*> _mockPingServers;
     LocationsById _mockServerList;
     std::vector<QSharedPointer<Location>> _mockPingLocations;
 };
-
-class AutoEcho : public QObject
-{
-    Q_OBJECT
-
-public:
-    AutoEcho(MockPingServers &mockServers)
-    {
-        connect(&mockServers, &MockPingServers::receivedPing, this,
-                [](const auto &receivedPing){receivedPing.echo();});
-    }
-};
-
-//Required to extract ReceivedPings and Latencies from QVariants captured by
-//QSignalSpy
-Q_DECLARE_METATYPE(ReceivedPing);
-namespace
-{
-    RegisterMetaType<ReceivedPing> rxPingMetaType;
-}
 
 // LatencyBatch and LatencyTracker batch their measurements, but the batching is
 // timing-dependent.  Using QSignalSpy on the batched measurement signals is
@@ -215,10 +116,7 @@ private slots:
 MeasurementSplitter::MeasurementSplitter(LatencyTracker &tracker)
 {
     connect(&tracker, &LatencyTracker::newMeasurements, this,
-            [this](ConnectionConfig::Infrastructure, const LatencyTracker::Latencies &measurements)
-            {
-                onNewMeasurements(measurements);
-            });
+            &MeasurementSplitter::onNewMeasurements);
 }
 
 MeasurementSplitter::MeasurementSplitter(LatencyBatch &batch)
@@ -242,164 +140,139 @@ private slots:
     //emits latency measurements when the replies are sent
     void locationPings()
     {
-        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
+        LatencyTracker tracker{};
         MeasurementSplitter splitter{tracker};
         tracker.start();
 
-        //Watch for pings to be sent to all of the mock servers
-        QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
+        auto pendingLocations = _mockServers.mockLocationIds();
 
+        // Send the pings and expect latency measurements
+        QSignalSpy latencySpy{&splitter, &MeasurementSplitter::newMeasurement};
         tracker.updateLocations(_mockServers.mockServerList());
 
-        auto pendingServers = _mockServers.getServerAddresses();
-        //Wait for a packet to be emitted for each server.  Note that
-        //pingSpy.wait() can return after more than one signal has occurred, so
-        //we can't simply call wait() 4 times, we have to actually wait until
-        //4 signals have occurred.
-        while(pingSpy.size() < MockPingServerCount)
+        while(!pendingLocations.empty())
         {
-            QVERIFY(pingSpy.wait());
-            qDebug() << "Received" << pingSpy.size() << "pings so far";
-        }
-
-        for(const auto &pingSignal : pingSpy)
-        {
-            //Remove this from the pending pings.  Verify that something was
-            //removed (we shouldn't receive any duplicates, and we shouldn't
-            //receive any unsolicited pings)
-            const auto &receivedPing = pingSignal[0].value<ReceivedPing>();
-            QVERIFY(pendingServers.remove(receivedPing.getServerAddress()));
-            qDebug() << "Received expected ping to" << receivedPing.getLocationId();
-        }
-
-        //Now send the replies and expect latency measurements
-        QSignalSpy latencySpy{&splitter, &MeasurementSplitter::newMeasurement};
-
-        for(const auto &ping : pingSpy)
-        {
-            const auto &receivedPing = ping[0].value<ReceivedPing>();
-            receivedPing.echo();
             QVERIFY(latencySpy.wait());
-            const auto &latencyArgs = latencySpy.takeFirst();
-            QCOMPARE(latencyArgs[0].toString(), receivedPing.getLocationId());
+            // The latency spy may trigger after more than one signal was
+            // emitted
+            while(!latencySpy.isEmpty())
+            {
+                const auto &signalArgs = latencySpy.takeFirst();
+                const auto &locId = signalArgs[0].toString();
+                // Can't emit the same location more than once
+                QVERIFY(pendingLocations.erase(locId) == 1);
+            }
         }
     }
 
-    //Verify that location updates with new locations ping the new locations
-    //immediately
+    // Verify that location updates with new locations ping the new locations
+    // immediately
     void newLocations()
     {
-        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
+        LatencyTracker tracker{};
         MeasurementSplitter splitter{tracker};
         tracker.start();
 
         //Pass in the first three locations initially, echo all of these pings
         {
-            AutoEcho autoEcho{_mockServers};
             auto initialLocations = _mockServers.mockServerList();
-            //Remove a server so we can add it later
+            // Remove a server so we can add it later
             initialLocations.erase(QStringLiteral("mock-server-0"));
 
-            //Wait for all of the measurements to be emitted
+            // Wait for all of the measurements to be emitted
             QSignalSpy initialLatencySpy{&splitter, &MeasurementSplitter::newMeasurement};
             tracker.updateLocations(initialLocations);
             while(initialLatencySpy.size() < MockPingServerCount-1)
                 QVERIFY(initialLatencySpy.wait());
         }
 
-        //Now update with a different set of locations.  Add in the location we
-        //removed above (which should trigger an immediate measurement), and
-        //delete a different location (which should not trigger anything).
+        // Now update with a different set of locations.  Add in the location we
+        // removed above (which should trigger an immediate measurement), and
+        // delete a different location (which should not trigger anything).
         auto updatedLocations = _mockServers.mockServerList();
         updatedLocations.erase(QStringLiteral("mock-server-1"));
-
-        QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
         tracker.updateLocations(updatedLocations);
-        QVERIFY(pingSpy.wait());
-        const auto &receivedPing = pingSpy.front()[0].value<ReceivedPing>();
-        QCOMPARE(receivedPing.getLocationId(), QStringLiteral("mock-server-0"));
 
-        //Echo and ensure that a measurement is emitted
+        // We get exactly one measurement
         QSignalSpy latencySpy{&splitter, &MeasurementSplitter::newMeasurement};
-        receivedPing.echo();
         QVERIFY(latencySpy.wait());
-        QCOMPARE(latencySpy.front()[0].toString(), receivedPing.getLocationId());
+        // Wait to make sure we don't get any more measurements that weren't
+        // grouped by the spy.  These are localhost pings, so we shouldn't have
+        // to wait more than a few ms.
+        QVERIFY(!latencySpy.wait(100));
+
+        // We should have gotten exactly one measurement
+        QVERIFY(latencySpy.size() == 1);
+        // That measurement should be for the one server we added
+        const auto &args = latencySpy.takeFirst();
+        const auto &id = args[0].toString();
+        QCOMPARE(id, QStringLiteral("mock-server-0"));
     }
 
     //Verify that new locations created before measurements are started will be
     //measured after measurements are enabled
     void delayedNewLocations()
     {
-        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
+        LatencyTracker tracker{};
         MeasurementSplitter splitter{tracker};
 
-        QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
         QSignalSpy measurementSpy{&splitter, &MeasurementSplitter::newMeasurement};
 
         tracker.updateLocations(_mockServers.mockServerList());
 
-        //This wait *should* time out - we don't expect pings to happen yet.
-        //We need to enter a message loop here to be sure, otherwise the events
-        //would be queued up anyway, and we couldn't tell whether they occurred
-        //before or after the call to start().
-        QVERIFY(!pingSpy.wait(2000));
+        // This wait *should* time out - we don't expect pings to happen yet.
+        // We need to enter a message loop here to be sure, otherwise the events
+        // would be queued up anyway, and we couldn't tell whether they occurred
+        // before or after the call to start().
+        QVERIFY(!measurementSpy.wait(2000));
 
-        AutoEcho autoEcho{_mockServers};
-        //Now, start measurements.  This should emit the pings and measurements
-        //now
+        // Now, start measurements.  This should emit the pings and measurements
+        // now
         tracker.start();
         while(measurementSpy.size() < MockPingServerCount)
         {
             QVERIFY(measurementSpy.wait());
         }
-        QCOMPARE(pingSpy.size(), MockPingServerCount);
     }
 
     //If a location is added and deleted again while stopped, no ping should be
     //emitted for it when we start measurements.
     void deletionWhileStopped()
     {
-        LatencyTracker tracker{ConnectionConfig::Infrastructure::Current};
+        LatencyTracker tracker{};
         MeasurementSplitter splitter{tracker};
         tracker.start();
-
-        AutoEcho autoEcho{_mockServers};
 
         QSignalSpy measurementSpy{&splitter, &MeasurementSplitter::newMeasurement};
 
         auto initialLocations = _mockServers.mockServerList();
-        //Delete a location
+        // Delete a location
         initialLocations.erase(QStringLiteral("mock-server-0"));
         tracker.updateLocations(initialLocations);
 
-        //Expect 3 measurements
+        // Expect 3 measurements
         while(measurementSpy.size() < MockPingServerCount-1)
             QVERIFY(measurementSpy.wait());
         measurementSpy.clear();
 
-        //Stop measurements
+        // Stop measurements
         tracker.stop();
-        //Add and delete the other location
+        // Add and delete the other location
         tracker.updateLocations(_mockServers.mockServerList());
         tracker.updateLocations(initialLocations);
 
-        //Start notifications again.  We don't expect to get any pings or
-        //measurements, so this wait *should* time out
-        QSignalSpy pingSpy{&_mockServers, &MockPingServers::receivedPing};
+        // Start notifications again.  We don't expect to get any pings or
+        // measurements, so this wait *should* time out
         QVERIFY(!measurementSpy.wait(2000));
-        QCOMPARE(pingSpy.size(), 0);
     }
 
     //Verify that a LatencyBatch is cleaned up properly under normal
     //circumstances (all addresses are valid and respond)
     void normalCleanup()
     {
-        AutoEcho autoEcho{_mockServers};
-
         //Create a LatencyBatch with these ping locations, then verify that it
         //destroys itself.
-        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
-                                     _mockServers.mockPingLocations(), this}};
+        auto pBatch{new LatencyBatch{_mockServers.mockPingLocations(), this}};
         MeasurementSplitter splitter{*pBatch};
         QSignalSpy measurementSpy{&splitter, &MeasurementSplitter::newMeasurement};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
@@ -411,9 +284,9 @@ private slots:
         QCOMPARE(measurementSpy.size(), MockPingServerCount);
     }
 
-    //Verify that a LatencyBatch destroys itself correctly when none of the
-    //addresses given are valid.  (It should be destroyed immediately, not after
-    //the measurement timeout.)
+    // Verify that a LatencyBatch destroys itself correctly when none of the
+    // addresses given are valid.  (It should be destroyed immediately, not after
+    // the measurement timeout.)
     void invalidCleanup()
     {
         //Bogus locations - no latency servers, unparseable addresses
@@ -422,33 +295,49 @@ private slots:
         pBogusAddr->name(QStringLiteral("mock-bogus-addr"));
         pBogusAddr->country(QStringLiteral("US"));
         pBogusAddr->portForward(false);
-        pBogusAddr->servers({buildLegacyServer(QStringLiteral("bogus_address"),
-                                               QStringLiteral("n/a"),
-                                               Service::Latency, {8888})});
+        Server mockServer;
+        mockServer.ip(QStringLiteral("bogus_address"));
+        mockServer.commonName("n/a");
+        mockServer.wireguardPorts({1337});
+        pBogusAddr->servers({std::move(mockServer)});
         QSharedPointer<Location> pNoServers{new Location{}};
         pBogusAddr->id(QStringLiteral("mock-no-servers"));
         pBogusAddr->name(QStringLiteral("mock-no-servers"));
         pBogusAddr->country(QStringLiteral("US"));
         pBogusAddr->portForward(false);
 
-        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
-                                     {pBogusAddr, pNoServers}, this}};
+        auto pBatch{new LatencyBatch{{pBogusAddr, pNoServers}, this}};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
 
-        //If this wait times out, the LatencyBatch probably waited for the
-        //measurement timeout to elapse instead of destroying itself
-        //immediately.
+        // If this wait times out, the LatencyBatch probably waited for the
+        // measurement timeout to elapse instead of destroying itself
+        // immediately.
         destroySpy.wait(1000);
     }
 
-    //Verify that a LatencyBatch destroys itself after the timeout interval if
-    //any of the servers never respond
+    // Verify that a LatencyBatch destroys itself after the timeout interval if
+    // any of the servers never respond
     void unresponsiveCleanup()
     {
-        //Note that we're not creating an AutoEcho and not calling echo(); the
-        //servers will not respond at all.
-        auto pBatch{new LatencyBatch{ConnectionConfig::Infrastructure::Current,
-                                     _mockServers.mockPingLocations(), this}};
+        // Prevent responses from being received by using bogus servers with
+        // valid but unreachable IP addresses.
+        std::vector<QSharedPointer<Location>> mockPingLocations;
+        for(int i=0; i<MockPingServerCount; ++i)
+        {
+            QSharedPointer<Location> pBogusAddr{new Location{}};
+            pBogusAddr->id(QStringLiteral("mock-bogus-addr-%1").arg(i));
+            pBogusAddr->name(QStringLiteral("mock-bogus-addr-%1").arg(i));
+            pBogusAddr->country(QStringLiteral("US"));
+            pBogusAddr->portForward(false);
+            Server mockServer;
+            // IP in documentation range
+            mockServer.ip(QStringLiteral("192.0.2.%1").arg(i));
+            mockServer.commonName("n/a");
+            mockServer.wireguardPorts({1337});
+            pBogusAddr->servers({std::move(mockServer)});
+            mockPingLocations.push_back(std::move(pBogusAddr));
+        }
+        auto pBatch{new LatencyBatch{mockPingLocations, this}};
         QSignalSpy measurementSpy{pBatch, &LatencyBatch::newMeasurements};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
 

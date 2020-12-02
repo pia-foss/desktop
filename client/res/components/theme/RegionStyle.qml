@@ -35,12 +35,15 @@ QtObject {
     readonly property color searchBarBackground : Theme.dark ? "#22252e" : "#d7d8d9"
     readonly property color searchBarTextColor: Theme.dark ? "#fff" : "#323642"
     readonly property color autoRegionSublabelColor: "#889099"
+    readonly property color dipRegionSublabelColor: "#889099"
     readonly property string favoriteUnselectedImage: Theme.imagePath + "/dashboard/regions/heart-unselected.png"
     readonly property string favoriteHoverImage: Theme.imagePath + "/dashboard/regions/heart-hover.png"
     readonly property string favoriteSelectedImage: Theme.imagePathCommon + "/dashboard/regions/heart-selected.png"
+    readonly property string offlineRegionImage: Theme.imagePathCommon + "/dashboard/regions/offline-icon.png"
 
     readonly property int headerTextPx: 12
     readonly property int labelTextPx: 13 // Group or standalone region
     readonly property int sublabelTextPx: 12
     readonly property int latencyTextPx: 12 // Nested region in group
+    readonly property int tagTextPx: 9 // Tags, like "Dedicated IP"
 }

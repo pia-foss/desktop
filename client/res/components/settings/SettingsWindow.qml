@@ -29,6 +29,7 @@ import "qrc:/javascript/util.js" as Util
 import "../theme"
 import "../common"
 import "../core"
+import "../daemon"
 
 import './tabs'
 import "./pages"
@@ -39,15 +40,10 @@ SecondaryWindow {
   contentLogicalWidth: tabLayout.item.implicitWidth
   contentLogicalHeight: tabLayout.item.implicitHeight
 
-  // Symbolic constants for the pages in 'pages', to be used with selectPage()
-  property var page: {
-    'general': 0,
-    'account': 1,
-    'privacy': 2,
-    'network': 3,
-    'connection': 4,
-    'help': 5,
-  }
+  // The "dedicated IP" page currently is shown based on a feature toggle, or
+  // if any dedicated IPs have already been added.
+  readonly property bool showDedicatedIp: Daemon.data.flags.includes("dedicated_ip") ||
+    Daemon.state.dedicatedIpLocations.length > 0
 
   // Limit InfoTips' texts to this width (both because the settings window is
   // pretty wide, and so it's consistent for both horizontal and vertical
@@ -71,6 +67,7 @@ SecondaryWindow {
     'network': QT_TR_NOOP("Network", 'setting-title'),
     'connection': QT_TR_NOOP("Connection", 'setting-title'),
     'proxy': QT_TR_NOOP("Proxy", 'setting-title'),
+    'dedicatedip': QT_TR_NOOP("Dedicated IP", 'setting-title'),
     'help': QT_TR_NOOP("Help", 'setting-title'),
   }
   readonly property var pageHeadings: {
@@ -80,38 +77,52 @@ SecondaryWindow {
     'network': QT_TR_NOOP("Network Preferences", 'setting-heading'),
     'connection': QT_TR_NOOP("Connection Preferences", 'setting-heading'),
     'proxy': QT_TR_NOOP("Proxy Preferences", 'setting-heading'),
+    'dedicatedip': QT_TR_NOOP("Dedicated IP Preferences", 'setting-heading'),
     'help': QT_TR_NOOP("Help", 'setting-heading'),
   }
-  property var pages: [
-    {
-      name: 'general',
-      component: "GeneralPage.qml"
-    },
-    {
-      name: 'account',
-      component: "AccountPage.qml"
-    },
-    {
-      name: 'privacy',
-      component: "PrivacyPage.qml"
-    },
-    {
-      name: 'network',
-      component: "NetworkPage.qml"
-    },
-    {
-      name: 'connection',
-      component: "ConnectionPage.qml"
-    },
-    {
-      name: 'proxy',
-      component: "ProxyPage.qml"
-    },
-    {
+  property var pages: {
+    var p = [
+      {
+        name: 'general',
+        component: "GeneralPage.qml"
+      },
+      {
+        name: 'account',
+        component: "AccountPage.qml"
+      },
+      {
+        name: 'privacy',
+        component: "PrivacyPage.qml"
+      },
+      {
+        name: 'network',
+        component: "NetworkPage.qml"
+      },
+      {
+        name: 'connection',
+        component: "ConnectionPage.qml"
+      },
+      {
+        name: 'proxy',
+        component: "ProxyPage.qml"
+      }
+    ]
+
+    if(showDedicatedIp) {
+      p.push({
+        name: 'dedicatedip',
+        component: "DedicatedIpPage.qml"
+      })
+    }
+
+    // Help is always last
+    p.push({
       name: 'help',
       component: "HelpPage.qml"
-    }
-  ]
+    })
+
+    return p
+  }
 
   // As usual, the call to uiTr() must occur in the same context as
   // QT_TR_NOOP() in order to translate correctly, these functions are passed
@@ -123,8 +134,10 @@ SecondaryWindow {
     return uiTr(pageHeadings[pageId], 'setting-heading')
   }
 
-  function selectPage(index) {
-    tabLayout.item.selectPage(index)
+  function selectPage(id) {
+    var index = pages.findIndex(page => page.name === id)
+    if(index >= 0)
+      tabLayout.item.selectPage(index)
   }
 
   property var currentAlert
@@ -247,23 +260,23 @@ SecondaryWindow {
   Connections {
     target: ClientNotifications
     function onShowPrivacyPage(){
-      selectPage(page.privacy)
+      selectPage('privacy')
       showSettings()
     }
     function onShowNetworkPage() {
-      selectPage(page.network)
+      selectPage('network')
       showSettings()
     }
     function onShowConnectionPage() {
-      selectPage(page.connection)
+      selectPage('connection')
       showSettings()
     }
     function onShowHelpPage() {
-      selectPage(page.help)
+      selectPage('help')
       showSettings()
     }
-    function onShowHelpAlert() {
-      selectPage(page.help)
+    function onShowHelpAlert(msg, title, level) {
+      selectPage('help')
       showSettings()
       alert(msg, title, level)
     }

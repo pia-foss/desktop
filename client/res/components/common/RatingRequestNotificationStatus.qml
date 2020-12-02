@@ -31,13 +31,6 @@ NotificationStatus {
 
   property int currentState: uiState.pending
 
-  // Keep a copy of "ratingEnabled" as is when the app is started up.
-  // visibility depends on session count, and ratings enabled.
-  //
-  // If we use Daemon.settings.ratingsEnabled directly to determine visibility,
-  // the notification will be hidden upon successful rating submission (at which point we set that flag to false)
-  property bool ratingEnabledOnStartup: false
-
   ratingEnabled: currentState === uiState.pending
   message: {
     switch (currentState) {
@@ -65,36 +58,31 @@ NotificationStatus {
 
   displayIcon: false
   dismissible: true
-  active: ratingEnabledOnStartup && Daemon.settings.sessionCount >= 10 && Daemon.data.flags.includes("ratings_1")
+  active: {
+    if(Daemon.settings.ratingEnabled)
+      return Daemon.settings.sessionCount >= 10 && Daemon.data.flags.includes("ratings_1")
+
+    // The ratingEnabled setting is disabled when we dismiss the rating or if we
+    // submit one.  If we do submit a rating, we want to keep the notification
+    // active temporarily to show the post-rating UI.
+    return currentState === uiState.rating_positive ||
+      currentState === uiState.rating_negative
+  }
   function dismiss () {
-    ratingEnabledOnStartup = false;
+    // If we were in a post-rating state, go back to "pending" to ensure the UI
+    // is hidden
+    currentState = uiState.pending
     Daemon.applySettings({"ratingEnabled": false});
   }
 
-
   onRatingFinished: function (value) {
     // Opt out of future notifications
-    // but do not reset ratingEnabledOnStartup because that would hide the notification
-    // immediately
     Daemon.applySettings({"ratingEnabled": false});
 
     if(value <= 3) {
       currentState = uiState.rating_negative;
     } else {
       currentState = uiState.rating_positive;
-    }
-  }
-
-  Component.onCompleted: {
-    // RatingEnabled is set to true by default.
-    // Set a small timer to defer reading the daemon setting value, so we get the correct value
-    initializeTimer.start();
-  }
-
-  property var initializeTimer: Timer {
-    interval: 100
-    onTriggered: {
-      ratingEnabledOnStartup = !!Daemon.settings.ratingEnabled;
     }
   }
 }

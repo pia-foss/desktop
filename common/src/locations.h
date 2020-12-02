@@ -24,30 +24,22 @@
 
 #include "settings.h"
 
-// Build a single legacy server that provides one service with the given ports.
-// Normally just used by buildLegacyLocations(), but also used by unit tests.
-COMMON_EXPORT Server buildLegacyServer(const QString &address, const QString &serial,
-                                       Service service,
-                                       const std::vector<quint16> &allServicePorts);
 
-// Build Location and Server objects for the legacy servers list from the
-// legacy regions list and Shadowsocks list.
-//
-// Latencies are taken from the latency measurements map if available.
-COMMON_EXPORT LocationsById buildLegacyLocations(const LatencyMap &latencies,
-                                                 const QJsonObject &serversObj,
-                                                 const QJsonObject &shadowsocksObj);
 
 // Build Location and Server objects for the modern region infrastructure from
 // the latencies and modern regions list.
 // The legacy Shadowsocks list is also taken so we can leverage legacy
 // Shadowsocks servers; the modern infrastructure does not have Shadowsocks yet.
+// Dedicated IPs are added as additional regions.
 COMMON_EXPORT LocationsById buildModernLocations(const LatencyMap &latencies,
                                                  const QJsonObject &regionsObj,
-                                                 const QJsonObject &legacyShadowsocksObj);
+                                                 const QJsonObject &legacyShadowsocksObj,
+                                                 const std::vector<AccountDedicatedIp> &dedicatedIps);
 
 // Build the grouped and sorted locations from the flat locations.
-COMMON_EXPORT std::vector<CountryLocations> buildGroupedLocations(const LocationsById &locations);
+COMMON_EXPORT void buildGroupedLocations(const LocationsById &locations,
+                                         std::vector<CountryLocations> &groupedLocations,
+                                         std::vector<QSharedPointer<Location>> &dedicatedIpLocations);
 
 class COMMON_EXPORT NearestLocations
 {
@@ -106,13 +98,18 @@ public:
     // do not match the predicate; use getBestLocation() as a fallback if that
     // is possible and this method fails to find a location.
     template<class LocationTestFunc>
-    QSharedPointer<Location> getBestMatchingLocation(LocationTestFunc isAllowed) const
+    QSharedPointer<Location> getBestMatchingLocation(LocationTestFunc isAllowedBase) const
     {
         if(_locations.empty())
         {
             qWarning() << "There are no available Server Locations!";
             return {};
         }
+
+        // Ensure we never select an offline region
+        auto isAllowed = [&isAllowedBase](const Location &loc) {
+            return !loc.offline() && isAllowedBase(loc);
+        };
 
         // Find the nearest matching server that's safe for auto and not geo.
         auto itResult = std::find_if(_locations.begin(), _locations.end(),

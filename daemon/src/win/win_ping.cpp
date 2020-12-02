@@ -24,6 +24,9 @@
 #include <IcmpAPI.h>
 #include <WinSock2.h>
 
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
+
 namespace
 {
     struct WinCloseIcmp
