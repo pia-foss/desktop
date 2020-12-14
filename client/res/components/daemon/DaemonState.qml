@@ -54,6 +54,7 @@ QtObject {
   readonly property double proxyUnreachable: NativeDaemon.state.proxyUnreachable
   readonly property bool killswitchEnabled: NativeDaemon.state.killswitchEnabled
   readonly property string availableVersion: NativeDaemon.state.availableVersion
+  readonly property bool osUnsupported: NativeDaemon.state.osUnsupported
   readonly property int updateDownloadProgress: NativeDaemon.state.updateDownloadProgress
   readonly property string updateInstallerPath: NativeDaemon.state.updateInstallerPath
   readonly property double updateDownloadFailure: NativeDaemon.state.updateDownloadFailure

@@ -70,11 +70,13 @@ class PiaVersion
 
         packageNameParts = [ Build::Platform.to_s ]
         if(Build::Platform == :windows)
-            if(Build::Architecture == :x86_64)
+            if(Build::TargetArchitecture == :x86_64)
                 packageNameParts.push("x64")
             else
-                packageNameParts.push(Build::Architecture.to_s)
+                packageNameParts.push(Build::TargetArchitecture.to_s)
             end
+        elsif(Build::Platform == :linux && Build::TargetArchitecture != :x86_64)
+            packageNameParts.push(Build::TargetArchitecture.to_s)
         end
         packageNameParts.push(Util.deleteSuffix(Build::VersionBase, '.0'))
         if(Build::VersionPrerelease != '')
@@ -90,6 +92,7 @@ class PiaVersion
         @probe = Probe.new('version')
         @probe.file('version.txt', "#{version}\n#{@productName}\n#{@packageName}\n#{@timestamp}\n")
         @probe.file('brand.txt', "#{@productName}\n#{Build::Brand}\n#{Build::ProductIdentifier}\n#{Build::BrandInfo['helpDeskLink']}\n")
+        @probe.file('architecture.txt', "#{Build::TargetArchitecture}")
 
         # Build version.h
         versionh = CppHeader.new('version')
@@ -216,6 +219,8 @@ class PiaVersion
         srcContent.gsub!('{{PIA_CODESIGN_CERT}}', ENV['PIA_CODESIGN_CERT'] || '')
         srcContent.gsub!('{{PIA_PRODUCT_VERSION}}', Build::VersionBase)
         srcContent.gsub!('{{PIA_SEMANTIC_VERSION}}', version)
+        # Used by Linux install script
+        srcContent.gsub!('{{BUILD_ARCHITECTURE}}', Build::TargetArchitecture.to_s)
         File.write(target, srcContent)
     end
 end

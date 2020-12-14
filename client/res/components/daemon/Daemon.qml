@@ -164,9 +164,6 @@ QtObject {
   function submitRating(rating) {
     call("submitRating", arguments);
   }
-  function installKext() {
-    call ("installKext", arguments);
-  }
 
   // Get the translated name of a location.
   // Returns the location's localized name if possible, otherwise the name

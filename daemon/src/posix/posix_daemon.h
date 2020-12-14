@@ -28,11 +28,12 @@
 #include "filewatcher.h"
 
 #if defined(Q_OS_MAC)
-#include "mac/kext_client.h"
+#include "mac/mac_splittunnel.h"
 #include "mac/mac_dns.h"
 #elif defined(Q_OS_LINUX)
 #include "posix/posix_firewall_iptables.h"
 #include "linux/linux_modsupport.h"
+#include "linux/linux_cn_proc.h"
 #endif
 
 class QSocketNotifier;
@@ -54,7 +55,6 @@ protected slots:
 
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) override;
-    virtual QJsonValue RPC_installKext() override;
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
 
 private:
@@ -73,6 +73,7 @@ private:
             auto pSplitTunnelHelper = new T(&_commThread.objectOwner());
             connect(this, &PosixDaemon::startSplitTunnel, pSplitTunnelHelper, &T::initiateConnection);
             connect(this, &PosixDaemon::updateSplitTunnel, pSplitTunnelHelper, &T::updateSplitTunnel);
+            connect(this, &PosixDaemon::aboutToConnectToVpn, pSplitTunnelHelper, &T::aboutToConnectToVpn);
             // Block the caller for shutdown.  The slot invocation is still
             // queued in the proper order with respect to the other changes, but
             // the caller will wait for it.  This is necessary on Mac to ensure
@@ -82,6 +83,12 @@ private:
                     Qt::ConnectionType::BlockingQueuedConnection);
         });
     }
+
+    // Check whether the host supports split tunnel and record errors
+    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
+    void checkSplitTunnelSupport();
+
+    void onAboutToConnect();
 
 #ifdef Q_OS_LINUX
     void checkLinuxModules();
@@ -103,10 +110,13 @@ private:
     FileWatcher _resolvconfWatcher;
     IpTablesFirewall _firewall;
     LinuxModSupport _linuxModSupport;
+    // Used to test if the running kernel is configured with cn_proc; there's no
+    // way to figure this out other than to try to connect to it and see if we
+    // get the initial notification.
+    nullable_t<CnProc> _pCnProcTest;
 #endif
 
 #ifdef Q_OS_MAC
-    KextMonitor _kextMonitor;
     MacDns _macDnsMonitor;
     // Network scan last used to create bound route (see applyFirewallRules())
     OriginalNetworkScan _boundRouteNetScan;
@@ -114,12 +124,11 @@ private:
 
 signals:
     void startSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                          QString tunnelDeviceLocalAddress,
-                          QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
+                          QString tunnelDeviceLocalAddress);
     void shutdownSplitTunnel();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                           QString tunnelDeviceLocalAddress,
-                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
+                           QString tunnelDeviceLocalAddress);
+    void aboutToConnectToVpn();
 };
 
 void setUidAndGid();

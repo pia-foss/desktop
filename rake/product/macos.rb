@@ -21,12 +21,6 @@ module PiaMacOS
         codesignProbe.file('codesign.txt', "#{ENV['PIA_CODESIGN_CERT']}\n#{ENV['PIA_BRANCH_BUILD']}\n#{ENV['PIA_ALWAYS_NOTARIZE']}")
         codesignProbeArtifact = codesignProbe.artifact('codesign.txt')
 
-        # Install the kext
-        FileList['deps/split_tunnel/mac/PiaKext.kext/**/*'].each do |f|
-            target = f.gsub('deps/split_tunnel/mac/', 'Contents/Resources/')
-            stage.install(f, target)
-        end
-
         # Install the app icon
         stage.install("brands/#{Build::Brand}/icons/app.icns", :res)
 

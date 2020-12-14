@@ -1,9 +1,14 @@
 /qbs/
 /out/
-build-*/
+/build-*/
+# Default build directory when opening CMake glue project in most IDEs
+/build/
+# Qt Creator project preferences
 *.user
 .DS_Store
 *.qm
 node_modules
 releases
 *.qmlc
+*.kdev4
+*.swp

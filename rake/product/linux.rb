@@ -7,38 +7,61 @@ require_relative '../util/dsl.rb'
 module PiaLinux
     extend BuildDSL
 
+    QtPatchelf = Executable::Qt.tool('patchelf')
+    # The PIA Qt distribution contains patchelf 0.11 to work around patchelf 0.9
+    # issues on Stretch / 18.04.  If it's there, use it.  If not (user might be
+    # using vanilla Qt), use patchelf from the host, and hope it isn't the
+    # version that breaks strip.
+    Patchelf = File.exist?(QtPatchelf) ? QtPatchelf : 'patchelf'
+
     # list of binaries built with QT
     QT_BINARIES = %w(pia-client pia-daemon piactl pia-support-tool)
+
+    # Version of libicu (needed to determine lib*.so.## file names in deployment)
+    ICU_VERSION = FileList[File.join(Executable::Qt.targetQtRoot, 'lib', 'libicudata.so.*')]
+        .first.match(/libicudata\.so\.(\d+)(\..*|)/)[1]
+
+    # Copy a directory recursively, excluding *.debug files (debugging symbols)
+    def self.copyWithoutDebug(sourceDir, destDir)
+        FileList[File.join(sourceDir, '**/*')].exclude('**/*.debug').each do |f|
+            if File.symlink?(f) || File.file?(f)
+                fileRel = Util.deletePrefix(f, sourceDir)
+                sourceFile = File.join(sourceDir, fileRel)
+                destFile = File.join(destDir, fileRel)
+                FileUtils.mkdir_p(File.dirname(destFile))
+                FileUtils.copy_entry(sourceFile, destFile)
+            end
+        end
+    end
 
     def self.deployQt(stageRoot, qtLibs, qtPlugins, qmlImports)
         # Patch rpaths on everything in bin/ to refer to the app's own lib
         # directory, so we can load our shipped libraries.
         FileList[File.join(stageRoot, 'bin/*')].exclude('**/*.sh').each do |f|
-
             # Only patchelf QT binaries
             if QT_BINARIES.include?(File.basename(f))
-                sh('patchelf', '--force-rpath', '--set-rpath', '$ORIGIN/../lib', f)
+                sh(Patchelf, '--force-rpath', '--set-rpath', '$ORIGIN/../lib', f)
             end
         end
 
         # Stage Qt libraries
         qtLibs.each do |l|
-            FileUtils.copy_file(File.join(Executable::Qt.qtRoot, 'lib', l),
+            FileUtils.copy_file(File.join(Executable::Qt.targetQtRoot, 'lib', l),
                                 File.join(stageRoot, 'lib', l))
         end
 
         # Stage Qt plugins
         FileUtils.mkdir_p(File.join(stageRoot, 'plugins'))
         qtPlugins.each do |p|
-            FileUtils.cp_r(File.join(Executable::Qt.qtRoot, 'plugins', p),
-                           File.join(stageRoot, 'plugins'))
+            copyWithoutDebug(File.join(Executable::Qt.targetQtRoot, 'plugins', p),
+                             File.join(stageRoot, 'plugins', p))
         end
 
         # Stage QML imports
         FileUtils.mkdir_p(File.join(stageRoot, 'qml'))
         qmlImports.each do |q|
-            FileUtils.cp_r(File.join(Executable::Qt.qtRoot, 'qml', q),
-                           File.join(stageRoot, 'qml'))
+            copyWithoutDebug(File.join(Executable::Qt.targetQtRoot, 'qml', q),
+                             File.join(stageRoot, 'qml', q))
         end
     end
 
@@ -69,9 +92,9 @@ module PiaLinux
             FileUtils.cp_r(integtestStage.dir, deployStage)
 
             deployQt(deployStage, [
-                'libicudata.so.56',
-                'libicui18n.so.56',
-                'libicuuc.so.56',
+                "libicudata.so.#{ICU_VERSION}",
+                "libicui18n.so.#{ICU_VERSION}",
+                "libicuuc.so.#{ICU_VERSION}",
                 'libQt5Core.so.5',
                 'libQt5Network.so.5',
                 'libQt5Test.so.5'
@@ -109,9 +132,9 @@ module PiaLinux
             FileUtils.cp_r(File.join(stage.dir, '.'), piafiles)
 
             deployQt(piafiles, [
-                'libicudata.so.56',
-                'libicui18n.so.56',
-                'libicuuc.so.56',
+                "libicudata.so.#{ICU_VERSION}",
+                "libicui18n.so.#{ICU_VERSION}",
+                "libicuuc.so.#{ICU_VERSION}",
                 'libQt5Core.so.5',
                 'libQt5DBus.so.5',
                 'libQt5Gui.so.5',

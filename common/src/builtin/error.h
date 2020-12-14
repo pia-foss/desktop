@@ -400,4 +400,22 @@ namespace std
     struct hash<Error::Code> : public hash<int> {};
 }
 
+// Trace an errno value - writes numeric value and name from qt_error_string()
+class COMMON_EXPORT ErrnoTracer : public DebugTraceable<ErrnoTracer>
+{
+public:
+    ErrnoTracer(int code) : _code{code} {}
+    ErrnoTracer() : ErrnoTracer{errno} {}
+
+public:
+    void trace(QDebug &dbg) const
+    {
+        dbg << QStringLiteral("(code: %1) %2").arg(_code)
+            .arg(qPrintable(qt_error_string(errno)));
+    }
+
+private:
+    int _code;
+};
+
 #endif // BUILTIN_ERROR_H

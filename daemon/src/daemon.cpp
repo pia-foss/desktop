@@ -60,10 +60,6 @@
 #pragma comment(lib, "advapi32.lib")
 #endif
 
-#ifdef Q_OS_LINUX
-#include "linux/linux_cgroup.h"
-#endif
-
 #ifndef UNIT_TEST
 // Hook global error reporting function into daemon instance
 void reportError(Error error)
@@ -223,7 +219,7 @@ void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
     info.openvpnCipher(config.openvpnCipher());
     info.openvpnAuth(config.openvpnAuth());
     info.openvpnServerCertificate(config.openvpnServerCertificate());
-    info.defaultRoute(config.defaultRoute());
+    info.otherAppsUseVpn(config.otherAppsUseVpn());
     switch(config.proxyType())
     {
         default:
@@ -257,26 +253,48 @@ void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
     info.portForward(config.requestPortForward());
 };
 
-void SubnetBypass::clearAllRoutes()
+void SubnetBypass::clearAllRoutes4()
 {
     for(const auto &subnet : _lastIpv4Subnets)
-        _routeManager->removeRoute(subnet, _lastNetScan.gatewayIp(), _lastNetScan.interfaceName());
+        _routeManager->removeRoute4(subnet, _lastNetScan.gatewayIp(), _lastNetScan.interfaceName());
 
     _lastIpv4Subnets.clear();
 }
 
-void SubnetBypass::addAndRemoveSubnets(const FirewallParams &params)
+void SubnetBypass::clearAllRoutes6()
+{
+    for(const auto &subnet : _lastIpv6Subnets)
+        _routeManager->removeRoute6(subnet, _lastNetScan.gatewayIp6(), _lastNetScan.interfaceName());
+
+    _lastIpv6Subnets.clear();
+}
+
+void SubnetBypass::addAndRemoveSubnets4(const FirewallParams &params)
 {
     auto subnetsToRemove{_lastIpv4Subnets - params.bypassIpv4Subnets};
     auto subnetsToAdd{params.bypassIpv4Subnets - _lastIpv4Subnets};
 
     // Remove routes for old subnets
     for(const auto &subnet : subnetsToRemove)
-        _routeManager->removeRoute(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
+        _routeManager->removeRoute4(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
 
     // Add routes for new subnets
     for(auto subnet : subnetsToAdd)
-        _routeManager->addRoute(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
+        _routeManager->addRoute4(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
+}
+
+void SubnetBypass::addAndRemoveSubnets6(const FirewallParams &params)
+{
+    auto subnetsToRemove{_lastIpv6Subnets - params.bypassIpv6Subnets};
+    auto subnetsToAdd{params.bypassIpv6Subnets - _lastIpv6Subnets};
+
+    // Remove routes for old subnets
+    for(const auto &subnet : subnetsToRemove)
+        _routeManager->removeRoute6(subnet, params.netScan.gatewayIp6(), params.netScan.interfaceName());
+
+    // Add routes for new subnets
+    for(auto subnet : subnetsToAdd)
+        _routeManager->addRoute6(subnet, params.netScan.gatewayIp6(), params.netScan.interfaceName());
 }
 
 QString SubnetBypass::stateChangeString(bool oldValue, bool newValue)
@@ -291,12 +309,12 @@ void SubnetBypass::updateRoutes(const FirewallParams &params)
 {
     // We only need to create routes if:
     // - split tunnel is enabled
-    // - we're connected
-    // - the VPN has the default route
+    // - we've connected since enabling the VPN
+    // - bypassing isn't already the default behavior
     // - the netScan is valid
     bool shouldBeEnabled = params.enableSplitTunnel &&
                            params.hasConnected &&
-                           params.defaultRoute &&
+                           !params.bypassDefaultApps &&
                            params.netScan.ipv4Valid();
 
     qInfo() << "SubnetBypass:" << stateChangeString(_isEnabled, shouldBeEnabled);
@@ -305,33 +323,34 @@ void SubnetBypass::updateRoutes(const FirewallParams &params)
     if(!shouldBeEnabled && _isEnabled)
     {
         qInfo() << "Clearing all subnet bypass routes";
-        clearAllRoutes();
+        clearAllRoutes4();
+        clearAllRoutes6();
         _isEnabled = false;
-        _lastIpv4Subnets.clear();
         _lastNetScan = {};
     }
     // Otherwise, enable it
     else if(shouldBeEnabled)
     {
-        // We're only interested in IPv4 subnets (if they change) - we don't need to add
-        // routes on IPv6 as we don't modify the IPv6 routing table.
-        // We also need to update routes if the network changes - as that network info is used to
-        // create the routes (gatewayIp, interfaceName, etc)
-        if(didSubnetsChange(params.bypassIpv4Subnets) || didNetworkChange(params.netScan))
+        // Wipe out all routes if the network changes. They'll get recreated
+        // later if necessary
+        if(params.netScan != _lastNetScan)
         {
-            if(didNetworkChange(params.netScan))
-            {
-                qInfo() << "Network info changed from"
-                    << _lastNetScan << "to" << params.netScan << "Clearing routes";
-                clearAllRoutes();
-            }
-
-            addAndRemoveSubnets(params);
-
-            _isEnabled = true;
-            _lastIpv4Subnets = params.bypassIpv4Subnets;
-            _lastNetScan = params.netScan;
+            qInfo() << "Network info changed from"
+                << _lastNetScan << "to" << params.netScan << "Clearing routes";
+            clearAllRoutes4();
+            clearAllRoutes6();
         }
+
+        if(params.bypassIpv4Subnets != _lastIpv4Subnets)
+            addAndRemoveSubnets4(params);
+
+        if(params.bypassIpv6Subnets != _lastIpv6Subnets)
+            addAndRemoveSubnets6(params);
+
+        _isEnabled = true;
+        _lastIpv4Subnets = params.bypassIpv4Subnets;
+        _lastIpv6Subnets = params.bypassIpv6Subnets;
+        _lastNetScan = params.netScan;
     }
 }
 
@@ -526,7 +545,6 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(downloadUpdate));
     _methodRegistry->add(RPC_METHOD(cancelDownloadUpdate));
     _methodRegistry->add(RPC_METHOD(submitRating));
-    _methodRegistry->add(RPC_METHOD(installKext));
     _methodRegistry->add(RPC_METHOD(inspectUwpApps));
     _methodRegistry->add(RPC_METHOD(checkDriverState));
     #undef RPC_METHOD
@@ -678,8 +696,11 @@ Daemon::Daemon(QObject* parent)
     _updateDownloader.setGaUpdateChannel(_settings.updateChannel(), _environment.getUpdateApi());
     _updateDownloader.setBetaUpdateChannel(_settings.betaUpdateChannel(), _environment.getUpdateApi());
     _updateDownloader.enableBetaChannel(_settings.offerBetaUpdates(), _environment.getUpdateApi());
-    _updateDownloader.reloadAvailableUpdates(Update{_data.gaChannelVersionUri(), _data.gaChannelVersion(), {}},
-                                             Update{_data.betaChannelVersionUri(), _data.betaChannelVersion(), {}});
+    _updateDownloader.reloadAvailableUpdates(Update{_data.gaChannelVersionUri(), _data.gaChannelVersion(),
+                                                    _data.gaChannelOsRequired()},
+                                             Update{_data.betaChannelVersionUri(), _data.betaChannelVersion(),
+                                                    _data.betaChannelOsRequired()},
+                                             _data.flags());
 
     queueApplyFirewallRules();
 
@@ -706,10 +727,6 @@ Daemon::Daemon(QObject* parent)
     // cycling crash loop and the dumps generated could fill up the user's available HD.
     auto daemonCrashDir = Path::DaemonDataDir / QStringLiteral("crashes");
     daemonCrashDir.cleanDirFiles(5);
-
-    // Check whether the host supports split tunnel and record errors.
-    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist.
-    checkSplitTunnelSupport();
 }
 
 Daemon::~Daemon()
@@ -728,7 +745,7 @@ OriginalNetworkScan Daemon::originalNetwork() const
 {
     return {_state.originalGatewayIp(), _state.originalInterface(),
             _state.originalInterfaceIp(), _state.originalInterfaceNetPrefix(),
-            _state.originalInterfaceIp6()};
+            _state.originalInterfaceIp6(), _state.originalGatewayIp6()};
 }
 
 bool Daemon::hasActiveClient() const
@@ -1013,7 +1030,11 @@ void Daemon::RPC_connectVPN()
     connectVPN();
 
     // Increment the session counter, if ratings_1 flag is set
-    if(_data.flags().contains(QStringLiteral("ratings_1")) && _settings.ratingEnabled() && QStringLiteral(BRAND_CODE) == QStringLiteral("pia")) {
+    const auto &featureFlags = _data.flags();
+    if(std::find(featureFlags.begin(), featureFlags.end(), QStringLiteral("ratings_1")) != featureFlags.end() &&
+        _settings.ratingEnabled() &&
+        QStringLiteral(BRAND_CODE) == QStringLiteral("pia"))
+    {
         _settings.sessionCount(_settings.sessionCount() + 1);
     }
 }
@@ -1514,12 +1535,6 @@ Async<void> Daemon::RPC_submitRating(int rating)
     });
 }
 
-QJsonValue Daemon::RPC_installKext()
-{
-    // Not implemented; overridden on Mac OS with implementation
-    throw Error{HERE, Error::Code::Unknown};
-}
-
 QJsonValue Daemon::RPC_inspectUwpApps(const QJsonArray &)
 {
     // Not implemented; overridden on Windows with implementation
@@ -1742,6 +1757,7 @@ public:
             {
                 auto keepAlive = sharedFromThis();
                 const auto &result = parseVpnIpResponse(json);
+
                 if(result.problem)
                 {
                     qWarning() << "API was reachable but indicates we are not connected, may indicate routing problem";
@@ -2038,7 +2054,7 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     // this set if we go to any state like Connecting, Reconnecting,
     // Interrupted, etc., because we only find this address again when a
     // connection is initiated by an RPC.
-    if (state == VPNConnection::State::Disconnected)
+    if(state == VPNConnection::State::Disconnected)
     {
         _state.externalIp({});
         _state.tunnelDeviceName({});
@@ -2395,7 +2411,10 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
         if(network.defaultIpv6())
         {
             if(!network.addressesIpv6().empty())
+            {
                 defaultConnection.ipAddress6(network.addressesIpv6().front().first.toString());
+                defaultConnection.gatewayIp6(network.gatewayIpv6().toString());
+            }
             else
                 defaultConnection.ipAddress6({});
         }
@@ -2407,6 +2426,7 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
     _state.originalInterfaceNetPrefix(defaultConnection.prefixLength());
     _state.originalInterfaceIp(defaultConnection.ipAddress());
     _state.originalInterfaceIp6(defaultConnection.ipAddress6());
+    _state.originalGatewayIp6(defaultConnection.gatewayIp6());
 
     // Relevant only to macOS
     _state.macosPrimaryServiceKey(macosPrimaryServiceKey);
@@ -2722,23 +2742,27 @@ void Daemon::reapplyFirewallRules()
 
     // Though split tunnel in general can be toggled while connected,
     // defaultRoute can't.  The user can toggle split tunnel as long as the
-    // effective value for defaultRoute doesn't change.  If it does, we'll still
-    // update split tunnel, but the default route change will require a
+    // effective value for params.bypassDefaultApps doesn't change.  If it does,
+    // we'll still update split tunnel, but this change will require a
     // reconnect.
-    params.defaultRoute = params._connectionSettings ? params._connectionSettings->defaultRoute() : true;
+    if(params._connectionSettings)
+    {
+        params.bypassDefaultApps = !params._connectionSettings->otherAppsUseVpn();
+        params.setDefaultRoute = params._connectionSettings->setDefaultRoute();
+    }
 
-    // When not using the VPN as the default route, force Handshake and Unbound
-    // into the VPN with an "include" rule.  (Just routing the Handshake seeds
-    // into the VPN is not sufficient; hnsd uses a local recursive DNS resolver
-    // that will query authoritative DNS servers, and we want that to go through
-    // the VPN.)
-    if(!params.defaultRoute)
+    // When bypassing by default, force Handshake and Unbound into the VPN with
+    // an "include" rule.  (Just routing the Handshake seeds into the VPN is not
+    // sufficient; hnsd uses a local recursive DNS resolver that will query
+    // authoritative DNS servers, and we want that to go through the VPN.)
+    if(params.bypassDefaultApps)
     {
         params.vpnOnlyApps.push_back(Path::HnsdExecutable);
         params.vpnOnlyApps.push_back(Path::UnboundExecutable);
     }
 
-    params.blockAll = params.leakProtectionEnabled && params.defaultRoute;
+    // We can't block everything when the default behavior is to bypass.
+    params.blockAll = params.leakProtectionEnabled && !params.bypassDefaultApps;
     params.allowVPN = params.allowDHCP = params.blockAll;
     params.blockIPv6 = (vpnActive || params.leakProtectionEnabled) && _settings.blockIPv6();
     params.allowLAN = _settings.allowLAN() && (params.blockAll || params.blockIPv6);
@@ -2767,90 +2791,6 @@ void Daemon::reapplyFirewallRules()
     applyFirewallRules(params);
 
     _state.killswitchEnabled(params.leakProtectionEnabled);
-}
-
-// Check whether the host supports split tunnel and record errors
-// This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
-void Daemon::checkSplitTunnelSupport()
-{
-    // Early exit if we already have split tunnel errors
-    if(!_state.splitTunnelSupportErrors().isEmpty())
-        return;
-
-    QJsonArray errors;
-
-#if defined(Q_OS_WIN)
-    // WFP has serious issues in Windows 7 RTM.  Though we still support the
-    // client on Win 7 RTM, the split tunnel feature requires SP1 or newer.
-    //
-    // Some of the issues:
-    // https://support.microsoft.com/en-us/help/981889/a-windows-filtering-platform-wfp-driver-hotfix-rollup-package-is-avail
-    if(!::IsWindows7SP1OrGreater()) {
-        errors.push_back(QStringLiteral("win_version_invalid"));
-    }
-#endif
-
-#if defined(Q_OS_MAC)
-    // Network kernel extensions are no longer supported on 11.0+.
-    QProcess versionProcess;
-    versionProcess.start(QStringLiteral("sw_vers"), QStringList() << QStringLiteral("-productVersion"));
-    versionProcess.waitForFinished();
-    QString output = QString::fromLatin1(versionProcess.readAllStandardOutput());
-    QStringList parts = output.trimmed().split(QStringLiteral("."));
-    if(parts[0].toInt() >= 11) {
-      errors.push_back(QStringLiteral("osx_version_invalid"));
-    }
-#endif
-
-#ifdef Q_OS_LINUX
-    // iptables 1.6.1 is required.
-    QProcess iptablesVersion;
-    iptablesVersion.start(QStringLiteral("iptables"), QStringList{QStringLiteral("--version")});
-    iptablesVersion.waitForFinished();
-    auto output = iptablesVersion.readAllStandardOutput();
-    auto outputNewline = output.indexOf('\n');
-    // First line only
-    if(outputNewline >= 0)
-        output = output.left(outputNewline);
-    auto match = QRegularExpression{R"(([0-9]+)(\.|)([0-9]+|)(\.|)([0-9]+|))"}.match(output);
-    // Note that captured() returns QString{} by default if the pattern didn't
-    // match, so these will be 0 by default.
-    auto major = match.captured(1).toInt();
-    auto minor = match.captured(3).toInt();
-    auto patch = match.captured(5).toInt();
-    qInfo().nospace() << "iptables version " << output << " -> " << major << "."
-        << minor << "." << patch;
-    // SemVersion implements a suitable operator<(), we don't use it to parse
-    // the version because we're not sure that iptables will always return three
-    // parts in its version number though.
-    if(SemVersion{major, minor, patch} < SemVersion{1, 6, 1})
-        errors.push_back(QStringLiteral("iptables_invalid"));
-
-    // If the network monitor couldn't be created, libnl is missing.  (This was
-    // not required in some releases, but it is now used to monitor the default
-    // route, mainly because it can change while connected with WireGuard.)
-    if(!_pNetworkMonitor)
-        errors.push_back(QStringLiteral("libnl_invalid"));
-
-    // This cgroup must be mounted in this location for this feature.
-    QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
-    if(!cgroupFile.exists())
-    {
-        // Try to create the net_cls VFS (if we have no other errors)
-        if(errors.isEmpty())
-        {
-            if(!CGroup::createNetCls())
-                errors.push_back(QStringLiteral("cgroups_invalid"));
-        }
-        else
-        {
-            errors.push_back(QStringLiteral("cgroups_invalid"));
-        }
-    }
-#endif
-
-    if(!errors.isEmpty())
-        _state.splitTunnelSupportErrors(errors);
 }
 
 void Daemon::updatePortForwarder()
@@ -3177,14 +3117,23 @@ void Daemon::calculateLocationPreferences()
 }
 
 void Daemon::onUpdateRefreshed(const Update &availableUpdate,
-                               const Update &gaUpdate, const Update &betaUpdate)
+                               bool osFailedRequirement,
+                               const Update &gaUpdate, const Update &betaUpdate,
+                               const std::vector<QString> &flags)
 {
     _state.availableVersion(availableUpdate.version());
     _data.gaChannelVersion(gaUpdate.version());
     _data.gaChannelVersionUri(gaUpdate.uri());
-    _data.flags(gaUpdate.flags());
+    _data.gaChannelOsRequired(gaUpdate.osRequired());
+    _data.flags(flags);
     _data.betaChannelVersion(betaUpdate.version());
     _data.betaChannelVersionUri(betaUpdate.uri());
+    _data.betaChannelOsRequired(betaUpdate.osRequired());
+
+    // Only set osUnsupported if no updates are available.  It's possible, for
+    // example, that there might be a supported GA update available, and also a
+    // beta update that has dropped support for this OS version.
+    _state.osUnsupported(!availableUpdate.isValid() && osFailedRequirement);
 }
 
 void Daemon::onUpdateDownloadProgress(const QString &version, int progress)

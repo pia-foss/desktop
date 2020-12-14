@@ -73,6 +73,17 @@ Item {
     timestampValue: Daemon.state.updateDownloadFailure
   }
 
+  // OS is unsupported - updates are available, but none support this OS version
+  // This is not dismissible, but it's at "info" level since it will probably
+  // remain visible for a long time.
+  NotificationStatus {
+    id: osUnsupported
+    message: uiTr("This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.")
+    severity: severities.info
+    active: Daemon.state.osUnsupported
+    dismissible: false
+  }
+
   // One or more overrides are present but could not be loaded.  This is almost
   // certainly not what was intended.
   NotificationStatus {
@@ -533,22 +544,6 @@ Item {
     }
   }
 
-  NotificationStatus {
-    id: splitTunnelInstallKext
-    severity: severities.warning
-    message: uiTr("Approve the split tunnel extension to enable split tunnel.")
-    tipText: uiTr("The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.")
-    dismissible: false
-    active: Qt.platform.os === 'osx' && Daemon.settings.splitTunnelEnabled && Daemon.state.netExtensionState === "NotInstalled"
-    links: [{
-        text: uiTr("Security Preferences"),
-        clicked: function(){
-          Daemon.installKext();
-          NativeHelpers.openSecurityPreferencesMac()
-        }
-    }]
-  }
-
   // This property holds a list of all notifications, whether they are active,
   // their messages, severities, etc.  This is in the order they're displayed in
   // the list.
@@ -581,6 +576,7 @@ Item {
     // Update - first because this could resolve a known issue
     updateAvailable,
     downloadFailed,
+    osUnsupported,
     // Testing overrides - could cause virtually all of the following
     // conditions, particularly if the overrides are out of date or refer to
     // servers that no longer exist, etc.
@@ -601,7 +597,6 @@ Item {
     winIsElevated, // May cause other issues, list first
     killswitchEnabled,
     connectionLost,
-    splitTunnelInstallKext,
     proxyUnreachable,
     connectionTrouble,
     // Informational

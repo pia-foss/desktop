@@ -155,10 +155,10 @@ public:
     OriginalNetworkScan() = default;    // Required by Q_DECLARE_METATYPE
     OriginalNetworkScan(const QString &gatewayIp, const QString &interfaceName,
                         const QString &ipAddress, unsigned prefixLength,
-                        const QString &ipAddress6)
+                        const QString &ipAddress6, const QString &gatewayIp6)
         : _gatewayIp{gatewayIp}, _interfaceName{interfaceName},
-          _ipAddress{ipAddress}, _ipAddress6{ipAddress6},
-          _prefixLength{prefixLength}
+          _ipAddress{ipAddress}, _prefixLength{prefixLength},
+          _ipAddress6{ipAddress6}, _gatewayIp6{gatewayIp6}
     {
     }
 
@@ -168,7 +168,8 @@ public:
             interfaceName() == rhs.interfaceName() &&
             ipAddress() == rhs.ipAddress() &&
             prefixLength() == rhs.prefixLength() &&
-            ipAddress6() == rhs.ipAddress6();
+            ipAddress6() == rhs.ipAddress6() &&
+            gatewayIp6() == rhs.gatewayIp6();
     }
 
     bool operator!=(const OriginalNetworkScan& rhs) const
@@ -189,6 +190,7 @@ public:
     void ipAddress(const QString &value) {_ipAddress = value;}
     void prefixLength(unsigned value) {_prefixLength = value;}
     void ipAddress6(const QString &value) {_ipAddress6 = value;}
+    void gatewayIp6(const QString &value) {_gatewayIp6 = value;}
 
     const QString &gatewayIp() const {return _gatewayIp;}
     const QString &interfaceName() const {return _interfaceName;}
@@ -198,10 +200,13 @@ public:
     // An IP address from the default IPv6 interface.  This may not be the same
     // interface as the default IPv4 interface reported above.
     const QString &ipAddress6() const {return _ipAddress6;}
+    const QString &gatewayIp6() const {return _gatewayIp6;}
 
 private:
-    QString _gatewayIp, _interfaceName, _ipAddress, _ipAddress6;
+    QString _gatewayIp, _interfaceName, _ipAddress;
     unsigned _prefixLength;
+    QString _ipAddress6;
+    QString _gatewayIp6;
 };
 
 // Custom logging for OriginalNetworkScan instances
@@ -284,18 +289,43 @@ private:
     bool _triedAllServers;
 };
 
-// Holds the configuration details that we provide via DaemonState for the
-// last/current connection (connectedLocation, etc.) and the current attempting
-// connection (connectingLocation, etc.).
+// ConnectionConfig examines the current settings and determines how we will
+// configure a connection using those settings, including:
+// * What method to use, and the settings associated with that method
+// * How to configure DNS (what servers we use, whether we set the system
+//   defaults, and whether we need to force DNS for bypass/VPN-only apps)
+// * How to configure routing (whether the VPN becomes the default, etc.)
+// * Whether we use a proxy, and how to set up that proxy if so
 //
-// In general, this is _not_ specific to the VPN method being used - the intent
-// is that the majority of settings should work with any VPN method.
+// Almost all of this information is determined by DaemonSettings, but some
+// settings interact in subtle ways.  Separating the connection configuration
+// logic from the actual implementation of that configuration simplifies the
+// logic, avoids duplicating logic across platform backends, and allows us to
+// express the current/previous connection configuration in DaemonState.
 //
-// This is not possible in all cases, so there is some method-specific logic in
-// this class, such as forcing some settings off for some methods, knowledge of
-// the credentials required for each method, etc.  The intent is that over time,
-// these differences should be reduced; we should support most settings with all
-// methods.
+// All state determined by ConnectionConfig requires a reconnect to change.  (We
+// detect the "reconnect required" state by comparing a new ConnectionConfig to
+// the current one.)  Settings that can be changed without a reconnect are not
+// handled by ConnectionConfig; they are applied directly.
+//
+// ConnectionConfig also captures limited information from DaemonState and
+// DaemonAccount:
+// * DaemonState contains the available locations
+// * DaemonAccount contains authentication information for the VPN connection
+//   (and may force the OpenVPN method if we have not obtained an auth token).
+//
+// Most settings are independent of VPN method, but some are specific to VPN
+// methods, and some also are handled differently on different platforms.
+// ConnectionConfig handles these differences.
+//
+// The fields of ConnectionConfig generally have strong invariants to simplify
+// their use throughout the backend implementations - for example enumerations
+// are preferred over strings, etc.
+//
+// ConnectionConfig also exposes some information about how it determined the
+// settings as needed by backends and the client UI, such as indicating when
+// the VPN method was forced to OpenVPN in order to authenticate for the first
+// time.
 class ConnectionConfig
 {
     Q_GADGET
@@ -333,6 +363,10 @@ public:
     ConnectionConfig(DaemonSettings &settings, DaemonState &state, DaemonAccount &account);
 
 public:
+    /*
+     * General configuration information
+     */
+
     // Check if the ConnectionConfig was able to load everything required for a
     // connection attempt.
     // If this returns true:
@@ -347,6 +381,9 @@ public:
     // ID only - other location metadata changes are not considered a change.
     bool hasChanged(const ConnectionConfig &other) const;
 
+    /*
+     * VPN method
+     */
 
     // The effective VPN method.  Normally the method() setting; may be forced
     // to OpenVPN if an auth token is not available for WireGuard.
@@ -355,6 +392,10 @@ public:
     // Enabled if the method was forced to OpenVPN due to lack of an auth token
     // (causes an in-client notification).
     bool methodForcedByAuth() const {return _methodForcedByAuth;}
+
+    /*
+     * Method parameters
+     */
 
     // The effective VPN location, and whether that location was an 'auto'
     // selection or an explicit selection from the user.
@@ -374,6 +415,24 @@ public:
     const QString &vpnPassword() const {return _vpnPassword;}
     const QString &vpnToken() const {return _vpnToken;}
 
+    // Cryptographic settings for OpenVPN; only captured when method is OpenVPN
+    QString openvpnCipher() const {return _openvpnCipher;}
+    QString openvpnAuth() const {return _openvpnAuth;}
+    QString openvpnServerCertificate() const {return _openvpnServerCertificate;}
+
+    // For the WireGuard method only, whether to use kernel support if available
+    bool wireguardUseKernel() const {return _wireguardUseKernel;}
+
+    quint16 localPort() const {return _localPort;}
+    uint mtu() const {return _mtu;}
+
+    // Whether to try alternate transports.  Requires OpenVPN and no proxy.
+    bool automaticTransport() const {return _automaticTransport;}
+
+    /*
+     * DNS
+     */
+
     // The type of DNS selected by the user.
     DnsType dnsType() const {return _dnsType;}
     // For DnsType::Custom, the DNS server addresses - guaranteed to have at
@@ -388,24 +447,8 @@ public:
     // For the legacy infrastructure, MACE is not applied.
     QStringList getDnsServers() const;
 
-    // Get the effective DNS server addresses to use for the modern
-    // infrastructure.  This does depend on MACE, which simply selects a
-    // different DNS address.
-    QStringList getModernDnsServers() const;
-
-    // Cryptographic settings for OpenVPN; only captured when method is OpenVPN
-    QString openvpnCipher() const {return _openvpnCipher;}
-    QString openvpnAuth() const {return _openvpnAuth;}
-    QString openvpnServerCertificate() const {return _openvpnServerCertificate;}
-
-    quint16 localPort() const {return _localPort;}
-    uint mtu() const {return _mtu;}
-
-    // Whether to use the VPN as the default route.  Turning off the default
-    // route requires split tunnel - if split tunnel was not enabled when
-    // connecting, this will be true.  Split tunnel is only permitted with
-    // OpenVPN.
-    bool defaultRoute() const {return _defaultRoute;}
+    // Whether MACE is enabled.  Only permitted with PIA DNS and OpenVPN.
+    bool requestMace() const {return _requestMace;}
 
     // Whether to change the default DNS to PIA's DNS.  Usually true, false if:
     //  - "Use Existing DNS" is selected
@@ -420,79 +463,83 @@ public:
     // Whether we need to force "bypass" apps to use the existing DNS.
     bool forceBypassDns() const {return _forceBypassDns;}
 
+    /*
+     * Routing
+     */
+
+    // Whether apps with no specific split tunnel rules should use the VPN by
+    // default.  (If split tunnel is not active, this affects all applications,
+    // and is always true.)
+    bool otherAppsUseVpn() const {return _otherAppsUseVpn;}
+
+    // Whether to set the system's default route to go into the VPN.
+    //
+    // This is the same as "otherAppsUseVPN()" on Windows and Linux.  On Mac,
+    // when split tunnel is active, the split tunnel device becomes the default
+    // route regardless of the default app behavior, so this is false when
+    // split tunnel is enabled even if the VPN is the default.
+    bool setDefaultRoute() const {return _setDefaultRoute;}
+
+    /*
+     * Proxy configuration
+     */
+
     // Proxy information.  canConnect() checks requirements of these fields
     // based on the selected proxy type.  Proxies are only permitted with
     // OpenVPN.
     ProxyType proxyType() const {return _proxyType;}
+    // The parsed address for the SOCKS proxy host - used to connect and to
+    // interpret some errors from OpenVPN.
     const QHostAddress &socksHost() const {return _socksHostAddress;}
+    // Custom proxy configuration; meaningful if a custom proxy was selected.
     const CustomProxy &customProxy() const {return _customProxy;}
+    // Shadowsocks server location; meaningful if a Shadowsocks proxy was
+    // selected.
     const QSharedPointer<Location> &shadowsocksLocation() const {return _pShadowsocksLocation;}
+    // Whether the Shadowsocks location was an automatic selection
     bool shadowsocksLocationAuto() const {return _shadowsocksLocationAuto;}
 
-    // Whether to try alternate transports.  Requires OpenVPN and no proxy.
-    bool automaticTransport() const {return _automaticTransport;}
+    /*
+     * Additional minor settings
+     */
 
     // Whether port forwarding is enabled (even if the selected region does not
     // support it).  Only permitted with OpenVPN.
     bool requestPortForward() const {return _requestPortForward;}
 
-    // Whether MACE is enabled.  Only permitted with PIA DNS and OpenVPN.
-    bool requestMace() const {return _requestMace;}
-
-    // For the WireGuard method only, whether to use kernel support if available
-    bool wireguardUseKernel() const {return _wireguardUseKernel;}
-
 private:
-    // The method used to connect to the VPN
-    Method _method;
-    bool _methodForcedByAuth;
+    // VPN method
+    Method _method{Method::OpenVPN};
+    bool _methodForcedByAuth{false};
 
-    // The VPN location used for this connection
+    // Method parameters
     QSharedPointer<Location> _pVpnLocation;
-    // Whether the VPN location was an automatic selection
-    bool _vpnLocationAuto;
-
-    // The credentials to use for this connection.  Some methods use the split
-    // "OpenVPN username/password", others use the complete token.
+    bool _vpnLocationAuto{false};
     QString _vpnUsername, _vpnPassword, _vpnToken;
-
-    // Selected DNS type and custom DNS servers
-    DnsType _dnsType;
-    QStringList _customDns;
-
     QString _openvpnCipher, _openvpnAuth, _openvpnServerCertificate;
+    bool _wireguardUseKernel{false};
+    quint16 _localPort{0};
+    uint _mtu{0};
+    bool _automaticTransport{false};
 
-    quint16 _localPort;
-    uint _mtu;
+    // DNS
+    DnsType _dnsType{DnsType::Pia};
+    QStringList _customDns;
+    bool _requestMace{false};
+    bool _setDefaultDns{true}, _forceVpnOnlyDns{false}, _forceBypassDns{false};
 
-    // Whether to use the VPN as the default route for this connection.  This
-    // isn't exactly the same as the defaultRoute value at the time of
-    // connection - it also depends on whether split tunnel is enabled.
-    // We don't store the split tunnel setting though - the user can still
-    // toggle that while connected, but if it changes the defaultRoute value,
-    // we will require a reconnect.
-    bool _defaultRoute;
-    // Whether to set the default system DNS, and whether to use split tunnel
-    // DNS to force VPN-only or bypass apps to use a specific DNS.
-    bool _setDefaultDns, _forceVpnOnlyDns, _forceBypassDns;
+    // Routing
+    bool _otherAppsUseVpn{true}, _setDefaultRoute{true};
 
-    // The proxy type used for this connection
-    ProxyType _proxyType;
-    // The parsed address for the SOCKS proxy host - used to connect and to
-    // interpret some errors from OpenVPN.
+    // Proxy configuration
+    ProxyType _proxyType{ProxyType::None};
     QHostAddress _socksHostAddress;
-    // Custom proxy configuration; meaningful if a custom proxy was selected.
     CustomProxy _customProxy;
-    // Shadowsocks server location; meaningful if a Shadowsocks proxy was
-    // selected.
     QSharedPointer<Location> _pShadowsocksLocation;
-    // Whether the Shadowsocks location was an automatic selection
-    bool _shadowsocksLocationAuto;
+    bool _shadowsocksLocationAuto{false};
 
-    // Flags for additional features for this connection
-    bool _automaticTransport, _requestPortForward, _requestMace;
-
-    bool _wireguardUseKernel;
+    // Additional minor settings
+    bool _requestPortForward{false};
 };
 
 class VPNConnection : public QObject

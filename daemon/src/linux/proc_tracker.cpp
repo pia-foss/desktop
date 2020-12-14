@@ -99,35 +99,6 @@ bool ProcFs::isChildOf(pid_t parentPid, pid_t pid)
     return false;
 }
 
-// Explicitly specify struct alignment
-typedef struct __attribute__((aligned(NLMSG_ALIGNTO)))
-{
-    nlmsghdr header;
-
-    // Insert no padding as we want the members contiguous
-    struct __attribute__((__packed__))
-    {
-        cn_msg body;
-        proc_cn_mcast_op subscription_type;
-    };
-} NetlinkRequest;
-
-typedef struct __attribute__((aligned(NLMSG_ALIGNTO)))
-{
-    nlmsghdr header;
-
-    struct __attribute__((__packed__))
-    {
-        cn_msg body;
-        proc_event event;
-    };
-} NetlinkResponse;
-
-void ProcTracker::showError(QString funcName)
-{
-    qWarning() << QStringLiteral("%1 Error (code: %2) %3").arg(funcName).arg(errno).arg(qPrintable(qt_error_string(errno)));
-}
-
 void ProcTracker::writePidToCGroup(pid_t pid, const QString &cGroupPath)
 {
     QFile cGroupFile{cGroupPath};
@@ -288,57 +259,26 @@ void ProcTracker::updateNetwork(const FirewallParams &params, QString tunnelDevi
 void ProcTracker::initiateConnection(const FirewallParams &params,
                                      QString tunnelDeviceName, QString tunnelDeviceLocalAddress)
 {
-    int sock;
-    qInfo() << "Attempting to connect to Netlink";
-
-    if(_sockFd != -1)
+    if(_pCnProc)
     {
         qInfo() << "Existing connection already exists, disconnecting first";
         shutdownConnection();
     }
 
-    // Set SOCK_CLOEXEC to prevent socket being inherited by child processes (such as openvpn)
-    sock = ::socket(PF_NETLINK, SOCK_DGRAM|SOCK_CLOEXEC, NETLINK_CONNECTOR);
-    if(sock == -1)
-    {
-        showError("::socket");
-        return;
-    }
+    _pCnProc.emplace();
 
-    sockaddr_nl address = {};
+    connect(_pCnProc.ptr(), &CnProc::exec, this,
+            &ProcTracker::addLaunchedApp);
+    connect(_pCnProc.ptr(), &CnProc::exit, this,
+            &ProcTracker::removeTerminatedApp);
 
-    address.nl_pid = getpid();
-    address.nl_groups = CN_IDX_PROC;
-    address.nl_family = AF_NETLINK;
-
-    if(::bind(sock, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_nl)) == -1)
-    {
-        showError("::bind");
-        ::close(sock);
-        return;
-    }
-
-    if(subscribeToProcEvents(sock, true) == -1)
-    {
-        qWarning() << "Could not subscribe to proc events";
-        ::close(sock);
-        return;
-    }
-
-    qInfo() << "Successfully connected to Netlink";
-
-    // Save the socket FD to an ivar
-    _sockFd = sock;
     // setup cgroups + configure routing rules
     CGroup::setupNetCls();
 
     setVpnBlackHole();
     updateFirewall(params);
-    updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress,
-                      params.excludeApps, params.vpnOnlyApps);
+    updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress);
     setupReversePathFiltering();
-    _readNotifier = new QSocketNotifier(sock, QSocketNotifier::Read);
-    connect(_readNotifier, &QSocketNotifier::activated, this, &ProcTracker::readFromSocket);
 }
 
 void ProcTracker::setVpnBlackHole()
@@ -437,37 +377,14 @@ void ProcTracker::removeApps(const QVector<QString> &keepApps, AppMap &appMap)
     }
 }
 
-int ProcTracker::subscribeToProcEvents(int sock, bool enabled)
-{
-    NetlinkRequest message = {};
-
-    message.subscription_type = enabled ? PROC_CN_MCAST_LISTEN : PROC_CN_MCAST_IGNORE;
-
-    message.header.nlmsg_len = sizeof(message);
-    message.header.nlmsg_pid = getpid();
-    message.header.nlmsg_type = NLMSG_DONE;
-
-    message.body.len = sizeof(proc_cn_mcast_op);
-    message.body.id.val = CN_VAL_PROC;
-    message.body.id.idx = CN_IDX_PROC;
-
-    if(::send(sock, &message, sizeof(message), 0) == -1)
-    {
-        showError("::send");
-        return -1;
-    }
-
-    return 0;
-}
-
 void ProcTracker::updateFirewall(const FirewallParams &params)
 {
     // Setup the packet tagging rule (this rule is unaffected by network changes)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagBypass"), true, IpTablesFirewall::kMangleTable);
 
-    // Only create the vpnOnly tagging rule if the VPN does NOT have the default route
+    // Only create the vpnOnly tagging rule if bypassing is the default
     // (otherwise the packets will go through VPN anyway)
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagVpnOnly"), !params.defaultRoute, IpTablesFirewall::kMangleTable);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagVpnOnly"), params.bypassDefaultApps, IpTablesFirewall::kMangleTable);
 
     // Enable the masquerading rule - this gets updated with interface changes via replaceAnchor()
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.transIp"), true, IpTablesFirewall::kNatTable);
@@ -505,20 +422,7 @@ void ProcTracker::removeRoutingPolicyForSourceIp(QString ipAddress, QString rout
 
 void ProcTracker::shutdownConnection()
 {
-    qInfo() << "Attempting to disconnect from Netlink";
-    if(_readNotifier)
-    {
-        _readNotifier->setEnabled(false);
-        delete _readNotifier;
-    }
-
-    if(_sockFd != -1)
-    {
-        // Unsubscribe from proc events
-        subscribeToProcEvents(_sockFd, false);
-        if(::close(_sockFd) != 0)
-            showError("::close");
-    }
+    _pCnProc.clear();
 
     teardownFirewall();
     // Remove cgroup routing rules
@@ -530,19 +434,17 @@ void ProcTracker::shutdownConnection()
 
     // Clear out our network info
     _previousNetScan = {};
-    _sockFd = -1;
 
     qInfo() << "Successfully disconnected from Netlink";
 }
 
 void ProcTracker::updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                                    QString tunnelDeviceLocalAddress,
-                                    QVector<QString> excludedApps, QVector<QString> vpnOnlyApps)
+                                    QString tunnelDeviceLocalAddress)
 {
     // Update network first, then updateApps() can add/remove all excluded apps
     // when we gain/lose a valid network scan
     updateNetwork(params, tunnelDeviceName, tunnelDeviceLocalAddress);
-    updateApps(excludedApps, vpnOnlyApps);
+    updateApps(params.excludeApps, params.vpnOnlyApps);
 }
 
 void ProcTracker::removeTerminatedApp(pid_t pid)
@@ -596,34 +498,7 @@ void ProcTracker::addLaunchedApp(pid_t pid)
     }
 }
 
-void ProcTracker::readFromSocket(int sock)
+void ProcTracker::aboutToConnectToVpn()
 {
-    NetlinkResponse message = {};
 
-    ::recv(sock, &message, sizeof(message), 0);
-
-    // shortcut
-    const auto &eventData = message.event.event_data;
-    pid_t pid;
-    QString appName;
-
-    switch(message.event.what)
-    {
-    case proc_event::PROC_EVENT_NONE:
-        qInfo() << "Listening to process events";
-        break;
-    case proc_event::PROC_EVENT_EXEC:
-        pid = eventData.exec.process_pid;
-        addLaunchedApp(pid);
-
-        break;
-    case proc_event::PROC_EVENT_EXIT:
-        pid = eventData.exit.process_pid;
-        removeTerminatedApp(pid);
-
-        break;
-    default:
-        // We're not interested in any other events
-        break;
-    }
 }

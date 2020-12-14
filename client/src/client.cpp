@@ -68,6 +68,7 @@
 #include <QtGlobal>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QStandardPaths>
 
 QmlCallResult::QmlCallResult(Async<QJsonValue> asyncResult)
     : _asyncResult{std::move(asyncResult)}
@@ -180,6 +181,17 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
 
     if(previousVersion < currentVersion)
         _state.clientHasBeenUpdated(true);
+    // If the client version has changed (even if it's older), wipe the QML
+    // cache.  We can do this here since we haven't started the QML engine yet.
+    // Qt has been observed in some cases reusing old caches incorrectly after
+    // an upgrade.
+    if(previousVersion != currentVersion)
+    {
+        Path cachePath{QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation)};
+        cachePath = cachePath / QStringLiteral("qmlcache");
+        qInfo() << "Clean QML cache directory" << cachePath;
+        QDir{cachePath}.removeRecursively();
+    }
     // The current What's New content was introduced in 2.3.0, show this if
     // upgrading from an older version
     if(previousVersion < SemVersion{2, 3, 0})

@@ -189,8 +189,6 @@ public:
 
     void requestDashboardReopen();
 
-    Q_INVOKABLE void openSecurityPreferencesMac();
-
     Q_INVOKABLE void checkAppDeactivate();
 
     // Get the best location for a country - provides

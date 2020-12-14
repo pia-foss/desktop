@@ -409,82 +409,14 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "sndbuf 262144" << endl;
     out << "rcvbuf 262144" << endl;
 
-    if (_connectingConfig.defaultRoute())
+    if (_connectingConfig.setDefaultRoute())
     {
         out << "redirect-gateway def1 bypass-dhcp";
         if (!g_settings.blockIPv6())
             out << " ipv6";
-        // When using a SOCKS proxy, handle the VPN endpoint route ourselves.
-        if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-            out << " local";
+        // Handle the VPN endpoint route ourselves.
+        out << " local";
         out << endl;
-
-        // When using a SOCKS proxy, if that proxy is on the Internet, we need
-        // to route it back to the default gateway (like we do with the VPN
-        // server).
-        if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
-        {
-            QHostAddress remoteHost;
-            switch(_connectingConfig.proxyType())
-            {
-                default:
-                case ConnectionConfig::ProxyType::None:
-                    Q_ASSERT(false);
-                    break;
-                case ConnectionConfig::ProxyType::Custom:
-                    remoteHost = _connectingConfig.socksHost();
-                    break;
-                case ConnectionConfig::ProxyType::Shadowsocks:
-                    remoteHost = shadowsocksServerAddress;
-                    break;
-            }
-            // If the remote host address couldn't be parsed, fail now.
-            if(remoteHost.isNull())
-                throw Error{HERE, Error::Code::OpenVPNProxyResolveError};
-
-            // We do _not_ want this route if the SOCKS proxy is on LAN or
-            // localhost.  (It actually mostly works, but on Windows with a LAN
-            // proxy it does reroute the traffic through the gateway.)
-            //
-            // This may be incorrect with nested LANs - a SOCKS proxy on the outer
-            // LAN is detected as LAN, but we actually do want this route since it's
-            // not on _our_ LAN.  We don't fully support nested LANs right now, and
-            // the only fix for that is to actually read the entire routing table.
-            // Users can work around this by manually creating this route to the
-            // SOCKS proxy.
-            if(isIpv4Local(remoteHost))
-            {
-                qInfo() << "Not creating route for local proxy" << remoteHost;
-            }
-            else
-            {
-                qInfo() << "Creating gateway route for Internet proxy"
-                    << remoteHost;
-
-                // OpenVPN still creates a route to the remote endpoint when doing
-                // this, which might seem unnecessary but is still desirable if the
-                // proxy is running on localhost.  (Or even if the proxy is not
-                // actually on localhost but ends up communicating over this host,
-                // such as a proxy running in a VM on this host.)
-                out << "route " << remoteHost.toString()
-                    << " 255.255.255.255 net_gateway 0" << endl;
-            }
-
-            // We still want to route the VPN server back to the default gateway
-            // too.  If the proxy communicates via localhost, we need this
-            // route.  (Otherwise, traffic would be recursively routed back into
-            // the proxy.)  This is needed for proxies on localhost, on a VM
-            // running on this host, etc., and it doesn't hurt anything when
-            // it's not needed.  The killswitch still blocks these connections
-            // by default though, so this also requires turning killswitch off
-            // or manually creating firewall rules to exempt the proxy.
-            //
-            // We do this ourselves because OpenVPN inconsistently substitutes
-            // the SOCKS proxy address in the redirect-gateway route (it's not
-            // clear why it does that occasionally but not always).
-            out << "route " << remoteServer << " 255.255.255.255 net_gateway 0"
-                << endl;
-        }
     }
     else
     {
@@ -506,6 +438,75 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // Ignore pushed settings to add default route
         out << "pull-filter ignore \"redirect-gateway \"" << endl;
     }
+
+    // Route the VPN host and/or proxy remote address via the default gateway,
+    // not the VPN.  Do this even if we're not setting the default route - on
+    // Mac the split tunnel device may have the default route, and on any
+    // platform there could be other routes created by the user.
+
+    // When using a SOCKS proxy, if that proxy is on the Internet, we need
+    // to route it back to the default gateway (like we do with the VPN
+    // server).
+    if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
+    {
+        QHostAddress remoteHost;
+        switch(_connectingConfig.proxyType())
+        {
+            default:
+            case ConnectionConfig::ProxyType::None:
+                Q_ASSERT(false);
+                break;
+            case ConnectionConfig::ProxyType::Custom:
+                remoteHost = _connectingConfig.socksHost();
+                break;
+            case ConnectionConfig::ProxyType::Shadowsocks:
+                remoteHost = shadowsocksServerAddress;
+                break;
+        }
+        // If the remote host address couldn't be parsed, fail now.
+        if(remoteHost.isNull())
+            throw Error{HERE, Error::Code::OpenVPNProxyResolveError};
+
+        // We do _not_ want this route if the SOCKS proxy is on LAN or
+        // localhost.  (It actually mostly works, but on Windows with a LAN
+        // proxy it does reroute the traffic through the gateway.)
+        //
+        // This may be incorrect with nested LANs - a SOCKS proxy on the outer
+        // LAN is detected as LAN, but we actually do want this route since it's
+        // not on _our_ LAN.  We don't fully support nested LANs right now, and
+        // the only fix for that is to actually read the entire routing table.
+        // Users can work around this by manually creating this route to the
+        // SOCKS proxy.
+        if(isIpv4Local(remoteHost))
+        {
+            qInfo() << "Not creating route for local proxy" << remoteHost;
+        }
+        else
+        {
+            qInfo() << "Creating gateway route for Internet proxy"
+                << remoteHost;
+
+            // OpenVPN still creates a route to the remote endpoint when doing
+            // this, which might seem unnecessary but is still desirable if the
+            // proxy is running on localhost.  (Or even if the proxy is not
+            // actually on localhost but ends up communicating over this host,
+            // such as a proxy running in a VM on this host.)
+            out << "route " << remoteHost.toString()
+                << " 255.255.255.255 net_gateway 0" << endl;
+        }
+    }
+
+    // Route the VPN server back to the default gateway too.  Even if using a
+    // proxy, if that proxy communcates via localhost, we need this route.
+    // (Otherwise, traffic would be recursively routed back into the proxy.)
+    //
+    // This is needed for proxies on localhost, on a VM running on this host,
+    // etc., and it doesn't hurt anything when it's not needed.  The killswitch
+    // still blocks these connections by default though, so this also requires
+    // turning killswitch off or manually creating firewall rules to exempt the
+    // proxy.
+    out << "route " << remoteServer << " 255.255.255.255 net_gateway 0"
+        << endl;
 
     // Always route this special address through the VPN even when not using
     // PIA DNS; it's also used for port forwarding in the legacy

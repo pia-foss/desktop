@@ -39,12 +39,12 @@ module PiaWindows
 
     # Find the MSVC/UCRT runtime files and add them to an installation target
     def self.installRuntime(target)
-        arch = (Build::Architecture == :x86_64) ? 'x64' : Build::Architecture.to_s
+        arch = (Build::TargetArchitecture == :x86_64) ? 'x64' : Build::TargetArchitecture.to_s
 
         msvcLibs = [ 'msvcp140', 'msvcp140_1', 'vcruntime140' ]
         # vcruntime140_1.dll is required on x86_64 (SEH fix in VC runtime), but
         # does not exist at all on x86
-        if(Build::Architecture == :x86_64)
+        if(Build::TargetArchitecture == :x86_64)
             msvcLibs << 'vcruntime140_1'
         end
 
@@ -178,15 +178,15 @@ module PiaWindows
         installRuntime(stage)
 
         # Drivers
-        FileList["deps/tap/win/#{Build::Architecture}/win*/*"].each do |f|
+        FileList["deps/tap/win/#{Build::TargetArchitecture}/win*/*"].each do |f|
             # Install to win7/* or win10/*
             winVerDir = File.basename(File.dirname(f))
             stage.install(f, "tap/#{winVerDir}/")
         end
-        FileList["brands/#{Build::Brand}/wintun/#{Build::Architecture}/*.msi"].each do |f|
+        FileList["brands/#{Build::Brand}/wintun/#{Build::TargetArchitecture}/*.msi"].each do |f|
             stage.install(f, 'wintun/')
         end
-        FileList["deps/wfp_callout/win/#{Build::Architecture}/win*/*"].each do |f|
+        FileList["deps/wfp_callout/win/#{Build::TargetArchitecture}/win*/*"].each do |f|
             winVerDir = File.basename(File.dirname(f))
             stage.install(f, "wfp_callout/#{winVerDir}/")
         end

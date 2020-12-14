@@ -43,7 +43,7 @@ def defineTranslationTargets(stage, artifacts)
     translations.each do |ts|
         file tsBuild.artifact(File.basename(ts)) => [ts, tsBuild.componentDir] do |t|
             puts "import: #{ts}"
-            importedContent = PiaOneSky.tsImport(File.read(ts))
+            importedContent = PiaOneSky.tsImport(File.read(ts, encoding: "UTF-8"))
             File.write(t.name, importedContent)
         end
     end
@@ -120,7 +120,7 @@ def defineTranslationTargets(stage, artifacts)
     updatedEnUs = tsBuild.artifact('en_US.ts')
     file exportFile => [updatedEnUs, exportBuild.componentDir] do |t|
         puts "export: #{updatedEnUs}"
-        exportedContent = PiaOneSky.tsExport(File.read(updatedEnUs))
+        exportedContent = PiaOneSky.tsExport(File.read(updatedEnUs, encoding: "UTF-8"))
         File.write(t.name, exportedContent)
     end
 

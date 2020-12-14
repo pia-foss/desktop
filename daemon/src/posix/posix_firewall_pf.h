@@ -58,7 +58,7 @@ public:
     static void setFilterWithRules(const QString &anchor, bool enabled, const QStringList &rules);
 
     // Manipulate anchors containing translation rules
-    static void setTranslationEnabled(const QString &anchor, bool enable);
+    static void setTranslationEnabled(const QString &anchor, bool enable, const MacroPairs &macroPairs={});
 
     static void ensureRootAnchorPriority();
 

@@ -315,8 +315,8 @@ void ShadowsocksRunner::setupProcess(UidGidProcess &process)
 // Custom logging for our OriginalNetworkScan struct
 QDebug operator<<(QDebug debug, const OriginalNetworkScan& netScan) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << QStringLiteral("Network(gatewayIp: %1, interfaceName: %2, ipAddress: %3, ipAddress6: %4)")
-        .arg(netScan.gatewayIp(), netScan.interfaceName(), netScan.ipAddress(), netScan.ipAddress6());
+    debug.nospace() << QStringLiteral("Network(gatewayIp: %1, interfaceName: %2, ipAddress: %3, ipAddress6: %4, gatewayIp6: %5)")
+        .arg(netScan.gatewayIp(), netScan.interfaceName(), netScan.ipAddress(), netScan.ipAddress6(), netScan.gatewayIp6());
 
     return debug;
 }
@@ -534,14 +534,6 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 }
 
 ConnectionConfig::ConnectionConfig()
-    : _method{Method::OpenVPN},
-      _methodForcedByAuth{false},
-      _vpnLocationAuto{false}, _dnsType{DnsType::Pia}, _localPort{0}, _mtu{0},
-      _defaultRoute{true}, _setDefaultDns{true}, _forceVpnOnlyDns{false},
-      _forceBypassDns{false}, _proxyType{ProxyType::None},
-      _shadowsocksLocationAuto{false}, _automaticTransport{false},
-      _requestPortForward{false}, _requestMace{false},
-      _wireguardUseKernel{false}
 {}
 
 ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
@@ -635,7 +627,16 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
 
     if(settings.splitTunnelEnabled())
     {
-        _defaultRoute = settings.defaultRoute();
+        _otherAppsUseVpn = settings.defaultRoute();
+
+        // On Windows and Linux, _setDefaultRoute follows _otherAppsUseVPN.
+        // On Mac, _setDefaultRoute is always false when split tunnel is enabled
+        // due to the split tunnel device taking the default route.
+#if defined(Q_OS_MAC)
+        _setDefaultRoute = false;
+#else
+        _setDefaultRoute = _otherAppsUseVpn;
+#endif
 
         // Do we want to split DNS too?
         // (Not currently available on Mac)
@@ -643,13 +644,13 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         if(_dnsType != DnsType::Existing && settings.splitTunnelDNS())
         {
             // Yes - set the default DNS only if the VPN has the default route
-            _setDefaultDns = _defaultRoute;
+            _setDefaultDns = _setDefaultRoute;
             // Force VPN-only apps to use PIA's configured DNS if the VPN does
             // not have the default route
-            _forceVpnOnlyDns = !_defaultRoute;
+            _forceVpnOnlyDns = !_setDefaultRoute;
             // Force bypass apps to use existing DNS if the VPN has the default
             // route
-            _forceBypassDns = _defaultRoute;
+            _forceBypassDns = _setDefaultRoute;
         }
 #endif
         // Otherwise, not splitting DNS - either split tunnel DNS is disabled,
@@ -793,7 +794,8 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         customDns() != other.customDns() ||
         localPort() != other.localPort() ||
         mtu() != other.mtu() ||
-        defaultRoute() != other.defaultRoute() ||
+        otherAppsUseVpn() != other.otherAppsUseVpn() ||
+        setDefaultRoute() != other.setDefaultRoute() ||
         setDefaultDns() != other.setDefaultDns() ||
         forceVpnOnlyDns() != other.forceVpnOnlyDns() ||
         forceBypassDns() != other.forceBypassDns() ||
@@ -1346,11 +1348,21 @@ void VPNConnection::doConnect()
     connect(_method, &VPNMethod::firewallParamsChanged, this, &VPNConnection::firewallParamsChanged);
     connect(_method, &VPNMethod::error, this, &VPNConnection::raiseError);
 
+    QHostAddress localBindAddress = _transportSelector.lastLocalAddress();
+
+#if defined(Q_OS_MAC)
+    // On Mac, if split tunnel is enabled, the split tunnel device gets the
+    // default route, even when not connected.  We need OpenVPN to bind to the
+    // physical interface whenever we're not going to set the default route to
+    // bypass this - even if we're using the preferred transport.
+    if(!_connectingConfig.setDefaultRoute())
+        localBindAddress = QHostAddress{netScan.ipAddress()};
+#endif
+
     try
     {
         _method->run(_connectingConfig, _connectingServer,
-                     _transportSelector.lastUsed(),
-                     _transportSelector.lastLocalAddress(),
+                     _transportSelector.lastUsed(), localBindAddress,
                      _shadowsocksServerIp, _shadowsocksRunner.localPort());
     }
     catch(const Error &ex)

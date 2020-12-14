@@ -15,12 +15,10 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
 
 ### Prerequisites:
 
-- On **all platforms**:
+- On **Windows**:
   - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
   - [Qt 5.15](https://www.qt.io/download) or later (open source edition)
     - Install CMake (under development tools) to use this project in Qt Creator
-  - *Optional:* [Node.js](https://nodejs.org) (for auxiliary scripts)
-- On **Windows**:
   - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
      - Requires VS 16.7 or later
      - The Windows SDK must be at least 10.0.17763.0
@@ -30,20 +28,29 @@ Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and 
   - [Ruby](https://rubyinstaller.org/) - includes Rake
   - [7-zip](https://www.7-zip.org/)
 - On **macOS**:
-  - High Sierra or newer
+  - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
+  - [Qt 5.15](https://www.qt.io/download) or later (open source edition)
+    - Install CMake (under development tools) to use this project in Qt Creator
+  - Mojave or newer
   - Up-to-date version of Xcode
   - Ruby, can be installed using [Homebrew](https://brew.sh) with `brew install ruby`
 - On **Linux**:
-  - Ubuntu 18.04 or newer
-  - The following development packages:
+  - Debian 9 (Stretch) or newer
+    - Supported architectures: x86_64, armhf, arm64
+  - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
+  - Qt 5.15 or later
+    - PIA's build of Qt is recommended: [desktop-dep-build releases](https://github.com/pia-foss/desktop-dep-build/releases)
+    - If you want Qt Creator, also install Qt from [qt.io](https://www.qt.io/download)
+  - To build natively on the host, install the following development packages:
     - `build-essential`
     - `rake`
-    - `clang`
+    - `clang` (or specific version, `clang-7` recommended on Debian Stretch)
     - `mesa-common-dev`
-    - `patchelf`
     - `libnl-3-dev` (PIA can run without the library installed, but the headers are needed to build)
     - `libnl-route-3-dev`
     - `libnl-genl-3-dev`
+    - `git` (needed even in chroot build environment, to determine commit info for version)
+  - To build releasable artifacts (always built under Debian 9, and optionally including arm64/armhf cross builds), set up Debian 9 chroots - see "Building for Distribution" - "Linux" below
 
 ### Cloning the repository
 
@@ -177,6 +184,14 @@ Call `scripts/build-macos.sh`
 A certificate is required for the Mac build to be installable (even for local builds), see below to generate a self-signed certificate for local use.  Unsigned builds can be manually installed by running the install script with `sudo`.
 
 #### Linux
+
+If you have not already done so, set up Debian 9 build chroots.  This requires `debootstrap` and `schroot`.
+
+```shell
+$ ./scripts/chroot/setup.sh # native x86_64 build environment
+$ ./scripts/chroot/setup.sh --cross-target arm64 # arm64 cross build environment
+$ ./scripts/chroot/setup.sh --cross-target armhf # armhf cross build environment
+```
 
 Set environment variables:
 

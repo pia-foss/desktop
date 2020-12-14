@@ -144,9 +144,15 @@ struct FirewallParams
     // activated once we successfully connect, but remain active even if we lose
     // the connection while reconnecting.)
     bool hasConnected;
-    // When connected or connecting, whether the VPN is being used as the
-    // default route.  ('true' when not connected.)
-    bool defaultRoute;
+    // Whether to bypass the VPN for apps with no split tunnel rules.
+    // When split tunnel is enabled, or when not connecting/connected, this is
+    // false.
+    bool bypassDefaultApps;
+    // Whether the default route has or will be set to the VPN (false when not
+    // connected or connecting).  Note that this _really_ refers to the routing
+    // table itself, not the intended default app behavior (which is indicated
+    // by bypassDefaultApps, and may not be the same on Mac).
+    bool setDefaultRoute;
 
     // Whether to enable split tunnel.  Split tunnel is enabled whenever the
     // setting is enabled, even if the PIA client is not logged in.  This is
@@ -157,10 +163,6 @@ struct FirewallParams
     // Bypass VPN apps though are only affected when we connect
     // - persistent connections from those apps would be
     // fine since they bypass the VPN anyway.
-    //
-    // On Mac, this causes the kext to be loaded, but on Windows the WFP callout
-    // is not loaded until we connect (app blocks can be implemented in WFP
-    // without loading the callout driver).
     bool enableSplitTunnel;
     // Original network information used (among other things) to manage apps for split
     // tunnel.
@@ -177,8 +179,10 @@ class RouteManager
 {
     CLASS_LOGGING_CATEGORY("RouteManager")
 public:
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
+    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
+    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
+    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
+    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
     virtual ~RouteManager() {}
 };
 
@@ -196,16 +200,17 @@ public:
 
     void updateRoutes(const FirewallParams &params);
 private:
-    bool didNetworkChange(const OriginalNetworkScan &netScan) {return netScan != _lastNetScan;}
-    bool didSubnetsChange(const QSet<QString> &subnets) {return subnets != _lastIpv4Subnets;}
-    void addAndRemoveSubnets(const FirewallParams &params);
-    void clearAllRoutes();
+    void addAndRemoveSubnets4(const FirewallParams &params);
+    void addAndRemoveSubnets6(const FirewallParams &params);
+    void clearAllRoutes4();
+    void clearAllRoutes6();
     QString boolToString(bool value) {return value ? "ON" : "OFF";}
     QString stateChangeString(bool oldValue, bool newValue);
 private:
     std::unique_ptr<RouteManager> _routeManager;
     OriginalNetworkScan _lastNetScan;
     QSet<QString> _lastIpv4Subnets;
+    QSet<QString> _lastIpv6Subnets;
     bool _isEnabled;
 };
 
@@ -316,8 +321,6 @@ public:
     // Get the _state.original* fields as an OriginalNetworkScan
     OriginalNetworkScan originalNetwork() const;
 
-    bool vpnHasDefaultRoute() { return _settings.splitTunnelEnabled() ?  _settings.defaultRoute() : true; }
-
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
 
@@ -403,8 +406,7 @@ protected:
 
     // These RPCs are platform-specific; platform daemons override them with
     // implementation.
-    // Attempt to load the network kext on Mac
-    virtual QJsonValue RPC_installKext();
+
     // Inspect UWP apps on Windows to determine which have executables and which
     // are WWA apps.  (Must be done by the daemon because we read the package
     // manifests to check this.)
@@ -514,15 +516,13 @@ private:
     // selections.
     void updateChosenLocations();
     void onUpdateRefreshed(const Update &availableUpdate,
-                           const Update &gaUpdate, const Update &betaUpdate);
+                           bool osFailedRequirement,
+                           const Update &gaUpdate, const Update &betaUpdate,
+                           const std::vector<QString> &flags);
     void onUpdateDownloadProgress(const QString &version, int progress);
     void onUpdateDownloadFinished(const QString &version,
                                   const QString &installerPath);
     void onUpdateDownloadFailed(const QString &version, bool error);
-
-    // Check whether the host supports split tunnel and record errors
-    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
-    void checkSplitTunnelSupport();
 
     // Update the port forwarder's enabled state, based on the current setting
     // or the setting value that we connected with

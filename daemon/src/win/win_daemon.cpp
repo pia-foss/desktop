@@ -273,7 +273,7 @@ void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString 
     route.Metric = metric;
 }
 
-void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
+void WinRouteManager::addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
     MIB_IPFORWARD_ROW2 route{};
     createRouteEntry(route, subnet, gatewayIp, interfaceName, metric);
@@ -289,7 +289,7 @@ void WinRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, 
     }
 }
 
-void WinRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
+void WinRouteManager::removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
 {
     MIB_IPFORWARD_ROW2 route{};
     createRouteEntry(route, subnet, gatewayIp, interfaceName, 0);
@@ -411,6 +411,19 @@ WinDaemon::WinDaemon(QObject* parent)
     {
         _clientMemTraceTimer.stop();
     });
+
+    // Split tunnel support errors are platform-dependent, nothing else adds
+    // them (otherwise we'd have to do a proper get-append-set below)
+    Q_ASSERT(_state.splitTunnelSupportErrors().empty());
+    // WFP has serious issues in Windows 7 RTM.  Though we still support the
+    // client on Win 7 RTM, the split tunnel feature requires SP1 or newer.
+    //
+    // Some of the issues:
+    // https://support.microsoft.com/en-us/help/981889/a-windows-filtering-platform-wfp-driver-hotfix-rollup-package-is-avail
+    if(!::IsWindows7SP1OrGreater())
+    {
+        _state.splitTunnelSupportErrors({QStringLiteral("win_version_invalid")});
+    }
 }
 
 WinDaemon::~WinDaemon()
@@ -907,7 +920,7 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
         newExcludedApps = _appMonitor.getExcludedAppIds();
         newVpnOnlyApps = _appMonitor.getVpnOnlyAppIds();
 
-        if(!params.defaultRoute)
+        if(params.bypassDefaultApps)
         {
             // Put hnsd in the VPN since we did not use the VPN as the default
             // route
@@ -930,7 +943,7 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     newSplitParams._tunnelIp = _state.tunnelDeviceLocalAddress();
     newSplitParams._isConnected = params.isConnected;
     newSplitParams._hasConnected = params.hasConnected;
-    newSplitParams._vpnDefaultRoute = params.defaultRoute;
+    newSplitParams._vpnDefaultRoute = !params.bypassDefaultApps;
     newSplitParams._blockDNS = params.blockDNS;
     newSplitParams._forceVpnOnlyDns = newSplitParams._forceBypassDns = false;
     if(params._connectionSettings)

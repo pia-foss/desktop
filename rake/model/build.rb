@@ -8,12 +8,12 @@ require 'json'
 # and creates a per-component build directory for this component.
 class Build
     # The major-minor-patch parts of this version
-    VersionMMP = [2, 6, 1]
+    VersionMMP = [2, 6, 2]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
     # dash), or empty string if none
-    VersionPrerelease = ''
+    VersionPrerelease = 'beta.1'
 
     # Select a build configuration based on environment variables, or use
     # defaults for the host platform if unspecified
@@ -21,8 +21,8 @@ class Build
     Variant = Util.selectSymbol('VARIANT', :debug, [:release, :debug])
     # Platform can't be overridden, only native builds are supported
     Platform = Util.hostPlatform
-    Architecture = Util.selectSymbol('ARCHITECTURE', Util.hostArchitecture,
-                                     [:x86, :x86_64])
+    TargetArchitecture = Util.selectSymbol('ARCHITECTURE', Util.hostArchitecture,
+                                           [:x86, :x86_64, :armhf, :arm64])
 
     # Load the essential brand info - the brand identifier is needed in many
     # places on Mac to brand assets, property lists, etc.
@@ -34,8 +34,17 @@ class Build
     # ('com.privateinternetaccess.vpn' in the PIA brand)
     ProductIdentifier = BrandInfo['brandIdentifier']
 
+    # If building in a piabuild chroot environment on Linux, include the
+    # environment name so the output directory does not conflict with host
+    # builds.
+    # For example, in a 'piabuild-stretch-<arch>' chroot, set the output
+    # directory to 'pia_<variant>_<arch>_stretch'.
+    chrootPiabuildMatch = nil
+    chrootPiabuildMatch = ENV['SCHROOT_CHROOT_NAME'].match('^piabuild-([^-]*)-*.*$') if ENV['SCHROOT_CHROOT_NAME']
+    ChrootSuffix = chrootPiabuildMatch ? "_#{chrootPiabuildMatch[1]}" : ''
+
     # Determine the build directory based on configuration
-    BuildDir = "out/#{Brand}_#{Variant}_#{Architecture}"
+    BuildDir = "out/#{Brand}_#{Variant}_#{TargetArchitecture}#{ChrootSuffix}"
 
     # Minimum macOS version supported by the project
     MacosVersionMajor = 10

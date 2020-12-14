@@ -6,7 +6,7 @@ require 'json'
 class MsvcToolchain
     include BuildDSL
 
-    VcArch = (Build::Architecture == :x86_64) ? 'x64' : 'x86'
+    VcArch = (Build::TargetArchitecture == :x86_64) ? 'x64' : 'x86'
 
     def initialize(qt)
         @qt = qt
@@ -14,7 +14,7 @@ class MsvcToolchain
         @rccPath = @qt.tool('rcc')
 
         # Find Visual Studio, use the version matching the Qt build
-        vsVer = @qt.qtRoot.match(/msvc([0-9]+)/)[1]
+        vsVer = @qt.targetQtRoot.match(/msvc([0-9]+)/)[1]
         vsRoot = File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'),
                            'Microsoft Visual Studio', vsVer)
         vsEdition = Util.find(['Professional','Community','BuildTools']) do |e|
@@ -190,6 +190,12 @@ class MsvcToolchain
         false
     end
 
+    # This toolchain only supports x86_64 hosts and x86/x86_64 targets, both can
+    # be executed
+    def canExecute?
+        true
+    end
+
     def toolchainPath
         @msvcRoot
     end
@@ -250,7 +256,7 @@ class MsvcToolchain
     def openMakedep(depFile, objectFile, sourceFile, &block)
         File.open(depFile, 'w') do |f|
             writer = MakedepWriter.new(f, objectFile, sourceFile,
-                                       [@msvcRoot, @sdkRoot, @qt.qtRoot])
+                                       [@msvcRoot, @sdkRoot, @qt.targetQtRoot])
             block.call(writer)
         end
     end

@@ -59,8 +59,12 @@ private:
 class WinRouteManager : public RouteManager
 {
 public:
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
+    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
+    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
+
+    // TODO: Implement these when we support IPv6
+    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override {}
+    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override {}
 private:
     void createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const;
 };

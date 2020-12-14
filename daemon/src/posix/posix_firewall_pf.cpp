@@ -308,14 +308,14 @@ void PFFirewall::setFilterEnabled(const QString &anchor, bool enable, const Macr
 void PFFirewall::setFilterWithRules(const QString& anchor, bool enabled, const QStringList &ruleList)
 {
     if(!enabled)
-        return (void)execute(QStringLiteral("pfctl -q -a '%1/%2' -F rules").arg(kRootAnchor, anchor), true);
+        return (void)execute(QStringLiteral("pfctl -q -a '%1/%2' -F all").arg(kRootAnchor, anchor), true);
     else
         return (void)execute(QStringLiteral("echo -e \"%1\" | pfctl -q -a '%2/%3' -f -").arg(ruleList.join('\n'), kRootAnchor, anchor), true);
 }
 
-void PFFirewall::setTranslationEnabled(const QString &anchor, bool enable)
+void PFFirewall::setTranslationEnabled(const QString &anchor, bool enable, const MacroPairs &macroPairs)
 {
-    setAnchorEnabled(anchor, QStringLiteral("nat"), enable, {});
+    setAnchorEnabled(anchor, QStringLiteral("nat"), enable, macroPairs);
 }
 
 void PFFirewall::ensureRootAnchorPriority()

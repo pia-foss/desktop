@@ -129,13 +129,13 @@ module PiaUnitTest
                 testBin = testExec.target
                 cmd = ''
                 covData = coverageRawBuild.artifact("coverage_#{t}.raw")
-                opensslLibPath = File.absolute_path(File.join('deps/openvpn',
+                opensslLibPath = File.absolute_path(File.join('deps/built',
                                                               Build.selectPlatform('win', 'mac', 'linux'),
-                                                              Build::Architecture.to_s))
+                                                              Build::TargetArchitecture.to_s))
                 if Build.windows?
                     # Don't bother with covData, not supported on MSVC
                     path = [
-                        File.join(Executable::Qt.qtRoot, 'bin'),
+                        File.join(Executable::Qt.targetQtRoot, 'bin'),
                         opensslLibPath,
                         ENV['PATH']
                     ]
@@ -144,13 +144,15 @@ module PiaUnitTest
                     cmd = "LLVM_PROFILE_FILE=\"#{covData}\" UNIT_TEST_LIB=\"#{opensslLibPath}\" \"#{testBin}\""
                 elsif Build.linux?
                     libPath = [
-                        File.join(Executable::Qt.qtRoot, 'lib'),
+                        File.join(Executable::Qt.targetQtRoot, 'lib'),
                         opensslLibPath
                     ]
                     cmd = "LD_LIBRARY_PATH=\"#{libPath.join(':')}\" LLVM_PROFILE_FILE=\"#{covData}\" UNIT_TEST_LIB=\"#{opensslLibPath}\" \"#{testBin}\""
                 end
                 sh cmd
             end
+
+            task :build_all_tests => "test-#{t}"
 
             task :run_all_tests => "run-test-#{t}"
         end
@@ -163,14 +165,18 @@ module PiaUnitTest
         task :test => allTestsLib.target
 
         testTarget = nil
-        if(Executable::Tc.coverageAvailable?)
+        if(!Executable::Tc.canExecute?)
+            # Can't execute the unit tests - cross compiling with no emulation
+            # support.  Just build the tests.
+            testTarget = :build_all_tests
+        elsif(Executable::Tc.coverageAvailable?)
             defineCoverageTargets(version, artifacts, coverageRawBuild, anyTestBin)
             # Hook up the 'test' target for use from the command line - include
             # coverage measurements in this target
             testTarget = :coverage
         else
-            # Coverage isn't available, hook up the :test target to
-            # :run_all_tests
+            # Can execute the tests, but coverage isn't available, hook up the
+            # :test target to :run_all_tests
             testTarget = :run_all_tests
         end
 

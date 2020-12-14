@@ -617,13 +617,6 @@ void NativeHelpers::requestDashboardReopen()
   emit dashboardOpenRequested();
 }
 
-void NativeHelpers::openSecurityPreferencesMac()
-{
-#ifdef Q_OS_MAC
-  QProcess::execute(QStringLiteral("/usr/bin/open"), QStringList() << QStringLiteral("x-apple.systempreferences:com.apple.preference.security?General"));
-#endif
-}
-
 void NativeHelpers::checkAppDeactivate()
 {
 #ifdef Q_OS_MAC

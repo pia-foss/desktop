@@ -144,7 +144,7 @@ private slots:
     // Test that the garbage signature is rejected
     void testGarbageSignature()
     {
-        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:0407008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto[\/\\]+rsa[\/\\]+rsa_pk1.c:67:\\n"$)"});
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:0407008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto[\/\\]+rsa[\/\\]+rsa_pk1.c:\d+:\\n"$)"});
         QVERIFY(!verifySignature(Environment::defaultRegionsListPublicKey, garbageSig, samplePayload1));
     }
 

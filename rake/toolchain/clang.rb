@@ -2,40 +2,77 @@ require_relative '../model/build.rb'
 require_relative '../util/util.rb'
 require_relative '../util/dsl.rb'
 
-# This toolchain would likely work with g++ too with minor modifications, but
-# we only use it with clang.
 class ClangToolchain
     include BuildDSL
+
+    LinuxArchTargets = {
+        x86_64: 'x86_64-linux-gnu',
+        armhf: 'arm-linux-gnueabihf',
+        arm64: 'aarch64-linux-gnu'
+    }
 
     def initialize(qt)
         @qt = qt
         @mocPath = @qt.tool('moc')
         @rccPath = @qt.tool('rcc')
 
-        @clang = 'clang' # In PATH
-        @clangpp = 'clang++' # In PATH
-        @mocCppDefIncludeOpts = findDefaultIncludes(@clangpp, 'c++')
+        # If CLANG_VERSION is set to a specific version ('7', etc.), use that
+        # version of clang and clang++.
+        if ENV['CLANG_VERSION']
+            @clang = "clang-#{ENV['CLANG_VERSION']}"
+            @clangpp = "clang++-#{ENV['CLANG_VERSION']}"
+        else
+            # Otherwise, find the newest clang available.
+            # Searching for clang++ conveniently excludes things like
+            # clang-tblgen-<ver>, and we need clang++ anyway.
+            clangPatterns = Util.joinPaths([ENV['PATH'].split(':'), ['clang++', 'clang++-*']])
+            @clangpp = FileList[*clangPatterns]
+                .find_all { |p| File.exist?(p) }
+                .max_by { |p| getClangVersion(`#{p} --version`) }
+            # Path to clang - 'clang++'/'clang++-<ver>' -> 'clang'/'clang-<ver>'
+            @clang = File.join(File.dirname(@clangpp), File.basename(@clangpp).gsub('clang++', 'clang'))
+        end
 
-        clangVersionOutput = `#{@clangpp} --version`
-        @clangMajorVersion = clangVersionOutput.match(/(clang|Apple LLVM) version (\d+)\./)[2].to_i
+        cppDefaultPaths = findDefaultIncludes(@clangpp, 'c++',
+                                              DriverPlatformArchOpts[Build::Platform][Build::TargetArchitecture] +
+                                              DriverPlatformOpts[Build::Platform])
+        @mocCppDefIncludeOpts = cppDefaultPaths[:frameworkPaths].map{|p| "-F#{p}"} +
+                                cppDefaultPaths[:includePaths].map{|p| "-I#{p}"}
+
+        clangVersionOutput = `#{@clang} --version`
+        @clangMajorVersion = getClangVersion(clangVersionOutput)
         # Get the toolchain installation directory - needed by unit tests for
         # llvm-profdata, etc.
         @toolchainPath = clangVersionOutput.match(/^InstalledDir: (.*)$/m)[1].strip
-        puts "Detected clang #{@clangMajorVersion} at #{@toolchainPath}"
+        # On some systems (Debian), clang --version reports the toolchain path as
+        # /usr/bin, but /usr/bin/clang is actually a symlink to a versioned LLVM
+        # directory, which is where the rest of the LLVM tools are, like llvm-profdata.
+        # (On Debian, the LLVM symlinks in /usr/bin have version suffixes, like
+        # llvm-profdata-7.)
+        @toolchainPath = File.dirname(File.realpath(File.join(@toolchainPath, File.basename(@clang))))
+        puts "Detected clang #{@clangMajorVersion} at #{@toolchainPath} (#{@clang}, #{@clangpp})"
     end
 
-    def findDefaultIncludes(clang, lang)
-        `#{clang} -E -x #{lang} - -v </dev/null 2>&1 >/dev/null`
+    def getClangVersion(clangVersionOutput)
+        clangVersionOutput.match(/(clang|Apple LLVM) version (\d+)\./)[2].to_i
+    end
+
+    def findDefaultIncludes(clang, lang, extraArgs)
+        frameworkPaths = []
+        includePaths = []
+        `#{clang} -E -x #{lang} #{extraArgs.map{|a| "'#{a}'"}.join(' ')} - -v </dev/null 2>&1 >/dev/null`
             .match(/#include <\.\.\.> search starts here:.(.*).End of search list\./m)[1]
             .split("\n")
             .map do |s|
-                pathOnly = Util.deleteSuffix(s, " (framework directory)")
-                if(pathOnly.length < s.length)
-                    "-F#{pathOnly}" # It's a framework path
+                trimmed = Util.deletePrefix(s, ' ')
+                pathOnly = Util.deleteSuffix(trimmed, " (framework directory)")
+                if(pathOnly.length < trimmed.length)
+                    frameworkPaths << pathOnly # It's a framework path
                 else
-                    "-I#{pathOnly}" # It's a normal include directory
+                    includePaths << pathOnly # It's a normal include directory
                 end
             end
+        {frameworkPaths: frameworkPaths, includePaths: includePaths}
     end
 
     def targetExt(type)
@@ -86,12 +123,21 @@ class ClangToolchain
     # Driver arguments that vary by platform
     DriverPlatformOpts = {
         linux: [
-            '-target', 'x86_64-pc-linux-gnu'
         ],
         macos: [
-            '-stdlib=libc++',
-            '-target', 'x86_64-apple-macosx10.10-macho'
+            '-stdlib=libc++'
         ]
+    }
+
+    DriverPlatformArchOpts = {
+        linux: {
+            x86_64: ['-target', 'x86_64-linux-gnu'],
+            armhf: ['-target', 'arm-linux-gnueabihf'],  # TODO - could target V7 or V6, check
+            arm64: ['-target', 'aarch64-linux-gnu']
+        },
+        macos: {
+            x86_64: ['-target', 'x86_64-apple-macosx10.10-macho']
+        }
     }
 
     # C++-specific compile options
@@ -136,13 +182,21 @@ class ClangToolchain
         }
     }
 
+    LinkPlatformArchOpts = {
+        linux: {
+            x86_64: [],
+            armhf: [],
+            arm64: [],
+        },
+        macos: {
+            x86_64: ['-arch', 'x86_64']
+        }
+    }
+
     LinkPlatformOpts = {
         linux: [
-            # Linker script hard-coded for x86_64
-            '-m', 'elf_x86_64'
         ],
         macos: [
-            '-arch', 'x86_64',
             '-macosx_version_min', "#{Build::MacosVersionMajor}.#{Build::MacosVersionMinor}",
             # Max header padding - ensures that codesign has enough space to
             # modify load commands when inserting the signature
@@ -185,7 +239,39 @@ class ClangToolchain
         #
         # It's possible this might actually work with some versions of clang
         # between 3.8 and 6.0, but they haven't been tested.
-        @clangMajorVersion >= 6
+        #
+        # There's also an issue with coverage support when cross-compiling in
+        # Stretch - it does not seem to be possible to install libclang-7-dev
+        # for the target architecture; it indirectly conflicts with clang-7 for
+        # the host architecture.  Don't use coverage support for cross builds.
+        @clangMajorVersion >= 6 && Build::TargetArchitecture == Util.hostArchitecture
+    end
+
+    # Check if we can execute binaries built for the current target, possibly
+    # with emulation
+    def canExecute?
+        # True if we're building for the host architecture, don't need arch-test
+        return true if Build::TargetArchitecture == Util.hostArchitecture
+        # Cross builds only supported under Linux, remaining logic uses arch-test
+        return false unless Build::linux?
+
+        linuxArch = {
+            x86_64: 'amd64',
+            armhf: 'armhf',
+            arm64: 'arm64'
+        }[Build::TargetArchitecture]
+
+        # Check if we can execute this architecture with arch-test.  We get one
+        # of three results:
+        #   true: yes, we can execute this arch (possibly with emulation)
+        #   false: no, we can't execute this arch
+        #   nil: arch-test isn't present
+        #
+        # Ignore stdout, arch-test prints a message that doesn't make much
+        # sense out of context if the arch isn't supported
+        result = system('arch-test', linuxArch, :out=>'/dev/null')
+        puts "arch-test returned #{result} for #{linuxArch}"
+        result
     end
 
     # Get the toolchain installation path - where other tools like llvm-profdata
@@ -231,8 +317,6 @@ class ClangToolchain
 
     def compileForLang(clang, langCompileOpts, sourceFile, objectFile, depFile,
                        macros, includeDirs, frameworkPaths, coverage)
-        # Target type hard-coded for x86_64 below
-        raise "Unsupported architecture: #{Build::Architecture}" if Build::Architecture != :x86_64
         params = [clang]
         params += langCompileOpts
         params += [
@@ -249,6 +333,7 @@ class ClangToolchain
             '-MMD', # Write dependency file for user headers only
             '-MF', depFile # Specify dependency file
         ]
+        params += DriverPlatformArchOpts[Build::Platform][Build::TargetArchitecture]
         params += DriverPlatformOpts[Build::Platform]
         params += CompileOpts[Build::Variant]
         params += coverageOpts(coverage, CoverageDriverOpts)
@@ -296,8 +381,6 @@ class ClangToolchain
 
     def cppLink(targetFile, objFiles, libPaths, libs, frameworkPaths,
                 frameworks, driverArgs, linkerArgs, coverage)
-        # Linker script hard-coded for x86_64 on Linux (in LinkPlatformOpts above)
-        raise "Unsupported architecture: #{Build::Architecture}" if Build::linux? && Build::Architecture != :x86_64
         linkParams = []
         # Include '$ORIGIN/../lib' in the rpath to find PIA-specific libraries
         # (specifically pia-clientlib) when testing builds from the staging
@@ -308,9 +391,10 @@ class ClangToolchain
         # patched to the final installation directory; this rpath is needed for
         # directly running the staged build in development.
         if(libs.any? {|l| l.include?('Qt5Core')} || frameworks.any? {|f| f.include?('QtCore')})
-            linkParams.concat(['-rpath', File.join(@qt.qtRoot, 'lib')])
+            linkParams.concat(['-rpath', File.join(@qt.targetQtRoot, 'lib')])
         end
         linkParams.concat(LinkPlatformVariantOpts[Build::Platform][Build::Variant])
+        linkParams.concat(LinkPlatformArchOpts[Build::Platform][Build::TargetArchitecture])
         linkParams.concat(LinkPlatformOpts[Build::Platform])
         linkParams.concat(linkerArgs)
 
@@ -321,6 +405,7 @@ class ClangToolchain
             "-Wl,#{linkParams.join(',')}",
         ]
         params += driverArgs
+        params += DriverPlatformArchOpts[Build::Platform][Build::TargetArchitecture]
         params += DriverPlatformOpts[Build::Platform]
         params += coverageOpts(coverage, CoverageDriverOpts)
         params += libPaths.map { |l| "-L#{l}" }

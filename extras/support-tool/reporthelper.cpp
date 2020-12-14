@@ -89,7 +89,15 @@ void ReportHelper::sendPayload(const QByteArray &payloadContent, const QString &
         platformPart.setBody("win-x86");
     #endif // defined(Q_PROCESSOR_X86_64)
 #elif defined(Q_OS_LINUX)
-    platformPart.setBody("linux-x64");
+    #if defined(Q_PROCESSOR_X86_64)
+        platformPart.setBody("linux-x64");
+    #elif defined(__aarch64__)
+        platformPart.setBody("linux-arm64");
+    #elif defined(__arm__)
+        platformPart.setBody("linux-armhf");
+    #else
+        #error "Platform name not known for this Linux architecture"
+    #endif
 #endif
 
     uploader->append(verPart);

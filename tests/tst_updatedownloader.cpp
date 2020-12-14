@@ -181,9 +181,12 @@ private slots:
         QVERIFY(fixture._updateSpy.wait());
         // The available update and GA update are both the newer release
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::newerGa);
         // Beta channel isn't active
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        // No feature flags
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // An older release in GA should be offered as a downgrade only if the
@@ -215,10 +218,13 @@ private slots:
             // No update is offered
             QCOMPARE(fixture._updateSpy[0][0].value<Update>(), Update{});
         }
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
         // The cached GA update is the older release
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::olderGa);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::olderGa);
         // Beta channel isn't active
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        // No feature flags
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // Exactly the same release in GA is not offered.
@@ -237,8 +243,10 @@ private slots:
         // There is no available update, but the release is still cached for the
         // GA channel.   Beta isn't active.
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), Update{});
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::sameGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::sameGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // Exactly the same release in beta is not offered.
@@ -260,14 +268,18 @@ private slots:
         // Update for GA being fetched - nothing offered (even if the current
         // build is a beta, since the beta channel is enabled)
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), Update{});
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::olderGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::olderGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // Update for beta being fetched - still nothing offered, since the
         // newest release is the same
         QCOMPARE(fixture._updateSpy[1][0].value<Update>(), Update{});
-        QCOMPARE(fixture._updateSpy[1][1].value<Update>(), TestData::olderGa);
-        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::sameGa);
+        QCOMPARE(fixture._updateSpy[1][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::olderGa);
+        QCOMPARE(fixture._updateSpy[1][3].value<Update>(), TestData::sameGa);
+        QCOMPARE(fixture._updateSpy[1][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // With beta active, a newer release supersedes GA
@@ -294,14 +306,18 @@ private slots:
 
         // When GA only had been fetched, the GA release is offered
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // When beta is fetched, it supersedes the GA release.  The GA release
         // is still cached on the GA channel.
         QCOMPARE(fixture._updateSpy[1][0].value<Update>(), TestData::newerBeta);
-        QCOMPARE(fixture._updateSpy[1][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::newerBeta);
+        QCOMPARE(fixture._updateSpy[1][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[1][3].value<Update>(), TestData::newerBeta);
+        QCOMPARE(fixture._updateSpy[1][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // An older beta release does not supersede GA
@@ -322,14 +338,18 @@ private slots:
 
         // When GA only had been fetched, the GA release is offered
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // When beta is fetched, the GA release is still offered, but we cache
         // the older beta on that channel.
         QCOMPARE(fixture._updateSpy[1][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[1][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::olderBeta);
+        QCOMPARE(fixture._updateSpy[1][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[1][3].value<Update>(), TestData::olderBeta);
+        QCOMPARE(fixture._updateSpy[1][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // No beta release at all does not cause any issues; GA is still offered
@@ -352,8 +372,10 @@ private slots:
 
         // When GA only had been fetched, the GA release is offered
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 
     // Test toggling the beta channel.
@@ -374,8 +396,10 @@ private slots:
 
         // Verify the update from GA.
         QCOMPARE(fixture._updateSpy[0][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[0][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[0][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[0][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // Enable the beta channel.  It has a newer beta initially.
         auto pBetaNewerReply = enqueueUpdateReply(TestData::newerBeta);
@@ -385,8 +409,10 @@ private slots:
 
         // Verify the beta update.
         QCOMPARE(fixture._updateSpy[1][0].value<Update>(), TestData::newerBeta);
-        QCOMPARE(fixture._updateSpy[1][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::newerBeta);
+        QCOMPARE(fixture._updateSpy[1][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[1][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[1][3].value<Update>(), TestData::newerBeta);
+        QCOMPARE(fixture._updateSpy[1][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // Disable the beta channel and verify that we offer the GA update
         // again.  This happens synchronouly and doesn't have to make any
@@ -395,8 +421,10 @@ private slots:
         QVERIFY(fixture._updateSpy.length() == 3);  // Emitted synchronously
         // We go back to the GA update, and the beta cache is cleared.
         QCOMPARE(fixture._updateSpy[2][0].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[2][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[2][2].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[2][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[2][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[2][3].value<Update>(), Update{});
+        QCOMPARE(fixture._updateSpy[2][4].value<std::vector<QString>>(), std::vector<QString>{});
 
         // Enable beta again.  We don't cache the beta channel when it's
         // stopped, so there shouldn't be any change at this point.
@@ -408,8 +436,10 @@ private slots:
         pBetaNewer2Reply->queueFinished();
         QVERIFY(fixture._updateSpy.wait());
         QCOMPARE(fixture._updateSpy[3][0].value<Update>(), TestData::newerBeta2);
-        QCOMPARE(fixture._updateSpy[3][1].value<Update>(), TestData::newerGa);
-        QCOMPARE(fixture._updateSpy[3][2].value<Update>(), TestData::newerBeta2);
+        QCOMPARE(fixture._updateSpy[3][1].value<bool>(), false);
+        QCOMPARE(fixture._updateSpy[3][2].value<Update>(), TestData::newerGa);
+        QCOMPARE(fixture._updateSpy[3][3].value<Update>(), TestData::newerBeta2);
+        QCOMPARE(fixture._updateSpy[3][4].value<std::vector<QString>>(), std::vector<QString>{});
     }
 };
 

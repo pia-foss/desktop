@@ -30,9 +30,11 @@ logFile="/dev/null"
 
 readonly appName="{{BRAND_NAME}}"
 readonly brandCode="{{BRAND_CODE}}"
+readonly buildArchitecture="{{BUILD_ARCHITECTURE}}"
 readonly installDir="/opt/${brandCode}vpn"
 readonly daemonSettingsPath="$installDir/etc"
 readonly daemonDataPath="$installDir/var"
+readonly daemonResPath="$installDir/share"
 readonly oldSettingsPath="/$HOME/.pia_manager/data"
 readonly systemdServiceLocation="/etc/systemd/system/${brandCode}vpn.service"
 readonly sysvinitServiceLocation="/etc/init.d/${brandCode}vpn"
@@ -50,6 +52,10 @@ readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
 readonly wgIfPrefix="wg${brandCode}"                       # WireGuard interface prefix, e.g wgpia
 readonly nmConfigDir="/etc/NetworkManager/conf.d"
 readonly nmConfigPath="${nmConfigDir}/${wgIfPrefix}.conf"  # Our custom NetworkManager config
+
+# Set by arguments, or auto-detected
+BOOT_MANAGER=
+FORCE_ARCHITECTURE=
 
 echo ""
 echo "================================="
@@ -372,6 +378,169 @@ function migrateLegacySettings() {
     true
 }
 
+# This checks uname -m to try to figure out if there is a native PIA build
+# available for this platform, and what the PIA build architecture is if so.
+#
+# Prints the PIA architecture name (x86_64, armhf, or arm64 - matches build.rb),
+# or nothing if no such build is known.
+#
+# Note that this is _not_ 100% reliable as discussed in
+# checkArchitectureSupport and is just used for advisory purposes to suggest a
+# native build when available.
+function guessNativeArchitecture() {
+    case "$(uname -m)" in
+        amd64|x86_64)
+            echo "x86_64"
+            ;;
+        aarch64*|armv8*)
+            echo "arm64"
+            ;;
+        # This is particularly vague because we don't actually know what ABI
+        # the system is using from this information.  Most ARM systems have
+        # moved to 64-bit though, and the remaining 32-bit systems are mostly
+        # armhf, so guess that this is likely armhf.
+        arm*)
+            echo "armhf"
+            ;;
+        *)
+            # Something else
+            ;;
+    esac
+}
+
+function checkBestArchitecture() {
+    # This build can be installed, but if we think a different build is native
+    # for this system, suggest that build instead.
+    if [ -n "$HOST_PIA_ARCHITECTURE" ] && [ "$HOST_PIA_ARCHITECTURE" != "$buildArchitecture" ]; then
+        echo "This is the $buildArchitecture build, which may be running under emulation."
+        echo "Consider using the $HOST_PIA_ARCHITECTURE build instead, which may be native for your system."
+        requestConfirmation "Continue installing $buildArchitecture?"
+    fi
+}
+
+function checkAlternateArchitecture() {
+    # This build can't be installed.  If we think a different build is native
+    # for this system, suggest that build instead.
+    if [ -n "$HOST_PIA_ARCHITECTURE" ] && [ "$HOST_PIA_ARCHITECTURE" != "$buildArchitecture" ]; then
+        echo "Install the $HOST_PIA_ARCHITECTURE build instead, this system does not support $buildArchitecture."
+        exit 1
+    else
+        # Either we do not know the native architecture for this system, or
+        # we think this build actually is the native architecture (we may be
+        # wrong, or there may be another reason the build does not work, such as
+        # a glibc version mismatch).
+        echo "This build does not appear to be compatible with this system."
+        echo "This may be due to an architecture or library mismatch."
+        echo "If your distribution is recent and supported, consider trying a different build of PIA."
+        requestConfirmation "Continue installing $buildArchitecture?"
+    fi
+}
+
+function promptIncompatibleUpgrade() {
+    echo "This upgrade does not appear to be compatible with this system."
+    echo "If this is an older distribution, it may no longer be supported."
+    echo ""
+    echo "The PIA installation will not be modified."
+    echo "You can stop receiving update notifications if this distribution is out of support."
+    requestConfirmation "Stop receiving update notifications?"
+    # If the user answers 'no', requestConfirmation exits.
+    # Disable update notifications by clearing the update channels the daemon
+    # stops checking for updates when this is done.
+    "/opt/${brandCode}vpn/bin/${brandCode}ctl" --unstable applysettings '{"updateChannel":"","betaUpdateChannel":""}'
+}
+
+function isBinExecutable() {
+    local BIN="$1"
+    # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
+    if ! "$BIN" --version >/dev/null 2>&1; then
+        # Not compatible, show the specific error (will indicate incompatible
+        # architecture or missing library, etc.)
+        echoFail "Build is not compatible with this system."
+        echo "$BIN --version"
+        "$BIN" --version
+        echo ""
+        return 1
+    fi
+}
+
+function isBuildExecutable() {
+    # The CLI is the most basic test; it has few dependencies.
+    if ! isBinExecutable "$root/piafiles/bin/${brandCode}ctl"; then return 1; fi
+    # Test the daemon too.  It may refer to specific versioned symbols from
+    # libstdc++ that aren't used by the CLI.  Note that we haven't installed the
+    # libnl dependencies yet, but that's OK, those are loaded at runtime.
+    if ! isBinExecutable "$root/piafiles/bin/${brandCode}-daemon"; then return 1; fi
+    # We can't test the client, as the XCB dependencies have not been installed
+    # yet.
+    return 0
+}
+
+function checkArchitectureSupport() {
+    HOST_PIA_ARCHITECTURE="$(guessNativeArchitecture)"
+    echo "Installing PIA for $buildArchitecture, system is $(uname -m)"
+
+    # If PIA is already installed with this architecture, assume we can upgrade
+    # it, even if it doesn't seem to be executable.  This indicates that the
+    # user overrode detection at some point in the past, we don't want to
+    # prompt again in that case for every upgrade.
+    if [ -d "$daemonResPath" ]; then
+        if [ -f "$daemonResPath/architecture.txt" ]; then
+            INSTALLED_PIA_ARCHITECTURE="$(cat "$daemonResPath/architecture.txt")"
+        else
+            # Prior versions of PIA didn't have architecture.txt, and only
+            # x86_64 builds were available for Linux.
+            INSTALLED_PIA_ARCHITECTURE=x86_64
+        fi
+    else
+        # PIA is not installed
+        INSTALLED_PIA_ARCHITECTURE=
+    fi
+
+    # If the user has forced the architecture, skip all architecture chceks
+    if [ -n "$FORCE_ARCHITECTURE" ]; then
+        true # Nothing to check
+    # If the architecture being installed is already installed, then still test
+    # the new build for compatibility, but handle the results differently.
+    elif [ "$INSTALLED_PIA_ARCHITECTURE" == "$buildArchitecture" ]; then
+        # This architecture is already installed (assume the user does want this
+        # architecture, if it is not an exact match then the user overrode it
+        # for the previous install.)
+        #
+        # Still check that the executables can be executed; library updates may
+        # prevent a newer build from running on an older operating system -
+        # don't blindly install in that case.
+        if ! isBuildExecutable; then
+            promptIncompatibleUpgrade
+            exit 1
+        fi
+    # Otherwise, check that this build is the correct architecture.
+    else
+        # Check if this build can be executed on the host machine - make sure the
+        # user isn't trying to install a build for the wrong architecture.  Note
+        # that we haven't installed any extra dependency libraries yet, but that
+        # piactl --version does not require any of them.
+        #
+        # This is the preferred way to detect architecture support rather than
+        # trying to match uname -m.  There could be variants or changes in uname -m,
+        # or future Linux architectures might gain multiarch support (like how amd64
+        # is able to execute i686 binaries), etc., we can't predict all of those.
+        #
+        # We do follow this up with an advisory uname -m check to try to identify
+        # situations where an emulated build is being used but a native build is
+        # available; etc.
+        if "$root/piafiles/bin/${brandCode}ctl" --version >/dev/null 2>&1; then
+            # The build architecture can be executed, make sure this is the best
+            # build (suggest a native build if this build appears to run under
+            # emulation)
+            checkBestArchitecture
+        else
+            # The build can't be executed.  Suggest an alternative if possible or
+            # suggest to configure emulation.
+            checkAlternateArchitecture
+        fi
+    fi
+}
+
 function autoDetectSystem() {
     # ignore "ps | grep" warning (below in elif) pgrep cannot check a specific PID
     # shellcheck disable=SC2009
@@ -406,34 +575,46 @@ function autoDetectSystem() {
 }
 
 function processOpts() {
-    case "$1" in
-    --sysvinit)
-        BOOT_MANAGER=sysvinit
-        ;;
-    --systemd)
-        BOOT_MANAGER=systemd
-        ;;
-    --openrc)
-        BOOT_MANAGER=openrc
-        ;;
-    --skip-service)
-        BOOT_MANAGER=none
-        ;;
-    -h|--help)
-        echo "Usage: $brandCode-linux-<version>.run -- <install-options>"
-        echo "Install options:"
-        echo "  --systemd to setup a systemd service on boot"
-        echo "  --sysvinit to setup a sysvinit service on boot"
-        echo "  --skip-service to skip setting up a service"
-        exit 0
-        ;;
-    *)
-        echo "Unrecognized option: '$1'"
-        echo "Type: 'pia-linux-<version>.run -- -h' to see the available options."
-        exit 1
-        ;;
-    esac
-    true
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+        --sysvinit)
+            BOOT_MANAGER=sysvinit
+            shift
+            ;;
+        --systemd)
+            BOOT_MANAGER=systemd
+            shift
+            ;;
+        --openrc)
+            BOOT_MANAGER=openrc
+            shift
+            ;;
+        --skip-service)
+            BOOT_MANAGER=none
+            shift
+            ;;
+        --force-architecture)
+            FORCE_ARCHITECTURE=1
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $brandCode-linux-<version>.run -- <install-options>"
+            echo "Install options:"
+            echo "  Init system (default is to auto-detect):"
+            echo "    --systemd - setup a systemd service on boot"
+            echo "    --sysvinit - setup a sysvinit service on boot"
+            echo "    --skip-service - skip setting up a service"
+            echo "  Architecture (default is to check host architecture)"
+            echo "    --force-architecture - install even if build does not match system architecture"
+            exit 0
+            ;;
+        *)
+            echo "Unrecognized option: '$1'"
+            echo "Type: 'pia-linux-<version>.run -- -h' to see the available options."
+            exit 1
+            ;;
+        esac
+    done
 }
 
 function requestConfirmation() {
@@ -459,10 +640,10 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # process command line options and figure out the system type (e.g systemd vs sysvinit)
-if [[ $# -eq 0 ]]; then
+processOpts "$@"
+checkArchitectureSupport
+if [ -z "$BOOT_MANAGER" ]; then
     autoDetectSystem
-else
-    processOpts "$1"
 fi
 
 # early-exit in our default case (systemd) if systemd is not installed

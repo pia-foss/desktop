@@ -6,6 +6,7 @@ require_relative './rake/product/translations.rb'
 require_relative './rake/product/breakpad.rb'
 require_relative './rake/product/unittest.rb'
 require 'net/http'
+require 'openssl'
 
 # Fail if LFS wasn't set up.  Otherwise, builds can actually succeed but fail
 # with confusing problems at runtime.
@@ -178,21 +179,22 @@ jsonFetched = Build.new('json-fetched')
     stage.install(fetchedFile, :res)
 end
 
+# Install version/brand/arch info in case an upgrade needs to know what is
+# currently installed
+stage.install(version.artifact('version.txt'), :res)
+stage.install(version.artifact('brand.txt'), :res)
+stage.install(version.artifact('architecture.txt'), :res)
+
 # Install dependencies built separately
 depDirs = [
-    'deps/openvpn',
-    'deps/libk5crypto',
-    'deps/resolvers/unbound',
-    'deps/shadowsocks',
-    'deps/wireguard-go',
-    'deps/wgservice'
+    'deps/built'
 ]
 depPlatformDir = ''
 depPlatformDir = 'win' if Build::windows?
 depPlatformDir = 'mac' if Build::macos?
 depPlatformDir = 'linux' if Build::linux?
 depDirs.each do |d|
-    FileList[File.join(d, depPlatformDir, "#{Build::Architecture}", '*')].each do |f|
+    FileList[File.join(d, depPlatformDir, "#{Build::TargetArchitecture}", '*')].each do |f|
         # On Linux, shared objects need to go to lib/ and executables to bin/.
         # On Mac and Windows, :lib and :bin are the same.
         dir = File.basename(f).include?(".so") ? :lib : :bin
@@ -225,9 +227,9 @@ integtestBin = Executable.new("#{Build::Brand}-integtest")
     .install(integtestStage, :bin)
 
 # Install OpenSSL libraries to the integtest staging area
-FileList[File.join('deps/openvpn',
+FileList[File.join('deps/built',
                    Build.selectPlatform('win', 'mac', 'linux'),
-                   Build::Architecture.to_s, 'lib*')].each do |d|
+                   Build::TargetArchitecture.to_s, 'lib*')].each do |d|
     integtestStage.install(d, :lib)
 end
 
@@ -260,10 +262,12 @@ task :stage => stage.target do |t|
     puts "staged installation"
 end
 
+desc "Build the installer"
 task :installer do |t|
     puts "built installer"
 end
 
+desc "Run integration tests"
 task :integtest do |t|
     puts "built integration tests"
 end

@@ -800,9 +800,9 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     {
         if(appDnsInfo.isValid())
         {
-            qInfo() << QStringLiteral("Updating split tunnel DNS due to network change: dnsServer: %1, cgroupId %2, sourceIp %3, defaultRoute %4")
+            qInfo() << QStringLiteral("Updating split tunnel DNS due to network change: dnsServer: %1, cgroupId %2, sourceIp %3")
                 .arg(appDnsInfo.dnsServer(), appDnsInfo.cGroupId(),
-                     appDnsInfo.sourceIp(), g_daemon->vpnHasDefaultRoute() ? "true" : "false");
+                     appDnsInfo.sourceIp());
             replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"), {
                 QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j SNAT --to-source %2").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.sourceIp()),
                 QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j SNAT --to-source %2").arg(appDnsInfo.cGroupId()).arg(appDnsInfo.sourceIp()),
@@ -817,9 +817,9 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         }
         else
         {
-            qInfo() << QStringLiteral("Clear split tunnel DNS rules, don't have all information: dnsServer: %1, cgroupId %2, sourceIp %3, defaultRoute %4")
+            qInfo() << QStringLiteral("Clear split tunnel DNS rules, don't have all information: dnsServer: %1, cgroupId %2, sourceIp %3")
                 .arg(appDnsInfo.dnsServer(), appDnsInfo.cGroupId(),
-                     appDnsInfo.sourceIp(), g_daemon->vpnHasDefaultRoute() ? "true" : "false");
+                     appDnsInfo.sourceIp());
             replaceAnchor(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"),
                           {}, kNatTable);
 
@@ -842,16 +842,14 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
         if(!ruleList.isEmpty() && params.enableSplitTunnel)
         {
-            const auto vpnOnlyServersStr = (params.defaultRoute ? effectiveDnsServers : QStringList{appDnsInfo.dnsServer()}).join(",");
-            const auto bypassServersStr = (params.defaultRoute ? QStringList{appDnsInfo.dnsServer()} : effectiveDnsServers).join(",");
-
             // No DNS leak protection required for bypass traffic - at worst it'll go over the VPN which isn't a leak
             ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
             ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
 
             // DNS leak protection for vpnOnly apps.
-            if(!params.defaultRoute)
+            if(params._connectionSettings && params._connectionSettings->forceVpnOnlyDns())
             {
+                const auto vpnOnlyServersStr = QStringList{appDnsInfo.dnsServer()}.join(",");
                 // When the VPN does not have the default route, allow
                 // the vpnOnly DNS servers
                 ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -d %2 -j ACCEPT").arg(CGroup::vpnOnlyId, vpnOnlyServersStr);
@@ -862,6 +860,7 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
             }
             else
             {
+                const auto bypassServersStr = QStringList{appDnsInfo.dnsServer()}.join(",");
                 // When the VPN does have the default route vpnOnly apps use the default DNS.
                 // However, vpnOnly apps could still leak if a DNS request re-uses the route used by
                 // by a prior bypass app. This happens when a vpnOnly app re-uses the source port of a bypass app within the UDP conntrack timeout.

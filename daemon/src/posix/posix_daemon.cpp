@@ -32,15 +32,17 @@
 #if defined(Q_OS_MACOS)
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include "mac/kext_client.h"
+#include "mac/mac_splittunnel.h"
 #elif defined(Q_OS_LINUX)
 #include "linux/proc_tracker.h"
 #include "linux/linux_routing.h"
 #include "linux/linux_fwmark.h"
+#include "linux/linux_cgroup.h"
 #endif
 
 #include <QFileSystemWatcher>
 #include <QSocketNotifier>
+#include <QVersionNumber>
 
 #include <initializer_list>
 
@@ -94,24 +96,42 @@ void setUidAndGid()
 class PosixRouteManager : public RouteManager
 {
 public:
-    virtual void addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
-    virtual void removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
+    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
+    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
+    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
+    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
 };
 
-
-void PosixRouteManager::addRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
+void PosixRouteManager::addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
 {
 #if defined(Q_OS_MACOS)
-    qInfo() << "Adding bypass route for" << subnet;
+    qInfo() << "Adding ipv4 bypass route for" << subnet;
     Exec::cmd("route", {"add", "-net", subnet, gatewayIp});
 #endif
 }
 
-void PosixRouteManager::removeRoute(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
+void PosixRouteManager::removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
 {
 #if defined(Q_OS_MACOS)
-    qInfo() << "Removing bypass route for" << subnet;
+    qInfo() << "Removing ipv4 bypass route for" << subnet;
     Exec::cmd("route", {"delete", "-net", subnet, gatewayIp});
+#endif
+}
+
+// sudo route -q -n delete -inet6 2a03:b0c0:2:d0::26:c001 fe80::325a:3aff:fe6d:a1e0
+void PosixRouteManager::addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
+{
+#if defined(Q_OS_MACOS)
+    qInfo() << "Adding ipv6 bypass route for" << subnet;
+    Exec::cmd("route", {"add", "-inet6", subnet, QStringLiteral("%1%%2").arg(gatewayIp, interfaceName)});
+#endif
+}
+
+void PosixRouteManager::removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
+{
+#if defined(Q_OS_MACOS)
+    qInfo() << "Removing ipv6 bypass route for" << subnet;
+    Exec::cmd("route", {"delete", "-inet6", subnet, QStringLiteral("%1%%2").arg(gatewayIp, interfaceName)});
 #endif
 }
 
@@ -128,14 +148,14 @@ PosixDaemon::PosixDaemon()
 #ifdef Q_OS_MACOS
     PFFirewall::install();
 
-    prepareSplitTunnel<KextClient>();
+    prepareSplitTunnel<MacSplitTunnel>();
 #endif
+
+    // There's no installation required for split tunnel on Mac or Linux (!)
+    _state.netExtensionState(qEnumToString(DaemonState::NetExtensionState::Installed));
 
 #ifdef Q_OS_LINUX
     IpTablesFirewall::install();
-
-    // There's no installation required for split tunnel on Linux (!)
-    _state.netExtensionState(qEnumToString(DaemonState::NetExtensionState::Installed));
 
     // Check for the WireGuard kernel module
     connect(&_linuxModSupport, &LinuxModSupport::modulesUpdated, this,
@@ -148,6 +168,8 @@ PosixDaemon::PosixDaemon()
 
     prepareSplitTunnel<ProcTracker>();
 #endif
+
+    checkSplitTunnelSupport();
 
     auto daemonBinaryWatcher = new QFileSystemWatcher(this);
     daemonBinaryWatcher->addPath(Path::DaemonExecutable);
@@ -164,6 +186,8 @@ PosixDaemon::PosixDaemon()
         }
     });
 
+    connect(this, &Daemon::aboutToConnect, this, &PosixDaemon::onAboutToConnect);
+
 #ifdef Q_OS_MAC
     connect(_connection, &VPNConnection::stateChanged, this,
         [this](VPNConnection::State state)
@@ -173,12 +197,6 @@ PosixDaemon::PosixDaemon()
             else
                 _macDnsMonitor.disableMonitor();
         });
-    connect(&_kextMonitor, &KextMonitor::kextStateChanged, this,
-            [this](DaemonState::NetExtensionState extState)
-            {
-                state().netExtensionState(qEnumToString(extState));
-            });
-    state().netExtensionState(qEnumToString(_kextMonitor.lastState()));
 
     PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());
 
@@ -205,6 +223,11 @@ PosixDaemon::~PosixDaemon()
 std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
 {
     return {};
+}
+
+void PosixDaemon::onAboutToConnect()
+{
+    aboutToConnectToVpn();
 }
 
 void PosixDaemon::handleSignal(int sig) Q_DECL_NOEXCEPT
@@ -445,12 +468,29 @@ static QStringList subnetsToBypass(const FirewallParams &params)
         return QStringList{"fe80::/10", "ff00::/8"}
                + (params.bypassIpv4Subnets + params.bypassIpv6Subnets).toList();
 }
+
+static QStringList natPhysRules(const OriginalNetworkScan &netScan, const QString &macVersionStr)
+{
+    // Mojave (10.14) kernel panics when we enable nat for ipv6
+    const QString noNat6{QStringLiteral("10.14")};
+    static const auto noNat6Version = QVersionNumber::fromString(noNat6);
+    const auto macVersion = QVersionNumber::fromString(macVersionStr);
+    const QString itfName = netScan.interfaceName();
+
+    QStringList ruleList{QStringLiteral("nat on %1 inet -> (%1)").arg(itfName)};
+
+    if(macVersion > noNat6Version)
+        ruleList << QStringLiteral("nat on %1 inet6 -> (%1)").arg(itfName);
+    else
+        qInfo() << QStringLiteral("Not creating inet6 nat rule for %1 - macOS version %2 < %3").arg(itfName, macVersionStr, noNat6);
+
+    return ruleList;
+}
 #endif
 
 void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 {
     const auto &netScan{params.netScan};
-    // TODO: Just one more tiny step of refactoring needed :)
 #if defined(Q_OS_MACOS)
     // double-check + ensure our firewall is installed and enabled. This is necessary as
     // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
@@ -458,7 +498,13 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     PFFirewall::ensureRootAnchorPriority();
 
-    PFFirewall::setTranslationEnabled(QStringLiteral("000.natVPN"), params.hasConnected);
+    if(params.hasConnected)
+    {
+        qInfo() << "FOO setting 000.natVPN anchor with interfacename" << _state.tunnelDeviceName();
+    }
+
+    PFFirewall::setTranslationEnabled(QStringLiteral("000.natVPN"), params.hasConnected, { {"interface", _state.tunnelDeviceName()} });
+    PFFirewall::setFilterWithRules(QStringLiteral("001.natPhys"), params.enableSplitTunnel, natPhysRules(netScan, QSysInfo::productVersion()));
     PFFirewall::setFilterEnabled(QStringLiteral("000.allowLoopback"), params.allowLoopback);
     PFFirewall::setFilterEnabled(QStringLiteral("100.blockAll"), params.blockAll);
     PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
@@ -559,8 +605,8 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     // block VpnOnly packets when the VPN is not connected
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowResolver && params.defaultRoute);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowResolver && !params.defaultRoute);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowResolver && !params.bypassDefaultApps);
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowResolver && params.bypassDefaultApps);
 
     // Allow PIA Wireguard packets when PIA is allowed.  These come from the
     // kernel when using the kernel module method, so they aren't covered by the
@@ -600,19 +646,6 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 
     updateBoundRoute(params);
     toggleSplitTunnel(params);
-}
-
-QJsonValue PosixDaemon::RPC_installKext()
-{
-#ifdef Q_OS_MAC
-    // Running checkState should perform the installation
-    _kextMonitor.checkState();
-    // Return the new state in the response (the update would be delivered
-    // asynchronously)
-    return QJsonValue{qEnumToString(_kextMonitor.lastState())};
-#else
-    throw Error{HERE, Error::Code::Unknown};    // Not implemented
-#endif
 }
 
 #ifdef Q_OS_MAC
@@ -689,7 +722,6 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
     file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
-    file.writeText("kext syslog", _kextMonitor.getKextLog());
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
     file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
@@ -791,15 +823,15 @@ void PosixDaemon::updateBoundRoute(const FirewallParams &params)
         Exec::bash(QStringLiteral("route delete 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
     };
 
-
-    // When we have connected (even if we're currently reconnecting), create a
-    // bound route for the physical interface.  This has two purposes:
-    // - Split tunnel - it allows "bypass" apps to bind to the physical
-    //   interface
-    // - DNS leak protection - we allow apps to try to send DNS packets out the
-    //   physical interface toward the configured DNS servers, but then force
-    //   them into the tunnel anyway.  (mDNSResponder does this on 10.15.4+.)
-    if(params.hasConnected)
+    // We may need a bound route for the physical interface:
+    // - When we have connected (even if currently reconnecting) - we need this
+    //   for DNS leak protection.  Apps can try to send DNS packets out the
+    //   physical interface toward the configured DNS servers, but PIA forces it
+    //   it into the tunnel anyway.  (mDNSResponder does this in 10.15.4+.)
+    // - Split tunnel (even if disconnected) - needed to allow bypass apps to
+    //   bind to the physical interface, and needed for OpenVPN itself to bind
+    //   to the physical interface to bypass split tunnel.
+    if(params.enableSplitTunnel || params.hasConnected)
     {
         // Remove the previous bound route if it's present and different
         if(_boundRouteNetScan.ipv4Valid() &&
@@ -858,28 +890,15 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     if(params.enableSplitTunnel && !_enableSplitTunnel)
     {
         qInfo() << "Starting Split Tunnel";
-#ifdef Q_OS_MAC
-        if(!_kextMonitor.loadKext())
-          qWarning() << "Failed to load Kext";
-        else
-          qInfo() << "Successfully loaded Kext";
-#endif
 
         startSplitTunnel(params, _state.tunnelDeviceName(),
-                         _state.tunnelDeviceLocalAddress(),
-                         params.excludeApps, params.vpnOnlyApps);
+                         _state.tunnelDeviceLocalAddress());
     }
     // Deactivate if it's supposed to be inactive but is currently active
     else if(!params.enableSplitTunnel && _enableSplitTunnel)
     {
         qInfo() << "Shutting down Split Tunnel";
         shutdownSplitTunnel();
-#ifdef Q_OS_MAC
-        if(!_kextMonitor.unloadKext())
-            qWarning() << "Failed to unload Kext";
-        else
-            qInfo() << "Successfully unloaded Kext";
-#endif
     }
     // Otherwise, the current active state is correct, but if we are currently
     // active, update the configuration
@@ -889,11 +908,89 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
         // Note we do not check first for _splitTunnelNetScan != params.netScan as
         // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
         updateSplitTunnel(params, _state.tunnelDeviceName(),
-                          _state.tunnelDeviceLocalAddress(),
-                          params.excludeApps, params.vpnOnlyApps);
+                          _state.tunnelDeviceLocalAddress());
     }
 
     _enableSplitTunnel = params.enableSplitTunnel;
+}
+
+void PosixDaemon::checkSplitTunnelSupport()
+{
+    std::vector<QString> errors;
+
+#ifdef Q_OS_LINUX
+    // iptables 1.6.1 is required.
+    QProcess iptablesVersion;
+    iptablesVersion.start(QStringLiteral("iptables"), QStringList{QStringLiteral("--version")});
+    iptablesVersion.waitForFinished();
+    auto output = iptablesVersion.readAllStandardOutput();
+    auto outputNewline = output.indexOf('\n');
+    // First line only
+    if(outputNewline >= 0)
+        output = output.left(outputNewline);
+    auto match = QRegularExpression{R"(([0-9]+)(\.|)([0-9]+|)(\.|)([0-9]+|))"}.match(output);
+    // Note that captured() returns QString{} by default if the pattern didn't
+    // match, so these will be 0 by default.
+    auto major = match.captured(1).toInt();
+    auto minor = match.captured(3).toInt();
+    auto patch = match.captured(5).toInt();
+    qInfo().nospace() << "iptables version " << output << " -> " << major << "."
+        << minor << "." << patch;
+    // SemVersion implements a suitable operator<(), we don't use it to parse
+    // the version because we're not sure that iptables will always return three
+    // parts in its version number though.
+    if(SemVersion{major, minor, patch} < SemVersion{1, 6, 1})
+        errors.push_back(QStringLiteral("iptables_invalid"));
+
+    // If the network monitor couldn't be created, libnl is missing.  (This was
+    // not required in some releases, but it is now used to monitor the default
+    // route, mainly because it can change while connected with WireGuard.)
+    if(!_pNetworkMonitor)
+        errors.push_back(QStringLiteral("libnl_invalid"));
+
+    // This cgroup must be mounted in this location for this feature.
+    QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
+    if(!cgroupFile.exists())
+    {
+        // Try to create the net_cls VFS (if we have no other errors)
+        if(errors.empty())
+        {
+            if(!CGroup::createNetCls())
+                errors.push_back(QStringLiteral("cgroups_invalid"));
+        }
+        else
+        {
+            errors.push_back(QStringLiteral("cgroups_invalid"));
+        }
+    }
+
+    // We need proc events in order to detect process invocations
+    // (CONFIG_PROC_EVENTS in kconfig).  There's no direct way to check this,
+    // and it tends to be disabled on lightweight kernels, like for ARM boards
+    // (it requires CONFIG_CONNECTOR=y, and those kernels are often built with
+    // CONFIG_CONNECTOR=m).
+    //
+    // Try to connect and see if we get an initial message.  This is async, so
+    // we'll assume the kernel does not support it initially until we get the
+    // initial message.
+    errors.push_back(QStringLiteral("cn_proc_invalid"));
+    qInfo() << "Checking proc event support by connecting to Netlink connector";
+    _pCnProcTest.emplace();
+    connect(_pCnProcTest.ptr(), &CnProc::connected, this, [this]()
+    {
+        qInfo() << "Proc event recieved, kernel supports proc events";
+        auto errors = _state.splitTunnelSupportErrors();
+        auto itNewEnd = std::remove(errors.begin(), errors.end(),
+                                    QStringLiteral("cn_proc_invalid"));
+        errors.erase(itNewEnd, errors.end());
+        _state.splitTunnelSupportErrors(errors);
+        // Don't need the netlink connection any more
+        _pCnProcTest.clear();
+    });
+#endif
+
+    if(!errors.empty())
+        _state.splitTunnelSupportErrors(errors);
 }
 
 #ifdef Q_OS_LINUX

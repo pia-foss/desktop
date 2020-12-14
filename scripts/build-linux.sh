@@ -60,9 +60,31 @@ fi
 
 pushd "$ROOT"
 
-# Build
-export RUBYOPT=-Eutf-8
-rake clean VARIANT=release BRAND="$BRAND"
-rake all VARIANT=release BRAND="$BRAND"
+function crossbuild() {
+    ARCH="$1"
+    echo "===Build $ARCH==="
+    ./scripts/chroot/enter.sh "$ARCH" -- rake clean VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCH"
+    ./scripts/chroot/enter.sh "$ARCH" -- rake all VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCH"
+}
+
+# Build the specified architectures.  By default, if PIA_BUILD_ARCHITECTURE
+# isn't set, build everything.  If it is set, build only the specified
+# architecture.
+
+# amd64 is assumed by this script to be the host architecture (not a cross
+# build), although in theory cross builds to amd64 should work too
+if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "x86_64" ]; then
+    echo "===Build x86_64==="
+    ./scripts/chroot/enter.sh -- rake clean VARIANT=release BRAND="$BRAND"
+    ./scripts/chroot/enter.sh -- rake all VARIANT=release BRAND="$BRAND"
+fi
+
+if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "arm64" ]; then
+    crossbuild arm64
+fi
+
+if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "armhf" ]; then
+    crossbuild armhf
+fi
 
 popd

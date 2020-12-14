@@ -51,11 +51,21 @@ const QString UpdateChannel::platformName =
 #elif defined(Q_OS_WIN)
     #if defined(Q_PROCESSOR_X86_64)
         QStringLiteral("windows_x64");
-    #else
+    #elif defined(Q_PROCESSOR_X86_32)
         QStringLiteral("windows_x86");
+    #else
+        #error "Platform name not known for this Windows architecture"
     #endif
-#elif defined(Q_OS_LINUX) && defined(Q_PROCESSOR_X86_64)
-    QStringLiteral("linux_x64");
+#elif defined(Q_OS_LINUX)
+    #if defined(Q_PROCESSOR_X86_64)
+        QStringLiteral("linux_x64");
+    #elif defined(__aarch64__)
+        QStringLiteral("linux_arm64");
+    #elif defined(__arm__)
+        QStringLiteral("linux_armhf");
+    #else
+        #error "Platform name not known for this Linux architecture"
+    #endif
 #else
     #error "Platform name not known for this platform"
 #endif
@@ -68,22 +78,20 @@ namespace
     const std::chrono::hours versionRefreshInterval{1};
 }
 
-Update::Update(const QString &uri, const QString &version, const QJsonArray &flags)
+Update::Update(const QString &uri, const QString &version, const QString &osRequired)
 {
     if(!uri.isEmpty() && !version.isEmpty())
     {
         _uri = uri;
         _version = version;
-    }
-
-    if(!flags.isEmpty()) {
-        _flags = flags;
+        _osRequired = osRequired;
     }
 }
 
 bool Update::operator==(const Update &other) const
 {
-    return uri() == other.uri() && version() == other.version() && flags() == other.flags();
+    return uri() == other.uri() && version() == other.version() &&
+        osRequired() == other.osRequired();
 }
 
 UpdateChannel::UpdateChannel()
@@ -98,14 +106,26 @@ void UpdateChannel::onVersionMetadataReady(const QJsonDocument &metadataDoc)
     // Grab the current available version so we can emit the
     // signal only if it changes.
     Update prevUpdate{_update};
+    std::vector<QString> prevFlags{_flags};
     checkVersionMetadata(metadataDoc);
 
-    if(prevUpdate != _update)
+    if(prevUpdate != _update || prevFlags != _flags)
         emit updateChanged();
 }
 
 void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
 {
+    // Store feature flags even if the rest of the update is invalid.  This is
+    // not related to the actual update being offered.
+    const auto &flagList = regionsDoc[QStringLiteral("flags")].toArray();
+    _flags.clear();
+    _flags.reserve(flagList.size());
+    for(const auto &flag : flagList)
+    {
+        if(flag.isString())
+            _flags.push_back(flag.toString());
+    }
+
     // Use a unique branded "latest_version_BRAND", so accidentally fetching a update json
     // for the wrong brand never shows an update
     //
@@ -133,23 +153,9 @@ void UpdateChannel::checkVersionMetadata(const QJsonDocument &regionsDoc)
             << downloadUrl;
     }
 
-    if(!osVersionRequirement.isEmpty()) {
-      if(!validateOSRequirements(osVersionRequirement)) {
-        qWarning () << "This OS version does not support the requirement for update";
-        return;
-      }
-    }
-
-    const auto &flagListVal= regionsDoc[QStringLiteral("flags")];
-    QJsonArray flags;
-
-    if(flagListVal.isArray()) {
-        flags = flagListVal.toArray();
-    }
-
     // Store the update.  (Update ignores partial data if the server returned
     // only a URI or version somehow.)
-    _update = Update{downloadUrl, latestVersion, flags};
+    _update = Update{downloadUrl, latestVersion, osVersionRequirement};
 }
 
 void UpdateChannel::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi)
@@ -176,7 +182,7 @@ void UpdateChannel::discardStaleCache()
     }
 }
 
-void UpdateChannel::reloadAvailableUpdate(const Update &update)
+void UpdateChannel::reloadAvailableUpdate(const Update &update, const std::vector<QString> &flags)
 {
     // If we're on a valid channel, restore the available update.
     // If we're not on a valid channel, this channel doesn't provide any
@@ -189,6 +195,7 @@ void UpdateChannel::reloadAvailableUpdate(const Update &update)
         Q_ASSERT(!_update.isValid());
 
         _update = update;
+        _flags = flags;
 
         // Does not emit updateChanged(); UpdateDownloader rechecks the updates
         // after reloading both channels.
@@ -289,43 +296,59 @@ UpdateDownloader::UpdateDownloader()
 
 void UpdateDownloader::checkUpdateChannel(const UpdateChannel &channel,
                                           nullable_t<SemVersion> &newestVersion,
-                                          Update &availableUpdate) const
+                                          Update &availableUpdate,
+                                          bool &osFailedRequirement) const
 {
     if(!channel.update().isValid())
         return; // Nothing available from this channel
 
-    const QString &channelVersion = channel.update().version();
-    try
+    auto channelVersion = SemVersion::tryParse(channel.update().version());
+    if(!channelVersion)
     {
-        SemVersion channelSemVersion{channelVersion};
-        if(!newestVersion || channelSemVersion > *newestVersion)
-        {
-            // This version is newer, use it.
-            newestVersion = channelSemVersion;
-            availableUpdate = channel.update();
-        }
+        qWarning() << "Version" << channel.update().version()
+            << "is not valid, ignoring this channel";
+        return;
     }
-    catch(const Error &ex)
+
+    // If this version is the same or older than the currently known newest
+    // version, ignore it
+    if(newestVersion && *channelVersion <= *newestVersion)
+        return;
+
+    // This version is newer, or there is no other version known yet.  Check the
+    // OS requirement
+    if(!channel.update().osRequired().isEmpty() &&
+        !validateOSRequirements(channel.update().osRequired()))
     {
-        qWarning() << "Version" << channelVersion << "is not valid, ignoring this channel";
+        qWarning() << "This OS version does not meet the requirement"
+            << channel.update().osRequired() << "for version"
+            << channel.update().version();
+        osFailedRequirement = true;
+        return;
     }
+
+    // This version is newer, and the current OS is supported.  Use this version
+    newestVersion = channelVersion;
+    availableUpdate = channel.update();
 }
 
-Update UpdateDownloader::calculateAvailableUpdate() const
+Update UpdateDownloader::calculateAvailableUpdate(bool &osFailedRequirement) const
 {
     // The semantic version of the newst version available (so far, as we check
     // the channels.  Null if no versions are available.
     nullable_t<SemVersion> newestVersion;
     Update availableUpdate;
 
+    osFailedRequirement = false;
+
     // Check whether there is a build available from the GA channel.
-    checkUpdateChannel(_gaChannel, newestVersion, availableUpdate);
+    checkUpdateChannel(_gaChannel, newestVersion, availableUpdate, osFailedRequirement);
     qInfo() << "checked GA channel:" << !!newestVersion << availableUpdate;
 
     // Check whether there is a build available from the beta channel.
     // If beta is disabled, this has no effect, because we don't keep a cache of
     // the beta channel when it's disabled.
-    checkUpdateChannel(_betaChannel, newestVersion, availableUpdate);
+    checkUpdateChannel(_betaChannel, newestVersion, availableUpdate, osFailedRequirement);
     qInfo() << "checked beta channel:" << !!newestVersion << availableUpdate;
 
     // If no advertised version was found, there's nothing to offer
@@ -353,8 +376,10 @@ Update UpdateDownloader::calculateAvailableUpdate() const
 
 void UpdateDownloader::emitUpdateRefreshed()
 {
-    emit updateRefreshed(calculateAvailableUpdate(), _gaChannel.update(),
-                         _betaChannel.update());
+    bool osFailedRequirement = false;
+    Update availableUpdate = calculateAvailableUpdate(osFailedRequirement);
+    emit updateRefreshed(availableUpdate, osFailedRequirement, _gaChannel.update(),
+                         _betaChannel.update(), _gaChannel.flags());
 }
 
 void UpdateDownloader::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpdateApi)
@@ -365,19 +390,20 @@ void UpdateDownloader::run(bool newRunning, const std::shared_ptr<ApiBase> &pUpd
 }
 
 void UpdateDownloader::reloadAvailableUpdates(const Update &gaUpdate,
-                                              const Update &betaUpdate)
+                                              const Update &betaUpdate,
+                                              const std::vector<QString> &flags)
 {
     // Daemon calls this before UpdateDownloader has ever been started.
     Q_ASSERT(!_running);
 
     // Reload each channel
-    _gaChannel.reloadAvailableUpdate(gaUpdate);
+    _gaChannel.reloadAvailableUpdate(gaUpdate, flags);
 
     // The cached beta update only makes sense if the beta channel is enabled.
     // Normally this cache should be empty anyway, but validate it since we
     // can't be sure.
     if(_enableBeta)
-        _betaChannel.reloadAvailableUpdate(betaUpdate);
+        _betaChannel.reloadAvailableUpdate(betaUpdate, {}); // Beta "flags" aren't used
     else if(betaUpdate.isValid())
         qWarning() << "Ignoring cached beta update" << betaUpdate << "- beta channel is not enabled";
 
@@ -437,7 +463,8 @@ void UpdateDownloader::enableBetaChannel(bool enable, const std::shared_ptr<ApiB
 
 Async<DownloadResult> UpdateDownloader::downloadUpdate()
 {
-    Update availableUpdate = calculateAvailableUpdate();
+    bool ignored;
+    Update availableUpdate = calculateAvailableUpdate(ignored);
 
     // The client doesn't provide this UI when no update is available or an
     // update is already being downloaded, don't need to provide feedback to the
@@ -613,7 +640,7 @@ void UpdateDownloader::onDownloadFinished()
     pFinishedTask->resolve(std::move(taskResult));
 }
 
-bool UpdateChannel::validateOSRequirements(const QString &requirement)
+bool UpdateDownloader::validateOSRequirements(const QString &requirement) const
 {
 #ifdef Q_OS_MAC
   nullable_t<SemVersion> reqVer = SemVersion::tryParse(requirement);

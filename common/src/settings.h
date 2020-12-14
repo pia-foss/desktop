@@ -604,11 +604,10 @@ public:
     // the version that was just installed.
     JsonField(QString, gaChannelVersion, {})
     JsonField(QString, gaChannelVersionUri, {})
+    JsonField(QString, gaChannelOsRequired, {})
     JsonField(QString, betaChannelVersion, {})
     JsonField(QString, betaChannelVersionUri, {})
-
-    // Flags published in the release channel that we are currently loading
-    JsonField(QJsonArray, flags, {})
+    JsonField(QString, betaChannelOsRequired, {})
 
 #if defined(Q_OS_WINDOWS)
     // Original service command for the Dnscache service on Windows.  PIA must
@@ -624,6 +623,9 @@ public:
     // value once it is found for resiliency (we never clear this).
     JsonField(QString, winDnscacheOriginalPath, {})
 #endif
+
+    // Flags published in the release channel that we are currently loading
+    JsonField(std::vector<QString>, flags, {})
 };
 
 
@@ -1040,7 +1042,7 @@ public:
         openvpnCipher(other.openvpnCipher());
         openvpnAuth(other.openvpnAuth());
         openvpnServerCertificate(other.openvpnServerCertificate());
-        defaultRoute(other.defaultRoute());
+        otherAppsUseVpn(other.otherAppsUseVpn());
         proxy(other.proxy());
         proxyCustom(other.proxyCustom());
         proxyShadowsocks(other.proxyShadowsocks());
@@ -1060,7 +1062,7 @@ public:
             openvpnCipher() == other.openvpnCipher() &&
             openvpnAuth() == other.openvpnAuth() &&
             openvpnServerCertificate() == other.openvpnServerCertificate() &&
-            defaultRoute() == other.defaultRoute() &&
+            otherAppsUseVpn() == other.otherAppsUseVpn() &&
             proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
             proxyShadowsocksLocationAuto() == other.proxyShadowsocksLocationAuto() &&
@@ -1089,10 +1091,10 @@ public:
     JsonField(QString, openvpnAuth, {})
     JsonField(QString, openvpnServerCertificate, {})
 
-    // Whether the VPN is being used as the default route for this connection.
-    // (Not precisely equivalent to DaemonSettings::defaultRoute; the setting is
-    // only used when split tunnel is enabled.)
-    JsonField(bool, defaultRoute, true)
+    // Whether the default app behavior is to use the VPN - i.e. whether apps
+    // with no specific rules use the VPN (always true when split tunnel is
+    // disabled).
+    JsonField(bool, otherAppsUseVpn, true)
     // The proxy type used for this connection - same values as
     // DaemonSettings::proxy (when set)
     JsonField(QString, proxy, {})
@@ -1348,6 +1350,9 @@ public:
     // Note that the download URI is not provided since it is not used by the
     // client.
     JsonField(QString, availableVersion, {})
+    // Enabled if the current OS is out of support - newer updates are available
+    // but they do not support this OS version.
+    JsonField(bool, osUnsupported, false)
     // When a download has been initiated, updateDownloadProgress indicates the
     // progress (as a percentage).  -1 means no download is occurring,
     // 0-100 indicates that a download is ongoing.  When the download completes,
@@ -1424,6 +1429,9 @@ public:
     // The original IPv6 interface IP before we activated the VPN
     JsonField(QString, originalInterfaceIp6, {})
 
+    // The original IPv6 gateway IP before we activated the VPN
+    JsonField(QString, originalGatewayIp6, {})
+
     // The key for the primary service on macOS
     JsonField(QString, macosPrimaryServiceKey, {})
 
@@ -1434,7 +1442,7 @@ public:
     // transitions from "VPN Disconnected" to "VPN Connected" once the snooze ends
     JsonField(qint64, snoozeEndTime, -1)
 
-    JsonField(QJsonArray, splitTunnelSupportErrors, {})
+    JsonField(std::vector<QString>, splitTunnelSupportErrors, {})
 
     // On Mac/Linux, the name of the tunnel device being used.  Set during the
     // [Still](Connecting|Reconnecting) states when known, remains set while

@@ -70,21 +70,20 @@ public:
     // Construct Update with the URI and version.  If either is empty, both
     // strings are left empty in the resulting object (there is never a
     // partially-valid Update).
-    Update(const QString &uri, const QString &version, const QJsonArray &flags);
+    Update(const QString &uri, const QString &version, const QString &osRequired);
 
 public:
     // A valid Update has a non-empty URI and version.
     bool isValid() const {return !_uri.isEmpty();}
     const QString &uri() const {return _uri;}
     const QString &version() const {return _version;}
-    const QJsonArray &flags() const {return _flags;}
+    const QString &osRequired() const {return _osRequired;}
 
     bool operator==(const Update &other) const;
     bool operator!=(const Update &other) const {return !(*this == other);}
 
 private:
-    QString _uri, _version;
-    QJsonArray _flags;
+    QString _uri, _version, _osRequired;
 };
 
 inline QDebug &operator<<(QDebug &dbg, const Update &update)
@@ -141,7 +140,7 @@ public:
     //
     // This does not emit updateChanged(), even if the available update changes.
     // (UpdateDownloader checks the new versions after reloading both channels.)
-    void reloadAvailableUpdate(const Update &update);
+    void reloadAvailableUpdate(const Update &update, const std::vector<QString> &flags);
 
     // If this channel is running, refresh update metadata (asynchronously).
     // (Does not discard the current cache before refreshing.)
@@ -159,8 +158,14 @@ public:
     // received a response yet.
     const Update &update() const {return _update;}
 
+    // Get the current feature flags from this channel.  This is separate from
+    // any available update - the OS requirement does not apply to these, and
+    // the update channel does not even necessarily have to have a valid update
+    // for this platform.
+    const std::vector<QString> &flags() const {return _flags;}
+
 signals:
-    // Emitted when the available update has changed.
+    // Emitted when the available update or feature flags have changed.
     void updateChanged();
 
 private:
@@ -170,8 +175,7 @@ private:
     // The update available on this channel (even if it's not newer than the
     // current daemon version).
     Update _update;
-
-    bool validateOSRequirements (const QString &requirement);
+    std::vector<QString> _flags;
 };
 
 // UpdateDownloader tracks what updates are available and manages requests
@@ -189,16 +193,25 @@ private:
     // newestVersion (including if newestVersion is null, meaning no versions
     // have been found yet), update newestVersion and availableUpdate.
     // Doesn't emit any changes (used by calculateAvailableUpdate()).
+    //
+    // If the version in this channel does not support the current OS,
+    // osFailedRequirement is set to true, and newestVersion/availableUpdate are
+    // unchanged.  (Otherwise, osFailedRequirement is unchanged.)
     void checkUpdateChannel(const UpdateChannel &channel,
                             nullable_t<SemVersion> &newestVersion,
-                            Update &availableUpdate) const;
+                            Update &availableUpdate,
+                            bool &osFailedRequirement) const;
 
     // Determine the current available update from the update channels, the
     // daemon version, and the _enableBeta flag.
     //
     // The available update isn't stored in UpdateDownloader since it can be
     // computed from the updates available from the channels.
-    Update calculateAvailableUpdate() const;
+    //
+    // If any update is found that does not support this OS, then
+    // osFailedRequirement is set to true.  (A valid update may still be
+    // returned if one is available on another active update channel.)
+    Update calculateAvailableUpdate(bool &osFailedRequirement) const;
 
     void emitUpdateRefreshed();
 
@@ -217,7 +230,8 @@ public:
     //
     // updateRefreshed() is emitted even if the state does not change as a
     // result of this call (to sync up DaemonData with the current state).
-    void reloadAvailableUpdates(const Update &gaUpdate, const Update &betaUpdate);
+    void reloadAvailableUpdates(const Update &gaUpdate, const Update &betaUpdate,
+                                const std::vector<QString> &flags);
 
     // Refresh available updates (if running)
     void refreshUpdate();
@@ -252,6 +266,7 @@ private:
     void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void onDownloadReadyRead();
     void onDownloadFinished();
+    bool validateOSRequirements(const QString &requirement) const;
 
 signals:
     // Emitted when the available update version has been refreshed.
@@ -259,8 +274,9 @@ signals:
     // DaemonData.
     // This can be emitted with an unchanged availableUpdate (the GA/beta
     // channel data might have changed, or there could be no changes at all).
-    void updateRefreshed(const Update &availableUpdate, const Update &gaUpdate,
-                         const Update &betaUpdate);
+    void updateRefreshed(const Update &availableUpdate,
+                         bool osFailedRequirement, const Update &gaUpdate,
+                         const Update &betaUpdate, const std::vector<QString> &flags);
     // Emitted when a download is starting, in progress, or completed.
     // 'progress' ranges from 0-100.
     void downloadProgress(const QString &version, int progress);

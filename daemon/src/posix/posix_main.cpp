@@ -29,6 +29,8 @@ void dummyPosixMain() {}
 #include "posix.h"
 #include "posix_daemon.h"
 #include "path.h"
+#include "version.h"
+#include "brand.h"
 
 #include <exception>
 #include <stdexcept>
@@ -36,7 +38,7 @@ void dummyPosixMain() {}
 #include <cxxabi.h>
 #include <stdio.h>
 #include <sys/stat.h>
-
+#include <QCommandLineParser>
 
 static void (*g_oldTerminateHandler)() = nullptr;
 
@@ -87,6 +89,31 @@ int main(int argc, char** argv)
     g_oldTerminateHandler = std::set_terminate(terminateHandler);
 
     Path::initializePostApp();
+
+    // The daemon just has the general --help and --version options.
+    // --version is used by the install script on Linux to verify that the
+    // daemon can be linked and executed.
+    QCommandLineParser parser;
+    parser.addVersionOption();
+    parser.addHelpOption();
+    parser.setApplicationDescription(QStringLiteral(
+        BRAND_SHORT_NAME " daemon - manages the " BRAND_SHORT_NAME " VPN connection as root."));
+    if(!parser.parse(QCoreApplication::arguments()))
+    {
+        QTextStream{stderr} << parser.errorText() << Qt::endl;
+        return -1;
+    }
+
+    if(parser.isSet(QStringLiteral("help")))
+    {
+        QTextStream{stdout} << parser.helpText() << Qt::endl;
+        return 0;
+    }
+    if(parser.isSet(QStringLiteral("version")))
+    {
+        QTextStream{stdout} << QStringLiteral(PIA_VERSION) << Qt::endl;
+        return 0;
+    }
     Logger logSingleton{Path::DaemonLogFile};
 
     setUidAndGid();

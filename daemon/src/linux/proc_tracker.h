@@ -25,6 +25,7 @@
 #include <QSocketNotifier>
 #include <QPointer>
 #include <QDir>
+#include "linux_cn_proc.h"
 #include "daemon.h"
 #include "posix/posix_firewall_pf.h"
 #include "exec.h"
@@ -58,8 +59,7 @@ class ProcTracker : public QObject
 
 public:
     ProcTracker(QObject *pParent)
-        : QObject{pParent},
-          _sockFd{-1}
+        : QObject{pParent}
     {
     }
 
@@ -71,18 +71,13 @@ public:
 public slots:
     void initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
                             QString tunnelDeviceLocalAddress);
-    void readFromSocket(int socket);
     void shutdownConnection();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
-                           QString tunnelDeviceLocalAddress,
-                           QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
-
+                           QString tunnelDeviceLocalAddress);
+    void aboutToConnectToVpn();
 private:
     using AppMap = QHash<QString, QSet<pid_t>>;
 
-    void showError(QString funcName);
-
-    int subscribeToProcEvents(int sock, bool enable);
     void addPidToCgroup(pid_t pid, const Path &cGroupPath);
     void removePidFromCgroup(pid_t pid, const Path &cGroupPath);
     void addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath);
@@ -111,9 +106,8 @@ private:
     void setVpnBlackHole();
     void teardownRouteLocalNet();
     void updateApps(QVector<QString> excludedApps, QVector<QString> vpnOnlyApps);
-
 private:
-    QPointer<QSocketNotifier> _readNotifier;
+    nullable_t<CnProc> _pCnProc;
     OriginalNetworkScan _previousNetScan;
     QString _previousRPFilter;
     QString _previousRouteLocalNet;
@@ -121,7 +115,6 @@ private:
     AppMap _vpnOnlyMap;
     QString _previousTunnelDeviceLocalAddress;
     QString _previousTunnelDeviceName;
-    int _sockFd;
 
     static Executor _executor;
 };

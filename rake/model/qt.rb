@@ -9,11 +9,17 @@ require_relative '../util/util.rb'
 class Qt
     # Specify the preferred minor/patch version of Qt 5 here (the major version
     # must be 5).
-    # - If the preferred version exactly is available, it's used.
-    # - Otherwise, if another patch level of the preferred minor version is
-    #   available, the greatest available patch release of that minor version is
-    #   used.
-    # - Otherwise, the greatest available version is used.
+    #
+    # We use PIA's build of Qt on Linux; PIA may build with the qt.io releases
+    # but we do not test it.  Windows and Mac still currently use the qt.io
+    # builds but will likely switch to PIA's build in the future.
+    #
+    # - If the PIA build of the exact preferred version is available, it's used.
+    # - Otherwise, if a PIA build of another patch level of the preferred minor
+    #   version is available, the greatest available patch release of that minor
+    #   version is used.
+    # - Otherwise, the most recent PIA build is used.
+    # - Otherwise, non-PIA Qt builds are checked using the same precedence.
     #
     # This allows us to control precisely when we apply Qt minor/patch updates,
     # while still allowing the product to be built with whatever version of Qt
@@ -25,6 +31,7 @@ class Qt
     # Score biases to implement the preferences above
     ExactMatchBias = 2000000
     MinorMatchBias = 1000000
+    PiaQtBuildBias =  500000
 
     def initialize()
         # Locate Qt.  QTROOT can be set to the path to a Qt version to force
@@ -45,8 +52,17 @@ class Qt
             searchPatterns = Util.joinPaths([searchRoots, ['Qt*/5.*']])
 
             qtVersion = FileList[*searchPatterns].max_by do |p|
-                v = getQtPathVersion(p)
-                (v == nil) ? 0 : getQtVersionScore(v[0], v[1])
+                # Both host and target Qt roots must be present
+                hostQtRoot = getQtRoot(p, Util.hostArchitecture)
+                targetQtRoot = getQtRoot(p, Build::TargetArchitecture)
+                version = getQtPathVersion(p)
+                if(hostQtRoot != nil && targetQtRoot != nil && version != nil)
+                    # Prefer PIA Qt builds if available per above
+                    piaBias = File.exist?(File.join(hostQtRoot, 'share/pia-qt-build')) ? PiaQtBuildBias : 0
+                    getQtVersionScore(version[0], version[1]) + piaBias
+                else
+                    0
+                end
             end
             if(qtVersion == nil || !File.directory?(qtVersion))
                 raise "Unable to find Qt installation in #{searchPatterns}\n" +
@@ -74,26 +90,26 @@ class Qt
         # Determine the Qt build to use for the specified architecture.  Select
         # the toolchain Qt should be built with to make sure we don't pick up
         # something like a UWP/Android build on Windows, etc.
-        qtToolchain = ''
-        # Some Qt releases on Windows have builds for more than one version of
-        # MSVC.  Select the latest one.
-        # '????' instead of '*' ensures we don't match 'msvc2017_64' when
-        # looking for 'msvc2017'
-        qtToolchain = 'msvc????' if Build.windows?
-        qtToolchain = 'clang' if Build.macos?
-        qtToolchain = 'gcc' if Build.linux?
-        qtToolchain << '_64' if Build::Architecture == :x86_64
-
-        @qtRoot = FileList[File.join(qtVersion, qtToolchain)].max
+        #
+        # Both host and target Qt builds are needed (build tools are used from
+        # the host installation, libraries are used from the target).  These are
+        # the same when not cross-compiling.
+        @hostQtRoot = getQtRoot(qtVersion, Util.hostArchitecture)
+        @targetQtRoot = getQtRoot(qtVersion, Build::TargetArchitecture)
+        puts "Host: #{Util.hostArchitecture} - #{@hostQtRoot}"
+        puts "Target: #{Build::TargetArchitecture} - #{@targetQtRoot}"
 
         # Use a probe to detect if the Qt directory changes
         qtProbe = Probe.new('qt')
         qtProbe.file('qtversion.txt', "5.#{@actualVersion[0]}.#{@actualVersion[1]}\n")
-        qtProbe.file('qtroot.txt', "#{@qtRoot}\n")
+        qtProbe.file('qtroot.txt', "#{@hostQtRoot}\n#{@targetQtRoot}\n")
         qtProbeArtifact = qtProbe.artifact('qtroot.txt')
 
-        if(@qtRoot == nil)
-            raise "Unable to find any \"#{qtToolchain}\" Qt build in #{qtVersion}"
+        if(@hostQtRoot == nil)
+            raise "Unable to find any \"#{Util.hostArchitecture}\" Qt build in #{qtVersion}"
+        end
+        if(@targetQtRoot == nil)
+            raise "Unable to find any \"#{Build::TargetArchitecture}\" Qt build in #{qtVersion}"
         end
 
         mkspec = ''
@@ -103,14 +119,14 @@ class Qt
 
         # Create the "core" component and add essential Qt definitions
         @core = buildDefaultComponent("Core", qtProbeArtifact)
-            .include(File.join(@qtRoot, "include"))
-            .include(File.join(@qtRoot, "mkspecs/#{mkspec}"))
-            .libPath(File.join(@qtRoot, "lib"))
+            .include(File.join(@targetQtRoot, "include"))
+            .include(File.join(@targetQtRoot, "mkspecs/#{mkspec}"))
+            .libPath(File.join(@targetQtRoot, "lib"))
         @core.lib('qtmain') if Build.windows? && Build.release?
         @core.lib('qtmaind') if Build.windows? && Build.debug?
         if(Build.macos?)
             # Specify Qt framework path on Mac
-            @core.frameworkPath(File.join(@qtRoot, "lib")) if Build.macos?
+            @core.frameworkPath(File.join(@targetQtRoot, "lib")) if Build.macos?
             # We should load these frameworks from the .prl files (see component()),
             # for now hard-code the common dependencies
             @core.framework('DiskArbitration')
@@ -122,6 +138,34 @@ class Qt
     end
 
     private
+
+    def getQtToolchainPatterns(arch)
+        # Some Qt releases on Windows have builds for more than one version of
+        # MSVC.  Select the latest one.
+        # '????' instead of '*' ensures we don't match 'msvc2017_64' when
+        # looking for 'msvc2017'
+        qtToolchains = ['msvc????'] if Build.windows?
+        qtToolchains = ['clang'] if Build.macos?
+        qtToolchains = ['clang', 'gcc'] if Build.linux?
+        suffix = ''
+        if(arch == :x86_64)
+            suffix = '_64'
+        elsif(arch != :x86)
+            # Qt doesn't provide armhf or arm64 builds.  The PIA Qt builds
+            # include the entire architecture name here.
+            suffix = '_' + Build::TargetArchitecture.to_s
+        end
+        qtToolchains.map { |t| t + suffix }
+    end
+
+    def getQtRoot(qtVersion, arch)
+        qtToolchainPtns = getQtToolchainPatterns(arch)
+        qtRoots = FileList[*Util.joinPaths([[qtVersion], qtToolchainPtns])]
+        # Explicitly filter for existing paths - if the pattern has wildcards
+        # we only get existing directories, but if the patterns are just
+        # alternates with no wildcards, we can get directories that don't exist
+        qtRoots.find_all { |r| File.exist?(r) }.max
+    end
 
     def getQtVersionScore(minor, patch)
         score = minor * 100 + patch
@@ -152,15 +196,15 @@ class Qt
             .define("QT_#{name.upcase}_LIB")
 
         if(Build.windows?)
-            comp.include(File.join(@qtRoot, "include/Qt#{name}"))
+            comp.include(File.join(@targetQtRoot, "include/Qt#{name}"))
             comp.lib("Qt5#{name}") if Build.release?
             comp.lib("Qt5#{name}d") if Build.debug?
         elsif(Build.macos?)
-            comp.include(File.join(@qtRoot, "lib/Qt#{name}.framework/Headers"))
+            comp.include(File.join(@targetQtRoot, "lib/Qt#{name}.framework/Headers"))
             comp.framework("Qt#{name}")
         elsif(Build.linux?)
-            comp.include(File.join(@qtRoot, "include/Qt#{name}"))
-            comp.lib(File.join(@qtRoot, 'lib', "libQt5#{name}.so.5.#{@actualVersion[0]}.#{@actualVersion[1]}"))
+            comp.include(File.join(@targetQtRoot, "include/Qt#{name}"))
+            comp.lib(File.join(@targetQtRoot, 'lib', "libQt5#{name}.so.5.#{@actualVersion[0]}.#{@actualVersion[1]}"))
         else
             raise "Don't know how to define Qt component #{name} for #{Build::Platform}"
         end
@@ -214,10 +258,13 @@ class Qt
     # Get the path to a tool, such as rcc, lupdate, moc, etc.  The tool name
     # should include the .exe extension on Windows.
     def tool(name)
-        File.join(@qtRoot, 'bin', name).tap{|v| v << '.exe' if Build.windows?}
+        File.join(@hostQtRoot, 'bin', name).tap{|v| v << '.exe' if Build.windows?}
     end
 
-    def qtRoot
-        @qtRoot
+    def targetQtRoot
+        @targetQtRoot
+    end
+    def hostQtRoot
+        @hostQtRoot
     end
 end

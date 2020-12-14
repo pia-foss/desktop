@@ -59,8 +59,19 @@ module Util
                 puts "Architecture not known: #{archProbe.dump}"
                 nil
             end
+        elsif(hostPlatform == :linux)
+            uname_m = `uname -m`.strip
+            if(uname_m == 'x86_64')
+                :x86_64
+            elsif(uname_m == 'armv7l')
+                :armhf
+            elsif(uname_m == 'aarch64')
+                :arm64
+            else
+                puts "Architecture not known: #{uname_m}"
+            end
         else
-            # On Mac and Linux we currently only support x86_64, so assume this
+            # On Mac we currently only support x86_64, so assume this
             # architecture.  Building on other architectures should work this
             # way if emulation is available - the dependencies for x86_64 will
             # be used.

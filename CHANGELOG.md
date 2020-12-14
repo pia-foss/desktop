@@ -1,5 +1,12 @@
 # Changelog
 
+### v2.6.2
+* Split tunnel on macOS no longer uses a network kernel extension
+* Split tunnel now supports macOS 11.0 (Big Sur)
+* Added support for Linux ARM build configurations (armhf and arm64)
+* Linux builds are now made on Debian Stretch
+* Ubuntu 16.04 is no longer supported (libstdc++ 6.0.22 is now required)
+
 ### v2.6.1
 * Fixed a crash when connecting to a region with no servers available for the current protocol
 
@@ -37,6 +44,10 @@
 * Split tunnel can now bypass routed packets on Linux
 * Fixed a crash on macOS caused by changing screen layouts
 * Fixed an issue causing installation to hang in some cases on macOS
+
+### v2.3.2
+* Added notification for OS versions that are no longer supported
+* Removed network setting from Help page
 
 ### v2.3.1
 * Fixed a possible daemon crash on macOS when split tunnel was enabled
