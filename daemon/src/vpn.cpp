@@ -441,6 +441,13 @@ const Server *TransportSelector::beginAttempt(const Location &location,
     // The number of servers for this location (constrained by port and protocol)
     const std::size_t serverCount{_selected.countServersForLocation(location)};
 
+    // No servers available
+    if(serverCount == 0)
+    {
+        qWarning() << "No servers are available for the selected OpenVPN transport";
+        return nullptr;
+    }
+
     // Always use the preferred transport if:
     // - We haven't yet tried all servers (if there's > 1 server)
     // - there are no alternates
@@ -1275,9 +1282,18 @@ void VPNConnection::doConnect()
     {
         const auto location = _connectingConfig.vpnLocation();
         const auto serverCount{location->countServersForService(Service::WireGuard)};
-        const auto index{_connectionAttemptCount % serverCount};
-        // Attempt to connect to the next server for this location
-        pVpnServer = location->serverWithIndexForService(index, Service::WireGuard);
+
+        if(serverCount != 0)
+        {
+            // Attempt to connect to the next server for this location
+            pVpnServer = location->serverWithIndexForService(_connectionAttemptCount % serverCount, Service::WireGuard);
+        }
+        else
+        {
+            // No servers available
+            qWarning() << "No WireGuard servers are available in this location";
+            pVpnServer = nullptr;
+        }
     }
 
     // Set when the next earliest reconnect attempt is allowed

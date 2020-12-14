@@ -1,5 +1,8 @@
 # Changelog
 
+### v2.6.1
+* Fixed a crash when connecting to a region with no servers available for the current protocol
+
 ### v2.6.0
 * Removed support for the legacy PIA network
 * Added support for upcoming Dedicated IP feature
