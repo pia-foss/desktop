@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Private Internet Access, Inc.
+# Copyright (c) 2021 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -179,16 +179,11 @@ function hasDependencies() {
     if ! [ -x /sbin/ifconfig ]; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon-x11.so.0; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-xkb.so.1; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-xinerama.so.0; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-icccm.so.4; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-image.so.0; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-keysyms.so.1; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-randr.so.0; then return 1; fi
-    if ! ldconfig -p | grep -q libxcb-render-util.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libnl-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnl-route-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnl-genl-3.so.200; then return 1; fi
+    if ! ldconfig -p | grep -q libnsl.so.1; then return 1; fi
+
     return 0
 }
 
@@ -201,16 +196,9 @@ function promptManualDependencies() {
     echo "Could not install dependencies.  Please install these packages:"
     echo " - net-tools (ifconfig)"
     echo " - libxkbcommon-x11 (libxkbcommon-x11.so.0, libxkbcommon.so.0)"
-    echo " - libxcb (libxcb.so.1)"
-    echo " - libxcb-xkb (libxcb-xkb.so.1, may be included in libxcb)"
-    echo " - libxcb-xinerama (libxcb-xinerama.so.0, may be included in libxcb)"
-    echo " - libxcb-icccm (libxcb-icccm.so.4, may be included in libxcb)"
-    echo " - libxcb-image (libxcb-image.so.0, may be included in libxcb)"
-    echo " - libxcb-keysyms (libxcb-keysyms.so.1, may be included in libxcb)"
-    echo " - libxcb-randr (libxcb-randr.so.0, may be included in libxcb)"
-    echo " - libxcb-render-util (libxcb-render-util.so.0, may be included in libxcb)"
     echo " - libnl-3-200"
     echo " - libnl-route-3-200, libnl-genl-3-200 (may be included in libnl-3-200)"
+    echo " - libnsl (libnsl.so.1)"
     requestConfirmation "Continue with installation?"
 }
 
@@ -220,15 +208,12 @@ function installDependencies() {
     if hasDependencies; then return 0; fi
 
     if hash yum 2>/dev/null; then
-        # Fedora and relatives put all xcb libs in libxcb
-        sudo yum -y install net-tools libxkbcommon-x11 libxcb libnl3 xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil
+        # libnsl is no longer part of of the glibc package on Fedora
+        sudo yum -y install net-tools libxkbcommon-x11 libnl3 libnsl
     elif hash pacman 2>/dev/null; then
-        # Arch puts all xcb libs in the libxcb package.
-        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libxcb libnl xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil
+        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libnl
     elif hash zypper 2>/dev/null; then
-        # openSUSE splits up xcb
-        sudo zypper install libxkbcommon-x11-0 libxcb1 libxcb-xkb1 libxcb-xinerama0 libnl3-200 \
-            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0
+        sudo zypper install libxkbcommon-x11-0
         # We can't set up ifconfig on openSUSE; our OpenVPN build has a
         # hard-coded path to /sbin/ifconfig, but openSUSE installs it to
         # /usr/bin/ifconfig.  We don't want to mess with the user's sbin
@@ -239,10 +224,7 @@ function installDependencies() {
     # manager.  This check uses Debian package names though that aren't
     # necessarily the same on other distributions.
     elif hash apt-get 2>/dev/null; then
-        # Debian splits up the xcb libs
-        APT_PKGS="libxkbcommon-x11-0 libxcb1 libxcb-xkb1 libxcb-xinerama0 \
-        libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-        libnl-3-200 libnl-route-3-200"
+        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200"
         # A few releases do not have the net-tools package at all, still try to
         # install other dependencies
         if [[ $(apt-cache search --names-only net-tools) ]]; then

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -44,7 +44,7 @@ public:
     // other members should be used; this class works on the worker thread)
     //
     // Worker takes ownership of the kill socket.
-    explicit Worker(LinuxNl &parent, LinuxFd killSocket);
+    explicit Worker(LinuxNl &parent, PosixFd killSocket);
 
 private:
     // Read the current state of the caches and send state to main thread
@@ -66,7 +66,7 @@ private:
     // poll configurations - includes kill socket and all netlink sockets
     std::array<pollfd, PollIdx::Count> _pollCfgs;
     // Kill socket - terminates the event loop when signaled
-    LinuxFd _killSocket;
+    PosixFd _killSocket;
     // Socket for all "route" caches - link/address/route
     LinuxNlCacheSock _routeSock;
     // Fixed caches - these are always valid
@@ -78,7 +78,7 @@ private:
     std::vector<NetworkConnection> _lastConnections;
 };
 
-LinuxNl::Worker::Worker(LinuxNl &parent, LinuxFd killSocket)
+LinuxNl::Worker::Worker(LinuxNl &parent, PosixFd killSocket)
     : _parent{parent}, _pollCfgs{}, _killSocket{std::move(killSocket)},
       _routeSock{NETLINK_ROUTE}
 {
@@ -401,20 +401,20 @@ bool LinuxNl::Worker::receive()
 }
 
 void LinuxNl::runOnWorkerThread(LinuxNl *pThis,
-                                std::promise<LinuxFd> killSocketPromise)
+                                std::promise<PosixFd> killSocketPromise)
 {
     // Note that this function is on the worker thread, so we shouldn't access
     // members of pThis, just use it to queue signals back to the main thread
     // (which is why pThis is passed as a parameter to a static function).
 
-    int killSockets[2]{LinuxFd::Invalid, LinuxFd::Invalid};
+    int killSockets[2]{PosixFd::Invalid, PosixFd::Invalid};
     auto spResult = ::socketpair(AF_UNIX, SOCK_STREAM, 0, killSockets);
     // Provide the socket handle back to the main thread even if ::socketpair()
-    // failed.  The main thread now owns it (using LinuxFd).
-    killSocketPromise.set_value(LinuxFd{killSockets[1]});
+    // failed.  The main thread now owns it (using PosixFd).
+    killSocketPromise.set_value(PosixFd{killSockets[1]});
 
     // This thread owns the other handle.
-    LinuxFd killSocket{killSockets[0]};
+    PosixFd killSocket{killSockets[0]};
 
     if(spResult || !killSocket)
     {
@@ -461,7 +461,7 @@ void LinuxNl::runOnWorkerThread(LinuxNl *pThis,
 
 LinuxNl::LinuxNl()
 {
-    std::promise<LinuxFd> killSocketPromise;
+    std::promise<PosixFd> killSocketPromise;
     _workerKillSocket = killSocketPromise.get_future();
 
     _workerThread = std::thread{&LinuxNl::runOnWorkerThread, this,
@@ -474,7 +474,7 @@ LinuxNl::~LinuxNl()
     // Terminate the run loop by writing to the kill socket.  If the worker
     // thread is still starting, this blocks until it provides the kill socket.
     unsigned char term = 0;
-    LinuxFd killSocket = _workerKillSocket.get();
+    PosixFd killSocket = _workerKillSocket.get();
     if(killSocket)
         ::write(killSocket.get(), &term, sizeof(term));
     _workerThread.join();

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,99 +32,31 @@
 
 #include "mac/utun.h"
 
-uint UTun::mtu() const
+UTun::UTun(int unitNumber)
 {
-    if(isOpen())
-    {
-        struct ifreq ifr{};
-        ::strlcpy(ifr.ifr_name, qPrintable(name()), sizeof(ifr.ifr_name));
-
-        // SIOCSIFMTU == Socket IO Control Get InterFace MTU
-        if(!::ioctl(_fd, SIOCGIFMTU, &ifr))
-        {
-            return ifr.ifr_mtu;
-        }
-    }
-    return 0;
-}
-
-uint UTun::setMtu(uint mtu)
-{
-    if(isOpen())
-    {
-        struct ifreq ifr{};
-        ifr.ifr_mtu = mtu;
-        ::strlcpy(ifr.ifr_name, qPrintable(name()), sizeof(ifr.ifr_name));
-
-        // SIOCSIFMTU == Socket IO Control Set InterFace MTU
-        if(!::ioctl(_fd, SIOCSIFMTU, &ifr))
-        {
-            return mtu;
-        }
-    }
-    return 0;
-}
-
-void UTun::close()
-{
-    if(isOpen())
-    {
-        qInfo() << "Closing open tunnel";
-        ::close(_fd);
-        _fd = -1;
-        _unitNumber = -1;
-    }
-    else
-    {
-        qInfo() << "No open tunnel to close";
-    }
-}
-
-UTun UTun::create()
-{
-    const int baseNumber = 8; // Start at utun7
-    int unitNumber = 0;
-
-    UTun utun;
-    // Attempt to find a usable unit number (i.e utunN)
-    for(int i = 0; i < 25; ++i)
-    {
-        unitNumber = baseNumber + i;
-        qInfo() << "Trying unit_number:" << unitNumber;
-        if(utun.open(unitNumber) != -1)
-            return utun;
-    }
-
-    qWarning() << "Could not open utun device!";
-    return {};
-}
-
-int UTun::open(int unitNumber)
-{
-    struct sockaddr_ctl sc{};
-    struct ctl_info ctlInfo{};
+    sockaddr_ctl sc{};
+    ctl_info ctlInfo{};
 
     // Request a utun device
     ::strlcpy(ctlInfo.ctl_name, UTUN_CONTROL_NAME, sizeof(ctlInfo.ctl_name));
 
-    int fd = ::socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
-    if(fd < 0)
+    _sock = PosixFd{::socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL)};
+    if(!_sock)
     {
         qWarning() << "Unable to open system socket for utun device:" << ErrnoTracer{errno};
-        return -1;
+        return;
     }
 
     // Prevent the socket being inherited by child processes
-    if(::fcntl(fd, F_SETFD, FD_CLOEXEC))
+    if(::fcntl(_sock.get(), F_SETFD, FD_CLOEXEC))
         qWarning() << "fcntl failed setting FD_CLOEXEC:" << ErrnoTracer{errno};
 
     // Convert Kernel control name to id
     // This updates the ctlInfo.ctl_id field
-    if(::ioctl(fd, CTLIOCGINFO, &ctlInfo) == -1)
+    if(::ioctl(_sock.get(), CTLIOCGINFO, &ctlInfo) == -1)
     {
         qWarning() << "Unable to get system socket info for utun device:" << ErrnoTracer{errno};
-        ::close(fd);
-        return -1;
+        return;
     }
 
     // Configure the tunnel device
@@ -135,14 +67,53 @@ int UTun::open(int unitNumber)
     sc.sc_unit = unitNumber;         // utun<unitNumber>
 
     // Setup && configure the utun
-    if(::connect(fd, reinterpret_cast<sockaddr*>(&sc), sizeof(sc)) < 0)
-    {
-        qWarning() << "Unable to connect system socket for utun device:" << ErrnoTracer{errno};
-        ::close(fd);
-        return -1;
-    }
+    if(::connect(_sock.get(), reinterpret_cast<sockaddr*>(&sc), sizeof(sc)) < 0)
+        return;
 
     _unitNumber = unitNumber;
-    _fd = fd;
-    return fd;
+    _name = QStringLiteral("utun%1").arg(_unitNumber - 1);
+}
+
+uint UTun::mtu() const
+{
+    ifreq ifr{};
+    ::strlcpy(ifr.ifr_name, qPrintable(name()), sizeof(ifr.ifr_name));
+
+    // SIOCSIFMTU == Socket IO Control Get InterFace MTU
+    if(!::ioctl(_sock.get(), SIOCGIFMTU, &ifr))
+        return ifr.ifr_mtu;
+
+    return 0;
+}
+
+uint UTun::setMtu(uint mtu)
+{
+    ifreq ifr{};
+    ifr.ifr_mtu = mtu;
+    ::strlcpy(ifr.ifr_name, qPrintable(name()), sizeof(ifr.ifr_name));
+
+    // SIOCSIFMTU == Socket IO Control Set InterFace MTU
+    if(!::ioctl(_sock.get(), SIOCSIFMTU, &ifr))
+        return mtu;
+
+    return 0;
+}
+
+nullable_t<UTun> UTun::create()
+{
+    // Start at utun7 and go up to utun33 (25 + 8)
+    enum : int { BaseNumber = 8, MaxUnits = 25 };
+
+    // Attempt to find a usable unit number (i.e utunN)
+    for(int i = 0; i < MaxUnits; ++i)
+    {
+        int unitNumber = BaseNumber + i;
+
+        UTun utun{unitNumber};
+        if(utun.valid())
+            return utun;
+    }
+
+    qWarning() << "Could not open utun device. Tried up to unit number:" << BaseNumber + MaxUnits - 1;
+    return {};
 }

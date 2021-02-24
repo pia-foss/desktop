@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,41 +22,29 @@
 #ifndef UTUN_H
 #define UTUN_H
 
+#include "posix/posix_objects.h"
+
 class UTun
 {
 public:
-    UTun()
-        : _fd{-1}
-        , _unitNumber{-1}
-    {}
-
-    UTun(UTun &&other)
-    : UTun{}
-    {
-        *this = std::move(other);
-    }
-
-    ~UTun() { if(_fd > 0) ::close(_fd); }
-    UTun &operator=(UTun &&other)
-    {
-        std::swap(_fd, other._fd);
-        std::swap(_unitNumber, other._unitNumber);
-        return *this;
-    }
-
-    int open(int unitNumber);
-    void close();
-    int unitNumber() const { return _unitNumber; }
-    QString name() const { return QStringLiteral("utun%1").arg(_unitNumber - 1); }
-    int fd() const { return _fd; }
-    bool isOpen() const { return _fd > 0; }
+    int fd() const {return _sock.get();}
     uint setMtu(uint mtu);
     uint mtu() const;
-
-    static UTun create();
+    const QString& name() const {return _name;}
+    static nullable_t<UTun> create();
 private:
-    int _fd;
-    int _unitNumber;
+    // Users must use UTun::create()
+    UTun() = default;
+    explicit UTun(int unitNumber);
+    bool valid() const {return _unitNumber != Invalid;}
+private:
+    enum : int { Invalid = -1 };
+    // Since this member is move-only we can rely on rule of 0
+    // to generate only move ctor/move assignment but NOT
+    // copy ctors/assignment
+    PosixFd _sock;
+    int _unitNumber{Invalid};
+    QString _name;
 };
 
 #endif

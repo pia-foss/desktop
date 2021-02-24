@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -148,6 +148,7 @@ Page {
 
     RowLayout {
       TextLink {
+        Layout.alignment: Qt.AlignBottom
         text: uiTr("Trademarks")
         underlined: true
         onClicked: {
@@ -159,13 +160,26 @@ Page {
         Layout.fillWidth: true
       }
 
-      TextLink {
-        id: infoLink
+      ColumnLayout {
         Layout.alignment: Qt.AlignRight
-        text: uiTr("What do these settings mean?")
-        link: BrandHelper.getBrandParam("encryptionSettingsLink")
-        visible: Daemon.settings.method === 'openvpn'
-        underlined: true
+        Layout.rightMargin: 15
+        spacing: 5
+        TextLink {
+          Layout.alignment: Qt.AlignRight
+          text: uiTr("Handshake and Authentication Settings")
+          link: BrandHelper.getBrandParam("deprecatedOpenVPNSettingsLink")
+          visible: Daemon.settings.method === 'openvpn'
+          underlined: true
+        }
+
+        TextLink {
+          Layout.alignment: Qt.AlignRight
+          id: infoLink
+          text: uiTr("What do these settings mean?")
+          link: BrandHelper.getBrandParam("encryptionSettingsLink")
+          visible: Daemon.settings.method === 'openvpn'
+          underlined: true
+        }
       }
     }
   }

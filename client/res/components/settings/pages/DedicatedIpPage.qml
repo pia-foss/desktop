@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -60,10 +60,10 @@ Page {
         anchors.topMargin: 8
         anchors.right: parent.right
         message: uiTr("Secure your remote connections to any asset with a dedicated IP from a country of your choice.  During your subscription, this IP will be yours and yours alone, protecting your data transfers with the strongest encryption out there.")
-        links: [{
+        links: dedicatedIpList.showAddRow ? [{
           text: uiTr("Get Your Dedicated IP"),
           clicked: function(){Qt.openUrlExternally("https://www.privateinternetaccess.com/pages/client-control-panel/dedicated-ip")}
-        }]
+        }] : []
         wrapMode: Text.WordWrap
         color: Theme.settings.inputDescriptionColor
 
@@ -80,6 +80,7 @@ Page {
     }
 
     DedicatedIpList {
+      id: dedicatedIpList
       Layout.fillWidth: true
       Layout.fillHeight: true
     }

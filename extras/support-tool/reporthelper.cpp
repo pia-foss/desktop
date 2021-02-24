@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -31,6 +31,7 @@
 #include <QDirIterator>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QTimer>
 #include "path.h"
 #include "brand.h"
@@ -48,7 +49,7 @@ QObject *ReportHelper::_uiParams;
 void ReportHelper::sendPayload(const QByteArray &payloadContent, const QString &comment)
 {
     // Set up the request
-    QString url = getUrl("/api/v1/reports/upload");
+    QString url = getUrl();
     qDebug () << "Sending payload to URL: " << url << "Payload size: " << payloadContent.size();
     _request.setUrl(url);
 
@@ -347,11 +348,17 @@ QPalette ReportHelper::getPalette() const
     return appPalette;
 }
 
-QString ReportHelper::getUrl(const QString &path) const
+QString ReportHelper::getUrl() const
 {
-    QString base = QStringLiteral("https://clients.privateinternetaccess.com");
+    if(ReportHelper::_uiParams) {
+        auto endpointOverride = _uiParams->property("endpointOverride").toString();
 
-    return base.append(path);
+        if(!endpointOverride.isEmpty()) {
+            return endpointOverride;
+        }
+    }
+
+    return QStringLiteral("https://clients.privateinternetaccess.com/api/v1/reports/upload");
 }
 
 
@@ -533,4 +540,30 @@ bool checkAutoRestart(const QString &settingsPath, const QString &clientCrashPat
   }
 
   return false;
+}
+
+QString getEndpointOverride(const QString &overridePath)
+{
+    if(overridePath.isEmpty())
+        return "";
+
+    QFile file{overridePath};
+    if(!file.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text))
+        return "";
+    QByteArray apiOverrideJson = file.readAll();
+
+    if(apiOverrideJson.isEmpty())
+        return "";
+
+    QJsonParseError parseError;
+    auto apiOverride = QJsonDocument::fromJson(apiOverrideJson, &parseError);
+    if(apiOverride.isNull())
+    {
+        qWarning() << "Can't parse api_override.json:" << parseError.errorString();
+        return "";
+    }
+
+    auto overrideBasesValue = apiOverride[QStringLiteral("debug_report_url")];
+
+    return overrideBasesValue.toArray().first().toString();
 }

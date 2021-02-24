@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -53,6 +53,9 @@ SecondaryWindow {
     TabButton {
       text: "Paths"
     }
+    TabButton {
+      text: "Messages"
+    }
   }
 
   StackLayout {
@@ -73,11 +76,9 @@ SecondaryWindow {
       width: parent.width
       height: parent.height
     }
-  }
-
-  Shortcut {
-    sequence: "Ctrl+Shift+I"
-    context: Qt.ApplicationShortcut
-    onActivated: open()
+    AppMessages {
+      width: parent.width
+      height: parent.height
+    }
   }
 }

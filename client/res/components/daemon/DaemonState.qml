@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -82,7 +82,6 @@ QtObject {
   readonly property bool wireguardAvailable: NativeDaemon.state.wireguardAvailable
   readonly property bool wireguardKernelSupport: NativeDaemon.state.wireguardKernelSupport
   readonly property bool existingDNSServers: NativeDaemon.state.existingDNSServers
-
   // Constants for special values of forwardedPort (see PortForwarder::Special)
   readonly property var portForward: {
     'inactive': 0,

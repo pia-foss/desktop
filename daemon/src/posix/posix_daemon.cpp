@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -477,7 +477,11 @@ static QStringList natPhysRules(const OriginalNetworkScan &netScan, const QStrin
     const auto macVersion = QVersionNumber::fromString(macVersionStr);
     const QString itfName = netScan.interfaceName();
 
-    QStringList ruleList{QStringLiteral("nat on %1 inet -> (%1)").arg(itfName)};
+    QString inetLanIps{"{ 10.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32 }"};
+    QString inet6LanIps{"{ fc00::/7, fe80::/10, ff00::/8 }"};
+    QStringList ruleList{QStringLiteral("no nat on %1 inet6 from any to %2").arg(itfName).arg(inet6LanIps),
+                         QStringLiteral("no nat on %1 inet from any to %2").arg(itfName).arg(inetLanIps),
+                         QStringLiteral("nat on %1 inet -> (%1)").arg(itfName)};
 
     if(macVersion > noNat6Version)
         ruleList << QStringLiteral("nat on %1 inet6 -> (%1)").arg(itfName);
@@ -588,6 +592,11 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("000.allowLoopback"), params.allowLoopback);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("200.allowVPN"), params.allowVPN);
+    // Allow bypass apps to override KS only when disconnected -
+    // if we were to allow this rule when connected as well (which just allows a bypass app to do what it wants)
+    // then it'll override our split tunnel DNS leak protection rules (possibly
+    // allowing DNS on all interfaces) which is not what we want.
+    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("230.allowBypassApps"), params.blockAll && !params.isConnected);
 
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("250.blockIPv6"), params.blockIPv6);
     IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("290.allowDHCP"), params.allowDHCP);
@@ -711,17 +720,19 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn")});
     file.writeCommand("PF (App NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*")});
     file.writeCommand("PF (000.natVPN)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.natVPN")});
+    file.writeCommand("PF (001.natPhys)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/001.natPhys")});
     file.writeCommand("PF (000.stubDNS)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.stubDNS")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary()), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaModernDnsVpn()), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary(),
+    file.writeCommand("ping (ping piadns)", "ping", QStringList{piaModernDnsVpn(),
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
     file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
+    file.writeCommand("System Extensions", "systemextensionsctl", QStringList{QStringLiteral("list")});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
     file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
@@ -754,11 +765,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("iptables --version", "iptables", QStringList{QStringLiteral("--version")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
-    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaLegacyDnsPrimary()), QStringLiteral("www.privateinternetaccess.com"),
+    file.writeCommand("dig (dig @piadns www.pia.com)", "dig", QStringList{QStringLiteral("@%1").arg(piaModernDnsVpn()), QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("-c1"), QStringLiteral("-W1")});
-    file.writeCommand("ping (ping 202.222.18.222)", "ping", QStringList{piaLegacyDnsPrimary(),
+    file.writeCommand("ping (ping piadns)", "ping", QStringList{piaModernDnsVpn(),
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("resolv.conf", "cat", QStringList{QStringLiteral("/etc/resolv.conf")});
     file.writeCommand("ls -l resolv.conf", "ls", QStringList{QStringLiteral("-l"), QStringLiteral("/etc/resolv.conf")});

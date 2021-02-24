@@ -1,4 +1,4 @@
-rem Copyright (c) 2020 Private Internet Access, Inc.
+rem Copyright (c) 2021 Private Internet Access, Inc.
 rem
 rem This file is part of the Private Internet Access Desktop Client.
 rem

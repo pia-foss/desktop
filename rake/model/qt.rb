@@ -2,11 +2,14 @@ require_relative 'build.rb'
 require_relative 'component.rb'
 require_relative 'probe.rb'
 require_relative '../util/util.rb'
+require 'forwardable'
 
 # Locate Qt to use:
 # - Build-time tools: rcc, lupdate, moc, etc.
 # - Qt modules, such as Qt5Core, Qt5Network, etc.
 class Qt
+    extend Forwardable
+
     # Specify the preferred minor/patch version of Qt 5 here (the major version
     # must be 5).
     #
@@ -26,7 +29,7 @@ class Qt
     # is available.  (Later releases may likely work, but there are no
     # guarantees.)
     PreferredQtMinorVersion = 15
-    PreferredQtPatchVersion = 0
+    PreferredQtPatchVersion = 2
 
     # Score biases to implement the preferences above
     ExactMatchBias = 2000000
@@ -34,6 +37,14 @@ class Qt
     PiaQtBuildBias =  500000
 
     def initialize()
+        # On Mac and Linux, both host and target architecture Qt builds must be
+        # present.  (They're the same if not cross-compiling.)
+        #
+        # On Windows, we have to use windeployqt from the target architecture,
+        # or it would deploy the wrong libraries.  We don't yet support cross
+        # compiling on Windows as a result, but x86 builds are still made on x64
+        # hosts since x64 Windows can execute x86 tools.
+        hostArch = (Util.hostPlatform == :windows) ? Build::TargetArchitecture : Util.hostArchitecture
         # Locate Qt.  QTROOT can be set to the path to a Qt version to force
         # the use of that build (if we can't find Qt automatically, or to force
         # a particular version)
@@ -53,7 +64,7 @@ class Qt
 
             qtVersion = FileList[*searchPatterns].max_by do |p|
                 # Both host and target Qt roots must be present
-                hostQtRoot = getQtRoot(p, Util.hostArchitecture)
+                hostQtRoot = getQtRoot(p, hostArch)
                 targetQtRoot = getQtRoot(p, Build::TargetArchitecture)
                 version = getQtPathVersion(p)
                 if(hostQtRoot != nil && targetQtRoot != nil && version != nil)
@@ -94,19 +105,19 @@ class Qt
         # Both host and target Qt builds are needed (build tools are used from
         # the host installation, libraries are used from the target).  These are
         # the same when not cross-compiling.
-        @hostQtRoot = getQtRoot(qtVersion, Util.hostArchitecture)
+        @hostQtRoot = getQtRoot(qtVersion, hostArch)
         @targetQtRoot = getQtRoot(qtVersion, Build::TargetArchitecture)
-        puts "Host: #{Util.hostArchitecture} - #{@hostQtRoot}"
+        puts "Host: #{hostArch} - #{@hostQtRoot}"
         puts "Target: #{Build::TargetArchitecture} - #{@targetQtRoot}"
 
         # Use a probe to detect if the Qt directory changes
-        qtProbe = Probe.new('qt')
-        qtProbe.file('qtversion.txt', "5.#{@actualVersion[0]}.#{@actualVersion[1]}\n")
-        qtProbe.file('qtroot.txt', "#{@hostQtRoot}\n#{@targetQtRoot}\n")
-        qtProbeArtifact = qtProbe.artifact('qtroot.txt')
+        @qtProbe = Probe.new('qt')
+        @qtProbe.file('qtversion.txt', "5.#{@actualVersion[0]}.#{@actualVersion[1]}\n")
+        @qtProbe.file('qtroot.txt', "#{@hostQtRoot}\n#{@targetQtRoot}\n")
+        qtProbeArtifact = @qtProbe.artifact('qtroot.txt')
 
         if(@hostQtRoot == nil)
-            raise "Unable to find any \"#{Util.hostArchitecture}\" Qt build in #{qtVersion}"
+            raise "Unable to find any \"#{hostArch}\" Qt build in #{qtVersion}"
         end
         if(@targetQtRoot == nil)
             raise "Unable to find any \"#{Build::TargetArchitecture}\" Qt build in #{qtVersion}"
@@ -260,6 +271,9 @@ class Qt
     def tool(name)
         File.join(@hostQtRoot, 'bin', name).tap{|v| v << '.exe' if Build.windows?}
     end
+
+    # Get an artifact path (for probe text files)
+    def_delegators :@qtProbe, :artifact
 
     def targetQtRoot
         @targetQtRoot

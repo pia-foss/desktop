@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -80,6 +80,16 @@ Item {
         Layout.fillHeight: false
         currentIndex: Daemon.settings.proxy === "shadowsocks" ? 1 : 0
         DropdownInput {
+          // Qt 5.15.2 seems to have broken the way these nested layouts interact,
+          // we have to explicitly set the dropdown's Layout.preferredWidth/
+          // preferredHeight to its implicitWidth/implicitHeight.
+          //
+          // Looks like this commit was trying to optimize the way layouts are
+          // processed, but it seems to prevent the implicitHeight changes in the
+          // dropdowns from correctly propagating up to the ColumnLayout
+          // https://code.qt.io/cgit/qt/qtdeclarative.git/commit/src/imports/layouts/qquickstacklayout.cpp?id=a5d2fd816bcbee6026894927ae5d049536bfc7ea
+          Layout.preferredWidth: implicitWidth
+          Layout.preferredHeight: implicitHeight
           label: SettingsMessages.connectionTypeSetting
           setting: DaemonSetting { name: "protocol" }
           model: [
@@ -88,6 +98,8 @@ Item {
           ]
         }
         DropdownInput {
+          Layout.preferredWidth: implicitWidth
+          Layout.preferredHeight: implicitHeight
           label: SettingsMessages.connectionTypeSetting
           enabled: false
           setting: Setting { sourceValue: 0 }
@@ -106,11 +118,15 @@ Item {
         Layout.fillWidth: false
         Layout.fillHeight: false
         DropdownInput {
+          Layout.preferredWidth: implicitWidth
+          Layout.preferredHeight: implicitHeight
           label: SettingsMessages.remotePortSetting
           setting: DaemonSetting { name: "remotePortUDP" }
           model: portSelection(Daemon.state.openvpnUdpPortChoices)
         }
         DropdownInput {
+          Layout.preferredWidth: implicitWidth
+          Layout.preferredHeight: implicitHeight
           label: SettingsMessages.remotePortSetting
           setting: DaemonSetting { name: "remotePortTCP" }
           model: portSelection(Daemon.state.openvpnTcpPortChoices)
@@ -164,46 +180,9 @@ Item {
           { name: "AES-128 (GCM)", value: "AES-128-GCM" },
           { name: "AES-128 (CBC)", value: "AES-128-CBC" },
           { name: "AES-256 (GCM)", value: "AES-256-GCM" },
-          { name: "AES-256 (CBC)", value: "AES-256-CBC" },
-          { name: uiTranslate("ConnectionPage", "None"), value: "none" }
+          { name: "AES-256 (CBC)", value: "AES-256-CBC" }
         ]
         warning: setting.sourceValue === 'none' ? uiTranslate("ConnectionPage", "Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.") : ""
-      }
-      StackLayout {
-        currentIndex: Daemon.settings.cipher.endsWith("GCM") ? 1 : 0
-        Layout.fillWidth: false
-        Layout.fillHeight: false
-        DropdownInput {
-          label: SettingsMessages.dataAuthenticationSetting
-          setting: DaemonSetting { name: "auth" }
-          model: [
-            { name: "SHA1", value: "SHA1" },
-            { name: "SHA256", value: "SHA256" },
-            { name: uiTranslate("ConnectionPage", "None"), value: "none" }
-          ]
-          warning: setting.sourceValue === 'none' ? uiTranslate("ConnectionPage", "Warning: Your traffic is unauthenticated and is vulnerable to manipulation.") : ""
-        }
-        DropdownInput {
-          label: SettingsMessages.dataAuthenticationSetting
-          enabled: false
-          setting: Setting { sourceValue: 0 }
-          model: [
-            { name: "GCM", value: 0 }
-          ]
-        }
-      }
-      DropdownInput {
-        label: SettingsMessages.handshakeSetting
-        setting: DaemonSetting { name: "serverCertificate" }
-        model: [
-          { name: "RSA-2048", value: "RSA-2048" },
-          { name: "RSA-3072", value: "RSA-3072" },
-          { name: "RSA-4096", value: "RSA-4096" },
-          { name: "ECC-256k1", value: "ECDSA-256k1" },
-          { name: "ECC-256r1", value: "ECDSA-256r1" },
-          { name: "ECC-521", value: "ECDSA-521" }
-        ]
-        warning: setting.sourceValue.startsWith("ECDSA-") && !setting.sourceValue.endsWith("k1") ? uiTranslate("ConnectionPage", "This handshake relies on an Elliptic Curve endorsed by US standards bodies.") : ""
       }
     }
 

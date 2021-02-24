@@ -211,4 +211,22 @@ module PiaLinux
 
         task :installer => installer
     end
+
+    # Define targets for tools built just for development use (not part of the
+    # build process itself or shipped artifacts).
+    #
+    # Since these are just development workflow tools, they can be skipped if
+    # specific dependencies are not available.
+    def self.defineTools(toolsStage)
+        # Test if we have libthai-dev, for the Thai word breaking utility
+        if(Executable::Tc.sysHeaderAvailable?('thai/thwbrk.h'))
+            Executable.new('thaibreak')
+                .source('tools/thaibreak')
+                .lib('thai')
+                .install(toolsStage, :bin)
+            toolsStage.install('tools/thaibreak/thai_ts.sh', :bin)
+        else
+            puts "skipping thaibreak utility, install libthai-dev to build thaibreak"
+        end
+    end
 end

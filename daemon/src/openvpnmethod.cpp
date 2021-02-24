@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -190,8 +190,15 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         // back in to ensure we can find `ip` if it's somewhere like /usr/sbin
         // (Fedora 33).  We can't apply environment variables with OpenVPN's
         // interface, so the script accepts --path <PATH> on the command line.
-        updownCmd += QStringLiteral(" --path ");
-        updownCmd += escapeArg(QString::fromLocal8Bit(qgetenv("PATH")));
+        // We also have to break it into <256 char chunks in order to work
+        // around OpenVPN's arg limits.
+        QString actualPath{QString::fromLocal8Bit(qgetenv("PATH"))};
+        enum : int { PathChunk=120 };   // Allows headroom even in extreme cases of quoting
+        for(int i=0; i<actualPath.size(); i += PathChunk)
+        {
+            updownCmd += QStringLiteral(" --path ");
+            updownCmd += escapeArg(actualPath.mid(i, PathChunk));
+        }
 #endif
 
 #ifdef Q_OS_WIN
@@ -508,10 +515,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "route " << remoteServer << " 255.255.255.255 net_gateway 0"
         << endl;
 
-    // Always route this special address through the VPN even when not using
-    // PIA DNS; it's also used for port forwarding in the legacy
-    // infrastructure.
-    out << "route " << piaLegacyDnsPrimary() << " 255.255.255.255 vpn_gateway 0" << endl;
     // If we're setting the system default DNS, route the DNS servers through
     // the tunnel.  This is important if split tunnel DNS is disabled (or not
     // available - macOS) and the VPN isn't getting the default route.
@@ -520,7 +523,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
         for(const auto &dnsServer : _connectingConfig.getDnsServers())
         {
-            if(dnsServer != piaLegacyDnsPrimary())
+            if(!Ipv4Address{dnsServer}.isLoopback())
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
         }
     }
@@ -540,7 +543,8 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
 
     out << "cipher " << sanitize(_connectingConfig.openvpnCipher()) << endl;
     if (!_connectingConfig.openvpnCipher().endsWith("GCM"))
-        out << "auth " << sanitize(_connectingConfig.openvpnAuth()) << endl;
+        out << "auth SHA256" << endl;
+
 
     if (_connectingConfig.mtu() > 0)
     {
@@ -591,9 +595,8 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     out << "pull-filter ignore \"dhcp-option DOMAIN local\"" << endl;
 
     out << "<ca>" << endl;
-    out << g_daemon->environment().getCertificateAuthority(_connectingConfig.openvpnServerCertificate()) << endl;
+    out << g_daemon->environment().getCertificateAuthority(QStringLiteral("RSA-4096")) << endl;
     out << "</ca>" << endl;
-
     return true;
 }
 

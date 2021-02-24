@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -23,7 +23,7 @@
 #define LINUX_CN_PROC_H
 
 #include <QSocketNotifier>
-#include "linux_objects.h"
+#include "posix/posix_objects.h"
 
 // CnProc connects a NETLINK_CONNECTOR socket and subscribes to Proc events
 // (exec, exit, etc.).  This is used by split tunnel to monitor process
@@ -62,7 +62,7 @@ signals:
     void exit(pid_t pid);
 
 private:
-    LinuxFd _cnSock;
+    PosixFd _cnSock;
     nullable_t<QSocketNotifier> _pReadNotifier;
 };
 

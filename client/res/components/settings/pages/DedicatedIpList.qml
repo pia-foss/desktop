@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -35,10 +35,31 @@ TableBase {
   //: Screen reader label for the list of Dedicated IPs.
   label: uiTr("Dedicated IPs")
 
+  readonly property bool showAddRow: {
+    // Both clients and Web are going to limit to one configured DIP in order to
+    // support renewals, we want this change to occur simultaneously with the
+    // Web changes
+    if(!Daemon.data.flags.includes("limit_one_dip"))
+      return true // Not limiting to one DIP yet
+
+    // It seems that dedicatedIpRepeater.count doesn't always report changes
+    // correctly - hack in a dependency on the children.
+    var dep = dedicatedIpRepeater.children
+
+    // Only one DIP can be added, show the add row when no DIPs have been added
+    // yet.
+    return dedicatedIpRepeater.count === 0
+  }
+
   // The initial keyboard row is the "add" row.
   // Add row: "add/" (no value)
   // DIP row: "dip/<dip-region-id>"
-  keyboardRow: buildRowId("add")
+  keyboardRow: {
+    if(dedicatedIpList.showAddRow)
+      return buildRowId("add")
+    else
+      return buildRowId("dip", Daemon.state.dedicatedIpLocations[0].id)
+  }
 
   verticalScrollPolicy: ScrollBar.AsNeeded
   contentHeight: dedicatedIpsLayout.implicitHeight
@@ -51,6 +72,7 @@ TableBase {
     width: parent.width
 
     DedicatedIpAddRow {
+      visible: dedicatedIpList.showAddRow
       id: addDedicatedIpRow
       Layout.fillWidth: true
       parentTable: dedicatedIpList
@@ -113,8 +135,9 @@ TableBase {
     var table = []
 
     // 'Add' row
-    table.push({row: buildRowId("add"), name: addDedicatedIpRow.displayName,
-                item: addDedicatedIpRow})
+    if(dedicatedIpList.showAddRow)
+      table.push({row: buildRowId("add"), name: addDedicatedIpRow.displayName,
+                  item: addDedicatedIpRow})
 
     // DIP rows
     for(var i=0; i<dedicatedIpRepeater.count; ++i) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -38,6 +38,7 @@
 #include "linux_routing.h"
 #include "posix/posix_firewall_iptables.h"
 #include "proc_tracker.h"
+#include "linux_proc_fs.h"
 
 namespace
 {
@@ -48,115 +49,12 @@ namespace
 
 Executor ProcTracker::_executor{CURRENT_CATEGORY};
 
-QSet<pid_t> ProcFs::filterPids(const std::function<bool(pid_t)> &filterFunc)
-{
-    QDir procDir{"/proc"};
-    procDir.setFilter(QDir::Dirs);
-    procDir.setNameFilters({"[1-9]*"});
-
-    QSet<pid_t> filteredPids;
-    for(const auto &entry : procDir.entryList())
-    {
-        pid_t pid = entry.toInt();
-        if(filterFunc(pid))
-            filteredPids.insert(pid);
-    }
-
-    return filteredPids;
-}
-
-QSet<pid_t> ProcFs::pidsForPath(const QString &path)
-{
-    return filterPids([&](pid_t pid) { return pathForPid(pid) == path; });
-}
-
-QSet<pid_t> ProcFs::childPidsOf(pid_t parentPid)
-{
-    return filterPids([&](pid_t pid) { return isChildOf(parentPid, pid); });
-}
-
-QString ProcFs::pathForPid(pid_t pid)
-{
-    QString link = QStringLiteral("/proc/%1/exe").arg(pid);
-    return QFile::symLinkTarget(link);
-}
-
-bool ProcFs::isChildOf(pid_t parentPid, pid_t pid)
-{
-    static const QRegularExpression parentPidRegex{ QStringLiteral("PPid:\\s+([0-9]+)") };
-
-    QFile statusFile{QStringLiteral("/proc/%1/status").arg(pid)};
-    if(!statusFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-
-    auto match = parentPidRegex.match(statusFile.readAll());
-    if(match.hasMatch())
-    {
-        auto foundParentPid = match.captured(1).toInt();
-        return foundParentPid == parentPid;
-    }
-
-    return false;
-}
-
-void ProcTracker::writePidToCGroup(pid_t pid, const QString &cGroupPath)
-{
-    QFile cGroupFile{cGroupPath};
-
-    if(!cGroupFile.open(QFile::WriteOnly))
-    {
-        qWarning() << "Cannot open" << cGroupPath << "for writing!" << cGroupFile.errorString();
-        return;
-    }
-
-    if(cGroupFile.write(QByteArray::number(pid)) < 0)
-        qWarning() << "Could not write to" << cGroupPath << cGroupFile.errorString();
-}
-
-void ProcTracker::addPidToCgroup(pid_t pid, const Path &cGroupPath)
-{
-    writePidToCGroup(pid, cGroupPath);
-    // Add child processes (NOTE: we also recurse through child processes of child processes)
-    addChildPidsToCgroup(pid, cGroupPath);
-}
-
-void ProcTracker::addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath)
-{
-    for(pid_t pid : ProcFs::childPidsOf(parentPid))
-    {
-        qInfo() << "Adding child pid" << pid;
-        addPidToCgroup(pid, cGroupPath);
-    }
-}
-
-void ProcTracker::removeChildPidsFromCgroup(pid_t parentPid, const Path &cGroupPath)
-{
-    for(pid_t pid : ProcFs::childPidsOf(parentPid))
-    {
-        qInfo() << "Removing child pid" << pid << cGroupPath;
-        removePidFromCgroup(pid, cGroupPath);
-    }
-}
-
-void ProcTracker::removePidFromCgroup(pid_t pid, const Path &cGroupPath)
-{
-    // We remove a PID from a cgroup by adding it to its parent cgroup
-    writePidToCGroup(pid, cGroupPath);
-    // Remove child processes (NOTE: we also recurse through child processes of child processes)
-    removeChildPidsFromCgroup(pid, cGroupPath);
-}
-
 void ProcTracker::updateMasquerade(QString interfaceName, QString tunnelDeviceName)
 {
     if(interfaceName.isEmpty())
     {
         qInfo() << "Removing masquerade rule, not connected";
-        IpTablesFirewall::replaceAnchor(
-            IpTablesFirewall::Both,
-            QStringLiteral("100.transIp"),
-            {},
-            IpTablesFirewall::kNatTable
-        );
+        IpTablesFirewall::replaceAnchor(IpTablesFirewall::Both, QStringLiteral("100.transIp"), {}, IpTablesFirewall::kNatTable);
     }
     else
     {
@@ -175,16 +73,6 @@ void ProcTracker::updateMasquerade(QString interfaceName, QString tunnelDeviceNa
 
 void ProcTracker::updateRoutes(QString gatewayIp, QString interfaceName, QString tunnelDeviceName)
 {
-    qInfo() << "Updating the default route in"
-        << Routing::bypassTable
-        << "for"
-        << gatewayIp
-        << "and"
-        << interfaceName
-        << "and"
-        << "tunnel interface"
-        << tunnelDeviceName;
-
     // The bypass route can be left as-is if the configuration is not known,
     // even though the route may be out of date - we don't put any processes in
     // this cgroup when not connected.
@@ -355,7 +243,7 @@ void ProcTracker::addApps(const QVector<QString> &apps, AppMap &appMap, QString 
         for(pid_t pid : ProcFs::pidsForPath(app))
         {
             // Both these calls are no-ops if the PID is already excluded
-            addPidToCgroup(pid, cGroupPath);
+            CGroup::addPidToCgroup(pid, cGroupPath);
             appMap[app].insert(pid);
         }
     }
@@ -369,7 +257,7 @@ void ProcTracker::removeApps(const QVector<QString> &keepApps, AppMap &appMap)
         {
             for(pid_t pid : appMap[app])
             {
-                removePidFromCgroup(pid, Path::ParentVpnExclusionsFile);
+                CGroup::removePidFromCgroup(pid, Path::ParentVpnExclusionsFile);
             }
 
             appMap.remove(app);
@@ -484,7 +372,7 @@ void ProcTracker::addLaunchedApp(pid_t pid)
 
             // Add the PID to the cgroup so its network traffic goes out the
             // physical uplink
-            addPidToCgroup(pid, Path::VpnExclusionsFile);
+            CGroup::addPidToCgroup(pid, Path::VpnExclusionsFile);
         }
     }
     else if(_vpnOnlyMap.contains(appName))
@@ -494,11 +382,6 @@ void ProcTracker::addLaunchedApp(pid_t pid)
 
         // Add the PID to the cgroup so its network traffic is forced out the
         // VPN
-        addPidToCgroup(pid, Path::VpnOnlyFile);
+        CGroup::addPidToCgroup(pid, Path::VpnOnlyFile);
     }
-}
-
-void ProcTracker::aboutToConnectToVpn()
-{
-
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -61,7 +61,7 @@ CnProc::CnProc()
     qInfo() << "Connecting to Netlink";
 
     // Set SOCK_CLOEXEC to prevent socket being inherited by child processes (such as openvpn)
-    _cnSock = LinuxFd{::socket(PF_NETLINK, SOCK_DGRAM|SOCK_CLOEXEC, NETLINK_CONNECTOR)};
+    _cnSock = PosixFd{::socket(PF_NETLINK, SOCK_DGRAM|SOCK_CLOEXEC, NETLINK_CONNECTOR)};
     if(!_cnSock)
     {
         qWarning() << "Failed to open Netlink connector socket -"

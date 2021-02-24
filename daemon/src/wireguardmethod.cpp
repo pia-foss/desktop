@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -721,22 +721,19 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         }
     }
 
-    // Always route the special PIA DNS address and the configured DNS addresses
-    // into the tunnel.  As with OpenVPN, Linux apps may do their own DNS when
-    // not using systemd-resolved, and even bypass apps need to do this through
-    // the tunnel.
-    // Always route special address through VPN (used for MACE, port forwarding etc)
-    _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(piaLegacyDnsPrimary(), deviceName));
     // Route virtual server IP (ping endpoint) through VPN
     _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(_pingEndpointAddress.toString(), deviceName));
 
+    // Always route the configured DNS addresses into the tunnel.  As with
+    // OpenVPN, Linux apps may do their own DNS when not using systemd-resolved,
+    // and even bypass apps need to do this through the tunnel.
     // If we're setting the default DNS, route those servers through the tunnel,
     // and then apply the DNS servers.
     if(_connectionConfig.setDefaultDns())
     {
         for(const auto &dnsServer : _dnsServers)
         {
-            if(dnsServer != piaLegacyDnsPrimary())
+            if(!Ipv4Address{dnsServer}.isLoopback())
                 _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
         }
 
@@ -764,9 +761,6 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     }
     else
     {
-        // Always route special address through VPN (used for MACE, port forwarding etc)
-        _executor.bash(QStringLiteral("route -q -n add %1 -interface %2").arg(piaLegacyDnsPrimary(), deviceName));
-
         // Route virtual server IP (ping endpoint) through VPN
         _executor.bash(QStringLiteral("route -q -n add %1 -interface %2").arg(_pingEndpointAddress.toString(), deviceName));
     }
@@ -789,7 +783,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Route DNS through the tunnel.
         for(const auto &dnsServer : _dnsServers)
         {
-            if(dnsServer != piaLegacyDnsPrimary())
+            if(!Ipv4Address{dnsServer}.isLoopback())
                 _executor.bash(QStringLiteral("route -q -n add -inet %1 -interface %2").arg(dnsServer, deviceName));
         }
         setupPosixDNS(deviceName, _dnsServers);
@@ -857,9 +851,6 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
 
         // Route virtual server IP (ping endpoint) through VPN
         routeManager.addRoute4(_pingEndpointAddress.toString(), onLink, luidStr);
-
-        // Always route special address through VPN (used for MACE, port forwarding etc)
-        routeManager.addRoute4(piaLegacyDnsPrimary(), onLink, luidStr);
     }
 
     // Reset DNS on this interface (even if we're not overriding the system
@@ -874,7 +865,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
         {
-            if(dnsServer != piaLegacyDnsPrimary())
+            if(!Ipv4Address{dnsServer}.isLoopback())
                 routeManager.addRoute4(dnsServer, onLink, luidStr);
         }
         // Add each DNS server

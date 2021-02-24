@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "payloadbuilder.h"
+﻿#include "payloadbuilder.h"
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -67,7 +67,7 @@ private:
     QNetworkAccessManager _nm;
     QNetworkRequest _request;
     QNetworkReply *_reply;
-    QString getUrl(const QString &path) const;
+    QString getUrl() const;
 
 #ifdef Q_OS_WIN
     bool checkDumpFileAgainstBlacklist(const QString &path) const;
@@ -83,5 +83,6 @@ private slots:
 };
 
 bool checkAutoRestart (const QString &settingsPath, const QString &clientCrashPath);
+QString getEndpointOverride(const QString &overridePath);
 
 #endif // REPORTHELPER_H

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -280,7 +280,7 @@ public:
     QStringList filters() const;
     void wipeLogFile ();
 
-    Q_SLOT void configure(bool logToFile, const QStringList& filters);
+    Q_SLOT void configure(bool logToFile, bool largeLogFiles, const QStringList& filters);
     Q_SIGNAL void configurationChanged(bool logToFile, const QStringList& filters);
 
 private:

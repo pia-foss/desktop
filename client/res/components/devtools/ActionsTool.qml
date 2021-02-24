@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -63,12 +63,6 @@ Item {
             onClicked: {
               Daemon.writeDummyLogs();
               NativeHelpers.writeDummyLogs();
-            }
-          }
-          Button {
-            text: "Refresh Dedicated IPs"
-            onClicked: {
-              Daemon.refreshDedicatedIps()
             }
           }
         }
@@ -151,6 +145,18 @@ Item {
             }
           }
         }
+        Row {
+          spacing: 5
+          Button {
+            Layout.alignment: Qt.AlignTop|Qt.AlignRight
+            text: "Check for updates"
+            onClicked: Daemon.refreshMetadata()
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Refreshes client updates, notification data, dedicated IPs, etc."
+          }
+        }
 
         Row {
           // spacer
@@ -169,16 +175,6 @@ Item {
         UpdateChannel {
           label: "GA"
           channelPropName: "updateChannel"
-        }
-        // Spacer (put the Check for Updates button at the top-right of the
-        // group box)
-        Item {
-          Layout.fillWidth: true
-        }
-        Button {
-          Layout.alignment: Qt.AlignTop|Qt.AlignRight
-          text: "Check for updates"
-          onClicked: Daemon.refreshUpdate()
         }
         UpdateChannel {
           label: "Beta"

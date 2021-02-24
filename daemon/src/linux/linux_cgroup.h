@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -40,7 +40,15 @@ public:
     // Actually make the net_cls cgroup directory and mount the VFS.
     // This function is only called if the host system does not already have a net_cls VFS
     static bool createNetCls();
+
+public:
+    static void addPidToCgroup(pid_t pid, const Path &cGroupPath);
+    static void removePidFromCgroup(pid_t pid, const Path &cGroupPath);
+
 private:
+    static void writePidToCGroup(pid_t pid, const QString &cGroupPath);
+    static void removeChildPidsFromCgroup(pid_t parentPid, const Path &cGroupPath);
+    static void addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath);
     static void setupCgroup(const Path &cGroupDir, const QString &cGroupId, const QString &packetTag,
                             const QString &routingTableName, int priority);
     static void teardownCgroup(const QString &packetTag, const QString &routingTableName);

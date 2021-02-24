@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2020 Private Internet Access, Inc.
+# Copyright (c) 2021 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -162,12 +162,12 @@ mkdir -p /etc/schroot/piabuild
 # For desktop:
 HOST_PACKAGES_DTOP=(build-essential rake clang-7 git arch-test)
 # For desktop-dep-build:
-HOST_PACKAGES_DEP=(curl pv bison automake libtool python)
+HOST_PACKAGES_DEP=(curl pv bison automake libtool python gperf)
 # Packages needed for target architecture(s)
 # For desktop:
 TARGET_PACKAGES_DTOP=(mesa-common-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev zlib1g libglib2.0-0)
 # For desktop-dep-build:
-TARGET_PACKAGES_DEP=(libmnl-dev libclang-dev libssl-dev libxcb-xinerama0-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-xfixes0-dev libxcb-sync-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-image0-dev libxkbcommon-x11-dev libxi-dev libxrender-dev libxext-dev libx11-dev libx11-xcb-dev libxcb1-dev libfontconfig1-dev libfreetype6-dev libsm-dev libice-dev libglib2.0-dev libpq-dev libatspi2.0-dev libgl-dev libegl1-mesa-dev)
+TARGET_PACKAGES_DEP=(libmnl-dev libclang-dev libssl-dev libxkbcommon-x11-dev libxi-dev libxrender-dev libxext-dev libx11-dev libx11-xcb-dev libxcb1-dev libfontconfig1-dev libfreetype6-dev libsm-dev libice-dev libglib2.0-dev libpq-dev libatspi2.0-dev libgl-dev libegl1-mesa-dev xutils-dev)
 
 echo "Install host arch packages"
 # Enter the chroot and install additional packages

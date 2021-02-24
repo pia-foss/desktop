@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -370,6 +370,52 @@ public:
     JsonField(quint64, sent, {})
 };
 
+class COMMON_EXPORT AppMessage : public NativeJsonObject
+{
+    Q_OBJECT
+public:
+    using TextTranslations = std::unordered_map<QString, QString>;
+public:
+    AppMessage() {}
+
+    AppMessage(const AppMessage &other) {*this = other;}
+    AppMessage &operator=(const AppMessage &other)
+    {
+        id(other.id());
+        hasLink(other.hasLink());
+        messageTranslations(other.messageTranslations());
+        linkTranslations(other.linkTranslations());
+        settingsAction(other.settingsAction());
+        viewAction(other.viewAction());
+        uriAction(other.uriAction());
+        return *this;
+    }
+
+    bool operator==(const AppMessage &other) const
+    {
+        return id() == other.id() && hasLink() == other.hasLink() &&
+        messageTranslations() == other.messageTranslations() &&
+        linkTranslations() == other.linkTranslations() &&
+        settingsAction() == other.settingsAction() &&
+        viewAction() == other.viewAction() &&
+        uriAction() == other.uriAction();
+    }
+
+    bool operator!=(const AppMessage &other) const
+    {
+        return !(*this == other);
+    }
+
+public:
+    JsonField(quint64, id, 0)
+    JsonField(bool, hasLink, false)
+    JsonField(TextTranslations, messageTranslations, {})
+    JsonField(TextTranslations, linkTranslations, {})
+    JsonField(QJsonObject, settingsAction, {})
+    JsonField(QString, viewAction, {})
+    JsonField(QString, uriAction, {})
+};
+
 // Transport settings that might vary due to automatic failover.
 class COMMON_EXPORT Transport : public NativeJsonObject
 {
@@ -626,6 +672,12 @@ public:
 
     // Flags published in the release channel that we are currently loading
     JsonField(std::vector<QString>, flags, {})
+
+    // In-app communication message
+    JsonField(AppMessage, appMessage, {})
+
+    // Check if a single flag exists on the list of flags
+    bool hasFlag (const QString &flag) const;
 };
 
 
@@ -837,9 +889,7 @@ public:
     JsonField(uint, remotePortTCP, 0) // 0 == auto
     JsonField(uint, localPort, 0) // 0 == auto
     JsonField(uint, mtu, 0) // 0 == unspecified
-    JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM", "AES-128-CBC", "AES-256-CBC", "none" })
-    JsonField(QString, auth, QStringLiteral("SHA1"), { "SHA1", "SHA256", "none" })
-    JsonField(QString, serverCertificate, QStringLiteral("RSA-2048"), { "ECDSA-256k1", "ECDSA-256r1", "ECDSA-521", "RSA-2048", "RSA-3072", "RSA-4096", "default" })
+    JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM", "AES-128-CBC", "AES-256-CBC" })
     // On Windows, the method to use to configure the TAP adapter's IP addresses
     // and DNS servers.
     // - dhcp - use "ip-win32 dhcp", DNS servers applied as DHCP options
@@ -933,6 +983,16 @@ public:
 
     // Set to false when user opts out, or finishes rating successfully.
     JsonField(bool, ratingEnabled, true)
+
+    // Keep track of the id of the last dismissed in-app message
+    JsonField(quint64, lastDismissedAppMessageId, 0)
+
+    // Keep extra logs on disk for debugging/diagnosis purposes. This is disabled
+    // by default and can only be turned on using the CLI
+    JsonField(bool, largeLogFiles, false)
+
+    // Whether to show in-app communication messages to the user
+    JsonField(bool, showAppMessages, true)
 };
 
 // Compare QSharedPointer<Location>s by value; used by ServiceLocations
@@ -1040,8 +1100,6 @@ public:
         methodForcedByAuth(other.methodForcedByAuth());
         dnsType(other.dnsType());
         openvpnCipher(other.openvpnCipher());
-        openvpnAuth(other.openvpnAuth());
-        openvpnServerCertificate(other.openvpnServerCertificate());
         otherAppsUseVpn(other.otherAppsUseVpn());
         proxy(other.proxy());
         proxyCustom(other.proxyCustom());
@@ -1060,8 +1118,6 @@ public:
             methodForcedByAuth() == other.methodForcedByAuth() &&
             dnsType() == other.dnsType() &&
             openvpnCipher() == other.openvpnCipher() &&
-            openvpnAuth() == other.openvpnAuth() &&
-            openvpnServerCertificate() == other.openvpnServerCertificate() &&
             otherAppsUseVpn() == other.otherAppsUseVpn() &&
             proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
@@ -1088,8 +1144,6 @@ public:
 
     // OpenVPN cryptographic settings - only meaningful when method is OpenVPN
     JsonField(QString, openvpnCipher, {})
-    JsonField(QString, openvpnAuth, {})
-    JsonField(QString, openvpnServerCertificate, {})
 
     // Whether the default app behavior is to use the VPN - i.e. whether apps
     // with no specific rules use the VPN (always true when split tunnel is
@@ -1467,11 +1521,6 @@ public:
 
 // The 127/8 loopback address used for local DNS.
 COMMON_EXPORT const QString resolverLocalAddress();
-
-// The IP used for PIA DNS and MACE activation in the legacy infrastructure.
-COMMON_EXPORT const QString piaLegacyDnsPrimary();
-// The IP used for the secondary PIA DNS address in the legacy infrastructure.
-COMMON_EXPORT const QString piaLegacyDnsSecondary();
 
 // The IP used for PIA DNS in the modern infrastructure - on-VPN, and with MACE.
 COMMON_EXPORT const QString piaModernDnsVpnMace();

@@ -313,6 +313,17 @@ module PiaWindows
         task :installer => signedInstaller
     end
 
+    # Define targets for tools built just for development use (not part of the
+    # build process itself or shipped artifacts).
+    #
+    # Since these are just development workflow tools, they can be skipped if
+    # specific dependencies are not available.
+    def self.defineTools(toolsStage)
+        Executable.new("#{Build::Brand}-closegui")
+            .source('tools/closegui')
+            .install(toolsStage, :bin)
+    end
+
     def self.collectSymbols(version, stage, debugSymbols)
         symbolsDir = debugSymbols.artifact("symbols-#{version.packageName}")
         FileUtils.mkdir(symbolsDir)

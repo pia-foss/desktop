@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -34,8 +34,7 @@ public:
     {}
 
     AddressAndPort(const AddressAndPort &other)
-    : _ip{other._ip}
-    , _port{other._port}
+    : AddressAndPort(other._ip, other._port)
     {}
 
     bool operator==(const AddressAndPort &other) const { return _ip == other._ip && _port == other._port; }
@@ -79,7 +78,6 @@ public:
     QSet<AddressAndPort> addresses4(const QSet<pid_t> &pids);
     pid_t pidForPort(quint16 port, IPVersion ipVersion=IPv4);
 
-//private:
     bool matchesPath(pid_t pid);
     QString pidToPath(pid_t);
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -282,13 +282,7 @@ void Environment::loadApiBases()
 void Environment::reload()
 {
     _authorities.clear();
-    loadCertificateAuthority(QStringLiteral("ECDSA-256k1"), QStringLiteral("ecdsa_256k1.crt"));
-    loadCertificateAuthority(QStringLiteral("ECDSA-256r1"), QStringLiteral("ecdsa_256r1.crt"));
-    loadCertificateAuthority(QStringLiteral("ECDSA-521"), QStringLiteral("ecdsa_521.crt"));
-    loadCertificateAuthority(QStringLiteral("RSA-2048"), QStringLiteral("rsa_2048.crt"));
-    loadCertificateAuthority(QStringLiteral("RSA-3072"), QStringLiteral("rsa_3072.crt"));
     loadCertificateAuthority(QStringLiteral("RSA-4096"), QStringLiteral("rsa_4096.crt"));
-    loadCertificateAuthority(QStringLiteral("default"), QStringLiteral("default.crt"));
 
     _pRsa4096CA = std::make_shared<PrivateCA>(getCertificateAuthority(QStringLiteral("RSA-4096")));
 

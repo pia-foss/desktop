@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -383,6 +383,10 @@ void IpTablesFirewall::install()
         QStringLiteral("! -o lo+ -j REJECT"),
     });
 
+    installAnchor(IPv4, QStringLiteral("230.allowBypassApps"), {
+        QStringLiteral("-m cgroup --cgroup %1 -j ACCEPT").arg(CGroup::bypassId, Fwmark::excludePacketTag),
+    });
+
     installAnchor(Both, QStringLiteral("200.allowVPN"), {
         // To be added at runtime, dependent upon vpn method (i.e openvpn or wireguard)
     });
@@ -542,6 +546,7 @@ void IpTablesFirewall::uninstall()
     uninstallAnchor(IPv6, QStringLiteral("299.allowIPv6Prefix"));
     uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
+    uninstallAnchor(IPv4, QStringLiteral("230.allowBypassApps"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
     uninstallAnchor(Both, QStringLiteral("100.protectLoopback"));
@@ -735,7 +740,6 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     updateBypassSubnets(IpTablesFirewall::IPv4, params.bypassIpv4Subnets, _bypassIpv4Subnets);
     updateBypassSubnets(IpTablesFirewall::IPv6, params.bypassIpv6Subnets, _bypassIpv6Subnets);
 
-
     // Manage DNS for forwarded packets
     SplitDNSInfo::SplitDNSType routedDns = SplitDNSInfo::SplitDNSType::VpnOnly;
     if(params.enableSplitTunnel && !g_daemon->settings().routedPacketsOnVPN())
@@ -842,33 +846,53 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
         if(!ruleList.isEmpty() && params.enableSplitTunnel)
         {
-            // No DNS leak protection required for bypass traffic - at worst it'll go over the VPN which isn't a leak
-            ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
-            ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j ACCEPT").arg(CGroup::bypassId);
-
             // DNS leak protection for vpnOnly apps.
+            // In rare situations, when making a DNS request, a vpnOnly app could re-use the port
+            // previously used by a bypass app. When this happens, iptables causes the vpnOnly DNS request
+            // to get routed the same way as the bypass request - causing a DNS leak.
+            // We guard against this below.
             if(params._connectionSettings && params._connectionSettings->forceVpnOnlyDns())
             {
-                const auto vpnOnlyServersStr = QStringList{appDnsInfo.dnsServer()}.join(",");
+                const auto vpnOnlyServersStr = QStringList{appDnsInfo.dnsServer()}.join(',');
                 // When the VPN does not have the default route, allow
                 // the vpnOnly DNS servers
                 ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -d %2 -j ACCEPT").arg(CGroup::vpnOnlyId, vpnOnlyServersStr);
                 ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -d %2 -j ACCEPT").arg(CGroup::vpnOnlyId, vpnOnlyServersStr);
                 // And block everything else
+                // Doing this prevents a vpnOnly app re-using a port/route used by a bypass app
                 ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j REJECT").arg(CGroup::vpnOnlyId);
                 ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j REJECT").arg(CGroup::vpnOnlyId);
+
+                // Reject bypass apps from using vpnOnly DNS (prevents a bypass app re-using a vpnOnly port/route)
+                // If we didn't block this, it may allow bypass apps to make DNS requests over the VPN - this isn't technically a 'leak'
+                // but is still weird/unexpected behaviour, so we prevent it.
+                ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, vpnOnlyServersStr);
+                ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, vpnOnlyServersStr);
             }
-            else
+            else // VPN has default route
             {
                 const auto bypassServersStr = QStringList{appDnsInfo.dnsServer()}.join(",");
-                // When the VPN does have the default route vpnOnly apps use the default DNS.
-                // However, vpnOnly apps could still leak if a DNS request re-uses the route used by
-                // by a prior bypass app. This happens when a vpnOnly app re-uses the source port of a bypass app within the UDP conntrack timeout.
-                // To guard against this we block bypass DNS servers for any packet that is not part of the bypass cgroup.
-                // NOTE: we cannot use the vpnOnly cgroup here as no apps are added to the vpnOnly cgroup when the VPN has
-                // the default route.
-                ruleList << QStringLiteral("-p udp -m cgroup ! --cgroup %1 -m udp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
-                ruleList << QStringLiteral("-p tcp -m cgroup ! --cgroup %1 -m tcp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
+                // Allow configured DNS servers for bypass apps (VPN has the default route)
+
+                // Only apply our bypass leak protection if we have bypass DNS servers
+                // (we will not have bypass DNS servers if ST "Name Servers" is set to "Use VPN DNS Only" rather than "Follow App Rules")
+                if(!bypassServersStr.isEmpty())
+                {
+                    ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -d %2 -j ACCEPT").arg(CGroup::bypassId, bypassServersStr);
+                    ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -d %2 -j ACCEPT").arg(CGroup::bypassId, bypassServersStr);
+                    // And block everything else
+                    ruleList << QStringLiteral("-p udp -m cgroup --cgroup %1 -m udp --dport 53 -j REJECT").arg(CGroup::bypassId);
+                    ruleList << QStringLiteral("-p tcp -m cgroup --cgroup %1 -m tcp --dport 53 -j REJECT").arg(CGroup::bypassId);
+
+                    // When the VPN does have the default route, vpnOnly apps use the configured VPN DNS.
+                    // However, vpnOnly apps could still leak if a DNS request re-uses the route used by
+                    // by a prior bypass app. This happens when a vpnOnly app re-uses the source port of a bypass app within the UDP conntrack timeout.
+                    // To guard against this we block bypass DNS servers for any packet that is not part of the bypass cgroup.
+                    // NOTE: we cannot use the vpnOnly cgroup here as no apps are added to the vpnOnly cgroup when the VPN has
+                    // the default route.
+                    ruleList << QStringLiteral("-p udp -m cgroup ! --cgroup %1 -m udp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
+                    ruleList << QStringLiteral("-p tcp -m cgroup ! --cgroup %1 -m tcp --dport 53 -d %2 -j REJECT").arg(CGroup::bypassId, bypassServersStr);
+                }
             }
         }
 

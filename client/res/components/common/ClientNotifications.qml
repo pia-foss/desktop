@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -82,6 +82,25 @@ Item {
     severity: severities.info
     active: Daemon.state.osUnsupported
     dismissible: false
+  }
+
+  // Test in-app message - created in devtools
+  AppMessageNotificationStatus {
+    id: testAppMessage
+    appMessage: {id: 0}
+    severity: severities.info
+    dismissed: false
+
+    function dismiss() {
+      dismissed = true
+    }
+  }
+
+  // In-app messages
+  AppMessageNotificationStatus {
+    id: appMessage
+    appMessage: Daemon.data.appMessage
+    severity: severities.info
   }
 
   // One or more overrides are present but could not be loaded.  This is almost
@@ -544,6 +563,20 @@ Item {
     }
   }
 
+  function updateTestMessage(message) {
+    testAppMessage.appMessage = message
+    testAppMessage.dismissed = false
+  }
+
+  function deleteTestMessage() {
+    testAppMessage.appMessage = {id: 0}
+    testAppMessage.dismissed = true
+  }
+
+  function testMessageExists() {
+    return testAppMessage.active && !testAppMessage.dismissed
+  }
+
   // This property holds a list of all notifications, whether they are active,
   // their messages, severities, etc.  This is in the order they're displayed in
   // the list.
@@ -577,6 +610,8 @@ Item {
     updateAvailable,
     downloadFailed,
     osUnsupported,
+    testAppMessage,
+    appMessage,
     // Testing overrides - could cause virtually all of the following
     // conditions, particularly if the overrides are out of date or refer to
     // servers that no longer exist, etc.
@@ -660,6 +695,10 @@ Item {
   // Emitted when a notification needs to show an alert on the Settings Help
   // page (due to an error handling a user action)
   signal showHelpAlert(string msg, string title, string level)
+  // Show an arbitrary settings page
+  signal showPage(string pageName)
+  // Show regions page
+  signal showRegions()
 
   // The title of the first active error-level notification if there is one, or
   // "" if there are no active errors.

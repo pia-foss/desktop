@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -107,6 +107,10 @@ public:
     // than other, >0 if this has higher precedence than other, or 0 if they are
     // equivalent.
     int compare(const SemVersion &other) const;
+
+    int major() const {return _major;}
+    int minor() const {return _minor;}
+    int patch() const {return _patch;}
 
 private:
     int _major;

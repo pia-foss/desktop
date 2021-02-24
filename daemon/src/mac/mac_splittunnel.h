@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -39,16 +39,8 @@
 #include "exec.h"
 #include "vpn.h"
 #include "pid_finder.h"
+#include "rule_updater.h"
 #include "packet.h"
-
-namespace
-{
-    enum IPVersion { IPv4, IPv6 };
-
-    inline QString ipToString(IPVersion ipVersion) { return (ipVersion == IPv4 ? "IPv4" : "IPv6"); }
-}
-
-using PortSet = QSet<quint16>;
 
 class AppCache
 {
@@ -86,66 +78,6 @@ private:
     QString nextAddress(const QString &addressStr) const;
 private:
     std::array<QString, 2> _ipAddress;
-};
-
-class MacSplitTunnel;
-
-class RuleUpdater
-{
-public:
-    RuleUpdater(MacSplitTunnel *pMacSplitTunnel)
-        : _pMacSplitTunnel{pMacSplitTunnel}
-    {}
-
-    void update(IPVersion ipVersion, const PortSet &ports);
-    void forceUpdate(IPVersion ipVersion, const PortSet &ports) const;
-    void clearRules(IPVersion ipVersion);
-    void clearAllRules();
-
-protected:
-    virtual QString anchorNameFor(IPVersion ipVersion) const = 0;
-    virtual QString tagNameFor(IPVersion ipVersion) const = 0;
-    virtual QStringList routingRule(IPVersion ipVersion) const = 0;
-    virtual QString protocolFor(IPVersion ipVersion) const {return ipVersion == IPv4 ? QStringLiteral("inet") : QStringLiteral("inet6");}
-    virtual QStringList rules(IPVersion ipVersion, const PortSet &ports) const;
-    const FirewallParams &params() const;
-    const QString& tunnelDeviceName() const;
-private:
-    std::array<PortSet, 2> _ports;
-    OriginalNetworkScan _netScan;
-    QSet<QString> _bypassIpv4Subnets;
-    QSet<QString> _bypassIpv6Subnets;
-    MacSplitTunnel *_pMacSplitTunnel;
-};
-
-class BypassRuleUpdater : public RuleUpdater
-{
-public:
-    using RuleUpdater::RuleUpdater;
-protected:
-    virtual QStringList rules(IPVersion ipVersion, const PortSet &ports) const override;
-    virtual QString tagNameFor(IPVersion ipVersion) const override;
-    virtual QString anchorNameFor(IPVersion ipVersion) const override;
-    virtual QStringList routingRule(IPVersion ipVersion) const override;
-};
-class VpnOnlyRuleUpdater : public RuleUpdater
-{
-public:
-    using RuleUpdater::RuleUpdater;
-protected:
-    virtual QString tagNameFor(IPVersion ipVersion) const override;
-    virtual QString anchorNameFor(IPVersion ipVersion) const override;
-    virtual QStringList routingRule(IPVersion ipVersion) const override;
-};
-
-class DefaultRuleUpdater : public RuleUpdater
-{
-public:
-    using RuleUpdater::RuleUpdater;
-protected:
-    virtual QString tagNameFor(IPVersion ipVersion) const override;
-    virtual QString anchorNameFor(IPVersion ipVersion) const override;
-    virtual QStringList routingRule(IPVersion ipVersion) const override;
 };
 
 class MacSplitTunnel : public QObject
@@ -205,9 +137,9 @@ private:
     };
 
 private:
-    std::unique_ptr<QSocketNotifier> _readNotifier;
-    int _rawFd4{-1};
-    UTun _utun;
+    nullable_t<QSocketNotifier> _readNotifier;
+    nullable_t<PosixFd> _rawFd4;
+    nullable_t<UTun> _pUtun;
     State _state{State::Inactive};
     QVector<QString> _excludedApps;
     QVector<QString> _vpnOnlyApps;
@@ -215,9 +147,9 @@ private:
     QString _tunnelDeviceName;
     QString _tunnelDeviceLocalAddress;
     AppCache _defaultAppsCache;
-    BypassRuleUpdater _bypassRuleUpdater;
-    VpnOnlyRuleUpdater _vpnOnlyRuleUpdater;
-    DefaultRuleUpdater _defaultRuleUpdater;
+    RuleUpdater _bypassRuleUpdater;
+    RuleUpdater _vpnOnlyRuleUpdater;
+    RuleUpdater _defaultRuleUpdater;
     SplitTunnelIp _splitTunnelIp;
     FirewallParams _params;
 

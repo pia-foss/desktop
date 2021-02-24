@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -65,7 +65,7 @@ Item {
         }
       }
 
-       TextArea {
+      TextArea {
         anchors.left: pathButton.right
         text: modelData.path
         selectByMouse: true

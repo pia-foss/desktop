@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,11 +22,13 @@
 #include "linux_cgroup.h"
 #include "linux_fwmark.h"
 #include "linux_routing.h"
+#include "linux_proc_fs.h"
 #include "exec.h"
 #include "path.h"
 #include "brand.h"
 
 #include <QDir>
+
 
 const QString CGroup::bypassId{hexNumberStr(BRAND_LINUX_CGROUP_BASE)};
 const QString CGroup::vpnOnlyId{hexNumberStr(BRAND_LINUX_CGROUP_BASE+1)};
@@ -106,4 +108,51 @@ int CGroup::execute(const QString &command, bool ignoreErrors)
 {
     static Executor iptablesExecutor{CURRENT_CATEGORY};
     return iptablesExecutor.bash(command, ignoreErrors);
+}
+
+void CGroup::writePidToCGroup(pid_t pid, const QString &cGroupPath)
+{
+    QFile cGroupFile{cGroupPath};
+
+    if(!cGroupFile.open(QFile::WriteOnly))
+    {
+        qWarning() << "Cannot open" << cGroupPath << "for writing!" << cGroupFile.errorString();
+        return;
+    }
+
+    if(cGroupFile.write(QByteArray::number(pid)) < 0)
+        qWarning() << "Could not write to" << cGroupPath << cGroupFile.errorString();
+}
+
+void CGroup::addPidToCgroup(pid_t pid, const Path &cGroupPath)
+{
+    writePidToCGroup(pid, cGroupPath);
+    // Add child processes (NOTE: we also recurse through child processes of child processes)
+    addChildPidsToCgroup(pid, cGroupPath);
+}
+
+void CGroup::addChildPidsToCgroup(pid_t parentPid, const Path &cGroupPath)
+{
+    for(pid_t pid : ProcFs::childPidsOf(parentPid))
+    {
+        qInfo() << "Adding child pid" << pid;
+        addPidToCgroup(pid, cGroupPath);
+    }
+}
+
+void CGroup::removeChildPidsFromCgroup(pid_t parentPid, const Path &cGroupPath)
+{
+    for(pid_t pid : ProcFs::childPidsOf(parentPid))
+    {
+        qInfo() << "Removing child pid" << pid << cGroupPath;
+        removePidFromCgroup(pid, cGroupPath);
+    }
+}
+
+void CGroup::removePidFromCgroup(pid_t pid, const Path &cGroupPath)
+{
+    // We remove a PID from a cgroup by adding it to its parent cgroup
+    writePidToCGroup(pid, cGroupPath);
+    // Remove child processes (NOTE: we also recurse through child processes of child processes)
+    removeChildPidsFromCgroup(pid, cGroupPath);
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -167,18 +167,6 @@ private slots:
     {
         testSettingChoices(QStringLiteral("cipher"), DaemonSettings::default_cipher(),
                            DaemonSettings::choices_cipher());
-    }
-    void testAuthChoices()
-    {
-        // Auth choices only matter when using a CBC cipher
-        CliHarness::applySetting(QStringLiteral("cipher"), QStringLiteral("AES-128-CBC"));
-        testSettingChoices(QStringLiteral("auth"), DaemonSettings::default_auth(),
-                           DaemonSettings::choices_auth());
-    }
-    void testServerCertChoices()    // "Handshake" setting
-    {
-        testSettingChoices(QStringLiteral("serverCertificate"), DaemonSettings::default_serverCertificate(),
-                           DaemonSettings::choices_serverCertificate());
     }
 };
 

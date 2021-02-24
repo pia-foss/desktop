@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -128,7 +128,7 @@ MovableModule {
           return "Poly1305"
         if(Daemon.displayConnectionConfig.openvpnCipher.endsWith("GCM"))
           return "GCM"
-        return Daemon.displayConnectionConfig.openvpnAuth
+        return "SHA256"
       }
       bottomRow: true
     }
@@ -138,7 +138,7 @@ MovableModule {
       metricValue: {
         if(showWireguard)
           return "Noise_IK"
-        return Daemon.displayConnectionConfig.openvpnServerCertificate
+        return "RSA-4096"
       }
       bottomRow: true
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -125,6 +125,7 @@ void startSupportTool (const QString &mode, const QString &diagFile)
     args << "--client-crashes" << Path::ClientDataDir / "crashes";
     args << "--daemon-crashes" << Path::DaemonDataDir / "crashes";
     args << "--client-settings" << Path::ClientSettingsDir / "clientsettings.json";
+    args << "--api-override" << Path::DaemonSettingsDir / QStringLiteral("api_override.json");
 
     qDebug () << "Starting support tool at " << Path::SupportToolExecutable;
     qDebug () << args;

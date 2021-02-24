@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -377,6 +377,11 @@ DaemonData::DaemonData()
 
 }
 
+bool DaemonData::hasFlag(const QString &flag) const {
+    const auto &featureFlags = flags();
+    return std::find(featureFlags.begin(), featureFlags.end(), flag) != featureFlags.end();
+}
+
 const std::unordered_set<QString> &DaemonAccount::sensitiveProperties()
 {
     static const std::unordered_set<QString> _sensitiveProperties
@@ -525,16 +530,6 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 const QString resolverLocalAddress()
 {
     static QString value{QStringLiteral("127.80.73.65")};
-    return value;
-}
-const QString piaLegacyDnsPrimary()
-{
-    static QString value{QStringLiteral("209.222.18.222")};
-    return value;
-}
-const QString piaLegacyDnsSecondary()
-{
-    static QString value{QStringLiteral("209.222.18.218")};
     return value;
 }
 const QString piaModernDnsVpnMace()

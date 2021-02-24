@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -84,7 +84,10 @@ namespace
     // (but not necessarily at the same time).  These don't have a "fast"
     // interval because we fetch them once when adding the token, and they don't
     // use a JsonRefresher since DIP info comes from an authenticated API POST.
-    const std::chrono::minutes dipRefreshInterval{10};
+    const std::chrono::minutes dipRefreshFastInterval{10};
+    const std::chrono::hours dipRefreshSlowInterval{24};
+    // Check for new messages
+    const std::chrono::minutes appMessagesCheckInterval{10};
 
     //Resource path used to retrieve regions
     const QString regionsResource{QStringLiteral("vpninfo/servers?version=1002&client=x-alpha")};
@@ -217,8 +220,6 @@ void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
             break;
     }
     info.openvpnCipher(config.openvpnCipher());
-    info.openvpnAuth(config.openvpnAuth());
-    info.openvpnServerCertificate(config.openvpnServerCertificate());
     info.otherAppsUseVpn(config.otherAppsUseVpn());
     switch(config.proxyType())
     {
@@ -432,8 +433,11 @@ Daemon::Daemon(QObject* parent)
     _accountRefreshTimer.setInterval(86400000);
     connect(&_accountRefreshTimer, &QTimer::timeout, this, &Daemon::refreshAccountInfo);
 
-    _dedicatedIpRefreshTimer.setInterval(msec(dipRefreshInterval));
+    _dedicatedIpRefreshTimer.setInterval(msec(dipRefreshFastInterval));
     connect(&_dedicatedIpRefreshTimer, &QTimer::timeout, this, &Daemon::refreshDedicatedIps);
+
+    _checkForAppMessagesTimer.setInterval(msec(appMessagesCheckInterval));
+    connect(&_checkForAppMessagesTimer, &QTimer::timeout, this, &Daemon::checkForAppMessages);
 
     auto connectPropertyChanges = [this](NativeJsonObject &object, QSet<QString> Daemon::* pSet)
     {
@@ -457,15 +461,19 @@ Daemon::Daemon(QObject* parent)
     connect(&_settings, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
     connect(&_account, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
 
-    // Set up logging.  Do this before migrating settings so tracing from the
-    // migration is written (if debug logging is enabled).
-    connect(&_settings, &DaemonSettings::debugLoggingChanged, this, [this]() {
+    auto updateLogger =  [this]() {
         const auto& value = _settings.debugLogging();
         if (value == nullptr)
-            g_logger->configure(false, {});
+            g_logger->configure(false, _settings.largeLogFiles(), {});
         else
-            g_logger->configure(true, *value);
-    });
+            g_logger->configure(true, _settings.largeLogFiles(), *value);
+    };
+
+    // Set up logging.  Do this before migrating settings so tracing from the
+    // migration is written (if debug logging is enabled).
+    connect(&_settings, &DaemonSettings::debugLoggingChanged, this, updateLogger);
+    connect(&_settings, &DaemonSettings::largeLogFilesChanged, this, updateLogger);
+
     connect(g_logger, &Logger::configurationChanged, this, [this](bool logToFile, const QStringList& filters) {
         if (logToFile)
             _settings.debugLogging(filters);
@@ -493,7 +501,7 @@ Daemon::Daemon(QObject* parent)
     {
         if(!g_logger->logToFile())
         {
-            g_logger->configure(true, DaemonSettings::defaultDebugLogging);
+            g_logger->configure(true, _settings.largeLogFiles(), DaemonSettings::defaultDebugLogging);
             qInfo() << "Enabled debug logging due to" << earlyDebugFile;
         }
         else
@@ -526,7 +534,6 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(addDedicatedIp));
     _methodRegistry->add(RPC_METHOD(removeDedicatedIp));
     _methodRegistry->add(RPC_METHOD(dismissDedicatedIpChange));
-    _methodRegistry->add(RPC_METHOD(refreshDedicatedIps));
     _methodRegistry->add(RPC_METHOD(connectVPN));
     _methodRegistry->add(RPC_METHOD(disconnectVPN));
     _methodRegistry->add(RPC_METHOD(startSnooze));
@@ -534,7 +541,7 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(writeDiagnostics));
     _methodRegistry->add(RPC_METHOD(writeDummyLogs));
     _methodRegistry->add(RPC_METHOD(crash));
-    _methodRegistry->add(RPC_METHOD(refreshUpdate));
+    _methodRegistry->add(RPC_METHOD(refreshMetadata));
     _methodRegistry->add(RPC_METHOD(notifyClientActivate));
     _methodRegistry->add(RPC_METHOD(notifyClientDeactivate));
     _methodRegistry->add(RPC_METHOD(emailLogin));
@@ -628,7 +635,7 @@ Daemon::Daemon(QObject* parent)
 
         _modernLatencyTracker.start();
         _dedicatedIpRefreshTimer.start();
-        refreshDedicatedIps();
+        _checkForAppMessagesTimer.start();
         _shadowsocksRefresher.startOrOverride(environment().getRegionsListApi(),
                                               Path::LegacyShadowsocksOverride,
                                               Path::LegacyShadowsocksBundle,
@@ -646,6 +653,9 @@ Daemon::Daemon(QObject* parent)
                                                _data.modernRegionMeta());
         _updateDownloader.run(true, _environment.getUpdateApi());
 
+        // Refresh metadata right away too
+        RPC_refreshMetadata();
+
         queueNotification(&Daemon::reapplyFirewallRules);
     });
 
@@ -656,6 +666,7 @@ Daemon::Daemon(QObject* parent)
         _modernRegionMetaRefresher.stop();
         _dedicatedIpRefreshTimer.stop();
         _modernLatencyTracker.stop();
+        _checkForAppMessagesTimer.stop();
         queueNotification(&Daemon::RPC_disconnectVPN);
         queueNotification(&Daemon::reapplyFirewallRules);
     });
@@ -898,6 +909,8 @@ void Daemon::RPC_resetSettings()
     defaultsJson.remove(QStringLiteral("ratingEnabled"));
     defaultsJson.remove(QStringLiteral("sessionCount"));
 
+    defaultsJson.remove(QStringLiteral("lastDismissedAppMessageId"));
+
     RPC_applySettings(defaultsJson, false);
 }
 
@@ -1011,11 +1024,6 @@ void Daemon::RPC_dismissDedicatedIpChange()
     rebuildActiveLocations();
 }
 
-void Daemon::RPC_refreshDedicatedIps()
-{
-    refreshDedicatedIps();
-}
-
 void Daemon::RPC_connectVPN()
 {
     // Cannot connect when no active client is connected (there'd be no way for
@@ -1030,8 +1038,7 @@ void Daemon::RPC_connectVPN()
     connectVPN();
 
     // Increment the session counter, if ratings_1 flag is set
-    const auto &featureFlags = _data.flags();
-    if(std::find(featureFlags.begin(), featureFlags.end(), QStringLiteral("ratings_1")) != featureFlags.end() &&
+    if(_data.hasFlag(QStringLiteral("ratings_1")) &&
         _settings.ratingEnabled() &&
         QStringLiteral(BRAND_CODE) == QStringLiteral("pia"))
     {
@@ -1290,8 +1297,10 @@ void Daemon::RPC_crash()
     }
 }
 
-void Daemon::RPC_refreshUpdate()
+void Daemon::RPC_refreshMetadata()
 {
+    refreshDedicatedIps();
+    checkForAppMessages();
     _updateDownloader.refreshUpdate();
 }
 
@@ -2471,7 +2480,26 @@ void Daemon::applyDedicatedIpJson(const QJsonObject &tokenData,
     QString oldIp = dipInfo.ip();
     // API returns the expire time in seconds; we store timestamps in
     // milliseconds
-    dipInfo.expire(json_cast<quint64>(tokenData["dip_expire"], HERE) * 1000);
+    quint64 newExpire = json_cast<quint64>(tokenData["dip_expire"], HERE) * 1000;
+    if(newExpire == 0)
+    {
+        qWarning() << "Dedicated IP" << dipInfo.id()
+            << "returned invalid expiration 0";
+        // This shouldn't happen, but just in case, do not ever store an
+        // expiration timestamp of 0 - this would make the region look like a
+        // non-DIP region.
+        //
+        // We should store _something_ though since this might be a new DIP,
+        // just use 1000 instead (1 second after midnight, Jan 1, 1970 -
+        // functionally equivalent assuming no time travel)
+        newExpire = 1000;
+    }
+    if(newExpire != dipInfo.expire())
+    {
+        qInfo() << "Dedicated IP" << dipInfo.id() << "updated expiration from"
+            << dipInfo.expire() << "to" << newExpire;
+        dipInfo.expire(newExpire);
+    }
     dipInfo.regionId(json_cast<QString>(tokenData["id"], HERE));
     dipInfo.serviceGroups(json_cast<QStringList>(tokenData["groups"], HERE));
     dipInfo.ip(json_cast<QString>(tokenData["ip"], HERE));
@@ -2480,7 +2508,10 @@ void Daemon::applyDedicatedIpJson(const QJsonObject &tokenData,
     // timestamp.  Don't clear this if it didn't change, the timestamps are only
     // cleared when the user dismisses the notification.
     if(!oldIp.isEmpty() && oldIp != dipInfo.ip())
+    {
+        qInfo() << "Dedicated IP" << dipInfo.id() << "has changed IP address";
         dipInfo.lastIpChange(QDateTime::currentMSecsSinceEpoch());
+    }
 }
 
 void Daemon::applyRefreshedDedicatedIp(const QJsonObject &tokenData, int traceIdx,
@@ -2555,6 +2586,7 @@ void Daemon::refreshDedicatedIps()
                 return;
             }
 
+            _dedicatedIpRefreshTimer.setInterval(msec(dipRefreshSlowInterval));
             auto dedicatedIps = _account.dedicatedIps();
             int priorSize = dedicatedIps.size();
 
@@ -2605,6 +2637,89 @@ void Daemon::refreshDedicatedIps()
             _account.dedicatedIps(std::move(dedicatedIps));
             rebuildActiveLocations();
         });
+
+    if(dipTokens.count() > 0 && _data.hasFlag(QStringLiteral("check_renew_dip"))) {
+        auto renewToken = dipTokens.first().toString();
+        _apiClient.postRetry(*_environment.getApiv2(), QStringLiteral("check_renew_dip"),
+                             QJsonDocument{QJsonObject{{QStringLiteral("token"), renewToken}}},
+                             ApiClient::autoAuth(_account.username(), _account.password(), _account.token()))
+                ->notify(this, [this, expectedSize](const Error &err,
+                                                    const QJsonDocument &json)
+                {
+                    Q_UNUSED(json);
+                    if(err)
+                    {
+                        qWarning() << "Unable to send renewal notification:" << err;
+                        return;
+                    }
+
+                    qDebug() << "Renewal notification sent successfully.";
+                });
+    }
+}
+
+AppMessage Daemon::parseAppMessage(const QJsonObject &messageJson) const
+{
+    // The API returns an empty object when no message is available; that's not
+    // an error - remove any existing message
+    if(messageJson.isEmpty())
+    {
+        qInfo() << "No app messages available (received empty object from endpoint)";
+        return {};
+    }
+
+    try
+    {
+        AppMessage message;
+        message.id(json_cast<quint64>(messageJson["id"], HERE));
+        message.messageTranslations(json_cast<AppMessage::TextTranslations>(messageJson["message"], HERE));
+
+        // A link exists
+        if(messageJson.contains("link"))
+        {
+            message.hasLink(true);
+
+            const auto &linkJson = messageJson["link"].toObject();
+            message.linkTranslations(json_cast<AppMessage::TextTranslations>(linkJson["text"], HERE));
+
+            const auto &actionJson = linkJson["action"].toObject();
+            if(actionJson.contains("settings"))
+                message.settingsAction(actionJson["settings"].toObject());
+            if(actionJson.contains("view"))
+                message.viewAction(json_cast<QString>(actionJson["view"], HERE));
+            if(actionJson.contains("uri"))
+                message.uriAction(json_cast<QString>(actionJson["uri"], HERE));
+        }
+        return message;
+    }
+    catch(const Error &err)
+    {
+        qWarning().noquote() << "Invalid Json for App Message -" << err << "-"
+                             << QJsonDocument(messageJson).toJson();
+    }
+
+    return {};
+}
+
+void Daemon::checkForAppMessages()
+{
+    const auto version = SemVersion{u"" PIA_VERSION};
+    // Strip off pre-release tag leaving only major.minor.patch
+    const auto versionString = QStringLiteral("%1.%2.%3").arg(version.major()).arg(version.minor()).arg(version.patch());
+    const QString queryParams = QStringLiteral("version=%1&client=%2").arg(versionString).arg(UpdateChannel::platformName);
+    qInfo() << QStringLiteral("Checking for app Messages (%1)").arg(queryParams);
+    _apiClient.getRetry(*_environment.getApiv2(), QStringLiteral("messages?%1").arg(queryParams),
+        ApiClient::autoAuth(_account.username(), _account.password(), _account.token()))
+        ->notify(this, [this](const Error &err, const QJsonDocument &json)
+        {
+            if(err)
+            {
+                qWarning() << "Unable to check app messages:" << err;
+                return;
+            }
+
+            _data.appMessage(parseAppMessage(json.object()));
+        });
 }
 
 // Load account info from the web API and return the result asynchronously
@@ -2637,7 +2752,7 @@ Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QStrin
                 assignOrDefault(renewable, "renewable");
                 assignOrDefault(renewURL, "renew_url", {
                     if (value == QStringLiteral("https://www.privateinternetaccess.com/pages/client-support/"))
-                        value = QStringLiteral("https://www.privateinternetaccess.com/pages/client-sign-in");
+                        value = QStringLiteral("https://www.privateinternetaccess.com/pages/client-control-panel#subscription-overview");
                 });
                 assignOrDefault(expirationTime, "expiration_time", {
                     value = value.toDouble() * 1000.0;
@@ -2772,7 +2887,8 @@ void Daemon::reapplyFirewallRules()
     // - we've connected at least once since the VPN was enabled
     params.blockDNS = params._connectionSettings && params._connectionSettings->setDefaultDns() && vpnActive && params.hasConnected;
 
-    params.allowPIA = params.allowLoopback = (params.blockAll || params.blockIPv6 || params.blockDNS);
+    params.allowPIA = (params.blockAll || params.blockIPv6 || params.blockDNS);
+    params.allowLoopback = params.allowPIA || params.enableSplitTunnel;
     params.allowResolver = params.blockDNS && params._connectionSettings &&
                            (params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Handshake ||
                             params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Local);
@@ -2876,17 +2992,6 @@ static QString decryptOldPassword(const QString& bytes)
     return bytes;
 }
 
-static QString translateOldHandshake(const QString& value)
-{
-    if (value == QStringLiteral("rsa2048")) return QStringLiteral("RSA-2048");
-    if (value == QStringLiteral("rsa3072")) return QStringLiteral("RSA-3072");
-    if (value == QStringLiteral("rsa4096")) return QStringLiteral("RSA-4096");
-    if (value == QStringLiteral("ecdsa256k1")) return QStringLiteral("ECDSA-256k1");
-    if (value == QStringLiteral("ecdsa256")) return QStringLiteral("ECDSA-256r1");
-    if (value == QStringLiteral("ecdsa521")) return QStringLiteral("ECDSA-521");
-    return QStringLiteral("default");
-}
-
 // Migrate settings from prior daemon versions or from an upgraded legacy version,
 // or if the argument is false, just perform basic settings initialization such
 // as automatically opting into betas if running a fresh beta install etc.
@@ -2958,10 +3063,6 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
             _settings.desktopNotifications(value.toBool());
         if ((value = legacy.take(QStringLiteral("symmetric_cipher"))).isString())
             _settings.cipher(value.toString().toUpper().replace(QStringLiteral("NONE"), QStringLiteral("none")));
-        if ((value = legacy.take(QStringLiteral("symmetric_auth"))).isString())
-            _settings.auth(value.toString().toUpper().replace(QStringLiteral("NONE"), QStringLiteral("none")));
-        if ((value = legacy.take(QStringLiteral("handshake_enc"))).isString())
-            _settings.serverCertificate(translateOldHandshake(value.toString()));
         if ((value = legacy.take(QStringLiteral("connect_on_startup"))).isBool())
             _settings.connectOnLaunch(value.toBool());
         if ((value = legacy.take(QStringLiteral("mace"))).isBool())
@@ -3228,7 +3329,6 @@ void Daemon::disconnectVPN()
     _state.vpnEnabled(false);
     _connection->disconnectVPN();
 }
-
 
 ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistry* registry, QObject *parent)
     : QObject(parent)

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -37,7 +37,14 @@ Page {
   ColumnLayout {
     anchors.fill: parent
     anchors.leftMargin: Theme.settings.narrowPageLeftMargin
-    anchors.rightMargin: Theme.settings.narrowPageLeftMargin
+    // In Russian, the "Include Geo-Located Regions" translation just _barely_
+    // runs over the right margin (<5 pixels), which causes it to wrap in the
+    // horizontal layout.  This page is pretty full as it is, and the wrapping
+    // looks bad since it's a just a few pixels over.
+    //
+    // Fudge the margin so it doesn't wrap.  Nothing else in any other language
+    // is close to the margin, so this doesn't affect anything else.
+    anchors.rightMargin: Math.max(0, Theme.settings.narrowPageLeftMargin - 20)
     spacing: 6
 
     // This text is treated as a static even though its text does label a
@@ -167,6 +174,11 @@ Page {
       }
     }
 
+    CheckboxInput {
+      label: uiTr("Show service communication messages")
+      setting: DaemonSetting { name: 'showAppMessages' }
+    }
+
     // Spacer between groups
     Item {
       width: 1
@@ -218,11 +230,13 @@ Page {
         name: "disableHardwareGraphics"
       }
       info: uiTr("Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.")
+      infoShowBelow: false
     }
 
     CheckboxInput {
       label: uiTr("Enable Debug Logging")
       info: uiTr("Save debug logs which can be submitted to technical support to help troubleshoot problems.")
+      infoShowBelow: false
       setting: Setting {
         sourceValue: Daemon.settings.debugLogging !== null
         onCurrentValueChanged: {
@@ -249,14 +263,11 @@ Page {
       link: BrandHelper.getBrandParam("helpDeskLink")
     }
 
-
-
     // Spacer between groups
     Item {
       width: 1
       height: 4
     }
-
 
     StaticText {
       text: uiTr("Maintenance")

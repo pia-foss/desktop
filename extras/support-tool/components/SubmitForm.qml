@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -153,6 +153,23 @@ Item {
           wrapMode: Text.WordWrap
           color: "#fff"
           text: "Error: No diagnostic info available. Please ensure debug mode is enabled in the application settings."
+        }
+      }
+
+      Rectangle {
+        Layout.topMargin: 10
+        Layout.bottomMargin: 15
+        color: "#5f51f5"
+        Layout.fillWidth: true
+        visible: params.endpointOverride.length > 0
+        height: overrideActiveWarning.contentHeight + 15
+        Text {
+          id: overrideActiveWarning
+          anchors.fill: parent
+          anchors.margins: 5
+          wrapMode: Text.WordWrap
+          color: "#fff"
+          text: "Endpoint override active: " + params.endpointOverride
         }
       }
 

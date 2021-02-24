@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
     parser.addOption(clientCrashesOption);
     QCommandLineOption daemonCrashesOption = QCommandLineOption("daemon-crashes", "Path to daemon crashes", "crashpath");
     parser.addOption(daemonCrashesOption);
+    QCommandLineOption apiOverrideOption = QCommandLineOption("api-override", "Path to API Override file", "overridepath");
+    parser.addOption(apiOverrideOption);
     QCommandLineOption invokePipeOption{"invoke-pipe", {}, "pipefd"};
     invokePipeOption.setFlags(QCommandLineOption::Flag::HiddenFromHelp);
     parser.addOption(invokePipeOption);
@@ -108,6 +110,8 @@ int main(int argc, char *argv[])
         // Start an application main loop so the app can have enough time to restart
         return app.exec();
     }
+
+    auto endpointOverride = getEndpointOverride(parser.value(apiOverrideOption));
 
     bool invokePipeOk = false;
     int invokePipeArg = parser.value(invokePipeOption).toInt(&invokePipeOk);
@@ -164,6 +168,7 @@ int main(int argc, char *argv[])
         params->setProperty("daemon_crash", parser.value(daemonCrashesOption));
         params->setProperty("version", QStringLiteral(PIA_VERSION));
         params->setProperty("invoke_pipe", invokePipeArg);
+        params->setProperty("endpointOverride", endpointOverride);
 
         ReportHelper::setUIParams(params);
     }

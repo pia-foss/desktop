@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -60,8 +60,9 @@ QtObject {
     dashPopup: dashboard.window
   }
 
-  property var wDevTools: DevToolsWindow {
-    visible: false
+  property var wDevToolsLoader: WindowLoader {
+    objectName: 'wDevToolsLoader'
+    component: Component { DevToolsWindow { visible: false }}
   }
 
   property var wChangeLog: ChangelogWindow {
@@ -133,5 +134,11 @@ QtObject {
       // Not a quiet launch or first run - initially show the dashboard near the tray icon
       initialShowTimer.start()
     }
+  }
+
+  property var devToolsShortcut: Shortcut {
+    sequence: "Ctrl+Shift+I"
+    context: Qt.ApplicationShortcut
+    onActivated: wDevToolsLoader.open()
   }
 }

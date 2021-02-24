@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -417,8 +417,6 @@ public:
 
     // Cryptographic settings for OpenVPN; only captured when method is OpenVPN
     QString openvpnCipher() const {return _openvpnCipher;}
-    QString openvpnAuth() const {return _openvpnAuth;}
-    QString openvpnServerCertificate() const {return _openvpnServerCertificate;}
 
     // For the WireGuard method only, whether to use kernel support if available
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
@@ -516,7 +514,7 @@ private:
     QSharedPointer<Location> _pVpnLocation;
     bool _vpnLocationAuto{false};
     QString _vpnUsername, _vpnPassword, _vpnToken;
-    QString _openvpnCipher, _openvpnAuth, _openvpnServerCertificate;
+    QString _openvpnCipher;
     bool _wireguardUseKernel{false};
     quint16 _localPort{0};
     uint _mtu{0};

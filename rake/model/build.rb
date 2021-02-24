@@ -8,12 +8,12 @@ require 'json'
 # and creates a per-component build directory for this component.
 class Build
     # The major-minor-patch parts of this version
-    VersionMMP = [2, 6, 2]
+    VersionMMP = [2, 7, 0]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
     # dash), or empty string if none
-    VersionPrerelease = 'beta.1'
+    VersionPrerelease = ''
 
     # Select a build configuration based on environment variables, or use
     # defaults for the host platform if unspecified

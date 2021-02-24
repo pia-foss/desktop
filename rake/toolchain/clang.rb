@@ -274,6 +274,14 @@ class ClangToolchain
         result
     end
 
+    # Test if a header is available on the host system.
+    # (Note that the MSVC toolchain doesn't currently provide this.)
+    def sysHeaderAvailable?(path)
+        # Try preprocessing a file that just says "#include <path>", this
+        # succeeds if the path is present.
+        system("echo '#include <#{path}>' | #{@clangpp} -E -x c++ - -v 2>/dev/null >/dev/null")
+    end
+
     # Get the toolchain installation path - where other tools like llvm-profdata
     # can be found.  Only used if coverageAvailable?() returns true (the MSVC
     # toolchain does not provide this)

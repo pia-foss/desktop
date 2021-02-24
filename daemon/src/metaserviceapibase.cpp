@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -41,6 +41,15 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
 {
     QSharedPointer<Location> pFirstBaseRegion{}, pSecondBaseRegion{};
 
+    std::vector<BaseUri> bases;
+    bases.reserve(_fixedBaseUris.size() + 2);
+
+    auto appendFixedBases = [&]
+    {
+        for(const auto &fixedBase : _fixedBaseUris)
+            bases.push_back({fixedBase, nullptr, {}});
+    };
+
     // If we're connected check which infra we're using
     if(_state.connectionState() == QStringLiteral("Connected"))
     {
@@ -49,11 +58,13 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
             // Use a fixed address for the internal meta sevice available in
             // the modern infrastructure.  This is provided by the VPN server,
             // so use the VPN cert's common name
-            qInfo() << "Connected to modern infra, using internal API base only";
-            QSharedPointer<ApiBaseData> pBaseData{new ApiBaseData{
-                QString("https://10.0.0.1:443") + _dynamicBasePath,
-                _pDynamicBaseCA,
-                _state.connectedServer()->commonName()}};
+            bases.push_back({QString("https://10.0.0.1:443") + _dynamicBasePath, _pDynamicBaseCA, _state.connectedServer()->commonName()});
+            // Fallback addresses
+            appendFixedBases();
+
+            qInfo() << "Connected to modern infra, using internal API base";
+
+            QSharedPointer<ApiBaseData> pBaseData{new ApiBaseData{std::move(bases)}};
             return {pBaseData};
         }
     }
@@ -94,9 +105,6 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
         }
     }
 
-    std::vector<BaseUri> bases;
-    bases.reserve(_fixedBaseUris.size() + 2);
-
     // Select a server in the region for the Meta service, and a port on that
     // server.
     auto appendDynamicBase = [&](const QSharedPointer<Location> &pRegion)
@@ -116,13 +124,12 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
             bases.push_back({uri, _pDynamicBaseCA, pBaseServer->commonName()});
         }
     };
+
     appendDynamicBase(pFirstBaseRegion);
     appendDynamicBase(pSecondBaseRegion);
     auto dynamicCount = bases.size();   // For tracing
-    for(const auto &fixedBase : _fixedBaseUris)
-    {
-        bases.push_back({fixedBase, nullptr, {}});
-    }
+    // append fixed bases
+    appendFixedBases();
 
     qInfo() << "Selected" << bases.size() << "API bases for request;"
         << dynamicCount << "dynamic and" << _fixedBaseUris.size() << "fixed";

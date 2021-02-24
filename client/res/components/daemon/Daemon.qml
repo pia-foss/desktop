@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -113,9 +113,6 @@ QtObject {
   function dismissDedicatedIpChange() {
     call("dismissDedicatedIpChange", arguments);
   }
-  function refreshDedicatedIps() {
-    call("refreshDedicatedIps", arguments);
-  }
   function connectVPN() {
     call("connectVPN", arguments);
   }
@@ -137,8 +134,8 @@ QtObject {
   function crash() {
     call ("crash", arguments);
   }
-  function refreshUpdate() {
-    call("refreshUpdate", arguments)
+  function refreshMetadata() {
+    call("refreshMetadata", arguments)
   }
   function emailLogin(email) {
     call("emailLogin", arguments);

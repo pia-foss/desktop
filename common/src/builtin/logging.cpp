@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -154,7 +154,8 @@ namespace
 }
 
 // The log limit in bytes
-const qint64 logFileLimit = 4000000;
+const qint64 standardLogFileLimit = 4000000;
+const qint64 largeLogFileLimit = 40000000;
 
 CodeLocation::CodeLocation(const char *file, int line, const QLoggingCategory &category)
     : category{&category}, file{stripRepoPath(file)}, line{line}
@@ -173,6 +174,7 @@ class LoggerPrivate
 
     QFile logFile;
     qint64 logSize;
+    qint64 logFileLimit;
     QStringList filters;
     QFileSystemWatcher watcher;
     Path logFilePath;
@@ -300,11 +302,12 @@ void Logger::wipeLogFile()
     d->wipeLogFile();
 }
 
-void Logger::configure(bool logToFile, const QStringList& filters)
+void Logger::configure(bool logToFile, bool largeLogFiles, const QStringList& filters)
 {
     Q_D(Logger);
     bool changed = false, success = true, writeDebugFile = false, removeDebugFile = false;
     {
+        d->logFileLimit = largeLogFiles ? largeLogFileLimit : standardLogFileLimit;
         QMutexLocker lock(&g_logMutex);
         if (logToFile && !d->logToFile())
         {

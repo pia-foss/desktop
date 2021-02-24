@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,26 +32,6 @@
 #include "vpn.h"
 #include "daemon.h"
 
-// Convenience class for working with the Linux /proc VFS
-class ProcFs
-{
-public:
-    // Return all pids for the given executable path
-    static QSet<pid_t> pidsForPath(const QString &path);
-
-    // Return all (immediate) children pids of parentPid
-    static QSet<pid_t> childPidsOf(pid_t parentPid);
-
-    // Iterate and filter over all process PIDs in /proc
-    static QSet<pid_t> filterPids(const std::function<bool(pid_t)> &filterFunc);
-
-    // Given a pid, return the launch path for the process
-    static QString pathForPid(pid_t pid);
-
-    // Is pid a child of parentPid ?
-    static bool isChildOf(pid_t parentPid, pid_t pid);
-};
-
 class ProcTracker : public QObject
 {
     Q_OBJECT
@@ -74,7 +54,7 @@ public slots:
     void shutdownConnection();
     void updateSplitTunnel(const FirewallParams &params, QString tunnelDeviceName,
                            QString tunnelDeviceLocalAddress);
-    void aboutToConnectToVpn();
+    void aboutToConnectToVpn() {} // Stub, only used by macOS
 private:
     using AppMap = QHash<QString, QSet<pid_t>>;
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -595,13 +595,16 @@ Client::Client(bool hasExistingSettingsFile, const QJsonObject &initialSettings,
 
     NativeAcc::init();
 
-    connect(&g_daemonSettings, &DaemonSettings::debugLoggingChanged, this, []() {
+    auto updateLogger = []() {
         const auto& value = g_daemonSettings.debugLogging();
         if (value == nullptr)
-            g_logger->configure(false, {});
+            g_logger->configure(false, g_daemonSettings.largeLogFiles(), {});
         else
-            g_logger->configure(true, *value);
-    });
+            g_logger->configure(true, g_daemonSettings.largeLogFiles(), *value);
+    };
+
+    connect(&g_daemonSettings, &DaemonSettings::debugLoggingChanged, this, updateLogger);
+    connect(&g_daemonSettings, &DaemonSettings::largeLogFilesChanged, this, updateLogger);
 
     connect(g_logger, &Logger::configurationChanged, this, [](bool logToFile, const QStringList& filters) {
         if (!logToFile)

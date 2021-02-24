@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -38,12 +38,12 @@
 #include "exec.h"
 #include "mac/mac_constants.h"
 #include "mac_splittunnel.h"
+#include "posix/posix_objects.h"
 #include "mac/utun.h"
 #include "pid_finder.h" // For PidFinder
 #include "daemon.h"
 #include "path.h"
 #include "packet.h"
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,14 +73,6 @@ namespace
     // connects to the VPN.
     const QString kSplitTunnelDeviceIpv6Base{QStringLiteral("fd00:feed:face:cafe:beef:70:69:1")};
     const QString kSplitTunnelDeviceIpv4Base{QStringLiteral("10.0.255.1")};
-
-    const QString kDefaultApps4 = "450.routeDefaultApps4";
-    const QString kBypassApps4 =  "460.routeBypassApps4";
-    const QString kVpnOnlyApps4 = "470.routeVpnOnlyApps4";
-
-    const QString kDefaultApps6 = "450.routeDefaultApps6";
-    const QString kBypassApps6 =  "460.routeBypassApps6";
-    const QString kVpnOnlyApps6 = "470.routeVpnOnlyApps6";
 }
 
 void AppCache::addEntry(IPVersion ipVersion, pid_t newPid, quint16 srcPort)
@@ -112,178 +104,6 @@ PortSet AppCache::ports(IPVersion ipVersion) const
     }
 
     return allPorts;
-}
-
-
-void RuleUpdater::forceUpdate(IPVersion ipVersion, const PortSet &ports) const
-{
-    PFFirewall::setFilterWithRules(anchorNameFor(ipVersion),
-                                   true, {rules(ipVersion, ports) + routingRule(ipVersion)});
-}
-
-void RuleUpdater::clearRules(IPVersion ipVersion)
-{
-    PFFirewall::setFilterWithRules(anchorNameFor(ipVersion),
-                                   false, {});
-
-    _ports[ipVersion].clear();
-}
-
-void RuleUpdater::clearAllRules()
-{
-    clearRules(IPv4);
-    clearRules(IPv6);
-}
-
-const FirewallParams& RuleUpdater::params() const
-{
-    return _pMacSplitTunnel->params();
-}
-
-const QString& RuleUpdater::tunnelDeviceName() const
-{
-    return _pMacSplitTunnel->tunnelDeviceName();
-}
-
-void RuleUpdater::update(IPVersion ipVersion, const PortSet &ports)
-{
-    // Update the rules if the ports change OR the network has changed
-    // (since our rules make use of interface and gateway ips)
-    if(ports != _ports[ipVersion] || params().netScan != _netScan ||
-       params().bypassIpv4Subnets != _bypassIpv4Subnets ||
-       params().bypassIpv6Subnets != _bypassIpv6Subnets)
-    {
-        forceUpdate(ipVersion, ports);
-
-        _ports[ipVersion] = ports;
-        _netScan = params().netScan;
-        _bypassIpv4Subnets = params().bypassIpv4Subnets;
-        _bypassIpv6Subnets = params().bypassIpv6Subnets;
-    }
-}
-
-QStringList RuleUpdater::rules(IPVersion ipVersion, const PortSet &ports) const
-{
-    QStringList ruleList;
-    for(const auto &port : ports)
-        ruleList << QStringLiteral("pass out %1 proto {udp,tcp} from port %2 flags any no state tag %3")
-            .arg(protocolFor(ipVersion))
-            .arg(port)
-            .arg(tagNameFor(ipVersion));
-
-    return ruleList;
-}
-
-QString BypassRuleUpdater::tagNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? QStringLiteral("BYPASS4") : QStringLiteral("BYPASS6");
-}
-QString BypassRuleUpdater::anchorNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? kBypassApps4 : kBypassApps6;
-}
-
-QStringList BypassRuleUpdater::rules(IPVersion ipVersion, const PortSet &ports) const
-{
-    QStringList ruleList;
-    ruleList << RuleUpdater::rules(ipVersion, ports);
-
-    if(ipVersion == IPv4)
-    {
-        auto ip4Subnets = QStringList{params().bypassIpv4Subnets.toList()};
-        PFFirewall::setAnchorTable(kBypassApps4, true, QStringLiteral("subnets"), ip4Subnets);
-    }
-    // No need for ipv6 support as we don't support it yet while connected
-
-    ruleList << QStringLiteral("pass out to <subnets> flags any no state tag %1").arg(tagNameFor(ipVersion));
-
-    return ruleList;
-}
-
-QStringList BypassRuleUpdater::routingRule(IPVersion ipVersion) const
-{
-    const auto &netScan = params().netScan;
-    const QString &gateway = (ipVersion == IPv4) ? netScan.gatewayIp() : netScan.gatewayIp6();
-    if(!netScan.interfaceName().isEmpty() && !gateway.isEmpty())
-    {
-        return QStringList{QStringLiteral("pass out route-to (%1 %2) flags any no state tagged %3")
-            .arg(netScan.interfaceName(), gateway, tagNameFor(ipVersion))};
-    }
-    else
-    {
-        qInfo() << "Can't create bypass route-to rule for"
-                << ipToString(ipVersion) << "- interface or gateway not known";
-        return {};
-    }
-}
-
-QString VpnOnlyRuleUpdater::tagNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? QStringLiteral("VPNONLY4") : QStringLiteral("VPNONLY6");
-}
-QString VpnOnlyRuleUpdater::anchorNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? kVpnOnlyApps4 : kVpnOnlyApps6;
-}
-
-QStringList VpnOnlyRuleUpdater::routingRule(IPVersion ipVersion) const
-{
-    if(!tunnelDeviceName().isEmpty())
-    {
-        return QStringList{QStringLiteral("pass out route-to %2 flags any no state tagged %1")
-            .arg(tagNameFor(ipVersion), tunnelDeviceName())};
-    }
-    else
-    {
-        qInfo() << "Can't create VPN-only route-to rule for"
-                << ipToString(ipVersion) << "- tunnel interface not known";
-        return {};
-    }
-}
-
-QString DefaultRuleUpdater::tagNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? QStringLiteral("DEFAULT4") : QStringLiteral("DEFAULT6");
-}
-QString DefaultRuleUpdater::anchorNameFor(IPVersion ipVersion) const
-{
-    return ipVersion == IPv4 ? kDefaultApps4 : kDefaultApps6;
-}
-
-QStringList DefaultRuleUpdater::routingRule(IPVersion ipVersion) const
-{
-    QStringList ruleList;
-    const auto &netScan = params().netScan;
-
-    const QString icmpVersion = (ipVersion == IPv4 ? "icmp" : "icmp6");
-    if(!params().blockAll || params().isConnected)
-        ruleList << QStringLiteral("pass out %1 proto %2 all flags any no state tag %3")
-                        .arg(protocolFor(ipVersion))
-                        .arg(icmpVersion)
-                        .arg(tagNameFor(ipVersion));
-
-    if(!params().bypassDefaultApps && !tunnelDeviceName().isEmpty())
-        ruleList << QStringLiteral("pass out route-to %1 flags any no state tagged %2")
-                        .arg(tunnelDeviceName(), tagNameFor(ipVersion));
-    else
-    {
-        const QString &gateway = (ipVersion == IPv4 ? netScan.gatewayIp()
-                                                      : netScan.gatewayIp6());
-
-        if(!netScan.interfaceName().isEmpty() && !gateway.isEmpty())
-        {
-            ruleList << QStringLiteral("pass out route-to (%1 %2) flags any no state tagged %3")
-                            .arg(netScan.interfaceName(), gateway, tagNameFor(ipVersion));
-        }
-        else
-        {
-            qInfo() << "Can't create default route-to rule for"
-                    << ipToString(ipVersion) << "- interface or gateway not known"
-                    << netScan;
-        }
-    }
-
-    return ruleList;
 }
 
 QString SplitTunnelIp::nextAddress(const QString &addressStr) const
@@ -362,9 +182,9 @@ PiaConnections::PiaConnections(const QString &path, const MacSplitTunnel *pMacSp
 
 MacSplitTunnel::MacSplitTunnel(QObject *pParent)
 : QObject{pParent}
-, _bypassRuleUpdater{this}
-, _vpnOnlyRuleUpdater{this}
-, _defaultRuleUpdater{this}
+, _bypassRuleUpdater{std::make_unique<BypassStrategy>(this), this}
+, _vpnOnlyRuleUpdater{std::make_unique<VpnOnlyStrategy>(this), this}
+, _defaultRuleUpdater{std::make_unique<DefaultStrategy>(this), this}
 , _splitTunnelIp{kSplitTunnelDeviceIpv4Base, kSplitTunnelDeviceIpv6Base}
 {
 }
@@ -383,33 +203,39 @@ void MacSplitTunnel::aboutToConnectToVpn()
     {
         // Replace the existing UTun with a new one so that
         // all existing TCP connections are terminated before we connect
-        auto newUtun = UTun::create();
+        auto pNewUtun = UTun::create();
+
+        if(!pNewUtun)
+        {
+            qWarning() << "Unable to create new UTun for split tunnel on connect. Existing connections will not be cleared";
+            return;
+        }
 
         // Change the Ips of the new tunnel device
         // (this ensures existing connections die)
         _splitTunnelIp.refresh();
 
-        Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(newUtun.name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
-        Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(newUtun.name(), _splitTunnelIp.ip6()));
+        Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(pNewUtun->name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
+        Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(pNewUtun->name(), _splitTunnelIp.ip6()));
 
         // After adding the ipv4 ips to the interface we need a slight pause before trying to change the routes
         // without the pause sometimes these routes will not be created.
         // Adding the ipv6 ip is sufficient delay
-        Exec::bash(QStringLiteral("route -q -n change -inet 0.0.0.0/1 -interface %1").arg(newUtun.name()));
-        Exec::bash(QStringLiteral("route -q -n change -inet 128.0.0.0/1 -interface %1").arg(newUtun.name()));
+        Exec::bash(QStringLiteral("route -q -n change -inet 0.0.0.0/1 -interface %1").arg(pNewUtun->name()));
+        Exec::bash(QStringLiteral("route -q -n change -inet 128.0.0.0/1 -interface %1").arg(pNewUtun->name()));
 
         // Update IPv6 routes with new tun device
         Exec::bash(QStringLiteral("route -q -n change -inet6 8000::/1 %1").arg(_splitTunnelIp.ip6()));
         Exec::bash(QStringLiteral("route -q -n change -inet6 0::/1 %1").arg(_splitTunnelIp.ip6()));
 
         // Set the MTU
-        newUtun.setMtu(_utun.mtu());
+        pNewUtun->setMtu(_pUtun->mtu());
 
         // This kills the old tun device and replaces it with the new one
-        _utun = std::move(newUtun);
+        _pUtun = std::move(pNewUtun);
 
-        _readNotifier.reset(new QSocketNotifier(_utun.fd(), QSocketNotifier::Read));
-        connect(_readNotifier.get(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
+        _readNotifier.emplace(_pUtun->fd(), QSocketNotifier::Read);
+        connect(_readNotifier.ptr(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
 
         qInfo() << "Split Tunnel ip4 addresses are" << _splitTunnelIp.ip4() << _splitTunnelIp.ip4();
         qInfo() << "Split Tunnel ip6 address is" << _splitTunnelIp.ip6();
@@ -424,59 +250,57 @@ void MacSplitTunnel::aboutToConnectToVpn()
 void MacSplitTunnel::initiateConnection(const FirewallParams &params, QString tunnelDeviceName,
                                         QString tunnelDeviceLocalAddress)
 {
-    _utun = UTun::create();
+    _pUtun = UTun::create();
 
-    if(_utun.isOpen())
-    {
-        qInfo() << "Opened tun device" << _utun.name() << "for split tunnel";
-        _readNotifier.reset(new QSocketNotifier(_utun.fd(), QSocketNotifier::Read));
-        connect(_readNotifier.get(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
-
-        Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(_utun.name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
-
-        // Add global Ipv6 IP
-        Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(_utun.name(), _splitTunnelIp.ip6()));
-
-        _utun.setMtu(1500); // default MTU when setting up
-
-        // To setup the ICMP rules
-        _defaultRuleUpdater.forceUpdate(IPv4, {});
-        _defaultRuleUpdater.forceUpdate(IPv6, {});
-
-        // Include Ip Header when writing to raw socket
-        auto hdrIncl = [](int fd) {
-            int one = 1;
-            setsockopt(fd, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one));
-        };
-
-        _rawFd4 = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-        if(::fcntl(_rawFd4, F_SETFD, FD_CLOEXEC))
-            qWarning() << "fcntl failed setting FD_CLOEXEC:" << ErrnoTracer{errno};
-
-        hdrIncl(_rawFd4);
-
-        // Required by Big Sur
-        setupIpForwarding(QStringLiteral("net.inet.ip.forwarding"), QStringLiteral("1"), _ipForwarding4);
-        setupIpForwarding(QStringLiteral("net.inet6.ip6.forwarding"), QStringLiteral("1"), _ipForwarding6);
-
-        updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress);
-
-        _state = State::Active;
-    }
-    else
+    if(!_pUtun)
     {
         qInfo() << "Failed to open a tun device";
+        return;
     }
+
+    qInfo() << "Opened tun device" << _pUtun->name() << "for split tunnel";
+    _readNotifier.emplace(_pUtun->fd(), QSocketNotifier::Read);
+    connect(_readNotifier.ptr(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
+
+    Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(_pUtun->name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
+    // Add unique local Ipv6 IP
+    Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(_pUtun->name(), _splitTunnelIp.ip6()));
+    _pUtun->setMtu(1500); // default MTU when setting up
+
+    // To setup the ICMP rules
+    _defaultRuleUpdater.forceUpdate(IPv4, {});
+    _defaultRuleUpdater.forceUpdate(IPv6, {});
+
+    // Include Ip Header when writing to raw socket
+    auto hdrIncl = [](int fd) {
+        int one = 1;
+        setsockopt(fd, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one));
+    };
+
+    _rawFd4 = PosixFd{socket(AF_INET, SOCK_RAW, IPPROTO_RAW)};
+    if(::fcntl(_rawFd4->get(), F_SETFD, FD_CLOEXEC))
+        qWarning() << "fcntl failed setting FD_CLOEXEC:" << ErrnoTracer{errno};
+
+    // Allow us to write complete Ipv4 packets, including header.
+    // Ipv6 raw sockets do not allow us to do this.
+    hdrIncl(_rawFd4->get());
+
+    // Required by Big Sur
+    setupIpForwarding(QStringLiteral("net.inet.ip.forwarding"), QStringLiteral("1"), _ipForwarding4);
+    setupIpForwarding(QStringLiteral("net.inet6.ip6.forwarding"), QStringLiteral("1"), _ipForwarding6);
+
+    updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress);
+
+    _state = State::Active;
 }
 
 void MacSplitTunnel::shutdownConnection()
 {
-    _readNotifier.reset();
-    _utun.close();
+    _readNotifier.clear();
+    _pUtun.clear();
     _routesUp = false;
 
-    if(_rawFd4 > 0) ::close(_rawFd4);
-    _rawFd4 = -1;
+    _rawFd4.clear();
 
     _state = State::Inactive;
 
@@ -562,27 +386,27 @@ QString MacSplitTunnel::sysctl(const QString &setting, const QString &value)
 {
     QString out = Exec::bashWithOutput(QStringLiteral("sysctl -n '%1'").arg(setting));
 
-    if(!out.isEmpty())
+    if(out.isEmpty())
     {
-        if(out.toInt() != value.toInt())
-        {
-            qInfo() << QStringLiteral("Setting %1 to %2").arg(setting, value);
-            if(0 == Exec::bash(QStringLiteral("sysctl -w '%1=%2'").arg(setting, value)))
-                return out;
-            else
-                return {};
-        }
-        else
-        {
-            qInfo() << QStringLiteral("%1 already %2; nothing to do!").arg(setting, value);
-            return {};
-        }
+        qWarning() << QStringLiteral("Unable to read value of %1 setting from sysctl").arg(setting);
+        return {};
+    }
+
+    if(out.toInt() != value.toInt())
+    {
+        qInfo() << QStringLiteral("Setting %1 to %2").arg(setting, value);
+        if(0 == Exec::bash(QStringLiteral("sysctl -w '%1=%2'").arg(setting, value)))
+            return out;
     }
     else
     {
-        qWarning() << QStringLiteral("Unable to store old %1 value").arg(setting);
+        qInfo() << QStringLiteral("%1 already set to %2; nothing to do!").arg(setting).arg(value);
         return {};
     }
+
+    qWarning() << QStringLiteral("Unable to set old %1 value from %2 to %3").arg(setting).arg(out).arg(value);
+
+    return {};
 }
 
 // setupIpForwarding(QStringLiteral("net.inet.ip.forwarding"), QStringLiteral("1"), _ipForwarding4);
@@ -640,14 +464,14 @@ void MacSplitTunnel::updateNetwork(const FirewallParams &params, QString tunnelD
     if(params._connectionSettings && params._connectionSettings->mtu())
     {
         auto mtu = params._connectionSettings->mtu();
-        if (_utun.mtu() != mtu)
-            _utun.setMtu(mtu);
+        if (_pUtun->mtu() != mtu)
+            _pUtun->setMtu(mtu);
     }
     else
     {
         // 1420 is the default MTU for the VPN tunnel device
-        if(_utun.mtu() != 1420)
-            _utun.setMtu(1420);
+        if(_pUtun->mtu() != 1420)
+            _pUtun->setMtu(1420);
     }
 
     // Create routes into the split tunnel device to override the default
@@ -659,8 +483,8 @@ void MacSplitTunnel::updateNetwork(const FirewallParams &params, QString tunnelD
     if(!params.setDefaultRoute)
     {
         // IPv4 default routes
-        Exec::bash(QStringLiteral("route -q -n add -inet 0.0.0.0/1 -interface %1").arg(_utun.name()));
-        Exec::bash(QStringLiteral("route -q -n add -inet 128.0.0.0/1 -interface %1").arg(_utun.name()));
+        Exec::bash(QStringLiteral("route -q -n add -inet 0.0.0.0/1 -interface %1").arg(_pUtun->name()));
+        Exec::bash(QStringLiteral("route -q -n add -inet 128.0.0.0/1 -interface %1").arg(_pUtun->name()));
 
         // IPv6 default routes - (equivalent to 128/1 route for ipv6)
         Exec::bash(QStringLiteral("route -q -n add -inet6 8000::/1 %1").arg(_splitTunnelIp.ip6()));
@@ -847,14 +671,14 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
 
     _lastPacketAddress4 = newPacketAddress;
 
-    qInfo() << "Re-injecting IPv4 packet:" << pPacket->toString();
+    //qInfo() << "Re-injecting IPv4 packet:" << pPacket->toString();
 
     // Re-inject the packet
     struct sockaddr_in to{};
     to.sin_family = AF_INET;
     to.sin_addr.s_addr = htonl(pPacket->destAddress());
 
-    if(::sendto(_rawFd4, pPacket->toRaw(), pPacket->len() , 0, reinterpret_cast<sockaddr *>(&to), sizeof(to)) == -1)
+    if(::sendto(_rawFd4->get(), pPacket->toRaw(), pPacket->len() , 0, reinterpret_cast<sockaddr *>(&to), sizeof(to)) == -1)
     {
         qWarning() << "Unable to reinject packet" << pPacket->toString() << "-"
             << ErrnoTracer{errno};
@@ -885,7 +709,7 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
 
 void MacSplitTunnel::readFromTunnel(int socket)
 {
-    const uint mtu = _utun.mtu();
+    const uint mtu = _pUtun->mtu();
     std::vector<unsigned char> buffer(mtu);
     buffer.resize(mtu);
 

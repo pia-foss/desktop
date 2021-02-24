@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -111,6 +111,7 @@ ApplicationWindow {
     property bool include_crash: true
     property string errorMessage: ""
     property string confirmMessage: ""
+    property string endpointOverride: ""
   }
 
   SupportToolUI {

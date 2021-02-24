@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,7 +22,7 @@
 #ifndef LINUX_NL_H
 #define LINUX_NL_H
 
-#include "linux_objects.h"
+#include "posix/posix_objects.h"
 #include "networkmonitor.h"
 #include <thread>
 #include <future>
@@ -55,7 +55,7 @@ private:
     // networksUpdated() with updates.  Catches exceptions and gracefully
     // terminates the thread.
     static void runOnWorkerThread(LinuxNl *pThis,
-                                  std::promise<LinuxFd> killSocketPromise);
+                                  std::promise<PosixFd> killSocketPromise);
 
 public:
     // The constructor starts the worker thread and reads the initial state.
@@ -80,7 +80,7 @@ private:
     // sockets.  This is provided by the worker thread using socketpair().
     // If the worker thread couldn't be initialized, it returns a socket handle
     // of -1.
-    std::future<LinuxFd> _workerKillSocket;
+    std::future<PosixFd> _workerKillSocket;
 };
 
 #endif

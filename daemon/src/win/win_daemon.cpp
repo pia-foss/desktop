@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -1552,9 +1552,9 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // DNS
     file.writeCommand("Resolve-DnsName (www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com"));
-    file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(piaLegacyDnsPrimary()));
+    file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(piaModernDnsVpn()));
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringLiteral("www.privateinternetaccess.com /w 1000 /n 1"));
-    file.writeCommand("ping (ping 209.222.18.222)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(piaLegacyDnsPrimary()));
+    file.writeCommand("ping (ping piadns)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(piaModernDnsVpn()));
 }
 
 void WinDaemon::checkWintunInstallation()

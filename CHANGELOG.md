@@ -1,11 +1,21 @@
 # Changelog
 
-### v2.6.2
+### v2.7.0
 * Split tunnel on macOS no longer uses a network kernel extension
 * Split tunnel now supports macOS 11.0 (Big Sur)
+* Service notifications can now be shown below the Connect button
 * Added support for Linux ARM build configurations (armhf and arm64)
 * Linux builds are now made on Debian Stretch
 * Ubuntu 16.04 is no longer supported (libstdc++ 6.0.22 is now required)
+* Added support for renewing Dedicated IPs
+* "Bypass" apps on Linux now also bypass the PIA killswitch
+* OpenVPN now always uses RSA-4096 for the server authentication handshake
+* OpenVPN CBC ciphers now always use SHA-256 for data authentication
+* Removed the Data Encrytion "None" setting for OpenVPN
+* Updated to Qt 5.15.2, OpenVPN 2.4.10, OpenSSL 1.1.1i
+* Fixed an issue causing bypass apps on Linux to occasionally use VPN DNS
+* Fixed an issue on Linux causing OpenVPN to fail to connect when PATH exceeds 256 characters
+* Fixed an issue preventing the Built-in Resolver from working reliably on some Windows systems
 
 ### v2.6.1
 * Fixed a crash when connecting to a region with no servers available for the current protocol

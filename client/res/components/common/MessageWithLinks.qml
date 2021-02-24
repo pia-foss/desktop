@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -164,7 +164,7 @@ FocusScope {
   //
   // To solve this, the message is laid out and rendered using two separate Text
   // objects:
-  // - An inivisible 'layout' Text object is used to size the MessageWithLinks
+  // - An invisible 'layout' Text object is used to size the MessageWithLinks
   //   and detect the pointed link.  This Text *cannot* depend on anything
   //   computed from the pointed link.  (Its HTML is always built as if no links
   //   are highlighted.)

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -45,6 +45,9 @@ FocusScope {
   // Only shown if 'desc' is non-empty.
   property var descLinks: []
   property string info
+
+  // Whether the info-tip is shown below or above the item
+  property bool infoShowBelow: true
   property string warning
 
   // A text link can be displayed to the right of the InfoTip, this has some
@@ -168,7 +171,7 @@ FocusScope {
         return betaFeature.x + betaFeature.width + leftMargin
       return root.textRightX + leftMargin
     }
-    showBelow: true
+    showBelow: infoShowBelow
     tipText: warning || info
     visible: warning || info
     icon: warning ? icons.warning : icons.settings

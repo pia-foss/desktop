@@ -26,9 +26,6 @@ stage = Install.new(Build.macos? ? "stage/#{version.productName}.app" : 'stage')
 # Artifacts - These are the final outputs preserved from CI builds
 artifacts = Install.new('artifacts')
 
-# TODO
-# - gendebug
-
 clientlib = Executable.new("#{Build::Brand}-clientlib", :dynamic)
     .define('BUILD_COMMON')
     .define('BUILD_CLIENTLIB')
@@ -226,12 +223,18 @@ integtestBin = Executable.new("#{Build::Brand}-integtest")
     .useQt('Test')
     .install(integtestStage, :bin)
 
-# Install OpenSSL libraries to the integtest staging area
+# Install built libraries to the integtest staging area
+# This includes OpenSSL (all platforms) and xcb (Linux only)
 FileList[File.join('deps/built',
                    Build.selectPlatform('win', 'mac', 'linux'),
                    Build::TargetArchitecture.to_s, 'lib*')].each do |d|
     integtestStage.install(d, :lib)
 end
+
+# 'tools' builds utility applications that are just part of the development
+# workflow.  These are staged to tools/ in the output directory.  These are not
+# part of the build process itself or any shipped artifacts.
+toolsStage = Install.new("tools")
 
 # Include platform-specific targets.  These call stage.install() to add
 # additional installation artifacts.
@@ -240,6 +243,7 @@ if(Build.windows?)
     PiaWindows::defineTargets(version, stage)
     PiaWindows::defineIntegtestArtifact(version, integtestStage, artifacts)
     PiaWindows::defineInstaller(version, stage, artifacts)
+    PiaWindows::defineTools(toolsStage)
     task :default => :windeploy
 elsif(Build.macos?)
     require_relative('./rake/product/macos.rb')
@@ -252,6 +256,7 @@ elsif(Build.linux?)
     PiaLinux::defineTargets(version, stage)
     PiaLinux::defineIntegtestArtifact(version, integtestStage, artifacts)
     PiaLinux::defineInstaller(version, stage, artifacts)
+    PiaLinux::defineTools(toolsStage)
     task :default => :stage
 end
 
@@ -270,6 +275,9 @@ end
 desc "Run integration tests"
 task :integtest do |t|
     puts "built integration tests"
+end
+task :tools => toolsStage.target do |t|
+    puts "built tools"
 end
 
 # Define debug artifact targets
@@ -321,12 +329,14 @@ task :debug_collect => [debugSymbols.componentDir, stage.target,
 
     FileUtils.copy_entry(version.artifact('version.txt'),
                          debugSymbols.artifact('version.txt'))
+    FileUtils.copy_entry(Executable::Qt.artifact('qtversion.txt'),
+                         debugSymbols.artifact('qtversion.txt'))
     FileUtils.copy_entry(installerArtifact,
                          debugSymbols.artifact(File.basename(installerArtifact)))
 end
 
 debugArchive = Build.new('debug-archive')
-debugArchivePkg = debugArchive.artifact("debug-#{version.packageName}.zip")
+debugArchivePkg = debugArchive.artifact("debug.zip")
 task debugArchivePkg => [debugArchive.componentDir, :debug_collect] do |t|
     Archive.zipDirectoryContents(debugSymbols.componentDir, debugArchivePkg)
 end
@@ -337,6 +347,7 @@ end
 
 artifacts.install(debugArchivePkg, '')
 artifacts.install(version.artifact('version.txt'), '')
+artifacts.install(Executable::Qt.artifact('qtversion.txt'), '')
 
 task :artifacts => artifacts.target do |t|
     puts "produced artifacts:"

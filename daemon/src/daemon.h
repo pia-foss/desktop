@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -183,7 +183,7 @@ public:
     virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
     virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
     virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
-    virtual ~RouteManager() {}
+    virtual ~RouteManager() = default;
 };
 
 class SubnetBypass
@@ -361,9 +361,6 @@ protected:
     // notification), clear that notification by dismissing the change.  This
     // resets AccountDedicatedIp::lastIpChange() for all dedicated IPs.
     void RPC_dismissDedicatedIpChange();
-    // Refresh dedicated IPs now (usually done automatically every 10 minutes,
-    // used by dev tools)
-    void RPC_refreshDedicatedIps();
 
     // Connection
     void RPC_connectVPN();
@@ -375,8 +372,12 @@ protected:
     QJsonValue RPC_writeDiagnostics();
     void RPC_writeDummyLogs();
     void RPC_crash();
-    // Refresh update metadata (asynchronously)
-    void RPC_refreshUpdate();
+
+    // Refresh server metadata (asynchronously)
+    // Refreshes most information that's normally loaded periodically, such as
+    // dedicated IPs, update information, client notifications, etc.  Used for
+    // testing to avoid waiting on long timers.
+    void RPC_refreshMetadata();
 
     // Client activation
     void RPC_notifyClientActivate();
@@ -505,6 +506,8 @@ private:
     void refreshDedicatedIps();
     void reapplyFirewallRules();
 
+    AppMessage parseAppMessage(const QJsonObject &messageJson) const;
+    void checkForAppMessages();
 
 private:
     // Rebuild location preferences from the grouped locations.  Used when
@@ -595,6 +598,8 @@ protected:
 
     QTimer _accountRefreshTimer;
     QTimer _dedicatedIpRefreshTimer;
+
+    QTimer _checkForAppMessagesTimer;
 
     // Ongoing login attempt.  If we try to log in again or log out, we need to
     // abort the prior attempt.  This is an AbortableTask so it'll still

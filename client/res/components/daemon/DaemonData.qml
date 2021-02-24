@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -30,4 +30,6 @@ QtObject {
   readonly property var modernRegionMeta: NativeDaemon.data.modernRegionMeta
 
   readonly property var flags: NativeDaemon.data.flags
+
+  readonly property var appMessage: NativeDaemon.data.appMessage
 }

@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright (c) 2020 Private Internet Access, Inc.
+# Copyright (c) 2021 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -80,6 +80,20 @@ dns_servers=""
 domain=""
 pia_args_done=""
 
+# OpenVPN discards PATH when invoking this script, due to setting up a
+# "clean" environment and then applying its own variables.  This seems to
+# be an oversight, but it prevents us from finding executables like 'ip'
+# when they aren't in the default PATH that bash guesses.
+#
+# We can't easily set variables in the script environment through
+# OpenVPN's interface, so instead this is explicitly passed to the script
+# as an argument.
+#
+# On top of all that, OpenVPN also limits args to 256 chars for some reason
+# (options.h, OPTION_PARM_SIZE), so we have to split up PATH if it is longer
+# than that (which has been encountered in the field).
+arg_path=""
+
 while [ "$#" -gt 0 ] && [ -z "$pia_args_done" ]; do
   case "$1" in
     "--dns")
@@ -88,15 +102,9 @@ while [ "$#" -gt 0 ] && [ -z "$pia_args_done" ]; do
       ;;
     "--path")
       shift
-      # OpenVPN discards PATH when invoking this script, due to setting up a
-      # "clean" environment and then applying its own variables.  This seems to
-      # be an oversight, but it prevents us from finding executables like 'ip'
-      # when they aren't in the default PATH that bash guesses.
-      #
-      # We can't easily set variables in the script environment through
-      # OpenVPN's interface, so instead this is explicitly passed to the script
-      # as an argument.
-      export PATH="$1"
+      # Append this segment to arg_path, long PATH values have to be split up to
+      # work around OpenVPN limitations.  Then the whole path is applied later.
+      arg_path="$arg_path$1"
       ;;
     "--")
       pia_args_done=1
@@ -108,6 +116,11 @@ while [ "$#" -gt 0 ] && [ -z "$pia_args_done" ]; do
   esac
   shift
 done
+
+if [ -n "$arg_path" ]; then
+  echo "PATH provided from command line: $arg_path"
+  export PATH="$arg_path"
+fi
 
 for (( i=1 ; ; i++ )); do
   var="foreign_option_$i"

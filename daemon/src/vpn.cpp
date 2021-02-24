@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Private Internet Access, Inc.
+// Copyright (c) 2021 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -59,8 +59,6 @@ static std::initializer_list<const char*> g_connectionSettingNames = {
     "localPort",
     "automaticTransport",
     "cipher",
-    "auth",
-    "serverCertificate",
     "overrideDNS",
     "defaultRoute",
     "blockIPv6",
@@ -661,8 +659,6 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     if(_method == Method::OpenVPN)
     {
         _openvpnCipher = settings.cipher();
-        _openvpnAuth = settings.auth();
-        _openvpnServerCertificate = settings.serverCertificate();
 
         // Proxy and automatic transport require OpenVPN.
         if(settings.proxy() == QStringLiteral("custom"))
