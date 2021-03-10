@@ -16,12 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("posix_ping.h")
-
 #ifndef POSIX_PING_H
 #define POSIX_PING_H
 
+#include "common.h"
+#include "posix_objects.h"
 #include <QSocketNotifier>
 
 // Open an ICMP socket and send pings on Mac/Linux.
@@ -51,7 +50,6 @@ private:
 
 public:
     PosixPing();
-    ~PosixPing();
 
 private:
     quint16 calcChecksum(const quint8 *data, std::size_t len) const;
@@ -68,7 +66,7 @@ signals:
     void receivedReply(quint32 address);
 
 private:
-    int _icmpSocket;
+    PosixFd _icmpSocket;
     // Have to delay construction of this notifier until we have set up the
     // ICMP socket.
     nullable_t<QSocketNotifier> _pReadNotifier;

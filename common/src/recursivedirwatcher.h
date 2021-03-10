@@ -23,18 +23,29 @@
 #define RECURSIVEDIRWATCHER_H
 
 #include <QFileSystemWatcher>
+#include <QTimer>
 #include "path.h"
 
 // RecursiveWatcher watches a path to a file or directory that may or may not
 // exist yet.  It watches all parent directories to detect when the target path
 // is created.
 //
-// When any change occurs - in the file/directory specified or any parent -
-// changed() is emitted with the path that was changed.
+// This is usually used for short-lived watches when the caller expects to see
+// a file created (say, by a child process).  The caller should re-check the
+// target file whenever check() is emitted - this is a 'hint' that a change may
+// have occurred.
 //
-// RecursiveWatcher is best used for short-lived watches, such as while waiting
-// for a child process to start up and create a file.  Watches of all parents up
-// to the root might be expensive for long-lived watches.
+// On Linux, this is properly implemented using a QFileSystemWatcher, which is
+// the ideal behavior - we don't do any extra work polling the file, and we
+// don't have to wait for a poll interval to elapse before checking again.
+//
+// On macOS, crashes were observed on macOS 10.13 using Qt 5.15.2, it appears
+// that a change in Qt may have caused this to start crashing on 10.13:
+//   https://code.qt.io/cgit/qt/qtbase.git/commit/src/corelib/io/qfilesystemwatcher_fsevents.mm?h=5.15.2&id=c6f0236892c0002b11512683754f2b22ae979eec
+//
+// To avoid this issue, this falls back to short-polling every 100ms on macOS.
+// This isn't ideal, but the current uses of RecursiveWatcher are very short-
+// lived anyway, so it is reasonable.
 class RecursiveWatcher : public QObject
 {
     Q_OBJECT
@@ -43,31 +54,33 @@ public:
     RecursiveWatcher(Path target);
 
 private:
+#ifndef Q_OS_MACOS
     // Add watches to _fsWatcher for _target and all of its ancestors.
     void addRecursiveWatches();
     void pathChanged(const QString &path);
+#endif
 
 public:
     const Path &target() const {return _target;}
 
 signals:
-    // The specified file/directory, or any parent, was changed.  The path given
-    // has the same semantics as QFileSystemWatcher::directoryChanged() or
-    // QFileSystemWatcher::fileChanged() - that is, for a directory, a file was
-    // added/removed in the specified directory (directory modified), or the
-    // directory itself was removed.  For a file, the file itself was modified
-    // or removed.
+    // The caller should re-check the file/directory of interest.
     //
-    // In general, slots should usually ignore 'path' and just re-check
-    // existence of the file/directory of interest.  When an ancestor directory
-    // is created, it could already have contents (changed() won't be emitted
-    // for children that already exist).  For example, an existing directory
-    // could have been linked at the path specified.
-    void changed(const QString &path);
+    // On Linux, this is emitted when the path specified or any ancestor has
+    // changed.  (It's still possible that the file doesn't exist, etc., since
+    // more than one change could have occurred.)
+    //
+    // On macOS, this is emitted periodically with a timer to fall back to
+    // short-polling due to the QFileSystemWatcher issues mentioned above.
+    void check();
 
 private:
     Path _target;
+#ifdef Q_OS_MACOS
+    QTimer _timer;
+#else
     QFileSystemWatcher _fsWatcher;
+#endif
 };
 
 #endif

@@ -137,7 +137,7 @@ private:
 MacInterfaceNameTask::MacInterfaceNameTask()
     : _devFileWatcher{Path::WireguardInterfaceFile}
 {
-    connect(&_devFileWatcher, &RecursiveWatcher::changed, this,
+    connect(&_devFileWatcher, &RecursiveWatcher::check, this,
             &MacInterfaceNameTask::checkInterfaceFile);
     checkInterfaceFile();
 }
@@ -260,7 +260,7 @@ PendingLocalSocketTask::PendingLocalSocketTask(Path socketPath)
       _dirWatcher{_socketPath.parent()},    // Watch the parent directory
       _alreadyChanged{false}
 {
-    connect(&_dirWatcher, &RecursiveWatcher::changed, this,
+    connect(&_dirWatcher, &RecursiveWatcher::check, this,
         &PendingLocalSocketTask::directoryChanged);
 
     // Begin an attempt now

@@ -52,12 +52,6 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 
-static void ignoreSignals(std::initializer_list<int> sigs)
-{
-    for (int sig : sigs)
-        ::signal(sig, SIG_IGN);
-}
-
 #define VPN_GROUP BRAND_CODE "vpn"
 
 void setUidAndGid()
@@ -143,7 +137,6 @@ PosixDaemon::PosixDaemon()
 #endif
 {
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
-    ignoreSignals({ SIGPIPE });
 
 #ifdef Q_OS_MACOS
     PFFirewall::install();
@@ -737,6 +730,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});
     file.writeCommand("scutil (scutil --nwi)", "scutil", QStringList{QStringLiteral("--nwi")});
     scutilDNSDiagnostics(file);
+    // Even with -detaillevel mini this can take a long time, just capture the
+    // specific hardware information we're interested in.
+    file.writeCommand("System information", "system_profiler",
+        QStringList{QStringLiteral("SPHardwareDataType"), QStringLiteral("SPDisplaysDataType"),
+            QStringLiteral("SPMemoryDataType"), QStringLiteral("SPStorageDataType")});
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeText("Overview", diagnosticsOverview());

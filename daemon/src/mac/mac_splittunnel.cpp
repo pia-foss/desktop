@@ -198,9 +198,10 @@ MacSplitTunnel::MacSplitTunnel(QObject *pParent)
 // will timeout and die.
 void MacSplitTunnel::aboutToConnectToVpn()
 {
-    qInfo() << "Connecting to VPN, replacing stun device and cycling Ips";
     if(_state == State::Active)
     {
+        qInfo() << "Connecting to VPN, replacing stun device and cycling Ips";
+
         // Replace the existing UTun with a new one so that
         // all existing TCP connections are terminated before we connect
         auto pNewUtun = UTun::create();

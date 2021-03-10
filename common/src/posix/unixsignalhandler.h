@@ -37,7 +37,8 @@ public:
 private:
   // called by the system when a signal is received
   static void _signalHandler(int signal, siginfo_t *info, void *uap);
-
+  template<int Signal>
+  void setAbortAction();
   static void setAction(int signal, const struct sigaction &action);
 
 public:

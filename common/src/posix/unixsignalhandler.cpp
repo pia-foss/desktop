@@ -24,6 +24,44 @@
 #include <unistd.h>
 #include <QDebug>
 
+namespace
+{
+    // These signal handlers are for all the signals that cause us to abort.
+    // We want to capture what the signal was in case this happens in the field.
+    //
+    // Actually doing this is a bit tricky:
+    // - Most of these signals indicate that it's not safe to return to the
+    //   regular application code (SIGSEGV, SIGFPE, SIGILL, SIGSYS), or that
+    //   we'll probably be SIGKILL'ed if we do (SIGXCPU).
+    // - The logger is not reentrant, and the application code could have been
+    //   in the logger.
+    // - We don't capture the heap in core dumps.
+    //
+    // So we need to get this information in the stack captured by the dump.
+    // The easiest thing to see are function names, so if each signal calls a
+    // unique function, we can identify the signal that way.  (Here the template
+    // parameter becomes part of the function name, rather than writing a bunch
+    // of specifically-named functions.)
+    //
+    // In a stack trace from the dump, you can see the signal here:
+    // 3  pia-daemon!void (anonymous namespace)::abortSignalHandler<10>(int, __siginfo*, void*) + 0x9
+    //                                                              ^^ signal number
+    //
+    // The sending PID isn't captured.  There may be some way to get it into a
+    // stack variable so it'd be in the dump, but some initial attempts with
+    // clang were unsuccessful (even passing a volatile int to a non-inlined
+    // function seemed not to actually write the PID to memory).
+    template<int Signal>
+    void abortSignalHandler(int, siginfo_t *, void*)
+    {
+        // Just abort.  The signal number is apparent from the name of the
+        // function, and this can't be inlined since it was called via a
+        // function pointer.
+        ::abort();
+    }
+
+}
+
 UnixSignalHandler::UnixSignalHandler(QObject *parent)
     : QObject{parent}, _rxBytes{0}
 {
@@ -42,16 +80,43 @@ UnixSignalHandler::UnixSignalHandler(QObject *parent)
     setAction(SIGUSR1, action);
     setAction(SIGTERM, action);
     setAction(SIGINT, action);
-    // SIGHUP is ignored, but we still attach a handler to trace it
+    // These signals are ignored, but we still attach a handler to trace them
     setAction(SIGHUP, action);
+    setAction(SIGPIPE, action);
+    setAction(SIGALRM, action);
+    setAction(SIGPROF, action);
+    setAction(SIGUSR2, action);
+    setAction(SIGVTALRM, action);
+    // These signals still cause us to abort, but we'll capture a dump, and the
+    // mechanism above gets the signal and process PID in the stack captured by
+    // the dump.
+    // (Most of these signals would have terminated with no dump by default.)
+    setAbortAction<SIGBUS>();
+    setAbortAction<SIGFPE>();
+    setAbortAction<SIGILL>();
+    setAbortAction<SIGQUIT>();
+    setAbortAction<SIGSEGV>();
+    setAbortAction<SIGSYS>();
+    setAbortAction<SIGTRAP>();
+    setAbortAction<SIGXCPU>();
+    setAbortAction<SIGXFSZ>();
 }
 
 UnixSignalHandler::~UnixSignalHandler()
 {
+    // Ignore signals that we were handling, UnixSignalHandler is being
+    // destroyed so our signal handler would no longer work
     ::signal(SIGUSR1, SIG_IGN);
     ::signal(SIGTERM, SIG_IGN);
     ::signal(SIGINT, SIG_IGN);
     ::signal(SIGHUP, SIG_IGN);
+    ::signal(SIGPIPE, SIG_IGN);
+    ::signal(SIGALRM, SIG_IGN);
+    ::signal(SIGPROF, SIG_IGN);
+    ::signal(SIGUSR2, SIG_IGN);
+    ::signal(SIGVTALRM, SIG_IGN);
+    // The 'abort' signals are left alone, these can still be handled, they
+    // don't directly involve UnixSignalHandler
     ::close(_sigFd[0]);
     ::close(_sigFd[1]);
 }
@@ -68,6 +133,14 @@ void UnixSignalHandler::_signalHandler(int, siginfo_t *info, void *)
     auto pThis = instance();
     if(pThis)
         ::write(pThis->_sigFd[0], info, sizeof(siginfo_t));
+}
+template<int Signal>
+void UnixSignalHandler::setAbortAction()
+{
+    struct sigaction action{};
+    action.sa_sigaction = &abortSignalHandler<Signal>;
+    action.sa_flags = SA_RESTART | SA_SIGINFO;
+    setAction(Signal, action);
 }
 
 void UnixSignalHandler::setAction(int signal, const struct sigaction &action)
@@ -126,7 +199,7 @@ void UnixSignalHandler::handleSignal(int socket)
     case SIGTERM:
         emit sigTerm();
         break;
-    case SIGHUP:
+    default:
         // Ignored
         break;
     }

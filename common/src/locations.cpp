@@ -362,8 +362,7 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
     if(regionsLackingWireguard > 0)
     {
         qWarning() << "Found" << regionsLackingWireguard
-            << "regions with no WireGuard endpoints:"
-            << QJsonDocument{regionsObj}.toJson();
+            << "regions with no WireGuard endpoints";
     }
 
     // Build dedicated IP regions

@@ -360,12 +360,15 @@ Item {
           // build.
           property var isPrerelease: params.version.match(/^[0-9]+\.[0-9]+\.[0-9]+-/i)
           betaEmail: {
-            if(Qt.platform.os === 'win') {
+            if(Qt.platform.os === 'windows') {
               return "beta-feedback-win@privateinternetaccess.com"
              } else if(Qt.platform.os === 'linux') {
-                 return "beta-feedback-linux@privateinternetaccess.com"
+              return "beta-feedback-linux@privateinternetaccess.com"
+             } else if(Qt.platform.os === 'osx') {
+              return "beta-feedback-mac@privateinternetaccess.com"
              } else {
-                 return "beta-feedback-mac@privateinternetaccess.com"
+              console.log("Unsupported platform got: " + Qt.platform.os + " - defaulting to windows");
+              return "beta-feedback-win@privateinternetaccess.com"
              }
           }
           anchors.fill: parent

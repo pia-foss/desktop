@@ -114,10 +114,10 @@ Path Path::DebugFile;
 #ifdef Q_OS_WIN
 #include <shlobj_core.h>
 #pragma comment(lib, "shell32.lib")
-Path getShellFolder(int csidl)
+Path Path::getProgramsFolder()
 {
     wchar_t path[MAX_PATH];
-    if (S_OK == SHGetFolderPathW(NULL, csidl, NULL, SHGFP_TYPE_CURRENT, path))
+    if (S_OK == SHGetFolderPathW(NULL, CSIDL_PROGRAM_FILES, NULL, SHGFP_TYPE_CURRENT, path))
         return QDir::fromNativeSeparators(QString::fromWCharArray(path));
     return QString();
 }
@@ -179,7 +179,7 @@ void Path::initializePreApp()
 void Path::initializePostApp()
 {
 #if defined(Q_OS_WIN)
-    InstallationDir = getShellFolder(CSIDL_PROGRAM_FILES) / PIA_PRODUCT_NAME;
+    InstallationDir = getProgramsFolder() / PIA_PRODUCT_NAME;
     BaseDir = getBaseDir();
     ExecutableDir = BaseDir;
     LibraryDir = BaseDir;

@@ -277,6 +277,9 @@ public:
     // Most paths depend on the QCoreApplication.
     static void initializePostApp();
 
+    // Return the path to the Program Files folder
+    static Path getProgramsFolder();
+
     Path& operator=(const QString& path) { _path = path; return *this; }
 
     bool operator==(const Path &other) const {return _path == other._path;}

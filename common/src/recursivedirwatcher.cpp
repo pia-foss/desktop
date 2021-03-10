@@ -32,11 +32,21 @@ RecursiveWatcher::RecursiveWatcher(Path target)
     Q_ASSERT(false);
 #endif
 
+#ifdef Q_OS_MACOS
+    // Use a short-polling QTimer instead to work around QFileSystemWatcher
+    // issues on macOS 10.13.
+    connect(&_timer, &QTimer::timeout, this, &RecursiveWatcher::check);
+    _timer.setSingleShot(false);
+    _timer.setInterval(100);
+    _timer.start();
+#else
     connect(&_fsWatcher, &QFileSystemWatcher::directoryChanged, this,
             &RecursiveWatcher::pathChanged);
     addRecursiveWatches();
+#endif
 }
 
+#ifndef Q_OS_MACOS
 void RecursiveWatcher::pathChanged(const QString &path)
 {
     // Any time a change occurs, add watches for all parents again.  We
@@ -52,7 +62,7 @@ void RecursiveWatcher::pathChanged(const QString &path)
     addRecursiveWatches();
     qInfo() << "Change in path" << path << "watching"
         << _target;
-    emit changed(path);
+    emit check();
 };
 
 void RecursiveWatcher::addRecursiveWatches()
@@ -67,3 +77,4 @@ void RecursiveWatcher::addRecursiveWatches()
         watchDir = std::move(parent);
     }
 }
+#endif

@@ -50,7 +50,6 @@ GUID PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4 = { 0x18ebe4a1, 0xa7b4, 0x4b76, { 0x9f,
 GUID PIA_WFP_CALLOUT_CONNECT_AUTH_V4 = { 0xf6e93b65, 0x5cd0, 0x4b0d, { 0xa9, 0x4c, 0x13, 0xba, 0xfd, 0x92, 0xf4, 0x1c } };
 GUID PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4 = { 0x6a564cd3, 0xd14e, 0x43dc, { 0x98, 0xde, 0xa4, 0x18, 0x14, 0x4d, 0x5d, 0xd2 } };
 GUID PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4 = { 0xb06c0a5f, 0x2b58, 0x6753, { 0x85, 0x29, 0xad, 0x8f, 0x1c, 0x51, 0x5f, 0xf5 } };
-
 namespace
 {
     // The shipped version of the WinTUN driver
@@ -1546,6 +1545,10 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     // Wireguard logs
     file.writeCommand("WireGuard Logs", Path::WireguardServiceExecutable,
                       QStringList{QStringLiteral("/dumplog"), Path::ConfigLogFile});
+
+    // Whether the official WireGuard app is installed - it can sometimes cause problems
+    QString wgAppExe = Path::getProgramsFolder() / QStringLiteral("WireGuard") / QStringLiteral("WireGuard.exe");
+    file.writeText("Official WireGuard App installed", QFile::exists(wgAppExe) ? "yes" : "no");
 
     // Installed and running drivers (buggy drivers may prevent TAP installation)
     file.writeCommand("Drivers", QStringLiteral("driverquery"), {QStringLiteral("/v")});

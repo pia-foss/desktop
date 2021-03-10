@@ -1,5 +1,10 @@
 # Changelog
 
+### v2.7.1
+* Fixed an issue causing WireGuard connections to fail on some systems running macOS 10.13
+* Fixed an issue causing PIA to stop responding on some systems running macOS 11
+* Additional diagnostics on Windows
+
 ### v2.7.0
 * Split tunnel on macOS no longer uses a network kernel extension
 * Split tunnel now supports macOS 11.0 (Big Sur)

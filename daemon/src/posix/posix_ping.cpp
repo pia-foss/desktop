@@ -26,6 +26,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <netinet/ip.h>
+#include <fcntl.h>
 
 namespace
 {
@@ -39,32 +40,27 @@ namespace
 }
 
 PosixPing::PosixPing()
-    : _icmpSocket{-1},
-      _identifier{static_cast<quint16>(QRandomGenerator::global()->bounded(std::numeric_limits<quint16>::max()))},
+    : _identifier{static_cast<quint16>(QRandomGenerator::global()->bounded(std::numeric_limits<quint16>::max()))},
       _nextSequence{0}
 {
     // Unit tests don't run as root, so we can't actually do the ICMP pings.  We
     // still want to test the bulk of LatencyTracker, so mimic the pings just by
     // triggering phony measurements in unit tests.
 #ifndef UNIT_TEST
-    _icmpSocket = ::socket(PF_INET, sockType, IPPROTO_ICMP);
-    if(_icmpSocket < 0)
+    _icmpSocket = PosixFd{::socket(PF_INET, sockType, IPPROTO_ICMP)};
+    if(!_icmpSocket)
     {
         qWarning() << "Failed to open ICMP socket:" << errno;
     }
 
-    _pReadNotifier.emplace(_icmpSocket, QSocketNotifier::Type::Read);
+    // apply NONBLOCK flag
+    int oldFlags = ::fcntl(_icmpSocket.get(), F_GETFL);
+    ::fcntl(_icmpSocket.get(), F_SETFL, oldFlags | O_NONBLOCK);
+
+    _pReadNotifier.emplace(_icmpSocket.get(), QSocketNotifier::Type::Read);
     connect(_pReadNotifier.ptr(), &QSocketNotifier::activated, this,
             &PosixPing::onReadyRead);
 #endif
-}
-
-PosixPing::~PosixPing()
-{
-    if(_icmpSocket >= 0)
-    {
-        ::close(_icmpSocket);
-    }
 }
 
 quint16 PosixPing::calcChecksum(const quint8 *data, std::size_t len) const
@@ -104,7 +100,7 @@ bool PosixPing::sendEchoRequest(quint32 address)
     }
     return true;
 #endif
-    if(_icmpSocket < 0)
+    if(!_icmpSocket)
         return false; // Can't do anything, failed to open raw socket - traced earlier
 
     // Build an ICMP echo request packet.  (Don't include the IP header, the
@@ -149,7 +145,7 @@ bool PosixPing::sendEchoRequest(quint32 address)
     to.sin_family = AF_INET;
     to.sin_port = 0;    // Not used for ICMP raw socket
     to.sin_addr.s_addr = htonl(address);
-    auto sent = ::sendto(_icmpSocket, &packet, sizeof(packet), MSG_DONTWAIT,
+    auto sent = ::sendto(_icmpSocket.get(), &packet, sizeof(packet), 0,
                          reinterpret_cast<sockaddr*>(&to), sizeof(to));
     if(sent < 0)
     {
@@ -192,7 +188,7 @@ void PosixPing::onReadyRead()
     };
 
     alignas(Ipv4) std::array<quint8, 2048> packet;
-    auto read = recv(_icmpSocket, packet.data(), packet.size(), MSG_DONTWAIT);
+    auto read = recv(_icmpSocket.get(), packet.data(), packet.size(), 0);
     if(read < 0)
     {
         // Shouldn't happen, socket said it was ready
