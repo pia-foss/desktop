@@ -257,6 +257,16 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         }
 #endif
 
+#ifdef Q_OS_LINUX
+        // Pass path to ip command
+        QString ipCmd(QStandardPaths::findExecutable("ip"));
+        if(!ipCmd.isEmpty())
+        {
+            arguments += "--iproute";
+            arguments += ipCmd;
+        }
+#endif
+
         // Use the same script for --up and --down
         arguments += "--up";
         arguments += updownCmd;
