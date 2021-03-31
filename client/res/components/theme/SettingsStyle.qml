@@ -49,9 +49,19 @@ QtObject {
       'privacy': [ Theme.imagePathCommon + "/settings/privacy-active.png", Theme.imagePath + "/settings/privacy-inactive.png" ],
       'network': [ Theme.imagePathCommon + "/settings/network-active.png", Theme.imagePath + "/settings/network-inactive.png" ],
       'connection': [ Theme.imagePathCommon + "/settings/connection-active.png", Theme.imagePath + "/settings/connection-inactive.png" ],
-      'proxy': [ Theme.imagePathCommon + "/settings/proxy-active.png", Theme.imagePath + "/settings/proxy-inactive.png" ],
+      'automation': [ Theme.imagePathCommon + "/settings/automation-active.png", Theme.imagePath + "/settings/automation-inactive.png" ],
       'dedicatedip': [ Theme.imagePathCommon + "/settings/dedicatedip-active.png", Theme.imagePath + "/settings/dedicatedip-inactive.png" ],
       'help': [ Theme.imagePathCommon + "/settings/help-active.png", Theme.imagePath + "/settings/help-inactive.png" ],
+    })
+    readonly property var buttonIcons: ({
+      'configure': Theme.imagePath + "/icons/configure.png"
+    })
+
+    readonly property var ruleTypeImages: ({
+      'wired': Theme.imagePath + "/settings/automation-rule-types/wired.png",
+      'openWifi': Theme.imagePath + "/settings/automation-rule-types/openWifi.png",
+      'protectedWifi': Theme.imagePath + "/settings/automation-rule-types/protectedWifi.png",
+      'ssid': Theme.imagePath + "/settings/automation-rule-types/ssid.png",
     })
     readonly property color pageIconBgInactiveColor: Theme.dark ? "#323642" : "#9a9da5"
     readonly property color pageIconBgActiveColor: "#4cb649"

@@ -717,6 +717,19 @@ void NativeHelpers::openUrl(const QString &path, const QJsonObject &queryItems)
     }
 }
 
+QString NativeHelpers::cleanSsidDisplay(const QString &ssid)
+{
+    QString cleaned{ssid};
+    for(QChar &qc : cleaned)
+    {
+        ushort &cval{qc.unicode()};
+        // Replace control codes (anything < 0x20, or 0x7F 'DEL'), with spaces
+        if(cval < 0x20 || cval == 0x7F)
+            cval = ' ';
+    }
+    return cleaned;
+}
+
 void NativeHelpers::onFocusWindowChanged(QWindow *pFocusWindow)
 {
     if(!pFocusWindow)

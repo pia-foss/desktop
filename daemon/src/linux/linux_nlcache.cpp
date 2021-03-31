@@ -69,6 +69,7 @@ LinuxNlReqSock::LinuxNlReqSock(int family)
 }
 
 LinuxNlNtfSock::LinuxNlNtfSock(int netlinkFamily)
+    : _receivingDump{false}
 {
     // Create the notification socket
     _pNtfSock.reset(libnl::nl_socket_alloc());
@@ -89,25 +90,54 @@ LinuxNlNtfSock::LinuxNlNtfSock(int netlinkFamily)
     auto validCb = [](libnl::nl_msg *pMsg, void *pArg)
     {
         LinuxNlNtfSock *pThis = reinterpret_cast<LinuxNlNtfSock*>(pArg);
-        try
-        {
-            return pThis->handleMsg(pMsg);
-        }
-        catch(LibnlError &ex)
-        {
-            // Eat exception, we can't throw out of libnl callbacks
-            qWarning() << "Error applying cache update:" << ex;
-            // We can still return the error code, which will throw again when
-            // the receive result is checked, but this loses the original
-            // exception context.
-            return -ex.libnlCode();
-        }
+        return pThis->onValidMsg(pMsg);
     };
 
     // Set up the callback for the notification socket
     libnlErr = libnl::nl_socket_modify_cb(_pNtfSock.get(), NL_CB_VALID, NL_CB_CUSTOM,
                                           validCb, this);
-    LibnlError::checkRet(libnlErr, HERE, "Could not set socket notification callback");
+    LibnlError::checkRet(libnlErr, HERE, "Could not set valid message callback");
+
+    // Set up the "finish" callback that indicates the end of a dump
+    auto finishCb = [](libnl::nl_msg *pMsg, void *pArg)
+    {
+        LinuxNlNtfSock *pThis = reinterpret_cast<LinuxNlNtfSock*>(pArg);
+        return pThis->onFinishMsg(pMsg);
+    };
+    libnlErr = libnl::nl_socket_modify_cb(_pNtfSock.get(), NL_CB_FINISH, NL_CB_CUSTOM,
+                                          finishCb, this);
+    LibnlError::checkRet(libnlErr, HERE, "Could not set multipart finish callback");
+}
+
+int LinuxNlNtfSock::onValidMsg(libnl::nl_msg *pMsg)
+{
+    try
+    {
+        libnl::nlmsghdr *pHeader = libnl::nlmsg_hdr(pMsg);
+        if(!_receivingDump && pHeader->nlmsg_flags & NLM_F_MULTI)
+        {
+            qInfo() << "Beginning multipart message";
+            _receivingDump = true;
+        }
+        return handleMsg(pMsg);
+    }
+    catch(LibnlError &ex)
+    {
+        // Eat exception, we can't throw out of libnl callbacks
+        qWarning() << "Error applying cache update:" << ex;
+        // We can still return the error code, which will throw again when
+        // the receive result is checked, but this loses the original
+        // exception context.
+        return -ex.libnlCode();
+    }
+}
+
+int LinuxNlNtfSock::onFinishMsg(libnl::nl_msg *pMsg)
+{
+    // _receivingDump might still be false if this dump was empty, in that case
+    // we just get a "done" message.
+    _receivingDump = false;
+    return handleFinish(pMsg);
 }
 
 int LinuxNlNtfSock::getFd() const

@@ -26,6 +26,7 @@ import "../stores"
 import "../../client"
 import "../../daemon"
 import "../../common"
+import "../../common/regions"
 import "../../theme"
 import PIA.BrandHelper 1.0
 
@@ -184,6 +185,224 @@ Item {
         ]
         warning: setting.sourceValue === 'none' ? uiTranslate("ConnectionPage", "Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.") : ""
       }
+
+      DropdownInput {
+        id: proxyInput
+        hasConfigureButton: setting.currentValue !== "none"
+        configureButtonHelp: uiTranslate("ProxyPage", "Configure...")
+
+        function customProxyHost() {
+          var proxyCustomValue = Daemon.settings.proxyCustom
+          return proxyCustomValue ? proxyCustomValue.host : ""
+        }
+
+        onConfigureClicked: {
+          if(setting.currentValue === "shadowsocks") {
+            shadowsocksRegionDialog.updateAndOpen();
+          } else if(setting.currentValue === "custom") {
+            customProxyDialog.updateAndOpen();
+          }
+        }
+
+        label: uiTranslate("ConnectionPage", "Proxy")
+        setting: Setting {
+          id: customProxySetting
+
+          readonly property DaemonSetting daemonSetting: DaemonSetting { name: "proxy"; }
+          sourceValue: daemonSetting.sourceValue
+
+          onCurrentValueChanged: {
+            if(currentValue === 'custom' && !proxyInput.customProxyHost())
+              customProxyDialog.updateAndOpen()
+            else
+              daemonSetting.currentValue = currentValue
+          }
+        }
+
+        model: {
+          // Determine the name for the Shadowsocks item based on the selected
+          // region
+          var shadowsocksRegion = Messages.displayLocationSelection(Daemon.state.shadowsocksLocations.chosenLocation,
+                                                                    Daemon.state.shadowsocksLocations.bestLocation)
+          //: Label for the Shadowsocks proxy choice.  "Shadowsocks" is a proper
+          //: noun and shouldn't be translated, but the dash should match the
+          //: other proxy choice labels.  %1 is a description of the selected
+          //: region, such as "Japan" or "Auto (US East)", this uses the
+          //: localizations defined for the region module.
+          var shadowsocksName = uiTranslate("ProxyPage", "Shadowsocks - %1").arg(shadowsocksRegion)
+
+          // Determine the name for the custom item based on whether it is
+          // configured
+          var customHost = customProxyHost()
+          var customName = uiTranslate("ConnectionPage", "SOCKS5 Proxy...")
+          if(customHost) {
+            if(Daemon.settings.proxyCustom.port)
+              customHost += ":" + Daemon.settings.proxyCustom.port
+            //: Label for the custom SOCKS5 proxy choice when a proxy has been
+            //: configured.  %1 is the configured proxy (host or host:port), such
+            //: as "SOCKS5 Proxy: 127.0.0.1" or "SOCKS5 Proxy: 172.16.24.18:9080"
+            customName = uiTranslate("ProxyPage", "SOCKS5 Proxy - %1").arg(customHost)
+          }
+
+          return [
+            {name: uiTranslate("ConnectionPage", "None"), value: 'none'},
+            {
+              name: shadowsocksName,
+              value: 'shadowsocks',
+            },
+            {
+              name: customName,
+              value: 'custom',
+            }
+          ]
+        }
+      }
+
+      OverlayDialog {
+        id: customProxyDialog
+        buttons: [Dialog.Ok, Dialog.Cancel]
+        canAccept: proxyHostname.acceptableInput
+        contentWidth: 300
+        title: uiTranslate("ConnectionPage", "SOCKS5 Proxy")
+
+        function updateAndOpen() {
+          var currentCustomProxy = Daemon.settings.proxyCustom
+          proxyHostname.setting.currentValue = currentCustomProxy.host
+          if(currentCustomProxy.port > 0 && currentCustomProxy.port <= 65535)
+            proxyPort.setting.currentValue = currentCustomProxy.port.toString()
+          else
+            proxyPort.setting.currentValue = ""
+
+          proxyUsername.setting.currentValue = currentCustomProxy.username
+          proxyPassword.setting.currentValue = currentCustomProxy.password
+
+          open()
+        }
+
+        GridLayout {
+          width: parent.width
+          columns: 2
+          TextboxInput {
+            id: proxyHostname
+            Layout.fillWidth: true
+            //: The IP address of the SOCKS proxy server to use when
+            //: connecting.  Labeled with "IP Address" to indicate that it
+            //: can't be a hostname.
+            label: uiTranslate("ConnectionPage", "Server IP Address")
+            setting: Setting { sourceValue: "" }
+            // Only IP addresses allowed.  This regex allows leading zeros in each
+            // part.
+            validator: RegExpValidator {
+              regExp: /(([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])/
+            }
+          }
+          TextboxInput {
+            id: proxyPort
+            label: uiTranslate("ConnectionPage", "Port")
+            setting: Setting { sourceValue: "" }
+            validator: RegExpValidator { regExp: /(?:[0-9]{,5})?/ }
+            placeholderText: uiTranslate("ConnectionPage", "Default")
+          }
+          TextboxInput {
+            id: proxyUsername
+            Layout.fillWidth: true
+            Layout.columnSpan: 2
+            label: uiTranslate("ConnectionPage", "User (optional)")
+            setting: Setting { sourceValue: "" }
+          }
+          TextboxInput {
+            id: proxyPassword
+            Layout.fillWidth: true
+            Layout.columnSpan: 2
+            label: uiTranslate("ConnectionPage", "Password (optional)")
+            masked: true
+            setting: Setting { sourceValue: "" }
+          }
+        }
+        onAccepted: {
+          Daemon.applySettings({
+            proxy: "custom",
+            proxyCustom: {
+              host: proxyHostname.setting.currentValue,
+              port: Number(proxyPort.setting.currentValue),
+              username: proxyUsername.setting.currentValue,
+              password: proxyPassword.setting.currentValue
+            }
+          })
+          proxyInput.forceActiveFocus(Qt.MouseFocusReason)
+        }
+        onRejected: {
+          // Revert the proxy setting choice
+          proxyInput.setting.currentValue = proxyInput.setting.sourceValue
+          proxyInput.forceActiveFocus(Qt.MouseFocusReason)
+        }
+      }
+
+      OverlayDialog {
+        id: shadowsocksRegionDialog
+        buttons: [Dialog.Ok, Dialog.Cancel]
+        canAccept: true
+        contentWidth: 350
+        title: "Shadowsocks" // Not translated
+        topPadding: 0
+        bottomPadding: 0
+        leftPadding: 0
+        rightPadding: 0
+
+        function updateAndOpen() {
+          shadowsocksRegionList.chosenLocation = Daemon.state.shadowsocksLocations.chosenLocation
+          shadowsocksRegionList.clearSearch()
+          shadowsocksRegionList.reevalSearchPlaceholder()
+          open()
+        }
+
+        RegionList {
+          id: shadowsocksRegionList
+          width: parent.width
+          implicitHeight: 300
+          regionFilter: function(serverLocation) {
+            // Show regions that have at least one shadowsocks server
+            for(var i=0; i<serverLocation.servers.length; ++i) {
+              if(serverLocation.servers[i].shadowsocksPorts.length > 0 &&
+                 serverLocation.servers[i].shadowsocksKey &&
+                 serverLocation.servers[i].shadowsocksCipher)
+                return true
+            }
+            return false
+          }
+          // Don't use shadowsocksLocations directly since the chosen location
+          // isn't applied until the user clicks OK
+          property var chosenLocation // assigned in updateAndOpen() or onRegionSelected()
+          serviceLocations: ({
+            bestLocation: Daemon.state.shadowsocksLocations.bestLocation,
+            chosenLocation: shadowsocksRegionList.chosenLocation
+          })
+          portForwardEnabled: false
+          canFavorite: false
+          collapsedCountriesSettingName: "shadowsocksCollapsedCountries"
+          onRegionSelected: {
+            // Update chosenLocation - null if 'auto' or an unknown region was
+            // selected
+            shadowsocksRegionList.chosenLocation = Daemon.state.availableLocations[locationId]
+          }
+        }
+
+        onAccepted: {
+          var regionId = 'auto'
+          if(shadowsocksRegionList.chosenLocation)
+            regionId = shadowsocksRegionList.chosenLocation.id
+          Daemon.applySettings({
+            proxy: "shadowsocks",
+            proxyShadowsocksLocation: regionId
+          })
+          proxyInput.forceActiveFocus(Qt.MouseFocusReason)
+        }
+        onRejected: {
+          // Just focus the proxy input.  Nothing to revert, since the proxy input
+          // never shows this dialog due to a radio button selection.
+          proxyInput.forceActiveFocus(Qt.MouseFocusReason)
+        }
+      }
     }
 
     ColumnLayout {
@@ -223,6 +442,7 @@ Item {
           return ""
         }
       }
+
 
       Item {
         Layout.fillHeight: true // spacer

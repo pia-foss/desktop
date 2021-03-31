@@ -39,7 +39,7 @@ Item {
     pm = _pm
   }
 
-  property bool needsBottomLine: true
+  property bool needsBottomLine:  !!Daemon.state.automationLastTrigger
   property bool needsMenuButton: true
   property bool logoCentered: false
   // Description of back button used for screen readers (undefined if none)

@@ -17,9 +17,9 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("win_networks.cpp")
-
 #include "win_networks.h"
+#include "win_nativewifi.h"
+#include "win_servicestate.h"
 #include "win.h"
 #include "win/win_util.h"
 #include <QMetaObject>
@@ -70,8 +70,19 @@ private:
     std::vector<NetworkConnection> readRoutes();
     // Read the routing table, then emit the new network connections
     void updateConnections();
+    // Create WinNativeWifi, trace if it can't connect
+    void connectNativeWifi();
+    // Handle a change in the state of WlanSvc - can connect or disconnect the
+    // Native Wifi client.  We don't care about the PID.
+    void onWlanSvcStateChange(WinServiceState::State newState);
 
 private:
+    // State of the WLAN AutoConfig ('WlanSvc') service.  We can only connect to
+    // the WLAN client when this is up.
+    WinServiceState _wlanSvcState;
+    // Our Native Wifi client that reads state from WlanSvc.  This is only
+    // present when it's possible to connect to the service.
+    nullable_t<WinNativeWifi> _pWifi;
     HANDLE _routeNotificationHandle, _unicastIpNotificationHandle,
            _ipInterfaceNotificationHandle;
 };
@@ -154,9 +165,17 @@ void WINAPI WinNetworks::ipInterfaceChangeCallback(PVOID callerContext,
 
 
 WinNetworks::WinNetworks()
-    : _routeNotificationHandle{}, _unicastIpNotificationHandle{},
+    : _wlanSvcState{L"WlanSvc", 0}, // We don't need any start/stop rights
+      _routeNotificationHandle{}, _unicastIpNotificationHandle{},
       _ipInterfaceNotificationHandle{}
 {
+    connect(&_wlanSvcState, &WinServiceState::stateChanged, this,
+            &WinNetworks::onWlanSvcStateChange);
+    // Although the service could already be up, WinServiceMonitor reports it
+    // asynchronously.  We don't need to try to connect now.
+    // Postcondition of WinServiceState::WinServiceState()
+    Q_ASSERT(_wlanSvcState.lastState() != WinServiceState::State::Running);
+
     // We don't need initial callbacks for any of these notifications - we just
     // scan the routing table once after initializing
     auto notifyResult = ::NotifyRouteChange2(AF_UNSPEC, &WinNetworks::routeChangeCallback,
@@ -232,6 +251,7 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
         throw Error{HERE, Error::Code::Unknown};
     }
 
+    // The route table is used to find gateway routes.
     WinMibPtr<MIB_IPFORWARD_TABLE2> pRouteTable;
     tableResult = ::GetIpForwardTable2(AF_UNSPEC, pRouteTable.receive());
     if(tableResult != NO_ERROR || !pRouteTable)
@@ -240,139 +260,201 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
         throw Error{HERE, Error::Code::Unknown};
     }
 
-    // Find an interface row for an address family and LUID - returns nullptr if
-    // it's not found
-    auto findInterface = [&](ADDRESS_FAMILY family, ULONG64 luidValue) -> const MIB_IPINTERFACE_ROW*
+    // Collate all of this information by LUID - create entries for each known
+    // interface, then add addresses, gateways, default IPv4/6, and Wi-Fi state.
+    struct InterfaceInfo
     {
-        for(unsigned long i=0; i<pItfTable.get()->NumEntries; ++i)
-        {
-            const MIB_IPINTERFACE_ROW &row = pItfTable.get()->Table[i];
-            if(row.Family == family && row.InterfaceLuid.Value == luidValue)
-                return &row;
-        }
-        qWarning() << "Interface for LUID" << luidValue << "and family"
-            << family << "was not found";
-        return nullptr;
+        // IPv4 and IPv6 interface rows - the Connected flag and Metric are
+        // needed when examining gateway routes.  Either could be nullptr
+        const MIB_IPINTERFACE_ROW *pItf4;
+        const MIB_IPINTERFACE_ROW *pItf6;
+        Ipv4Address gatewayIpv4;
+        Ipv6Address gatewayIpv6;
+        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
+        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
+    };
+    std::unordered_map<WinLuid, InterfaceInfo> interfacesByLuid;
+    interfacesByLuid.reserve(pItfTable.get()->NumEntries);
+    for(unsigned long i=0; i<pItfTable.get()->NumEntries; ++i)
+    {
+        const MIB_IPINTERFACE_ROW &row = pItfTable.get()->Table[i];
+        // Create this interface's entry and store the reference to the row
+        InterfaceInfo &info = interfacesByLuid[row.InterfaceLuid];
+        if(row.Family == AF_INET)
+            info.pItf4 = &row;
+        else if(row.Family == AF_INET6)
+            info.pItf6 = &row;
+    }
+
+    auto getItfForLuid = [&](const WinLuid &luid) -> InterfaceInfo *
+    {
+        auto itItf = interfacesByLuid.find(luid);
+        if(itItf == interfacesByLuid.end())
+            return nullptr;
+        return &itItf->second;
     };
 
-    unsigned long bestIpv4Metric{0}, bestIpv6Metric{0};
-    const MIB_IPFORWARD_ROW2 *pBestIpv4Gateway{nullptr}, *pBestIpv6Gateway{nullptr};
+    // Go through the address table and apply addresses
+    for(unsigned long i=0; i<pAddrTable.get()->NumEntries; ++i)
+    {
+        const auto &addr = pAddrTable.get()->Table[i];
+        InterfaceInfo *pItf = getItfForLuid(addr.InterfaceLuid);
+        if(!pItf)
+            continue;   // Ignore address for unknown interface
 
+        if(addr.Address.si_family == AF_INET)
+        {
+            pItf->addressesIpv4.push_back({Ipv4Address{ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)},
+                                           addr.OnLinkPrefixLength});
+        }
+        else if(addr.Address.si_family == AF_INET6)
+        {
+            pItf->addressesIpv6.push_back({Ipv6Address{addr.Address.Ipv6.sin6_addr.u.Byte},
+                                           addr.OnLinkPrefixLength});
+            // Ignore link-local
+            if(pItf->addressesIpv6.back().first.isLinkLocal())
+                pItf->addressesIpv6.pop_back();
+        }
+    }
+
+    // Go through the route table and apply gateways.  Keep track of which one
+    // is the best.  If an interface has more than one gateway route for some
+    // reason, only the first one found is considered.
+    WinLuid bestGatewayIpv4, bestGatewayIpv6;
+    unsigned long bestMetricIpv4{0}, bestMetricIpv6{0};
     for(unsigned long i=0; i<pRouteTable.get()->NumEntries; ++i)
     {
         const auto &route = pRouteTable.get()->Table[i];
+        WinLuid routeItfLuid{route.InterfaceLuid};
 
         // We are only interested in default gateway routes.
         if(route.DestinationPrefix.PrefixLength != 0)
             continue;
 
-        // Find the interface for this route - we need to know if it's connected
-        // and what its route metric is
-        auto pItf = findInterface(route.DestinationPrefix.Prefix.si_family,
-                                  route.InterfaceLuid.Value);
+        // Get the interface row corresponding to this route's address family
+        InterfaceInfo *pItf = getItfForLuid(routeItfLuid);
+        const MIB_IPINTERFACE_ROW *pItfRow{};
+        if(pItf)
+        {
+            if(route.DestinationPrefix.Prefix.si_family == AF_INET)
+                pItfRow = pItf->pItf4;
+            else if(route.DestinationPrefix.Prefix.si_family == AF_INET6)
+                pItfRow = pItf->pItf6;
+        }
+
         // Tolerate a missing interface - route and interface changes aren't
         // synchronized, we might have missing interfaces during a transient.
-        if(!pItf)
+        if(!pItf || !pItfRow)
         {
             qWarning() << "Ignoring gateway route via"
                 << parseWinSockaddr(route.NextHop).toString() << "on interface"
-                << route.InterfaceLuid.Value << "=" << route.InterfaceIndex
+                << routeItfLuid << "=" << route.InterfaceIndex
                 << "- can't find interface";
             continue;
         }
 
+        // Consequence of the above; any family other than AF_INET or AF_INET6
+        // was ignored due to not finding an interface row
+        Q_ASSERT(route.DestinationPrefix.Prefix.si_family == AF_INET ||
+                 route.DestinationPrefix.Prefix.si_family == AF_INET6);
+
         // Ignore interfaces that are not connected.  The routes still usually
         // exist after an interface is disconnected, netstat -nr seems to hide
         // them.
-        if(!pItf->Connected)
+        if(!pItfRow->Connected)
         {
             qInfo() << "Ignoring gateway route via"
                 << parseWinSockaddr(route.NextHop).toString() << "on interface"
-                << route.InterfaceLuid.Value << "=" << route.InterfaceIndex
+                << routeItfLuid << "=" << route.InterfaceIndex
                 << "- interface is not connected";
             continue;
         }
 
+        // If we already saw a gateway route for this interface and this
+        // protocol, ignore this one.  Otherwise, store the gateway.
+        WinLuid *pBestGateway{};
+        unsigned long *pBestMetric;
+        if(route.DestinationPrefix.Prefix.si_family == AF_INET)
+        {
+            if(pItf->gatewayIpv4 != Ipv4Address{})
+            {
+                qInfo() << "Ignoring gateway route via"
+                    << parseWinSockaddr(route.NextHop).toString() << "on interface"
+                    << routeItfLuid << "=" << route.InterfaceIndex
+                    << "- already saw gateway" << pItf->gatewayIpv4
+                    << "for this interface";
+                continue;
+            }
+            pItf->gatewayIpv4 = Ipv4Address{ntohl(route.NextHop.Ipv4.sin_addr.S_un.S_addr)};
+            pBestGateway = &bestGatewayIpv4;
+            pBestMetric = &bestMetricIpv4;
+        }
+        else
+        {
+            if(pItf->gatewayIpv6 != Ipv6Address{})
+            {
+                qInfo() << "Ignoring gateway route via"
+                    << parseWinSockaddr(route.NextHop).toString() << "on interface"
+                    << routeItfLuid << "=" << route.InterfaceIndex
+                    << "- already saw gateway" << pItf->gatewayIpv6
+                    << "for this interface";
+                continue;
+            }
+            pItf->gatewayIpv6 = Ipv6Address{route.NextHop.Ipv6.sin6_addr.u.Byte};
+            pBestGateway = &bestGatewayIpv6;
+            pBestMetric = &bestMetricIpv6;
+        }
+
         // Windows combines the route metric with the interface metric to
         // compare routes (this is also what netstat -nr prints)
-        unsigned long combinedMetric = route.Metric + pItf->Metric;
-        switch(route.DestinationPrefix.Prefix.si_family)
+        unsigned long combinedMetric = route.Metric + pItfRow->Metric;
+        if(!*pBestGateway || combinedMetric < *pBestMetric)
         {
-            case AF_INET:
-                if(!pBestIpv4Gateway || combinedMetric < bestIpv4Metric)
-                {
-                    bestIpv4Metric = combinedMetric;
-                    pBestIpv4Gateway = &route;
-                }
-                break;
-            case AF_INET6:
-                if(!pBestIpv6Gateway || combinedMetric < bestIpv6Metric)
-                {
-                    bestIpv6Metric = combinedMetric;
-                    pBestIpv6Gateway = &route;
-                }
-                break;
-            default:
-                break;
+            *pBestGateway = routeItfLuid;
+            *pBestMetric = combinedMetric;
         }
     }
 
     // If an IPv4 route was found, find the local addresses and build a
     // NetworkConnection
+    static const WinNativeWifi::InterfaceMap emptyInterfaceMap{};
+    // If we can't connect to Native Wifi, we'll assume all interfaces are
+    // wired.
+    const auto &wifiInterfaces = _pWifi ? _pWifi->interfaces() : emptyInterfaceMap;
     std::vector<NetworkConnection> connections;
-    connections.reserve(2);
-    if(pBestIpv4Gateway)
+    connections.reserve(interfacesByLuid.size());
+    for(auto &itf : interfacesByLuid)
     {
-        std::vector<std::pair<Ipv4Address, unsigned>> addresses;
-        for(unsigned long i=0; i<pAddrTable.get()->NumEntries; ++i)
+        connections.push_back({});
+        connections.back().networkInterface(QString::number(itf.first.value()));
+        connections.back().defaultIpv4(itf.first == bestGatewayIpv4);
+        connections.back().defaultIpv6(itf.first == bestGatewayIpv6);
+        connections.back().gatewayIpv4(itf.second.gatewayIpv4);
+        connections.back().gatewayIpv6(itf.second.gatewayIpv6);
+        connections.back().addressesIpv4(std::move(itf.second.addressesIpv4));
+        connections.back().addressesIpv6(std::move(itf.second.addressesIpv6));
+
+        // Check if this is a Wi-Fi interface and apply that state
+        auto itWifiState = wifiInterfaces.find(itf.first);
+        if(itWifiState == wifiInterfaces.end())
         {
-            const auto &addr = pAddrTable.get()->Table[i];
-            if(addr.InterfaceLuid.Value == pBestIpv4Gateway->InterfaceLuid.Value &&
-               addr.Address.si_family == AF_INET)
+            // Assume any non-Wifi interface is a wired interface.  Not 100%
+            // correct for things like cellular data connections, but reasonable
+            // for most interfaces.
+            connections.back().medium(NetworkConnection::Medium::Wired);
+        }
+        else
+        {
+            connections.back().medium(NetworkConnection::Medium::WiFi);
+            if(itWifiState->second.associated)
             {
-                addresses.push_back({Ipv4Address{ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)},
-                                     addr.OnLinkPrefixLength});
+                connections.back().wifiAssociated(true);
+                connections.back().wifiEncrypted(itWifiState->second.encrypted);
+                connections.back().parseWifiSsid(
+                    reinterpret_cast<const char *>(itWifiState->second.ssid),
+                    itWifiState->second.ssidLength);
             }
         }
-        Ipv4Address gateway4{ntohl(pBestIpv4Gateway->NextHop.Ipv4.sin_addr.S_un.S_addr)};
-        connections.push_back({QString::number(pBestIpv4Gateway->InterfaceLuid.Value),
-                               true, false, gateway4,
-                               {}, std::move(addresses), {}});
-    }
-
-    // If an IPv6 route was found, find the local addresses and build a
-    // NetworkConnection
-    if(pBestIpv6Gateway)
-    {
-        std::vector<std::pair<Ipv6Address, unsigned>> addresses;
-        for(unsigned long i=0; i<pAddrTable.get()->NumEntries; ++i)
-        {
-            const auto &addr = pAddrTable.get()->Table[i];
-            if(addr.InterfaceLuid.Value == pBestIpv6Gateway->InterfaceLuid.Value &&
-               addr.Address.si_family == AF_INET6)
-            {
-                addresses.push_back({Ipv6Address{addr.Address.Ipv6.sin6_addr.u.Byte},
-                                     addr.OnLinkPrefixLength});
-                // Ignore link-local
-                if(addresses.back().first.isLinkLocal())
-                    addresses.pop_back();
-            }
-        }
-
-        Ipv6Address gateway6{pBestIpv6Gateway->NextHop.Ipv6.sin6_addr.u.Byte};
-
-        // If it's a different interface from the IPv4 gateway, create a new
-        // connection.  If they're the same, add this information to the
-        // existing connection.
-        if(!pBestIpv4Gateway || pBestIpv6Gateway->InterfaceLuid.Value != pBestIpv4Gateway->InterfaceLuid.Value)
-        {
-            connections.push_back({});
-            connections.back().networkInterface(QString::number(pBestIpv6Gateway->InterfaceLuid.Value));
-        }
-
-        connections.back().defaultIpv6(true);
-        connections.back().gatewayIpv6(gateway6);
-        connections.back().addressesIpv6(std::move(addresses));
     }
 
     return connections;
@@ -390,6 +472,77 @@ void WinNetworks::updateConnections()
             << ex;
         // We don't know what the network connections are at this point
         updateNetworks({});
+    }
+}
+
+void WinNetworks::connectNativeWifi()
+{
+    Q_ASSERT(!_pWifi);  // Ensured by caller
+    try
+    {
+        qInfo() << "Connect to Native Wifi now, service is up";
+        _pWifi.emplace();
+    }
+    catch(const Error &ex)
+    {
+        // If we can't connect, we won't be able to get Wi-Fi adapter
+        // information.  This might happen if a connection attempt races
+        // with the service shutting down, in which case we will get a
+        // notification when it comes back up.
+        qWarning() << "Failed to connect to Native Wifi:" << ex;
+    }
+}
+
+void WinNetworks::onWlanSvcStateChange(WinServiceState::State newState)
+{
+    qInfo() << "WLAN AutoConfig service is now in state" << traceEnum(newState);
+    switch(newState)
+    {
+        // No change occurs in these states - the service status is more or less
+        // "unknown".
+        // In Pause/Continue states, the service might resume (meaning any
+        // existing connection is fine), but we shouldn't try to connect now.
+        default:
+        case WinServiceState::State::Initializing:
+        case WinServiceState::State::ContinuePending:
+        case WinServiceState::State::PausePending:
+        case WinServiceState::State::Paused:
+            break;
+        // The service is up - try to connect if we're not connected
+        case WinServiceState::State::Running:
+        {
+            if(!_pWifi)
+            {
+                connectNativeWifi();
+                if(_pWifi)
+                {
+                    // It succeeded, so update the current state with Wi-Fi
+                    // information.
+                    updateConnections();
+                }
+            }
+            break;
+        }
+        // The service is down - disconnect if we were connected, the connection
+        // is no longer valid (we must reconnect if it comes back up, we will
+        // not get updates on this connection).
+        case WinServiceState::State::StartPending:
+        case WinServiceState::State::StopPending:
+        case WinServiceState::State::Stopped:
+        case WinServiceState::State::Deleted:
+        {
+            if(_pWifi)
+            {
+                // This is not really good - we won't be able to report Wi-Fi
+                // state.  Connections will probably go down anyway, but this
+                // does not normally happen.
+                qWarning() << "Disconnected from Native Wifi, service is down."
+                    << "Wifi state will not be available.";
+                _pWifi.clear();
+                updateConnections();
+            }
+            break;
+        }
     }
 }
 

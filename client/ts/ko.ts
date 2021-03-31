@@ -2,31 +2,417 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>자동화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>일반</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>계정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>프라이버시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>자동화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>전용 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>도움말</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>일반 환경 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>계정 정보</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>프라이버시 환경 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>네트워크 환경 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>연결 환경 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>자동화 기본 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>전용 IP 기본 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>도움말</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>경고</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>설정</translation>
+    </message>
+</context>
+<context>
+    <name>AccountModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
+        <source>AccountModule --- Subscription tile</source>
+        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
+        <translation>구독 타일</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
+        <source>AccountModule --- SUBSCRIPTION</source>
+        <translation>구독</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
+        <source>AccountModule --- Subscription</source>
+        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
+        <translation>구독</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
+        <source>AccountModule --- Expired</source>
+        <translation>만료됨</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
+        <source>AccountModule --- (%1 days left)</source>
+        <translation>(%1일 남음)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Expired on</source>
+        <translation>만료일:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Renews on</source>
+        <translation>갱신일:</translation>
+    </message>
+</context>
+<context>
+    <name>AccountPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <source>AccountPage --- Username</source>
+        <translation>사용자 이름</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <source>AccountPage --- Subscription</source>
+        <translation>구독</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <source>AccountPage --- Expired</source>
+        <translation>만료</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <source>AccountPage --- (expired on %1)</source>
+        <translation>(%1에 만료됨)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <source>AccountPage --- (renews on %1)</source>
+        <translation>(%1에 갱신)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <source>AccountPage --- (expires on %1)</source>
+        <translation>(%1에 만료)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Renews in %1 days</source>
+        <translation>%1일 후 갱신</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Expires in %1 days</source>
+        <translation>%1일 후 만료</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>구독 구매</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>구독 관리</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>구독 갱신</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>계정 관리</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
+        <source>AccountPage --- Logout / Switch Account</source>
+        <translation>로그아웃 / 계정 전환</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
+        <source>AccountPage --- Not logged in</source>
+        <translation>로그인 중이 아님</translation>
+    </message>
+</context>
+<context>
+    <name>ActiveRuleDisplay</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ActiveRuleDisplay.qml" line="117"/>
+        <source>ActiveRuleDisplay --- Open Automation Rule Settings</source>
+        <translation>자동화 규칙 설정 열기</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="48"/>
+        <source>AutomationAddRuleDialog --- Network</source>
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
+        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+        <translation>자동화 규칙 유형</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <source>AutomationAddRuleDialog --- RULE EXISTS</source>
+        <translation>규칙이 존재함</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
+        <source>AutomationAddRuleDialog --- Rule</source>
+        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
+        <translation>규칙</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <source>AutomationAddRuleDialog --- Action</source>
+        <translation>작업</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleRow.qml" line="21"/>
+        <source>AutomationAddRuleRow --- Add Automation Rule</source>
+        <translation>자동화 규칙 추가</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="23"/>
+        <source>AutomationPage --- Connection Automation</source>
+        <translation>연결 자동화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="29"/>
+        <source>AutomationPage --- Create rules to automatically connect or disconnect the VPN when you join a particular network.</source>
+        <extracomment>Text displayed in a tooltip for connection automation</extracomment>
+        <translation>규칙을 생성하여 특정 네트워크에 접속할 때 VPN을 연결하거나 연결 해제하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="32"/>
+        <source>AutomationPage --- Help</source>
+        <extracomment>Help link for automation page</extracomment>
+        <translation>도움말</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="23"/>
+        <source>AutomationRuleRow --- Remove</source>
+        <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
+        <translation>제거</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="106"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>활성화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="187"/>
+        <source>AutomationRuleRow --- Remove Automation Rule</source>
+        <translation>자동화 규칙 제거</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="197"/>
+        <source>AutomationRuleRow --- Remove %1?</source>
+        <extracomment>Message shown when removing an automation rule. &quot;%1&quot; is the name of a rule, which can be a standard rule like &quot;Protected Wi-Fi&quot;, &quot;Open Wi-Fi&quot;, or &quot;Wired&quot;, or it can be a network SSID for a rule created for a specific wireless network. For example - &quot;Remove Protected Wi-Fi?&quot;, or &quot;Remove Steve&apos;s House?&quot;</extracomment>
+        <translation>%1을(를) 제거할까요?</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationTable</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="27"/>
+        <source>AutomationTable --- Automation Rules</source>
+        <extracomment>Screen reader annotation for the name of the table</extracomment>
+        <translation>자동화 규칙</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="86"/>
+        <source>AutomationTable --- Condition</source>
+        <extracomment>Name of the &quot;Condition&quot; table column, in the Automation table</extracomment>
+        <translation>조건</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="92"/>
+        <source>AutomationTable --- Action</source>
+        <extracomment>Name of the &quot;Action&quot; table column, in the automation table</extracomment>
+        <translation>작업</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="98"/>
+        <source>AutomationTable --- Remove</source>
+        <extracomment>Name of the &quot;Remove&quot; table column, containing the remove button, in the automation table</extracomment>
+        <translation>제거</translation>
+    </message>
+</context>
+<context>
+    <name>BelowFold</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
+        <source>BelowFold --- DEFAULT DISPLAY</source>
+        <translation>기본 표시</translation>
+    </message>
+</context>
+<context>
+    <name>BetaAgreementDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
+        <source>BetaAgreementDialog --- Agreement</source>
+        <translation>약관</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
+        <source>BetaAgreementDialog --- Accept</source>
+        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
+        <translation>수락</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
+        <source>BetaAgreementDialog --- Decline</source>
+        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
+        <translation>거절</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
+        <source>BetaAgreementDialog --- Agreement text</source>
+        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
+        <translation>계약문</translation>
+    </message>
+</context>
+<context>
     <name>ChangelogWindow</name>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuard 기능: 로켓을 탄 로봇</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>커맨드 라인 인터페이스 기능</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="86"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="181"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>변경 로그</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="85"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="169"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>새로운 기능</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <source>ChangelogWindow --- Checkmark bullet</source>
+        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
+        <translation>체크 표시 글머리 기호</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
@@ -37,12 +423,6 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
         <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
         <translation>새롭고 더 효율적인 VPN 프로토콜입니다. 주요 특징:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
-        <source>ChangelogWindow --- Checkmark bullet</source>
-        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
-        <translation>체크 표시 글머리 기호</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
@@ -70,10 +450,6 @@
         <translation>지금 WireGuard® 사용해 보기</translation>
     </message>
     <message>
-    <source>ChangelogWindow --- Open Settings</source>
-        <translation>설정 열기</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
         <source>ChangelogWindow --- Learn more</source>
         <translation>자세히 보기</translation>
@@ -82,6 +458,12 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
         <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
         <translation>WireGuard®를 활성화하려면 다시 연결하세요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
+        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
+        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
+        <translation>WireGuard 기능: 로켓을 탄 로봇</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
@@ -99,6 +481,12 @@
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>완벽한 분할 터널 기능을 사용해 VPN을 사용할 앱과 그 시간을 관리할 수 있습니다. 분할 터널 [[앱 예시]] 페이지에서 자세한 사항을 확인해 보세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
+        <translation>커맨드 라인 인터페이스 기능</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
@@ -119,618 +507,16 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelRoutedRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
-        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
-<source>SplitTunnelRoutedRow --- Routed Packets</source>
-        <translation>라우팅된 패킷</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
-        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
-<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
-        <translation>대부분의 컨테이너 및 가상 머신이 포함됩니다</translation>
-    </message>
-</context>
-<context>
-    <name>winstaller</name>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
-        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
-        <translation>Private Internet Access는 Windows 8 버전 이상을 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
-        <source>winstaller --- Private Internet Access Installer</source>
-        <translation>Private Internet Access 설치 프로그램</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
-        <source>winstaller --- %.0f SECONDS REMAINING</source>
-        <translation>%.0f초 남음</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
-        <source>winstaller --- INSTALL</source>
-        <translation>설치</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
-        <source>winstaller --- UNINSTALL</source>
-        <translation>제거</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
-        <source>winstaller --- FINISH</source>
-        <translation>완료</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
-        <source>winstaller --- PREPARING</source>
-        <translation>준비 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
-        <source>winstaller --- READY TO INSTALL</source>
-        <translation>설치 준비 완료</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
-        <source>winstaller --- INSTALLING</source>
-        <translation>설치 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
-        <source>winstaller --- ABORTING</source>
-        <translation>중단 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
-        <source>winstaller --- FINISHING UP</source>
-        <translation>완료 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
-        <source>winstaller --- CLEANING UP</source>
-        <translation>정리 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
-        <source>winstaller --- ROLLING BACK CHANGES</source>
-        <translation>변경 사항 롤백 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
-        <source>winstaller --- FINISHED</source>
-        <translation>완료됨</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
-        <source>winstaller --- ABORTED</source>
-        <translation>중단됨</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
-        <source>winstaller --- UNPACKING</source>
-        <translation>압축 해제 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
-        <source>winstaller --- COPYING FILES</source>
-        <translation>파일 복사 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
-        <source>winstaller --- SHUTTING DOWN CLIENT</source>
-        <translation>클라이언트 셧다운 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
-        <source>winstaller --- STOPPING SERVICE</source>
-        <translation>서비스 중단 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
-        <source>winstaller --- UNREGISTERING SERVICE</source>
-        <translation>서비스 등록 취소 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
-        <source>winstaller --- REGISTERING SERVICE</source>
-        <translation>서비스 등록 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
-        <source>winstaller --- STARTING SERVICE</source>
-        <translation>서비스 시작 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
-        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
-        <translation>네트워크 어댑터 제거 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
-        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
-        <translation>네트워크 어댑터 설치 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
-        <source>winstaller --- BACKING UP FILES</source>
-        <translation>파일 백업 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
-        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
-        <translation>이전 버전 제거 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
-        <source>winstaller --- REMOVING FILES</source>
-        <translation>파일 제거 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
-        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
-        <translation>콜아웃 드라이버 제거 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
-        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
-        <translation>콜아웃 드라이버 업데이트 중</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
-        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
-        <translation>기존 설치 파일을 인식할 수 없습니다. 전체 디렉터리를 삭제하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
-        <source>winstaller --- Corrupt installation detected</source>
-        <translation>손상된 설치 파일이 발견되었습니다</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
-        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
-        <translation>설치 디렉터리에 잘못된 파일이 있습니다. 삭제하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
-        <source>winstaller --- Files remaining</source>
-        <translation>파일 남음</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
-        <source>winstaller --- Do you want to abort the installation?</source>
-        <translation>설치를 중단하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
-        <source>winstaller --- Abort installation?</source>
-        <translation>설치를 중단합니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
-        <source>winstaller --- Error</source>
-        <translation>오류</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
-        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
-        <translation>이 작업은 Private Internet Access의 기존 설치 파일을 대체합니다. 나중에 다운그레이드하려면 모두 다시 설치해야 합니다. 계속하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
-        <source>winstaller --- Replace existing version?</source>
-        <translation>기존 버전을 대체하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
-        <source>winstaller --- Unable to remove directory: %s</source>
-        <translation>디렉터리 제거 불가: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
-        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
-        <translation>계속 진행하기 전에 기존의 Private Internet Access를 종료하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
-        <source>winstaller --- There was a problem uninstalling the existing version.</source>
-        <translation>기존 버전을 제거하는 중 문제가 발생했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
-        <source>winstaller --- There are still clients running.</source>
-        <translation>아직 실행 중인 클라이언트가 있습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
-        <source>winstaller --- Failed to stop the service.</source>
-        <translation>서비스를 중단하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
-        <source>winstaller --- A reboot is needed before installation can proceed.</source>
-        <translation>설치를 진행하려면 다시 부팅해야 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
-        <source>winstaller --- Service executable missing.</source>
-        <translation>서비스 실행 파일이 없습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
-        <source>winstaller --- Service uninstallation failed.</source>
-        <translation>서비스를 제거하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
-        <source>winstaller --- The service installation failed.</source>
-        <translation>서비스를 설치하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
-        <source>winstaller --- The service failed to start.</source>
-        <translation>서비스를 시작하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
-        <source>winstaller --- Error uninstalling TAP driver.</source>
-        <translation>TAP 드라이버 제거 오류.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
-        <source>winstaller --- The TAP driver was not approved for installation.</source>
-        <translation>TAP 드라이버가 설치 승인을 받지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
-        <source>winstaller --- The TAP driver installation failed.</source>
-        <translation>TAP 드라이버가 설치되지 않았습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
-        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
-        <translation>Private Internet Access를 실행하려면 최소 Windows 7 버전 이상이 필요합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
-        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
-        <translation>32비트 버전의 Private Internet Access는 32비트 버전의 Windows에서만 실행됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
-        <source>winstaller --- Failed to retrieve shell folder %s.</source>
-        <translation>셸 폴더 %s을(를) 검색하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
-        <source>winstaller --- Out of memory.</source>
-        <translation>메모리 부족.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
-        <source>winstaller --- Payload decompression error.</source>
-        <translation>페이로드 압축 해제 오류.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
-        <source>winstaller --- Corrupted payload (CRC error).</source>
-        <translation>손상된 페이로드(CRC 오류).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
-        <source>winstaller --- Unable to create file: %s</source>
-        <translation>파일 생성 불가: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
-        <source>winstaller --- Unable to write file: %s</source>
-        <translation>파일 쓰기 불가: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
-        <source>winstaller --- Unable to write entire file: %s</source>
-        <translation>전체 파일 쓰기 불가: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
-        <source>winstaller --- Unable to initialize decompressor.</source>
-        <translation>압축 해제 프로그램을 초기화하지 못했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
-        <source>winstaller --- Corrupted payload (invalid parameters).</source>
-        <translation>손상된 페이로드(잘못됨 매개 변수).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
-        <source>winstaller --- Unable to move %s</source>
-        <translation>%s 이동 불가</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
-        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
-        <translation>롤백 디렉터리를 생성할 수 없습니다. 설치를 계속 진행할 경우 오류가 발생해도 변경 사항을 취소할 수 없습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
-        <source>winstaller --- Unable to create directory: %s</source>
-        <translation>디렉터리 생성 불가: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
-        <source>winstaller --- The installer does not contain a recognizable payload.</source>
-        <translation>설치 프로그램이 인식 가능한 페이로드를 포함하고 있지 않습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
-        <source>winstaller --- Missing payload</source>
-        <translation>누락된 페이로드</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
-        <source>winstaller --- Error uninstalling callout driver.</source>
-        <translation>콜아웃 드라이버 제거 오류.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
-        <source>winstaller --- Callout driver installation failed.</source>
-        <translation>콜아웃 드라이버 설치에 실패했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
-        <source>winstaller --- WireGuard installation failed.</source>
-        <translation>WireGuard 설치 실패.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
-        <source>winstaller --- WireGuard uninstallation failed.</source>
-        <translation>WireGuard 제거 실패.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
-        <source>winstaller --- WinTUN installation failed.</source>
-        <translation>WinTUN 설치 실패.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
-        <source>winstaller --- WinTUN uninstallation failed.</source>
-        <translation>WinTUN 제거 실패</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
-        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
-        <translation>안전 모드(네트워킹 사용)를 사용해 Private Internet Access를 설치 또는 제거하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
-        <source>winstaller --- Installation complete</source>
-        <translation>설치 완료</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
-        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
-        <translation>Private Internet Access를 사용하려면 컴퓨터를 다시 시작하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
-        <source>winstaller --- The installation will now abort.</source>
-        <translation>설치가 중단됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
-        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
-        <source>winstaller --- This is preventing the installation from proceeding.</source>
-        <translation>이 작업은 설치가 계속 진행되는 것을 방해합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
-        <source>winstaller --- Do you wish to continue the installation anyway?</source>
-        <translation>그래도 계속 설치하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
-        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
-        <translation>다시 시도하거나 설치를 계속 진행해볼 수 있습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
-        <source>winstaller --- The uninstallation will now abort.</source>
-        <translation>제거가 중단됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
-        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
-        <translation>그래도 계속 제거하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
-        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
-        <translation>다시 시도하거나 제거를 계속 진행해볼 수 있습니다.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingControl</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
-        <source>RatingControl --- Loading</source>
-        <translation>불러오는 중</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
-        <source>RatingControl --- Something went wrong.</source>
-        <translation>문제가 발생했습니다.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingRequestNotificationStatus</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
-        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
-        <translation>PIA에 대한 회원님의 경험에 대해 평가해 주세요</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="22"/>
-        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
-        <translation>피드백을 제공해 주셔서 감사합니다!</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="31"/>
-        <source>RatingRequestNotificationStatus --- Contact Support</source>
-        <translation>고객 지원 문의</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="24"/>
-        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
-        <translation>감사합니다! 문제가 발생하면 지원팀에 문의해 주세요.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingStar</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
-        <source>RatingStar --- Star rating of: %1</source>
-        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
-        <translation>별 등급: %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
-        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
-        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
-        <translation>5개 중 %1개의 별 등급 제출</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsMessages</name>
-    <message>
-    <source>SettingsMessages --- This feature requires macOS 10.15 or earlier.</source>
-        <translation>이 기능은 macOS 10.15 이전 버전을 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
-        <source>SettingsMessages --- This feature requires kernel process events.</source>
-        <translation>이 기능은 커널 프로세스 이벤트가 필요합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
-        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
-        <translation>분할 터널 필터의 설치를 완료하려면 컴퓨터를 다시 시작하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
-        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
-        <translation>분할 터널 필터를 설치하지 못했습니다.  컴퓨터를 다시 시작하거나, 문제가 계속 발생하면 지원 센터에 문의하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
-        <translation>이 기능은 Windows 7 Service Pack 1 이상을 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
-        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
-        <translation>이 기능은 iptables 1.6.1 이상을 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
-        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
-        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
-        <translation>이 기능은 libnl-3, libnl-route-3 및 libnl-genl-3을 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
-        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
-        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
-        <translation>이 기능은 %1에서 이용 가능한 net_cls를 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
-        <source>SettingsMessages --- This feature requires OpenVPN.</source>
-        <translation>이 기능은 OpenVPN이 필요합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
-        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
-        <translation>WireGuard는 Windows 8 이상이 필요합니다.</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelNameServersRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
-        <source>SplitTunnelNameServersRow --- Name Servers</source>
-        <translation>이름 서버</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelRowBase</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
-        <source>SplitTunnelRowBase --- Follow App Rules</source>
-        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
-        <translation>앱 규칙 따르기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
-        <source>SplitTunnelRowBase --- VPN DNS Only</source>
-        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
-        <translation>VPN DNS만 사용</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
-        <source>SplitTunnelRowBase --- Bypass VPN</source>
-        <translation>VPN 우회</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
-        <source>SplitTunnelRowBase --- Only VPN</source>
-        <translation>VPN 전용</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
-        <source>SplitTunnelRowBase --- Use VPN</source>
-        <translation>VPN 사용</translation>
+    <name>Client</name>
+    <message>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+        <source>Client --- %1 - Best</source>
+        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
+        <translation>%1 - 최상</translation>
     </message>
 </context>
 <context>
     <name>ClientNotifications</name>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
-        <translation>회원님의 전용 IP는 %1일 후 만료됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
-        <source>ClientNotifications --- Get a new one</source>
-        <translation>새로 획득하기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
-        <source>ClientNotifications --- Your dedicated IP was updated.</source>
-        <translation>회원님의 전용 IP가 업데이트되었습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
-        <translation>회원님의 전용 IP는 1일 후 만료됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
-        <translation>회원님의 전용 IP는 오늘 만료됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
-        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
-        <translation>이 운영 체제 버전은 더 이상 지원되지 않습니다. 업그레이드하여 최신 PIA 업데이트를 이용하세요.</translation>
-    </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
@@ -747,6 +533,11 @@
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
         <source>ClientNotifications --- Download of version %1 failed.</source>
         <translation>버전 %1 다운로드 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>이 운영 체제 버전은 더 이상 지원되지 않습니다. 업그레이드하여 최신 PIA 업데이트를 이용하세요.</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
@@ -974,6 +765,34 @@
         <translation>갱신</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>회원님의 전용 IP는 %1일 후 만료됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>회원님의 전용 IP는 1일 후 만료됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>회원님의 전용 IP는 오늘 만료됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>새로 획득하기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>회원님의 전용 IP가 업데이트되었습니다.</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
@@ -1007,21 +826,341 @@
         <translation>애플리케이션이 예기치 않게 종료되었습니다. VPN 연결은 보존되었습니다.</translation>
     </message>
     <message>
-    <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>분할 터널을 활성화하려면 분할 터널 확장을 승인하세요.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>분할 터널 기능은 직접 승인될 때까지 macOS에 의해 차단됩니다. 분할 터널 규칙은 적용되지 않습니다.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- Security Preferences</source>
-        <translation>보안 기본 설정</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
         <source>ClientNotifications --- The virtual network adapter is not installed.</source>
         <translation>가상 네트워크 어댑터가 설치되지 않았습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectButton</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
+        <source>ConnectButton --- Toggle connection</source>
+        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
+        <translation>연결 전환</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
+        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
+        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
+        <translation>스누즈에서 재개하여 다시 연결, 현재 스누즈 및 연결 해제 상태</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
+        <source>ConnectButton --- Connect to VPN, error has occurred</source>
+        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
+        <translation>VPN에 연결, 오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
+        <source>ConnectButton --- Connect to VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
+        <translation>VPN에 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
+        <source>ConnectButton --- Disconnect from VPN, connecting</source>
+        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
+        <translation>VPN 연결 해제, 연결 중</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
+        <source>ConnectButton --- Disconnect from VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
+        <translation>VPN 연결 해제</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
+        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
+        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
+        <translation>VPN 연결 해제, 연결 해제 중</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectPage</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
+        <source>ConnectPage --- Connect page</source>
+        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
+        <translation>연결 페이지</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
+        <source>ConnectionModule --- Connection tile</source>
+        <extracomment>Screen reader annotation for the Connection tile</extracomment>
+        <translation>연결 타일</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
+        <source>ConnectionModule --- CONNECTION</source>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
+        <source>ConnectionModule --- Protocol</source>
+        <translation>프로토콜</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>프로토콜: </translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>18년 이상의 오픈 소스 개발 경험과 신뢰할 수 있고 안정적인 보안 프로토콜.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>성능 향상이 가능한 더 새롭고 효율적인 프로토콜.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>OpenVPN® 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>WireGuard® 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>상표</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <source>ConnectionPage --- Handshake and Authentication Settings</source>
+        <translation>핸드셰이크 및 인증 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>이 설정이 의미하는 것은 무엇입니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>모든 제품 및 회사 이름은 각 소유자의 상표™ 또는 등록® 상표입니다. 이를 사용함이 해당 회사와의 제휴 또는 해당 회사의 승인이 있음을 의미하지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN®은 OpenVPN Technologies, Inc의 상표입니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard®는 개인인 Jason A. Donenfeld의 상표입니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="89"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <translation>Shadowsocks 프록시 설정은 TCP를 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="119"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
+        <source>ConnectionPage --- Local Port</source>
+        <translation>로컬 포트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="131"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
+        <source>ConnectionPage --- Auto</source>
+        <translation>자동</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="135"/>
+        <source>ConnectionPage --- Configuration Method</source>
+        <translation>구성 방법</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
+        <source>ConnectionPage --- DHCP</source>
+        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
+        <translation>DHCP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="146"/>
+        <source>ConnectionPage --- Static</source>
+        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
+        <translation>고정 주소</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
+        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
+        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
+        <translation>TAP 어댑터에서 주소가 구성되는 방식을 결정합니다. 연결하는 데 문제가 있을 경우 다른 방법이 더 안정적일 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
+        <translation>경고: 트래픽이 암호화되지 않은 채 전송되어서 외부로부터의 공격에 취약합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <source>ConnectionPage --- Proxy</source>
+        <translation>프록시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <source>ConnectionPage --- SOCKS5 Proxy...</source>
+        <translation>SOCKS5 프록시...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <source>ConnectionPage --- None</source>
+        <translation>없음</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <source>ConnectionPage --- SOCKS5 Proxy</source>
+        <translation>SOCKS5 프록시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <source>ConnectionPage --- Server IP Address</source>
+        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
+        <translation>서버 IP 주소</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <source>ConnectionPage --- Port</source>
+        <translation>포트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+        <source>ConnectionPage --- Default</source>
+        <translation>기본값</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <source>ConnectionPage --- User (optional)</source>
+        <translation>사용자 (선택 사항)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <source>ConnectionPage --- Password (optional)</source>
+        <translation>비밀번호 (선택 사항)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
+        <source>ConnectionPage --- Use Small Packets</source>
+        <translation>작은 패킷 사용</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
+        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+        <translation>VPN 연결에 더 작은 MTU를 설정합니다. 이로 인하여 전송 속도가 느려질 수 있지만, 연결 상태가 불량한 경우 안정성이 개선됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <source>ConnectionPage --- Try Alternate Settings</source>
+        <translation>다른 설정 시도</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
+        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
+        <translation>위의 연결 유형 및 원격 포트를 사용할 수 없을 경우 다른 설정을 자동으로 시도합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
+        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
+        <translation>프록시가 설정된 경우 대체 설정을 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+        <source>ConnectionPage --- Connection Type</source>
+        <translation>연결 유형</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+        <source>ConnectionPage --- Remote Port</source>
+        <translation>원격 포트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+        <source>ConnectionPage --- Data Encryption</source>
+        <translation>데이터 암호화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+        <source>ConnectionPage --- Data Authentication</source>
+        <translation>데이터 인증</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+        <source>ConnectionPage --- Handshake</source>
+        <translation>핸드셰이크</translation>
+    </message>
+</context>
+<context>
+    <name>DaemonAccount</name>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
+        <source>DaemonAccount --- Deactivated</source>
+        <translation>비활성화됨</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
+        <source>DaemonAccount --- One Month Plan</source>
+        <translation>1개월 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
+        <source>DaemonAccount --- Three Month Plan</source>
+        <translation>3개월 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
+        <source>DaemonAccount --- Six Month Plan</source>
+        <translation>6개월 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <source>DaemonAccount --- One Year Plan</source>
+        <translation>1년 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
+        <source>DaemonAccount --- Two Year Plan</source>
+        <translation>2년 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <source>DaemonAccount --- Three Year Plan</source>
+        <translation>3년 플랜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <source>DaemonAccount --- Trial</source>
+        <translation>체험</translation>
+    </message>
+</context>
+<context>
+    <name>DashboardPopup</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
+        <source>DashboardPopup --- PIA Dashboard</source>
+        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
+        <translation>PIA 대시보드</translation>
     </message>
 </context>
 <context>
@@ -1157,1473 +1296,6 @@
         <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
         <source>DedicatedIpSubtitle --- DEDICATED IP</source>
         <translation>전용 IP</translation>
-    </message>
-</context>
-<context>
-    <name>RegionListView</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
-        <source>RegionListView --- Detail</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
-        <translation>세부 정보</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
-        <source>RegionListView --- Region</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
-        <translation>지역</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
-        <source>RegionListView --- Latency</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
-        <translation>대기 시간</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
-        <source>RegionListView --- Favorite</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
-        <translation>즐겨찾기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>지역 목록</translation>
-    </message>
-</context>
-<context>
-    <name>RegionRowLabels</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
-        <source>RegionRowLabels --- offline</source>
-        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
-        <translation>오프라인</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>전용 IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>전용 IP 기본 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>일반</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>계정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>프라이버시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>네트워크</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>연결</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Proxy</source>
-        
-        <translation>프록시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>도움말</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>일반 환경 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>계정 정보</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>프라이버시 환경 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>네트워크 환경 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>연결 환경 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        
-        <translation>프록시 기본 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>도움말</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="143"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>경고</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="177"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>설정</translation>
-    </message>
-</context>
-<context>
-    <name>TrayMenuBuilder</name>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
-        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
-        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
-        <translation>전용 IP에 연결</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
-        <source>TrayMenuBuilder --- Connect to region</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>지역에 연결</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
-        <source>TrayMenuBuilder --- Help</source>
-        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
-        <translation>도움말</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
-        <source>TrayMenuBuilder --- Show Window</source>
-        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
-        <translation>창 표시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
-        <source>TrayMenuBuilder --- Resume Connection</source>
-        <translation>연결 재개</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
-        <source>TrayMenuBuilder --- Connect (Auto)</source>
-        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
-        <translation>연결 (자동)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
-        <source>TrayMenuBuilder --- Connect (%1)</source>
-        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
-        <translation>연결 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
-        <source>TrayMenuBuilder --- Disconnect</source>
-        <extracomment>Menu command to disconnect from the VPN.</extracomment>
-        <translation>연결 해제</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
-        <source>TrayMenuBuilder --- Snooze</source>
-        <translation>스누즈</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
-        <source>TrayMenuBuilder --- 5 Minutes</source>
-        <translation>5분</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
-        <source>TrayMenuBuilder --- 10 Minutes</source>
-        <translation>10분</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
-        <source>TrayMenuBuilder --- 15 Minutes</source>
-        <translation>15분</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
-        <source>TrayMenuBuilder --- 30 Minutes</source>
-        <translation>30분</translation>
-    </message>
-    <message>
-    <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>연결 대상:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
-        <source>TrayMenuBuilder --- Log In</source>
-        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
-        <translation>로그인</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
-        <source>TrayMenuBuilder --- Settings...</source>
-        <extracomment>Menu command to open the settings dialog.</extracomment>
-        <translation>설정...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
-        <source>TrayMenuBuilder --- Enable Debug Logging</source>
-        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
-        <translation>디버그 로깅 활성화</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
-        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
-        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
-        <translation>디버그 로그 제출...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
-        <source>TrayMenuBuilder --- Changelog</source>
-        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
-        <translation>변경 로그</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
-        <source>TrayMenuBuilder --- Support Portal</source>
-        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
-        <translation>지원 포털</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
-        <source>TrayMenuBuilder --- Blog</source>
-        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
-        <translation>블로그</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
-        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
-        <translation>공용 IP 복사 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
-        <source>TrayMenuBuilder --- Copy Public IP</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
-        <translation>공용 IP 복사</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
-        <translation>전달된 포트 복사 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
-        <translation>전달된 포트 복사</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
-        <source>TrayMenuBuilder --- Quit</source>
-        <extracomment>Menu command to quit the application.</extracomment>
-        <translation>종료</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
-        <source>ConnectionPage --- Handshake and Authentication Settings</source>
-        <translation>핸드셰이크 및 인증 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
-        <source>ConnectionPage --- Protocol: </source>
-        <translation>프로토콜: </translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
-        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
-        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
-        <translation>18년 이상의 오픈 소스 개발 경험과 신뢰할 수 있고 안정적인 보안 프로토콜.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
-        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
-        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
-        <translation>성능 향상이 가능한 더 새롭고 효율적인 프로토콜.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
-        <source>ConnectionPage --- OpenVPN® Settings</source>
-        <translation>OpenVPN® 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
-        <source>ConnectionPage --- WireGuard® Settings</source>
-        <translation>WireGuard® 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
-        <source>ConnectionPage --- Trademarks</source>
-        <translation>상표</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>이 설정이 의미하는 것은 무엇입니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
-        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
-        <translation>모든 제품 및 회사 이름은 각 소유자의 상표™ 또는 등록® 상표입니다. 이를 사용함이 해당 회사와의 제휴 또는 해당 회사의 승인이 있음을 의미하지 않습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
-        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
-        <translation>OpenVPN®은 OpenVPN Technologies, Inc의 상표입니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
-        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
-        <translation>WireGuard®는 개인인 Jason A. Donenfeld의 상표입니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="88"/>
-        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
-        <translation>Shadowsocks 프록시 설정은 TCP를 필요로 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="118"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
-        <source>ConnectionPage --- Local Port</source>
-        <translation>로컬 포트</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="130"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
-        <source>ConnectionPage --- Auto</source>
-        <translation>자동</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="134"/>
-        <source>ConnectionPage --- Configuration Method</source>
-        <translation>구성 방법</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="141"/>
-        <source>ConnectionPage --- DHCP</source>
-        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
-        <translation>DHCP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="145"/>
-        <source>ConnectionPage --- Static</source>
-        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
-        <translation>고정 주소</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="150"/>
-        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
-        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
-        <translation>TAP 어댑터에서 주소가 구성되는 방식을 결정합니다. 연결하는 데 문제가 있을 경우 다른 방법이 더 안정적일 수 있습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
-        <source>ConnectionPage --- None</source>
-        <translation>없음</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="167"/>
-        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
-        <translation>경고: 트래픽이 암호화되지 않은 채 전송되어서 외부로부터의 공격에 취약합니다.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
-        <translation>경고: 트래픽이 인증되지 않아서 외부로부터의 조작에 취약합니다.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
-        <translation>이 핸드셰이크는 미국 표준 기관이 추천한 타원곡선을 사용합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="178"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
-        <source>ConnectionPage --- Use Small Packets</source>
-        <translation>작은 패킷 사용</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="182"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
-        <translation>VPN 연결에 더 작은 MTU를 설정합니다. 이로 인하여 전송 속도가 느려질 수 있지만, 연결 상태가 불량한 경우 안정성이 개선됩니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="186"/>
-        <source>ConnectionPage --- Try Alternate Settings</source>
-        <translation>다른 설정 시도</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="195"/>
-        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
-        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
-        <translation>위의 연결 유형 및 원격 포트를 사용할 수 없을 경우 다른 설정을 자동으로 시도합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="203"/>
-        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
-        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
-        <translation>프록시가 설정된 경우 대체 설정을 사용할 수 없습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
-        <source>ConnectionPage --- Proxy</source>
-        <translation>프록시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
-        <source>ConnectionPage --- SOCKS5 Proxy...</source>
-        <translation>SOCKS5 프록시...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
-        <source>ConnectionPage --- SOCKS5 Proxy</source>
-        <translation>SOCKS5 프록시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
-        <source>ConnectionPage --- Server IP Address</source>
-        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
-        <translation>서버 IP 주소</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
-        <source>ConnectionPage --- Port</source>
-        <translation>포트</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
-        <source>ConnectionPage --- Default</source>
-        <translation>기본값</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
-        <source>ConnectionPage --- User (optional)</source>
-        <translation>사용자 (선택 사항)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
-        <source>ConnectionPage --- Password (optional)</source>
-        <translation>비밀번호 (선택 사항)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
-        <source>ConnectionPage --- Connection Type</source>
-        <translation>연결 유형</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
-        <source>ConnectionPage --- Remote Port</source>
-        <translation>원격 포트</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
-        <source>ConnectionPage --- Data Encryption</source>
-        <translation>데이터 암호화</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
-        <source>ConnectionPage --- Data Authentication</source>
-        <translation>데이터 인증</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
-        <source>ConnectionPage --- Handshake</source>
-        <translation>핸드셰이크</translation>
-    </message>
-</context>
-<context>
-    <name>HelpPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
-        <source>HelpPage --- Show service communication messages</source>
-        <translation>서비스 연락 메시지 표시</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
-        <source>HelpPage --- Version</source>
-        <translation>버전</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
-        <source>HelpPage --- Client:</source>
-        <translation>클라이언트:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
-        <source>HelpPage --- Daemon:</source>
-        <translation>데몬:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
-        <source>HelpPage --- Changelog</source>
-        <translation>변경 로그</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
-        <source>HelpPage --- Quick Tour</source>
-        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
-        <translation>퀵 투어</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
-        <source>HelpPage --- Receive Beta Updates</source>
-        <translation>베타 업데이트 받기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
-        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
-        <translation>베타 프로그램에 참여하여 새로운 기능을 테스트하고 피드백을 제공해 주세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
-        <source>HelpPage --- Network</source>
-        <translation>네트워크</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Current</source>
-        <translation>현재</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Next Generation</source>
-        <translation>차세대</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
-        <source>HelpPage --- Include Geo-Located Regions</source>
-        <translation>지리적 위치 기반 지역 포함</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
-        <source>HelpPage --- Support</source>
-        <translation>지원</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
-        <source>HelpPage --- Disable Accelerated Graphics</source>
-        <translation>그래픽 가속 비활성화</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
-        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
-        <translation>이 설정을 적용하려면 Private Internet Access를 다시 시작하세요</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
-        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
-        <translation>그래픽 가속을 사용하면 CPU 사용량이 줄어들고 그래픽 효과가 활성화되지만, 일부 그래픽 카드 또는 드라이브에서 문제가 발생할 수 있습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="218"/>
-        <source>HelpPage --- Enable Debug Logging</source>
-        <translation>디버그 로깅 활성화</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
-        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
-        <translation>문제 해결을 돕기 위하여 기술 지원팀에 제출할 디버그 로그를 저장합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="235"/>
-        <source>HelpPage --- Submit Debug Logs</source>
-        <translation>디버그 로그 제출</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Support Portal</source>
-        <translation>지원 포털</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="253"/>
-        <source>HelpPage --- Maintenance</source>
-        <translation>유지 관리</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="263"/>
-        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
-        <translation>OpenVPN 네트워크 어댑터 다시 설치</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="264"/>
-        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
-        <translation>OpenVPN 네트워크 어댑터를 다시 설치하는 중...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="274"/>
-        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
-        <translation>WireGuard 네트워크 어댑터 다시 설치</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="275"/>
-        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
-        <translation>WireGuard 네트워크 어댑터를 다시 설치하는 중...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>분할 터널 필터를 다시 설치하는 중...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>분할 터널 필터 다시 설치</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>분할 터널 필터가 다시 설치되었습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="363"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>Private Internet Access 제거</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="404"/>
-        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
-        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
-        <translation>터미널에서 명령을 실행하지 못했습니다. x-terminal-emulator와 호환되는 터미널을 설치하세요.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
-        <source>HelpPage --- Unable to open terminal</source>
-        <translation>터미널을 열 수 없습니다</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="415"/>
-        <source>HelpPage --- v%1</source>
-        <translation>v%1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>연결 해제를 기다리는 중...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>연결된 동안은 네트워크 어댑터를 다시 설치할 수 없습니다. 지금 연결을 해제하고 다시 설치하시겠습니까?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>연결 해제 필요</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>네트워크 어댑터가 다시 설치되었습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>네트워크 어댑터가 다시 설치되었습니다. 시스템을 다시 부팅해야 합니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>네트워크 어댑터를 다시 설치하는 중 오류가 발생했습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
-        <source>HelpPage --- Reinstall successful</source>
-        <translation>재설치 성공</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
-        <source>HelpPage --- Reinstall error</source>
-        <translation>재설치 오류</translation>
-    </message>
-</context>
-<context>
-    <name>AccountModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
-        <source>AccountModule --- Subscription tile</source>
-        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
-        <translation>구독 타일</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
-        <source>AccountModule --- SUBSCRIPTION</source>
-        <translation>구독</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
-        <source>AccountModule --- Subscription</source>
-        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
-        <translation>구독</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
-        <source>AccountModule --- Expired</source>
-        <translation>만료됨</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
-        <source>AccountModule --- (%1 days left)</source>
-        <translation>(%1일 남음)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Expired on</source>
-        <translation>만료일:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Renews on</source>
-        <translation>갱신일:</translation>
-    </message>
-</context>
-<context>
-    <name>AccountPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
-        <source>AccountPage --- Username</source>
-        <translation>사용자 이름</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
-        <source>AccountPage --- Subscription</source>
-        <translation>구독</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
-        <source>AccountPage --- Expired</source>
-        <translation>만료</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
-        <source>AccountPage --- (expired on %1)</source>
-        <translation>(%1에 만료됨)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
-        <source>AccountPage --- (renews on %1)</source>
-        <translation>(%1에 갱신)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
-        <source>AccountPage --- (expires on %1)</source>
-        <translation>(%1에 만료)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Renews in %1 days</source>
-        <translation>%1일 후 갱신</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Expires in %1 days</source>
-        <translation>%1일 후 만료</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>구독 구매</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>구독 관리</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>구독 갱신</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>계정 관리</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
-        <source>AccountPage --- Logout / Switch Account</source>
-        <translation>로그아웃 / 계정 전환</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
-        <source>AccountPage --- Not logged in</source>
-        <translation>로그인 중이 아님</translation>
-    </message>
-</context>
-<context>
-    <name>BelowFold</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
-        <source>BelowFold --- DEFAULT DISPLAY</source>
-        <translation>기본 표시</translation>
-    </message>
-</context>
-<context>
-    <name>BetaAgreementDialog</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
-        <source>BetaAgreementDialog --- Agreement</source>
-        <translation>약관</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
-        <source>BetaAgreementDialog --- Accept</source>
-        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
-        <translation>수락</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
-        <source>BetaAgreementDialog --- Decline</source>
-        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
-        <translation>거절</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
-        <source>BetaAgreementDialog --- Agreement text</source>
-        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
-        <translation>계약문</translation>
-    </message>
-</context>
-<context>
-    <name>Client</name>
-    <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
-        <source>Client --- %1 - Best</source>
-        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
-        <translation>%1 - 최상</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectButton</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
-        <source>ConnectButton --- Toggle connection</source>
-        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
-        <translation>연결 전환</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
-        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
-        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
-        <translation>스누즈에서 재개하여 다시 연결, 현재 스누즈 및 연결 해제 상태</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
-        <source>ConnectButton --- Connect to VPN, error has occurred</source>
-        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
-        <translation>VPN에 연결, 오류가 발생했습니다</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
-        <source>ConnectButton --- Connect to VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
-        <translation>VPN에 연결</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
-        <source>ConnectButton --- Disconnect from VPN, connecting</source>
-        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
-        <translation>VPN 연결 해제, 연결 중</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
-        <source>ConnectButton --- Disconnect from VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
-        <translation>VPN 연결 해제</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
-        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
-        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
-        <translation>VPN 연결 해제, 연결 해제 중</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectPage</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
-        <source>ConnectPage --- Connect page</source>
-        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
-        <translation>연결 페이지</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
-        <source>ConnectionModule --- Connection tile</source>
-        <extracomment>Screen reader annotation for the Connection tile</extracomment>
-        <translation>연결 타일</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
-        <source>ConnectionModule --- CONNECTION</source>
-        <translation>연결</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
-        <source>ConnectionModule --- Protocol</source>
-        <translation>프로토콜</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonAccount</name>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
-        <source>DaemonAccount --- Deactivated</source>
-        <translation>비활성화됨</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
-        <source>DaemonAccount --- One Month Plan</source>
-        <translation>1개월 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
-        <source>DaemonAccount --- Three Month Plan</source>
-        <translation>3개월 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
-        <source>DaemonAccount --- Six Month Plan</source>
-        <translation>6개월 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
-        <source>DaemonAccount --- One Year Plan</source>
-        <translation>1년 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
-        <source>DaemonAccount --- Two Year Plan</source>
-        <translation>2년 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
-        <source>DaemonAccount --- Three Year Plan</source>
-        <translation>3년 플랜</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
-        <source>DaemonAccount --- Trial</source>
-        <translation>체험</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonData</name>
-    <message>
-    <source>DaemonData --- AU Melbourne</source>
-        <translation>호주 멜버른</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Perth</source>
-        <translation>호주 퍼스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Sydney</source>
-        <translation>호주 시드니</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Albania</source>
-        <translation>알바니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Algeria</source>
-        <translation>알제리</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Andorra</source>
-        <translation>안도라</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Argentina</source>
-        <translation>아르헨티나</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Armenia</source>
-        <translation>아르메니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Australia</source>
-        <translation>호주</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Austria</source>
-        <translation>오스트리아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bahamas</source>
-        <translation>바하마</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bangladesh</source>
-        <translation>방글라데시</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belarus</source>
-        <translation>벨라루스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belgium</source>
-        <translation>벨기에</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bosnia and Herzegovina</source>
-        <translation>보스니아 헤르초코비나</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Brazil</source>
-        <translation>브라질</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bulgaria</source>
-        <translation>불가리아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Montreal</source>
-        <translation>캐나다 몬트리올</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Ontario</source>
-        <translation>캐나다 온타리오</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Toronto</source>
-        <translation>캐나다 토론토</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Vancouver</source>
-        <translation>캐나다 밴쿠버</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cambodia</source>
-        <translation>캄보디아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Canada</source>
-        <translation>캐나다</translation>
-    </message>
-    <message>
-    <source>DaemonData --- China</source>
-        <translation>중국</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cyprus</source>
-        <translation>키프로스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Croatia</source>
-        <translation>크로아티아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Czech Republic</source>
-        <translation>체코 공화국</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Berlin</source>
-        <translation>독일 베를린</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Frankfurt</source>
-        <translation>독일 프랑크푸르트</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Denmark</source>
-        <translation>덴마크</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Egypt</source>
-        <translation>이집트</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Estonia</source>
-        <translation>에스토니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Finland</source>
-        <translation>핀란드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- France</source>
-        <translation>프랑스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Germany</source>
-        <translation>독일</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Georgia</source>
-        <translation>조지아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greece</source>
-        <translation>그리스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greenland</source>
-        <translation>그린란드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hong Kong</source>
-        <translation>홍콩</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hungary</source>
-        <translation>헝가리</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iceland</source>
-        <translation>아이슬란드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- India</source>
-        <translation>인도</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iran</source>
-        <translation>이란</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ireland</source>
-        <translation>아일랜드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Isle of Man</source>
-        <translation>맨 섬</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Israel</source>
-        <translation>이스라엘</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Italy</source>
-        <translation>이탈리아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Japan</source>
-        <translation>일본</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Kazakhstan</source>
-        <translation>카자흐스탄</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Latvia</source>
-        <translation>라트비아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Liechtenstein</source>
-        <translation>리히텐슈타인</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Lithuania</source>
-        <translation>리투아니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Luxembourg</source>
-        <translation>룩셈부르크</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macao</source>
-        <translation>마카오</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macau</source>
-        <translation>마카오</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malaysia</source>
-        <translation>말레이시아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malta</source>
-        <translation>몰타</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mexico</source>
-        <translation>멕시코</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Moldova</source>
-        <translation>몰도바</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Monaco</source>
-        <translation>모나코</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mongolia</source>
-        <translation>몽고</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Montenegro</source>
-        <translation>몬테네그로</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Morocco</source>
-        <translation>모로코</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Netherlands</source>
-        <translation>네덜란드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- New Zealand</source>
-        <translation>뉴질랜드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Nigeria</source>
-        <translation>나이지리아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- North Macedonia</source>
-        <translation>북마케도니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Norway</source>
-        <translation>노르웨이</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Panama</source>
-        <translation>파나마</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Philippines</source>
-        <translation>필리핀</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Poland</source>
-        <translation>폴란드</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Portugal</source>
-        <translation>포르투갈</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Qatar</source>
-        <translation>카타르</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Romania</source>
-        <translation>루마니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Russia</source>
-        <translation>러시아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Saudi Arabia</source>
-        <translation>사우디아라비아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Serbia</source>
-        <translation>세르비아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Singapore</source>
-        <translation>싱가포르</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovakia</source>
-        <translation>슬로바키아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovenia</source>
-        <translation>슬로베니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- South Africa</source>
-        <translation>남아프리카</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Spain</source>
-        <translation>스페인</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sri Lanka</source>
-        <translation>스리랑카</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sweden</source>
-        <translation>스웨덴</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Switzerland</source>
-        <translation>스위스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Taiwan</source>
-        <translation>대만</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Turkey</source>
-        <translation>터키</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UAE</source>
-        <translation>아랍에미리트</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK London</source>
-        <translation>영국 런던</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Manchester</source>
-        <translation>영국 맨체스터</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Southampton</source>
-        <translation>영국 사우샘프턴</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Atlanta</source>
-        <translation>미국 애틀랜타</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US California</source>
-        <translation>미국 캘리포니아</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Chicago</source>
-        <translation>미국 시카고</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Denver</source>
-        <translation>미국 덴버</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US East</source>
-        <translation>미국 동부</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Florida</source>
-        <translation>미국 플로리다</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Houston</source>
-        <translation>미국 휴스턴</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Las Vegas</source>
-        <translation>미국 라스베가스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York City</source>
-        <translation>미국 뉴욕 시</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York</source>
-        <translation>미국 뉴욕</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Seattle</source>
-        <translation>미국 시애틀</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Silicon Valley</source>
-        <translation>미국 실리콘 밸리</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Texas</source>
-        <translation>미국 텍사스</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Washington DC</source>
-        <translation>미국 워싱턴 시</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US West</source>
-        <translation>미국 서부</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ukraine</source>
-        <translation>우크라이나</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Arab Emirates</source>
-        <translation>아랍에미리트</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Kingdom</source>
-        <translation>영국</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United States</source>
-        <translation>미국</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Venezuela</source>
-        <translation>베네수엘라</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Vietnam</source>
-        <translation>베트남</translation>
-    </message>
-</context>
-<context>
-    <name>DashboardPopup</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
-        <source>DashboardPopup --- PIA Dashboard</source>
-        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
-        <translation>PIA 대시보드</translation>
     </message>
 </context>
 <context>
@@ -2808,13 +1480,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="11"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="12"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>알파 사전 릴리스</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="14"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="15"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>베타 사전 릴리스</translation>
@@ -2881,6 +1553,201 @@
         <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
         <source>HeaderBar --- Quit</source>
         <translation>종료</translation>
+    </message>
+</context>
+<context>
+    <name>HelpPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
+        <source>HelpPage --- Version</source>
+        <translation>버전</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
+        <source>HelpPage --- Client:</source>
+        <translation>클라이언트:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
+        <source>HelpPage --- Daemon:</source>
+        <translation>데몬:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <source>HelpPage --- Changelog</source>
+        <translation>변경 로그</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <source>HelpPage --- Quick Tour</source>
+        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
+        <translation>퀵 투어</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <source>HelpPage --- Receive Beta Updates</source>
+        <translation>베타 업데이트 받기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
+        <translation>베타 프로그램에 참여하여 새로운 기능을 테스트하고 피드백을 제공해 주세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <source>HelpPage --- Show service communication messages</source>
+        <translation>서비스 연락 메시지 표시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <source>HelpPage --- Network</source>
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <source>HelpPage --- Include Geo-Located Regions</source>
+        <translation>지리적 위치 기반 지역 포함</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <source>HelpPage --- Support</source>
+        <translation>지원</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <source>HelpPage --- Disable Accelerated Graphics</source>
+        <translation>그래픽 가속 비활성화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
+        <translation>이 설정을 적용하려면 Private Internet Access를 다시 시작하세요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
+        <translation>그래픽 가속을 사용하면 CPU 사용량이 줄어들고 그래픽 효과가 활성화되지만, 일부 그래픽 카드 또는 드라이브에서 문제가 발생할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <source>HelpPage --- Enable Debug Logging</source>
+        <translation>디버그 로깅 활성화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
+        <translation>문제 해결을 돕기 위하여 기술 지원팀에 제출할 디버그 로그를 저장합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <source>HelpPage --- Submit Debug Logs</source>
+        <translation>디버그 로그 제출</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <source>HelpPage --- Support Portal</source>
+        <translation>지원 포털</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <source>HelpPage --- Maintenance</source>
+        <translation>유지 관리</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>OpenVPN 네트워크 어댑터 다시 설치</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>OpenVPN 네트워크 어댑터를 다시 설치하는 중...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>WireGuard 네트워크 어댑터 다시 설치</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>WireGuard 네트워크 어댑터를 다시 설치하는 중...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>분할 터널 필터를 다시 설치하는 중...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>분할 터널 필터 다시 설치</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>분할 터널 필터가 다시 설치되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>Private Internet Access 제거</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
+        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
+        <translation>터미널에서 명령을 실행하지 못했습니다. x-terminal-emulator와 호환되는 터미널을 설치하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <source>HelpPage --- Unable to open terminal</source>
+        <translation>터미널을 열 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <source>HelpPage --- v%1</source>
+        <translation>v%1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>연결 해제를 기다리는 중...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>연결된 동안은 네트워크 어댑터를 다시 설치할 수 없습니다. 지금 연결을 해제하고 다시 설치하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>연결 해제 필요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>네트워크 어댑터가 다시 설치되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>네트워크 어댑터가 다시 설치되었습니다. 시스템을 다시 부팅해야 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>네트워크 어댑터를 다시 설치하는 중 오류가 발생했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
+        <source>HelpPage --- Reinstall successful</source>
+        <translation>재설치 성공</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
+        <source>HelpPage --- Reinstall error</source>
+        <translation>재설치 오류</translation>
     </message>
 </context>
 <context>
@@ -3007,6 +1874,36 @@
         <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
         <source>LoginPage --- Buy Account</source>
         <translation>계정 구입</translation>
+    </message>
+</context>
+<context>
+    <name>Messages</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="49"/>
+        <source>Messages --- Wired Connection</source>
+        <translation>유선 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="51"/>
+        <source>Messages --- Open Wi-Fi</source>
+        <translation>개방형 Wi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="53"/>
+        <source>Messages --- Protected Wi-Fi</source>
+        <translation>보호된 Wi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="63"/>
+        <source>Messages --- Connect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="66"/>
+        <source>Messages --- Disconnect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>연결 해제</translation>
     </message>
 </context>
 <context>
@@ -3218,14 +2115,6 @@
         <translation>분할 터널</translation>
     </message>
     <message>
-    <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>이 기능을 활성화하려면 분할 터널 확장을 승인하세요.</translation>
-    </message>
-    <message>
-    <source>NetworkPage --- Security Preferences</source>
-        <translation>보안 기본 설정</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="276"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>분할 터널 필터 설치 중...</translation>
@@ -3285,7 +2174,7 @@
         <translation>메시지 해제 %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="215"/>
+        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="216"/>
         <source>Notification --- Stop</source>
         <extracomment>Screen reader annotation for the square &quot;Stop&quot; button on the message used to download an update.</extracomment>
         <translation>중단</translation>
@@ -3738,28 +2627,22 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
-        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
-        <translation>추가 위치를 통해 VPN 연결을 리디렉션합니다</translation>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
+<source>ProxyPage --- Configure...</source>
+        <translation>설정...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 프록시 - %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
-        <source>ProxyPage --- Configure...</source>
-        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
-        <translation>설정...</translation>
     </message>
 </context>
 <context>
@@ -3792,6 +2675,63 @@
     </message>
 </context>
 <context>
+    <name>RatingControl</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <source>RatingControl --- Loading</source>
+        <translation>불러오는 중</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <source>RatingControl --- Something went wrong.</source>
+        <translation>문제가 발생했습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>RatingRequestNotificationStatus</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
+        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
+        <translation>PIA에 대한 회원님의 경험에 대해 평가해 주세요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="28"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].</source>
+        <extracomment>Shown after the user submits a positive rating to ask if they would rate us on Trustpilot. The text between brackets ([[....]]) is a link, please preserve the brackets around the corresponding text. Do not translate &apos;Trustpilot&apos; since it is a brand (even though link text is normally translated in PIA.)</extracomment>
+        <translation>의견을 제공해 주셔서 감사합니다! [[Trustpilot]]에서 평가를 해 주시면 감사하겠습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="30"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
+        <translation>피드백을 제공해 주셔서 감사합니다!</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="32"/>
+        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
+        <translation>감사합니다! 문제가 발생하면 지원팀에 문의해 주세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
+        <source>RatingRequestNotificationStatus --- Contact Support</source>
+        <translation>고객 지원 문의</translation>
+    </message>
+</context>
+<context>
+    <name>RatingStar</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
+        <source>RatingStar --- Star rating of: %1</source>
+        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
+        <translation>별 등급: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
+        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
+        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
+        <translation>5개 중 %1개의 별 등급 제출</translation>
+    </message>
+</context>
+<context>
     <name>ReconnectWarning</name>
     <message>
         <location filename="../../../client/res/components/settings/ReconnectWarning.qml" line="62"/>
@@ -3821,14 +2761,47 @@
     </message>
 </context>
 <context>
+    <name>RegionListView</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>지역 목록</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
+        <source>RegionListView --- Region</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
+        <translation>지역</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>세부 정보</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
+        <source>RegionListView --- Latency</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
+        <translation>대기 시간</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
+        <source>RegionListView --- Favorite</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
+        <translation>즐겨찾기</translation>
+    </message>
+</context>
+<context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="32"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="33"/>
         <source>RegionModule --- Auto</source>
         <translation>자동</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="34"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="35"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>자동 (%1)</translation>
     </message>
@@ -3869,6 +2842,12 @@
 <context>
     <name>RegionPage</name>
     <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
+        <source>RegionPage --- Region list sort</source>
+        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
+        <translation>지역 목록 정렬</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/regions/RegionList.qml" line="79"/>
         <source>RegionPage --- Search...</source>
         <translation>검색...</translation>
@@ -3888,12 +2867,6 @@
         <source>RegionPage --- Back to Connect page</source>
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>연결 페이지로 돌아가기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
-        <source>RegionPage --- Region list sort</source>
-        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
-        <translation>지역 목록 정렬</translation>
     </message>
 </context>
 <context>
@@ -3926,6 +2899,65 @@
         <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ms</translation>
+    </message>
+</context>
+<context>
+    <name>RegionRowLabels</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>오프라인</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMessages</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
+        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
+        <translation>분할 터널 필터의 설치를 완료하려면 컴퓨터를 다시 시작하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
+        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
+        <translation>분할 터널 필터를 설치하지 못했습니다.  컴퓨터를 다시 시작하거나, 문제가 계속 발생하면 지원 센터에 문의하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
+        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
+        <translation>이 기능은 Windows 7 Service Pack 1 이상을 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
+        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
+        <translation>이 기능은 iptables 1.6.1 이상을 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
+        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
+        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
+        <translation>이 기능은 libnl-3, libnl-route-3 및 libnl-genl-3을 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
+        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
+        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+        <translation>이 기능은 %1에서 이용 가능한 net_cls를 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>이 기능은 커널 프로세스 이벤트가 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>이 기능은 OpenVPN이 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard는 Windows 8 이상이 필요합니다.</translation>
     </message>
 </context>
 <context>
@@ -4184,11 +3216,61 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelSettings</name>
+    <name>SplitTunnelNameServersRow</name>
     <message>
-    <source>SplitTunnelSettings --- Applications</source>
-        <translation>애플리케이션</translation>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
+        <source>SplitTunnelNameServersRow --- Name Servers</source>
+        <translation>이름 서버</translation>
     </message>
+</context>
+<context>
+    <name>SplitTunnelRoutedRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
+        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
+<source>SplitTunnelRoutedRow --- Routed Packets</source>
+        <translation>라우팅된 패킷</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
+        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
+<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
+        <translation>대부분의 컨테이너 및 가상 머신이 포함됩니다</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
+        <source>SplitTunnelRowBase --- Bypass VPN</source>
+        <translation>VPN 우회</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
+        <source>SplitTunnelRowBase --- Only VPN</source>
+        <translation>VPN 전용</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
+        <source>SplitTunnelRowBase --- Use VPN</source>
+        <translation>VPN 사용</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
+        <source>SplitTunnelRowBase --- Follow App Rules</source>
+        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
+        <translation>앱 규칙 따르기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
+        <source>SplitTunnelRowBase --- VPN DNS Only</source>
+        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
+        <translation>VPN DNS만 사용</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelSettings</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
         <source>SplitTunnelSettings --- App</source>
@@ -4383,6 +3465,153 @@
     </message>
 </context>
 <context>
+    <name>TrayMenuBuilder</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="24"/>
+        <source>TrayMenuBuilder --- Help</source>
+        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
+        <translation>도움말</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+        <source>TrayMenuBuilder --- Show Window</source>
+        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
+        <translation>창 표시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <source>TrayMenuBuilder --- Resume Connection</source>
+        <translation>연결 재개</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <source>TrayMenuBuilder --- Connect (Auto)</source>
+        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
+        <translation>연결 (자동)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+        <source>TrayMenuBuilder --- Connect (%1)</source>
+        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
+        <translation>연결 (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+        <source>TrayMenuBuilder --- Disconnect</source>
+        <extracomment>Menu command to disconnect from the VPN.</extracomment>
+        <translation>연결 해제</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+        <source>TrayMenuBuilder --- Snooze</source>
+        <translation>스누즈</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+        <source>TrayMenuBuilder --- 5 Minutes</source>
+        <translation>5분</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+        <source>TrayMenuBuilder --- 10 Minutes</source>
+        <translation>10분</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+        <source>TrayMenuBuilder --- 15 Minutes</source>
+        <translation>15분</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+        <source>TrayMenuBuilder --- 30 Minutes</source>
+        <translation>30분</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>전용 IP에 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>지역에 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
+        <source>TrayMenuBuilder --- Log In</source>
+        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
+        <translation>로그인</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+        <source>TrayMenuBuilder --- Settings...</source>
+        <extracomment>Menu command to open the settings dialog.</extracomment>
+        <translation>설정...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+        <source>TrayMenuBuilder --- Enable Debug Logging</source>
+        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
+        <translation>디버그 로깅 활성화</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
+        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
+        <translation>디버그 로그 제출...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
+        <source>TrayMenuBuilder --- Changelog</source>
+        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
+        <translation>변경 로그</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
+        <source>TrayMenuBuilder --- Support Portal</source>
+        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
+        <translation>지원 포털</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+        <source>TrayMenuBuilder --- Blog</source>
+        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
+        <translation>블로그</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
+        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
+        <translation>공용 IP 복사 (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+        <source>TrayMenuBuilder --- Copy Public IP</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
+        <translation>공용 IP 복사</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
+        <translation>전달된 포트 복사 (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
+        <translation>전달된 포트 복사</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
+        <source>TrayMenuBuilder --- Quit</source>
+        <extracomment>Menu command to quit the application.</extracomment>
+        <translation>종료</translation>
+    </message>
+</context>
+<context>
     <name>UpdateNotificationStatus</name>
     <message>
         <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
@@ -4513,6 +3742,425 @@
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
 <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>배포용 설치판에 대한 설명:</translation>
+    </message>
+</context>
+<context>
+    <name>winstaller</name>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
+        <source>winstaller --- Private Internet Access Installer</source>
+        <translation>Private Internet Access 설치 프로그램</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
+        <source>winstaller --- %.0f SECONDS REMAINING</source>
+        <translation>%.0f초 남음</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
+        <source>winstaller --- INSTALL</source>
+        <translation>설치</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
+        <source>winstaller --- UNINSTALL</source>
+        <translation>제거</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
+        <source>winstaller --- FINISH</source>
+        <translation>완료</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
+        <source>winstaller --- PREPARING</source>
+        <translation>준비 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
+        <source>winstaller --- READY TO INSTALL</source>
+        <translation>설치 준비 완료</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
+        <source>winstaller --- INSTALLING</source>
+        <translation>설치 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
+        <source>winstaller --- ABORTING</source>
+        <translation>중단 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
+        <source>winstaller --- FINISHING UP</source>
+        <translation>완료 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
+        <source>winstaller --- CLEANING UP</source>
+        <translation>정리 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
+        <source>winstaller --- ROLLING BACK CHANGES</source>
+        <translation>변경 사항 롤백 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
+        <source>winstaller --- FINISHED</source>
+        <translation>완료됨</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
+        <source>winstaller --- ABORTED</source>
+        <translation>중단됨</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
+        <source>winstaller --- UNPACKING</source>
+        <translation>압축 해제 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
+        <source>winstaller --- COPYING FILES</source>
+        <translation>파일 복사 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
+        <source>winstaller --- SHUTTING DOWN CLIENT</source>
+        <translation>클라이언트 셧다운 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
+        <source>winstaller --- STOPPING SERVICE</source>
+        <translation>서비스 중단 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
+        <source>winstaller --- UNREGISTERING SERVICE</source>
+        <translation>서비스 등록 취소 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
+        <source>winstaller --- REGISTERING SERVICE</source>
+        <translation>서비스 등록 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
+        <source>winstaller --- STARTING SERVICE</source>
+        <translation>서비스 시작 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
+        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
+        <translation>네트워크 어댑터 제거 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
+        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
+        <translation>네트워크 어댑터 설치 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
+        <source>winstaller --- BACKING UP FILES</source>
+        <translation>파일 백업 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
+        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
+        <translation>이전 버전 제거 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
+        <source>winstaller --- REMOVING FILES</source>
+        <translation>파일 제거 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
+        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
+        <translation>콜아웃 드라이버 제거 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
+        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
+        <translation>콜아웃 드라이버 업데이트 중</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
+        <translation>기존 설치 파일을 인식할 수 없습니다. 전체 디렉터리를 삭제하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
+        <source>winstaller --- Corrupt installation detected</source>
+        <translation>손상된 설치 파일이 발견되었습니다</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
+        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
+        <translation>설치 디렉터리에 잘못된 파일이 있습니다. 삭제하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
+        <source>winstaller --- Files remaining</source>
+        <translation>파일 남음</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
+        <source>winstaller --- Do you want to abort the installation?</source>
+        <translation>설치를 중단하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
+        <source>winstaller --- Abort installation?</source>
+        <translation>설치를 중단합니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
+        <source>winstaller --- Error</source>
+        <translation>오류</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
+        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
+        <translation>이 작업은 Private Internet Access의 기존 설치 파일을 대체합니다. 나중에 다운그레이드하려면 모두 다시 설치해야 합니다. 계속하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
+        <source>winstaller --- Replace existing version?</source>
+        <translation>기존 버전을 대체하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
+        <source>winstaller --- Unable to remove directory: %s</source>
+        <translation>디렉터리 제거 불가: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
+        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
+        <translation>계속 진행하기 전에 기존의 Private Internet Access를 종료하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
+        <source>winstaller --- There was a problem uninstalling the existing version.</source>
+        <translation>기존 버전을 제거하는 중 문제가 발생했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
+        <source>winstaller --- There are still clients running.</source>
+        <translation>아직 실행 중인 클라이언트가 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
+        <source>winstaller --- Failed to stop the service.</source>
+        <translation>서비스를 중단하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
+        <source>winstaller --- A reboot is needed before installation can proceed.</source>
+        <translation>설치를 진행하려면 다시 부팅해야 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
+        <source>winstaller --- Service executable missing.</source>
+        <translation>서비스 실행 파일이 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
+        <source>winstaller --- Service uninstallation failed.</source>
+        <translation>서비스를 제거하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
+        <source>winstaller --- The service installation failed.</source>
+        <translation>서비스를 설치하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
+        <source>winstaller --- The service failed to start.</source>
+        <translation>서비스를 시작하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
+        <source>winstaller --- Error uninstalling TAP driver.</source>
+        <translation>TAP 드라이버 제거 오류.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
+        <source>winstaller --- The TAP driver was not approved for installation.</source>
+        <translation>TAP 드라이버가 설치 승인을 받지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
+        <source>winstaller --- The TAP driver installation failed.</source>
+        <translation>TAP 드라이버가 설치되지 않았습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
+        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
+        <translation>Private Internet Access를 실행하려면 최소 Windows 7 버전 이상이 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
+        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
+        <translation>32비트 버전의 Private Internet Access는 32비트 버전의 Windows에서만 실행됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
+        <source>winstaller --- Failed to retrieve shell folder %s.</source>
+        <translation>셸 폴더 %s을(를) 검색하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
+        <source>winstaller --- Out of memory.</source>
+        <translation>메모리 부족.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
+        <source>winstaller --- Payload decompression error.</source>
+        <translation>페이로드 압축 해제 오류.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
+        <source>winstaller --- Corrupted payload (CRC error).</source>
+        <translation>손상된 페이로드(CRC 오류).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
+        <source>winstaller --- Unable to create file: %s</source>
+        <translation>파일 생성 불가: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
+        <source>winstaller --- Unable to write file: %s</source>
+        <translation>파일 쓰기 불가: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
+        <source>winstaller --- Unable to write entire file: %s</source>
+        <translation>전체 파일 쓰기 불가: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
+        <source>winstaller --- Unable to initialize decompressor.</source>
+        <translation>압축 해제 프로그램을 초기화하지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
+        <source>winstaller --- Corrupted payload (invalid parameters).</source>
+        <translation>손상된 페이로드(잘못됨 매개 변수).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
+        <source>winstaller --- Unable to move %s</source>
+        <translation>%s 이동 불가</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
+        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
+        <translation>롤백 디렉터리를 생성할 수 없습니다. 설치를 계속 진행할 경우 오류가 발생해도 변경 사항을 취소할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
+        <source>winstaller --- Unable to create directory: %s</source>
+        <translation>디렉터리 생성 불가: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
+        <source>winstaller --- The installer does not contain a recognizable payload.</source>
+        <translation>설치 프로그램이 인식 가능한 페이로드를 포함하고 있지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
+        <source>winstaller --- Missing payload</source>
+        <translation>누락된 페이로드</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
+        <source>winstaller --- Error uninstalling callout driver.</source>
+        <translation>콜아웃 드라이버 제거 오류.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
+        <source>winstaller --- Callout driver installation failed.</source>
+        <translation>콜아웃 드라이버 설치에 실패했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>WireGuard 설치 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>WireGuard 제거 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>WinTUN 설치 실패.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>WinTUN 제거 실패</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
+        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
+        <translation>안전 모드(네트워킹 사용)를 사용해 Private Internet Access를 설치 또는 제거하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
+        <source>winstaller --- Installation complete</source>
+        <translation>설치 완료</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
+        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
+        <translation>Private Internet Access를 사용하려면 컴퓨터를 다시 시작하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
+        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
+        <translation>Private Internet Access는 Windows 8 버전 이상을 필요로 합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+        <source>winstaller --- The installation will now abort.</source>
+        <translation>설치가 중단됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
+        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
+        <source>winstaller --- This is preventing the installation from proceeding.</source>
+        <translation>이 작업은 설치가 계속 진행되는 것을 방해합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
+        <source>winstaller --- Do you wish to continue the installation anyway?</source>
+        <translation>그래도 계속 설치하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
+        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
+        <translation>다시 시도하거나 설치를 계속 진행해볼 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
+        <source>winstaller --- The uninstallation will now abort.</source>
+        <translation>제거가 중단됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
+        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
+        <translation>그래도 계속 제거하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
+        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
+        <translation>다시 시도하거나 제거를 계속 진행해볼 수 있습니다.</translation>
     </message>
 </context>
 </TS>

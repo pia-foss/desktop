@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-import QtQuick 2.0
+import QtQuick 2.9
 import QtQuick.Window 2.10
 import QtQuick.Controls 2.4
 import "../core"
@@ -185,6 +185,21 @@ PiaWindow {
     // Center the window on the selected screen.
     x = Screen.virtualX + (Screen.width - width) / 2;
     y = Screen.virtualY + (Screen.height - height) / 2;
+  }
+
+  // Handle close keys.
+  // Alt+F4 on Windows can be handled by the window procedure, but Cmd+W on Mac
+  // is our responsibility.
+  Shortcut {
+    sequence: StandardKey.Close
+    context: Qt.WindowShortcut
+    onActivated: {
+      // If the dashboard is visible, focus it before hiding (otherwise it would
+      // hide since the application is losing focus)
+      if(dashboard.window)
+        dashboard.window.focusIfVisible()
+      hide()
+    }
   }
 
   Component.onCompleted: {

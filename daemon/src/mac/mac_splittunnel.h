@@ -38,8 +38,9 @@
 #include "settings.h"
 #include "exec.h"
 #include "vpn.h"
-#include "pid_finder.h"
+#include "port_finder.h"
 #include "rule_updater.h"
+#include "mac/mac_splittunnel_types.h"
 #include "packet.h"
 
 class AppCache
@@ -47,7 +48,7 @@ class AppCache
 public:
     void addEntry(IPVersion ipVerrsion, pid_t newPid, quint16 srcPort);
     PortSet ports(IPVersion ipVersion) const;
-    void refresh(IPVersion ipVersion);
+    void refresh(IPVersion ipVersion, const OriginalNetworkScan &netScan);
     void clear(IPVersion ipVersion) { _cache[ipVersion].clear(); }
     void clearAll() { _cache[IPv4].clear(); _cache[IPv6].clear();}
 private:
@@ -127,6 +128,8 @@ private:
     void handleIp6(std::vector<unsigned char> buffer, int packetSize);
     void setupIpForwarding(const QString &setting, const QString &value, QString &storedValue);
     void teardownIpForwarding(const QString &setting, QString &storedValue);
+    // Cycle the split tunnel ip and interface - this breaks existing connections
+    bool cycleSplitTunnelDevice();
     QString sysctl(const QString &setting, const QString &value);
 
 private:

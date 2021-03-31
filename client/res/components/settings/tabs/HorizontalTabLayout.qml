@@ -34,7 +34,20 @@ FocusScope {
   // Function used to translate page titles (called with page's ID)
   property var pageTitleFunc
   anchors.fill: parent
-  implicitWidth: Theme.settings.hbarContentLeftMargin + Theme.settings.contentWidth + Theme.settings.hbarContentRightMargin
+
+  // Some translations are so long that we just can't fit them in the normal
+  // width, but enlarging the width in general leaves an excess of empty space.
+  // Enlarge the width for very long languages to accommodate the tab bar.
+  // These languages typically have long translations for the content too, so
+  // the extra width is beneficial there also.
+  property int minimumWidth: Theme.settings.hbarContentLeftMargin + Theme.settings.contentWidth + Theme.settings.hbarContentRightMargin
+  property int minimumTabEndMargins: 10
+  // Widen the window whenever the tabs would exceed the normal width.  Note
+  // that the way the tab list accommodates very long text does not actually
+  // include that text's bounds in the list's bound (it just adjusts the item
+  // spacing), but fortunately the first and last tabs are reasonably short in
+  // all languages.
+  implicitWidth: Math.max(minimumWidth, listView.width + 2*minimumTabEndMargins)
   implicitHeight: Theme.settings.hbarHeight + Theme.settings.hbarContentTopMargin + Theme.settings.contentHeight + Theme.settings.hbarContentBottomMargin
 
   function selectPage(index) {

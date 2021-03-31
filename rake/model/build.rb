@@ -8,7 +8,7 @@ require 'json'
 # and creates a per-component build directory for this component.
 class Build
     # The major-minor-patch parts of this version
-    VersionMMP = [2, 7, 1]
+    VersionMMP = [2, 8, 0]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
@@ -86,7 +86,7 @@ class Build
         @name = name
 
         # Build directory for this component
-        @componentDir = File.join(BuildDir, name)
+        @componentDir = File.join(BuildDir, @name)
 
         # Create the component build directory
         directory @componentDir

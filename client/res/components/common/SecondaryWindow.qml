@@ -50,19 +50,4 @@ DecoratedWindow {
     contentHeight: contentLogicalHeight
     label: window.title
   }
-
-  // Handle close keys.
-  // Alt+F4 on Windows can be handled by the window procedure, but Cmd+W on Mac
-  // is our responsibility.
-  Shortcut {
-    sequence: StandardKey.Close
-    context: Qt.WindowShortcut
-    onActivated: {
-      // If the dashboard is visible, focus it before hiding (otherwise it would
-      // hide since the application is losing focus)
-      if(dashboard.window)
-        dashboard.window.focusIfVisible()
-      hide()
-    }
-  }
 }

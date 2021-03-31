@@ -41,8 +41,8 @@ public:
         VpnOnly
     };
 
-    static QString existingDNS();
-    static SplitDNSInfo infoFor(const FirewallParams &params, SplitDNSType dnsType);
+    static QString existingDNS(const DaemonState &state);
+    static SplitDNSInfo infoFor(const FirewallParams &params, const DaemonState &state, SplitDNSType dnsType);
 
 public:
     SplitDNSInfo() = default;
@@ -96,7 +96,11 @@ private:
     static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const QString &rootChain = kRootChain);
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable, const QString &rootChain = kRootChain);
     static QString rootChainFor(const QString &chain);
-    static QStringList getDNSRules(const QString &adapterName, const QStringList& servers);
+    // Generate iptables rules to permit DNS to the specified servers.
+    // vpnAdapterName is used for non-local DNS; traffic is only permitted
+    // through the tunnel.  For local DNS, we permit it on any adapter.
+    // No rules are created if the VPN adapter name is not known yet.
+    static QStringList getDNSRules(const QString &vpnAdapterName, const QStringList& servers);
     static int execute(const QString& command, bool ignoreErrors = false);
     void enableRouteLocalNet();
     void disableRouteLocalNet();

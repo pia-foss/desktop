@@ -2,31 +2,417 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>Automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>General</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>Cuenta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>Privacidad</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>Red</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>Conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>Automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>IP dedicada</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>Ayuda</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>Preferencias generales</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>Información de la cuenta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>Preferencias de privacidad</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>Preferencias de la red</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>Preferencias de la conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>Preferencias de automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>Preferencias de IP dedicada</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>Ayuda</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>Alerta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>Configuración</translation>
+    </message>
+</context>
+<context>
+    <name>AccountModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
+        <source>AccountModule --- Subscription tile</source>
+        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
+        <translation>Casilla de suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
+        <source>AccountModule --- SUBSCRIPTION</source>
+        <translation>SUSCRIPCIÓN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
+        <source>AccountModule --- Subscription</source>
+        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
+        <translation>Suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
+        <source>AccountModule --- Expired</source>
+        <translation>Expiró</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
+        <source>AccountModule --- (%1 days left)</source>
+        <translation>(%1 días restantes)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Expired on</source>
+        <translation>Expiró el</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Renews on</source>
+        <translation>Se renueva el</translation>
+    </message>
+</context>
+<context>
+    <name>AccountPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <source>AccountPage --- Username</source>
+        <translation>Nombre de usuario</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <source>AccountPage --- Subscription</source>
+        <translation>Suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <source>AccountPage --- Expired</source>
+        <translation>Expiró</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <source>AccountPage --- (expired on %1)</source>
+        <translation>(expiró el %1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <source>AccountPage --- (renews on %1)</source>
+        <translation>(se renueva el %1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <source>AccountPage --- (expires on %1)</source>
+        <translation>(expira el %1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Renews in %1 days</source>
+        <translation>Se renueva en %1 días</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Expires in %1 days</source>
+        <translation>Expira en %1 días</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>Comprar suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>Administrar suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>Renovar suscripción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>Administrar mi cuenta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
+        <source>AccountPage --- Logout / Switch Account</source>
+        <translation>Cerrar sesión / Cambiar de cuenta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
+        <source>AccountPage --- Not logged in</source>
+        <translation>No conectado</translation>
+    </message>
+</context>
+<context>
+    <name>ActiveRuleDisplay</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ActiveRuleDisplay.qml" line="117"/>
+        <source>ActiveRuleDisplay --- Open Automation Rule Settings</source>
+        <translation>Abrir ajustes de regla de automatización</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="48"/>
+        <source>AutomationAddRuleDialog --- Network</source>
+        <translation>Red</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
+        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+        <translation>Tipos de regla de automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <source>AutomationAddRuleDialog --- RULE EXISTS</source>
+        <translation>LA REGLA EXISTE</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
+        <source>AutomationAddRuleDialog --- Rule</source>
+        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
+        <translation>Regla</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <source>AutomationAddRuleDialog --- Action</source>
+        <translation>Acción</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleRow.qml" line="21"/>
+        <source>AutomationAddRuleRow --- Add Automation Rule</source>
+        <translation>Añadir regla de automatización</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="23"/>
+        <source>AutomationPage --- Connection Automation</source>
+        <translation>Automatización de conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="29"/>
+        <source>AutomationPage --- Create rules to automatically connect or disconnect the VPN when you join a particular network.</source>
+        <extracomment>Text displayed in a tooltip for connection automation</extracomment>
+        <translation>Crea reglas para conectar o desconectar automáticamente la VPN cuando te unas a una red determinada.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="32"/>
+        <source>AutomationPage --- Help</source>
+        <extracomment>Help link for automation page</extracomment>
+        <translation>Ayuda</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="23"/>
+        <source>AutomationRuleRow --- Remove</source>
+        <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
+        <translation>Eliminar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="106"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>ACTIVA</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="187"/>
+        <source>AutomationRuleRow --- Remove Automation Rule</source>
+        <translation>Eliminar regla de automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="197"/>
+        <source>AutomationRuleRow --- Remove %1?</source>
+        <extracomment>Message shown when removing an automation rule. &quot;%1&quot; is the name of a rule, which can be a standard rule like &quot;Protected Wi-Fi&quot;, &quot;Open Wi-Fi&quot;, or &quot;Wired&quot;, or it can be a network SSID for a rule created for a specific wireless network. For example - &quot;Remove Protected Wi-Fi?&quot;, or &quot;Remove Steve&apos;s House?&quot;</extracomment>
+        <translation>¿Eliminar %1?</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationTable</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="27"/>
+        <source>AutomationTable --- Automation Rules</source>
+        <extracomment>Screen reader annotation for the name of the table</extracomment>
+        <translation>Reglas de automatización</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="86"/>
+        <source>AutomationTable --- Condition</source>
+        <extracomment>Name of the &quot;Condition&quot; table column, in the Automation table</extracomment>
+        <translation>Condición</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="92"/>
+        <source>AutomationTable --- Action</source>
+        <extracomment>Name of the &quot;Action&quot; table column, in the automation table</extracomment>
+        <translation>Acción</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="98"/>
+        <source>AutomationTable --- Remove</source>
+        <extracomment>Name of the &quot;Remove&quot; table column, containing the remove button, in the automation table</extracomment>
+        <translation>Eliminar</translation>
+    </message>
+</context>
+<context>
+    <name>BelowFold</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
+        <source>BelowFold --- DEFAULT DISPLAY</source>
+        <translation>VISUALIZACIÓN PREDETERMINADA</translation>
+    </message>
+</context>
+<context>
+    <name>BetaAgreementDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
+        <source>BetaAgreementDialog --- Agreement</source>
+        <translation>Acuerdo</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
+        <source>BetaAgreementDialog --- Accept</source>
+        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
+        <translation>Aceptar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
+        <source>BetaAgreementDialog --- Decline</source>
+        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
+        <translation>Rechazar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
+        <source>BetaAgreementDialog --- Agreement text</source>
+        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
+        <translation>Texto del acuerdo</translation>
+    </message>
+</context>
+<context>
     <name>ChangelogWindow</name>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>Función WireGuard: Un robot en un cohete</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>Función de interfaz de línea de comandos</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="86"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="181"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>Registro de cambios</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="85"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="169"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>Novedades</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <source>ChangelogWindow --- Checkmark bullet</source>
+        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
+        <translation>Viñeta de marca de comprobación</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
@@ -37,12 +423,6 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
         <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
         <translation>Se trata de un nuevo protocolo VPN más eficaz que ofrece:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
-        <source>ChangelogWindow --- Checkmark bullet</source>
-        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
-        <translation>Viñeta de marca de comprobación</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
@@ -70,10 +450,6 @@
         <translation>Prueba WireGuard® ahora</translation>
     </message>
     <message>
-    <source>ChangelogWindow --- Open Settings</source>
-        <translation>Abrir Ajustes</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
         <source>ChangelogWindow --- Learn more</source>
         <translation>Más información</translation>
@@ -82,6 +458,12 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
         <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
         <translation>Vuelve a conectarte para activar WireGuard®</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
+        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
+        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
+        <translation>Función WireGuard: Un robot en un cohete</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
@@ -99,6 +481,12 @@
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>Con nuestra completa funcionalidad de túnel dividido, puedes controlar qué aplicaciones usan la VPN y cuándo. Echa un vistazo a nuestro túnel dividido [[ejemplos de aplicaciones]] para ver lo que puedes hacer.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
+        <translation>Función de interfaz de línea de comandos</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
@@ -119,618 +507,16 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelRoutedRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
-        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
-<source>SplitTunnelRoutedRow --- Routed Packets</source>
-        <translation>Paquetes enrutados</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
-        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
-<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
-        <translation>Incluye la mayoría de contenedores y máquinas virtuales.</translation>
-    </message>
-</context>
-<context>
-    <name>winstaller</name>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
-        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
-        <translation>Private Internet Access requiere Windows 8 o superior.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
-        <source>winstaller --- Private Internet Access Installer</source>
-        <translation>Instalador de Private Internet Access</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
-        <source>winstaller --- %.0f SECONDS REMAINING</source>
-        <translation>RESTAN %.0f SEGUNDOS</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
-        <source>winstaller --- INSTALL</source>
-        <translation>INSTALAR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
-        <source>winstaller --- UNINSTALL</source>
-        <translation>DESINSTALAR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
-        <source>winstaller --- FINISH</source>
-        <translation>FINALIZAR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
-        <source>winstaller --- PREPARING</source>
-        <translation>PREPARANDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
-        <source>winstaller --- READY TO INSTALL</source>
-        <translation>LISTO PARA INSTALAR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
-        <source>winstaller --- INSTALLING</source>
-        <translation>INSTALANDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
-        <source>winstaller --- ABORTING</source>
-        <translation>CANCELANDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
-        <source>winstaller --- FINISHING UP</source>
-        <translation>FINALIZANDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
-        <source>winstaller --- CLEANING UP</source>
-        <translation>LIMPIANDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
-        <source>winstaller --- ROLLING BACK CHANGES</source>
-        <translation>DESHACIENDO CAMBIOS</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
-        <source>winstaller --- FINISHED</source>
-        <translation>FINALIZADO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
-        <source>winstaller --- ABORTED</source>
-        <translation>CANCELADO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
-        <source>winstaller --- UNPACKING</source>
-        <translation>DESCOMPRIMIENDO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
-        <source>winstaller --- COPYING FILES</source>
-        <translation>COPIANDO ARCHIVOS</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
-        <source>winstaller --- SHUTTING DOWN CLIENT</source>
-        <translation>CERRANDO CLIENTE</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
-        <source>winstaller --- STOPPING SERVICE</source>
-        <translation>DETENIENDO SERVICIO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
-        <source>winstaller --- UNREGISTERING SERVICE</source>
-        <translation>ANULANDO REGISTRO DE SERVICIO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
-        <source>winstaller --- REGISTERING SERVICE</source>
-        <translation>REGISTRANDO SERVICIO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
-        <source>winstaller --- STARTING SERVICE</source>
-        <translation>INICIANDO SERVICIO</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
-        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
-        <translation>QUITANDO ADAPTADOR DE RED</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
-        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
-        <translation>INSTALANDO ADAPTADOR DE RED</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
-        <source>winstaller --- BACKING UP FILES</source>
-        <translation>REALIZANDO COPIA DE SEGURIDAD DE ARCHIVOS</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
-        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
-        <translation>ELIMINANDO VERSIÓN ANTERIOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
-        <source>winstaller --- REMOVING FILES</source>
-        <translation>ELIMINANDO ARCHIVOS</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
-        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
-        <translation>ELIMINANDO CONTROLADOR DE LLAMADA</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
-        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
-        <translation>ACTUALIZANDO CONTROLADOR DE LLAMADA</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
-        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
-        <translation>No se pudo reconocer la instalación actual. ¿Deseas borrar el directorio completo?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
-        <source>winstaller --- Corrupt installation detected</source>
-        <translation>Instalación corrupta detectada</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
-        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
-        <translation>Hay archivos sueltos en el directorio de instalación. ¿Deseas borrarlos?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
-        <source>winstaller --- Files remaining</source>
-        <translation>Archivos restantes</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
-        <source>winstaller --- Do you want to abort the installation?</source>
-        <translation>¿Deseas cancelar la instalación?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
-        <source>winstaller --- Abort installation?</source>
-        <translation>¿Cancelar la instalación?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
-        <source>winstaller --- Error</source>
-        <translation>Error</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
-        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
-        <translation>Esto reemplazará tu instalación actual de Private Internet Access. Si después deseas regresar a la versión anterior, deberás realizar una reinstalación limpia. ¿Deseas continuar?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
-        <source>winstaller --- Replace existing version?</source>
-        <translation>¿Reemplazar la versión actual?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
-        <source>winstaller --- Unable to remove directory: %s</source>
-        <translation>No se pudo eliminar el directorio: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
-        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
-        <translation>Sal del Private Internet Access actual antes de continuar.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
-        <source>winstaller --- There was a problem uninstalling the existing version.</source>
-        <translation>Se produjo un problema a la hora de desinstalar la versión actual.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
-        <source>winstaller --- There are still clients running.</source>
-        <translation>Todavía se están ejecutando clientes.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
-        <source>winstaller --- Failed to stop the service.</source>
-        <translation>No se pudo detener el servicio.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
-        <source>winstaller --- A reboot is needed before installation can proceed.</source>
-        <translation>Es necesario reiniciar antes de que pueda continuar la instalación.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
-        <source>winstaller --- Service executable missing.</source>
-        <translation>Falta el ejecutable del servicio.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
-        <source>winstaller --- Service uninstallation failed.</source>
-        <translation>Falló la desinstalación del servicio.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
-        <source>winstaller --- The service installation failed.</source>
-        <translation>Falló la instalación del servicio.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
-        <source>winstaller --- The service failed to start.</source>
-        <translation>No se pudo iniciar el servicio.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
-        <source>winstaller --- Error uninstalling TAP driver.</source>
-        <translation>Error en la desinstalación del controlador de TAP.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
-        <source>winstaller --- The TAP driver was not approved for installation.</source>
-        <translation>No se aprobó la instalación del controlador de TAP.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
-        <source>winstaller --- The TAP driver installation failed.</source>
-        <translation>Falló la instalación de TAP.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
-        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
-        <translation>Private Internet Access requiere al menos Windows 7 para ejecutarse.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
-        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
-        <translation>La versión de 32 bits de Private Internet Access solo puede ejecutarse en una versión de 32 bits de Windows.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
-        <source>winstaller --- Failed to retrieve shell folder %s.</source>
-        <translation>No se pudo recuperar la carpeta de shell %s.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
-        <source>winstaller --- Out of memory.</source>
-        <translation>Memoria agotada.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
-        <source>winstaller --- Payload decompression error.</source>
-        <translation>Error de descompresión de carga.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
-        <source>winstaller --- Corrupted payload (CRC error).</source>
-        <translation>Carga corrupta (error de CRC).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
-        <source>winstaller --- Unable to create file: %s</source>
-        <translation>No se pudo crear el archivo: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
-        <source>winstaller --- Unable to write file: %s</source>
-        <translation>No se pudo escribir el archivo: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
-        <source>winstaller --- Unable to write entire file: %s</source>
-        <translation>No se pudo escribir el archivo completo: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
-        <source>winstaller --- Unable to initialize decompressor.</source>
-        <translation>No se pudo inicializar el descompresor.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
-        <source>winstaller --- Corrupted payload (invalid parameters).</source>
-        <translation>Carga corrupta (parámetros inválidos).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
-        <source>winstaller --- Unable to move %s</source>
-        <translation>No se pudo mover %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
-        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
-        <translation>No se pudo crear el directorio de regreso a la versión anterior. Si continúas, la instalación no podrá deshacer los cambios si se produce un error.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
-        <source>winstaller --- Unable to create directory: %s</source>
-        <translation>No se pudo crear el directorio: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
-        <source>winstaller --- The installer does not contain a recognizable payload.</source>
-        <translation>El instalador no contiene una carga reconocible.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
-        <source>winstaller --- Missing payload</source>
-        <translation>Carga faltante</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
-        <source>winstaller --- Error uninstalling callout driver.</source>
-        <translation>Error al desinstalar el controlador de llamada.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
-        <source>winstaller --- Callout driver installation failed.</source>
-        <translation>Error en la instalación del controlador de llamada.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
-        <source>winstaller --- WireGuard installation failed.</source>
-        <translation>Error en la instalación de WireGuard.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
-        <source>winstaller --- WireGuard uninstallation failed.</source>
-        <translation>Error en la desinstalación de WireGuard.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
-        <source>winstaller --- WinTUN installation failed.</source>
-        <translation>Error en la instalación de WinTUN.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
-        <source>winstaller --- WinTUN uninstallation failed.</source>
-        <translation>Error en la desinstalación de WinTUN.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
-        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
-        <translation>Usa el modo seguro con la conexión de red para instalar o desinstalar Private Internet Access.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
-        <source>winstaller --- Installation complete</source>
-        <translation>Instalación completada</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
-        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
-        <translation>Reinicia el equipo para usar Private Internet Access.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
-        <source>winstaller --- The installation will now abort.</source>
-        <translation>Ahora se cancelará la instalación.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
-        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
-        <source>winstaller --- This is preventing the installation from proceeding.</source>
-        <translation>Esto evita que continúe la instalación.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
-        <source>winstaller --- Do you wish to continue the installation anyway?</source>
-        <translation>¿Deseas continuar con la instalación de todos modos?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
-        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
-        <translation>Puedes volver a intentarlo o tratar de continuar con la instalación de todas formas.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
-        <source>winstaller --- The uninstallation will now abort.</source>
-        <translation>Ahora se cancelará la desinstalación.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
-        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
-        <translation>¿Deseas continuar con la desinstalación de todos modos?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
-        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
-        <translation>Puedes volver a intentarlo o tratar de continuar con la desinstalación de todas formas.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingControl</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
-        <source>RatingControl --- Loading</source>
-        <translation>Cargando</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
-        <source>RatingControl --- Something went wrong.</source>
-        <translation>Se produjo un problema.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingRequestNotificationStatus</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
-        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
-        <translation>Valora tu experiencia con PIA.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="22"/>
-        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
-        <translation>¡Gracias por tus comentarios!</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="31"/>
-        <source>RatingRequestNotificationStatus --- Contact Support</source>
-        <translation>Contacto con el servicio de asistencia</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="24"/>
-        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
-        <translation>¡Gracias! Si tienes algún problema, ponte en contacto con el servicio de asistencia.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingStar</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
-        <source>RatingStar --- Star rating of: %1</source>
-        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
-        <translation>Valoración de estrellas de: %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
-        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
-        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
-        <translation>Envía una valoración de estrellas de %1 de 5</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsMessages</name>
-    <message>
-    <source>SettingsMessages --- This feature requires macOS 10.15 or earlier.</source>
-        <translation>Esta característica requiere macOS 10.15 o más reciente.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
-        <source>SettingsMessages --- This feature requires kernel process events.</source>
-        <translation>Esta característica requiere eventos de proceso de kernel.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
-        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
-        <translation>Reinicia el equipo para finalizar la instalación del filtro de túnel dividido.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
-        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
-        <translation>El filtro de túnel dividido no se pudo instalar. Prueba a reiniciar tu equipo o ponte en contacto si este problema continúa.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
-        <translation>Esta característica requiere el Windows 7 Service Pack 1 o más reciente.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
-        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
-        <translation>Esta característica requiere iptables 1.6.1 o más reciente.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
-        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
-        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
-        <translation>Esta función requiere libnl-3, libnl-route-3 y libnl-genl-3.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
-        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
-        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
-        <translation>Esta característica requiere que net_cls esté disponible en %1.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
-        <source>SettingsMessages --- This feature requires OpenVPN.</source>
-        <translation>Esta característica requiere OpenVPN.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
-        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
-        <translation>WireGuard requiere Windows 8 o posterior.</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelNameServersRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
-        <source>SplitTunnelNameServersRow --- Name Servers</source>
-        <translation>Servidores de nombre</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelRowBase</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
-        <source>SplitTunnelRowBase --- Follow App Rules</source>
-        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
-        <translation>Seguir reglas de la aplicación</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
-        <source>SplitTunnelRowBase --- VPN DNS Only</source>
-        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
-        <translation>Solo VPN DNS</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
-        <source>SplitTunnelRowBase --- Bypass VPN</source>
-        <translation>Eludir VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
-        <source>SplitTunnelRowBase --- Only VPN</source>
-        <translation>Solo VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
-        <source>SplitTunnelRowBase --- Use VPN</source>
-        <translation>Usar VPN</translation>
+    <name>Client</name>
+    <message>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+        <source>Client --- %1 - Best</source>
+        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
+        <translation>%1 - El mejor</translation>
     </message>
 </context>
 <context>
     <name>ClientNotifications</name>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
-        <translation>Tu IP dedicada caducará en %1 días.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
-        <source>ClientNotifications --- Get a new one</source>
-        <translation>Obtén una nueva</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
-        <source>ClientNotifications --- Your dedicated IP was updated.</source>
-        <translation>Tu IP dedicada perfil se actualizó.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
-        <translation>Tu IP dedicada caducará en 1 día.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
-        <translation>Tu IP dedicada caducará hoy.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
-        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
-        <translation>La versión del sistema operativo ya no es compatible. Actualiza para recibir las actualizaciones más recientes de PIA.</translation>
-    </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
@@ -747,6 +533,11 @@
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
         <source>ClientNotifications --- Download of version %1 failed.</source>
         <translation>Falló la descarga de la versión %1.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>La versión del sistema operativo ya no es compatible. Actualiza para recibir las actualizaciones más recientes de PIA.</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
@@ -974,6 +765,34 @@
         <translation>Renovar</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>Tu IP dedicada caducará en %1 días.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>Tu IP dedicada caducará en 1 día.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>Tu IP dedicada caducará hoy.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>Obtén una nueva</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>Tu IP dedicada perfil se actualizó.</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
@@ -1007,21 +826,341 @@
         <translation>La aplicación se ha cerrado de forma inesperada. Tu conexión VPN se ha conservado.</translation>
     </message>
     <message>
-    <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>Aprueba la extensión de túnel dividido para habilitar esta función.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>La función de túnel dividido está bloqueada por macOS hasta que se apruebe de forma manual. Las reglas de túnel dividido no tienen efecto.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- Security Preferences</source>
-        <translation>Preferencias de seguridad</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
         <source>ClientNotifications --- The virtual network adapter is not installed.</source>
         <translation>El adaptador de red virtual no está instalado.</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectButton</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
+        <source>ConnectButton --- Toggle connection</source>
+        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
+        <translation>Activar conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
+        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
+        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
+        <translation>Reanuda el funcionamiento y se reconecta; suspendida y desconectada en este momento.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
+        <source>ConnectButton --- Connect to VPN, error has occurred</source>
+        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
+        <translation>Conectar a VPN, se ha producido un error</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
+        <source>ConnectButton --- Connect to VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
+        <translation>Conectar a VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
+        <source>ConnectButton --- Disconnect from VPN, connecting</source>
+        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
+        <translation>Desconectar de VPN, conectando</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
+        <source>ConnectButton --- Disconnect from VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
+        <translation>Desconectar de VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
+        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
+        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
+        <translation>Desconectar de VPN, desconectando</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectPage</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
+        <source>ConnectPage --- Connect page</source>
+        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
+        <translation>Página de conexión</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
+        <source>ConnectionModule --- Connection tile</source>
+        <extracomment>Screen reader annotation for the Connection tile</extracomment>
+        <translation>Casilla de conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
+        <source>ConnectionModule --- CONNECTION</source>
+        <translation>CONEXIÓN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
+        <source>ConnectionModule --- Protocol</source>
+        <translation>Protocolo</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>Protocolo: </translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>Protocolo de seguridad estable y fiable con más de 18 años de desarrollo de código abierto.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>Protocolo más moderno y eficaz con potencial para un mayor rendimiento.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>Ajustes de OpenVPN®</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>Ajustes de WireGuard®</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>Marcas registradas.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <source>ConnectionPage --- Handshake and Authentication Settings</source>
+        <translation>Ajustes de conexión y autentificación</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>¿Qué significan estos ajustes?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>Todos los nombres de empresas y productos son marcas comerciales™ o marcas comerciales registradas® de sus respectivos propietarios. Su uso no implica ninguna afiliación con ellos ni consentimiento por su parte.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN® es una marca registrada de OpenVPN Technologies, Inc.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard® es una marca registrada de Jason A. Donenfeld, persona física.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="89"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <translation>La configuración del proxy de Shadowsocks requiere TCP.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="119"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
+        <source>ConnectionPage --- Local Port</source>
+        <translation>Puerto local</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="131"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
+        <source>ConnectionPage --- Auto</source>
+        <translation>Automático</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="135"/>
+        <source>ConnectionPage --- Configuration Method</source>
+        <translation>Método de configuración</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
+        <source>ConnectionPage --- DHCP</source>
+        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
+        <translation>DHCP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="146"/>
+        <source>ConnectionPage --- Static</source>
+        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
+        <translation>Estático</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
+        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
+        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
+        <translation>Determina cómo se configuran las direcciones en el adaptador TAP. Si tienes problemas para conectarte, puede que un método diferente sea más fiable.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
+        <translation>Advertencia: tu tráfico se envía sin encriptar y es vulnerable a interceptaciones.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <source>ConnectionPage --- Proxy</source>
+        <translation>Proxy</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <source>ConnectionPage --- SOCKS5 Proxy...</source>
+        <translation>Proxy SOCKS5...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <source>ConnectionPage --- None</source>
+        <translation>Ninguno</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <source>ConnectionPage --- SOCKS5 Proxy</source>
+        <translation>Proxy SOCKS5</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <source>ConnectionPage --- Server IP Address</source>
+        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
+        <translation>Dirección IP del servidor</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <source>ConnectionPage --- Port</source>
+        <translation>Puerto</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+        <source>ConnectionPage --- Default</source>
+        <translation>Predeterminado</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <source>ConnectionPage --- User (optional)</source>
+        <translation>Usuario (opcional)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <source>ConnectionPage --- Password (optional)</source>
+        <translation>Contraseña (opcional)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
+        <source>ConnectionPage --- Use Small Packets</source>
+        <translation>Usar paquetes pequeños</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
+        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+        <translation>Configure una MTU menor para la conexión a la VPN. Esto puede hacer que las velocidades de transferencia sean inferiores, pero que las malas conexiones sean más fiables.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <source>ConnectionPage --- Try Alternate Settings</source>
+        <translation>Probar configuración alternativa</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
+        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
+        <translation>Si el tipo de conexión y el puerto remoto anteriores no funcionan, se prueba con otra configuración automáticamente.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
+        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
+        <translation>Se pueden usar ajustes alternativos si se configura un proxy.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+        <source>ConnectionPage --- Connection Type</source>
+        <translation>Tipo de conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+        <source>ConnectionPage --- Remote Port</source>
+        <translation>Puerto remoto</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+        <source>ConnectionPage --- Data Encryption</source>
+        <translation>Encriptado de datos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+        <source>ConnectionPage --- Data Authentication</source>
+        <translation>Autenticación de datos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+        <source>ConnectionPage --- Handshake</source>
+        <translation>Apretón de manos</translation>
+    </message>
+</context>
+<context>
+    <name>DaemonAccount</name>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
+        <source>DaemonAccount --- Deactivated</source>
+        <translation>Desactivado</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
+        <source>DaemonAccount --- One Month Plan</source>
+        <translation>Plan de un mes</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
+        <source>DaemonAccount --- Three Month Plan</source>
+        <translation>Plan de tres meses</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
+        <source>DaemonAccount --- Six Month Plan</source>
+        <translation>Plan de seis meses</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <source>DaemonAccount --- One Year Plan</source>
+        <translation>Plan de un año</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
+        <source>DaemonAccount --- Two Year Plan</source>
+        <translation>Plan de dos años</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <source>DaemonAccount --- Three Year Plan</source>
+        <translation>Plan de tres años</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <source>DaemonAccount --- Trial</source>
+        <translation>Prueba</translation>
+    </message>
+</context>
+<context>
+    <name>DashboardPopup</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
+        <source>DashboardPopup --- PIA Dashboard</source>
+        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
+        <translation>Panel de control de PIA</translation>
     </message>
 </context>
 <context>
@@ -1157,1473 +1296,6 @@
         <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
         <source>DedicatedIpSubtitle --- DEDICATED IP</source>
         <translation>IP DEDICADA</translation>
-    </message>
-</context>
-<context>
-    <name>RegionListView</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
-        <source>RegionListView --- Detail</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
-        <translation>Información</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
-        <source>RegionListView --- Region</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
-        <translation>Región</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
-        <source>RegionListView --- Latency</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
-        <translation>Latencia</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
-        <source>RegionListView --- Favorite</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
-        <translation>Favoritos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>Lista de región</translation>
-    </message>
-</context>
-<context>
-    <name>RegionRowLabels</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
-        <source>RegionRowLabels --- offline</source>
-        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
-        <translation>sin conexión</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>IP dedicada</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>Preferencias de IP dedicada</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>General</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>Cuenta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>Privacidad</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>Red</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>Conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Proxy</source>
-        
-        <translation>Proxy</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>Ayuda</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>Preferencias generales</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>Información de la cuenta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>Preferencias de privacidad</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>Preferencias de la red</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>Preferencias de la conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        
-        <translation>Preferencias de proxy</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>Ayuda</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="143"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>Alerta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="177"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>Configuración</translation>
-    </message>
-</context>
-<context>
-    <name>TrayMenuBuilder</name>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
-        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
-        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
-        <translation>Conectar a IP dedicada</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
-        <source>TrayMenuBuilder --- Connect to region</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>Conectar a región</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
-        <source>TrayMenuBuilder --- Help</source>
-        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
-        <translation>Ayuda</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
-        <source>TrayMenuBuilder --- Show Window</source>
-        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
-        <translation>Mostrar ventana</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
-        <source>TrayMenuBuilder --- Resume Connection</source>
-        <translation>Reanudar conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
-        <source>TrayMenuBuilder --- Connect (Auto)</source>
-        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
-        <translation>Conectar (automáticamente)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
-        <source>TrayMenuBuilder --- Connect (%1)</source>
-        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
-        <translation>Conectar (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
-        <source>TrayMenuBuilder --- Disconnect</source>
-        <extracomment>Menu command to disconnect from the VPN.</extracomment>
-        <translation>Desconectar</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
-        <source>TrayMenuBuilder --- Snooze</source>
-        <translation>Suspender</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
-        <source>TrayMenuBuilder --- 5 Minutes</source>
-        <translation>5 minutos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
-        <source>TrayMenuBuilder --- 10 Minutes</source>
-        <translation>10 minutos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
-        <source>TrayMenuBuilder --- 15 Minutes</source>
-        <translation>15 minutos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
-        <source>TrayMenuBuilder --- 30 Minutes</source>
-        <translation>30 minutos</translation>
-    </message>
-    <message>
-    <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>Conectar a</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
-        <source>TrayMenuBuilder --- Log In</source>
-        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
-        <translation>Iniciar sesión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
-        <source>TrayMenuBuilder --- Settings...</source>
-        <extracomment>Menu command to open the settings dialog.</extracomment>
-        <translation>Ajustes...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
-        <source>TrayMenuBuilder --- Enable Debug Logging</source>
-        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
-        <translation>Habilitar registro de depuración</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
-        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
-        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
-        <translation>Enviar registros de depuración...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
-        <source>TrayMenuBuilder --- Changelog</source>
-        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
-        <translation>Registro de cambios</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
-        <source>TrayMenuBuilder --- Support Portal</source>
-        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
-        <translation>Portal de asistencia</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
-        <source>TrayMenuBuilder --- Blog</source>
-        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
-        <translation>Blog</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
-        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
-        <translation>Copiar IP pública (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
-        <source>TrayMenuBuilder --- Copy Public IP</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
-        <translation>Copiar IP pública</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
-        <translation>Copiar puerto reenviado (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
-        <translation>Copiar puerto reenviado</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
-        <source>TrayMenuBuilder --- Quit</source>
-        <extracomment>Menu command to quit the application.</extracomment>
-        <translation>Salir</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
-        <source>ConnectionPage --- Handshake and Authentication Settings</source>
-        <translation>Ajustes de conexión y autentificación</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
-        <source>ConnectionPage --- Protocol: </source>
-        <translation>Protocolo: </translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
-        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
-        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
-        <translation>Protocolo de seguridad estable y fiable con más de 18 años de desarrollo de código abierto.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
-        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
-        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
-        <translation>Protocolo más moderno y eficaz con potencial para un mayor rendimiento.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
-        <source>ConnectionPage --- OpenVPN® Settings</source>
-        <translation>Ajustes de OpenVPN®</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
-        <source>ConnectionPage --- WireGuard® Settings</source>
-        <translation>Ajustes de WireGuard®</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
-        <source>ConnectionPage --- Trademarks</source>
-        <translation>Marcas registradas.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>¿Qué significan estos ajustes?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
-        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
-        <translation>Todos los nombres de empresas y productos son marcas comerciales™ o marcas comerciales registradas® de sus respectivos propietarios. Su uso no implica ninguna afiliación con ellos ni consentimiento por su parte.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
-        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
-        <translation>OpenVPN® es una marca registrada de OpenVPN Technologies, Inc.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
-        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
-        <translation>WireGuard® es una marca registrada de Jason A. Donenfeld, persona física.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="88"/>
-        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
-        <translation>La configuración del proxy de Shadowsocks requiere TCP.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="118"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
-        <source>ConnectionPage --- Local Port</source>
-        <translation>Puerto local</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="130"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
-        <source>ConnectionPage --- Auto</source>
-        <translation>Automático</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="134"/>
-        <source>ConnectionPage --- Configuration Method</source>
-        <translation>Método de configuración</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="141"/>
-        <source>ConnectionPage --- DHCP</source>
-        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
-        <translation>DHCP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="145"/>
-        <source>ConnectionPage --- Static</source>
-        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
-        <translation>Estático</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="150"/>
-        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
-        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
-        <translation>Determina cómo se configuran las direcciones en el adaptador TAP. Si tienes problemas para conectarte, puede que un método diferente sea más fiable.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
-        <source>ConnectionPage --- None</source>
-        <translation>Ninguno</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="167"/>
-        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
-        <translation>Advertencia: tu tráfico se envía sin encriptar y es vulnerable a interceptaciones.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
-        <translation>Advertencia: tu tráfico no está autenticado y es vulnerable a manipulaciones.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
-        <translation>Este apretón de manos depende de una curva elíptica avalada por organismos de normas estadounidenses.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="178"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
-        <source>ConnectionPage --- Use Small Packets</source>
-        <translation>Usar paquetes pequeños</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="182"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
-        <translation>Configure una MTU menor para la conexión a la VPN. Esto puede hacer que las velocidades de transferencia sean inferiores, pero que las malas conexiones sean más fiables.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="186"/>
-        <source>ConnectionPage --- Try Alternate Settings</source>
-        <translation>Probar configuración alternativa</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="195"/>
-        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
-        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
-        <translation>Si el tipo de conexión y el puerto remoto anteriores no funcionan, se prueba con otra configuración automáticamente.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="203"/>
-        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
-        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
-        <translation>Se pueden usar ajustes alternativos si se configura un proxy.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
-        <source>ConnectionPage --- Proxy</source>
-        <translation>Proxy</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
-        <source>ConnectionPage --- SOCKS5 Proxy...</source>
-        <translation>Proxy SOCKS5...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
-        <source>ConnectionPage --- SOCKS5 Proxy</source>
-        <translation>Proxy SOCKS5</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
-        <source>ConnectionPage --- Server IP Address</source>
-        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
-        <translation>Dirección IP del servidor</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
-        <source>ConnectionPage --- Port</source>
-        <translation>Puerto</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
-        <source>ConnectionPage --- Default</source>
-        <translation>Predeterminado</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
-        <source>ConnectionPage --- User (optional)</source>
-        <translation>Usuario (opcional)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
-        <source>ConnectionPage --- Password (optional)</source>
-        <translation>Contraseña (opcional)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
-        <source>ConnectionPage --- Connection Type</source>
-        <translation>Tipo de conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
-        <source>ConnectionPage --- Remote Port</source>
-        <translation>Puerto remoto</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
-        <source>ConnectionPage --- Data Encryption</source>
-        <translation>Encriptado de datos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
-        <source>ConnectionPage --- Data Authentication</source>
-        <translation>Autenticación de datos</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
-        <source>ConnectionPage --- Handshake</source>
-        <translation>Apretón de manos</translation>
-    </message>
-</context>
-<context>
-    <name>HelpPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
-        <source>HelpPage --- Show service communication messages</source>
-        <translation>Mostrar mensajes de comunicación de servicio</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
-        <source>HelpPage --- Version</source>
-        <translation>Versión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
-        <source>HelpPage --- Client:</source>
-        <translation>Cliente:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
-        <source>HelpPage --- Daemon:</source>
-        <translation>Daemon:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
-        <source>HelpPage --- Changelog</source>
-        <translation>Registro de cambios</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
-        <source>HelpPage --- Quick Tour</source>
-        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
-        <translation>Visita rápida</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
-        <source>HelpPage --- Receive Beta Updates</source>
-        <translation>Recibir actualizaciones de la beta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
-        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
-        <translation>Únete a nuestro programa de la beta para probar nuevas características y proporcionar opiniones.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
-        <source>HelpPage --- Network</source>
-        <translation>Red</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Current</source>
-        <translation>Actual</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Next Generation</source>
-        <translation>Nueva generación</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
-        <source>HelpPage --- Include Geo-Located Regions</source>
-        <translation>Incluye regiones geolocalizadas.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
-        <source>HelpPage --- Support</source>
-        <translation>Soporte</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
-        <source>HelpPage --- Disable Accelerated Graphics</source>
-        <translation>Deshabilitar gráficos acelerados</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
-        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
-        <translation>Reinicia Private Internet Access para aplicar este ajuste</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
-        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
-        <translation>Los gráficos acelerados reducen el uso de CPU y habilitan los efectos gráficos, pero pueden provocar problemas con algunas tarjetas gráficas o controladores.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="218"/>
-        <source>HelpPage --- Enable Debug Logging</source>
-        <translation>Habilitar el registro de depuración</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
-        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
-        <translation>Guarda los registros de depuración, los cuales pueden enviarse a soporte técnico para ayudar a resolver problemas.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="235"/>
-        <source>HelpPage --- Submit Debug Logs</source>
-        <translation>Enviar registros de depuración</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Support Portal</source>
-        <translation>Portal de asistencia</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="253"/>
-        <source>HelpPage --- Maintenance</source>
-        <translation>Mantenimiento</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="263"/>
-        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
-        <translation>Reinstalar el adaptador de red de OpenVPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="264"/>
-        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
-        <translation>Reinstalando el adaptador de red de OpenVPN...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="274"/>
-        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
-        <translation>Reinstalar el adaptador de red de WireGuard</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="275"/>
-        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
-        <translation>Reinstalando el adaptador de red de WireGuard...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>Reinstalando filtro de túnel dividido...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>Reinstalar filtro de túnel dividido</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>El filtro de túnel dividido se reinstaló.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="363"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>Desinstalar Private Internet Access</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="404"/>
-        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
-        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
-        <translation>No se pudo ejecutar el comando en el terminal. Instala un terminal compatible con x-terminal-emulator.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
-        <source>HelpPage --- Unable to open terminal</source>
-        <translation>Deshabilitar para abrir el terminal</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="415"/>
-        <source>HelpPage --- v%1</source>
-        <translation>v%1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>Esperando que se desconecte...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>No se puede reinstalar el adaptador de red mientras esté conectado. ¿Deseas desconectar y reinstalar ahora?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>Es necesario desconectar</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>Se ha reinstalado correctamente el adaptador de red.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>Se ha reinstalado correctamente el adaptador de red. Es posible que necesites reiniciar tu sistema.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>Se produjo un error mientras se intentaba reinstalar el adaptador de red.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
-        <source>HelpPage --- Reinstall successful</source>
-        <translation>Reinstalación exitosa</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
-        <source>HelpPage --- Reinstall error</source>
-        <translation>Error de reinstalación</translation>
-    </message>
-</context>
-<context>
-    <name>AccountModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
-        <source>AccountModule --- Subscription tile</source>
-        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
-        <translation>Casilla de suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
-        <source>AccountModule --- SUBSCRIPTION</source>
-        <translation>SUSCRIPCIÓN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
-        <source>AccountModule --- Subscription</source>
-        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
-        <translation>Suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
-        <source>AccountModule --- Expired</source>
-        <translation>Expiró</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
-        <source>AccountModule --- (%1 days left)</source>
-        <translation>(%1 días restantes)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Expired on</source>
-        <translation>Expiró el</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Renews on</source>
-        <translation>Se renueva el</translation>
-    </message>
-</context>
-<context>
-    <name>AccountPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
-        <source>AccountPage --- Username</source>
-        <translation>Nombre de usuario</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
-        <source>AccountPage --- Subscription</source>
-        <translation>Suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
-        <source>AccountPage --- Expired</source>
-        <translation>Expiró</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
-        <source>AccountPage --- (expired on %1)</source>
-        <translation>(expiró el %1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
-        <source>AccountPage --- (renews on %1)</source>
-        <translation>(se renueva el %1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
-        <source>AccountPage --- (expires on %1)</source>
-        <translation>(expira el %1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Renews in %1 days</source>
-        <translation>Se renueva en %1 días</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Expires in %1 days</source>
-        <translation>Expira en %1 días</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>Comprar suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>Administrar suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>Renovar suscripción</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>Administrar mi cuenta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
-        <source>AccountPage --- Logout / Switch Account</source>
-        <translation>Cerrar sesión / Cambiar de cuenta</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
-        <source>AccountPage --- Not logged in</source>
-        <translation>No conectado</translation>
-    </message>
-</context>
-<context>
-    <name>BelowFold</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
-        <source>BelowFold --- DEFAULT DISPLAY</source>
-        <translation>VISUALIZACIÓN PREDETERMINADA</translation>
-    </message>
-</context>
-<context>
-    <name>BetaAgreementDialog</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
-        <source>BetaAgreementDialog --- Agreement</source>
-        <translation>Acuerdo</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
-        <source>BetaAgreementDialog --- Accept</source>
-        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
-        <translation>Aceptar</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
-        <source>BetaAgreementDialog --- Decline</source>
-        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
-        <translation>Rechazar</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
-        <source>BetaAgreementDialog --- Agreement text</source>
-        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
-        <translation>Texto del acuerdo</translation>
-    </message>
-</context>
-<context>
-    <name>Client</name>
-    <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
-        <source>Client --- %1 - Best</source>
-        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
-        <translation>%1 - El mejor</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectButton</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
-        <source>ConnectButton --- Toggle connection</source>
-        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
-        <translation>Activar conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
-        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
-        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
-        <translation>Reanuda el funcionamiento y se reconecta; suspendida y desconectada en este momento.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
-        <source>ConnectButton --- Connect to VPN, error has occurred</source>
-        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
-        <translation>Conectar a VPN, se ha producido un error</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
-        <source>ConnectButton --- Connect to VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
-        <translation>Conectar a VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
-        <source>ConnectButton --- Disconnect from VPN, connecting</source>
-        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
-        <translation>Desconectar de VPN, conectando</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
-        <source>ConnectButton --- Disconnect from VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
-        <translation>Desconectar de VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
-        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
-        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
-        <translation>Desconectar de VPN, desconectando</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectPage</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
-        <source>ConnectPage --- Connect page</source>
-        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
-        <translation>Página de conexión</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
-        <source>ConnectionModule --- Connection tile</source>
-        <extracomment>Screen reader annotation for the Connection tile</extracomment>
-        <translation>Casilla de conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
-        <source>ConnectionModule --- CONNECTION</source>
-        <translation>CONEXIÓN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
-        <source>ConnectionModule --- Protocol</source>
-        <translation>Protocolo</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonAccount</name>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
-        <source>DaemonAccount --- Deactivated</source>
-        <translation>Desactivado</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
-        <source>DaemonAccount --- One Month Plan</source>
-        <translation>Plan de un mes</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
-        <source>DaemonAccount --- Three Month Plan</source>
-        <translation>Plan de tres meses</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
-        <source>DaemonAccount --- Six Month Plan</source>
-        <translation>Plan de seis meses</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
-        <source>DaemonAccount --- One Year Plan</source>
-        <translation>Plan de un año</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
-        <source>DaemonAccount --- Two Year Plan</source>
-        <translation>Plan de dos años</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
-        <source>DaemonAccount --- Three Year Plan</source>
-        <translation>Plan de tres años</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
-        <source>DaemonAccount --- Trial</source>
-        <translation>Prueba</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonData</name>
-    <message>
-    <source>DaemonData --- AU Melbourne</source>
-        <translation>AU Melbourne</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Perth</source>
-        <translation>AU Perth</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Sydney</source>
-        <translation>AU Sídney</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Albania</source>
-        <translation>Albania</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Algeria</source>
-        <translation>Argelia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Andorra</source>
-        <translation>Andorra</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Argentina</source>
-        <translation>Argentina</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Armenia</source>
-        <translation>Armenia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Australia</source>
-        <translation>Australia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Austria</source>
-        <translation>Austria</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bahamas</source>
-        <translation>Bahamas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bangladesh</source>
-        <translation>Bangladesh</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belarus</source>
-        <translation>Bielorrusia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belgium</source>
-        <translation>Bélgica</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bosnia and Herzegovina</source>
-        <translation>Bosnia - Herzegovina</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Brazil</source>
-        <translation>Brasil</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bulgaria</source>
-        <translation>Bulgaria</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Montreal</source>
-        <translation>CA Montreal</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Ontario</source>
-        <translation>CA Ontario</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Toronto</source>
-        <translation>CA Toronto</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Vancouver</source>
-        <translation>CA Vancouver</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cambodia</source>
-        <translation>Camboya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Canada</source>
-        <translation>Canadá</translation>
-    </message>
-    <message>
-    <source>DaemonData --- China</source>
-        <translation>China</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cyprus</source>
-        <translation>Chipre</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Croatia</source>
-        <translation>Croacia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Czech Republic</source>
-        <translation>República Checa</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Berlin</source>
-        <translation>DE Berlín</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Frankfurt</source>
-        <translation>DE Frankfurt</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Denmark</source>
-        <translation>Dinamarca</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Egypt</source>
-        <translation>Egipto</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Estonia</source>
-        <translation>Estonia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Finland</source>
-        <translation>Finlandia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- France</source>
-        <translation>Francia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Germany</source>
-        <translation>Alemania</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Georgia</source>
-        <translation>Georgia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greece</source>
-        <translation>Grecia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greenland</source>
-        <translation>Groenlandia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hong Kong</source>
-        <translation>Hong Kong</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hungary</source>
-        <translation>Hungría</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iceland</source>
-        <translation>Islandia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- India</source>
-        <translation>India</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iran</source>
-        <translation>Irán</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ireland</source>
-        <translation>Irlanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Isle of Man</source>
-        <translation>Isla de Man</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Israel</source>
-        <translation>Israel</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Italy</source>
-        <translation>Italia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Japan</source>
-        <translation>Japón</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Kazakhstan</source>
-        <translation>Kazajistán</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Latvia</source>
-        <translation>Letonia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Liechtenstein</source>
-        <translation>Liechtenstein</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Lithuania</source>
-        <translation>Lituania</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Luxembourg</source>
-        <translation>Luxemburgo</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macao</source>
-        <translation>Macao</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macau</source>
-        <translation>Macao</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malaysia</source>
-        <translation>Malasia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malta</source>
-        <translation>Malta</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mexico</source>
-        <translation>México</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Moldova</source>
-        <translation>Moldavia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Monaco</source>
-        <translation>Mónaco</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mongolia</source>
-        <translation>Mongolia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Montenegro</source>
-        <translation>Montenegro</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Morocco</source>
-        <translation>Marruecos</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Netherlands</source>
-        <translation>Países Bajos</translation>
-    </message>
-    <message>
-    <source>DaemonData --- New Zealand</source>
-        <translation>Nueva Zelanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Nigeria</source>
-        <translation>Nigeria</translation>
-    </message>
-    <message>
-    <source>DaemonData --- North Macedonia</source>
-        <translation>Macedonia del Norte</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Norway</source>
-        <translation>Noruega</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Panama</source>
-        <translation>Panamá</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Philippines</source>
-        <translation>Filipinas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Poland</source>
-        <translation>Polonia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Portugal</source>
-        <translation>Portugal</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Qatar</source>
-        <translation>Qatar</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Romania</source>
-        <translation>Rumanía</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Russia</source>
-        <translation>Rusia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Saudi Arabia</source>
-        <translation>Arabia Saudita</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Serbia</source>
-        <translation>Serbia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Singapore</source>
-        <translation>Singapur</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovakia</source>
-        <translation>Eslovaquia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovenia</source>
-        <translation>Eslovenia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- South Africa</source>
-        <translation>Sudáfrica</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Spain</source>
-        <translation>España</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sri Lanka</source>
-        <translation>Sri Lanka</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sweden</source>
-        <translation>Suecia</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Switzerland</source>
-        <translation>Suiza</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Taiwan</source>
-        <translation>Taiwán</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Turkey</source>
-        <translation>Turquía</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UAE</source>
-        <translation>EAU</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK London</source>
-        <translation>Reino Unido Londres</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Manchester</source>
-        <translation>Reino Unido Manchester</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Southampton</source>
-        <translation>Reino Unido Southampton</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Atlanta</source>
-        <translation>EE. UU. Atlanta</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US California</source>
-        <translation>EE. UU. California</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Chicago</source>
-        <translation>EE. UU. Chicago</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Denver</source>
-        <translation>EE. UU. Denver</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US East</source>
-        <translation>EE. UU. Este</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Florida</source>
-        <translation>EE. UU. Florida</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Houston</source>
-        <translation>EE. UU. Houston</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Las Vegas</source>
-        <translation>EE. UU. Las Vegas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York City</source>
-        <translation>EE. UU. Nueva York</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York</source>
-        <translation>EE. UU. Nueva York</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Seattle</source>
-        <translation>EE. UU. Seattle</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Silicon Valley</source>
-        <translation>EE. UU. Silicon Valley</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Texas</source>
-        <translation>EE. UU. Texas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Washington DC</source>
-        <translation>EE. UU. Washington DC</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US West</source>
-        <translation>EE. UU. Oeste</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ukraine</source>
-        <translation>Ucrania</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Arab Emirates</source>
-        <translation>Emiratos Árabes Unidos</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Kingdom</source>
-        <translation>Reino Unido</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United States</source>
-        <translation>Estados Unidos</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Venezuela</source>
-        <translation>Venezuela</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Vietnam</source>
-        <translation>Vietnam</translation>
-    </message>
-</context>
-<context>
-    <name>DashboardPopup</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
-        <source>DashboardPopup --- PIA Dashboard</source>
-        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
-        <translation>Panel de control de PIA</translation>
     </message>
 </context>
 <context>
@@ -2808,13 +1480,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="11"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="12"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>Prelanzamiento de la alfa</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="14"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="15"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>Prelanzamiento de la beta</translation>
@@ -2881,6 +1553,201 @@
         <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
         <source>HeaderBar --- Quit</source>
         <translation>Salir</translation>
+    </message>
+</context>
+<context>
+    <name>HelpPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
+        <source>HelpPage --- Version</source>
+        <translation>Versión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
+        <source>HelpPage --- Client:</source>
+        <translation>Cliente:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
+        <source>HelpPage --- Daemon:</source>
+        <translation>Daemon:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <source>HelpPage --- Changelog</source>
+        <translation>Registro de cambios</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <source>HelpPage --- Quick Tour</source>
+        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
+        <translation>Visita rápida</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <source>HelpPage --- Receive Beta Updates</source>
+        <translation>Recibir actualizaciones de la beta</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
+        <translation>Únete a nuestro programa de la beta para probar nuevas características y proporcionar opiniones.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <source>HelpPage --- Show service communication messages</source>
+        <translation>Mostrar mensajes de comunicación de servicio</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <source>HelpPage --- Network</source>
+        <translation>Red</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <source>HelpPage --- Include Geo-Located Regions</source>
+        <translation>Incluye regiones geolocalizadas.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <source>HelpPage --- Support</source>
+        <translation>Soporte</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <source>HelpPage --- Disable Accelerated Graphics</source>
+        <translation>Deshabilitar gráficos acelerados</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
+        <translation>Reinicia Private Internet Access para aplicar este ajuste</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
+        <translation>Los gráficos acelerados reducen el uso de CPU y habilitan los efectos gráficos, pero pueden provocar problemas con algunas tarjetas gráficas o controladores.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <source>HelpPage --- Enable Debug Logging</source>
+        <translation>Habilitar el registro de depuración</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
+        <translation>Guarda los registros de depuración, los cuales pueden enviarse a soporte técnico para ayudar a resolver problemas.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <source>HelpPage --- Submit Debug Logs</source>
+        <translation>Enviar registros de depuración</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <source>HelpPage --- Support Portal</source>
+        <translation>Portal de asistencia</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <source>HelpPage --- Maintenance</source>
+        <translation>Mantenimiento</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>Reinstalar el adaptador de red de OpenVPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>Reinstalando el adaptador de red de OpenVPN...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>Reinstalar el adaptador de red de WireGuard</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>Reinstalando el adaptador de red de WireGuard...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>Reinstalando filtro de túnel dividido...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>Reinstalar filtro de túnel dividido</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>El filtro de túnel dividido se reinstaló.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>Desinstalar Private Internet Access</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
+        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
+        <translation>No se pudo ejecutar el comando en el terminal. Instala un terminal compatible con x-terminal-emulator.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <source>HelpPage --- Unable to open terminal</source>
+        <translation>Deshabilitar para abrir el terminal</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <source>HelpPage --- v%1</source>
+        <translation>v%1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>Esperando que se desconecte...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>No se puede reinstalar el adaptador de red mientras esté conectado. ¿Deseas desconectar y reinstalar ahora?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>Es necesario desconectar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>Se ha reinstalado correctamente el adaptador de red.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>Se ha reinstalado correctamente el adaptador de red. Es posible que necesites reiniciar tu sistema.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>Se produjo un error mientras se intentaba reinstalar el adaptador de red.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
+        <source>HelpPage --- Reinstall successful</source>
+        <translation>Reinstalación exitosa</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
+        <source>HelpPage --- Reinstall error</source>
+        <translation>Error de reinstalación</translation>
     </message>
 </context>
 <context>
@@ -3007,6 +1874,36 @@
         <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
         <source>LoginPage --- Buy Account</source>
         <translation>Comprar cuenta</translation>
+    </message>
+</context>
+<context>
+    <name>Messages</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="49"/>
+        <source>Messages --- Wired Connection</source>
+        <translation>Conexión alámbrica</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="51"/>
+        <source>Messages --- Open Wi-Fi</source>
+        <translation>Abrir wifi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="53"/>
+        <source>Messages --- Protected Wi-Fi</source>
+        <translation>Wifi protegida</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="63"/>
+        <source>Messages --- Connect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>Conectar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="66"/>
+        <source>Messages --- Disconnect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>Desconectar</translation>
     </message>
 </context>
 <context>
@@ -3218,14 +2115,6 @@
         <translation>Túnel dividido</translation>
     </message>
     <message>
-    <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>Aprueba la extensión de túnel dividido para habilitar esta característica.</translation>
-    </message>
-    <message>
-    <source>NetworkPage --- Security Preferences</source>
-        <translation>Preferencias de seguridad</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="276"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>Instalando filtro de túnel dividido...</translation>
@@ -3285,7 +2174,7 @@
         <translation>Descartar mensaje: %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="215"/>
+        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="216"/>
         <source>Notification --- Stop</source>
         <extracomment>Screen reader annotation for the square &quot;Stop&quot; button on the message used to download an update.</extracomment>
         <translation>Detener</translation>
@@ -3738,28 +2627,22 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
-        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
-        <translation>Redirige la conexión VPN a través de una ubicación adicional.</translation>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
+<source>ProxyPage --- Configure...</source>
+        <translation>Configurar...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>Proxy SOCKS5 - %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
-        <source>ProxyPage --- Configure...</source>
-        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
-        <translation>Configurar...</translation>
     </message>
 </context>
 <context>
@@ -3792,6 +2675,63 @@
     </message>
 </context>
 <context>
+    <name>RatingControl</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <source>RatingControl --- Loading</source>
+        <translation>Cargando</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <source>RatingControl --- Something went wrong.</source>
+        <translation>Se produjo un problema.</translation>
+    </message>
+</context>
+<context>
+    <name>RatingRequestNotificationStatus</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
+        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
+        <translation>Valora tu experiencia con PIA.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="28"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].</source>
+        <extracomment>Shown after the user submits a positive rating to ask if they would rate us on Trustpilot. The text between brackets ([[....]]) is a link, please preserve the brackets around the corresponding text. Do not translate &apos;Trustpilot&apos; since it is a brand (even though link text is normally translated in PIA.)</extracomment>
+        <translation>Gracias por tus comentarios. Te agradeceríamos que pudieras valorarnos en [[Trustpilot]].</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="30"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
+        <translation>¡Gracias por tus comentarios!</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="32"/>
+        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
+        <translation>¡Gracias! Si tienes algún problema, ponte en contacto con el servicio de asistencia.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
+        <source>RatingRequestNotificationStatus --- Contact Support</source>
+        <translation>Contacto con el servicio de asistencia</translation>
+    </message>
+</context>
+<context>
+    <name>RatingStar</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
+        <source>RatingStar --- Star rating of: %1</source>
+        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
+        <translation>Valoración de estrellas de: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
+        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
+        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
+        <translation>Envía una valoración de estrellas de %1 de 5</translation>
+    </message>
+</context>
+<context>
     <name>ReconnectWarning</name>
     <message>
         <location filename="../../../client/res/components/settings/ReconnectWarning.qml" line="62"/>
@@ -3821,14 +2761,47 @@
     </message>
 </context>
 <context>
+    <name>RegionListView</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>Lista de región</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
+        <source>RegionListView --- Region</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
+        <translation>Región</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>Información</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
+        <source>RegionListView --- Latency</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
+        <translation>Latencia</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
+        <source>RegionListView --- Favorite</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
+        <translation>Favoritos</translation>
+    </message>
+</context>
+<context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="32"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="33"/>
         <source>RegionModule --- Auto</source>
         <translation>Automático</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="34"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="35"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>Automático (%1)</translation>
     </message>
@@ -3869,6 +2842,12 @@
 <context>
     <name>RegionPage</name>
     <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
+        <source>RegionPage --- Region list sort</source>
+        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
+        <translation>Ordenar lista de región</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/regions/RegionList.qml" line="79"/>
         <source>RegionPage --- Search...</source>
         <translation>Buscar...</translation>
@@ -3888,12 +2867,6 @@
         <source>RegionPage --- Back to Connect page</source>
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>Volver a la página de conexión</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
-        <source>RegionPage --- Region list sort</source>
-        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
-        <translation>Ordenar lista de región</translation>
     </message>
 </context>
 <context>
@@ -3926,6 +2899,65 @@
         <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ms</translation>
+    </message>
+</context>
+<context>
+    <name>RegionRowLabels</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>sin conexión</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMessages</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
+        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
+        <translation>Reinicia el equipo para finalizar la instalación del filtro de túnel dividido.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
+        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
+        <translation>El filtro de túnel dividido no se pudo instalar. Prueba a reiniciar tu equipo o ponte en contacto si este problema continúa.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
+        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
+        <translation>Esta característica requiere el Windows 7 Service Pack 1 o más reciente.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
+        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
+        <translation>Esta característica requiere iptables 1.6.1 o más reciente.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
+        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
+        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
+        <translation>Esta función requiere libnl-3, libnl-route-3 y libnl-genl-3.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
+        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
+        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+        <translation>Esta característica requiere que net_cls esté disponible en %1.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>Esta característica requiere eventos de proceso de kernel.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>Esta característica requiere OpenVPN.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard requiere Windows 8 o posterior.</translation>
     </message>
 </context>
 <context>
@@ -4184,11 +3216,61 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelSettings</name>
+    <name>SplitTunnelNameServersRow</name>
     <message>
-    <source>SplitTunnelSettings --- Applications</source>
-        <translation>Aplicaciones</translation>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
+        <source>SplitTunnelNameServersRow --- Name Servers</source>
+        <translation>Servidores de nombre</translation>
     </message>
+</context>
+<context>
+    <name>SplitTunnelRoutedRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
+        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
+<source>SplitTunnelRoutedRow --- Routed Packets</source>
+        <translation>Paquetes enrutados</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
+        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
+<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
+        <translation>Incluye la mayoría de contenedores y máquinas virtuales.</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
+        <source>SplitTunnelRowBase --- Bypass VPN</source>
+        <translation>Eludir VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
+        <source>SplitTunnelRowBase --- Only VPN</source>
+        <translation>Solo VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
+        <source>SplitTunnelRowBase --- Use VPN</source>
+        <translation>Usar VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
+        <source>SplitTunnelRowBase --- Follow App Rules</source>
+        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
+        <translation>Seguir reglas de la aplicación</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
+        <source>SplitTunnelRowBase --- VPN DNS Only</source>
+        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
+        <translation>Solo VPN DNS</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelSettings</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
         <source>SplitTunnelSettings --- App</source>
@@ -4383,6 +3465,153 @@
     </message>
 </context>
 <context>
+    <name>TrayMenuBuilder</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="24"/>
+        <source>TrayMenuBuilder --- Help</source>
+        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
+        <translation>Ayuda</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+        <source>TrayMenuBuilder --- Show Window</source>
+        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
+        <translation>Mostrar ventana</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <source>TrayMenuBuilder --- Resume Connection</source>
+        <translation>Reanudar conexión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <source>TrayMenuBuilder --- Connect (Auto)</source>
+        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
+        <translation>Conectar (automáticamente)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+        <source>TrayMenuBuilder --- Connect (%1)</source>
+        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
+        <translation>Conectar (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+        <source>TrayMenuBuilder --- Disconnect</source>
+        <extracomment>Menu command to disconnect from the VPN.</extracomment>
+        <translation>Desconectar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+        <source>TrayMenuBuilder --- Snooze</source>
+        <translation>Suspender</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+        <source>TrayMenuBuilder --- 5 Minutes</source>
+        <translation>5 minutos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+        <source>TrayMenuBuilder --- 10 Minutes</source>
+        <translation>10 minutos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+        <source>TrayMenuBuilder --- 15 Minutes</source>
+        <translation>15 minutos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+        <source>TrayMenuBuilder --- 30 Minutes</source>
+        <translation>30 minutos</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>Conectar a IP dedicada</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>Conectar a región</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
+        <source>TrayMenuBuilder --- Log In</source>
+        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
+        <translation>Iniciar sesión</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+        <source>TrayMenuBuilder --- Settings...</source>
+        <extracomment>Menu command to open the settings dialog.</extracomment>
+        <translation>Ajustes...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+        <source>TrayMenuBuilder --- Enable Debug Logging</source>
+        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
+        <translation>Habilitar registro de depuración</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
+        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
+        <translation>Enviar registros de depuración...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
+        <source>TrayMenuBuilder --- Changelog</source>
+        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
+        <translation>Registro de cambios</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
+        <source>TrayMenuBuilder --- Support Portal</source>
+        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
+        <translation>Portal de asistencia</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+        <source>TrayMenuBuilder --- Blog</source>
+        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
+        <translation>Blog</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
+        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
+        <translation>Copiar IP pública (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+        <source>TrayMenuBuilder --- Copy Public IP</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
+        <translation>Copiar IP pública</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
+        <translation>Copiar puerto reenviado (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
+        <translation>Copiar puerto reenviado</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
+        <source>TrayMenuBuilder --- Quit</source>
+        <extracomment>Menu command to quit the application.</extracomment>
+        <translation>Salir</translation>
+    </message>
+</context>
+<context>
     <name>UpdateNotificationStatus</name>
     <message>
         <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
@@ -4513,6 +3742,425 @@
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
 <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>Para obtener instrucciones de instalación específicas de la distribución, visita:</translation>
+    </message>
+</context>
+<context>
+    <name>winstaller</name>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
+        <source>winstaller --- Private Internet Access Installer</source>
+        <translation>Instalador de Private Internet Access</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
+        <source>winstaller --- %.0f SECONDS REMAINING</source>
+        <translation>RESTAN %.0f SEGUNDOS</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
+        <source>winstaller --- INSTALL</source>
+        <translation>INSTALAR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
+        <source>winstaller --- UNINSTALL</source>
+        <translation>DESINSTALAR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
+        <source>winstaller --- FINISH</source>
+        <translation>FINALIZAR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
+        <source>winstaller --- PREPARING</source>
+        <translation>PREPARANDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
+        <source>winstaller --- READY TO INSTALL</source>
+        <translation>LISTO PARA INSTALAR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
+        <source>winstaller --- INSTALLING</source>
+        <translation>INSTALANDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
+        <source>winstaller --- ABORTING</source>
+        <translation>CANCELANDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
+        <source>winstaller --- FINISHING UP</source>
+        <translation>FINALIZANDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
+        <source>winstaller --- CLEANING UP</source>
+        <translation>LIMPIANDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
+        <source>winstaller --- ROLLING BACK CHANGES</source>
+        <translation>DESHACIENDO CAMBIOS</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
+        <source>winstaller --- FINISHED</source>
+        <translation>FINALIZADO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
+        <source>winstaller --- ABORTED</source>
+        <translation>CANCELADO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
+        <source>winstaller --- UNPACKING</source>
+        <translation>DESCOMPRIMIENDO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
+        <source>winstaller --- COPYING FILES</source>
+        <translation>COPIANDO ARCHIVOS</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
+        <source>winstaller --- SHUTTING DOWN CLIENT</source>
+        <translation>CERRANDO CLIENTE</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
+        <source>winstaller --- STOPPING SERVICE</source>
+        <translation>DETENIENDO SERVICIO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
+        <source>winstaller --- UNREGISTERING SERVICE</source>
+        <translation>ANULANDO REGISTRO DE SERVICIO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
+        <source>winstaller --- REGISTERING SERVICE</source>
+        <translation>REGISTRANDO SERVICIO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
+        <source>winstaller --- STARTING SERVICE</source>
+        <translation>INICIANDO SERVICIO</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
+        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
+        <translation>QUITANDO ADAPTADOR DE RED</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
+        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
+        <translation>INSTALANDO ADAPTADOR DE RED</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
+        <source>winstaller --- BACKING UP FILES</source>
+        <translation>REALIZANDO COPIA DE SEGURIDAD DE ARCHIVOS</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
+        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
+        <translation>ELIMINANDO VERSIÓN ANTERIOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
+        <source>winstaller --- REMOVING FILES</source>
+        <translation>ELIMINANDO ARCHIVOS</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
+        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
+        <translation>ELIMINANDO CONTROLADOR DE LLAMADA</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
+        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
+        <translation>ACTUALIZANDO CONTROLADOR DE LLAMADA</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
+        <translation>No se pudo reconocer la instalación actual. ¿Deseas borrar el directorio completo?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
+        <source>winstaller --- Corrupt installation detected</source>
+        <translation>Instalación corrupta detectada</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
+        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
+        <translation>Hay archivos sueltos en el directorio de instalación. ¿Deseas borrarlos?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
+        <source>winstaller --- Files remaining</source>
+        <translation>Archivos restantes</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
+        <source>winstaller --- Do you want to abort the installation?</source>
+        <translation>¿Deseas cancelar la instalación?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
+        <source>winstaller --- Abort installation?</source>
+        <translation>¿Cancelar la instalación?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
+        <source>winstaller --- Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
+        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
+        <translation>Esto reemplazará tu instalación actual de Private Internet Access. Si después deseas regresar a la versión anterior, deberás realizar una reinstalación limpia. ¿Deseas continuar?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
+        <source>winstaller --- Replace existing version?</source>
+        <translation>¿Reemplazar la versión actual?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
+        <source>winstaller --- Unable to remove directory: %s</source>
+        <translation>No se pudo eliminar el directorio: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
+        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
+        <translation>Sal del Private Internet Access actual antes de continuar.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
+        <source>winstaller --- There was a problem uninstalling the existing version.</source>
+        <translation>Se produjo un problema a la hora de desinstalar la versión actual.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
+        <source>winstaller --- There are still clients running.</source>
+        <translation>Todavía se están ejecutando clientes.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
+        <source>winstaller --- Failed to stop the service.</source>
+        <translation>No se pudo detener el servicio.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
+        <source>winstaller --- A reboot is needed before installation can proceed.</source>
+        <translation>Es necesario reiniciar antes de que pueda continuar la instalación.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
+        <source>winstaller --- Service executable missing.</source>
+        <translation>Falta el ejecutable del servicio.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
+        <source>winstaller --- Service uninstallation failed.</source>
+        <translation>Falló la desinstalación del servicio.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
+        <source>winstaller --- The service installation failed.</source>
+        <translation>Falló la instalación del servicio.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
+        <source>winstaller --- The service failed to start.</source>
+        <translation>No se pudo iniciar el servicio.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
+        <source>winstaller --- Error uninstalling TAP driver.</source>
+        <translation>Error en la desinstalación del controlador de TAP.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
+        <source>winstaller --- The TAP driver was not approved for installation.</source>
+        <translation>No se aprobó la instalación del controlador de TAP.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
+        <source>winstaller --- The TAP driver installation failed.</source>
+        <translation>Falló la instalación de TAP.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
+        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
+        <translation>Private Internet Access requiere al menos Windows 7 para ejecutarse.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
+        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
+        <translation>La versión de 32 bits de Private Internet Access solo puede ejecutarse en una versión de 32 bits de Windows.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
+        <source>winstaller --- Failed to retrieve shell folder %s.</source>
+        <translation>No se pudo recuperar la carpeta de shell %s.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
+        <source>winstaller --- Out of memory.</source>
+        <translation>Memoria agotada.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
+        <source>winstaller --- Payload decompression error.</source>
+        <translation>Error de descompresión de carga.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
+        <source>winstaller --- Corrupted payload (CRC error).</source>
+        <translation>Carga corrupta (error de CRC).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
+        <source>winstaller --- Unable to create file: %s</source>
+        <translation>No se pudo crear el archivo: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
+        <source>winstaller --- Unable to write file: %s</source>
+        <translation>No se pudo escribir el archivo: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
+        <source>winstaller --- Unable to write entire file: %s</source>
+        <translation>No se pudo escribir el archivo completo: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
+        <source>winstaller --- Unable to initialize decompressor.</source>
+        <translation>No se pudo inicializar el descompresor.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
+        <source>winstaller --- Corrupted payload (invalid parameters).</source>
+        <translation>Carga corrupta (parámetros inválidos).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
+        <source>winstaller --- Unable to move %s</source>
+        <translation>No se pudo mover %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
+        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
+        <translation>No se pudo crear el directorio de regreso a la versión anterior. Si continúas, la instalación no podrá deshacer los cambios si se produce un error.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
+        <source>winstaller --- Unable to create directory: %s</source>
+        <translation>No se pudo crear el directorio: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
+        <source>winstaller --- The installer does not contain a recognizable payload.</source>
+        <translation>El instalador no contiene una carga reconocible.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
+        <source>winstaller --- Missing payload</source>
+        <translation>Carga faltante</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
+        <source>winstaller --- Error uninstalling callout driver.</source>
+        <translation>Error al desinstalar el controlador de llamada.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
+        <source>winstaller --- Callout driver installation failed.</source>
+        <translation>Error en la instalación del controlador de llamada.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>Error en la instalación de WireGuard.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>Error en la desinstalación de WireGuard.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>Error en la instalación de WinTUN.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>Error en la desinstalación de WinTUN.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
+        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
+        <translation>Usa el modo seguro con la conexión de red para instalar o desinstalar Private Internet Access.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
+        <source>winstaller --- Installation complete</source>
+        <translation>Instalación completada</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
+        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
+        <translation>Reinicia el equipo para usar Private Internet Access.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
+        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
+        <translation>Private Internet Access requiere Windows 8 o superior.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+        <source>winstaller --- The installation will now abort.</source>
+        <translation>Ahora se cancelará la instalación.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
+        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
+        <source>winstaller --- This is preventing the installation from proceeding.</source>
+        <translation>Esto evita que continúe la instalación.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
+        <source>winstaller --- Do you wish to continue the installation anyway?</source>
+        <translation>¿Deseas continuar con la instalación de todos modos?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
+        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
+        <translation>Puedes volver a intentarlo o tratar de continuar con la instalación de todas formas.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
+        <source>winstaller --- The uninstallation will now abort.</source>
+        <translation>Ahora se cancelará la desinstalación.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
+        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
+        <translation>¿Deseas continuar con la desinstalación de todos modos?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
+        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
+        <translation>Puedes volver a intentarlo o tratar de continuar con la desinstalación de todas formas.</translation>
     </message>
 </context>
 </TS>

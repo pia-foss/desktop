@@ -209,4 +209,6 @@ QtObject {
     readonly property string ratingStarFilled: Theme.imagePath + "/dashboard/connect/rating-star-filled.png"
     readonly property string ratingStarEmpty: Theme.imagePath + "/dashboard/connect/rating-star-empty.png"
     readonly property int ratingImageHeightPx: 25
+
+    readonly property color automationRuleBackgroundColor: Theme.dark ? "#2a2e39" : "#c2c8cc"
 }

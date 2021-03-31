@@ -419,6 +419,44 @@ SplitTunnelSubnetRule::SplitTunnelSubnetRule()
 
 }
 
+void AutomationRuleAction::trace(QDebug &dbg) const
+{
+    QDebugStateSaver save{dbg};
+    dbg.nospace() << "{connection: " << connection() << "}";
+}
+
+void AutomationRuleCondition::trace(QDebug &dbg) const
+{
+    QDebugStateSaver save{dbg};
+    bool wroteAnything = false;
+    dbg.nospace() << "{";
+
+    if(ruleType() != QString(""))
+    {
+        dbg << "ruleType: " << ruleType();
+        wroteAnything = true;
+    }
+
+    if(ssid() != QString(""))
+    {
+        if(wroteAnything)
+            dbg << ", ";
+        dbg << "ssid: " << ssid();
+        wroteAnything = true;
+    }
+
+    if(!wroteAnything)
+        dbg << "<none>";    // No criteria in this condition
+    dbg << "}";
+}
+
+void AutomationRule::trace(QDebug &dbg) const
+{
+    QDebugStateSaver save{dbg};
+    dbg.nospace() << "{condition: " << condition() << ", action: " << action()
+        << "}";
+}
+
 DaemonSettings::DaemonSettings()
     : NativeJsonObject(SaveUnknownProperties)
 {

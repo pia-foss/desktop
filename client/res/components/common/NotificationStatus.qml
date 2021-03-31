@@ -31,6 +31,12 @@ QtObject {
   // 'clicked' per MessageWithLinks
   // By default, no links.
   property var links: []
+  // The message can also contain an embedded link, surrounded by [[...]].  If
+  // present, this function is invoked when the link is clicked.  This has no
+  // effect if no link is present; keyboard nav and accessibility are determined
+  // by checking for [[...]] in the message.
+  property var embedLinkClicked
+
   // Tip to display in an InfoTip in the client UI, if set
   // The InfoTip and dismiss X occupy the same part of the notification; a
   // notification shouldn't have both.

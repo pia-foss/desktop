@@ -484,7 +484,8 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // the only fix for that is to actually read the entire routing table.
         // Users can work around this by manually creating this route to the
         // SOCKS proxy.
-        if(isIpv4Local(remoteHost))
+        Ipv4Address remoteHostIpv4{remoteHost.toIPv4Address()};
+        if(remoteHostIpv4.isLoopback() || remoteHostIpv4.isPrivateUse())
         {
             qInfo() << "Not creating route for local proxy" << remoteHost;
         }
@@ -523,7 +524,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
         for(const auto &dnsServer : _connectingConfig.getDnsServers())
         {
-            if(!Ipv4Address{dnsServer}.isLoopback())
+            if(!Ipv4Address{dnsServer}.isLocalDNS())
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
         }
     }

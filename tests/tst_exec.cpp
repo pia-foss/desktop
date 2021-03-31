@@ -55,18 +55,23 @@ private slots:
         Exec::cmd(QStringLiteral("c0mmandDoesNotExist"), {}, false);
     }
 
-#ifdef Q_OS_UNIX
     void testCmdWithRegex()
     {
+// We need to use this wacky way of limiting tests to a specific
+// platform. If we did the obvious (wrap all the related methods in a single #ifdef)
+// then Qt MOC would not recognize those methods as tests, and would fail to execute them.
+#ifdef Q_OS_UNIX
         Executor executor{CURRENT_CATEGORY};
 
         // ls -a will return . and .. so the Regex will match the "."
         auto regexMatch = executor.cmdWithRegex(_command, _args, QRegularExpression{R"(\.)"});
         QVERIFY(regexMatch.hasMatch());
+#endif
     }
 
     void testBash()
     {
+#ifdef Q_OS_UNIX
         // Success
         auto result1 = Exec::bash(QStringLiteral("ls -a | grep ."), true);
         QVERIFY(result1 == 0);
@@ -75,10 +80,12 @@ private slots:
         // -a will return . and .. so grep -v . should always fail
         auto result2 = Exec::bash(QStringLiteral("ls -a | grep -v ."), true);
         QVERIFY(result2 != 0);
+#endif
     }
 
     void testCmdWithOutput()
     {
+#ifdef Q_OS_UNIX
         // Success
         auto output1 = Exec::cmdWithOutput(QStringLiteral("ls"), { QStringLiteral("/bin/bash") });
         QVERIFY(output1 == QStringLiteral("/bin/bash"));
@@ -86,11 +93,12 @@ private slots:
         // Failure
         auto output2 = Exec::cmdWithOutput(QStringLiteral("c0mmandDoesNotExist"), {});
         QVERIFY(output2.isEmpty());
-
+#endif
     }
 
     void testBashWithOutput()
     {
+#ifdef Q_OS_UNIX
         // Success
         auto output1 = Exec::bashWithOutput(QStringLiteral("ls /bin/bash | grep bash"));
         QVERIFY(output1 == QStringLiteral("/bin/bash"));
@@ -98,8 +106,8 @@ private slots:
         // Failure
         auto output2 = Exec::bashWithOutput(QStringLiteral("which bash | grep -v bash"));
         QVERIFY(output2.isEmpty());
-    }
 #endif
+    }
 };
 
 QTEST_GUILESS_MAIN(tst_exec)

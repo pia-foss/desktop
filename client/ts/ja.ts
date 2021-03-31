@@ -2,31 +2,417 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>自動化</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>一般</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>アカウント</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>プライバシー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>ネットワーク</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>自動化</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>専用IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>ヘルプ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>一般設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>アカウント情報</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>プライバシー設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>ネットワーク設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>接続設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>自動化環境設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>専用IP詳細設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>ヘルプ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>アラート</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>設定</translation>
+    </message>
+</context>
+<context>
+    <name>AccountModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
+        <source>AccountModule --- Subscription tile</source>
+        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
+        <translation>サブスクリプションタイル</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
+        <source>AccountModule --- SUBSCRIPTION</source>
+        <translation>サブスクリプション</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
+        <source>AccountModule --- Subscription</source>
+        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
+        <translation>サブスクリプション</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
+        <source>AccountModule --- Expired</source>
+        <translation>有効期限が切れました</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
+        <source>AccountModule --- (%1 days left)</source>
+        <translation>（残り%1日）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Expired on</source>
+        <translation>有効期限が切れた日:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Renews on</source>
+        <translation>次の更新日:</translation>
+    </message>
+</context>
+<context>
+    <name>AccountPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <source>AccountPage --- Username</source>
+        <translation>ユーザー名</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <source>AccountPage --- Subscription</source>
+        <translation>サブスクリプション</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <source>AccountPage --- Expired</source>
+        <translation>有効期限が切れました</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <source>AccountPage --- (expired on %1)</source>
+        <translation>（%1に有効期限が切れました）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <source>AccountPage --- (renews on %1)</source>
+        <translation>（%1に更新されます）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <source>AccountPage --- (expires on %1)</source>
+        <translation>（有効期限: %1）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Renews in %1 days</source>
+        <translation>%1日後に更新されます</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Expires in %1 days</source>
+        <translation>%1日後に有効期限が切れます</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>サブスクリプションを購入する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>サブスクリプションを管理する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>サブスクリプションを更新する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>アカウントを管理する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
+        <source>AccountPage --- Logout / Switch Account</source>
+        <translation>ログアウト/アカウントを切り替える</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
+        <source>AccountPage --- Not logged in</source>
+        <translation>ログインされていません</translation>
+    </message>
+</context>
+<context>
+    <name>ActiveRuleDisplay</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ActiveRuleDisplay.qml" line="117"/>
+        <source>ActiveRuleDisplay --- Open Automation Rule Settings</source>
+        <translation>自動化ルール設定を開く</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="48"/>
+        <source>AutomationAddRuleDialog --- Network</source>
+        <translation>ネットワーク</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
+        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+        <translation>自動化ルールタイプ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <source>AutomationAddRuleDialog --- RULE EXISTS</source>
+        <translation>ルールが存在します</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
+        <source>AutomationAddRuleDialog --- Rule</source>
+        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
+        <translation>ルール</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <source>AutomationAddRuleDialog --- Action</source>
+        <translation>アクション</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleRow.qml" line="21"/>
+        <source>AutomationAddRuleRow --- Add Automation Rule</source>
+        <translation>自動化ルールを追加</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="23"/>
+        <source>AutomationPage --- Connection Automation</source>
+        <translation>接続の自動化</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="29"/>
+        <source>AutomationPage --- Create rules to automatically connect or disconnect the VPN when you join a particular network.</source>
+        <extracomment>Text displayed in a tooltip for connection automation</extracomment>
+        <translation>特定のネットワークに参加したときの、VPNを自動的に接続または切断するルールを作成します。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="32"/>
+        <source>AutomationPage --- Help</source>
+        <extracomment>Help link for automation page</extracomment>
+        <translation>ヘルプ</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="23"/>
+        <source>AutomationRuleRow --- Remove</source>
+        <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="106"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>有効</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="187"/>
+        <source>AutomationRuleRow --- Remove Automation Rule</source>
+        <translation>自動化ルールを削除</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="197"/>
+        <source>AutomationRuleRow --- Remove %1?</source>
+        <extracomment>Message shown when removing an automation rule. &quot;%1&quot; is the name of a rule, which can be a standard rule like &quot;Protected Wi-Fi&quot;, &quot;Open Wi-Fi&quot;, or &quot;Wired&quot;, or it can be a network SSID for a rule created for a specific wireless network. For example - &quot;Remove Protected Wi-Fi?&quot;, or &quot;Remove Steve&apos;s House?&quot;</extracomment>
+        <translation>%1を削除しますか？</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationTable</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="27"/>
+        <source>AutomationTable --- Automation Rules</source>
+        <extracomment>Screen reader annotation for the name of the table</extracomment>
+        <translation>自動化ルール</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="86"/>
+        <source>AutomationTable --- Condition</source>
+        <extracomment>Name of the &quot;Condition&quot; table column, in the Automation table</extracomment>
+        <translation>状態</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="92"/>
+        <source>AutomationTable --- Action</source>
+        <extracomment>Name of the &quot;Action&quot; table column, in the automation table</extracomment>
+        <translation>アクション</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="98"/>
+        <source>AutomationTable --- Remove</source>
+        <extracomment>Name of the &quot;Remove&quot; table column, containing the remove button, in the automation table</extracomment>
+        <translation>削除</translation>
+    </message>
+</context>
+<context>
+    <name>BelowFold</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
+        <source>BelowFold --- DEFAULT DISPLAY</source>
+        <translation>デフォルト表示</translation>
+    </message>
+</context>
+<context>
+    <name>BetaAgreementDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
+        <source>BetaAgreementDialog --- Agreement</source>
+        <translation>合意</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
+        <source>BetaAgreementDialog --- Accept</source>
+        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
+        <translation>同意する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
+        <source>BetaAgreementDialog --- Decline</source>
+        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
+        <translation>同意しない</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
+        <source>BetaAgreementDialog --- Agreement text</source>
+        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
+        <translation>合意内容</translation>
+    </message>
+</context>
+<context>
     <name>ChangelogWindow</name>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuardの機能: ロケットに乗ったロボット</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>コマンドライン インターフェイス機能</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="86"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="181"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>変更ログ</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="85"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="169"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>新着情報</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <source>ChangelogWindow --- Checkmark bullet</source>
+        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
+        <translation>箇条書きチェックマーク</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
@@ -37,12 +423,6 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
         <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
         <translation>新しいより効率的なVPNプロトコル。次の機能を提供します:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
-        <source>ChangelogWindow --- Checkmark bullet</source>
-        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
-        <translation>箇条書きチェックマーク</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
@@ -70,10 +450,6 @@
         <translation>今すぐ WireGuard®を試す</translation>
     </message>
     <message>
-    <source>ChangelogWindow --- Open Settings</source>
-        <translation>[設定]を開く</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
         <source>ChangelogWindow --- Learn more</source>
         <translation>詳しく知る</translation>
@@ -82,6 +458,12 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
         <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
         <translation>WireGuard®を有効にするには再接続してください</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
+        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
+        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
+        <translation>WireGuardの機能: ロケットに乗ったロボット</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
@@ -99,6 +481,12 @@
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>弊社の包括的なスプリットトンネリング機能を使用すると、どのアプリがいつVPNを使用するかを制御できます。スプリットトンネル[[アプリの例]]をチェックして、何が可能かご覧ください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
+        <translation>コマンドライン インターフェイス機能</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
@@ -119,618 +507,16 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelRoutedRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
-        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
-<source>SplitTunnelRoutedRow --- Routed Packets</source>
-        <translation>ルーティングされたパケット</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
-        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
-<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
-        <translation>ほとんどのコンテナと仮想マシンが含まれます</translation>
-    </message>
-</context>
-<context>
-    <name>winstaller</name>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
-        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
-        <translation>Private Internet Access は Windows 8 以降を必要とします。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
-        <source>winstaller --- Private Internet Access Installer</source>
-        <translation>Private Internet Access インストーラ</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
-        <source>winstaller --- %.0f SECONDS REMAINING</source>
-        <translation>残り %.0f 秒</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
-        <source>winstaller --- INSTALL</source>
-        <translation>インストール</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
-        <source>winstaller --- UNINSTALL</source>
-        <translation>アンインストール</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
-        <source>winstaller --- FINISH</source>
-        <translation>終了</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
-        <source>winstaller --- PREPARING</source>
-        <translation>準備中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
-        <source>winstaller --- READY TO INSTALL</source>
-        <translation>インストール準備完了</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
-        <source>winstaller --- INSTALLING</source>
-        <translation>インストール中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
-        <source>winstaller --- ABORTING</source>
-        <translation>強制終了中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
-        <source>winstaller --- FINISHING UP</source>
-        <translation>終了中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
-        <source>winstaller --- CLEANING UP</source>
-        <translation>クリーニング中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
-        <source>winstaller --- ROLLING BACK CHANGES</source>
-        <translation>変更をロールバック中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
-        <source>winstaller --- FINISHED</source>
-        <translation>終了しました</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
-        <source>winstaller --- ABORTED</source>
-        <translation>強制終了しました</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
-        <source>winstaller --- UNPACKING</source>
-        <translation>梱包解除</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
-        <source>winstaller --- COPYING FILES</source>
-        <translation>ファイルをコピー中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
-        <source>winstaller --- SHUTTING DOWN CLIENT</source>
-        <translation>クライアントをシャットダウン中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
-        <source>winstaller --- STOPPING SERVICE</source>
-        <translation>サービスを停止中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
-        <source>winstaller --- UNREGISTERING SERVICE</source>
-        <translation>サービス登録解除中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
-        <source>winstaller --- REGISTERING SERVICE</source>
-        <translation>サービス登録中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
-        <source>winstaller --- STARTING SERVICE</source>
-        <translation>サービス開始中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
-        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
-        <translation>ネットワークアダプタを取消中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
-        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
-        <translation>ネットワークアダプタをインストール中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
-        <source>winstaller --- BACKING UP FILES</source>
-        <translation>ファイルをバックアップ中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
-        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
-        <translation>以前のバージョンを削除中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
-        <source>winstaller --- REMOVING FILES</source>
-        <translation>ファイルを削除中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
-        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
-        <translation>コールアウトドライバーを削除中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
-        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
-        <translation>コールアウトドライバーを更新中</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
-        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
-        <translation>既存するインストールを認識できません。全ディレクトリを削除しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
-        <source>winstaller --- Corrupt installation detected</source>
-        <translation>破損したインストールが検出されました</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
-        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
-        <translation>インストールディレクトリにストレイファイルがあります。ストレイファイルを削除しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
-        <source>winstaller --- Files remaining</source>
-        <translation>残りのファイル</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
-        <source>winstaller --- Do you want to abort the installation?</source>
-        <translation>インストールを強制終了しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
-        <source>winstaller --- Abort installation?</source>
-        <translation>インストールを強制終了しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
-        <source>winstaller --- Error</source>
-        <translation>エラー</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
-        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
-        <translation>この操作により、既存するインストール済みのPrivate Internet Accessが置き換えられます。以後のダウングレードでは、クリーン再インストールが必要となります。続行しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
-        <source>winstaller --- Replace existing version?</source>
-        <translation>既存バージョンと置き換えますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
-        <source>winstaller --- Unable to remove directory: %s</source>
-        <translation>ディレクトリを削除できません: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
-        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
-        <translation>先へ進む前に、既存のPrivate Internet Accessを終了してください。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
-        <source>winstaller --- There was a problem uninstalling the existing version.</source>
-        <translation>既存バージョンのアンインストール中に問題が発生しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
-        <source>winstaller --- There are still clients running.</source>
-        <translation>クライアントがまだ実行中です。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
-        <source>winstaller --- Failed to stop the service.</source>
-        <translation>サービスの停止に失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
-        <source>winstaller --- A reboot is needed before installation can proceed.</source>
-        <translation>インストールを先に進めるには再起動が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
-        <source>winstaller --- Service executable missing.</source>
-        <translation>サービス実行ファイルが欠落しています。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
-        <source>winstaller --- Service uninstallation failed.</source>
-        <translation>サービスのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
-        <source>winstaller --- The service installation failed.</source>
-        <translation>サービスのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
-        <source>winstaller --- The service failed to start.</source>
-        <translation>サービスの開始に失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
-        <source>winstaller --- Error uninstalling TAP driver.</source>
-        <translation>TAPドライバのアンインストール中にエラーが発生しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
-        <source>winstaller --- The TAP driver was not approved for installation.</source>
-        <translation>インストールのためのTAPドライバーが承認されていませんでした。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
-        <source>winstaller --- The TAP driver installation failed.</source>
-        <translation>TAPドライバのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
-        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
-        <translation>Private Internet Accessを実行するには最低でもWindows 7 が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
-        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
-        <translation>32ビットバージョンのPrivate Internet Accessは、32ビットバージョンのWindowsでのみ実行可能です。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
-        <source>winstaller --- Failed to retrieve shell folder %s.</source>
-        <translation>シェルフォルダ「%s」の取得に失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
-        <source>winstaller --- Out of memory.</source>
-        <translation>メモリ切れです。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
-        <source>winstaller --- Payload decompression error.</source>
-        <translation>ペイロード圧縮解除エラー。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
-        <source>winstaller --- Corrupted payload (CRC error).</source>
-        <translation>破損したペイロード（CRCエラー）。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
-        <source>winstaller --- Unable to create file: %s</source>
-        <translation>ファイルを作成できません: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
-        <source>winstaller --- Unable to write file: %s</source>
-        <translation>ファイルを書けません: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
-        <source>winstaller --- Unable to write entire file: %s</source>
-        <translation>全ファイルを書けません: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
-        <source>winstaller --- Unable to initialize decompressor.</source>
-        <translation>圧縮解除ソフトを初期化できません。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
-        <source>winstaller --- Corrupted payload (invalid parameters).</source>
-        <translation>破損したペイロード（無効なパラメータ）。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
-        <source>winstaller --- Unable to move %s</source>
-        <translation>%sを移動できません。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
-        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
-        <translation>ロールバックディレクトリを作成できません。先へ進むと、エラーがある場合、インストールは変更を取消すことができません。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
-        <source>winstaller --- Unable to create directory: %s</source>
-        <translation>ディレクトリを作成できません: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
-        <source>winstaller --- The installer does not contain a recognizable payload.</source>
-        <translation>インストーラに認識可能なペイロードが含まれていません。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
-        <source>winstaller --- Missing payload</source>
-        <translation>欠落しているペイロード</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
-        <source>winstaller --- Error uninstalling callout driver.</source>
-        <translation>コールアウトドライバーのアンインストール中にエラーが発生しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
-        <source>winstaller --- Callout driver installation failed.</source>
-        <translation>コールアウトドライバーのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
-        <source>winstaller --- WireGuard installation failed.</source>
-        <translation>WireGuardのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
-        <source>winstaller --- WireGuard uninstallation failed.</source>
-        <translation>WireGuardのアンインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
-        <source>winstaller --- WinTUN installation failed.</source>
-        <translation>WinTUNのインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
-        <source>winstaller --- WinTUN uninstallation failed.</source>
-        <translation>WinTUNのアンインストールに失敗しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
-        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
-        <translation>セーフモードとネットワークを使用して、Private Internet Accessをインストール、またはアンインストールします。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
-        <source>winstaller --- Installation complete</source>
-        <translation>インストール完了</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
-        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
-        <translation>Private Internet Accessを使用するにはコンピューターを再起動してください。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
-        <source>winstaller --- The installation will now abort.</source>
-        <translation>インストールが直ぐに強制終了されます。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
-        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
-        <source>winstaller --- This is preventing the installation from proceeding.</source>
-        <translation>これが原因でインストールが先に進めなくなっています。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
-        <source>winstaller --- Do you wish to continue the installation anyway?</source>
-        <translation>構わずインストールを続行しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
-        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
-        <translation>構わずインストールを再試行するか、続行を試みることができます。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
-        <source>winstaller --- The uninstallation will now abort.</source>
-        <translation>アンインストールが直ぐに強制終了されます。</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
-        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
-        <translation>構わずアンインストールを続行しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
-        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
-        <translation>構わずアンインストールを再試行するか、続行を試みることができます。</translation>
-    </message>
-</context>
-<context>
-    <name>RatingControl</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
-        <source>RatingControl --- Loading</source>
-        <translation>読み込み中</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
-        <source>RatingControl --- Something went wrong.</source>
-        <translation>問題が発生しました。</translation>
-    </message>
-</context>
-<context>
-    <name>RatingRequestNotificationStatus</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
-        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
-        <translation>PIAでのエクスペリエンスを評価してください。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="22"/>
-        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
-        <translation>フィードバックありがとうございます！</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="31"/>
-        <source>RatingRequestNotificationStatus --- Contact Support</source>
-        <translation>サポートに問い合わせる</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="24"/>
-        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
-        <translation>ありがとうございます！問題に遭遇した場合は、サポートにお問い合わせください。</translation>
-    </message>
-</context>
-<context>
-    <name>RatingStar</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
-        <source>RatingStar --- Star rating of: %1</source>
-        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
-        <translation>評価星数: %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
-        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
-        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
-        <translation>5つ中%1つ星の評価を送信</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsMessages</name>
-    <message>
-    <source>SettingsMessages --- This feature requires macOS 10.15 or earlier.</source>
-        <translation>この機能にはmacOS 10.15以降が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
-        <source>SettingsMessages --- This feature requires kernel process events.</source>
-        <translation>この機能はカーネルプロセスイベントを必要とします。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
-        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
-        <translation>お使いのコンピュータを再起動してスプリットトンネルフィルタのインストールを終了してください。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
-        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
-        <translation>スプリットトンネルフィルタをインストールできませんでした。コンピュータを再起動してみるか、または問題が解決しない場合はサポートにお問い合わせください。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
-        <translation>この機能にはWindows 7 Service Pack 1以降が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
-        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
-        <translation>この機能には、iptables 1.6.1以上が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
-        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
-        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
-        <translation>この機能には、libnl-3、libnl-route-3、libnl-genl-3が必要です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
-        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
-        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
-        <translation>この機能を使用するには、%1でnet_clsを有効にする必要があります。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
-        <source>SettingsMessages --- This feature requires OpenVPN.</source>
-        <translation>この機能はOpenVPNを必要とします。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
-        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
-        <translation>WireGuardはWindows 8以降を必要とします。</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelNameServersRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
-        <source>SplitTunnelNameServersRow --- Name Servers</source>
-        <translation>ネームサーバー</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelRowBase</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
-        <source>SplitTunnelRowBase --- Follow App Rules</source>
-        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
-        <translation>アプリのルールに従う</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
-        <source>SplitTunnelRowBase --- VPN DNS Only</source>
-        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
-        <translation>VPN DNSのみ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
-        <source>SplitTunnelRowBase --- Bypass VPN</source>
-        <translation>VPN迂回</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
-        <source>SplitTunnelRowBase --- Only VPN</source>
-        <translation>VPNのみ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
-        <source>SplitTunnelRowBase --- Use VPN</source>
-        <translation>VPN使用</translation>
+    <name>Client</name>
+    <message>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+        <source>Client --- %1 - Best</source>
+        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
+        <translation>%1 - ベスト</translation>
     </message>
 </context>
 <context>
     <name>ClientNotifications</name>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
-        <translation>あなたの専用IPは%1日後に期限が切れます。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
-        <source>ClientNotifications --- Get a new one</source>
-        <translation>新しい専用IPを入手する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
-        <source>ClientNotifications --- Your dedicated IP was updated.</source>
-        <translation>あなたの専用IPが更新されました。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
-        <translation>あなたの専用IPは1日後に期限が切れます。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
-        <translation>あなたの専用IPは今日期限が切れます。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
-        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
-        <translation>このオペレーティングシステムのバージョンのサポートは終了しました。最新のPIAアップデートを受け取るには、アップグレードしてください。</translation>
-    </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
@@ -747,6 +533,11 @@
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
         <source>ClientNotifications --- Download of version %1 failed.</source>
         <translation>バージョン%1のダウンロードに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>このオペレーティングシステムのバージョンのサポートは終了しました。最新のPIAアップデートを受け取るには、アップグレードしてください。</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
@@ -974,6 +765,34 @@
         <translation>更新</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>あなたの専用IPは%1日後に期限が切れます。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>あなたの専用IPは1日後に期限が切れます。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>あなたの専用IPは今日期限が切れます。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>新しい専用IPを入手する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>あなたの専用IPが更新されました。</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
@@ -1007,21 +826,341 @@
         <translation>アプリケーションが予期せず終了しました。お客様のVPN接続は保持されました。</translation>
     </message>
     <message>
-    <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>スプリットトンネルを有効にするには、スプリットトンネル拡張機能を許可してください。</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>スプリットトンネル機能は、手動で承認されるまでmacOSによってブロックされます。スプリットトンネルルールは有効になりません。</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- Security Preferences</source>
-        <translation>セキュリティ環境設定</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
         <source>ClientNotifications --- The virtual network adapter is not installed.</source>
         <translation>バーチャルネットワークアダプタがインストールされていません。</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectButton</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
+        <source>ConnectButton --- Toggle connection</source>
+        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
+        <translation>接続切り替え</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
+        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
+        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
+        <translation>現在スヌーズ中で切断済み。スヌーズから再開して再度接続します</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
+        <source>ConnectButton --- Connect to VPN, error has occurred</source>
+        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
+        <translation>VPNに接続、エラーが発生しました</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
+        <source>ConnectButton --- Connect to VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
+        <translation>VPNに接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
+        <source>ConnectButton --- Disconnect from VPN, connecting</source>
+        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
+        <translation>VPNから切断、接続中</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
+        <source>ConnectButton --- Disconnect from VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
+        <translation>VPNから切断</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
+        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
+        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
+        <translation>VPNから切断、切断中</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectPage</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
+        <source>ConnectPage --- Connect page</source>
+        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
+        <translation>接続ページ</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
+        <source>ConnectionModule --- Connection tile</source>
+        <extracomment>Screen reader annotation for the Connection tile</extracomment>
+        <translation>接続タイル</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
+        <source>ConnectionModule --- CONNECTION</source>
+        <translation>接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
+        <source>ConnectionModule --- Protocol</source>
+        <translation>プロトコル</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>プロトコル: </translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>18年以上のオープンソース開発に基づく、信頼性と安定性が高く、安全なプロトコルです。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>パフォーマンス向上が期待できる、より新しくより効率的なプロトコルです。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>OpenVPN® 設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>WireGuard® 設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>商標</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <source>ConnectionPage --- Handshake and Authentication Settings</source>
+        <translation>ハンドシェイクと認証の設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>これらの設定は何を意味しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>すべての製品名と企業名は、それぞれの所有者の商標™または登録®商標です。これらの使用は、それらの所有者との提携またはそれらの所有者による支持を意味するものではありません。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN®はOpenVPN Technologies, Inc.の商標です。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard® はJason A. Donenfeld個人の商標です。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="89"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <translation>シャドウソックスプロキシ設定はTCPを必要とします。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="119"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
+        <source>ConnectionPage --- Local Port</source>
+        <translation>ローカルポート</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="131"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
+        <source>ConnectionPage --- Auto</source>
+        <translation>自動</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="135"/>
+        <source>ConnectionPage --- Configuration Method</source>
+        <translation>構成方法</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
+        <source>ConnectionPage --- DHCP</source>
+        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
+        <translation>DHCP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="146"/>
+        <source>ConnectionPage --- Static</source>
+        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
+        <translation>静的</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
+        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
+        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
+        <translation>TAPアダプタでのアドレスの構成方法を決定します。接続に問題がある場合は、別の方法の方が安定する可能性があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
+        <translation>警告: あなたのトラフィックは暗号化されない状態で送信されるため、傍受される脆弱性があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <source>ConnectionPage --- Proxy</source>
+        <translation>プロキシ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <source>ConnectionPage --- SOCKS5 Proxy...</source>
+        <translation>SOCKS5 プロキシ...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <source>ConnectionPage --- None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <source>ConnectionPage --- SOCKS5 Proxy</source>
+        <translation>SOCKS5 プロキシ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <source>ConnectionPage --- Server IP Address</source>
+        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
+        <translation>サーバーIPアドレス</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <source>ConnectionPage --- Port</source>
+        <translation>ポート</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+        <source>ConnectionPage --- Default</source>
+        <translation>デフォルト</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <source>ConnectionPage --- User (optional)</source>
+        <translation>ユーザー（任意）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <source>ConnectionPage --- Password (optional)</source>
+        <translation>パスワード（任意）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
+        <source>ConnectionPage --- Use Small Packets</source>
+        <translation>小パケットを使用</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
+        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+        <translation>VPN接続のMTUをより小さな値に設定します。この操作により、通信速度が遅くなる場合がありますが、接続不良が改善される場合があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <source>ConnectionPage --- Try Alternate Settings</source>
+        <translation>代替設定を試行する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
+        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
+        <translation>上の接続タイプとリモートポートで接続できない場合、自動的に他の設定を試行します。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
+        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
+        <translation>プロキシが構成済みである場合、代替設定を使用することはできません。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+        <source>ConnectionPage --- Connection Type</source>
+        <translation>接続タイプ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+        <source>ConnectionPage --- Remote Port</source>
+        <translation>リモートポート</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+        <source>ConnectionPage --- Data Encryption</source>
+        <translation>データ暗号化</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+        <source>ConnectionPage --- Data Authentication</source>
+        <translation>データ認証</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+        <source>ConnectionPage --- Handshake</source>
+        <translation>ハンドシェイク</translation>
+    </message>
+</context>
+<context>
+    <name>DaemonAccount</name>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
+        <source>DaemonAccount --- Deactivated</source>
+        <translation>非アクティブ化されています</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
+        <source>DaemonAccount --- One Month Plan</source>
+        <translation>1か月プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
+        <source>DaemonAccount --- Three Month Plan</source>
+        <translation>3か月プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
+        <source>DaemonAccount --- Six Month Plan</source>
+        <translation>6か月プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <source>DaemonAccount --- One Year Plan</source>
+        <translation>1年間プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
+        <source>DaemonAccount --- Two Year Plan</source>
+        <translation>2年間プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <source>DaemonAccount --- Three Year Plan</source>
+        <translation>3年間プラン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <source>DaemonAccount --- Trial</source>
+        <translation>トライアル</translation>
+    </message>
+</context>
+<context>
+    <name>DashboardPopup</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
+        <source>DashboardPopup --- PIA Dashboard</source>
+        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
+        <translation>PIAダッシュボード</translation>
     </message>
 </context>
 <context>
@@ -1157,1473 +1296,6 @@
         <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
         <source>DedicatedIpSubtitle --- DEDICATED IP</source>
         <translation>専用IP</translation>
-    </message>
-</context>
-<context>
-    <name>RegionListView</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
-        <source>RegionListView --- Detail</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
-        <translation>詳細</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
-        <source>RegionListView --- Region</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
-        <translation>地域</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
-        <source>RegionListView --- Latency</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
-        <translation>レイテンシ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
-        <source>RegionListView --- Favorite</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
-        <translation>お気に入り</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>地域リスト</translation>
-    </message>
-</context>
-<context>
-    <name>RegionRowLabels</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
-        <source>RegionRowLabels --- offline</source>
-        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
-        <translation>オフライン</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>専用IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>専用IP詳細設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>一般</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>アカウント</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>プライバシー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>ネットワーク</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>接続</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Proxy</source>
-        
-        <translation>プロキシ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>ヘルプ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>一般設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>アカウント情報</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>プライバシー設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>ネットワーク設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>接続設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        
-        <translation>プロキシ設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>ヘルプ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="143"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>アラート</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="177"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>設定</translation>
-    </message>
-</context>
-<context>
-    <name>TrayMenuBuilder</name>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
-        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
-        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
-        <translation>専用IPに接続</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
-        <source>TrayMenuBuilder --- Connect to region</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>地域に接続</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
-        <source>TrayMenuBuilder --- Help</source>
-        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
-        <translation>ヘルプ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
-        <source>TrayMenuBuilder --- Show Window</source>
-        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
-        <translation>ウィンドウを表示</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
-        <source>TrayMenuBuilder --- Resume Connection</source>
-        <translation>接続を再開</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
-        <source>TrayMenuBuilder --- Connect (Auto)</source>
-        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
-        <translation>接続（自動）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
-        <source>TrayMenuBuilder --- Connect (%1)</source>
-        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
-        <translation>接続（%1）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
-        <source>TrayMenuBuilder --- Disconnect</source>
-        <extracomment>Menu command to disconnect from the VPN.</extracomment>
-        <translation>切断</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
-        <source>TrayMenuBuilder --- Snooze</source>
-        <translation>スヌーズ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
-        <source>TrayMenuBuilder --- 5 Minutes</source>
-        <translation>5分</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
-        <source>TrayMenuBuilder --- 10 Minutes</source>
-        <translation>10分</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
-        <source>TrayMenuBuilder --- 15 Minutes</source>
-        <translation>15分</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
-        <source>TrayMenuBuilder --- 30 Minutes</source>
-        <translation>30分</translation>
-    </message>
-    <message>
-    <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>接続先</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
-        <source>TrayMenuBuilder --- Log In</source>
-        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
-        <translation>ログイン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
-        <source>TrayMenuBuilder --- Settings...</source>
-        <extracomment>Menu command to open the settings dialog.</extracomment>
-        <translation>設定...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
-        <source>TrayMenuBuilder --- Enable Debug Logging</source>
-        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
-        <translation>デバッグログ作成を有効にする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
-        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
-        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
-        <translation>デバッグログを送信...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
-        <source>TrayMenuBuilder --- Changelog</source>
-        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
-        <translation>変更ログ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
-        <source>TrayMenuBuilder --- Support Portal</source>
-        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
-        <translation>サポートポータル</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
-        <source>TrayMenuBuilder --- Blog</source>
-        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
-        <translation>ブログ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
-        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
-        <translation>パブリックIP（%1）をコピー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
-        <source>TrayMenuBuilder --- Copy Public IP</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
-        <translation>パブリックIPをコピー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
-        <translation>転送先ポート（%1）をコピー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
-        <translation>転送先ポートをコピー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
-        <source>TrayMenuBuilder --- Quit</source>
-        <extracomment>Menu command to quit the application.</extracomment>
-        <translation>中止</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
-        <source>ConnectionPage --- Handshake and Authentication Settings</source>
-        <translation>ハンドシェイクと認証の設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
-        <source>ConnectionPage --- Protocol: </source>
-        <translation>プロトコル: </translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
-        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
-        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
-        <translation>18年以上のオープンソース開発に基づく、信頼性と安定性が高く、安全なプロトコルです。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
-        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
-        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
-        <translation>パフォーマンス向上が期待できる、より新しくより効率的なプロトコルです。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
-        <source>ConnectionPage --- OpenVPN® Settings</source>
-        <translation>OpenVPN® 設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
-        <source>ConnectionPage --- WireGuard® Settings</source>
-        <translation>WireGuard® 設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
-        <source>ConnectionPage --- Trademarks</source>
-        <translation>商標</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>これらの設定は何を意味しますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
-        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
-        <translation>すべての製品名と企業名は、それぞれの所有者の商標™または登録®商標です。これらの使用は、それらの所有者との提携またはそれらの所有者による支持を意味するものではありません。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
-        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
-        <translation>OpenVPN®はOpenVPN Technologies, Inc.の商標です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
-        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
-        <translation>WireGuard® はJason A. Donenfeld個人の商標です。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="88"/>
-        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
-        <translation>シャドウソックスプロキシ設定はTCPを必要とします。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="118"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
-        <source>ConnectionPage --- Local Port</source>
-        <translation>ローカルポート</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="130"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
-        <source>ConnectionPage --- Auto</source>
-        <translation>自動</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="134"/>
-        <source>ConnectionPage --- Configuration Method</source>
-        <translation>構成方法</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="141"/>
-        <source>ConnectionPage --- DHCP</source>
-        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
-        <translation>DHCP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="145"/>
-        <source>ConnectionPage --- Static</source>
-        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
-        <translation>静的</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="150"/>
-        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
-        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
-        <translation>TAPアダプタでのアドレスの構成方法を決定します。接続に問題がある場合は、別の方法の方が安定する可能性があります。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
-        <source>ConnectionPage --- None</source>
-        <translation>なし</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="167"/>
-        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
-        <translation>警告: あなたのトラフィックは暗号化されない状態で送信されるため、傍受される脆弱性があります。</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
-        <translation>警告: あなたのトラフィックは認証されていないため、操作される脆弱性があります。</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
-        <translation>このハンドシェイクは米国標準化団体により承認された楕円曲線に依存しています。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="178"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
-        <source>ConnectionPage --- Use Small Packets</source>
-        <translation>小パケットを使用</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="182"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
-        <translation>VPN接続のMTUをより小さな値に設定します。この操作により、通信速度が遅くなる場合がありますが、接続不良が改善される場合があります。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="186"/>
-        <source>ConnectionPage --- Try Alternate Settings</source>
-        <translation>代替設定を試行する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="195"/>
-        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
-        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
-        <translation>上の接続タイプとリモートポートで接続できない場合、自動的に他の設定を試行します。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="203"/>
-        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
-        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
-        <translation>プロキシが構成済みである場合、代替設定を使用することはできません。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
-        <source>ConnectionPage --- Proxy</source>
-        <translation>プロキシ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
-        <source>ConnectionPage --- SOCKS5 Proxy...</source>
-        <translation>SOCKS5 プロキシ...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
-        <source>ConnectionPage --- SOCKS5 Proxy</source>
-        <translation>SOCKS5 プロキシ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
-        <source>ConnectionPage --- Server IP Address</source>
-        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
-        <translation>サーバーIPアドレス</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
-        <source>ConnectionPage --- Port</source>
-        <translation>ポート</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
-        <source>ConnectionPage --- Default</source>
-        <translation>デフォルト</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
-        <source>ConnectionPage --- User (optional)</source>
-        <translation>ユーザー（任意）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
-        <source>ConnectionPage --- Password (optional)</source>
-        <translation>パスワード（任意）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
-        <source>ConnectionPage --- Connection Type</source>
-        <translation>接続タイプ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
-        <source>ConnectionPage --- Remote Port</source>
-        <translation>リモートポート</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
-        <source>ConnectionPage --- Data Encryption</source>
-        <translation>データ暗号化</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
-        <source>ConnectionPage --- Data Authentication</source>
-        <translation>データ認証</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
-        <source>ConnectionPage --- Handshake</source>
-        <translation>ハンドシェイク</translation>
-    </message>
-</context>
-<context>
-    <name>HelpPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
-        <source>HelpPage --- Show service communication messages</source>
-        <translation>サービス通信メッセージを表示</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
-        <source>HelpPage --- Version</source>
-        <translation>バージョン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
-        <source>HelpPage --- Client:</source>
-        <translation>クライアント:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
-        <source>HelpPage --- Daemon:</source>
-        <translation>デーモン:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
-        <source>HelpPage --- Changelog</source>
-        <translation>変更ログ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
-        <source>HelpPage --- Quick Tour</source>
-        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
-        <translation>クイックツアー</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
-        <source>HelpPage --- Receive Beta Updates</source>
-        <translation>ベータ版アップデートを受け取る</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
-        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
-        <translation>ベータ版プログラムに参加して新機能をテストし、フィードバックを提供することができます。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
-        <source>HelpPage --- Network</source>
-        <translation>ネットワーク</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Current</source>
-        <translation>現在</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Next Generation</source>
-        <translation>次世代</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
-        <source>HelpPage --- Include Geo-Located Regions</source>
-        <translation>ジオロケーション地域を含める</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
-        <source>HelpPage --- Support</source>
-        <translation>サポート</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
-        <source>HelpPage --- Disable Accelerated Graphics</source>
-        <translation>アクセラレートされたグラフィックスを無効にする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
-        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
-        <translation>この設定を適用するにはPrivate Internet Accessをリスタートしてください</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
-        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
-        <translation>アクセラレートされたグラフィックスはCPU使用量を軽減し、グラフィックス効果を有効にしますが、特定のグラフィックスカードまたはドライバで問題を起こす原因となる場合があります。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="218"/>
-        <source>HelpPage --- Enable Debug Logging</source>
-        <translation>デバッグログ作成を有効にする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
-        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
-        <translation>テクニカルサポートに送信可能な、問題をトラブルシューティングするために役立つデバッグログを保存します。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="235"/>
-        <source>HelpPage --- Submit Debug Logs</source>
-        <translation>デバッグログを送信する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Support Portal</source>
-        <translation>サポートポータル</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="253"/>
-        <source>HelpPage --- Maintenance</source>
-        <translation>メインテナンス</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="263"/>
-        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
-        <translation>OpenVPNネットワークアダプタを再インストールする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="264"/>
-        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
-        <translation>OpenVPNネットワークアダプタを再インストール中…</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="274"/>
-        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
-        <translation>WireGuardネットワークアダプタを再インストールする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="275"/>
-        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
-        <translation>WireGuardネットワークアダプタを再インストール中…</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>スプリットトンネルフィルタを再インストール中...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>スプリットトンネルフィルタを再インストール</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>スプリットトンネルフィルタが再インストールされました。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="363"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>Private Internet Accessをアンインストールする</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="404"/>
-        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
-        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
-        <translation>ターミナルでのコマンド実行に失敗しました。ターミナルと互換性のあるx-terminal-emulatorをインストールしてください。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
-        <source>HelpPage --- Unable to open terminal</source>
-        <translation>ターミナルを開けません</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="415"/>
-        <source>HelpPage --- v%1</source>
-        <translation>V%1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>切断待機中…</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>接続中はネットワークアダプタを再インストールできません。今すぐ切断して再インストールしますか？</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>切断が必要です</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>ネットワークアダプタが正常に再インストールされました。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>ネットワークアダプタが正常に再インストールされました。システムを再起動する必要があります。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>ネットワークアダプタの再インストール試行中にエラーが発生しました。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
-        <source>HelpPage --- Reinstall successful</source>
-        <translation>再インストール成功</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
-        <source>HelpPage --- Reinstall error</source>
-        <translation>再インストールエラー</translation>
-    </message>
-</context>
-<context>
-    <name>AccountModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
-        <source>AccountModule --- Subscription tile</source>
-        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
-        <translation>サブスクリプションタイル</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
-        <source>AccountModule --- SUBSCRIPTION</source>
-        <translation>サブスクリプション</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
-        <source>AccountModule --- Subscription</source>
-        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
-        <translation>サブスクリプション</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
-        <source>AccountModule --- Expired</source>
-        <translation>有効期限が切れました</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
-        <source>AccountModule --- (%1 days left)</source>
-        <translation>（残り%1日）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Expired on</source>
-        <translation>有効期限が切れた日:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Renews on</source>
-        <translation>次の更新日:</translation>
-    </message>
-</context>
-<context>
-    <name>AccountPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
-        <source>AccountPage --- Username</source>
-        <translation>ユーザー名</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
-        <source>AccountPage --- Subscription</source>
-        <translation>サブスクリプション</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
-        <source>AccountPage --- Expired</source>
-        <translation>有効期限が切れました</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
-        <source>AccountPage --- (expired on %1)</source>
-        <translation>（%1に有効期限が切れました）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
-        <source>AccountPage --- (renews on %1)</source>
-        <translation>（%1に更新されます）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
-        <source>AccountPage --- (expires on %1)</source>
-        <translation>（有効期限: %1）</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Renews in %1 days</source>
-        <translation>%1日後に更新されます</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Expires in %1 days</source>
-        <translation>%1日後に有効期限が切れます</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>サブスクリプションを購入する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>サブスクリプションを管理する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>サブスクリプションを更新する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>アカウントを管理する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
-        <source>AccountPage --- Logout / Switch Account</source>
-        <translation>ログアウト/アカウントを切り替える</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
-        <source>AccountPage --- Not logged in</source>
-        <translation>ログインされていません</translation>
-    </message>
-</context>
-<context>
-    <name>BelowFold</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
-        <source>BelowFold --- DEFAULT DISPLAY</source>
-        <translation>デフォルト表示</translation>
-    </message>
-</context>
-<context>
-    <name>BetaAgreementDialog</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
-        <source>BetaAgreementDialog --- Agreement</source>
-        <translation>合意</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
-        <source>BetaAgreementDialog --- Accept</source>
-        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
-        <translation>同意する</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
-        <source>BetaAgreementDialog --- Decline</source>
-        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
-        <translation>同意しない</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
-        <source>BetaAgreementDialog --- Agreement text</source>
-        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
-        <translation>合意内容</translation>
-    </message>
-</context>
-<context>
-    <name>Client</name>
-    <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
-        <source>Client --- %1 - Best</source>
-        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
-        <translation>%1 - ベスト</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectButton</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
-        <source>ConnectButton --- Toggle connection</source>
-        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
-        <translation>接続切り替え</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
-        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
-        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
-        <translation>現在スヌーズ中で切断済み。スヌーズから再開して再度接続します</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
-        <source>ConnectButton --- Connect to VPN, error has occurred</source>
-        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
-        <translation>VPNに接続、エラーが発生しました</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
-        <source>ConnectButton --- Connect to VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
-        <translation>VPNに接続</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
-        <source>ConnectButton --- Disconnect from VPN, connecting</source>
-        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
-        <translation>VPNから切断、接続中</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
-        <source>ConnectButton --- Disconnect from VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
-        <translation>VPNから切断</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
-        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
-        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
-        <translation>VPNから切断、切断中</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectPage</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
-        <source>ConnectPage --- Connect page</source>
-        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
-        <translation>接続ページ</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
-        <source>ConnectionModule --- Connection tile</source>
-        <extracomment>Screen reader annotation for the Connection tile</extracomment>
-        <translation>接続タイル</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
-        <source>ConnectionModule --- CONNECTION</source>
-        <translation>接続</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
-        <source>ConnectionModule --- Protocol</source>
-        <translation>プロトコル</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonAccount</name>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
-        <source>DaemonAccount --- Deactivated</source>
-        <translation>非アクティブ化されています</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
-        <source>DaemonAccount --- One Month Plan</source>
-        <translation>1か月プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
-        <source>DaemonAccount --- Three Month Plan</source>
-        <translation>3か月プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
-        <source>DaemonAccount --- Six Month Plan</source>
-        <translation>6か月プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
-        <source>DaemonAccount --- One Year Plan</source>
-        <translation>1年間プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
-        <source>DaemonAccount --- Two Year Plan</source>
-        <translation>2年間プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
-        <source>DaemonAccount --- Three Year Plan</source>
-        <translation>3年間プラン</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
-        <source>DaemonAccount --- Trial</source>
-        <translation>トライアル</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonData</name>
-    <message>
-    <source>DaemonData --- AU Melbourne</source>
-        <translation>オーストラリア メルボルン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Perth</source>
-        <translation>オーストラリア、パース</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Sydney</source>
-        <translation>オーストラリア シドニー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Albania</source>
-        <translation>アルバニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Algeria</source>
-        <translation>アルジェリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Andorra</source>
-        <translation>アンドラ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Argentina</source>
-        <translation>アルゼンチン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Armenia</source>
-        <translation>アルメニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Australia</source>
-        <translation>オーストラリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Austria</source>
-        <translation>オーストリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bahamas</source>
-        <translation>バハマ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bangladesh</source>
-        <translation>バングラデシュ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belarus</source>
-        <translation>ベラルーシ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belgium</source>
-        <translation>ベルギー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bosnia and Herzegovina</source>
-        <translation>ボスニア・ヘルツェゴビナ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Brazil</source>
-        <translation>ブラジル</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bulgaria</source>
-        <translation>ブルガリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Montreal</source>
-        <translation>カナダ モントリオール</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Ontario</source>
-        <translation>カナダ オンタリオ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Toronto</source>
-        <translation>カナダ トロント</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Vancouver</source>
-        <translation>カナダ バンクーバー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cambodia</source>
-        <translation>カンボジア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Canada</source>
-        <translation>カナダ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- China</source>
-        <translation>中国</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cyprus</source>
-        <translation>サイプレス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Croatia</source>
-        <translation>クロアチア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Czech Republic</source>
-        <translation>チェコ共和国</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Berlin</source>
-        <translation>ドイツ ベルリン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Frankfurt</source>
-        <translation>ドイツ フランクフルト</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Denmark</source>
-        <translation>デンマーク</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Egypt</source>
-        <translation>エジプト</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Estonia</source>
-        <translation>エストニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Finland</source>
-        <translation>フィンランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- France</source>
-        <translation>フランス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Germany</source>
-        <translation>ドイツ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Georgia</source>
-        <translation>グルジア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greece</source>
-        <translation>ギリシャ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greenland</source>
-        <translation>グリーンランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hong Kong</source>
-        <translation>香港</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hungary</source>
-        <translation>ハンガリー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iceland</source>
-        <translation>アイスランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- India</source>
-        <translation>インド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iran</source>
-        <translation>イラン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ireland</source>
-        <translation>アイルランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Isle of Man</source>
-        <translation>マン島</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Israel</source>
-        <translation>イスラエル</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Italy</source>
-        <translation>イタリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Japan</source>
-        <translation>日本</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Kazakhstan</source>
-        <translation>カザフスタン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Latvia</source>
-        <translation>ラトビア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Liechtenstein</source>
-        <translation>リヒテンシュタイン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Lithuania</source>
-        <translation>リトアニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Luxembourg</source>
-        <translation>ルクセンブルク</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macao</source>
-        <translation>マカオ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macau</source>
-        <translation>マカオ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malaysia</source>
-        <translation>マレーシア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malta</source>
-        <translation>マルタ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mexico</source>
-        <translation>メキシコ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Moldova</source>
-        <translation>モルドバ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Monaco</source>
-        <translation>モナコ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mongolia</source>
-        <translation>モンゴル</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Montenegro</source>
-        <translation>モンテネグロ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Morocco</source>
-        <translation>モロッコ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Netherlands</source>
-        <translation>オランダ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- New Zealand</source>
-        <translation>ニュージーランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Nigeria</source>
-        <translation>ナイジェリア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- North Macedonia</source>
-        <translation>北マケドニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Norway</source>
-        <translation>ノルウェー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Panama</source>
-        <translation>パナマ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Philippines</source>
-        <translation>フィリピン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Poland</source>
-        <translation>ポーランド</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Portugal</source>
-        <translation>ポルトガル</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Qatar</source>
-        <translation>カタール</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Romania</source>
-        <translation>ルーマニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Russia</source>
-        <translation>ロシア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Saudi Arabia</source>
-        <translation>サウジアラビア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Serbia</source>
-        <translation>セルビア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Singapore</source>
-        <translation>シンガポール</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovakia</source>
-        <translation>スロバキア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovenia</source>
-        <translation>スロベニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- South Africa</source>
-        <translation>南アフリカ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Spain</source>
-        <translation>スペイン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sri Lanka</source>
-        <translation>スリランカ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sweden</source>
-        <translation>スウェーデン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Switzerland</source>
-        <translation>スイス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Taiwan</source>
-        <translation>台湾</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Turkey</source>
-        <translation>トルコ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UAE</source>
-        <translation>アラブ首長国連邦</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK London</source>
-        <translation>英国 ロンドン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Manchester</source>
-        <translation>英国 マンチェスター</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Southampton</source>
-        <translation>英国 サウザンプトン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Atlanta</source>
-        <translation>米国 アトランタ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US California</source>
-        <translation>米国 カリフォルニア</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Chicago</source>
-        <translation>米国 シカゴ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Denver</source>
-        <translation>米国 デンバー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US East</source>
-        <translation>米国 東部</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Florida</source>
-        <translation>米国 フロリダ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Houston</source>
-        <translation>米国 ヒューストン</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Las Vegas</source>
-        <translation>米国 ラスベガス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York City</source>
-        <translation>米国 ニューヨーク市</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York</source>
-        <translation>米国ニューヨーク</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Seattle</source>
-        <translation>米国 シアトル</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Silicon Valley</source>
-        <translation>米国 シリコンバレー</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Texas</source>
-        <translation>米国 テキサス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Washington DC</source>
-        <translation>米国 ワシントンDC</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US West</source>
-        <translation>米国 西部</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ukraine</source>
-        <translation>ウクライナ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Arab Emirates</source>
-        <translation>アラブ首長国連邦</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Kingdom</source>
-        <translation>イギリス</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United States</source>
-        <translation>アメリカ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Venezuela</source>
-        <translation>ベネズエラ</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Vietnam</source>
-        <translation>ベトナム</translation>
-    </message>
-</context>
-<context>
-    <name>DashboardPopup</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
-        <source>DashboardPopup --- PIA Dashboard</source>
-        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
-        <translation>PIAダッシュボード</translation>
     </message>
 </context>
 <context>
@@ -2808,13 +1480,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="11"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="12"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>アルファ プレリリース</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="14"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="15"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>ベータ版プレリリース</translation>
@@ -2881,6 +1553,201 @@
         <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
         <source>HeaderBar --- Quit</source>
         <translation>中止</translation>
+    </message>
+</context>
+<context>
+    <name>HelpPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
+        <source>HelpPage --- Version</source>
+        <translation>バージョン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
+        <source>HelpPage --- Client:</source>
+        <translation>クライアント:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
+        <source>HelpPage --- Daemon:</source>
+        <translation>デーモン:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <source>HelpPage --- Changelog</source>
+        <translation>変更ログ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <source>HelpPage --- Quick Tour</source>
+        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
+        <translation>クイックツアー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <source>HelpPage --- Receive Beta Updates</source>
+        <translation>ベータ版アップデートを受け取る</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
+        <translation>ベータ版プログラムに参加して新機能をテストし、フィードバックを提供することができます。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <source>HelpPage --- Show service communication messages</source>
+        <translation>サービス通信メッセージを表示</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <source>HelpPage --- Network</source>
+        <translation>ネットワーク</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <source>HelpPage --- Include Geo-Located Regions</source>
+        <translation>ジオロケーション地域を含める</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <source>HelpPage --- Support</source>
+        <translation>サポート</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <source>HelpPage --- Disable Accelerated Graphics</source>
+        <translation>アクセラレートされたグラフィックスを無効にする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
+        <translation>この設定を適用するにはPrivate Internet Accessをリスタートしてください</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
+        <translation>アクセラレートされたグラフィックスはCPU使用量を軽減し、グラフィックス効果を有効にしますが、特定のグラフィックスカードまたはドライバで問題を起こす原因となる場合があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <source>HelpPage --- Enable Debug Logging</source>
+        <translation>デバッグログ作成を有効にする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
+        <translation>テクニカルサポートに送信可能な、問題をトラブルシューティングするために役立つデバッグログを保存します。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <source>HelpPage --- Submit Debug Logs</source>
+        <translation>デバッグログを送信する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <source>HelpPage --- Support Portal</source>
+        <translation>サポートポータル</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <source>HelpPage --- Maintenance</source>
+        <translation>メインテナンス</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>OpenVPNネットワークアダプタを再インストールする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>OpenVPNネットワークアダプタを再インストール中…</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>WireGuardネットワークアダプタを再インストールする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>WireGuardネットワークアダプタを再インストール中…</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>スプリットトンネルフィルタを再インストール中...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>スプリットトンネルフィルタを再インストール</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>スプリットトンネルフィルタが再インストールされました。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>Private Internet Accessをアンインストールする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
+        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
+        <translation>ターミナルでのコマンド実行に失敗しました。ターミナルと互換性のあるx-terminal-emulatorをインストールしてください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <source>HelpPage --- Unable to open terminal</source>
+        <translation>ターミナルを開けません</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <source>HelpPage --- v%1</source>
+        <translation>V%1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>切断待機中…</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>接続中はネットワークアダプタを再インストールできません。今すぐ切断して再インストールしますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>切断が必要です</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>ネットワークアダプタが正常に再インストールされました。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>ネットワークアダプタが正常に再インストールされました。システムを再起動する必要があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>ネットワークアダプタの再インストール試行中にエラーが発生しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
+        <source>HelpPage --- Reinstall successful</source>
+        <translation>再インストール成功</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
+        <source>HelpPage --- Reinstall error</source>
+        <translation>再インストールエラー</translation>
     </message>
 </context>
 <context>
@@ -3007,6 +1874,36 @@
         <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
         <source>LoginPage --- Buy Account</source>
         <translation>アカウントを購入する</translation>
+    </message>
+</context>
+<context>
+    <name>Messages</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="49"/>
+        <source>Messages --- Wired Connection</source>
+        <translation>有線接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="51"/>
+        <source>Messages --- Open Wi-Fi</source>
+        <translation>オープンWi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="53"/>
+        <source>Messages --- Protected Wi-Fi</source>
+        <translation>保護されたWi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="63"/>
+        <source>Messages --- Connect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="66"/>
+        <source>Messages --- Disconnect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>切断</translation>
     </message>
 </context>
 <context>
@@ -3218,14 +2115,6 @@
         <translation>スプリットトンネル</translation>
     </message>
     <message>
-    <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>スプリットトンネル拡張機能がこの機能を有効にするのを許可します。</translation>
-    </message>
-    <message>
-    <source>NetworkPage --- Security Preferences</source>
-        <translation>セキュリティ設定</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="276"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>スプリットトンネルフィルタをインストール中...</translation>
@@ -3285,7 +2174,7 @@
         <translation>メッセージを閉じる: %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="215"/>
+        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="216"/>
         <source>Notification --- Stop</source>
         <extracomment>Screen reader annotation for the square &quot;Stop&quot; button on the message used to download an update.</extracomment>
         <translation>停止</translation>
@@ -3738,28 +2627,22 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
-        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
-        <translation>追加のロケーションを通してVPN接続をリダイレクトします</translation>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
+<source>ProxyPage --- Configure...</source>
+        <translation>設定...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>シャドウソックス - %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>ソックス5プロキシ - %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
-        <source>ProxyPage --- Configure...</source>
-        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
-        <translation>設定...</translation>
     </message>
 </context>
 <context>
@@ -3792,6 +2675,63 @@
     </message>
 </context>
 <context>
+    <name>RatingControl</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <source>RatingControl --- Loading</source>
+        <translation>読み込み中</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <source>RatingControl --- Something went wrong.</source>
+        <translation>問題が発生しました。</translation>
+    </message>
+</context>
+<context>
+    <name>RatingRequestNotificationStatus</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
+        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
+        <translation>PIAでのエクスペリエンスを評価してください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="28"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].</source>
+        <extracomment>Shown after the user submits a positive rating to ask if they would rate us on Trustpilot. The text between brackets ([[....]]) is a link, please preserve the brackets around the corresponding text. Do not translate &apos;Trustpilot&apos; since it is a brand (even though link text is normally translated in PIA.)</extracomment>
+        <translation>フィードバックをありがとうございます！ [[Trustpilot]]で評価していただければ幸いです。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="30"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
+        <translation>フィードバックありがとうございます！</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="32"/>
+        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
+        <translation>ありがとうございます！問題に遭遇した場合は、サポートにお問い合わせください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
+        <source>RatingRequestNotificationStatus --- Contact Support</source>
+        <translation>サポートに問い合わせる</translation>
+    </message>
+</context>
+<context>
+    <name>RatingStar</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
+        <source>RatingStar --- Star rating of: %1</source>
+        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
+        <translation>評価星数: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
+        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
+        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
+        <translation>5つ中%1つ星の評価を送信</translation>
+    </message>
+</context>
+<context>
     <name>ReconnectWarning</name>
     <message>
         <location filename="../../../client/res/components/settings/ReconnectWarning.qml" line="62"/>
@@ -3821,14 +2761,47 @@
     </message>
 </context>
 <context>
+    <name>RegionListView</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>地域リスト</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
+        <source>RegionListView --- Region</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
+        <translation>地域</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>詳細</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
+        <source>RegionListView --- Latency</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
+        <translation>レイテンシ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
+        <source>RegionListView --- Favorite</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
+        <translation>お気に入り</translation>
+    </message>
+</context>
+<context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="32"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="33"/>
         <source>RegionModule --- Auto</source>
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="34"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="35"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>自動（%1）</translation>
     </message>
@@ -3869,6 +2842,12 @@
 <context>
     <name>RegionPage</name>
     <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
+        <source>RegionPage --- Region list sort</source>
+        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
+        <translation>地域リスト並べ替え</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/regions/RegionList.qml" line="79"/>
         <source>RegionPage --- Search...</source>
         <translation>検索…</translation>
@@ -3888,12 +2867,6 @@
         <source>RegionPage --- Back to Connect page</source>
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>接続ページに戻る</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
-        <source>RegionPage --- Region list sort</source>
-        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
-        <translation>地域リスト並べ替え</translation>
     </message>
 </context>
 <context>
@@ -3926,6 +2899,65 @@
         <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ミリ秒</translation>
+    </message>
+</context>
+<context>
+    <name>RegionRowLabels</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>オフライン</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMessages</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
+        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
+        <translation>お使いのコンピュータを再起動してスプリットトンネルフィルタのインストールを終了してください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
+        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
+        <translation>スプリットトンネルフィルタをインストールできませんでした。コンピュータを再起動してみるか、または問題が解決しない場合はサポートにお問い合わせください。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
+        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
+        <translation>この機能にはWindows 7 Service Pack 1以降が必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
+        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
+        <translation>この機能には、iptables 1.6.1以上が必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
+        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
+        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
+        <translation>この機能には、libnl-3、libnl-route-3、libnl-genl-3が必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
+        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
+        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+        <translation>この機能を使用するには、%1でnet_clsを有効にする必要があります。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>この機能はカーネルプロセスイベントを必要とします。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>この機能はOpenVPNを必要とします。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuardはWindows 8以降を必要とします。</translation>
     </message>
 </context>
 <context>
@@ -4184,11 +3216,61 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelSettings</name>
+    <name>SplitTunnelNameServersRow</name>
     <message>
-    <source>SplitTunnelSettings --- Applications</source>
-        <translation>アプリケーション</translation>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
+        <source>SplitTunnelNameServersRow --- Name Servers</source>
+        <translation>ネームサーバー</translation>
     </message>
+</context>
+<context>
+    <name>SplitTunnelRoutedRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
+        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
+<source>SplitTunnelRoutedRow --- Routed Packets</source>
+        <translation>ルーティングされたパケット</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
+        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
+<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
+        <translation>ほとんどのコンテナと仮想マシンが含まれます</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
+        <source>SplitTunnelRowBase --- Bypass VPN</source>
+        <translation>VPN迂回</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
+        <source>SplitTunnelRowBase --- Only VPN</source>
+        <translation>VPNのみ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
+        <source>SplitTunnelRowBase --- Use VPN</source>
+        <translation>VPN使用</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
+        <source>SplitTunnelRowBase --- Follow App Rules</source>
+        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
+        <translation>アプリのルールに従う</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
+        <source>SplitTunnelRowBase --- VPN DNS Only</source>
+        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
+        <translation>VPN DNSのみ</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelSettings</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
         <source>SplitTunnelSettings --- App</source>
@@ -4383,6 +3465,153 @@
     </message>
 </context>
 <context>
+    <name>TrayMenuBuilder</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="24"/>
+        <source>TrayMenuBuilder --- Help</source>
+        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
+        <translation>ヘルプ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+        <source>TrayMenuBuilder --- Show Window</source>
+        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
+        <translation>ウィンドウを表示</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <source>TrayMenuBuilder --- Resume Connection</source>
+        <translation>接続を再開</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <source>TrayMenuBuilder --- Connect (Auto)</source>
+        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
+        <translation>接続（自動）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+        <source>TrayMenuBuilder --- Connect (%1)</source>
+        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
+        <translation>接続（%1）</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+        <source>TrayMenuBuilder --- Disconnect</source>
+        <extracomment>Menu command to disconnect from the VPN.</extracomment>
+        <translation>切断</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+        <source>TrayMenuBuilder --- Snooze</source>
+        <translation>スヌーズ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+        <source>TrayMenuBuilder --- 5 Minutes</source>
+        <translation>5分</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+        <source>TrayMenuBuilder --- 10 Minutes</source>
+        <translation>10分</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+        <source>TrayMenuBuilder --- 15 Minutes</source>
+        <translation>15分</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+        <source>TrayMenuBuilder --- 30 Minutes</source>
+        <translation>30分</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>専用IPに接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>地域に接続</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
+        <source>TrayMenuBuilder --- Log In</source>
+        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
+        <translation>ログイン</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+        <source>TrayMenuBuilder --- Settings...</source>
+        <extracomment>Menu command to open the settings dialog.</extracomment>
+        <translation>設定...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+        <source>TrayMenuBuilder --- Enable Debug Logging</source>
+        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
+        <translation>デバッグログ作成を有効にする</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
+        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
+        <translation>デバッグログを送信...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
+        <source>TrayMenuBuilder --- Changelog</source>
+        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
+        <translation>変更ログ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
+        <source>TrayMenuBuilder --- Support Portal</source>
+        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
+        <translation>サポートポータル</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+        <source>TrayMenuBuilder --- Blog</source>
+        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
+        <translation>ブログ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
+        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
+        <translation>パブリックIP（%1）をコピー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+        <source>TrayMenuBuilder --- Copy Public IP</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
+        <translation>パブリックIPをコピー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
+        <translation>転送先ポート（%1）をコピー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
+        <translation>転送先ポートをコピー</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
+        <source>TrayMenuBuilder --- Quit</source>
+        <extracomment>Menu command to quit the application.</extracomment>
+        <translation>中止</translation>
+    </message>
+</context>
+<context>
     <name>UpdateNotificationStatus</name>
     <message>
         <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
@@ -4513,6 +3742,425 @@
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
 <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>ディストリビューション特有のインストールの手順はこちら:</translation>
+    </message>
+</context>
+<context>
+    <name>winstaller</name>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
+        <source>winstaller --- Private Internet Access Installer</source>
+        <translation>Private Internet Access インストーラ</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
+        <source>winstaller --- %.0f SECONDS REMAINING</source>
+        <translation>残り %.0f 秒</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
+        <source>winstaller --- INSTALL</source>
+        <translation>インストール</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
+        <source>winstaller --- UNINSTALL</source>
+        <translation>アンインストール</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
+        <source>winstaller --- FINISH</source>
+        <translation>終了</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
+        <source>winstaller --- PREPARING</source>
+        <translation>準備中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
+        <source>winstaller --- READY TO INSTALL</source>
+        <translation>インストール準備完了</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
+        <source>winstaller --- INSTALLING</source>
+        <translation>インストール中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
+        <source>winstaller --- ABORTING</source>
+        <translation>強制終了中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
+        <source>winstaller --- FINISHING UP</source>
+        <translation>終了中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
+        <source>winstaller --- CLEANING UP</source>
+        <translation>クリーニング中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
+        <source>winstaller --- ROLLING BACK CHANGES</source>
+        <translation>変更をロールバック中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
+        <source>winstaller --- FINISHED</source>
+        <translation>終了しました</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
+        <source>winstaller --- ABORTED</source>
+        <translation>強制終了しました</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
+        <source>winstaller --- UNPACKING</source>
+        <translation>梱包解除</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
+        <source>winstaller --- COPYING FILES</source>
+        <translation>ファイルをコピー中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
+        <source>winstaller --- SHUTTING DOWN CLIENT</source>
+        <translation>クライアントをシャットダウン中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
+        <source>winstaller --- STOPPING SERVICE</source>
+        <translation>サービスを停止中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
+        <source>winstaller --- UNREGISTERING SERVICE</source>
+        <translation>サービス登録解除中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
+        <source>winstaller --- REGISTERING SERVICE</source>
+        <translation>サービス登録中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
+        <source>winstaller --- STARTING SERVICE</source>
+        <translation>サービス開始中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
+        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
+        <translation>ネットワークアダプタを取消中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
+        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
+        <translation>ネットワークアダプタをインストール中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
+        <source>winstaller --- BACKING UP FILES</source>
+        <translation>ファイルをバックアップ中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
+        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
+        <translation>以前のバージョンを削除中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
+        <source>winstaller --- REMOVING FILES</source>
+        <translation>ファイルを削除中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
+        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
+        <translation>コールアウトドライバーを削除中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
+        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
+        <translation>コールアウトドライバーを更新中</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
+        <translation>既存するインストールを認識できません。全ディレクトリを削除しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
+        <source>winstaller --- Corrupt installation detected</source>
+        <translation>破損したインストールが検出されました</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
+        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
+        <translation>インストールディレクトリにストレイファイルがあります。ストレイファイルを削除しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
+        <source>winstaller --- Files remaining</source>
+        <translation>残りのファイル</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
+        <source>winstaller --- Do you want to abort the installation?</source>
+        <translation>インストールを強制終了しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
+        <source>winstaller --- Abort installation?</source>
+        <translation>インストールを強制終了しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
+        <source>winstaller --- Error</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
+        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
+        <translation>この操作により、既存するインストール済みのPrivate Internet Accessが置き換えられます。以後のダウングレードでは、クリーン再インストールが必要となります。続行しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
+        <source>winstaller --- Replace existing version?</source>
+        <translation>既存バージョンと置き換えますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
+        <source>winstaller --- Unable to remove directory: %s</source>
+        <translation>ディレクトリを削除できません: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
+        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
+        <translation>先へ進む前に、既存のPrivate Internet Accessを終了してください。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
+        <source>winstaller --- There was a problem uninstalling the existing version.</source>
+        <translation>既存バージョンのアンインストール中に問題が発生しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
+        <source>winstaller --- There are still clients running.</source>
+        <translation>クライアントがまだ実行中です。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
+        <source>winstaller --- Failed to stop the service.</source>
+        <translation>サービスの停止に失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
+        <source>winstaller --- A reboot is needed before installation can proceed.</source>
+        <translation>インストールを先に進めるには再起動が必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
+        <source>winstaller --- Service executable missing.</source>
+        <translation>サービス実行ファイルが欠落しています。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
+        <source>winstaller --- Service uninstallation failed.</source>
+        <translation>サービスのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
+        <source>winstaller --- The service installation failed.</source>
+        <translation>サービスのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
+        <source>winstaller --- The service failed to start.</source>
+        <translation>サービスの開始に失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
+        <source>winstaller --- Error uninstalling TAP driver.</source>
+        <translation>TAPドライバのアンインストール中にエラーが発生しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
+        <source>winstaller --- The TAP driver was not approved for installation.</source>
+        <translation>インストールのためのTAPドライバーが承認されていませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
+        <source>winstaller --- The TAP driver installation failed.</source>
+        <translation>TAPドライバのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
+        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
+        <translation>Private Internet Accessを実行するには最低でもWindows 7 が必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
+        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
+        <translation>32ビットバージョンのPrivate Internet Accessは、32ビットバージョンのWindowsでのみ実行可能です。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
+        <source>winstaller --- Failed to retrieve shell folder %s.</source>
+        <translation>シェルフォルダ「%s」の取得に失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
+        <source>winstaller --- Out of memory.</source>
+        <translation>メモリ切れです。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
+        <source>winstaller --- Payload decompression error.</source>
+        <translation>ペイロード圧縮解除エラー。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
+        <source>winstaller --- Corrupted payload (CRC error).</source>
+        <translation>破損したペイロード（CRCエラー）。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
+        <source>winstaller --- Unable to create file: %s</source>
+        <translation>ファイルを作成できません: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
+        <source>winstaller --- Unable to write file: %s</source>
+        <translation>ファイルを書けません: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
+        <source>winstaller --- Unable to write entire file: %s</source>
+        <translation>全ファイルを書けません: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
+        <source>winstaller --- Unable to initialize decompressor.</source>
+        <translation>圧縮解除ソフトを初期化できません。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
+        <source>winstaller --- Corrupted payload (invalid parameters).</source>
+        <translation>破損したペイロード（無効なパラメータ）。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
+        <source>winstaller --- Unable to move %s</source>
+        <translation>%sを移動できません。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
+        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
+        <translation>ロールバックディレクトリを作成できません。先へ進むと、エラーがある場合、インストールは変更を取消すことができません。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
+        <source>winstaller --- Unable to create directory: %s</source>
+        <translation>ディレクトリを作成できません: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
+        <source>winstaller --- The installer does not contain a recognizable payload.</source>
+        <translation>インストーラに認識可能なペイロードが含まれていません。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
+        <source>winstaller --- Missing payload</source>
+        <translation>欠落しているペイロード</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
+        <source>winstaller --- Error uninstalling callout driver.</source>
+        <translation>コールアウトドライバーのアンインストール中にエラーが発生しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
+        <source>winstaller --- Callout driver installation failed.</source>
+        <translation>コールアウトドライバーのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>WireGuardのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>WireGuardのアンインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>WinTUNのインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>WinTUNのアンインストールに失敗しました。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
+        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
+        <translation>セーフモードとネットワークを使用して、Private Internet Accessをインストール、またはアンインストールします。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
+        <source>winstaller --- Installation complete</source>
+        <translation>インストール完了</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
+        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
+        <translation>Private Internet Accessを使用するにはコンピューターを再起動してください。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
+        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
+        <translation>Private Internet Access は Windows 8 以降を必要とします。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+        <source>winstaller --- The installation will now abort.</source>
+        <translation>インストールが直ぐに強制終了されます。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
+        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
+        <source>winstaller --- This is preventing the installation from proceeding.</source>
+        <translation>これが原因でインストールが先に進めなくなっています。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
+        <source>winstaller --- Do you wish to continue the installation anyway?</source>
+        <translation>構わずインストールを続行しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
+        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
+        <translation>構わずインストールを再試行するか、続行を試みることができます。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
+        <source>winstaller --- The uninstallation will now abort.</source>
+        <translation>アンインストールが直ぐに強制終了されます。</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
+        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
+        <translation>構わずアンインストールを続行しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
+        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
+        <translation>構わずアンインストールを再試行するか、続行を試みることができます。</translation>
     </message>
 </context>
 </TS>

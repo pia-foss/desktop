@@ -36,13 +36,28 @@ public:
     PosixFd &operator=(PosixFd &&other) {std::swap(_file, other._file); return *this;}
     ~PosixFd();
 
+private:
+    // Apply descriptor flags or file status flags - the get/set fcntl commands
+    // are either F_GETFD/F_SETFD or F_GETFL/F_SETFL.
+    // No effect if the file descriptor is invalid.
+    void applyFlags(int getCmd, int setCmd, int newFlags);
+
 public:
     explicit operator bool() const {return _file != Invalid;}
     bool operator!() const {return !this->operator bool();}
     int get() const {return _file;}
 
+    // Set FD_CLOEXEC on this file descriptor
+    void applyClOExec();
+    // Set O_NONBLOCK on this file decriptor
+    void applyNonblock();
+
 private:
     int _file;
 };
+
+// Create a socket pair, returned as two PosixFds.  FD_CLOEXEC is set on both
+// PosixFds.
+std::pair<PosixFd, PosixFd> createSocketPair();
 
 #endif

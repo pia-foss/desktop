@@ -111,6 +111,7 @@ namespace libnl
         loadLibnl(nla_data);
         loadLibnl(nla_get_u16);
         loadLibnl(nla_get_u32);
+        loadLibnl(nla_put_u32);
         loadLibnl(nla_len);
         loadLibnl(nla_next);
         loadLibnl(nla_ok);
@@ -181,6 +182,7 @@ namespace libnl
     LIBNL_FUNC(nla_data);
     LIBNL_FUNC(nla_get_u16);
     LIBNL_FUNC(nla_get_u32);
+    LIBNL_FUNC(nla_put_u32);
     LIBNL_FUNC(nla_len);
     LIBNL_FUNC(nla_next);
     LIBNL_FUNC(nla_ok);

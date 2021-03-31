@@ -21,11 +21,6 @@
 
 #include "common.h"
 
-// Test if an address is an IPv4 LAN or loopback address
-bool isIpv4Local(const QHostAddress &addr);
-// Test if an address is in the modern infrastructure DNS range
-bool isModernInfraDns(const QHostAddress &addr);
-
 // IPv4 address.  QHostAddress can hold an IPv4 address, but when we require an
 // IPv4 address specifically, this makes more sense than holding a QHostAddress
 // and expecting a specific type.
@@ -56,8 +51,38 @@ public:
     //   addr.inSubnet(0x0A000000, 8)
     bool inSubnet(quint32 netAddress, unsigned prefixLen) const;
 
+    // Check for specific IPv4 special address blocks.  A variety of groups are
+    // provided.
+    //
+    // Frequently, these are used to determine whether we should treat an
+    // address as reachable through the VPN or local (such as LAN DNS servers,
+    // etc.)  Note that 10.0.0.240/29 is a private use block but is used for
+    // PIA's VPN DNS, and other 10/8 addresses are used internally for various
+    // reasons (such as the meta service).  These tests are carefully named to
+    // clarify precisely what they test - e.g. "private use blocks" vs. "LAN",
+    // because some 10/8 addresses are private use but are not considered "LAN"
+    // by PIA.
+
     // Test if the address is a loopback address (127/8)
     bool isLoopback() const {return inSubnet(0x7F000000, 8);}
+
+    // Test if the address is in the PIA DNS block (10.0.0.240/29)
+    bool isPiaDns() const {return inSubnet(0x0A0000F0, 29);}
+
+    // Test if an address is in an IPv4 private use block
+    bool isPrivateUse() const
+    {
+        return inSubnet(0xC0A80000, 16) ||  // 192.168/16
+               inSubnet(0xAC100000, 12) ||  // 172.16/12
+               inSubnet(0x0A000000, 8) ||   // 10/8
+               inSubnet(0xA9FE0000, 16);    // 169.254/16
+    }
+
+    // Test if an address for a DNS server should be routed locally (not through
+    // the VPN).  Note that this is specific to DNS (and specific to PIA's DNS
+    // address allocation); other 10/8 addresses may be meaningful on the VPN in
+    // other contexts (like meta services).
+    bool isLocalDNS() const {return !isPiaDns() && (isLoopback() || isPrivateUse());}
 
     // Get a prefix length from an IPv4 subnet mask (counts consecutive leading
     // 1 bits - i.e. 255.255.128.0 -> 17)

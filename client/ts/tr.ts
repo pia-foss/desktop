@@ -2,31 +2,417 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>Otomasyon</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>Genel</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>Hesap</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>Gizlilik</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>Ağ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>Bağlantı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>Otomasyon</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>Özel IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>Yardım</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>Genel Tercihler</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>Hesap Bilgileri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>Gizlilik Tercihleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>Ağ Tercihleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>Bağlantı Tercihleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>Otomasyon Tercihleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>Özel IP Özellikleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>Yardım</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>Uyarı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>Ayarlar</translation>
+    </message>
+</context>
+<context>
+    <name>AccountModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
+        <source>AccountModule --- Subscription tile</source>
+        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
+        <translation>Abonelik bölümü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
+        <source>AccountModule --- SUBSCRIPTION</source>
+        <translation>ABONELİK</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
+        <source>AccountModule --- Subscription</source>
+        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
+        <translation>Abonelik</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
+        <source>AccountModule --- Expired</source>
+        <translation>Süresi Doldu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
+        <source>AccountModule --- (%1 days left)</source>
+        <translation>(%1 gün kaldı)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Expired on</source>
+        <translation>Sürenin dolduğu tarih:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
+        <source>AccountModule --- Renews on</source>
+        <translation>Yenilenme tarihi:</translation>
+    </message>
+</context>
+<context>
+    <name>AccountPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <source>AccountPage --- Username</source>
+        <translation>Kullanıcı Adı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <source>AccountPage --- Subscription</source>
+        <translation>Abonelik</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <source>AccountPage --- Expired</source>
+        <translation>Süresi Doldu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <source>AccountPage --- (expired on %1)</source>
+        <translation>(%1 tarihinde süresi doldu)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <source>AccountPage --- (renews on %1)</source>
+        <translation>(%1 tarihinde yenilenir)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <source>AccountPage --- (expires on %1)</source>
+        <translation>(%1 tarihinde süresi doluyor)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Renews in %1 days</source>
+        <translation>%1 gün içinde yenilenir</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
+        <source>AccountPage --- Expires in %1 days</source>
+        <translation>%1 gün içinde süresi doluyor</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>Abonelik Satın Al</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>Aboneliği Yönet</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>Aboneliği Yenile</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>Hesabımı Yönet</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
+        <source>AccountPage --- Logout / Switch Account</source>
+        <translation>Oturumu Kapat / Hesap Değiştir</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
+        <source>AccountPage --- Not logged in</source>
+        <translation>Oturum açılmadı</translation>
+    </message>
+</context>
+<context>
+    <name>ActiveRuleDisplay</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ActiveRuleDisplay.qml" line="117"/>
+        <source>ActiveRuleDisplay --- Open Automation Rule Settings</source>
+        <translation>Otomasyon Kuralı Ayarlarını Aç</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="48"/>
+        <source>AutomationAddRuleDialog --- Network</source>
+        <translation>Ağ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
+        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+        <translation>Otomasyon Kuralı Türleri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <source>AutomationAddRuleDialog --- RULE EXISTS</source>
+        <translation>KURAL MEVCUT</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
+        <source>AutomationAddRuleDialog --- Rule</source>
+        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
+        <translation>Kural</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <source>AutomationAddRuleDialog --- Action</source>
+        <translation>Eylem</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleRow.qml" line="21"/>
+        <source>AutomationAddRuleRow --- Add Automation Rule</source>
+        <translation>Otomasyon Kuralı Ekle</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="23"/>
+        <source>AutomationPage --- Connection Automation</source>
+        <translation>Bağlantı Otomasyonu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="29"/>
+        <source>AutomationPage --- Create rules to automatically connect or disconnect the VPN when you join a particular network.</source>
+        <extracomment>Text displayed in a tooltip for connection automation</extracomment>
+        <translation>Belirli bir ağa katıldığınızda otomatikman VPN&apos;ye bağlanmak ya da bağlantıyı kesmek için kurallar oluşturun.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="32"/>
+        <source>AutomationPage --- Help</source>
+        <extracomment>Help link for automation page</extracomment>
+        <translation>Yardım</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="23"/>
+        <source>AutomationRuleRow --- Remove</source>
+        <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
+        <translation>Kaldır</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="106"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>AKTİF</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="187"/>
+        <source>AutomationRuleRow --- Remove Automation Rule</source>
+        <translation>Otomasyon Kuralını Kaldır</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="197"/>
+        <source>AutomationRuleRow --- Remove %1?</source>
+        <extracomment>Message shown when removing an automation rule. &quot;%1&quot; is the name of a rule, which can be a standard rule like &quot;Protected Wi-Fi&quot;, &quot;Open Wi-Fi&quot;, or &quot;Wired&quot;, or it can be a network SSID for a rule created for a specific wireless network. For example - &quot;Remove Protected Wi-Fi?&quot;, or &quot;Remove Steve&apos;s House?&quot;</extracomment>
+        <translation>%1 kaldırılsın mı?</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationTable</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="27"/>
+        <source>AutomationTable --- Automation Rules</source>
+        <extracomment>Screen reader annotation for the name of the table</extracomment>
+        <translation>Otomasyon Kuralları</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="86"/>
+        <source>AutomationTable --- Condition</source>
+        <extracomment>Name of the &quot;Condition&quot; table column, in the Automation table</extracomment>
+        <translation>Koşul</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="92"/>
+        <source>AutomationTable --- Action</source>
+        <extracomment>Name of the &quot;Action&quot; table column, in the automation table</extracomment>
+        <translation>Eylem</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="98"/>
+        <source>AutomationTable --- Remove</source>
+        <extracomment>Name of the &quot;Remove&quot; table column, containing the remove button, in the automation table</extracomment>
+        <translation>Kaldır</translation>
+    </message>
+</context>
+<context>
+    <name>BelowFold</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
+        <source>BelowFold --- DEFAULT DISPLAY</source>
+        <translation>VARSAYILAN GÖSTERİM</translation>
+    </message>
+</context>
+<context>
+    <name>BetaAgreementDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
+        <source>BetaAgreementDialog --- Agreement</source>
+        <translation>Sözleşme</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
+        <source>BetaAgreementDialog --- Accept</source>
+        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
+        <translation>Kabul Et</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
+        <source>BetaAgreementDialog --- Decline</source>
+        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
+        <translation>Reddet</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
+        <source>BetaAgreementDialog --- Agreement text</source>
+        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
+        <translation>Anlaşma metni</translation>
+    </message>
+</context>
+<context>
     <name>ChangelogWindow</name>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuard özelliği: roketteki robot</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>Komut satırı arayüzü özelliği</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="86"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="181"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>Değişim Günlüğü</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="85"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="169"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>Yenilikler</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <source>ChangelogWindow --- Checkmark bullet</source>
+        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
+        <translation>İşaret madde imi</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
@@ -37,12 +423,6 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
         <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
         <translation>Daha verimli çalışan bu yeni VPN protokolü size şunları sunuyor:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
-        <source>ChangelogWindow --- Checkmark bullet</source>
-        <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
-        <translation>İşaret madde imi</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
@@ -70,10 +450,6 @@
         <translation>Hemen WireGuard® protokolünü deneyin</translation>
     </message>
     <message>
-    <source>ChangelogWindow --- Open Settings</source>
-        <translation>Ayarları Aç</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
         <source>ChangelogWindow --- Learn more</source>
         <translation>Daha çok bilgi</translation>
@@ -82,6 +458,12 @@
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
         <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
         <translation>WireGuard®&apos;ı etkinleştirmek için lütfen tekrar bağlanın</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
+        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
+        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
+        <translation>WireGuard özelliği: roketteki robot</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
@@ -99,6 +481,12 @@
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>Kapsamlı ayrık tünelleme işlevselliğimiz sayesinde, hangi uygulamaların ne zaman VPN kullanacağını kontrol edebilirsiniz. Neler yapabileceğinizi görmek için, Ayrık Tünelleme [[uygulama örneklerimize]] göz atın.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
+        <translation>Komut satırı arayüzü özelliği</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
@@ -119,618 +507,16 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelRoutedRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
-        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
-<source>SplitTunnelRoutedRow --- Routed Packets</source>
-        <translation>Yönlendirilmiş Paketler</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
-        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
-<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
-        <translation>Çoğu konteyneri (container) ve sanal makineyi içerir</translation>
-    </message>
-</context>
-<context>
-    <name>winstaller</name>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
-        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
-        <translation>Private Internet Access, en düşük Windows 8 ile kullanılabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
-        <source>winstaller --- Private Internet Access Installer</source>
-        <translation>Özel İnternet Erişimi Yükleyici</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
-        <source>winstaller --- %.0f SECONDS REMAINING</source>
-        <translation>%.0f SANİYE KALDI</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
-        <source>winstaller --- INSTALL</source>
-        <translation>YÜKLE</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
-        <source>winstaller --- UNINSTALL</source>
-        <translation>KALDIR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
-        <source>winstaller --- FINISH</source>
-        <translation>BİTİR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
-        <source>winstaller --- PREPARING</source>
-        <translation>HAZIRLANIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
-        <source>winstaller --- READY TO INSTALL</source>
-        <translation>YÜKLEMEYE HAZIR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
-        <source>winstaller --- INSTALLING</source>
-        <translation>YÜKLENİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
-        <source>winstaller --- ABORTING</source>
-        <translation>DURDURULUYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
-        <source>winstaller --- FINISHING UP</source>
-        <translation>TAMAMLANIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
-        <source>winstaller --- CLEANING UP</source>
-        <translation>TEMİZLENİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
-        <source>winstaller --- ROLLING BACK CHANGES</source>
-        <translation>DEĞİŞİKLİKLER GERİ ALINIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
-        <source>winstaller --- FINISHED</source>
-        <translation>BİTTİ</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
-        <source>winstaller --- ABORTED</source>
-        <translation>DURDURULDU</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
-        <source>winstaller --- UNPACKING</source>
-        <translation>PAKET AÇILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
-        <source>winstaller --- COPYING FILES</source>
-        <translation>DOSYALAR KOPYALANIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
-        <source>winstaller --- SHUTTING DOWN CLIENT</source>
-        <translation>İSTEMCİ KAPATILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
-        <source>winstaller --- STOPPING SERVICE</source>
-        <translation>HİZMET DURDURULUYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
-        <source>winstaller --- UNREGISTERING SERVICE</source>
-        <translation>HİZMET KAYDI SİLİNİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
-        <source>winstaller --- REGISTERING SERVICE</source>
-        <translation>HİZMET KAYDEDİLİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
-        <source>winstaller --- STARTING SERVICE</source>
-        <translation>HİZMET BAŞLATILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
-        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
-        <translation>AĞ BAĞDAŞTIRICISI KALDIRILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
-        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
-        <translation>AĞ BAĞDAŞTIRICISI YÜKLENİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
-        <source>winstaller --- BACKING UP FILES</source>
-        <translation>DOSYALAR YEDEKLENİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
-        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
-        <translation>ÖNCEKİ SÜRÜM KALDIRILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
-        <source>winstaller --- REMOVING FILES</source>
-        <translation>DOSYALAR KALDIRILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
-        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
-        <translation>CALLOUT SÜRÜCÜSÜ KALDIRILIYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
-        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
-        <translation>CALLOUT SÜRÜCÜSÜ GÜNCELLENİYOR</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
-        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
-        <translation>Var olan kurulum tanınamıyor. Tüm dizini silmek ister misiniz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
-        <source>winstaller --- Corrupt installation detected</source>
-        <translation>Bozuk yükleme algılandı</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
-        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
-        <translation>Kurulum dizininde başıboş dosyalar var. Bunları silmek ister misiniz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
-        <source>winstaller --- Files remaining</source>
-        <translation>Kalan dosyalar</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
-        <source>winstaller --- Do you want to abort the installation?</source>
-        <translation>Kurulumu durdurmak istiyor musunuz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
-        <source>winstaller --- Abort installation?</source>
-        <translation>Kurulum durdurulsun mu?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
-        <source>winstaller --- Error</source>
-        <translation>Hata</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
-        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
-        <translation>Bu, var olan Özel İnternet Erişimi kurulumunun yerini alır. Daha sonra eski sürümü yüklemek temiz bir yeniden yükleme gerektirir. Devam etmek istiyor musunuz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
-        <source>winstaller --- Replace existing version?</source>
-        <translation>Var olan sürüm değiştirilsin mi?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
-        <source>winstaller --- Unable to remove directory: %s</source>
-        <translation>Dizin kaldırılamadı: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
-        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
-        <translation>İlerlemeden önce lütfen var olan Özel İnternet Erişimi&apos;nden çıkın.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
-        <source>winstaller --- There was a problem uninstalling the existing version.</source>
-        <translation>Var olan sürüm kaldırılırken bir sorun oluştu.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
-        <source>winstaller --- There are still clients running.</source>
-        <translation>Hâlâ çalışan istemciler var.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
-        <source>winstaller --- Failed to stop the service.</source>
-        <translation>Hizmet durdurulamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
-        <source>winstaller --- A reboot is needed before installation can proceed.</source>
-        <translation>Kurulumun ilerlemesi için önce bir yeniden başlatma gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
-        <source>winstaller --- Service executable missing.</source>
-        <translation>Hizmet yürütülebilir dosyası eksik.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
-        <source>winstaller --- Service uninstallation failed.</source>
-        <translation>Hizmet kaldırılamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
-        <source>winstaller --- The service installation failed.</source>
-        <translation>Hizmet kaldırılması başarısız oldu.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
-        <source>winstaller --- The service failed to start.</source>
-        <translation>Hizmet başlatılamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
-        <source>winstaller --- Error uninstalling TAP driver.</source>
-        <translation>TAP sürücüsü kaldırılırken hata oluştu.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
-        <source>winstaller --- The TAP driver was not approved for installation.</source>
-        <translation>TAP sürücüsü kurulum için onaylanmamış.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
-        <source>winstaller --- The TAP driver installation failed.</source>
-        <translation>TAP sürücüsü kurulumu başarısız oldu.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
-        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
-        <translation>Özel İnternet Erişimi, çalışması için en az Windows 7 gerektirir.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
-        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
-        <translation>Özel İnternet Erişimi&apos;nin 32 bit sürümü yalnızca Windows&apos;un 32 bit sürümünde çalışabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
-        <source>winstaller --- Failed to retrieve shell folder %s.</source>
-        <translation>%s kabuk dosyası alınamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
-        <source>winstaller --- Out of memory.</source>
-        <translation>Bellek bitti.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
-        <source>winstaller --- Payload decompression error.</source>
-        <translation>Yük açma hatası.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
-        <source>winstaller --- Corrupted payload (CRC error).</source>
-        <translation>Bozuk yük (CRC hatası).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
-        <source>winstaller --- Unable to create file: %s</source>
-        <translation>Dosya oluşturulamıyor: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
-        <source>winstaller --- Unable to write file: %s</source>
-        <translation>Dosya yazılamıyor: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
-        <source>winstaller --- Unable to write entire file: %s</source>
-        <translation>Tüm dosya yazılamıyor: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
-        <source>winstaller --- Unable to initialize decompressor.</source>
-        <translation>Açıcı başlatılamıyor.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
-        <source>winstaller --- Corrupted payload (invalid parameters).</source>
-        <translation>Bozuk yük (geçersiz parametreler).</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
-        <source>winstaller --- Unable to move %s</source>
-        <translation>%s taşınamıyor</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
-        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
-        <translation>Geri alma dizini oluşturulamıyor. İlerlerseniz kurulum bir hata olması durumunda değişiklikleri geri alamaz.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
-        <source>winstaller --- Unable to create directory: %s</source>
-        <translation>Dizin oluşturulamıyor: %s</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
-        <source>winstaller --- The installer does not contain a recognizable payload.</source>
-        <translation>Yükleyici tanınabilir bir yük içermiyor.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
-        <source>winstaller --- Missing payload</source>
-        <translation>Eksik yük</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
-        <source>winstaller --- Error uninstalling callout driver.</source>
-        <translation>Callout sürücüsünü kaldırırken hata oluştu.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
-        <source>winstaller --- Callout driver installation failed.</source>
-        <translation>Callout sürücüsü kaldırılamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
-        <source>winstaller --- WireGuard installation failed.</source>
-        <translation>WireGuard yüklenemedi.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
-        <source>winstaller --- WireGuard uninstallation failed.</source>
-        <translation>WireGuard kaldırılamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
-        <source>winstaller --- WinTUN installation failed.</source>
-        <translation>WinTUN yüklenemedi.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
-        <source>winstaller --- WinTUN uninstallation failed.</source>
-        <translation>WinTUN kaldırılamadı.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
-        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
-        <translation>Private Internet Access&apos;i kurmak ya da kaldırmak için, Ağ Desteği ile Güvenli Modu kullanın.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
-        <source>winstaller --- Installation complete</source>
-        <translation>Kurulum tamamlandı</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
-        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
-        <translation>Private Internet Access&apos;i kullanmak için bilgisayarınızı yeniden başlatın.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
-        <source>winstaller --- The installation will now abort.</source>
-        <translation>Kurulum şimdi durdurulacak.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
-        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
-        <source>winstaller --- This is preventing the installation from proceeding.</source>
-        <translation>Bu, kurulumun ilerlemesini engelliyor.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
-        <source>winstaller --- Do you wish to continue the installation anyway?</source>
-        <translation>Kuruluma gene de devam etmek istiyor musunuz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
-        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
-        <translation>Yeniden deneyebilir veya kuruluma gene de devam etmeyi deneyebilirsiniz.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
-        <source>winstaller --- The uninstallation will now abort.</source>
-        <translation>Kaldırma işlemi şimdi durdurulacak.</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
-        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
-        <translation>Kaldırma işlemine gene de devam etmek istiyor musunuz?</translation>
-    </message>
-    <message>
-        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
-        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
-        <translation>Yeniden deneyebilir veya kaldırma işlemine gene de devam etmeyi deneyebilirsiniz.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingControl</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
-        <source>RatingControl --- Loading</source>
-        <translation>Yüklüyor</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
-        <source>RatingControl --- Something went wrong.</source>
-        <translation>Bir sorun oluştu.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingRequestNotificationStatus</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
-        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
-        <translation>PIA deneyiminizi değerlendirin.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="22"/>
-        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
-        <translation>Geri bildiriminiz için teşekkürler!</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="31"/>
-        <source>RatingRequestNotificationStatus --- Contact Support</source>
-        <translation>Destek İletişimi</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="24"/>
-        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
-        <translation>Teşekkürler! Herhangi bir sorunla karşılaşırsanız lütfen destek birimiyle iletişime geçin.</translation>
-    </message>
-</context>
-<context>
-    <name>RatingStar</name>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
-        <source>RatingStar --- Star rating of: %1</source>
-        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
-        <translation>Yıldız derecesi: %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
-        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
-        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
-        <translation>5 üzerinden %1 yıldız derecesi gönder.</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsMessages</name>
-    <message>
-    <source>SettingsMessages --- This feature requires macOS 10.15 or earlier.</source>
-        <translation>Bu özellik için en düşük macOS 10.15 kullanılabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
-        <source>SettingsMessages --- This feature requires kernel process events.</source>
-        <translation>Bu özellik için çekirdek işlemi olayları gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
-        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
-        <translation>Ayrık tünelleme filtresinin yüklenmesini tamamlamak için bilgisayarınızı yeniden başlatın.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
-        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
-        <translation>Ayrık tünelleme filtresi yüklenemedi. Bilgisayarınızı baştan başlatmayı deneyin ve sorun devam ederse destek birimiyle iletişime geçin.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
-        <translation>Bu özellik için Windows 7 Service Pack 1 veya üzeri gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
-        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
-        <translation>Bu özellik için iptables 1.6.1 veya üzeri gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
-        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
-        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
-        <translation>Bu özellik için libnl-3, libnl-route-3 ve libnl-genl-3 gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
-        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
-        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
-        <translation>Bu özellik için %1 dizininde net_cls mevcut olmalı.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
-        <source>SettingsMessages --- This feature requires OpenVPN.</source>
-        <translation>Bu özellik için OpenVPN gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
-        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
-        <translation>WireGuard için Windows 8 veya daha üst sürümü gerekli.</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelNameServersRow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
-        <source>SplitTunnelNameServersRow --- Name Servers</source>
-        <translation>İsim Sunucuları</translation>
-    </message>
-</context>
-<context>
-    <name>SplitTunnelRowBase</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
-        <source>SplitTunnelRowBase --- Follow App Rules</source>
-        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
-        <translation>Uygulama Kurallarını Uygula</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
-        <source>SplitTunnelRowBase --- VPN DNS Only</source>
-        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
-        <translation>Sadece VPN DNS</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
-        <source>SplitTunnelRowBase --- Bypass VPN</source>
-        <translation>VPN&apos;yi Atla</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
-        <source>SplitTunnelRowBase --- Only VPN</source>
-        <translation>Sadece VPN</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
-        <source>SplitTunnelRowBase --- Use VPN</source>
-        <translation>VPN Kullan</translation>
+    <name>Client</name>
+    <message>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+        <source>Client --- %1 - Best</source>
+        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
+        <translation>%1 - En İyi</translation>
     </message>
 </context>
 <context>
     <name>ClientNotifications</name>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
-        <translation>Özel IP&apos;nizin süresi %1 gün sonra dolacak.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
-        <source>ClientNotifications --- Get a new one</source>
-        <translation>Yenisini al</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
-        <source>ClientNotifications --- Your dedicated IP was updated.</source>
-        <translation>Özel IP&apos;niz güncellendi.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
-        <translation>Özel IP&apos;nizin süresi 1 gün sonra dolacak.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
-        <translation>Özel IP&apos;nizin süresi bugün dolacak.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
-        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
-        <translation>Bu işletim sistemi sürümü artık desteklenmiyor. En yeni PIA güncellemelerini almak için lütfen sisteminizi yükseltin.</translation>
-    </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
         <source>ClientNotifications -- header-title --- ERROR</source>
@@ -747,6 +533,11 @@
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
         <source>ClientNotifications --- Download of version %1 failed.</source>
         <translation>%1 sürümünün indirilmesi başarısız oldu.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>Bu işletim sistemi sürümü artık desteklenmiyor. En yeni PIA güncellemelerini almak için lütfen sisteminizi yükseltin.</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
@@ -974,6 +765,34 @@
         <translation>Yenile</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>Özel IP&apos;nizin süresi %1 gün sonra dolacak.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>Özel IP&apos;nizin süresi 1 gün sonra dolacak.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>Özel IP&apos;nizin süresi bugün dolacak.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>Yenisini al</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>Özel IP&apos;niz güncellendi.</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
@@ -1007,21 +826,341 @@
         <translation>Uygulama beklenmedik bir şekilde sonlandı. VPN bağlantınız korundu.</translation>
     </message>
     <message>
-    <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>Ayrık tünellemeyi etkinleştirmek için, ayrık tünelleme uzantısını onaylayın.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>Ayrık tünel özelliği, elle onaylanana kadar macOS tarafından engellenecek. Ayrık tünel kuralları etki etmeyecek.</translation>
-    </message>
-    <message>
-    <source>ClientNotifications --- Security Preferences</source>
-        <translation>Güvenlik Tercihleri</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
         <source>ClientNotifications --- The virtual network adapter is not installed.</source>
         <translation>Sanal ağ bağdaştırıcısı yüklü değil.</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectButton</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
+        <source>ConnectButton --- Toggle connection</source>
+        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
+        <translation>Bağlantıyı açıp kapat</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
+        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
+        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
+        <translation>Uyku modundan çıkarıp bağlanın; şu anda uykuda ve bağlantı yok</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
+        <source>ConnectButton --- Connect to VPN, error has occurred</source>
+        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
+        <translation>VPN&apos;ye bağlan; hata oluştu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
+        <source>ConnectButton --- Connect to VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
+        <translation>VPN&apos;ye bağlan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
+        <source>ConnectButton --- Disconnect from VPN, connecting</source>
+        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
+        <translation>VPN bağlantısını kes; bağlanıyor</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
+        <source>ConnectButton --- Disconnect from VPN</source>
+        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
+        <translation>VPN bağlantısını kes</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
+        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
+        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
+        <translation>VPN bağlantısını kes; bağlantı kesiliyor</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectPage</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
+        <source>ConnectPage --- Connect page</source>
+        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
+        <translation>Bağlantı sayfası</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionModule</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
+        <source>ConnectionModule --- Connection tile</source>
+        <extracomment>Screen reader annotation for the Connection tile</extracomment>
+        <translation>Bağlantı bölümü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
+        <source>ConnectionModule --- CONNECTION</source>
+        <translation>BAĞLANTI</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
+        <source>ConnectionModule --- Protocol</source>
+        <translation>Protokol</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
+        <source>ConnectionPage --- Protocol: </source>
+        <translation>Protokol: </translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
+        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+        <translation>En az 18 yıllık açık kaynak geliştirme deneyimini sunan güvenilir, istikrarlı ve güveli protokol.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>Performans artırma ihtimali bulunan daha yeni ve daha etkin protokol.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
+        <source>ConnectionPage --- OpenVPN® Settings</source>
+        <translation>OpenVPN® Ayarları</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
+        <source>ConnectionPage --- WireGuard® Settings</source>
+        <translation>WireGuard® Ayarları</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>Ticari Markalar</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <source>ConnectionPage --- Handshake and Authentication Settings</source>
+        <translation>Handshake ve Kimlik Doğrulama Ayarları</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>Bu ayarlar ne anlama gelir?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>Tüm ürün ve şirket adları, ilgili sahiplerinin ticari markaları™ ya da kayıtlı® ticari markalarıdır. Kullanıldıklarında, onlarla herhangi bir ortaklık kurulduğu ya da taraflarından onay verildiği anlamı çıkarılmamalıdır.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN®, OpenVPN Technologies, Inc. şirketinin ticari markasıdır.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard®, Jason A. Donenfeld adlı kişinin ticari markasıdır.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="89"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <translation>Shadowsocks vekil sunucu ayarları için TCP gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="119"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
+        <source>ConnectionPage --- Local Port</source>
+        <translation>Yerel Bağlantı Noktası</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="131"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
+        <source>ConnectionPage --- Auto</source>
+        <translation>Otomatik</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="135"/>
+        <source>ConnectionPage --- Configuration Method</source>
+        <translation>Yapılandırma Yöntemi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
+        <source>ConnectionPage --- DHCP</source>
+        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
+        <translation>DHCP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="146"/>
+        <source>ConnectionPage --- Static</source>
+        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
+        <translation>Statik</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
+        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
+        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
+        <translation>Adreslerin TAP adaptöründe nasıl yapılandırıldığını belirler. Bağlanırken sorun yaşıyorsanız, başka bir yöntem kullanmak sizin için daha uygun olabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
+        <translation>Uyarı: Trafiğiniz şifrelenmemiş olarak gönderiliyor ve gizli dinlemeye karşı savunmasız.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <source>ConnectionPage --- Proxy</source>
+        <translation>Vekil Sunucu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <source>ConnectionPage --- SOCKS5 Proxy...</source>
+        <translation>SOCKS5 Vekil Sunucu...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <source>ConnectionPage --- None</source>
+        <translation>Hiçbiri</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <source>ConnectionPage --- SOCKS5 Proxy</source>
+        <translation>SOCKS5 Vekil Sunucu</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <source>ConnectionPage --- Server IP Address</source>
+        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
+        <translation>Sunucu IP Adresi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <source>ConnectionPage --- Port</source>
+        <translation>Bağlantı Noktası</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+        <source>ConnectionPage --- Default</source>
+        <translation>Varsayılan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <source>ConnectionPage --- User (optional)</source>
+        <translation>Kullanıcı (isteğe bağlı)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <source>ConnectionPage --- Password (optional)</source>
+        <translation>Şifre (isteğe bağlı)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
+        <source>ConnectionPage --- Use Small Packets</source>
+        <translation>Küçük Paketler Kullan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
+        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+        <translation>VPN bağlantısı için daha küçük bir MTU ayarlayın. Bu, zayıf bağlantılarda daha düşük aktarım hızlarına ama gelişmiş kararlılığa neden olabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <source>ConnectionPage --- Try Alternate Settings</source>
+        <translation>Farklı Ayarlar Dene</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
+        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
+        <translation>Yukarıdaki bağlantı türü ve uzaktan bağlantı noktası çalışmazsa, otomatik olarak diğer ayarları dene.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
+        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
+        <translation>Vekil sunucu yapılandırıldığında farklı ayarlar kullanılamaz.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+        <source>ConnectionPage --- Connection Type</source>
+        <translation>Bağlantı Türü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+        <source>ConnectionPage --- Remote Port</source>
+        <translation>Uzak Bağlantı Noktası</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+        <source>ConnectionPage --- Data Encryption</source>
+        <translation>Veri Şifreleme</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+        <source>ConnectionPage --- Data Authentication</source>
+        <translation>Veri Kimlik Doğrulama</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+        <source>ConnectionPage --- Handshake</source>
+        <translation>El sıkışma</translation>
+    </message>
+</context>
+<context>
+    <name>DaemonAccount</name>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
+        <source>DaemonAccount --- Deactivated</source>
+        <translation>Devre dışı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
+        <source>DaemonAccount --- One Month Plan</source>
+        <translation>Bir Aylık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
+        <source>DaemonAccount --- Three Month Plan</source>
+        <translation>Üç Aylık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
+        <source>DaemonAccount --- Six Month Plan</source>
+        <translation>Altı Aylık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <source>DaemonAccount --- One Year Plan</source>
+        <translation>Bir Yıllık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
+        <source>DaemonAccount --- Two Year Plan</source>
+        <translation>İki Yıllık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <source>DaemonAccount --- Three Year Plan</source>
+        <translation>Üç Yıllık Tarife</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <source>DaemonAccount --- Trial</source>
+        <translation>Deneme</translation>
+    </message>
+</context>
+<context>
+    <name>DashboardPopup</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
+        <source>DashboardPopup --- PIA Dashboard</source>
+        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
+        <translation>PIA Kontrol Paneli</translation>
     </message>
 </context>
 <context>
@@ -1157,1473 +1296,6 @@
         <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
         <source>DedicatedIpSubtitle --- DEDICATED IP</source>
         <translation>ÖZEL IP</translation>
-    </message>
-</context>
-<context>
-    <name>RegionListView</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
-        <source>RegionListView --- Detail</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
-        <translation>Ayrıntı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
-        <source>RegionListView --- Region</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
-        <translation>Bölge</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
-        <source>RegionListView --- Latency</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
-        <translation>Gecikme</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
-        <source>RegionListView --- Favorite</source>
-        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
-        <translation>Favori</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>Bölge listesi</translation>
-    </message>
-</context>
-<context>
-    <name>RegionRowLabels</name>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
-        <source>RegionRowLabels --- offline</source>
-        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
-        <translation>çevrimdışı</translation>
-    </message>
-</context>
-<context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>Özel IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>Özel IP Özellikleri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>Genel</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>Hesap</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>Gizlilik</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>Ağ</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>Bağlantı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Proxy</source>
-        
-        <translation>Vekil Sunucu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>Yardım</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>Genel Tercihler</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>Hesap Bilgileri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>Gizlilik Tercihleri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>Ağ Tercihleri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>Bağlantı Tercihleri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
-        
-        <translation>Vekil Sunucu Tercihleri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>Yardım</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="143"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>Uyarı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="177"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>Ayarlar</translation>
-    </message>
-</context>
-<context>
-    <name>TrayMenuBuilder</name>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
-        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
-        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
-        <translation>Özel IP&apos;ye bağlan</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
-        <source>TrayMenuBuilder --- Connect to region</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>Bölgeye bağlan</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
-        <source>TrayMenuBuilder --- Help</source>
-        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
-        <translation>Yardım</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
-        <source>TrayMenuBuilder --- Show Window</source>
-        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
-        <translation>Pencereyi Göster</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
-        <source>TrayMenuBuilder --- Resume Connection</source>
-        <translation>Bağlantıyı Sürdür</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
-        <source>TrayMenuBuilder --- Connect (Auto)</source>
-        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
-        <translation>Bağlan (Otomatik)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
-        <source>TrayMenuBuilder --- Connect (%1)</source>
-        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
-        <translation>Bağlan (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
-        <source>TrayMenuBuilder --- Disconnect</source>
-        <extracomment>Menu command to disconnect from the VPN.</extracomment>
-        <translation>Bağlantıyı Kes</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
-        <source>TrayMenuBuilder --- Snooze</source>
-        <translation>Uyku</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
-        <source>TrayMenuBuilder --- 5 Minutes</source>
-        <translation>5 Dakika</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
-        <source>TrayMenuBuilder --- 10 Minutes</source>
-        <translation>10 Dakika</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
-        <source>TrayMenuBuilder --- 15 Minutes</source>
-        <translation>15 Dakika</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
-        <source>TrayMenuBuilder --- 30 Minutes</source>
-        <translation>30 Dakika</translation>
-    </message>
-    <message>
-    <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>Bağlan:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
-        <source>TrayMenuBuilder --- Log In</source>
-        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
-        <translation>Oturum Aç</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
-        <source>TrayMenuBuilder --- Settings...</source>
-        <extracomment>Menu command to open the settings dialog.</extracomment>
-        <translation>Ayarlar...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
-        <source>TrayMenuBuilder --- Enable Debug Logging</source>
-        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
-        <translation>Hata Ayıklama Günlüğünü Aç</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
-        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
-        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
-        <translation>Hata Ayıklama Günlüğünü Gönder...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
-        <source>TrayMenuBuilder --- Changelog</source>
-        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
-        <translation>Değişim Günlüğü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
-        <source>TrayMenuBuilder --- Support Portal</source>
-        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
-        <translation>Destek Portalı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
-        <source>TrayMenuBuilder --- Blog</source>
-        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
-        <translation>Blog</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
-        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
-        <translation>Genel IP&apos;yi kopyala (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
-        <source>TrayMenuBuilder --- Copy Public IP</source>
-        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
-        <translation>Genel IP&apos;yi kopyala</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
-        <translation>İletilen Bağlantı Noktasını Kopyala (%1)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
-        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
-        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
-        <translation>İletilen Bağlantı Noktasını Kopyala</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
-        <source>TrayMenuBuilder --- Quit</source>
-        <extracomment>Menu command to quit the application.</extracomment>
-        <translation>Çık</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
-        <source>ConnectionPage --- Handshake and Authentication Settings</source>
-        <translation>Handshake ve Kimlik Doğrulama Ayarları</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="25"/>
-        <source>ConnectionPage --- Protocol: </source>
-        <translation>Protokol: </translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="57"/>
-        <source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
-        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
-        <translation>En az 18 yıllık açık kaynak geliştirme deneyimini sunan güvenilir, istikrarlı ve güveli protokol.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="59"/>
-        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
-        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
-        <translation>Performans artırma ihtimali bulunan daha yeni ve daha etkin protokol.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="94"/>
-        <source>ConnectionPage --- OpenVPN® Settings</source>
-        <translation>OpenVPN® Ayarları</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="96"/>
-        <source>ConnectionPage --- WireGuard® Settings</source>
-        <translation>WireGuard® Ayarları</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
-        <source>ConnectionPage --- Trademarks</source>
-        <translation>Ticari Markalar</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>Bu ayarlar ne anlama gelir?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
-        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
-        <translation>Tüm ürün ve şirket adları, ilgili sahiplerinin ticari markaları™ ya da kayıtlı® ticari markalarıdır. Kullanıldıklarında, onlarla herhangi bir ortaklık kurulduğu ya da taraflarından onay verildiği anlamı çıkarılmamalıdır.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
-        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
-        <translation>OpenVPN®, OpenVPN Technologies, Inc. şirketinin ticari markasıdır.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
-        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
-        <translation>WireGuard®, Jason A. Donenfeld adlı kişinin ticari markasıdır.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="88"/>
-        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
-        <translation>Shadowsocks vekil sunucu ayarları için TCP gerekli.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="118"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
-        <source>ConnectionPage --- Local Port</source>
-        <translation>Yerel Bağlantı Noktası</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="130"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
-        <source>ConnectionPage --- Auto</source>
-        <translation>Otomatik</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="134"/>
-        <source>ConnectionPage --- Configuration Method</source>
-        <translation>Yapılandırma Yöntemi</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="141"/>
-        <source>ConnectionPage --- DHCP</source>
-        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
-        <translation>DHCP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="145"/>
-        <source>ConnectionPage --- Static</source>
-        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
-        <translation>Statik</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="150"/>
-        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
-        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
-        <translation>Adreslerin TAP adaptöründe nasıl yapılandırıldığını belirler. Bağlanırken sorun yaşıyorsanız, başka bir yöntem kullanmak sizin için daha uygun olabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
-        <source>ConnectionPage --- None</source>
-        <translation>Hiçbiri</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="167"/>
-        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
-        <translation>Uyarı: Trafiğiniz şifrelenmemiş olarak gönderiliyor ve gizli dinlemeye karşı savunmasız.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
-        <translation>Uyarı: Trafiğinizin kimliği doğrulanmamış ve manipülasyona karşı savunmasız.</translation>
-    </message>
-    <message>
-    <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
-        <translation>Bu el sıkışma ABD standart kurumları tarafından uygun bulunan bir Eliptik Eğri&apos;ye dayanır.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="178"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
-        <source>ConnectionPage --- Use Small Packets</source>
-        <translation>Küçük Paketler Kullan</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="182"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
-        <translation>VPN bağlantısı için daha küçük bir MTU ayarlayın. Bu, zayıf bağlantılarda daha düşük aktarım hızlarına ama gelişmiş kararlılığa neden olabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="186"/>
-        <source>ConnectionPage --- Try Alternate Settings</source>
-        <translation>Farklı Ayarlar Dene</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="195"/>
-        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
-        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
-        <translation>Yukarıdaki bağlantı türü ve uzaktan bağlantı noktası çalışmazsa, otomatik olarak diğer ayarları dene.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="203"/>
-        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
-        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
-        <translation>Vekil sunucu yapılandırıldığında farklı ayarlar kullanılamaz.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
-        <source>ConnectionPage --- Proxy</source>
-        <translation>Vekil Sunucu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
-        <source>ConnectionPage --- SOCKS5 Proxy...</source>
-        <translation>SOCKS5 Vekil Sunucu...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
-        <source>ConnectionPage --- SOCKS5 Proxy</source>
-        <translation>SOCKS5 Vekil Sunucu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
-        <source>ConnectionPage --- Server IP Address</source>
-        <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
-        <translation>Sunucu IP Adresi</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
-        <source>ConnectionPage --- Port</source>
-        <translation>Bağlantı Noktası</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
-        <source>ConnectionPage --- Default</source>
-        <translation>Varsayılan</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
-        <source>ConnectionPage --- User (optional)</source>
-        <translation>Kullanıcı (isteğe bağlı)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
-        <source>ConnectionPage --- Password (optional)</source>
-        <translation>Şifre (isteğe bağlı)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
-        <source>ConnectionPage --- Connection Type</source>
-        <translation>Bağlantı Türü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
-        <source>ConnectionPage --- Remote Port</source>
-        <translation>Uzak Bağlantı Noktası</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
-        <source>ConnectionPage --- Data Encryption</source>
-        <translation>Veri Şifreleme</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
-        <source>ConnectionPage --- Data Authentication</source>
-        <translation>Veri Kimlik Doğrulama</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
-        <source>ConnectionPage --- Handshake</source>
-        <translation>El sıkışma</translation>
-    </message>
-</context>
-<context>
-    <name>HelpPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
-        <source>HelpPage --- Show service communication messages</source>
-        <translation>Hizmet iletişim mesajlarını göster</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
-        <source>HelpPage --- Version</source>
-        <translation>Sürüm</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
-        <source>HelpPage --- Client:</source>
-        <translation>İstemci:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
-        <source>HelpPage --- Daemon:</source>
-        <translation>Daemon:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
-        <source>HelpPage --- Changelog</source>
-        <translation>Değişim Günlüğü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
-        <source>HelpPage --- Quick Tour</source>
-        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
-        <translation>Hızlı Tanıtım</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
-        <source>HelpPage --- Receive Beta Updates</source>
-        <translation>Beta Güncellemelerini Al</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
-        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
-        <translation>Beta programımıza bağlanarak yeni işlevleri deneyin ve geri bildirim gönderin.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
-        <source>HelpPage --- Network</source>
-        <translation>Ağ</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Current</source>
-        <translation>Güncel</translation>
-    </message>
-    <message>
-    <source>HelpPage --- Next Generation</source>
-        <translation>Yeni Nesil</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
-        <source>HelpPage --- Include Geo-Located Regions</source>
-        <translation>Jeolojik Konumlandırılmış Bölgeleri Dahil Et</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
-        <source>HelpPage --- Support</source>
-        <translation>Destek</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
-        <source>HelpPage --- Disable Accelerated Graphics</source>
-        <translation>Hızlandırılmış Grafikleri Kapat</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
-        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
-        <translation>Bu ayarı uygulamak için Private Internet Access&apos;i yeniden başlatın</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
-        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
-        <translation>Hızlandırılmış grafikler işlemci kullanımını azaltır ve grafik efektlerini açar, ancak belirli grafik kartlarında ya da sunucularda sorunlara neden olabilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="218"/>
-        <source>HelpPage --- Enable Debug Logging</source>
-        <translation>Hata Ayıklama Günlüğünü Etkinleştir</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
-        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
-        <translation>Sorunların giderilmesine yardımcı olması için teknik desteğe gönderilebilen hata ayıklama günlüklerini kaydedin.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="235"/>
-        <source>HelpPage --- Submit Debug Logs</source>
-        <translation>Hata Ayıklama Günlükleri Gönder</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="241"/>
-        <source>HelpPage --- Support Portal</source>
-        <translation>Destek Portalı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="253"/>
-        <source>HelpPage --- Maintenance</source>
-        <translation>Bakım</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="263"/>
-        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
-        <translation>OpenVPN Ağ Adaptörünü Tekrar Yükle</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="264"/>
-        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
-        <translation>OpenVPN Ağ Adaptörünü Tekrar Yüklüyor...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="274"/>
-        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
-        <translation>WireGuard Ağ Adaptörünü Tekrar Yükle</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="275"/>
-        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
-        <translation>WireGuard Ağ Adaptörünü Tekrar Yüklüyor...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>Ayrık Tünelleme Filtresi Yeniden Yükleniyor...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
-        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
-        <translation>Ayrık Tünelleme Filtresini Yeniden Yükle</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
-        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
-        <translation>Ayrık tünelleme filtresi yeniden yüklendi.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="363"/>
-        <source>HelpPage --- Uninstall Private Internet Access</source>
-        <translation>Özel İnternet Erişimini Kaldır</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="404"/>
-        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
-        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
-        <translation>Terminalde komut çalıştırılamadı. Lütfen x terminal öyküncüsüyle uyumlu bir terminal yükleyin.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
-        <source>HelpPage --- Unable to open terminal</source>
-        <translation>Terminal açılamıyor</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="415"/>
-        <source>HelpPage --- v%1</source>
-        <translation>v%1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
-        <source>HelpPage --- Waiting for Disconnect...</source>
-        <translation>Bağlantı Kesilmesi Bekleniyor...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
-        <translation>Ağ bağdaştırıcısı bağlıyken yeniden yüklenemez. Bağlantı kesilsin ve şimdi yeniden yüklensin mi?</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
-        <source>HelpPage --- Disconnect needed</source>
-        <translation>Bağlantı kesilmesi gerekli</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
-        <translation>Ağ bağdaştırıcısı başarıyla yeniden yüklendi.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
-        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
-        <translation>Ağ bağdaştırıcısı başarıyla yeniden yüklendi. Sisteminizi yeniden başlatmanız gerekebilir.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
-        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
-        <translation>Ağ bağdaştırıcısı yeniden yüklenmeye çalışılırken bir hata oluştu.</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
-        <source>HelpPage --- Reinstall successful</source>
-        <translation>Yeniden yükleme başarılı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
-        <source>HelpPage --- Reinstall error</source>
-        <translation>Yeniden yükleme hatası</translation>
-    </message>
-</context>
-<context>
-    <name>AccountModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
-        <source>AccountModule --- Subscription tile</source>
-        <extracomment>Screen reader annotation for the &quot;Subscription&quot; tile, should reflect the name of the tile</extracomment>
-        <translation>Abonelik bölümü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="22"/>
-        <source>AccountModule --- SUBSCRIPTION</source>
-        <translation>ABONELİK</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="35"/>
-        <source>AccountModule --- Subscription</source>
-        <extracomment>Screen reader annotation for the subscription status display in the Subscription tile, usually the same as the tile name (but not all-caps)</extracomment>
-        <translation>Abonelik</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="39"/>
-        <source>AccountModule --- Expired</source>
-        <translation>Süresi Doldu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="42"/>
-        <source>AccountModule --- (%1 days left)</source>
-        <translation>(%1 gün kaldı)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Expired on</source>
-        <translation>Sürenin dolduğu tarih:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="58"/>
-        <source>AccountModule --- Renews on</source>
-        <translation>Yenilenme tarihi:</translation>
-    </message>
-</context>
-<context>
-    <name>AccountPage</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
-        <source>AccountPage --- Username</source>
-        <translation>Kullanıcı Adı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
-        <source>AccountPage --- Subscription</source>
-        <translation>Abonelik</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
-        <source>AccountPage --- Expired</source>
-        <translation>Süresi Doldu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
-        <source>AccountPage --- (expired on %1)</source>
-        <translation>(%1 tarihinde süresi doldu)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
-        <source>AccountPage --- (renews on %1)</source>
-        <translation>(%1 tarihinde yenilenir)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
-        <source>AccountPage --- (expires on %1)</source>
-        <translation>(%1 tarihinde süresi doluyor)</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Renews in %1 days</source>
-        <translation>%1 gün içinde yenilenir</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
-        <source>AccountPage --- Expires in %1 days</source>
-        <translation>%1 gün içinde süresi doluyor</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>Abonelik Satın Al</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>Aboneliği Yönet</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>Aboneliği Yenile</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>Hesabımı Yönet</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
-        <source>AccountPage --- Logout / Switch Account</source>
-        <translation>Oturumu Kapat / Hesap Değiştir</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
-        <source>AccountPage --- Not logged in</source>
-        <translation>Oturum açılmadı</translation>
-    </message>
-</context>
-<context>
-    <name>BelowFold</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/SeparatorModule.qml" line="19"/>
-        <source>BelowFold --- DEFAULT DISPLAY</source>
-        <translation>VARSAYILAN GÖSTERİM</translation>
-    </message>
-</context>
-<context>
-    <name>BetaAgreementDialog</name>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="15"/>
-        <source>BetaAgreementDialog --- Agreement</source>
-        <translation>Sözleşme</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="19"/>
-        <source>BetaAgreementDialog --- Accept</source>
-        <extracomment>&quot;Accept&quot; button for accepting the Beta agreement, should use the typical terminology for accepting a legal agreement.</extracomment>
-        <translation>Kabul Et</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="22"/>
-        <source>BetaAgreementDialog --- Decline</source>
-        <extracomment>&quot;Decline&quot; button for declining the Beta agreement, should use the typical terminology for declining a legal agreement.</extracomment>
-        <translation>Reddet</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/BetaAgreementDialog.qml" line="62"/>
-        <source>BetaAgreementDialog --- Agreement text</source>
-        <extracomment>Screen reader annotation for the beta license agreement content (a text element containing the license agreement).</extracomment>
-        <translation>Anlaşma metni</translation>
-    </message>
-</context>
-<context>
-    <name>Client</name>
-    <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
-        <source>Client --- %1 - Best</source>
-        <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
-        <translation>%1 - En İyi</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectButton</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
-        <source>ConnectButton --- Toggle connection</source>
-        <extracomment>Screen reader annotation for the Connect button (the large &quot;power symbol&quot; button). Used for all states of the Connect button.</extracomment>
-        <translation>Bağlantıyı açıp kapat</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="99"/>
-        <source>ConnectButton --- Resume from Snooze and reconnect, currently snoozing and disconnected</source>
-        <extracomment>Description of the Connect button when connection is &quot;Snoozed&quot; meaning the connection is temporarily disconnected</extracomment>
-        <translation>Uyku modundan çıkarıp bağlanın; şu anda uykuda ve bağlantı yok</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="106"/>
-        <source>ConnectButton --- Connect to VPN, error has occurred</source>
-        <extracomment>Description of the Connect button in the &quot;error&quot; state. This indicates that an error occurred recently.</extracomment>
-        <translation>VPN&apos;ye bağlan; hata oluştu</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="110"/>
-        <source>ConnectButton --- Connect to VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;disconnected&quot; state</extracomment>
-        <translation>VPN&apos;ye bağlan</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="115"/>
-        <source>ConnectButton --- Disconnect from VPN, connecting</source>
-        <extracomment>Description of the Connect button when a connection is ongoing (clicking the button in this state disconnects, i.e. aborts the ongoing connection)</extracomment>
-        <translation>VPN bağlantısını kes; bağlanıyor</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="118"/>
-        <source>ConnectButton --- Disconnect from VPN</source>
-        <extracomment>Description of the Connect button in the normal &quot;connected&quot; state</extracomment>
-        <translation>VPN bağlantısını kes</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="123"/>
-        <source>ConnectButton --- Disconnect from VPN, disconnecting</source>
-        <extracomment>Description of the Connect button while currently disconnecting. Clicking the button in this state still tries to disconnect (which has no real effect since it is already disconnecting).</extracomment>
-        <translation>VPN bağlantısını kes; bağlantı kesiliyor</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectPage</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/ConnectPage.qml" line="80"/>
-        <source>ConnectPage --- Connect page</source>
-        <extracomment>Screen reader annotation for Connect page. This describes the entire page that contains the Connect button and tiles.</extracomment>
-        <translation>Bağlantı sayfası</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionModule</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="18"/>
-        <source>ConnectionModule --- Connection tile</source>
-        <extracomment>Screen reader annotation for the Connection tile</extracomment>
-        <translation>Bağlantı bölümü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="25"/>
-        <source>ConnectionModule --- CONNECTION</source>
-        <translation>BAĞLANTI</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/ConnectionModule.qml" line="51"/>
-        <source>ConnectionModule --- Protocol</source>
-        <translation>Protokol</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonAccount</name>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
-        <source>DaemonAccount --- Deactivated</source>
-        <translation>Devre dışı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
-        <source>DaemonAccount --- One Month Plan</source>
-        <translation>Bir Aylık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
-        <source>DaemonAccount --- Three Month Plan</source>
-        <translation>Üç Aylık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
-        <source>DaemonAccount --- Six Month Plan</source>
-        <translation>Altı Aylık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
-        <source>DaemonAccount --- One Year Plan</source>
-        <translation>Bir Yıllık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
-        <source>DaemonAccount --- Two Year Plan</source>
-        <translation>İki Yıllık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
-        <source>DaemonAccount --- Three Year Plan</source>
-        <translation>Üç Yıllık Tarife</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
-        <source>DaemonAccount --- Trial</source>
-        <translation>Deneme</translation>
-    </message>
-</context>
-<context>
-    <name>DaemonData</name>
-    <message>
-    <source>DaemonData --- AU Melbourne</source>
-        <translation>AU Melbourne</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Perth</source>
-        <translation>AU Perth</translation>
-    </message>
-    <message>
-    <source>DaemonData --- AU Sydney</source>
-        <translation>AU Sidney</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Albania</source>
-        <translation>Arnavutluk</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Algeria</source>
-        <translation>Cezayir</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Andorra</source>
-        <translation>Andorra</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Argentina</source>
-        <translation>Arjantin</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Armenia</source>
-        <translation>Ermenistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Australia</source>
-        <translation>Avustralya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Austria</source>
-        <translation>Avusturya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bahamas</source>
-        <translation>Bahamalar</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bangladesh</source>
-        <translation>Bangladeş</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belarus</source>
-        <translation>Belarus</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Belgium</source>
-        <translation>Belçika</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bosnia and Herzegovina</source>
-        <translation>Bosna Hersek</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Brazil</source>
-        <translation>Brezilya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Bulgaria</source>
-        <translation>Bulgaristan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Montreal</source>
-        <translation>CA Montreal</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Ontario</source>
-        <translation>CA Ontario</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Toronto</source>
-        <translation>CA Toronto</translation>
-    </message>
-    <message>
-    <source>DaemonData --- CA Vancouver</source>
-        <translation>CA Vancouver</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cambodia</source>
-        <translation>Kamboçya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Canada</source>
-        <translation>Kanada</translation>
-    </message>
-    <message>
-    <source>DaemonData --- China</source>
-        <translation>Çin</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Cyprus</source>
-        <translation>Güney Kıbrıs</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Croatia</source>
-        <translation>Hırvatistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Czech Republic</source>
-        <translation>Çek Cumhuriyeti</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Berlin</source>
-        <translation>DE Berlin</translation>
-    </message>
-    <message>
-    <source>DaemonData --- DE Frankfurt</source>
-        <translation>DE Frankfurt</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Denmark</source>
-        <translation>Danimarka</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Egypt</source>
-        <translation>Mısır</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Estonia</source>
-        <translation>Estonya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Finland</source>
-        <translation>Finlandiya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- France</source>
-        <translation>Fransa</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Germany</source>
-        <translation>Almanya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Georgia</source>
-        <translation>Gürcistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greece</source>
-        <translation>Yunanistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Greenland</source>
-        <translation>Grönland</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hong Kong</source>
-        <translation>Hong Kong</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Hungary</source>
-        <translation>Macaristan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iceland</source>
-        <translation>İzlanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- India</source>
-        <translation>Hindistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Iran</source>
-        <translation>İran</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ireland</source>
-        <translation>İrlanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Isle of Man</source>
-        <translation>Man Adası</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Israel</source>
-        <translation>İsrail</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Italy</source>
-        <translation>İtalya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Japan</source>
-        <translation>Japonya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Kazakhstan</source>
-        <translation>Kazakistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Latvia</source>
-        <translation>Letonya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Liechtenstein</source>
-        <translation>Liechtenstein</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Lithuania</source>
-        <translation>Litvanya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Luxembourg</source>
-        <translation>Lüksemburg</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macao</source>
-        <translation>Makao</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Macau</source>
-        <translation>Makao</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malaysia</source>
-        <translation>Malezya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Malta</source>
-        <translation>Malta</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mexico</source>
-        <translation>Meksika</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Moldova</source>
-        <translation>Moldova</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Monaco</source>
-        <translation>Monako</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Mongolia</source>
-        <translation>Moğolistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Montenegro</source>
-        <translation>Montenegro</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Morocco</source>
-        <translation>Fas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Netherlands</source>
-        <translation>Hollanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- New Zealand</source>
-        <translation>Yeni Zelanda</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Nigeria</source>
-        <translation>Nijerya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- North Macedonia</source>
-        <translation>Kuzey Makedonya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Norway</source>
-        <translation>Norveç</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Panama</source>
-        <translation>Panama</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Philippines</source>
-        <translation>Filipinler</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Poland</source>
-        <translation>Polonya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Portugal</source>
-        <translation>Portekiz</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Qatar</source>
-        <translation>Katar</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Romania</source>
-        <translation>Romanya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Russia</source>
-        <translation>Rusya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Saudi Arabia</source>
-        <translation>Suudi Arabistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Serbia</source>
-        <translation>Sırbistan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Singapore</source>
-        <translation>Singapur</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovakia</source>
-        <translation>Slovakya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Slovenia</source>
-        <translation>Slovakya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- South Africa</source>
-        <translation>Güney Afrika</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Spain</source>
-        <translation>İspanya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sri Lanka</source>
-        <translation>Sri Lanka</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Sweden</source>
-        <translation>İsveç</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Switzerland</source>
-        <translation>İsviçre</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Taiwan</source>
-        <translation>Tayvan</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Turkey</source>
-        <translation>Türkiye</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UAE</source>
-        <translation>BAE</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK London</source>
-        <translation>Birleşik Krallık Londra</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Manchester</source>
-        <translation>Birleşik Krallık Manchester</translation>
-    </message>
-    <message>
-    <source>DaemonData --- UK Southampton</source>
-        <translation>Birleşik Krallık Southampton</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Atlanta</source>
-        <translation>ABD Atlanta</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US California</source>
-        <translation>ABD Kaliforniya</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Chicago</source>
-        <translation>ABD Şikago</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Denver</source>
-        <translation>ABD Denver</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US East</source>
-        <translation>ABD Doğu</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Florida</source>
-        <translation>ABD Florida</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Houston</source>
-        <translation>ABD Houston</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Las Vegas</source>
-        <translation>ABD Las Vegas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York City</source>
-        <translation>ABD New York City</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US New York</source>
-        <translation>ABD New York</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Seattle</source>
-        <translation>ABD Seattle</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Silicon Valley</source>
-        <translation>ABD Silikon Vadisi</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Texas</source>
-        <translation>ABD Teksas</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US Washington DC</source>
-        <translation>ABD Washington DC</translation>
-    </message>
-    <message>
-    <source>DaemonData --- US West</source>
-        <translation>ABD Batı</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Ukraine</source>
-        <translation>Ukrayna</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Arab Emirates</source>
-        <translation>Birleşik Arap Emirlikleri</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United Kingdom</source>
-        <translation>Birleşik Krallık</translation>
-    </message>
-    <message>
-    <source>DaemonData --- United States</source>
-        <translation>Birleşik Devletler</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Venezuela</source>
-        <translation>Venezuela</translation>
-    </message>
-    <message>
-    <source>DaemonData --- Vietnam</source>
-        <translation>Vietnam</translation>
-    </message>
-</context>
-<context>
-    <name>DashboardPopup</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/DashboardPopup.qml" line="78"/>
-        <source>DashboardPopup --- PIA Dashboard</source>
-        <extracomment>Title of the dashboard window (the main UI that users interact with. This isn&apos;t normally shown, but it is used by screen readers, and it is occasionally used by tools on Windows that list open application windows. &quot;PIA&quot; stands for Private Internet Access. We refer to this window as the &quot;dashboard&quot;, but this term doesn&apos;t currently appear elsewhere in the product.</extracomment>
-        <translation>PIA Kontrol Paneli</translation>
     </message>
 </context>
 <context>
@@ -2808,13 +1480,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="11"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="12"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>Alpha ön sürümü</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="14"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="15"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>Beta ön sürümü</translation>
@@ -2881,6 +1553,201 @@
         <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
         <source>HeaderBar --- Quit</source>
         <translation>Çık</translation>
+    </message>
+</context>
+<context>
+    <name>HelpPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
+        <source>HelpPage --- Version</source>
+        <translation>Sürüm</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
+        <source>HelpPage --- Client:</source>
+        <translation>İstemci:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
+        <source>HelpPage --- Daemon:</source>
+        <translation>Daemon:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <source>HelpPage --- Changelog</source>
+        <translation>Değişim Günlüğü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <source>HelpPage --- Quick Tour</source>
+        <extracomment>This link displays the tour that users see initially after installation.</extracomment>
+        <translation>Hızlı Tanıtım</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <source>HelpPage --- Receive Beta Updates</source>
+        <translation>Beta Güncellemelerini Al</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
+        <translation>Beta programımıza bağlanarak yeni işlevleri deneyin ve geri bildirim gönderin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <source>HelpPage --- Show service communication messages</source>
+        <translation>Hizmet iletişim mesajlarını göster</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <source>HelpPage --- Network</source>
+        <translation>Ağ</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <source>HelpPage --- Include Geo-Located Regions</source>
+        <translation>Jeolojik Konumlandırılmış Bölgeleri Dahil Et</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <source>HelpPage --- Support</source>
+        <translation>Destek</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <source>HelpPage --- Disable Accelerated Graphics</source>
+        <translation>Hızlandırılmış Grafikleri Kapat</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
+        <translation>Bu ayarı uygulamak için Private Internet Access&apos;i yeniden başlatın</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
+        <translation>Hızlandırılmış grafikler işlemci kullanımını azaltır ve grafik efektlerini açar, ancak belirli grafik kartlarında ya da sunucularda sorunlara neden olabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <source>HelpPage --- Enable Debug Logging</source>
+        <translation>Hata Ayıklama Günlüğünü Etkinleştir</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
+        <translation>Sorunların giderilmesine yardımcı olması için teknik desteğe gönderilebilen hata ayıklama günlüklerini kaydedin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <source>HelpPage --- Submit Debug Logs</source>
+        <translation>Hata Ayıklama Günlükleri Gönder</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <source>HelpPage --- Support Portal</source>
+        <translation>Destek Portalı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <source>HelpPage --- Maintenance</source>
+        <translation>Bakım</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
+        <translation>OpenVPN Ağ Adaptörünü Tekrar Yükle</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
+        <translation>OpenVPN Ağ Adaptörünü Tekrar Yüklüyor...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
+        <translation>WireGuard Ağ Adaptörünü Tekrar Yükle</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
+        <translation>WireGuard Ağ Adaptörünü Tekrar Yüklüyor...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>Ayrık Tünelleme Filtresi Yeniden Yükleniyor...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <source>HelpPage --- Reinstall Split Tunnel Filter</source>
+        <translation>Ayrık Tünelleme Filtresini Yeniden Yükle</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <source>HelpPage --- The split tunnel filter was reinstalled.</source>
+        <translation>Ayrık tünelleme filtresi yeniden yüklendi.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <source>HelpPage --- Uninstall Private Internet Access</source>
+        <translation>Özel İnternet Erişimini Kaldır</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
+        <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
+        <translation>Terminalde komut çalıştırılamadı. Lütfen x terminal öyküncüsüyle uyumlu bir terminal yükleyin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <source>HelpPage --- Unable to open terminal</source>
+        <translation>Terminal açılamıyor</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <source>HelpPage --- v%1</source>
+        <translation>v%1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="31"/>
+        <source>HelpPage --- Waiting for Disconnect...</source>
+        <translation>Bağlantı Kesilmesi Bekleniyor...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
+        <translation>Ağ bağdaştırıcısı bağlıyken yeniden yüklenemez. Bağlantı kesilsin ve şimdi yeniden yüklensin mi?</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="43"/>
+        <source>HelpPage --- Disconnect needed</source>
+        <translation>Bağlantı kesilmesi gerekli</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="75"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
+        <translation>Ağ bağdaştırıcısı başarıyla yeniden yüklendi.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="78"/>
+        <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
+        <translation>Ağ bağdaştırıcısı başarıyla yeniden yüklendi. Sisteminizi yeniden başlatmanız gerekebilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ReinstallLink.qml" line="81"/>
+        <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
+        <translation>Ağ bağdaştırıcısı yeniden yüklenmeye çalışılırken bir hata oluştu.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="10"/>
+        <source>HelpPage --- Reinstall successful</source>
+        <translation>Yeniden yükleme başarılı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="12"/>
+        <source>HelpPage --- Reinstall error</source>
+        <translation>Yeniden yükleme hatası</translation>
     </message>
 </context>
 <context>
@@ -3007,6 +1874,36 @@
         <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
         <source>LoginPage --- Buy Account</source>
         <translation>Hesabı Satın Alın</translation>
+    </message>
+</context>
+<context>
+    <name>Messages</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="49"/>
+        <source>Messages --- Wired Connection</source>
+        <translation>Kablolu Bağlantı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="51"/>
+        <source>Messages --- Open Wi-Fi</source>
+        <translation>Ortak Wi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="53"/>
+        <source>Messages --- Protected Wi-Fi</source>
+        <translation>Korumalı Wi-Fi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="63"/>
+        <source>Messages --- Connect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>Bağlan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="66"/>
+        <source>Messages --- Disconnect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>Bağlantıyı Kes</translation>
     </message>
 </context>
 <context>
@@ -3218,14 +2115,6 @@
         <translation>Ayrık Tünelleme</translation>
     </message>
     <message>
-    <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>Bu özelliği etkinleştirmek için ayrık tünelleme uzantısını onaylayın.</translation>
-    </message>
-    <message>
-    <source>NetworkPage --- Security Preferences</source>
-        <translation>Güvenlik Tercihleri</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="276"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>Ayrık tünelleme filtresi yükleniyor...</translation>
@@ -3285,7 +2174,7 @@
         <translation>Mesajı kapat: %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="215"/>
+        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="216"/>
         <source>Notification --- Stop</source>
         <extracomment>Screen reader annotation for the square &quot;Stop&quot; button on the message used to download an update.</extracomment>
         <translation>Dur</translation>
@@ -3738,28 +2627,22 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
-        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
-        <translation>VPN bağlantısını ek bir konumdan tekrar yönlendir</translation>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
+<source>ProxyPage --- Configure...</source>
+        <translation>Yapılandır...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 Vekil Sunucu - %1</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
-        <source>ProxyPage --- Configure...</source>
-        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
-        <translation>Yapılandır...</translation>
     </message>
 </context>
 <context>
@@ -3792,6 +2675,63 @@
     </message>
 </context>
 <context>
+    <name>RatingControl</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <source>RatingControl --- Loading</source>
+        <translation>Yüklüyor</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <source>RatingControl --- Something went wrong.</source>
+        <translation>Bir sorun oluştu.</translation>
+    </message>
+</context>
+<context>
+    <name>RatingRequestNotificationStatus</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
+        <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
+        <translation>PIA deneyiminizi değerlendirin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="28"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].</source>
+        <extracomment>Shown after the user submits a positive rating to ask if they would rate us on Trustpilot. The text between brackets ([[....]]) is a link, please preserve the brackets around the corresponding text. Do not translate &apos;Trustpilot&apos; since it is a brand (even though link text is normally translated in PIA.)</extracomment>
+        <translation>Geri bildiriminiz için teşekkürler! [[Trustpilot]] üzerinden bizi değerlendirirseniz çok memnun oluruz.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="30"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
+        <translation>Geri bildiriminiz için teşekkürler!</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="32"/>
+        <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
+        <translation>Teşekkürler! Herhangi bir sorunla karşılaşırsanız lütfen destek birimiyle iletişime geçin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
+        <source>RatingRequestNotificationStatus --- Contact Support</source>
+        <translation>Destek İletişimi</translation>
+    </message>
+</context>
+<context>
+    <name>RatingStar</name>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="29"/>
+        <source>RatingStar --- Star rating of: %1</source>
+        <extracomment>Screen reader title for &quot;rating star&quot; button, value ranges from 1 to 5</extracomment>
+        <translation>Yıldız derecesi: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingStar.qml" line="32"/>
+        <source>RatingStar --- Submit a star rating of %1 out of 5</source>
+        <extracomment>Screen reader description for the action taken by a &quot;rating star&quot; button. Value ranges from 1 to 5</extracomment>
+        <translation>5 üzerinden %1 yıldız derecesi gönder.</translation>
+    </message>
+</context>
+<context>
     <name>ReconnectWarning</name>
     <message>
         <location filename="../../../client/res/components/settings/ReconnectWarning.qml" line="62"/>
@@ -3821,14 +2761,47 @@
     </message>
 </context>
 <context>
+    <name>RegionListView</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>Bölge listesi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
+        <source>RegionListView --- Region</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
+        <translation>Bölge</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>Ayrıntı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
+        <source>RegionListView --- Latency</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
+        <translation>Gecikme</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
+        <source>RegionListView --- Favorite</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
+        <translation>Favori</translation>
+    </message>
+</context>
+<context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="32"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="33"/>
         <source>RegionModule --- Auto</source>
         <translation>Otomatik</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="34"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="35"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>Otomatik (%1)</translation>
     </message>
@@ -3869,6 +2842,12 @@
 <context>
     <name>RegionPage</name>
     <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
+        <source>RegionPage --- Region list sort</source>
+        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
+        <translation>Sıralama kıstası</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/common/regions/RegionList.qml" line="79"/>
         <source>RegionPage --- Search...</source>
         <translation>Ara...</translation>
@@ -3888,12 +2867,6 @@
         <source>RegionPage --- Back to Connect page</source>
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>Bağlantı sayfasına dön</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
-        <source>RegionPage --- Region list sort</source>
-        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
-        <translation>Sıralama kıstası</translation>
     </message>
 </context>
 <context>
@@ -3926,6 +2899,65 @@
         <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
         <source>RegionRowBase --- %1 ms</source>
         <translation>%1 ms</translation>
+    </message>
+</context>
+<context>
+    <name>RegionRowLabels</name>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>çevrimdışı</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMessages</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
+        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
+        <translation>Ayrık tünelleme filtresinin yüklenmesini tamamlamak için bilgisayarınızı yeniden başlatın.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
+        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
+        <translation>Ayrık tünelleme filtresi yüklenemedi. Bilgisayarınızı baştan başlatmayı deneyin ve sorun devam ederse destek birimiyle iletişime geçin.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
+        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
+        <translation>Bu özellik için Windows 7 Service Pack 1 veya üzeri gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
+        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
+        <translation>Bu özellik için iptables 1.6.1 veya üzeri gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
+        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
+        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
+        <translation>Bu özellik için libnl-3, libnl-route-3 ve libnl-genl-3 gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
+        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
+        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+        <translation>Bu özellik için %1 dizininde net_cls mevcut olmalı.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>Bu özellik için çekirdek işlemi olayları gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>Bu özellik için OpenVPN gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard için Windows 8 veya daha üst sürümü gerekli.</translation>
     </message>
 </context>
 <context>
@@ -4184,11 +3216,61 @@
     </message>
 </context>
 <context>
-    <name>SplitTunnelSettings</name>
+    <name>SplitTunnelNameServersRow</name>
     <message>
-    <source>SplitTunnelSettings --- Applications</source>
-        <translation>Uygulamalar</translation>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelNameServersRow.qml" line="76"/>
+        <source>SplitTunnelNameServersRow --- Name Servers</source>
+        <translation>İsim Sunucuları</translation>
     </message>
+</context>
+<context>
+    <name>SplitTunnelRoutedRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="84"/>
+        <extracomment>&quot;Routed Packets&quot; refers to network connections that are being forwarded between networks - https://en.wikipedia.org/wiki/IP_routing</extracomment>
+<source>SplitTunnelRoutedRow --- Routed Packets</source>
+        <translation>Yönlendirilmiş Paketler</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRoutedRow.qml" line="94"/>
+        <extracomment>&quot;Containers&quot; refers to Linux OS level virtualization, like Docker ( https://en.wikipedia.org/wiki/Docker_(software) ) or LXC ( https://en.wikipedia.org/wiki/LXC ).</extracomment>
+<source>SplitTunnelRoutedRow --- Includes most containers and virtual machines</source>
+        <translation>Çoğu konteyneri (container) ve sanal makineyi içerir</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="30"/>
+        <source>SplitTunnelRowBase --- Bypass VPN</source>
+        <translation>VPN&apos;yi Atla</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="26"/>
+        <source>SplitTunnelRowBase --- Only VPN</source>
+        <translation>Sadece VPN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="31"/>
+        <source>SplitTunnelRowBase --- Use VPN</source>
+        <translation>VPN Kullan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="38"/>
+        <source>SplitTunnelRowBase --- Follow App Rules</source>
+        <extracomment>Indicates that name servers will match app rules - bypass apps will also bypass the VPN DNS to use the existing name servers, and VPN apps will use VPN DNS.</extracomment>
+        <translation>Uygulama Kurallarını Uygula</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelRowBase.qml" line="41"/>
+        <source>SplitTunnelRowBase --- VPN DNS Only</source>
+        <extracomment>Indicates that all apps will use VPN DNS, regardless of whether the app is set to bypass or use the VPN.</extracomment>
+        <translation>Sadece VPN DNS</translation>
+    </message>
+</context>
+<context>
+    <name>SplitTunnelSettings</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
         <source>SplitTunnelSettings --- App</source>
@@ -4383,6 +3465,153 @@
     </message>
 </context>
 <context>
+    <name>TrayMenuBuilder</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="24"/>
+        <source>TrayMenuBuilder --- Help</source>
+        <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
+        <translation>Yardım</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+        <source>TrayMenuBuilder --- Show Window</source>
+        <extracomment>Menu command to display the main app window/dashboard.</extracomment>
+        <translation>Pencereyi Göster</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <source>TrayMenuBuilder --- Resume Connection</source>
+        <translation>Bağlantıyı Sürdür</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <source>TrayMenuBuilder --- Connect (Auto)</source>
+        <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
+        <translation>Bağlan (Otomatik)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+        <source>TrayMenuBuilder --- Connect (%1)</source>
+        <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
+        <translation>Bağlan (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+        <source>TrayMenuBuilder --- Disconnect</source>
+        <extracomment>Menu command to disconnect from the VPN.</extracomment>
+        <translation>Bağlantıyı Kes</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+        <source>TrayMenuBuilder --- Snooze</source>
+        <translation>Uyku</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+        <source>TrayMenuBuilder --- 5 Minutes</source>
+        <translation>5 Dakika</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+        <source>TrayMenuBuilder --- 10 Minutes</source>
+        <translation>10 Dakika</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+        <source>TrayMenuBuilder --- 15 Minutes</source>
+        <translation>15 Dakika</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+        <source>TrayMenuBuilder --- 30 Minutes</source>
+        <translation>30 Dakika</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>Özel IP&apos;ye bağlan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>Bölgeye bağlan</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
+        <source>TrayMenuBuilder --- Log In</source>
+        <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
+        <translation>Oturum Aç</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+        <source>TrayMenuBuilder --- Settings...</source>
+        <extracomment>Menu command to open the settings dialog.</extracomment>
+        <translation>Ayarlar...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+        <source>TrayMenuBuilder --- Enable Debug Logging</source>
+        <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
+        <translation>Hata Ayıklama Günlüğünü Aç</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <source>TrayMenuBuilder --- Submit Debug Logs...</source>
+        <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
+        <translation>Hata Ayıklama Günlüğünü Gönder...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
+        <source>TrayMenuBuilder --- Changelog</source>
+        <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
+        <translation>Değişim Günlüğü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
+        <source>TrayMenuBuilder --- Support Portal</source>
+        <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
+        <translation>Destek Portalı</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+        <source>TrayMenuBuilder --- Blog</source>
+        <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
+        <translation>Blog</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
+        <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
+        <translation>Genel IP&apos;yi kopyala (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+        <source>TrayMenuBuilder --- Copy Public IP</source>
+        <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
+        <translation>Genel IP&apos;yi kopyala</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
+        <translation>İletilen Bağlantı Noktasını Kopyala (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
+        <source>TrayMenuBuilder --- Copy Forwarded Port</source>
+        <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
+        <translation>İletilen Bağlantı Noktasını Kopyala</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
+        <source>TrayMenuBuilder --- Quit</source>
+        <extracomment>Menu command to quit the application.</extracomment>
+        <translation>Çık</translation>
+    </message>
+</context>
+<context>
     <name>UpdateNotificationStatus</name>
     <message>
         <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
@@ -4513,6 +3742,425 @@
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
 <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>Dağıtıma özel yükleme talimatları için şurayı ziyaret edin:</translation>
+    </message>
+</context>
+<context>
+    <name>winstaller</name>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="37"/>
+        <source>winstaller --- Private Internet Access Installer</source>
+        <translation>Özel İnternet Erişimi Yükleyici</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="38"/>
+        <source>winstaller --- %.0f SECONDS REMAINING</source>
+        <translation>%.0f SANİYE KALDI</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="40"/>
+        <source>winstaller --- INSTALL</source>
+        <translation>YÜKLE</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="41"/>
+        <source>winstaller --- UNINSTALL</source>
+        <translation>KALDIR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="42"/>
+        <source>winstaller --- FINISH</source>
+        <translation>BİTİR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="44"/>
+        <source>winstaller --- PREPARING</source>
+        <translation>HAZIRLANIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="45"/>
+        <source>winstaller --- READY TO INSTALL</source>
+        <translation>YÜKLEMEYE HAZIR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="46"/>
+        <source>winstaller --- INSTALLING</source>
+        <translation>YÜKLENİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="47"/>
+        <source>winstaller --- ABORTING</source>
+        <translation>DURDURULUYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="48"/>
+        <source>winstaller --- FINISHING UP</source>
+        <translation>TAMAMLANIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="49"/>
+        <source>winstaller --- CLEANING UP</source>
+        <translation>TEMİZLENİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="50"/>
+        <source>winstaller --- ROLLING BACK CHANGES</source>
+        <translation>DEĞİŞİKLİKLER GERİ ALINIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="51"/>
+        <source>winstaller --- FINISHED</source>
+        <translation>BİTTİ</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="52"/>
+        <source>winstaller --- ABORTED</source>
+        <translation>DURDURULDU</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="53"/>
+        <source>winstaller --- UNPACKING</source>
+        <translation>PAKET AÇILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="54"/>
+        <source>winstaller --- COPYING FILES</source>
+        <translation>DOSYALAR KOPYALANIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="55"/>
+        <source>winstaller --- SHUTTING DOWN CLIENT</source>
+        <translation>İSTEMCİ KAPATILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="56"/>
+        <source>winstaller --- STOPPING SERVICE</source>
+        <translation>HİZMET DURDURULUYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="57"/>
+        <source>winstaller --- UNREGISTERING SERVICE</source>
+        <translation>HİZMET KAYDI SİLİNİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="58"/>
+        <source>winstaller --- REGISTERING SERVICE</source>
+        <translation>HİZMET KAYDEDİLİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="59"/>
+        <source>winstaller --- STARTING SERVICE</source>
+        <translation>HİZMET BAŞLATILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="60"/>
+        <source>winstaller --- REMOVING NETWORK ADAPTER</source>
+        <translation>AĞ BAĞDAŞTIRICISI KALDIRILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="61"/>
+        <source>winstaller --- INSTALLING NETWORK ADAPTER</source>
+        <translation>AĞ BAĞDAŞTIRICISI YÜKLENİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="62"/>
+        <source>winstaller --- BACKING UP FILES</source>
+        <translation>DOSYALAR YEDEKLENİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="63"/>
+        <source>winstaller --- REMOVING PREVIOUS VERSION</source>
+        <translation>ÖNCEKİ SÜRÜM KALDIRILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="64"/>
+        <source>winstaller --- REMOVING FILES</source>
+        <translation>DOSYALAR KALDIRILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="65"/>
+        <source>winstaller --- REMOVING CALLOUT DRIVER</source>
+        <translation>CALLOUT SÜRÜCÜSÜ KALDIRILIYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="66"/>
+        <source>winstaller --- UPDATING CALLOUT DRIVER</source>
+        <translation>CALLOUT SÜRÜCÜSÜ GÜNCELLENİYOR</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+        <source>winstaller --- Unable to recognize the existing installation. Would you like to delete the entire directory?</source>
+        <translation>Var olan kurulum tanınamıyor. Tüm dizini silmek ister misiniz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="69"/>
+        <source>winstaller --- Corrupt installation detected</source>
+        <translation>Bozuk yükleme algılandı</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="70"/>
+        <source>winstaller --- There are stray files in the installation directory. Would you like to delete them?</source>
+        <translation>Kurulum dizininde başıboş dosyalar var. Bunları silmek ister misiniz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="71"/>
+        <source>winstaller --- Files remaining</source>
+        <translation>Kalan dosyalar</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="72"/>
+        <source>winstaller --- Do you want to abort the installation?</source>
+        <translation>Kurulumu durdurmak istiyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="73"/>
+        <source>winstaller --- Abort installation?</source>
+        <translation>Kurulum durdurulsun mu?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="74"/>
+        <source>winstaller --- Error</source>
+        <translation>Hata</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="75"/>
+        <source>winstaller --- This will replace your existing installation of Private Internet Access. Downgrading afterwards will require a clean reinstall. Do you wish to continue?</source>
+        <translation>Bu, var olan Özel İnternet Erişimi kurulumunun yerini alır. Daha sonra eski sürümü yüklemek temiz bir yeniden yükleme gerektirir. Devam etmek istiyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="76"/>
+        <source>winstaller --- Replace existing version?</source>
+        <translation>Var olan sürüm değiştirilsin mi?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="77"/>
+        <source>winstaller --- Unable to remove directory: %s</source>
+        <translation>Dizin kaldırılamadı: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="78"/>
+        <source>winstaller --- Please exit the existing Private Internet Access before proceeding.</source>
+        <translation>İlerlemeden önce lütfen var olan Özel İnternet Erişimi&apos;nden çıkın.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="79"/>
+        <source>winstaller --- There was a problem uninstalling the existing version.</source>
+        <translation>Var olan sürüm kaldırılırken bir sorun oluştu.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="80"/>
+        <source>winstaller --- There are still clients running.</source>
+        <translation>Hâlâ çalışan istemciler var.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="81"/>
+        <source>winstaller --- Failed to stop the service.</source>
+        <translation>Hizmet durdurulamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="82"/>
+        <source>winstaller --- A reboot is needed before installation can proceed.</source>
+        <translation>Kurulumun ilerlemesi için önce bir yeniden başlatma gerekli.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="83"/>
+        <source>winstaller --- Service executable missing.</source>
+        <translation>Hizmet yürütülebilir dosyası eksik.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="84"/>
+        <source>winstaller --- Service uninstallation failed.</source>
+        <translation>Hizmet kaldırılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="85"/>
+        <source>winstaller --- The service installation failed.</source>
+        <translation>Hizmet kaldırılması başarısız oldu.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="86"/>
+        <source>winstaller --- The service failed to start.</source>
+        <translation>Hizmet başlatılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="87"/>
+        <source>winstaller --- Error uninstalling TAP driver.</source>
+        <translation>TAP sürücüsü kaldırılırken hata oluştu.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="88"/>
+        <source>winstaller --- The TAP driver was not approved for installation.</source>
+        <translation>TAP sürücüsü kurulum için onaylanmamış.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="89"/>
+        <source>winstaller --- The TAP driver installation failed.</source>
+        <translation>TAP sürücüsü kurulumu başarısız oldu.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="90"/>
+        <source>winstaller --- Private Internet Access requires at least Windows 7 to run.</source>
+        <translation>Özel İnternet Erişimi, çalışması için en az Windows 7 gerektirir.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="91"/>
+        <source>winstaller --- The 32-bit version of Private Internet Access can only run on a 32-bit version of Windows.</source>
+        <translation>Özel İnternet Erişimi&apos;nin 32 bit sürümü yalnızca Windows&apos;un 32 bit sürümünde çalışabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="92"/>
+        <source>winstaller --- Failed to retrieve shell folder %s.</source>
+        <translation>%s kabuk dosyası alınamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="93"/>
+        <source>winstaller --- Out of memory.</source>
+        <translation>Bellek bitti.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="94"/>
+        <source>winstaller --- Payload decompression error.</source>
+        <translation>Yük açma hatası.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="95"/>
+        <source>winstaller --- Corrupted payload (CRC error).</source>
+        <translation>Bozuk yük (CRC hatası).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="96"/>
+        <source>winstaller --- Unable to create file: %s</source>
+        <translation>Dosya oluşturulamıyor: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="97"/>
+        <source>winstaller --- Unable to write file: %s</source>
+        <translation>Dosya yazılamıyor: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="98"/>
+        <source>winstaller --- Unable to write entire file: %s</source>
+        <translation>Tüm dosya yazılamıyor: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="99"/>
+        <source>winstaller --- Unable to initialize decompressor.</source>
+        <translation>Açıcı başlatılamıyor.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="100"/>
+        <source>winstaller --- Corrupted payload (invalid parameters).</source>
+        <translation>Bozuk yük (geçersiz parametreler).</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="101"/>
+        <source>winstaller --- Unable to move %s</source>
+        <translation>%s taşınamıyor</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="102"/>
+        <source>winstaller --- Unable to create rollback directory. If you proceed, the installation can&apos;t undo any changes if there&apos;s an error.</source>
+        <translation>Geri alma dizini oluşturulamıyor. İlerlerseniz kurulum bir hata olması durumunda değişiklikleri geri alamaz.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="103"/>
+        <source>winstaller --- Unable to create directory: %s</source>
+        <translation>Dizin oluşturulamıyor: %s</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="104"/>
+        <source>winstaller --- The installer does not contain a recognizable payload.</source>
+        <translation>Yükleyici tanınabilir bir yük içermiyor.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="105"/>
+        <source>winstaller --- Missing payload</source>
+        <translation>Eksik yük</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="106"/>
+        <source>winstaller --- Error uninstalling callout driver.</source>
+        <translation>Callout sürücüsünü kaldırırken hata oluştu.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="107"/>
+        <source>winstaller --- Callout driver installation failed.</source>
+        <translation>Callout sürücüsü kaldırılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="108"/>
+        <source>winstaller --- WireGuard installation failed.</source>
+        <translation>WireGuard yüklenemedi.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="109"/>
+        <source>winstaller --- WireGuard uninstallation failed.</source>
+        <translation>WireGuard kaldırılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="110"/>
+        <source>winstaller --- WinTUN installation failed.</source>
+        <translation>WinTUN yüklenemedi.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="111"/>
+        <source>winstaller --- WinTUN uninstallation failed.</source>
+        <translation>WinTUN kaldırılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="112"/>
+        <source>winstaller --- Use Safe Mode with Networking to install or uninstall Private Internet Access.</source>
+        <translation>Private Internet Access&apos;i kurmak ya da kaldırmak için, Ağ Desteği ile Güvenli Modu kullanın.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="113"/>
+        <source>winstaller --- Installation complete</source>
+        <translation>Kurulum tamamlandı</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="114"/>
+        <source>winstaller --- Restart your computer to use Private Internet Access.</source>
+        <translation>Private Internet Access&apos;i kullanmak için bilgisayarınızı yeniden başlatın.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="115"/>
+        <source>winstaller --- Private Internet Access requires Windows 8 or later.</source>
+        <translation>Private Internet Access, en düşük Windows 8 ile kullanılabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+        <source>winstaller --- The installation will now abort.</source>
+        <translation>Kurulum şimdi durdurulacak.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="118"/>
+        <location filename="../../../extras/installer/win/strings.rc" line="122"/>
+        <source>winstaller --- This is preventing the installation from proceeding.</source>
+        <translation>Bu, kurulumun ilerlemesini engelliyor.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="119"/>
+        <source>winstaller --- Do you wish to continue the installation anyway?</source>
+        <translation>Kuruluma gene de devam etmek istiyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="120"/>
+        <source>winstaller --- You can retry or attempt to continue the installation anyway.</source>
+        <translation>Yeniden deneyebilir veya kuruluma gene de devam etmeyi deneyebilirsiniz.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="121"/>
+        <source>winstaller --- The uninstallation will now abort.</source>
+        <translation>Kaldırma işlemi şimdi durdurulacak.</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="123"/>
+        <source>winstaller --- Do you wish to continue the uninstallation anyway?</source>
+        <translation>Kaldırma işlemine gene de devam etmek istiyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../../extras/installer/win/strings.rc" line="124"/>
+        <source>winstaller --- You can retry or attempt to continue the uninstallation anyway.</source>
+        <translation>Yeniden deneyebilir veya kaldırma işlemine gene de devam etmeyi deneyebilirsiniz.</translation>
     </message>
 </context>
 </TS>

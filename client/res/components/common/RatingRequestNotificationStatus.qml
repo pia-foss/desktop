@@ -37,6 +37,14 @@ NotificationStatus {
     case uiState.pending:
       return uiTr("Rate your experience with PIA.")
     case uiState.rating_positive:
+      if(Daemon.data.flags.includes("trustpilot_feedback")) {
+        //: Shown after the user submits a positive rating to ask if they would
+        //: rate us on Trustpilot.  The text between brackets ([[....]]) is a
+        //: link, please preserve the brackets around the corresponding text.
+        //: Do not translate 'Trustpilot' since it is a brand (even though link
+        //: text is normally translated in PIA.)
+        return uiTr("Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].")
+      }
       return uiTr("Thank you for your feedback!")
     case uiState.rating_negative:
       return uiTr("Thank you! If you encounter any problems, please contact support.")
@@ -55,6 +63,8 @@ NotificationStatus {
 
     return []
   }
+
+  embedLinkClicked: function() { Qt.openUrlExternally("https://www.trustpilot.com/review/privateinternetaccess.com") }
 
   displayIcon: false
   dismissible: true

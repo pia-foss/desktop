@@ -30,17 +30,12 @@
 #include <QTimer>
 #include "daemon.h"
 #include "posix/posix_firewall_pf.h"
+#include "mac/mac_splittunnel_types.h"
 #include "mac/utun.h"
 #include "processrunner.h"
 #include "settings.h"
 #include "exec.h"
 #include "vpn.h"
-
-using PortSet = QSet<quint16>;
-
-enum IPVersion { IPv4, IPv6 };
-
-inline QString ipToString(IPVersion ipVersion) { return (ipVersion == IPv4 ? "IPv4" : "IPv6"); }
 
 class MacSplitTunnel;
 class UpdateStrategy;
@@ -95,8 +90,6 @@ protected:
     virtual QString tagNameFor(IPVersion ipVersion) const override;
     virtual QString anchorNameFor(IPVersion ipVersion) const override;
     virtual QStringList routingRule(IPVersion ipVersion) const override;
-protected:
-    QStringList bypassSubnetRules(IPVersion ipVersion) const;
 };
 
 class VpnOnlyStrategy : public UpdateStrategy
@@ -118,6 +111,9 @@ protected:
     virtual QString tagNameFor(IPVersion ipVersion) const override;
     virtual QString anchorNameFor(IPVersion ipVersion) const override;
     virtual QStringList routingRule(IPVersion ipVersion) const override;
+protected:
+    QStringList bypassSubnetsFor(IPVersion ipVersion) const;
+    QStringList lanSubnetsFor(IPVersion ipVersion) const;
 };
 
 #endif

@@ -66,7 +66,9 @@ private:
     static void CALLBACK serviceNotifyCallback(void *pParam);
 
 public:
-    // Open and monitor the service specified by serviceName.
+    // Open and monitor the service specified by serviceName.  The initial state
+    // is always Initializing or Deleted, any other state is reported
+    // asynchronously.
     //
     // The start/stop rights desired can be specified; by default both start and
     // stop are requested.  Occasionally, some rights may need to be omitted to

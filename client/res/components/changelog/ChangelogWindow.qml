@@ -39,7 +39,9 @@ DecoratedWindow {
   windowLogicalWidth: newsContent.width
   windowLogicalHeight: newsContent.height + tabBar.height
 
-  property int activePage: 0
+  // Default to the actual changelog since we haven't updated What's New in
+  // some time.
+  property int activePage: 1
   readonly property int pageCount: 2
 
   // Have to wrap everything in an Item so we can attach a Keys.onPressed

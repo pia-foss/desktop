@@ -14,6 +14,7 @@
     "encryptionSettingsLink":"https://www.privateinternetaccess.com/pages/vpn-encryption",
     "deprecatedOpenVPNSettingsLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/removing-openvpn-handshake-and-authentication-settings",
     "appExclusionsHelpLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/split-tunnel-app-examples",
+    "automationHelpLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/understanding-the-desktop-network-automation-feature",
     "windowsProductGuid": "{33023371-7761-4F81-BBB1-0E0D0D175ACF}",
     "windowsServiceName": "PrivateInternetAccessService",
     "windowsWireguardServiceName": "PrivateInternetAccessWireguard",

@@ -162,7 +162,7 @@ PosixDaemon::PosixDaemon()
     prepareSplitTunnel<ProcTracker>();
 #endif
 
-    checkSplitTunnelSupport();
+    checkFeatureSupport();
 
     auto daemonBinaryWatcher = new QFileSystemWatcher(this);
     daemonBinaryWatcher->addPath(Path::DaemonExecutable);
@@ -479,7 +479,7 @@ static QStringList natPhysRules(const OriginalNetworkScan &netScan, const QStrin
     if(macVersion > noNat6Version)
         ruleList << QStringLiteral("nat on %1 inet6 -> (%1)").arg(itfName);
     else
-        qInfo() << QStringLiteral("Not creating inet6 nat rule for %1 - macOS version %2 < %3").arg(itfName, macVersionStr, noNat6);
+        qInfo() << QStringLiteral("Not creating inet6 nat rule for %1 - macOS version %2 <= %3").arg(itfName, macVersionStr, noNat6);
 
     return ruleList;
 }
@@ -491,20 +491,15 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
 #if defined(Q_OS_MACOS)
     // double-check + ensure our firewall is installed and enabled. This is necessary as
     // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-    if (!PFFirewall::isInstalled()) PFFirewall::install();
+    if(!PFFirewall::isInstalled()) PFFirewall::install();
 
     PFFirewall::ensureRootAnchorPriority();
-
-    if(params.hasConnected)
-    {
-        qInfo() << "FOO setting 000.natVPN anchor with interfacename" << _state.tunnelDeviceName();
-    }
 
     PFFirewall::setTranslationEnabled(QStringLiteral("000.natVPN"), params.hasConnected, { {"interface", _state.tunnelDeviceName()} });
     PFFirewall::setFilterWithRules(QStringLiteral("001.natPhys"), params.enableSplitTunnel, natPhysRules(netScan, QSysInfo::productVersion()));
     PFFirewall::setFilterEnabled(QStringLiteral("000.allowLoopback"), params.allowLoopback);
     PFFirewall::setFilterEnabled(QStringLiteral("100.blockAll"), params.blockAll);
-    PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN);
+    PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN, { {"interface", _state.tunnelDeviceName()} });
     PFFirewall::setFilterEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
 
     PFFirewall::setFilterEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
@@ -512,9 +507,9 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
     PFFirewall::setAnchorTable(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN, QStringLiteral("ipv6prefix"), {
         // First 64 bits is the IPv6 Network Prefix
         QStringLiteral("%1/64").arg(netScan.ipAddress6())});
-    PFFirewall::setFilterEnabled(QStringLiteral("300.allowLAN"), params.allowLAN);
     PFFirewall::setFilterEnabled(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
     PFFirewall::setAnchorTable(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel, QStringLiteral("subnets"), subnetsToBypass(params));
+    PFFirewall::setFilterEnabled(QStringLiteral("490.allowLAN"), params.allowLAN);
 
     // On Mac, there are two DNS leak protection modes depending on whether we
     // are connected.
@@ -548,8 +543,8 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
             effectiveDnsServers = params._connectionSettings->getDnsServers();
         for(const auto &address : effectiveDnsServers)
         {
-            QHostAddress parsed{address};
-            if(isModernInfraDns(parsed) || !isIpv4Local(parsed))
+            Ipv4Address parsed{address};
+            if(!parsed.isLocalDNS())
                 tunnelDnsServers.push_back(address);
             else
                 localDnsServers.push_back(address);
@@ -567,12 +562,12 @@ void PosixDaemon::applyFirewallRules(const FirewallParams& params)
         // if the user disables the VPN while in this state.
         _connection->scheduleDnsCacheFlush();
     }
-    PFFirewall::setFilterEnabled(QStringLiteral("310.blockDNS"), macBlockDNS, { {"interface", _state.tunnelDeviceName()} });
-    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), macBlockDNS, QStringLiteral("localdns"), localDnsServers);
-    PFFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), macBlockDNS, QStringLiteral("tunneldns"), tunnelDnsServers);
-    PFFirewall::setFilterEnabled(QStringLiteral("311.stubDNS"), macStubDNS);
-    PFFirewall::setFilterEnabled(QStringLiteral("350.allowHnsd"), params.allowResolver);
     PFFirewall::setFilterEnabled(QStringLiteral("400.allowPIA"), params.allowPIA);
+    PFFirewall::setFilterEnabled(QStringLiteral("500.blockDNS"), macBlockDNS, { {"interface", _state.tunnelDeviceName()} });
+    PFFirewall::setAnchorTable(QStringLiteral("500.blockDNS"), macBlockDNS, QStringLiteral("localdns"), localDnsServers);
+    PFFirewall::setAnchorTable(QStringLiteral("500.blockDNS"), macBlockDNS, QStringLiteral("tunneldns"), tunnelDnsServers);
+    PFFirewall::setFilterEnabled(QStringLiteral("510.stubDNS"), macStubDNS);
+    PFFirewall::setFilterEnabled(QStringLiteral("520.allowHnsd"), params.allowResolver, { { "interface", _state.tunnelDeviceName() } });
 
 #elif defined(Q_OS_LINUX)
 
@@ -706,9 +701,11 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (pfctl -sr)", "pfctl", QStringList{QStringLiteral("-sr")});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (App anchors)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*"), QStringLiteral("-sr")});
-    file.writeCommand("PF (localdns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "localdns", "-T", "show"});
-    file.writeCommand("PF (tunneldns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/310.blockDNS"), "-t", "tunneldns", "-T", "show"});
+    file.writeCommand("PF (500.blockDNS:localdns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/500.blockDNS"), "-t", "localdns", "-T", "show"});
+    file.writeCommand("PF (500.blockDNS:tunneldns table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/500.blockDNS"), "-t", "tunneldns", "-T", "show"});
     file.writeCommand("PF (allowed subnets table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/305.allowSubnets"), "-t", "subnets", "-T", "show"});
+    file.writeCommand("PF (450.routeDefaultApps4:lanips table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/450.routeDefaultApps4"), "-t", "lanips", "-T", "show"});
+    file.writeCommand("PF (450.routeDefaultApps6:lanips table)", "pfctl", QStringList{QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/450.routeDefaultApps6"), "-t", "lanips", "-T", "show"});
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn")});
     file.writeCommand("PF (App NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*")});
@@ -923,7 +920,7 @@ void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
     _enableSplitTunnel = params.enableSplitTunnel;
 }
 
-void PosixDaemon::checkSplitTunnelSupport()
+void PosixDaemon::checkFeatureSupport()
 {
     std::vector<QString> errors;
 
@@ -955,7 +952,12 @@ void PosixDaemon::checkSplitTunnelSupport()
     // not required in some releases, but it is now used to monitor the default
     // route, mainly because it can change while connected with WireGuard.)
     if(!_pNetworkMonitor)
+    {
         errors.push_back(QStringLiteral("libnl_invalid"));
+        // This is the only error that also applies to automation, and it only
+        // applies on Linux.
+        _state.automationSupportErrors({QStringLiteral("libnl_invalid")});
+    }
 
     // This cgroup must be mounted in this location for this feature.
     QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);

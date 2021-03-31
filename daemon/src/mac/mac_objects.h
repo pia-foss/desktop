@@ -23,6 +23,7 @@
 #define MAC_OBJECTS_H
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <SystemConfiguration/SystemConfiguration.h>
 
 // This file contains various wrapper types for CoreFoundation handles.  These
 // are based on CFHandle, which reference counts the objects.
@@ -248,5 +249,6 @@ template<>
 inline CFTypeID macCfTypeId<CFArrayRef>() {return ::CFArrayGetTypeID();}
 template<>
 inline CFTypeID macCfTypeId<CFNumberRef>() {return ::CFNumberGetTypeID();}
-
+template<>
+inline CFTypeID macCfTypeId<SCNetworkInterfaceRef>() {return ::SCNetworkInterfaceGetTypeID();}
 #endif

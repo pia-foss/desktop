@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("linux_nl.h")
-
 #ifndef LINUX_NL_H
 #define LINUX_NL_H
 
+#include "common.h"
 #include "posix/posix_objects.h"
 #include "networkmonitor.h"
 #include <thread>

@@ -186,6 +186,7 @@ private slots:
             QVERIFY(recorder->methodCalls().size() == 0);
         }
 
+#ifndef Q_OS_MACOS
         // Disabled when params.bypassDefaultApps==true
         {
             FirewallParams params{validFirewallParams()};
@@ -195,7 +196,9 @@ private slots:
 
             QVERIFY(recorder->methodCalls().size() == 0);
         }
+#endif
 
+#ifndef Q_OS_MACOS
         // Disabled when params.hasConnected==false
         {
             FirewallParams params{validFirewallParams()};
@@ -205,6 +208,7 @@ private slots:
 
             QVERIFY(recorder->methodCalls().size() == 0);
         }
+#endif
 
         // Disabled when params.netScan.ipv4Valid()==false
         {
@@ -366,7 +370,7 @@ private slots:
         bypass.updateRoutes(params);
 
         // Setting this to false will disable SubnetBypass
-        params.hasConnected = false;
+        params.enableSplitTunnel = false;
         bypass.updateRoutes(params);
 
         QVERIFY(recorder->methodCalls().size() == 8);

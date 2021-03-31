@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("linux_libnl.h")
-
 #ifndef LINUX_LIBNL_H
 #define LINUX_LIBNL_H
 
+#include "common.h"
 #include <QLibrary>
 #include <linux/genetlink.h>
 #include <netlink/genl/genl.h>
@@ -163,6 +161,7 @@ namespace libnl
     LIBNL_FUNC(nla_data);
     LIBNL_FUNC(nla_get_u16);
     LIBNL_FUNC(nla_get_u32);
+    LIBNL_FUNC(nla_put_u32);
     LIBNL_FUNC(nla_len);
     LIBNL_FUNC(nla_next);
     LIBNL_FUNC(nla_ok);

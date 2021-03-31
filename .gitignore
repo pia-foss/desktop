@@ -12,3 +12,4 @@ releases
 *.qmlc
 *.kdev4
 *.swp
+.idea/*

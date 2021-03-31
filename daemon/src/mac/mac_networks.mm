@@ -22,19 +22,74 @@
 #include "mac_networks.h"
 #include "mac_dynstore.h"
 #include "exec.h"
+#include <posix/posix_objects.h>
 #include <QProcess>
 #include <QRegularExpression>
 #include <unordered_map>
+#include <QSocketNotifier>
+#import <CoreWLAN/CoreWLAN.h>
 
 static_assert(__has_feature(objc_arc), "MacNetworks requires Objective-C ARC");
+
+class MacNetworks;
+
+// Delegate attached to CWWiFiClient to forward changes to MacNetworks.
+//
+// The delegate methods are invoked on a worker queue thread.  In order to
+// dispatch back to the main thread, we use a socketpair.  This just indicates
+// to the main thread to re-read the Wi-Fi networks, so MacNetworkWiFiDelegate
+// just writes single bytes that are read and ignored by MacNetworks.
+//
+// The socketpair is used instead of dispatching a queued method invocation
+// because we can't control precisely when the delegate is destroyed, we'd need
+// additional synchronization for destruction.  (Typically it's destroyed when
+// MacNetworks shuts down, but if a delegate was being invoked at that time,
+// that thread might have obtained a strong reference that will keep it alive
+// while it's being invoked.)  With a socketpair, we can just close one end of
+// the socketpair and let the delegate continue to attempt to write to its end
+// until it shuts down.
+@interface MacNetworkWiFiDelegate : NSObject<CWEventDelegate>
+{
+@private
+    PosixFd signalSocket;
+}
+// Create the signaling socket pair and return MacNetwork's end of the socket
+ - (PosixFd) createSockets;
+ - (void) signalMacNetworks;
+ - (void) bssidDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) clientConnectionInterrupted;
+ - (void) clientConnectionInvalidated;
+ - (void) countryCodeDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) linkDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) linkQualityDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName
+    rssi:(NSInteger)rssi transmitRate:(double)transmitRate;
+ - (void) modeDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) powerStateDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) scanCacheUpdatedForWiFiInterfaceWithName:(NSString*)interfaceName;
+ - (void) ssidDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
+@end
 
 // Mac implementation of PosixNetworks.
 //
 // General network state is read from the SCDynamicStore API - refer to the
 // schemas defined here:
 //   https://developer.apple.com/library/archive/documentation/Networking/Conceptual/SystemConfigFrameworks/SC_UnderstandSchema/SC_UnderstandSchema.html#//apple_ref/doc/uid/TP40001065-CH203-CHDIHDCG
+//
+// Wireless SSIDs are read using the Core WLAN API.
 class MacNetworks : public NetworkMonitor
 {
+public:
+    // This value type is used to hold a CWInterface reference from
+    // readWifiSsids().  The CWInterface object is an NSObject and is reference
+    // counted by ARC, but there are reports of nuanced cases when ARC fails to
+    // apply to Objective-C references held by C++ template/polymorph/etc.
+    // Putting this in an object with an explicit destructor should be friendly
+    // to ARC.
+    class WifiConfig
+    {
+    public:
+        CWInterface *pInterface;
+    };
 public:
     MacNetworks();
     ~MacNetworks();
@@ -51,6 +106,12 @@ private:
 
     QString getGlobalRouterIp(const QString &ipVersion);
 public:
+    // Check all WiFi interfaces and build a map of interface names to
+    // CWInterface objects, which we'll use to find SSIDs and encryption modes.
+    std::unordered_map<QString, WifiConfig> readWifiConfig();
+    // Read interface media types from System Configuration
+    std::unordered_map<QString, NetworkConnection::Medium> readNetworkMedia();
+
     // Read all active network connections and forward the information to
     // PosixNetworks.
     // Public so it can be called by the WiFi delegate only.
@@ -63,6 +124,15 @@ private:
     // as the global state keys indicating the default services
     MacArray monitorKeyPatterns;
     MacDynamicStore _dynStore;
+    // Core WLAN client used to read network SSIDs and detect changes
+    CWWiFiClient *_pWifiClient;
+    // CWWiFiClient.delegate is a weak property, we have to keep the delegate
+    // alive here
+    MacNetworkWiFiDelegate *_pWifiDelegate;
+    // Socket used to receive signals from the WiFi delegate
+    PosixFd _delegateReceiveSocket;
+    // Notifier for that socket
+    nullable_t<QSocketNotifier> _pDelegateNotifier;
 };
 
 std::unique_ptr<NetworkMonitor> createMacNetworks()
@@ -89,11 +159,101 @@ MacNetworks::MacNetworks()
 
     _dynStore.setNotificationKeys(nullptr, monitorKeyPatterns.get());
 
+    _pWifiClient = [[CWWiFiClient alloc] init];
+    _pWifiDelegate = [MacNetworkWiFiDelegate alloc];
+    _delegateReceiveSocket = [_pWifiDelegate createSockets];
+    _pWifiClient.delegate = _pWifiDelegate;
+
+    [_pWifiClient startMonitoringEventWithType:CWEventTypeLinkDidChange error:nil];
+    [_pWifiClient startMonitoringEventWithType:CWEventTypeModeDidChange error:nil];
+    [_pWifiClient startMonitoringEventWithType:CWEventTypeSSIDDidChange error:nil];
+
+    // Set the receive socket file descriptor as non-blocking so we can read all
+    // outstanding signals at once.
+    _delegateReceiveSocket.applyNonblock();
+    _pDelegateNotifier.emplace(_delegateReceiveSocket.get(),
+                               QSocketNotifier::Type::Read, nullptr);
+    connect(&_pDelegateNotifier.get(), &QSocketNotifier::activated, this,
+            [this]()
+            {
+                qInfo() << "Re-read connections due to Wi-Fi event";
+                // Discard all signals (deduplicate multiple changes)
+                unsigned char dummy;
+                while(::read(_delegateReceiveSocket.get(), &dummy, sizeof(dummy)) > 0);
+                readConnections();
+            });
+
     readConnections();
 }
 
 MacNetworks::~MacNetworks()
 {
+    // Make sure the delegate is removed here in case the CWWiFiClient hangs
+    // around for any reason
+    _pWifiClient.delegate = nullptr;
+    _pWifiDelegate = nullptr;
+}
+
+auto MacNetworks::readWifiConfig() -> std::unordered_map<QString, WifiConfig>
+{
+    NSArray<CWInterface*> *pInterfaces = [_pWifiClient interfaces];
+
+    if(!pInterfaces)
+        return {};
+
+    std::unordered_map<QString, WifiConfig> wifiConfigs;
+
+    for(unsigned i=0; i<pInterfaces.count; ++i)
+    {
+        CWInterface *pInterface = pInterfaces[i];
+        if(!pInterface)
+            continue;
+
+        QString interfaceId = QString::fromNSString(pInterface.interfaceName);
+
+        if(!interfaceId.isEmpty())
+            wifiConfigs.emplace(interfaceId, WifiConfig{pInterface});
+    }
+
+    return wifiConfigs;
+}
+
+std::unordered_map<QString, NetworkConnection::Medium> MacNetworks::readNetworkMedia()
+{
+    MacArray interfaces{::SCNetworkInterfaceCopyAll()};
+
+    std::unordered_map<QString, NetworkConnection::Medium> media;
+
+    for(const auto &interface : interfaces.view<SCNetworkInterfaceRef>())
+    {
+        if(!interface)
+            continue;
+
+        // macOS gives us the medium as a text name - "Ethernet", "IEEE80211",
+        // etc.  We've observed that "Ethernet" can occur for many non-Ethernet
+        // devices as well - "Thunderbolt Bridge", "Bluetooth PAN", etc., but we
+        // still treat this as "Wired" as a reasonable default for those
+        // interfaces.
+        //
+        // The media types can be found in SCNetworkInterface.c:
+        // - https://opensource.apple.com/source/configd/configd-453.18/SystemConfiguration.fproj/SCNetworkInterface.c.auto.html
+        //
+        // ("Wired" makes sense for Thunderbolt Bridge, which might even get
+        // the default route when using internet connection sharing, etc.  It
+        // doesn't make sense for Bluetooth PAN, but it's unlikely that this
+        // would ever have the default route and is still at least a consistent
+        // behavior.)
+        auto mediumName = QString::fromCFString(::SCNetworkInterfaceGetInterfaceType(interface.get()));
+        NetworkConnection::Medium medium{NetworkConnection::Medium::Unknown};
+        if(mediumName == QStringLiteral("Ethernet"))
+            medium = NetworkConnection::Medium::Wired;
+        else if(mediumName == QStringLiteral("IEEE80211"))
+            medium = NetworkConnection::Medium::WiFi;
+        media.emplace(QString::fromCFString(::SCNetworkInterfaceGetBSDName(interface.get())),
+                      medium);
+    }
+
+    return media;
 }
 
 QString MacNetworks::getGlobalRouterIp(const QString &ipVersion)
@@ -129,6 +289,9 @@ QString MacNetworks::getDefaultServiceKeyName(const MacString &globalKey,
 
 void MacNetworks::readConnections()
 {
+    auto media = readNetworkMedia();
+    auto wifiConfigs = readWifiConfig();
+
     // Get the default IPv4 and IPv6 services
     QString defIpv4SvcKey = getDefaultServiceKeyName(MacString{CFSTR("State:/Network/Global/IPv4")},
                                                      QStringLiteral("IPv4"));
@@ -208,7 +371,7 @@ void MacNetworks::readConnections()
             if(i<ipv4SubnetMasks.getCount())
             {
                 MacString maskStr{ipv4SubnetMasks.getObjAtIndex(i).as<CFStringRef>()};
-                mask = Ipv4Address{addrStr.toQString()};
+                mask = Ipv4Address{maskStr.toQString()};
             }
             // If we fail to get a subnet mask for some reason, use /32, so the
             // local address is still known.
@@ -271,10 +434,61 @@ void MacNetworks::readConnections()
         Q_ASSERT(!ipConfigEntry.first.isEmpty());    // Didn't put empty interfaces in this map
 
         connectionInfo.emplace_back(ipConfigEntry.first,
-                                    ipConfig._defIpv4, ipConfig._defIpv6,
-                                    ipv4RouterAddr, ipv6RouterAddr,
+                                    NetworkConnection::Medium::Unknown,
+                                    ipConfig._defIpv4,
+                                    ipConfig._defIpv6, ipv4RouterAddr,
+                                    ipv6RouterAddr,
                                     std::move(addressesIpv4),
                                     std::move(addressesIpv6));
+        auto &connection = connectionInfo.back();
+
+        auto itWifiConfig = wifiConfigs.find(ipConfigEntry.first);
+        if(itWifiConfig != wifiConfigs.end() && itWifiConfig->second.pInterface)
+        {
+            CWInterface *pItf = itWifiConfig->second.pInterface;
+
+            NSData *pSsidData = pItf.ssidData;
+            if(pSsidData)
+            {
+                connection.wifiAssociated(true);
+                // Note that if parseWifiSsid() fails to store the SSID, this
+                // means the SSID can't be represented as text, not that the
+                // interface is not associated.  (All we do is trace the
+                // SSID data, parseWifiSsid() handles that.)
+                connection.parseWifiSsid(reinterpret_cast<const char *>(pSsidData.bytes), pSsidData.length);
+                switch(pItf.security)
+                {
+                    default:
+                    case kCWSecurityNone:
+                    case kCWSecurityUnknown:
+                    // It's not clear what kCWSecurityEnterprise is - it does
+                    // not seem to be documented at all.
+                    case kCWSecurityEnterprise:
+                        // Default is "not encrypted" for any future modes we're not
+                        // aware of
+                        break;
+                    case kCWSecurityDynamicWEP:
+                    case kCWSecurityWEP:
+                    case kCWSecurityWPA2Enterprise:
+                    case kCWSecurityWPA2Personal:
+                    case kCWSecurityWPAEnterprise:
+                    case kCWSecurityWPAEnterpriseMixed:
+                    case kCWSecurityWPAPersonal:
+                    case kCWSecurityWPAPersonalMixed:
+                    // WPA3 constants aren't available in the 10.14 SDK that we
+                    // currently build with, but are supported by PIA
+                    case 12: //kCWSecurityWPA3Enterprise
+                    case 11: //kCWSecurityWPA3Personal
+                    case 13: //kCWSecurityWPA3Transition
+                        connection.wifiEncrypted(true);
+                        break;
+                }
+            }
+        }
+
+        auto itMedium = media.find(ipConfigEntry.first);
+        if(itMedium != media.end())
+            connectionInfo.back().medium(itMedium->second);
 
         // Expose the primary service key
         connectionInfo.back().macosPrimaryServiceKey(defIpv4SvcKey);
@@ -282,3 +496,45 @@ void MacNetworks::readConnections()
 
     updateNetworks(std::move(connectionInfo));
 }
+
+#pragma clang diagnostic ignored "-Wunused-parameter"
+
+// We don't care about a lot of these notifications; the ones we do care about
+// call MacNetworks::readConnections().
+@implementation MacNetworkWiFiDelegate {}
+ - (PosixFd) createSockets
+{
+    auto [sigSock, rcvSock] = createSocketPair();
+    signalSocket = std::move(sigSock);
+    qInfo() << "will signal with fd" << signalSocket.get();
+    return std::move(rcvSock);
+}
+ - (void) signalMacNetworks
+{
+    // Write to the socket to signal MacNetworks, the actual data does not
+    // matter.  Errors writing are ignored.
+    unsigned char zero = 0;
+    if(signalSocket)
+        ::write(signalSocket.get(), &zero, sizeof(zero));
+}
+ - (void) bssidDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName {}
+ - (void) clientConnectionInterrupted {}
+ - (void) clientConnectionInvalidated {}
+ - (void) countryCodeDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName {}
+ - (void) linkDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName
+{
+    [self signalMacNetworks];
+}
+ - (void) linkQualityDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName
+    rssi:(NSInteger)rssi transmitRate:(double)transmitRate {}
+ - (void) modeDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName
+{
+    [self signalMacNetworks];
+}
+ - (void) powerStateDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName {}
+ - (void) scanCacheUpdatedForWiFiInterfaceWithName:(NSString*)interfaceName {}
+ - (void) ssidDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName
+{
+    [self signalMacNetworks];
+}
+@end

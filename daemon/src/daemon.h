@@ -34,6 +34,7 @@
 #include "updatedownloader.h"
 #include "vpn.h"
 #include "apiclient.h"
+#include "automation.h"
 
 #include <QCoreApplication>
 #include <QHash>
@@ -333,10 +334,11 @@ protected:
     // Check whether any active clients are connected
     bool hasActiveClient() const;
     // Check whether the daemon is currently active.  When this changes, we emit
-    // firstClientConnected() or lastClientDisconnected().
+    // daemonActivated() or daemonDeactivated().
     // Normally the daemon is active when any active client is connected, but it
     // can also remain active if an active client exits unexpectedly
-    // (DaemonState::invalidClientExit / killedClient).
+    // (DaemonState::invalidClientExit / killedClient), or if background mode is
+    // enabled in Settings.
     bool isActive() const;
 
     IMPLEMENT_NOTIFICATIONS(Daemon)
@@ -363,6 +365,10 @@ protected:
     void RPC_dismissDedicatedIpChange();
 
     // Connection
+
+    // Connect the VPN.  This indicates a manual connection request and will
+    // count a connection attempt if applicable.  Connections for other reasons
+    // (rules, snooze-end, etc.), should use connectVPN() directly.
     void RPC_connectVPN();
     void RPC_disconnectVPN();
     void RPC_startSnooze(qint64 seconds);
@@ -437,10 +443,12 @@ signals:
     // The daemon has stopped and no longer needs the message loop.
     void stopped();
 
-    // The number of connected clients (GUIs) has increased to 1
-    void firstClientConnected();
-    // The number of connected clients (GUIs) has decreased to 0
-    void lastClientDisconnected();
+    // The number of connected clients (GUIs) has increased to 1, or the daemon
+    // has activated due to background mode
+    void daemonActivated();
+    // The number of connected clients (GUIs) has decreased to 0, or the daemon
+    // has otherwise deactivated
+    void daemonDeactivated();
 
     // The daemon is about to connect to the VPN.  Some platform daemons do last
     // minute initialization the first time this happens.
@@ -544,7 +552,17 @@ private:
     // Log the current routing table; used after connecting
     void logRoutingTable();
 
-    void connectVPN();
+    // Apply the current matching automation rule's action - used when it has
+    // just triggered or when the daemon activates.  If the action has an
+    // effect, performs the connect/disconnect and updates
+    // automationLastTrigger.  (The action has no effect if we're already in the
+    // desired state.)
+    void applyCurrentAutomationRule();
+
+    void onAutomationRuleTriggered(const nullable_t<AutomationRule> &currentRule,
+                                   Automation::Trigger trigger);
+
+    Error connectVPN();
     void disconnectVPN();
 protected:
     bool _started, _stopping;
@@ -587,6 +605,7 @@ protected:
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;
     std::unique_ptr<NetworkMonitor> _pNetworkMonitor;
+    Automation _automation;
 
     QSet<QString> _dataChanges;
     QSet<QString> _accountChanges;

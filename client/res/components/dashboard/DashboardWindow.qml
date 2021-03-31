@@ -108,15 +108,6 @@ DecoratedWindow {
   // by other windows, and there's no great way to figure that out.
   readonly property bool suppressNotifications: active
 
-  // Handle close keys.
-  // Alt+F4 on Windows can be handled by the window procedure, but Cmd+W on Mac
-  // is our responsibility.
-  Shortcut {
-    sequence: StandardKey.Close
-    context: Qt.WindowShortcut
-    onActivated: hide()
-  }
-
   // When the dashboard is shown/hidden, update UIState
   onVisibleChanged: Client.uiState.dashboard.shown = dashWindow.visible
 

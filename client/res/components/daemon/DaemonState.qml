@@ -82,6 +82,10 @@ QtObject {
   readonly property bool wireguardAvailable: NativeDaemon.state.wireguardAvailable
   readonly property bool wireguardKernelSupport: NativeDaemon.state.wireguardKernelSupport
   readonly property bool existingDNSServers: NativeDaemon.state.existingDNSServers
+  readonly property var automationLastTrigger: NativeDaemon.state.automationLastTrigger
+  readonly property var automationCurrentMatch: NativeDaemon.state.automationCurrentMatch
+  readonly property var automationCurrentNetworks: NativeDaemon.state.automationCurrentNetworks
+
   // Constants for special values of forwardedPort (see PortForwarder::Special)
   readonly property var portForward: {
     'inactive': 0,

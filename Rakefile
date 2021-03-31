@@ -133,6 +133,7 @@ if(Build.windows?)
 elsif(Build.macos?)
     daemon
         .framework('AppKit')
+        .framework('CoreWLAN')
         .framework('SystemConfiguration')
 elsif(Build.linux?)
     daemon.include('/usr/include/libnl3')

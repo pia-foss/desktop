@@ -260,8 +260,9 @@ public:
     T& defaultConstructIfNull() { if (!_valid) { emplace(); } return get(); }
 
     // Construct a T in-place.  If a T already exists, destroys it first.
+    // If the new T's constructor throws, the nullable_t becomes empty.
     template<class... Args_t>
-    T& emplace(Args_t &&... args) { clear(); _valid = true; new(_data) T{std::forward<Args_t>(args)...}; return get(); }
+    T& emplace(Args_t &&... args) { clear(); new(_data) T{std::forward<Args_t>(args)...}; _valid = true; return get(); }
 };
 
 template<typename T, typename U> static inline bool operator==(const nullable_t<T>& a, const nullable_t<U>& b) { return a ? b && *a == *b : !b; }

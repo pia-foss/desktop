@@ -21,9 +21,7 @@
 
 #ifndef UTUN_H
 #define UTUN_H
-
 #include "posix/posix_objects.h"
-
 class UTun
 {
 public:

@@ -66,17 +66,24 @@ SecondaryWindow {
     'privacy': QT_TR_NOOP("Privacy", 'setting-title'),
     'network': QT_TR_NOOP("Network", 'setting-title'),
     'connection': QT_TR_NOOP("Connection", 'setting-title'),
-    'proxy': QT_TR_NOOP("Proxy", 'setting-title'),
+    'automation': QT_TR_NOOP("Automation", 'setting-title'),
     'dedicatedip': QT_TR_NOOP("Dedicated IP", 'setting-title'),
     'help': QT_TR_NOOP("Help", 'setting-title'),
   }
+
+  // The Russian titles for "Connection", "Automation", and "Dedicated IP" are
+  // all too long to fit in the horizontal layout.  "Automation" is abbreviated
+  // to allow them to fit, but the abbreviation does not look good in the
+  // vertical layout, so this page has different horizontal/vertical titles.
+  readonly property var automationTitleCompact: QT_TR_NOOP("Automation", 'setting-title-compact')
+
   readonly property var pageHeadings: {
     'general': QT_TR_NOOP("General Preferences", 'setting-heading'),
     'account': QT_TR_NOOP("Account Information", 'setting-heading'),
     'privacy': QT_TR_NOOP("Privacy Preferences", 'setting-heading'),
     'network': QT_TR_NOOP("Network Preferences", 'setting-heading'),
     'connection': QT_TR_NOOP("Connection Preferences", 'setting-heading'),
-    'proxy': QT_TR_NOOP("Proxy Preferences", 'setting-heading'),
+    'automation': QT_TR_NOOP("Automation Preferences", 'setting-heading'),
     'dedicatedip': QT_TR_NOOP("Dedicated IP Preferences", 'setting-heading'),
     'help': QT_TR_NOOP("Help", 'setting-heading'),
   }
@@ -103,8 +110,8 @@ SecondaryWindow {
         component: "ConnectionPage.qml"
       },
       {
-        name: 'proxy',
-        component: "ProxyPage.qml"
+        name: 'automation',
+        component: "AutomationPage.qml"
       }
     ]
 
@@ -128,6 +135,10 @@ SecondaryWindow {
   // QT_TR_NOOP() in order to translate correctly, these functions are passed
   // into the tab layouts to translate strings.
   function getPageTitle(pageId) {
+    // Use the compact translation for 'automation' in the horizontal layout
+    // (see automationTitleCompact above)
+    if(pageId === 'automation' && Theme.settings.horizontal)
+      return uiTr(pageTitles[pageId], 'setting-title-compact')
     return uiTr(pageTitles[pageId], 'setting-title')
   }
   function getHeadingTitle(pageId) {

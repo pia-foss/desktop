@@ -75,7 +75,10 @@ QtObject {
   // Used for interactions intended to connect to a specific region, like the
   // Quick Connect buttons.
   function connectLocation(locationId) {
-    // If this isn't the currently selected location, change to this location
+    // If this isn't the currently selected location, change to this location.
+    // Specify reconnectIfNeeded=true to ensure that we immediately reconnect
+    // if connected, this ensures that "reconnect to apply settings" doesn't
+    // blip in the UI.
     Daemon.applySettings({location: locationId}, true, function(error) {
       if(error) {
         console.error('Could not set location to ' + locationId, error)
@@ -85,13 +88,11 @@ QtObject {
         // If we are not already connected, connect to this location.
         //
         // If we were connected, the daemon started a reconnection due to
-        // specifying reconnectIfNeeded=true to applySettings().  This call has
-        // no effect.
-        //
-        // This is preferable than specifying reconnectIfNeeded=false though to
-        // ensure that we don't briefly show "reconnect to apply settings" in
-        // the UI.
-        Daemon.connectVPN()
+        // specifying reconnectIfNeeded=true to applySettings().  Don't call
+        // connectVPN(), because this may clear an automation trigger that's
+        // currently active.
+        if(!Daemon.state.vpnEnabled)
+          Daemon.connectVPN()
       }
     })
   }

@@ -32,9 +32,9 @@
 
 #include <QProcess>
 
-QString SplitDNSInfo::existingDNS()
+QString SplitDNSInfo::existingDNS(const DaemonState &state)
 {
-    auto existingDNSServers = g_daemon->state().existingDNSServers();
+    auto existingDNSServers = state.existingDNSServers();
     if (existingDNSServers.empty())
     {
         return QStringLiteral("");
@@ -45,13 +45,13 @@ QString SplitDNSInfo::existingDNS()
     }
 }
 
-SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, SplitDNSType splitType)
+SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, const DaemonState &state, SplitDNSType splitType)
 {
     QString dnsServer, cGroupId, sourceIp;
 
     if(splitType == SplitDNSType::Bypass)
     {
-        dnsServer = existingDNS();
+        dnsServer = existingDNS(state);
         cGroupId = CGroup::bypassId;
         sourceIp = params.netScan.ipAddress();
     }
@@ -62,7 +62,7 @@ SplitDNSInfo SplitDNSInfo::infoFor(const FirewallParams &params, SplitDNSType sp
             servers = params._connectionSettings->getDnsServers();
         dnsServer = servers.isEmpty() ? QString{} : servers.front();
         cGroupId = CGroup::vpnOnlyId;
-        sourceIp = g_daemon->state().tunnelDeviceLocalAddress();
+        sourceIp = state.tunnelDeviceLocalAddress();
     }
 
     // Deal with loopback dns server special case - if dnsServer is loopback then sourceIp must be too
@@ -260,9 +260,9 @@ void IpTablesFirewall::uninstallAnchor(IpTablesFirewall::IPVersion ip, const QSt
     deleteChain(ip, actualChain, tableName);
 }
 
-QStringList IpTablesFirewall::getDNSRules(const QString &adapterName, const QStringList& servers)
+QStringList IpTablesFirewall::getDNSRules(const QString &vpnAdapterName, const QStringList& servers)
 {
-    if(adapterName.isEmpty())
+    if(vpnAdapterName.isEmpty())
     {
         qInfo() << "Adapter name not set, not applying DNS firewall rules";
         return {};
@@ -271,8 +271,18 @@ QStringList IpTablesFirewall::getDNSRules(const QString &adapterName, const QStr
     QStringList result;
     for (const QString& server : servers)
     {
-        result << QStringLiteral("-o %1 -d %2 -p udp --dport 53 -j ACCEPT").arg(adapterName, server);
-        result << QStringLiteral("-o %1 -d %2 -p tcp --dport 53 -j ACCEPT").arg(adapterName, server);
+        // If this is a local DNS server, allow it on any adapter; we don't
+        // know which adapter would be used.  If it's a non-local DNS server,
+        // restrict it to the VPN interface.
+        //
+        // Invalid addresses (if they occur somehow) are treated as non-local by
+        // default.  If the address is unparseable, Ipv4Address is set to
+        // 0.0.0.0, which is non-local.
+        QString restrictAdapter{};
+        if(!Ipv4Address{server}.isLocalDNS())
+            restrictAdapter = QStringLiteral("-o ") + vpnAdapterName;
+        result << QStringLiteral("%1 -d %2 -p udp --dport 53 -j ACCEPT").arg(restrictAdapter, server);
+        result << QStringLiteral("%1 -d %2 -p tcp --dport 53 -j ACCEPT").arg(restrictAdapter, server);
     }
     return result;
 }
@@ -696,6 +706,7 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     const QString &adapterName = params.adapter ? params.adapter->devNode() : QString{};
     qInfo() << "VPN interface:" << adapterName;
     const QString &ipAddress6 = params.netScan.ipAddress6();
+    const auto &state = g_daemon->state();
 
     // These rules only depend on the adapter name
     if(adapterName != _adapterName)
@@ -744,7 +755,7 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
     SplitDNSInfo::SplitDNSType routedDns = SplitDNSInfo::SplitDNSType::VpnOnly;
     if(params.enableSplitTunnel && !g_daemon->settings().routedPacketsOnVPN())
         routedDns = SplitDNSInfo::SplitDNSType::Bypass;
-    SplitDNSInfo routedDnsInfo = SplitDNSInfo::infoFor(params, routedDns);
+    SplitDNSInfo routedDnsInfo = SplitDNSInfo::infoFor(params, state, routedDns);
 
     // Since we can't control where routed DNS is addressed, always create rules
     // to force it to the DNS server specified.
@@ -791,12 +802,12 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
         if(params._connectionSettings->forceVpnOnlyDns())
         {
             qInfo() << "Forcing VPN-only apps to our DNS";
-            appDnsInfo = SplitDNSInfo::infoFor(params, SplitDNSInfo::SplitDNSType::VpnOnly);
+            appDnsInfo = SplitDNSInfo::infoFor(params, state, SplitDNSInfo::SplitDNSType::VpnOnly);
         }
         else if(params._connectionSettings->forceBypassDns())
         {
             qInfo() << "Forcing bypass apps to existing DNS";
-            appDnsInfo = SplitDNSInfo::infoFor(params, SplitDNSInfo::SplitDNSType::Bypass);
+            appDnsInfo = SplitDNSInfo::infoFor(params, state, SplitDNSInfo::SplitDNSType::Bypass);
         }
     }
 

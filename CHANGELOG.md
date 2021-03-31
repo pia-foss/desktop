@@ -1,5 +1,11 @@
 # Changelog
 
+### v2.8.0
+* Automation rules can now be created in Settings to automatically connect or disconnect when joining networks
+* Fixed macOS split tunnel issues preventing access to LAN devices or bypassed subnets on some systems
+* Fixed issues preventing LAN DNS servers from working in the Custom DNS setting
+* Fixed the Cmd+W shortcut in the Changelog window on macOS
+
 ### v2.7.1
 * Fixed an issue causing WireGuard connections to fail on some systems running macOS 10.13
 * Fixed an issue causing PIA to stop responding on some systems running macOS 11

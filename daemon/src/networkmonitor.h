@@ -26,13 +26,40 @@
 
 // NetworkConnection represents a connection to a given network.  These objects
 // are returned by NetworkMonitor to identify the current network connections.
-class NetworkConnection
+class NetworkConnection : public DebugTraceable<NetworkConnection>
 {
+    Q_GADGET
+
+private:
+    static QString parseSsidWithCodec(const char *data, std::size_t len,
+                                      const char *codec);
+
 public:
-    NetworkConnection() : NetworkConnection({}, false, false, {}, {}, {}, {}) {}
+    // Type of interface used for this connection - users can create rules that
+    // apply to specific types of connections.
+    enum class Medium
+    {
+        // "Wired" is generally Ethernet but in principle could apply to other
+        // wired interface types if they're encountered.
+        Wired,
+        // WiFi specifically refers to Wi-Fi and not any wireless interface,
+        // because this type also provides the wireless SSID and whether the
+        // connection is encrypted.  Other future types might include mobile
+        // data (a cellular modem present in the device) or tethering via
+        // Bluetooth, etc.
+        WiFi,
+        // Any other medium is reported as Unknown.
+        Unknown
+    };
+    Q_ENUM(Medium);
+
+public:
+    NetworkConnection() : NetworkConnection{{}, Medium::Unknown, false, false,
+                                            {}, {}, {}, {}} {}
     // Create NetworkConnection.  Any of the fields could be empty (though it is
     // unusual for the interface to be empty).
     NetworkConnection(const QString &networkInterface,
+                      Medium medium,
                       bool defaultIpv4, bool defaultIpv6,
                       const Ipv4Address &gatewayIpv4,
                       const Ipv6Address &gatewayIpv6,
@@ -45,6 +72,10 @@ public:
         // Address vectors can be compared directly since the constructor sorts
         // them
         return networkInterface() == other.networkInterface() &&
+               medium() == other.medium() &&
+               wifiAssociated() == other.wifiAssociated() &&
+               wifiEncrypted() == other.wifiEncrypted() &&
+               wifiSsid() == other.wifiSsid() &&
                defaultIpv4() == other.defaultIpv4() &&
                defaultIpv6() == other.defaultIpv6() &&
                gatewayIpv4() == other.gatewayIpv4() &&
@@ -57,12 +88,68 @@ public:
     // connections.
     bool operator<(const NetworkConnection &other) const;
 
+private:
+    // Try to parse Wifi SSID data (used by parseWifiSsid()), returns false
+    // without modifying wifiSsid() if the data can't be represented as text.
+    bool tryParseWifiSsid(const char *data, std::size_t len);
+
 public:
+    void trace(QDebug &dbg) const;
+
     // The interface used to connect to this network.  On Windows this is a
     // device GUID; on Mac and Linux it is an interface name.  This isn't
     // necessarily unique among connections.
     const QString &networkInterface() const {return _networkInterface;}
     void networkInterface(QString networkInterface) {_networkInterface = networkInterface;}
+
+    // The medium used by this interface
+    Medium medium() const {return _medium;}
+    void medium(Medium medium) {_medium = medium;}
+
+    // If this is a Wi-Fi interface, whether it is associated with a network.
+    //
+    // IMPORTANT: Wi-Fi state is reported asynchronously on all platforms - a
+    // network can become the default before its Wi-Fi association is known (and
+    // it may still appear to be "associated" briefly after disconnecting.
+    //
+    // The automation rules engine avoids applying any rules when the current
+    // network is a Wi-Fi network that does not appear to be associated, which
+    // causes it to wait until the Wi-Fi association is known to take any
+    // action.
+    bool wifiAssociated() const {return _wifiAssociated;}
+    void wifiAssociated(bool wifiAssociated) {_wifiAssociated = wifiAssociated;}
+
+    // If this is a Wi-Fi interface that's currently associated, whether the
+    // connection is encrypted.  Even weak encryption like WEP counts for this
+    // for consistent behavior across all PIA platforms.
+    bool wifiEncrypted() const {return _wifiEncrypted;}
+    void wifiEncrypted(bool wifiEncrypted) {_wifiEncrypted = wifiEncrypted;}
+
+    // The SSID if this is an associated Wi-Fi connection and the SSID is
+    // representable as text - empty string otherwise.
+    //
+    // Technically, SSIDs are arbitrary 0-32 byte values.  Only non-empty SSIDs
+    // that are valid UTF-8 or Latin-1 can be represented as text.  We do not
+    // distinguish UTF-8 and Latin-1; different encodings of the same text are
+    // considered the same.
+    const QString &wifiSsid() const {return _wifiSsid;}
+    void wifiSsid(QString wifiSsid) {_wifiSsid = wifiSsid;}
+    // Parse raw SSID data and store it in wifiSsid().
+    //
+    // SSIDs are converted to text as follows:
+    // - If the SSID is empty, the result is an empty string (which can't be
+    //   matched)
+    // - Otherwise, if the SSID is valid printable UTF-8, it is parsed as UTF-8.
+    //   ("Printable" means it cannot contain any control characters, including
+    //   nulls.)
+    // - Otherwise, if the SSID is valid printable Latin-1, it is parsed as
+    //   Latin-1.
+    // - Otherwise, the SSID can't be represented and can't be matched.
+    //
+    // Stores the SSID if the SSID was a valid and non-empty string.  Otherwise,
+    // for an empty SSID or data that can't be represented as text, wifiSsid()
+    // is cleared and the unrepresentable data are traced.
+    void parseWifiSsid(const char *data, std::size_t len);
 
     // macOS only - the unique identifier for the primary IPv4 service
     const QString &macosPrimaryServiceKey() const {return _macosPrimaryServiceKey;}
@@ -104,6 +191,9 @@ public:
 
 private:
     QString _networkInterface;
+    Medium _medium;
+    bool _wifiAssociated, _wifiEncrypted;
+    QString _wifiSsid;
     bool _defaultIpv4, _defaultIpv6;
     Ipv4Address _gatewayIpv4;
     Ipv6Address _gatewayIpv6;

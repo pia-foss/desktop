@@ -24,12 +24,13 @@
 #include <strings.h>
 #include <string.h>
 #include <unistd.h>
+#include <syslog.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <arpa/inet.h>
 #include <sys/sys_domain.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
-#include <libproc.h>             // for proc_pidpath()
 #include <QSocketNotifier>
 #include <QProcess>
 #include <QThread>
@@ -39,34 +40,19 @@
 #include "mac/mac_constants.h"
 #include "mac_splittunnel.h"
 #include "posix/posix_objects.h"
-#include "mac/utun.h"
-#include "pid_finder.h" // For PidFinder
+#include "utun.h"
+#include "port_finder.h" // For PortFinder
 #include "daemon.h"
 #include "path.h"
 #include "packet.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <syslog.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/sys_domain.h>
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-
 namespace
 {
     RegisterMetaType<QVector<QString>> qStringVector;
     RegisterMetaType<OriginalNetworkScan> qNetScan;
     RegisterMetaType<FirewallParams> qFirewallParams;
 
-    // Unique local address used as a link-local address is not sufficient
-    // (forwarded packets have no return path as a LLA is scoped to a link)
+    // Unique local addresses are used (link-local addresses are not sufficient
+    // as forwarded packets have no return path with a LLA since they're scoped to a link)
 
     // Base Ip addresses used for our Split Tunnel interface.
     // Our split tunnel device will increment these ips each time the user
@@ -83,14 +69,13 @@ void AppCache::addEntry(IPVersion ipVersion, pid_t newPid, quint16 srcPort)
     _cache[ipVersion][newPid] << srcPort;
 }
 
-void AppCache::refresh(IPVersion ipVersion)
+void AppCache::refresh(IPVersion ipVersion, const OriginalNetworkScan &netScan)
 {
-    PidFinder finder{};
     // Refresh the ports in our default (non-split) app cache
     for(const auto &pid : _cache[ipVersion].keys())
     {
         // Update the list of ports for each pid
-        _cache[ipVersion][pid] = finder.ports({pid}, ipVersion == IPv4 ? PidFinder::IPv4 : PidFinder::IPv6);
+        _cache[ipVersion][pid] = PortFinder::ports({pid}, ipVersion == IPv4 ? IPv4 : IPv6, netScan);
     }
 }
 
@@ -143,7 +128,7 @@ QString SplitTunnelIp::nextAddress(const QString &addressStr) const
 
 // Pia Connections are special-cased.
 // Source-based routing ("strong host model") no longer works when ip forwarding is enabled.
-// As a result  all packets (regardless of source ip) pass through our tunnel device.
+// As a result all packets (regardless of source ip) pass through our tunnel device.
 //
 // To route Pia connections properly we inspect the source ip
 // and either add that connection to bypass or vpnOnly. We only do this with Pia connections.
@@ -165,9 +150,8 @@ PiaConnections::PiaConnections(const QString &path, const MacSplitTunnel *pMacSp
     const auto &physAddress = pMacSplitTunnel->netScan().ipAddress();
     const auto &vpnAddress = pMacSplitTunnel->tunnelDeviceLocalAddress();
 
-    PidFinder piaFinder{QVector<QString>{path}};
     // An address is a source-ip/source-port pair
-    auto piaAddresses = piaFinder.addresses4(piaFinder.pids());
+    const auto piaAddresses = PortFinder::addresses4({path});
     // Special-case PIA connections - allow them to do what they want and route them to
     // the interface indicated by their source IP
     for(const auto &address : piaAddresses)
@@ -189,6 +173,45 @@ MacSplitTunnel::MacSplitTunnel(QObject *pParent)
 {
 }
 
+bool MacSplitTunnel::cycleSplitTunnelDevice()
+{
+    auto pNewUtun = UTun::create();
+
+    if(!pNewUtun)
+        return false;
+
+    // Change the Ips of the new tunnel device
+    // (this ensures existing connections die)
+    _splitTunnelIp.refresh();
+
+    Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(pNewUtun->name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
+    Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(pNewUtun->name(), _splitTunnelIp.ip6()));
+
+    // After adding the ipv4 ips to the interface we need a slight pause before trying to change the routes
+    // without the pause sometimes these routes will not be created.
+    // Adding the ipv6 ip is sufficient delay
+    Exec::bash(QStringLiteral("route -q -n change -inet 0.0.0.0/1 -interface %1").arg(pNewUtun->name()));
+    Exec::bash(QStringLiteral("route -q -n change -inet 128.0.0.0/1 -interface %1").arg(pNewUtun->name()));
+
+    // Update IPv6 routes with new tun device
+    Exec::bash(QStringLiteral("route -q -n change -inet6 8000::/1 %1").arg(_splitTunnelIp.ip6()));
+    Exec::bash(QStringLiteral("route -q -n change -inet6 0::/1 %1").arg(_splitTunnelIp.ip6()));
+
+    // Set the MTU
+    pNewUtun->setMtu(_pUtun->mtu());
+
+    // This kills the old tun device and replaces it with the new one
+    _pUtun = std::move(pNewUtun);
+
+    _readNotifier.emplace(_pUtun->fd(), QSocketNotifier::Read);
+    connect(_readNotifier.ptr(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
+
+    // Flush out any pre-existing firewall state
+    PFFirewall::flushState();
+
+    return true;
+}
+
 // When the user actually connects to the VPN we replace the existing stun device with a new one
 // and change its Ips (both Ipv4 and Ipv6). This is so we destroy any "existing connections".
 // without doing this existing connections will survive connection to the VPN as the existing connection
@@ -204,39 +227,8 @@ void MacSplitTunnel::aboutToConnectToVpn()
 
         // Replace the existing UTun with a new one so that
         // all existing TCP connections are terminated before we connect
-        auto pNewUtun = UTun::create();
-
-        if(!pNewUtun)
-        {
+        if(!cycleSplitTunnelDevice())
             qWarning() << "Unable to create new UTun for split tunnel on connect. Existing connections will not be cleared";
-            return;
-        }
-
-        // Change the Ips of the new tunnel device
-        // (this ensures existing connections die)
-        _splitTunnelIp.refresh();
-
-        Exec::bash(QStringLiteral("ifconfig %1 %2 %3").arg(pNewUtun->name(), _splitTunnelIp.ip4(), _splitTunnelIp.ip4()));
-        Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(pNewUtun->name(), _splitTunnelIp.ip6()));
-
-        // After adding the ipv4 ips to the interface we need a slight pause before trying to change the routes
-        // without the pause sometimes these routes will not be created.
-        // Adding the ipv6 ip is sufficient delay
-        Exec::bash(QStringLiteral("route -q -n change -inet 0.0.0.0/1 -interface %1").arg(pNewUtun->name()));
-        Exec::bash(QStringLiteral("route -q -n change -inet 128.0.0.0/1 -interface %1").arg(pNewUtun->name()));
-
-        // Update IPv6 routes with new tun device
-        Exec::bash(QStringLiteral("route -q -n change -inet6 8000::/1 %1").arg(_splitTunnelIp.ip6()));
-        Exec::bash(QStringLiteral("route -q -n change -inet6 0::/1 %1").arg(_splitTunnelIp.ip6()));
-
-        // Set the MTU
-        pNewUtun->setMtu(_pUtun->mtu());
-
-        // This kills the old tun device and replaces it with the new one
-        _pUtun = std::move(pNewUtun);
-
-        _readNotifier.emplace(_pUtun->fd(), QSocketNotifier::Read);
-        connect(_readNotifier.ptr(), &QSocketNotifier::activated, this, &MacSplitTunnel::readFromTunnel);
 
         qInfo() << "Split Tunnel ip4 addresses are" << _splitTunnelIp.ip4() << _splitTunnelIp.ip4();
         qInfo() << "Split Tunnel ip6 address is" << _splitTunnelIp.ip6();
@@ -268,10 +260,6 @@ void MacSplitTunnel::initiateConnection(const FirewallParams &params, QString tu
     Exec::bash(QStringLiteral("ifconfig %1 inet6 %2").arg(_pUtun->name(), _splitTunnelIp.ip6()));
     _pUtun->setMtu(1500); // default MTU when setting up
 
-    // To setup the ICMP rules
-    _defaultRuleUpdater.forceUpdate(IPv4, {});
-    _defaultRuleUpdater.forceUpdate(IPv6, {});
-
     // Include Ip Header when writing to raw socket
     auto hdrIncl = [](int fd) {
         int one = 1;
@@ -279,6 +267,7 @@ void MacSplitTunnel::initiateConnection(const FirewallParams &params, QString tu
     };
 
     _rawFd4 = PosixFd{socket(AF_INET, SOCK_RAW, IPPROTO_RAW)};
+    // Do not inherit fds into child processes
     if(::fcntl(_rawFd4->get(), F_SETFD, FD_CLOEXEC))
         qWarning() << "fcntl failed setting FD_CLOEXEC:" << ErrnoTracer{errno};
 
@@ -291,6 +280,10 @@ void MacSplitTunnel::initiateConnection(const FirewallParams &params, QString tu
     setupIpForwarding(QStringLiteral("net.inet6.ip6.forwarding"), QStringLiteral("1"), _ipForwarding6);
 
     updateSplitTunnel(params, tunnelDeviceName, tunnelDeviceLocalAddress);
+
+    // Setup the ICMP rules
+    _defaultRuleUpdater.forceUpdate(IPv4, {});
+    _defaultRuleUpdater.forceUpdate(IPv6, {});
 
     _state = State::Active;
 }
@@ -489,7 +482,7 @@ void MacSplitTunnel::updateNetwork(const FirewallParams &params, QString tunnelD
 
         // IPv6 default routes - (equivalent to 128/1 route for ipv6)
         Exec::bash(QStringLiteral("route -q -n add -inet6 8000::/1 %1").arg(_splitTunnelIp.ip6()));
-        // Equivalent to 0/1 route for ipv
+        // Equivalent to 0/1 route for ipv4
         Exec::bash(QStringLiteral("route -q -n add -inet6 0::/1 %1").arg(_splitTunnelIp.ip6()));
 
         _routesUp = true;
@@ -498,6 +491,12 @@ void MacSplitTunnel::updateNetwork(const FirewallParams &params, QString tunnelD
     {
         qInfo() << "Can't create split tunnel device routes yet, VPN is still default route - wait for reconnect";
     }
+
+    // If we're disconnected, ensure we cycle the st device if killswitch changes.
+    // This is so when we go from ks:auto/off -> ks:always we break existing connections.
+    // Without  this, existing connections will continue to exist when ks is toggled to always
+    if(params.hasConnected == false && params.blockAll != _params.blockAll)
+        cycleSplitTunnelDevice();
 
     // Update our network info
     _params = params;
@@ -512,10 +511,10 @@ bool MacSplitTunnel::isSplitPort(quint16 port,
     return bypassPorts.contains(port) || vpnOnlyPorts.contains(port);
 }
 
-
 void MacSplitTunnel::handleIp6(std::vector<unsigned char> buffer, int actualSize)
 {
-    auto pPacket = Packet6::createFromData(std::move(buffer), 4);
+    // skip the first 4 bytes (it stores AF_NET)
+    const auto pPacket = Packet6::createFromData(std::move(buffer), 4);
     if(!pPacket)
     {
         qWarning() << "Packet is invalid; read" << actualSize << "bytes from utun";
@@ -534,15 +533,13 @@ void MacSplitTunnel::handleIp6(std::vector<unsigned char> buffer, int actualSize
         return;
     }
 
-    PidFinder bypassFinder{_excludedApps};
-    PidFinder vpnOnlyFinder{_vpnOnlyApps};
     // Update the cache for non-split apps, to keep track of the ports we care about
     // when generating firewall rules
-    _defaultAppsCache.refresh(IPv6);
+    _defaultAppsCache.refresh(IPv6, netScan());
 
     // Get ports for our tracked apps
-    auto bypassPorts = bypassFinder.ports(bypassFinder.pids(), PidFinder::IPv6);
-    auto vpnOnlyPorts = vpnOnlyFinder.ports(vpnOnlyFinder.pids(), PidFinder::IPv6);
+    auto bypassPorts = PortFinder::ports(_excludedApps, IPv6, netScan());
+    auto vpnOnlyPorts = PortFinder::ports(_vpnOnlyApps, IPv6, netScan());
     auto defaultPorts = _defaultAppsCache.ports(IPv6);
 
     // These packets seem to have protocol 255, so drop them
@@ -560,7 +557,7 @@ void MacSplitTunnel::handleIp6(std::vector<unsigned char> buffer, int actualSize
     // a bypass or vpnonly app
     if(pPacket->packetType() != Packet6::Other && !isSplitPort(pPacket->sourcePort(), bypassPorts, vpnOnlyPorts))
     {
-        pid_t newPid = bypassFinder.pidForPort(pPacket->sourcePort(), PidFinder::IPv6);
+        pid_t newPid = PortFinder::pidForPort(pPacket->sourcePort(), IPv6);
         if(newPid)
             _defaultAppsCache.addEntry(IPv6, newPid, pPacket->sourcePort());
         else
@@ -595,24 +592,22 @@ void MacSplitTunnel::handleIp6(std::vector<unsigned char> buffer, int actualSize
 void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize)
 {
     // skip the first 4 bytes (it stores AF_NET)
-    auto pPacket = Packet::createFromData(std::move(buffer), 4);
+    const auto pPacket = Packet::createFromData(std::move(buffer), 4);
     if(!pPacket)
     {
         qWarning() << "Packet is invalid; read" << actualSize << "bytes from stun";
         return;
     }
 
-    PidFinder bypassFinder{_excludedApps};
-    PidFinder vpnOnlyFinder{_vpnOnlyApps};
     PiaConnections piaConnections{Path::ExecutableDir, this};
 
     // Update the cache for non-split apps, to keep track of the ports we care about
     // when generating firewall rules
-    _defaultAppsCache.refresh(IPv4);
+    _defaultAppsCache.refresh(IPv4, netScan());
 
     // Get ports for our tracked apps
-    auto bypassPorts = bypassFinder.ports(bypassFinder.pids(), PidFinder::IPv4);
-    auto vpnOnlyPorts = vpnOnlyFinder.ports(vpnOnlyFinder.pids(), PidFinder::IPv4);
+    auto bypassPorts = PortFinder::ports(_excludedApps, IPv4, netScan());
+    auto vpnOnlyPorts = PortFinder::ports(_vpnOnlyApps, IPv4, netScan());
     auto defaultPorts = _defaultAppsCache.ports(IPv4);
 
     // These packets seem to have protocol 255, so drop them
@@ -634,7 +629,7 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     // a bypass or vpnonly app
     if(pPacket->packetType() != Packet::Other && !isSplitPort(pPacket->sourcePort(), bypassPorts, vpnOnlyPorts))
     {
-        pid_t newPid = bypassFinder.pidForPort(pPacket->sourcePort(), PidFinder::IPv4);
+        pid_t newPid = PortFinder::pidForPort(pPacket->sourcePort(), IPv4);
         if(newPid)
             _defaultAppsCache.addEntry(IPv4, newPid, pPacket->sourcePort());
         else
@@ -664,7 +659,12 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     // Prevent default traffic when KS=always and disconnected
     // All other traffic is fine - vpnOnly is blocked anyway and bypass is allowed
     if(_params.blockAll && !_params.isConnected)
+    {
         defaultPorts.clear();
+        // Ensure we wipe out firewall state - otherwise
+        // some pre-existing connections could continue to hang around
+        PFFirewall::flushState();
+    }
 
     _defaultRuleUpdater.update(IPv4, defaultPorts);
     _bypassRuleUpdater.update(IPv4, bypassPorts);
@@ -675,7 +675,7 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     //qInfo() << "Re-injecting IPv4 packet:" << pPacket->toString();
 
     // Re-inject the packet
-    struct sockaddr_in to{};
+    sockaddr_in to{};
     to.sin_family = AF_INET;
     to.sin_addr.s_addr = htonl(pPacket->destAddress());
 

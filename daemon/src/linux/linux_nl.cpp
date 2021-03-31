@@ -21,6 +21,8 @@
 
 #include "linux_nl.h"
 #include "linux_nlcache.h"
+#include "linux_nl80211.h"
+#include "linux_genlfamilies.h"
 #include "linux_libnl.h"
 #include <QMetaObject>
 #include <cstring>
@@ -36,6 +38,8 @@ private:
     {
         KillSocket,
         RouteSocket,
+        GenlFamiliesSocket,
+        Nl80211Socket,
         Count
     };
 
@@ -54,6 +58,8 @@ private:
     // passes it to the appropriate socket, then checks for updates to the data
     // in the appropriate cache(s).  Clears revents.
     void receiveRoute(short &revents);
+    void receiveGenlFamilies(short &revents);
+    void receiveNl80211(short &revents);
 
 public:
     // Wait for events to be signaled, then receive them.
@@ -69,10 +75,16 @@ private:
     PosixFd _killSocket;
     // Socket for all "route" caches - link/address/route
     LinuxNlCacheSock _routeSock;
+    // Cache of generic netlink families - used to detect when nl80211 is added
+    // or removed (and its ID and multicast groups)
+    LinuxGenlFamilies _genlFamilies;
     // Fixed caches - these are always valid
     std::shared_ptr<LinuxNlCache> _pLinkCache;
     std::shared_ptr<LinuxNlCache> _pAddrCache;
     std::shared_ptr<LinuxNlCache> _pRouteCache;
+    // nl80211 socket and cache - created dynamically when the nl80211 generic
+    // netlink family is present.  This is nullptr when nl80211 isn't present.
+    std::unique_ptr<LinuxNl80211Cache> _p80211Cache;
     // The last emitted connections are cached in order to ignore irrelevant/
     // duplicate events.  These are sorted and checked in readCaches().
     std::vector<NetworkConnection> _lastConnections;
@@ -84,6 +96,8 @@ LinuxNl::Worker::Worker(LinuxNl &parent, PosixFd killSocket)
 {
     _pollCfgs[PollIdx::KillSocket].fd = _killSocket.get();
     _pollCfgs[PollIdx::RouteSocket].fd = _routeSock.getFd();
+    _pollCfgs[PollIdx::GenlFamiliesSocket].fd = _genlFamilies.getFd();
+    _pollCfgs[PollIdx::Nl80211Socket].fd = PosixFd::Invalid; // Set on nl80211 cache creation
 
     for(auto &cfg : _pollCfgs)
     {
@@ -109,12 +123,14 @@ LinuxNl::Worker::Worker(LinuxNl &parent, PosixFd killSocket)
                                         RTNLGRP_DECnet_ROUTE}, // Just to stay in sync with libnl
                                        {RTM_NEWROUTE, RTM_DELROUTE, RTM_GETROUTE});
 
-    // Read the initial state and emit the initial network configuration.
-    // It seems that on older distributions, we always get an initial change
-    // that causes us to do this anyway, but on newer distributions this doesn't
-    // occur.  It's not clear if this is due to a difference in the kernel/
-    // libnl/etc., but it's consistent.
-    readCaches();
+    // Don't report anything yet, because the _genlFamilies cache definitely
+    // isn't ready yet (it fills asynchronously).  Note that older distributions
+    // tend to report an "initial change" for the route cache immediately, but
+    // newer distributions do not - we can't rely on getting any changes for the
+    // route cache.
+    //
+    // In our case though, since the genl cache fills asynchronously, it'll
+    // trigger our initial state notification when it becomes ready.
 }
 
 bool readNlAddr(libnl::nl_addr *pNlAddr, std::size_t valueSize, void *pValue)
@@ -275,30 +291,53 @@ void LinuxNl::Worker::readCaches()
 
         if(pGateway)
         {
-            // Get the metric (called "priority" by the kernel, "metrics" are other
-            // parameters)
-            std::uint32_t metric = libnl::rtnl_route_get_priority(pRoute);
-            int family = libnl::rtnl_route_get_family(pRoute);
-            switch(family)
+            auto itItfAddrs = interfaceAddrs.find(ifindex);
+            // It does sometimes happen that we get routes from libnl for
+            // interfaces that no longer exist.  Specifically, this has been
+            // observed with a USB Ethernet adapter by unplugging USB while it
+            // is connected to a network.
+            //
+            // It seems the IPv4 gateway route is removed in this case (the
+            // kernel no longer returns it in dumps), but no "delete route"
+            // notification is sent.  (The IPv6 gateway route deletion is sent
+            // correctly.)  It's not clear why this happens, but the route no
+            // longer matters anyway since the interface is gone, and libnl
+            // resyncs the next time it dumps IPv4 routes (which happens pretty
+            // frequently), so it should not cause accumulation of memory even
+            // if it happens a lot.
+            if(itItfAddrs != interfaceAddrs.end())
             {
-                case AF_INET:
-                    interfaceAddrs[ifindex]._pIpv4Gateway = pGateway;
-                    if(lowestGateway4.ifindex == -1 || metric < lowestGateway4.metric)
-                        lowestGateway4 = {metric, ifindex};
-                    break;
-                case AF_INET6:
-                    interfaceAddrs[ifindex]._pIpv6Gateway = pGateway;
-                    if(lowestGateway6.ifindex == -1 || metric < lowestGateway6.metric)
-                        lowestGateway6 = {metric, ifindex};
-                    break;
-                default:
-                    // Something else, don't care
-                    break;
+                // Get the metric (called "priority" by the kernel, "metrics" are other
+                // parameters)
+                std::uint32_t metric = libnl::rtnl_route_get_priority(pRoute);
+                int family = libnl::rtnl_route_get_family(pRoute);
+                switch(family)
+                {
+                    case AF_INET:
+                        itItfAddrs->second._pIpv4Gateway = pGateway;
+                        if(lowestGateway4.ifindex == -1 || metric < lowestGateway4.metric)
+                            lowestGateway4 = {metric, ifindex};
+                        break;
+                    case AF_INET6:
+                        itItfAddrs->second._pIpv6Gateway = pGateway;
+                        if(lowestGateway6.ifindex == -1 || metric < lowestGateway6.metric)
+                            lowestGateway6 = {metric, ifindex};
+                        break;
+                    default:
+                        // Something else, don't care
+                        break;
+                }
             }
         }
     }
 
-    // Build PosixConnectionInfo objects
+    // Get the nl80211 state too
+    // emptyWifi is used as a default if the 802.11 cache hasn't been created
+    // (because the nl80211 family doesn't exist yet in the kernel)
+    static const std::map<std::uint32_t, LinuxNl80211Cache::WifiStatus> emptyWifi{};
+    const auto &wifiInterfaces = _p80211Cache ? _p80211Cache->interfaces() : emptyWifi;
+
+    // Build NetworkConnection objects
     std::vector<NetworkConnection> connections;
     connections.reserve(interfaceAddrs.size());
     for(const auto &itfAddrs : interfaceAddrs)
@@ -329,12 +368,33 @@ void LinuxNl::Worker::readCaches()
         }
 
         connections.push_back(NetworkConnection{itfName,
+                                                NetworkConnection::Medium::Unknown,
                                                 itfAddrs.first == lowestGateway4.ifindex,
                                                 itfAddrs.first == lowestGateway6.ifindex,
                                                 readNlAddr4(itfAddrs.second._pIpv4Gateway),
                                                 readNlAddr6(itfAddrs.second._pIpv6Gateway),
                                                 std::move(addressesIpv4),
                                                 std::move(addressesIpv6)});
+
+        // If the interface is known to nl80211, it's a Wi-Fi interface.
+        // Otherwise, assume that it's wired.  This isn't precisely correct for
+        // other interfaces like cellular modems, etc., but it's reasonable.
+        auto itWifi = wifiInterfaces.find(itfAddrs.first);
+        if(itWifi == wifiInterfaces.end())
+        {
+            connections.back().medium(NetworkConnection::Medium::Wired);
+        }
+        else
+        {
+            connections.back().medium(NetworkConnection::Medium::WiFi);
+            if(itWifi->second.associated)
+            {
+                connections.back().wifiAssociated(true);
+                connections.back().parseWifiSsid(reinterpret_cast<const char *>(itWifi->second.ssid),
+                                                itWifi->second.ssidLength);
+                connections.back().wifiEncrypted(itWifi->second.encrypted);
+            }
+        }
     }
 
     // If the set of network connections hasn't changed, ignore this update.
@@ -349,6 +409,14 @@ void LinuxNl::Worker::readCaches()
     }
     // Save a copy of the current connections
     _lastConnections = connections;
+
+    qInfo() << "Reporting" << connections.size() << "networks:";
+    int i=0;
+    for(const auto &conn : connections)
+    {
+        qInfo() << "-" << i << "-" << conn;
+        ++i;
+    }
 
     // Dispatch this update over to the main thread
     // Capture the parent reference in the lambda, not this
@@ -366,7 +434,73 @@ void LinuxNl::Worker::receiveRoute(short &revents)
     {
         _routeSock.receive(revents);
         revents = 0;
-        readCaches();
+    }
+}
+
+void LinuxNl::Worker::receiveGenlFamilies(short &revents)
+{
+    if(revents)
+    {
+        _genlFamilies.receive(revents);
+        revents = 0;
+
+        const auto *pNl80211Family = _genlFamilies.getFamily(QStringLiteral(NL80211_GENL_NAME));
+        // Get the group IDs if the family and group exist, or 0 otherwise.
+        // 0 isn't a valid multicast group ID.
+        int configGroupId = 0;
+        int mlmeGroupId = 0;
+        if(pNl80211Family)
+        {
+            const auto &mcastGroups = pNl80211Family->_multicastGroups;
+            auto itConfigGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_CONFIG));
+            if(itConfigGroup != mcastGroups.end())
+                configGroupId = itConfigGroup->second;
+            auto itMlmeGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_MLME));
+            if(itMlmeGroup != mcastGroups.end())
+                mlmeGroupId = itMlmeGroup->second;
+        }
+
+
+        // If we have a cache; we might need to destroy it if nl80211 is gone or
+        // the protocol IDs have changed
+        if(_p80211Cache)
+        {
+            if(!pNl80211Family ||
+               pNl80211Family->_protocol != _p80211Cache->nl80211Protocol() ||
+               configGroupId != _p80211Cache->configGroup() ||
+               mlmeGroupId != _p80211Cache->mlmeGroup())
+            {
+                // nl80211 or config group is gone, or IDs changed, destroy cache
+                _p80211Cache.reset();
+                _pollCfgs[PollIdx::Nl80211Socket].fd = PosixFd::Invalid;
+            }
+        }
+
+        // If we don't have a cache (including if it was destroyed above), and
+        // we have all the protocol IDs, create a cache
+        if(!_p80211Cache && pNl80211Family && configGroupId && mlmeGroupId)
+        {
+            qInfo() << "Creating nl80211 cache (protocol"
+                << pNl80211Family->_protocol << "- config grp" << configGroupId
+                << "- mlme grp" << mlmeGroupId << ")";
+            _p80211Cache.reset(new LinuxNl80211Cache{pNl80211Family->_protocol,
+                                                     configGroupId,
+                                                     mlmeGroupId});
+            _pollCfgs[PollIdx::Nl80211Socket].fd = _p80211Cache->getFd();
+        }
+    }
+}
+
+void LinuxNl::Worker::receiveNl80211(short &revents)
+{
+    if(revents)
+    {
+        if(_p80211Cache)
+        {
+            qInfo() << "Receiving nl80211 events";
+            _p80211Cache->receive(revents);
+        }
+        revents = 0;
     }
 }
 
@@ -387,6 +521,31 @@ bool LinuxNl::Worker::receive()
         // This can also throw if the netlink socket is lost for any reason,
         // which ends the worker thread
         receiveRoute(_pollCfgs[PollIdx::RouteSocket].revents);
+        receiveGenlFamilies(_pollCfgs[PollIdx::GenlFamiliesSocket].revents);
+        receiveNl80211(_pollCfgs[PollIdx::Nl80211Socket].revents);
+
+        // If everything is ready, read caches and report updates.  If anything
+        // is not ready, do not report any updates (but do not wipe out the
+        // existing network configs, e.g. in case a Wi-Fi adapter has been
+        // plugged in for the first time and we are just now dumping nl80211 for
+        // the first time).
+        if(!_genlFamilies.ready())
+        {
+            qInfo() << "Can't report networks yet, genlfamilies is not ready";
+        }
+        // If the 802.11 cache doesn't exist right now, but genlfamilies is
+        // ready, that's fine, nl80211 just doesn't exist.  But if it does
+        // exist, we have to wait until it's ready before reporting any more
+        // updates.
+        else if(_p80211Cache && !_p80211Cache->ready())
+        {
+            qInfo() << "Can't report networks yet, nl80211 is not ready";
+        }
+        else
+        {
+            // Everything is ready, report
+            readCaches();
+        }
     }
     else if(errno != EINTR)
     {

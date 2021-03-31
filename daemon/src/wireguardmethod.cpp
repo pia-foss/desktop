@@ -733,7 +733,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     {
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLoopback())
+            if(!Ipv4Address{dnsServer}.isLocalDNS())
                 _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
         }
 
@@ -783,7 +783,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Route DNS through the tunnel.
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLoopback())
+            if(!Ipv4Address{dnsServer}.isLocalDNS())
                 _executor.bash(QStringLiteral("route -q -n add -inet %1 -interface %2").arg(dnsServer, deviceName));
         }
         setupPosixDNS(deviceName, _dnsServers);
@@ -865,7 +865,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLoopback())
+            if(!Ipv4Address{dnsServer}.isLocalDNS())
                 routeManager.addRoute4(dnsServer, onLink, luidStr);
         }
         // Add each DNS server

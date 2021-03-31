@@ -62,6 +62,13 @@ FocusScope {
   // - clicked: A function called (with no parameters) when the link is clicked
   property var links
 
+  // A single link can also be embedded in the message, surrounded by '[[..]]',
+  // like OneLinkMessage.  When clicked, the embeddedLinkClicked function is
+  // called.
+  // This has no effect if the message does not contain '[[...]]'; the embedded
+  // link tabstop is created by checking for '[[...]]'.
+  property var embedLinkClicked
+
   // Separator between the multiple links - defaults to a pipe character
   property string linkSeparator: ' &nbsp;|&nbsp; '
   // "Tail" text added to link - space and single right angle quote (per style
@@ -89,24 +96,42 @@ FocusScope {
   readonly property string linkFocusColorStr: Util.colorToStr(linkFocusColor)
   readonly property string linkFocusBgColorStr: Util.colorToStr(linkFocusBgColor)
 
-  // Link displaying keyboard focus cues, if any (-1 otherwise).  See
+  // Indices used in buildHtml to indicate "no link" or "the embedded link"
+  readonly property int noLinkIdx: -2
+  readonly property int embedLinkIdx: -1
+
+  // Link displaying keyboard focus cues, if any (noLinkIdx otherwise).  See
   // linkTabstopRepeater below
   readonly property int focusCueLinkIdx: {
+    if(embedLinkTabstop.showFocusCue)
+      return embedLinkIdx
+
     // itemAt() doesn't introduce a dependency on the Repeater's children
     var childrenDependency = linkTabstopRepeater.children
     for(var i=0; i<linkTabstopRepeater.count; ++i) {
       if(linkTabstopRepeater.itemAt(i).showFocusCue)
         return i
     }
-    return -1
+    return noLinkIdx
   }
 
   implicitHeight: layoutText.implicitHeight
   implicitWidth: layoutText.implicitWidth
 
+  function getLinkAnchor(index, pointedLinkIdx, focusLinkIdx) {
+    let text = '<a class="'
+    if(pointedLinkIdx === index)
+      text += 'hover '
+    if(focusLinkIdx === index)
+      text += 'focus '
+    // The link target is just the stringified index
+    text += '" href="' + index.toString(10) + '">'
+    return text
+  }
+
   // Build the HTML markup.  'pointedLinkIdx' is the index of the pointed link,
-  // or -1 if no link is pointed.  Similarly, 'focusLinkIdx' is the index of the
-  // link displaying keyboard focus, or -1 for none.
+  // or noLinkIdx if no link is pointed.  Similarly, 'focusLinkIdx' is the index of the
+  // link displaying keyboard focus, or noLinkIdx for none.
   function buildHtml(pointedLinkIdx, focusLinkIdx) {
     // Qt's CSS subset does not support the hover pseudo-class; we have to do it
     // manually by applying a class to the hovered link.
@@ -116,7 +141,10 @@ FocusScope {
       'a.focus { color: ' + linkFocusColorStr + '; background-color: ' + linkFocusBgColorStr + '; }\n' +
       'div { margin-top: 2px; color: #809099 }\n' +
       '</style>\n'
-    text += message
+    let messageMarkup = message.replace('[[',
+      getLinkAnchor(embedLinkIdx, pointedLinkIdx, focusLinkIdx))
+    messageMarkup = messageMarkup.replace(']]', '</a>')
+    text += messageMarkup
 
     // We have to explicitly specify the alignment of the divs, or they'll just
     // be left-aligned by default.
@@ -130,13 +158,8 @@ FocusScope {
 
         if (i > 0)
           text += linkSeparator
-        // The link target is just the stringified index
-        text += '<a class="'
-        if(pointedLinkIdx === i)
-          text += 'hover '
-        if(focusLinkIdx === i)
-          text += 'focus '
-        text += '" href="' + i.toString(10) + '">' + linkText + linkTail + '</a>'
+        text += getLinkAnchor(i, pointedLinkIdx, focusLinkIdx)
+        text += linkText + linkTail + '</a>'
       }
       text += '</div>';
     }
@@ -187,7 +210,7 @@ FocusScope {
     textFormat: Text.RichText
     text: {
       // The hovered link is determined by layoutText
-      var pointedLinkIdx = layoutText.hoveredLink ? parseInt(layoutText.hoveredLink) : -1
+      var pointedLinkIdx = layoutText.hoveredLink ? parseInt(layoutText.hoveredLink) : noLinkIdx
       return buildHtml(pointedLinkIdx, focusCueLinkIdx)
     }
     // Bind in all properties that the parent could control from layoutText
@@ -214,16 +237,22 @@ FocusScope {
       // This is key - we never pass a pointed link index when building the HTML
       // for the layout text.  As a result, it doesn't depend on the highlighted
       // link, which eliminates the binding loops.
-      return buildHtml(-1, -1)
+      return buildHtml(noLinkIdx, noLinkIdx)
     }
 
     onLinkActivated: {
       var linkIdx = parseInt(link)
-      // Focus the tab stop for this link
-      var linkTabstop = linkTabstopRepeater.itemAt(linkIdx)
-      if(linkTabstop)
-        linkTabstop.forceActiveFocus(Qt.MouseFocusReason)
-      links[linkIdx].clicked()
+      if(linkIdx == embedLinkIdx) {
+        embedLinkTabstop.forceActiveFocus(Qt.MouseFocusReason)
+        embedLinkClicked()
+      }
+      else if(linkIdx >= 0) {
+        // Focus the tab stop for this link
+        var linkTabstop = linkTabstopRepeater.itemAt(linkIdx)
+        if(linkTabstop)
+          linkTabstop.forceActiveFocus(Qt.MouseFocusReason)
+        links[linkIdx].clicked()
+      }
     }
   }
 
@@ -244,6 +273,40 @@ FocusScope {
   // keyboard.  They fill the entire message as a relatively-sane default.
   // This isn't perfect if the item has multiple links, but we don't have a
   // great way to get the links' actual positions.
+
+  // This item is for the embedded link, if there is one
+  Item {
+    id: embedLinkTabstop
+    anchors.fill: parent
+    activeFocusOnTab: true
+
+    readonly property string embedLinkText: {
+      let startBracketPos = messageWithLinks.message.indexOf('[[')
+      let endBracketPos = messageWithLinks.message.indexOf(']]')
+      if(startBracketPos == -1 || endBracketPos == -1)
+        return ""
+
+      return messageWithLinks.message.slice(startBracketPos+2, endBracketPos)
+    }
+
+    visible: !!embedLinkText
+    NativeAcc.Link.name: embedLinkText
+    NativeAcc.Link.onActivated: messageWithLinks.embedLinkClicked()
+
+    readonly property bool showFocusCue: embedLinkFocusCue.show
+    OutlineFocusCue {
+      id: embedLinkFocusCue
+      anchors.fill: parent
+      control: embedLinkTabstop
+    }
+
+    Keys.onPressed: {
+      if(KeyUtil.handleButtonKeyEvent(event)) {
+        embedLinkFocusCue.reveal()
+        messageWithLinks.embedLinkClicked()
+      }
+    }
+  }
   Repeater {
     id: linkTabstopRepeater
     // QML seems to not propagate the 'clicked' property of the links when they

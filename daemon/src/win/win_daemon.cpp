@@ -401,12 +401,12 @@ WinDaemon::WinDaemon(QObject* parent)
     _clientMemTraceTimer.setInterval(msec(std::chrono::minutes(5)));
     connect(&_clientMemTraceTimer, &QTimer::timeout, this, &WinDaemon::traceClientMemory);
 
-    connect(this, &WinDaemon::firstClientConnected, this, [this]()
+    connect(this, &WinDaemon::daemonActivated, this, [this]()
     {
         _clientMemTraceTimer.start();
         traceClientMemory();
     });
-    connect(this, &WinDaemon::lastClientDisconnected, this, [this]()
+    connect(this, &WinDaemon::daemonDeactivated, this, [this]()
     {
         _clientMemTraceTimer.stop();
     });

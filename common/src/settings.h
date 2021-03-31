@@ -823,11 +823,127 @@ public:
     // This field isn't used for manually-browsed executables, and it isn't used
     // on any other platform.
     JsonField(QString, linkTarget, {})
-    // The mode is for forward compatibility - currently "exclude" is the only
-    // supported mode.  Rules with any other mode are ignored.
-    JsonField(QString, mode,QStringLiteral("exclude"))
+    // The behavior to apply for this rule.  The terminology is historical:
+    // - "exclude" = Bypass VPN (exclude from VPN)
+    // - "include" = Only VPN
+    JsonField(QString, mode, QStringLiteral("exclude"), { "exclude", "include" })
 };
 
+// Automation rules
+//
+// Automation rules are composed of a "condition" and an "action".  The
+// condition determines when the rule applies, and at that point the action is
+// applied.
+class COMMON_EXPORT AutomationRuleAction : public NativeJsonObject,
+    public DebugTraceable<AutomationRuleAction>
+{
+    Q_OBJECT
+public:
+    AutomationRuleAction() {}
+    AutomationRuleAction(const AutomationRuleAction &other) {*this = other;}
+    AutomationRuleAction &operator=(const AutomationRuleAction &other)
+    {
+        connection(other.connection());
+        return *this;
+    }
+
+    bool operator==(const AutomationRuleAction &other) const
+    {
+        return connection() == other.connection();
+    }
+    bool operator!=(const AutomationRuleAction &other) const {return !(*this == other);}
+
+public:
+    void trace(QDebug &dbg) const;
+
+    // What to do with the VPN connection when this rule applies:
+    // - "enable" - enable the VPN (connect)
+    // - "disable" - disable the VPN (disconnect)
+    JsonField(QString, connection, "enable", { "enable", "disable" })
+};
+
+// Conditions have both a "network type" and "SSID" to implement the different
+// types of rules created from the UI.  Empty or 'null' for any criterion means
+// any network matches.
+//
+// The UI does not allow setting more than one criterion on a given condition
+// (only one criterion can be non-null).  The backend applies all non-null
+// criteria; if more than one was non-null then they would all have to match to
+// trigger a rule.
+class COMMON_EXPORT AutomationRuleCondition : public NativeJsonObject,
+    public DebugTraceable<AutomationRuleCondition>
+{
+    Q_OBJECT
+
+public:
+    AutomationRuleCondition() {}
+    AutomationRuleCondition(const AutomationRuleCondition &other) {*this = other;}
+    AutomationRuleCondition &operator=(const AutomationRuleCondition &other)
+    {
+        ruleType(other.ruleType());
+        ssid(other.ssid());
+        return *this;
+    }
+
+    bool operator==(const AutomationRuleCondition &other) const
+    {
+        return ruleType() == other.ruleType() &&
+            ssid() == other.ssid();
+    }
+    bool operator!=(const AutomationRuleCondition &other) const {return !(*this == other);}
+
+public:
+    void trace(QDebug &dbg) const;
+
+    // Rule type - determines what networks this condition matches
+    // - "openWifi" - any unencrypted Wi-Fi network
+    // - "protectedWifi" - any encrypted Wi-Fi network
+    // - "wired" - any wired network
+    // - "ssid" - Wi-Fi network with specified SSID (AutomationCondition::ssid())
+    //
+    // In some cases, the current network may be of a type that's not
+    // supported (such as mobile data, Bluetooth or USB tethering to a phone,
+    // etc.)  No network type is currently defined for these networks.
+    JsonField(QString, ruleType, {}, { "openWifi", "protectedWifi", "wired", "ssid" })
+
+    // Wireless SSID - if set, only wireless networks with the given SSID will
+    // match.
+    //
+    // Only SSIDs that are printable UTF-8 or Latin-1 can be matched, other
+    // SSIDs cannot be represented as text.  We do not distinguish between
+    // UTF-8 and Latin-1 encodings of the same text.
+    // See NetworkConnection::ssid().
+    JsonField(QString, ssid, {})
+};
+
+class COMMON_EXPORT AutomationRule : public NativeJsonObject,
+    public DebugTraceable<AutomationRule>
+{
+    Q_OBJECT
+
+public:
+    AutomationRule() {}
+    AutomationRule(const AutomationRule &other) {*this = other;}
+    AutomationRule &operator=(const AutomationRule &other)
+    {
+        condition(other.condition());
+        action(other.action());
+        return *this;
+    }
+
+    bool operator==(const AutomationRule &other) const
+    {
+        return condition() == other.condition() &&
+            action() == other.action();
+    }
+    bool operator!=(const AutomationRule &other) const {return !(*this == other);}
+
+public:
+    void trace(QDebug &dbg) const;
+
+    JsonObjectField(AutomationRuleCondition, condition, {})
+    JsonObjectField(AutomationRuleAction, action, {})
+};
 
 // Class encapsulating 'settings' properties of the daemon; these are the
 // only properties the user is allowed to directly manipulate, and describe
@@ -951,6 +1067,12 @@ public:
 
     // Subnets (both ipv4 and ipv6) to exclude from VPN
     JsonField(QVector<SplitTunnelSubnetRule>, bypassSubnets, {})
+
+    // Whether automation rules are enabled or not.
+    JsonField(bool, automationEnabled, {})
+    // Automation rules.  Initially there are no rules (not even general rules,
+    // these can be created by the user).
+    JsonField(std::vector<AutomationRule>, automationRules, {})
 
     // Whether to use the WireGuard kernel module on Linux, if it's available.
     // If false, uses wireguard-go method instead, even if the kernel module is
@@ -1496,6 +1618,10 @@ public:
     // transitions from "VPN Disconnected" to "VPN Connected" once the snooze ends
     JsonField(qint64, snoozeEndTime, -1)
 
+    // If split tunnel is not available, this is set to a list of reasons.
+    // The reasons are listed in SettingsMessages.qml along with their UI text.
+    // (For example - "libnl_invalid" is set if the libnl libraries can't be
+    // loaded on Linux.)
     JsonField(std::vector<QString>, splitTunnelSupportErrors, {})
 
     // On Mac/Linux, the name of the tunnel device being used.  Set during the
@@ -1514,6 +1640,45 @@ public:
     JsonField(bool, wireguardKernelSupport, false)
     // The DNS servers prior to connecting
     JsonField(std::vector<quint32>, existingDNSServers, {})
+
+    // Automation rules - indicates which rule has triggered, which rule
+    // currently matches, the rule that could be created for the current
+    // network, etc.
+
+    // If automation rules aren't available, this is set to a list of reasons.
+    // The possible reasons are a subset of those used for
+    // splitTunnelSupportErrors; the same text from SettingsMessages is used in
+    // the UI.
+    JsonField(std::vector<QString>, automationSupportErrors, {})
+
+    // The rule that caused the last VPN connection transition, if there is one.
+    // If the last transition was manual instead (connect button, snooze, etc.),
+    // this is 'null'.
+    //
+    // This is a complete Rule with both action and condition
+    JsonField(Optional<AutomationRule>, automationLastTrigger, {})
+
+    // The rule that matches the current network, even if it didn't cause a
+    // transition or the VPN connection was transitioned manually since then.
+    // Causes the "connected" indicator to appear in Settings.
+    //
+    // This is a rule that exists in DaemonSettings::automationRules.  If there
+    // is no custom rule for the current network, it can be a general rule if
+    // there is one that matches.
+    //
+    // If there is no network connection, or if the current connection does not
+    // match any general rule, it is 'null'.  (This is the case for connections
+    // of unknown type, which can't match any rule.)
+    JsonField(Optional<AutomationRule>, automationCurrentMatch, {})
+
+    // These are rule conditions for wireless networks that are currently
+    // connected.  Note that there can in principle be more than one of these
+    // (if the device has multiple Wi-Fi interfaces), and these may not be the
+    // default network (if, say, Ethernet is also connected).
+    //
+    // Conditions are populated for each connected wireless network, even if
+    // rules already exist for them.
+    JsonField(std::vector<AutomationRuleCondition>, automationCurrentNetworks, {})
 };
 
 

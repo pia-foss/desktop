@@ -94,10 +94,6 @@ void UidGidProcess::setupChildProcess()
         {
             qWarning("Failed to set group id to %d (%d: %s)", gr->gr_gid, errno, qPrintable(qt_error_string(errno)));
         }
-        else
-        {
-            qInfo().noquote() << "Set group of process" << program() << "to:" << _desiredGroup << "with gid:" << gr->gr_gid;
-        }
     }
 
     if(!_desiredUser.isEmpty())
@@ -110,10 +106,6 @@ void UidGidProcess::setupChildProcess()
         else if(seteuid(pw->pw_uid) == -1 && setuid(pw->pw_uid) == -1)
         {
             qWarning("Failed to set user id to %d (%d: %s)", pw->pw_uid, errno, qPrintable(qt_error_string(errno)));
-        }
-        else
-        {
-            qInfo().noquote() << "Set user of process" << program() << "to:" << _desiredUser << "with uid:" << pw->pw_uid;
         }
     }
 #endif

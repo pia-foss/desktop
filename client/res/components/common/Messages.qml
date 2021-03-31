@@ -19,6 +19,7 @@
 pragma Singleton
 import QtQuick 2.0
 import "../daemon"
+import PIA.NativeHelpers 1.0
 
 // These are general messages that are used in multiple places throughout the
 // app (so they're only translated once).
@@ -58,5 +59,31 @@ QtObject {
     if(chosenLocation)
       return displayLocation(chosenLocation, false)
     return displayLocation(autoLocation, true)
+  }
+
+  function getAutomationRuleName(condition) {
+    switch(condition.ruleType) {
+      case "wired":
+        return uiTr("Wired Connection")
+      case "openWifi":
+        return uiTr("Open Wi-Fi")
+      case "protectedWifi":
+        return uiTr("Protected Wi-Fi")
+      case "ssid":
+        return NativeHelpers.cleanSsidDisplay(condition.ssid)
+      }
+  }
+
+  function getAutomationActionName (connection) {
+    switch(connection) {
+    case "enable":
+      //: This is an action that is performed automatically by an automation rule
+      return uiTr("Connect");
+    case "disable":
+      //: This is an action that is performed automatically by an automation rule
+      return uiTr("Disconnect");
+    default:
+      return "Unknown";
+    }
   }
 }

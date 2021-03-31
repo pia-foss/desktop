@@ -92,7 +92,26 @@ class Executable
     #   :static - The module will be a static library ('.lib'/'.a')
     def initialize(name, type = :executable)
         @name = name
-        @build = Build.new(name)
+    
+        # Hack for Windows - limit component directory name to 30 chars.
+        # The PIA installer executable name can be pretty long for feature
+        # branches when there's also a prerelease tag, etc.  This itself is
+        # fine, but also including that in the component directory name often
+        # exceeds the Windows 260-char path limit.
+        #
+        # Chopping the directory name on Windows is fine, this just assumes that
+        # there won't be two built components in the same build with matching
+        # 30-char prefixes, which is reasonable.
+        buildName = name
+        if Build.windows?
+            buildName = name[0, 30]
+            # Avoid ending in '.' - this isn't a valid directory name in
+            # Windows.  It seems to just ignore it, but avoid it anyway for
+            # robustness.
+            buildName.chomp!('.') while buildName.end_with?('.')
+        end
+        @build = Build.new(buildName)
+        
         @macros = []
         @includeDirs = []
         @libPaths = []

@@ -162,6 +162,7 @@ Item {
 
       message: status.message
       links: status.links
+      embedLinkClicked: status.embedLinkClicked
       linkColor: severityLinkColors[status.severity]
       linkHoverColor: severityLinkHoverColors[status.severity]
       linkFocusColor: Theme.dashboard.notificationBackgroundColor

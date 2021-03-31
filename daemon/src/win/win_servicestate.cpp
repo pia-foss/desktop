@@ -167,7 +167,7 @@ void CALLBACK WinServiceState::serviceNotifyCallback(void *pParam)
 
 WinServiceState::WinServiceState(std::wstring serviceName, DWORD startStopRights)
     : _startStopRights{startStopRights}, _lastState{State::Deleted},
-      _serviceName{std::move(serviceName)}
+      _lastPid{0}, _serviceName{std::move(serviceName)}
 {
     startNotifications();
 }

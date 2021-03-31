@@ -33,6 +33,14 @@ Rectangle {
   // Size of the border
   property int borderSize: 2
 
+  property string iconName: ""
+
+  // Description of icon for screenreaders
+  property string iconDescription: ""
+  readonly property bool hasIcon: iconName.length > 0
+  property int iconWidth: 24
+  property int iconHeight: 24
+
   // The button can have multiple labels.  Specifying all the labels (rather
   // than binding just a single label to multiple values) allows the button to
   // size itself such that any label will fit (the button will not resize when
@@ -110,8 +118,8 @@ Rectangle {
         return maxTextWidth
       }
 
-      height: calcMaxLabelSize('contentHeight')
-      width: calcMaxLabelSize('contentWidth')
+      height: calcMaxLabelSize('contentHeight') + (!!hasIcon)*iconHeight
+      width: calcMaxLabelSize('contentWidth') + (!!hasIcon)*iconWidth
       currentIndex: pushButton.currentLabel
 
       Repeater {
@@ -127,13 +135,20 @@ Rectangle {
           text: pushButton.labels[index]
         }
       }
+
+      Image {
+        enabled: hasIcon
+        source: hasIcon ? Theme.settings.buttonIcons[iconName] : ""
+        width: iconWidth
+        height: iconHeight
+      }
     }
   }
 
   ButtonArea {
     id: pushButtonArea
     anchors.fill: parent
-    name: pushButton.labels[pushButton.currentLabel]
+    name: hasIcon ? iconDescription : pushButton.labels[pushButton.currentLabel]
     enabled: pushButton.enabled
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor

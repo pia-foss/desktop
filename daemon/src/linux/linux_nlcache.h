@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("linux_nlcache.h")
-
 #ifndef LINUX_NLCACHE_H
 #define LINUX_NLCACHE_H
 
+#include "common.h"
 #include <memory>
 #include <unordered_map>
 #include "linux_libnl.h"
@@ -137,6 +135,13 @@ public:
 
     virtual ~LinuxNlNtfSock() = default;
 
+private:
+    // libnl callback for valid message
+    int onValidMsg(libnl::nl_msg *pMsg);
+    // libnl callback for finishing a multipart message (called for the
+    // NLMSG_DONE message)
+    int onFinishMsg(libnl::nl_msg *pMsg);
+
 public:
     // Get the notification socket descriptor for use in a blocking wait.
     // When data becomes available, call receive().
@@ -146,17 +151,33 @@ public:
     // poll() call; if an error of any kind was signaled LinuxNlCache throws.
     void receive(int revents);
 
+    // Check if we're currently in the middle of receiving a dump (we have
+    // received at least one multipart message, but haven't received NLMSG_DONE
+    // yet).
+    //
+    // Dump requests shouldn't be sent when we're already receiving a dump -
+    // this may vary by protocol but is known not to work with nl80211 (see
+    // LinuxNl80211Cache).
+    bool inDump() const {return _receivingDump;}
+
 protected:
     // Implement handleMsg() to receive incoming messages.  This can return an
     // error code, which is returned to libnl.  Negative values indicate
     // failure; nonnegative values indicate success.
     virtual int handleMsg(libnl::nl_msg *pMsg) = 0;
 
+    // Implement handleFinish() to receive notifications that a multipart dump
+    // has completed.  Like handleMsg(), this can return an error code.
+    virtual int handleFinish(libnl::nl_msg *pMsg) = 0;
+
     // Take actions after a batch of messages have been received.
     // Whenever receive() is called, it calls this after all messages have been
     // processed (if they are processed successfully).
     // This isn't called if any error occurs (including exceptions from
     // handleMsg()).
+    // Note that this refers to a batch of messages received at once in the
+    // event loop, not a multipart message - we _can_ be in the middle of a
+    // multipart message at this point (see inDump() / handleFinish()).
     virtual void handleMsgBatchEnd() {}
 
     // Add or remove a notification group membership
@@ -169,6 +190,9 @@ protected:
 
 private:
     NlUniquePtr<libnl::nl_sock> _pNtfSock;
+    // Whether we're currently in the middle of a dump - enabled when we receive
+    // any multipart message, disabled on NLMSG_DONE.
+    bool _receivingDump;
 };
 
 // LinuxNlCacheSock opens a netlink socket that can receive notifications for
@@ -190,6 +214,8 @@ private:
 
     // handleMsg() parses a message and applies it to the appropriate cache.
     virtual int handleMsg(libnl::nl_msg *pMsg) override;
+
+    virtual int handleFinish(libnl::nl_msg *) override {return NL_OK;}
 
 public:
     // Add a new cache using this notification socket.

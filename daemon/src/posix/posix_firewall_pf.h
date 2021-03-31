@@ -65,6 +65,9 @@ public:
     // Update the DNS stub used when blocking DNS
     static void setMacDnsStubMethod(const QString &macDnsStubMethod);
     static bool setDnsStubEnabled(bool enabled);
+
+    // Flush firewall state
+    static void flushState();
 };
 
 #endif

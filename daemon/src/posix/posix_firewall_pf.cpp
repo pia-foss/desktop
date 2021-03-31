@@ -343,4 +343,9 @@ bool PFFirewall::setDnsStubEnabled(bool enabled)
     return getStubDns().enable(enabled);
 }
 
+void PFFirewall::flushState()
+{
+    execute(QStringLiteral("pfctl -F states"));
+}
+
 #endif

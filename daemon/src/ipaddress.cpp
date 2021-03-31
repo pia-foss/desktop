@@ -20,33 +20,6 @@
 #include "ipaddress.h"
 #include <array>
 
-namespace
-{
-    // All IPv4 LAN and loopback subnets
-    using SubnetPair = QPair<QHostAddress, int>;
-    std::array<SubnetPair, 5> ipv4LocalSubnets{
-        QHostAddress::parseSubnet(QStringLiteral("192.168.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("172.16.0.0/12")),
-        QHostAddress::parseSubnet(QStringLiteral("10.0.0.0/8")),
-        QHostAddress::parseSubnet(QStringLiteral("169.254.0.0/16")),
-        QHostAddress::parseSubnet(QStringLiteral("127.0.0.0/8"))
-    };
-
-    // The modern infrastructure DNS range
-    SubnetPair modernInfraDns{QHostAddress::parseSubnet(QStringLiteral("10.0.0.240/29"))};
-}
-
-bool isIpv4Local(const QHostAddress &addr)
-{
-    return std::any_of(ipv4LocalSubnets.begin(), ipv4LocalSubnets.end(),
-        [&](const SubnetPair &subnet) {return addr.isInSubnet(subnet);});
-}
-
-bool isModernInfraDns(const QHostAddress &addr)
-{
-    return addr.isInSubnet(modernInfraDns);
-}
-
 Ipv4Address::Ipv4Address(const QString &address)
     : Ipv4Address{}
 {

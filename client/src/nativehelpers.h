@@ -202,6 +202,11 @@ public:
 
     void openUrl (const QString &path, const QJsonObject &queryItems);
 
+    // Clean an SSID for display in the client - just replaces any control
+    // characters with spaces.  Mainly used because '\n' causes display
+    // problems.
+    Q_INVOKABLE QString cleanSsidDisplay(const QString &ssid);
+
 signals:
     // Emitted when the application loses focus (no window in the application is
     // focused).

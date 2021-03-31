@@ -68,6 +68,25 @@ int ownedIntValue(const OwnedInt &value)
 
 using NullableInt = nullable_t<OwnedInt>;
 
+// PostiveInt just throws if constructed with a value <= 0; used to test
+// exception safety of nullable_t::emplace()
+class PositiveInt
+{
+public:
+    PositiveInt(int i)
+        : _i{i}
+    {
+        if(_i <= 0)
+            throw Error{HERE, Error::Code::Unknown};
+    }
+public:
+    int value() const {return _i;}
+private:
+    int _i;
+};
+
+using NullablePositive = nullable_t<PositiveInt>;
+
 class tst_nullable_t : public QObject
 {
     Q_OBJECT
@@ -263,6 +282,34 @@ private slots:
         QVERIFY(value.get().value() == 56);
         // Prior value must have been destroyed
         QVERIFY(OwnedInt::takeLastDestroyedValue() == 71);
+    }
+
+    // Test emplace in the presence of exceptions
+    void verifyConstructException()
+    {
+        NullablePositive value;
+        value.emplace(17);
+        QVERIFY(!!value);
+        QVERIFY(value.get().value() == 17);
+
+        // Try to emplace over it, but the new value throws
+        QVERIFY_EXCEPTION_THROWN(value.emplace(-1), Error);
+        QVERIFY(!value);    // Now empty due to throw in emplace()
+
+        // Emplacing over an empty nullable should also remain empty
+        NullablePositive empty;
+        QVERIFY_EXCEPTION_THROWN(empty.emplace(-2), Error);
+        QVERIFY(!empty);    // Still empty
+
+        // Try to assign over the value, but the new value throws.
+        // nullable_t doesn't provide a "forwarding" operator=(), so the
+        // exception is thrown before its operator=() is called, preserving its
+        // value.
+        value.emplace(1997);
+        QVERIFY(value.get().value() == 1997);
+        QVERIFY_EXCEPTION_THROWN(value = -2006, Error);
+        QVERIFY(!!value);   // Still holds prior value
+        QVERIFY(value.get().value() == 1997);
     }
 };
 

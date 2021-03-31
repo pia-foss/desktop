@@ -29,10 +29,18 @@ import "./notifications"
 Item {
   implicitHeight: notifications.y + notifications.height
 
+  ActiveRuleDisplay {
+    id: activeRuleDisplay
+    height: enabled ? 34 : 0
+    width: parent.width
+    visible: enabled
+  }
+
   // Place margins around the connect button (the connect button sizes itself)
   Item {
     id: buttonWrapper
     width: parent.width
+    anchors.top: activeRuleDisplay.bottom
     height: cb.height + 2*Theme.dashboard.connectButtonVMarginPx
 
     ConnectButton {

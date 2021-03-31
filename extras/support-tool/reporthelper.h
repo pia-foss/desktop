@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-﻿#include "payloadbuilder.h"
+#include "payloadbuilder.h"
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>

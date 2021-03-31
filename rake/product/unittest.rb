@@ -17,6 +17,7 @@ module PiaUnitTest
         'linebuffer',
         'localsockets',
         'nearestlocations',
+        'networkmonitor',
         'nodelist',
         'nullable_t',
         'originalnetworkscan',
@@ -32,7 +33,13 @@ module PiaUnitTest
         'updatedownloader',
         'vpnmethod',
         'wireguarduapi'
-    ].tap { |t| t << 'wfp_filters' if Build.windows? }
+    ].tap do |t|
+        if Build.windows?
+            t << 'wfp_filters'
+        elsif Build.linux?
+            t << 'splitdnsinfo'
+        end
+    end
 
     def self.defineTargets(version, artifacts)
         # The all-tests-lib library compiles all client and daemon code once to
@@ -107,6 +114,7 @@ module PiaUnitTest
             elsif(Build.macos?)
                 testExec
                     .framework('AppKit')
+                    .framework('CoreWLAN')
                     .framework('Security')
                     .framework('ServiceManagement')
                     .framework('SystemConfiguration') # Daemon dependencies
@@ -194,6 +202,7 @@ module PiaUnitTest
         listing = coverageBuild.artifact('unittest_listing.txt')
         report = coverageBuild.artifact('unittest_report.txt')
         coverage = coverageBuild.artifact('unittest_coverage.json')
+        fileCoverage = coverageBuild.artifact('file_coverage.json')
         summaryJson = coverageBuild.artifact('pia_unittest_summary.json')
         # toolchainPath() is only provided by the clang toolchain; MSVC always
         # has coverageAvailable? == false so we won't do this for MSVC.
@@ -227,6 +236,28 @@ module PiaUnitTest
         file coverage => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage JSON export"
             sh "#{llvmCov} export -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
+        end
+
+        file fileCoverage => [coverage, coverageBuild.componentDir] do |t|
+            # Read the exported JSON and generate the code coverage summary
+            covData = JSON.parse(File.read(coverage))
+
+            if(covData['data'].length != 1)
+                raise "Expected one coverage object, found #{covData['data'].length}"
+            end
+
+            # The relevant source directories for code coverage
+            srcDirs = ['client/src', 'common/src', 'daemon/src'].map{ |d| File.absolute_path(d) }
+
+            json = covData['data'][0]['files']
+                .select { |v| srcDirs.any? { |d| v["filename"].start_with?(d) } }
+                .map { |v| [File.basename(v["filename"]), v['summary']['lines']['covered'],  v['summary']['lines']['count']] }
+                .sort_by { |v| -v[1] }
+                .each_with_object({}) { |v, o| o[v[0]] = [v[1], v[2]] }.to_json
+
+            # Outputs a json file of the form: ["filename", lines_covered, line_count]
+            # This aids us in debugging test covereage between platforms
+            File.write(fileCoverage, json)
         end
 
         file summaryJson => [coverage, coverageBuild.componentDir] do |t|
@@ -274,7 +305,27 @@ module PiaUnitTest
             File.write(summaryJson, JSON.generate(platformCounts))
         end
 
-        task :coverage => [merged, listing, report, coverage, summaryJson]
+        task :coverage => [merged, listing, report, coverage, fileCoverage, summaryJson]
+
+        # The aim of this task is to locate and understand differences in test coverage between platforms
+        # Run this on the file_coverage.json build artifacts from two different platforms
+        desc "Perform a diff of two file_coverage.json files: rake coverage_diff file_coverage1.json file_coverage2.json"
+        task :coverage_diff do
+            # horrible hack to work around Rake argument limitations
+            ARGV.each { |a| task a.to_sym do ; end }
+            platformCov1 = JSON.load(File.read(ARGV[1]))
+            platformCov2 = JSON.load(File.read(ARGV[2]))
+
+            # Output is a json document with keys being the files with differing
+            # coverage b/w the two platforms (if coverage is the same, we omit it from the output).
+            # The values are tuples with the first element the difference in coverage
+            # for that file, and the second element being the difference in total lines reported to be in that file.
+            # The difference is calculated by arg1 - arg2
+            Set.new(platformCov1.keys).intersection(platformCov2.keys)
+                .each_with_object({}) { |v, o| o[v] = [platformCov1[v][0] - platformCov2[v][0], platformCov1[v][1] - platformCov2[v][1]] }
+                .select { |k, v| v != [0, 0] }
+                .tap { |v| pp v }
+        end
 
         # Preserve all the coverage artifacts
         artifacts.install(merged, 'coverage/')
@@ -282,5 +333,6 @@ module PiaUnitTest
         artifacts.install(report, 'coverage/')
         artifacts.install(coverage, 'coverage/')
         artifacts.install(summaryJson, 'coverage/')
+        artifacts.install(fileCoverage, 'coverage/')
     end
 end

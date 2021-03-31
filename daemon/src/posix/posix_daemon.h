@@ -84,9 +84,11 @@ private:
         });
     }
 
-    // Check whether the host supports split tunnel and record errors
-    // This function will also attempt to create the net_cls VFS on Linux if it doesn't exist
-    void checkSplitTunnelSupport();
+    // Check whether the host supports advanced features (split tunnel,
+    // automation) and record errors.
+    // This function will also attempt to create the net_cls VFS on Linux if it
+    // doesn't exist
+    void checkFeatureSupport();
 
     void onAboutToConnect();
 

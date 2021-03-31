@@ -56,10 +56,16 @@ FocusScope {
   readonly property var currentValue: setting ? setting.currentValue : undefined
   readonly property int labelHeight: label === "" ? 0 : text.contentHeight + 5
 
+  property bool hasConfigureButton: false
+  property string configureButtonHelp: ""
+
   // activated - Emitted when a selection is made in the combo box after
   // updating setting.currentValue.  Only emitted if the current value actually
   // changes.
   signal activated
+
+  // configureClicked - Emitted when a valid configure button is clicked
+  signal configureClicked
 
   width: parent.width;
   implicitWidth: control.implicitWidth
@@ -157,6 +163,24 @@ FocusScope {
     tipText: warning || info
     visible: warning || info
     icon: warning ? icons.warning : icons.settings
+  }
+
+  PushButton {
+    anchors.left: control.right
+    anchors.verticalCenter: control.verticalCenter
+    anchors.leftMargin: 5
+    iconName: "configure"
+    visible: hasConfigureButton
+    iconDescription: configureButtonHelp
+    minWidth: 26
+    height: 26
+    minEndMargin: 0
+    iconWidth: 30
+    iconHeight: 30
+
+    onClicked: {
+      root.configureClicked()
+    }
   }
 
   Component.onCompleted: {

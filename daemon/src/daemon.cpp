@@ -314,8 +314,13 @@ void SubnetBypass::updateRoutes(const FirewallParams &params)
     // - bypassing isn't already the default behavior
     // - the netScan is valid
     bool shouldBeEnabled = params.enableSplitTunnel &&
+// We want bypass routes to continue to exist on macos even when disconnected - this is so
+// they override the split tunnel routes.
+// Also bypassDefaultApps doesn't prevent the split tunnel routes existing on macos, so we ignore that too.
+#ifndef Q_OS_MACOS
                            params.hasConnected &&
                            !params.bypassDefaultApps &&
+#endif
                            params.netScan.ipv4Valid();
 
     qInfo() << "SubnetBypass:" << stateChangeString(_isEnabled, shouldBeEnabled);
@@ -626,7 +631,7 @@ Daemon::Daemon(QObject* parent)
     connect(&_modernRegionMetaRefresher, &JsonRefresher::overrideFailed, this,
             [this](){Daemon::setOverrideFailed(QStringLiteral("modern regions meta"));});
 
-    connect(this, &Daemon::firstClientConnected, this, [this]() {
+    connect(this, &Daemon::daemonActivated, this, [this]() {
         // Reset override states since we are (re)activating
         _state.overridesFailed({});
         _state.overridesActive({});
@@ -656,10 +661,15 @@ Daemon::Daemon(QObject* parent)
         // Refresh metadata right away too
         RPC_refreshMetadata();
 
+        // Check the active automation rule and apply it if needed - the only
+        // action that can be relevant here is "connect", since we can't be
+        // connected when inactive
+        applyCurrentAutomationRule();
+
         queueNotification(&Daemon::reapplyFirewallRules);
     });
 
-    connect(this, &Daemon::lastClientDisconnected, this, [this]() {
+    connect(this, &Daemon::daemonDeactivated, this, [this]() {
         _updateDownloader.run(false, _environment.getUpdateApi());
         _shadowsocksRefresher.stop();
         _modernRegionRefresher.stop();
@@ -713,10 +723,20 @@ Daemon::Daemon(QObject* parent)
                                                     _data.betaChannelOsRequired()},
                                              _data.flags());
 
+    connect(&_settings, &DaemonSettings::automationRulesChanged, this,
+            [this]()
+            {
+                _automation.setRules(_settings.automationRules());
+            });
+    _automation.setRules(_settings.automationRules());
+
+    connect(&_automation, &Automation::ruleTriggered, this,
+            &Daemon::onAutomationRuleTriggered);
+
     queueApplyFirewallRules();
 
     if(isActive()) {
-        emit firstClientConnected();
+        emit daemonActivated();
     }
 #if defined(Q_OS_MAC)
     _pNetworkMonitor = createMacNetworks();
@@ -731,7 +751,11 @@ Daemon::Daemon(QObject* parent)
         connect(_pNetworkMonitor.get(), &NetworkMonitor::networksChanged, this,
                 &Daemon::onNetworksChanged);
         onNetworksChanged(_pNetworkMonitor->getNetworks());
+
+        connect(_pNetworkMonitor.get(), &NetworkMonitor::networksChanged,
+                &_automation, &Automation::setNetworks);
     }
+    // TODO - otherwise, need to indicate that automation rules are not available
 
     // Only keep the last 5 daemon crash dumps.
     // This is important as in rare circumstances the daemon could go into a
@@ -819,15 +843,16 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
     }
 
     bool wasActive = isActive();
+    bool wasAutomationEnabled = _settings.automationEnabled();
 
     bool success = _settings.assign(settings);
 
     if(isActive() && !wasActive) {
         qInfo () << "Going active after settings changed";
-        emit firstClientConnected();
+        emit daemonActivated();
     } else if (wasActive && !isActive()) {
         qInfo () << "Going inactive after settings changed";
-        emit lastClientDisconnected();
+        emit daemonDeactivated();
     }
 
     // If the settings affect location choices, rebuild locations from servers
@@ -873,13 +898,41 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
         {
             qInfo() << "Reconnecting due to setting change with reconnectIfNeeded=true";
             Q_ASSERT(isActive());   // Class invariant, vpnEnabled() is cleared when inactive
-            RPC_connectVPN();
+
+            // Keep the last automation trigger if there is one when
+            // reconnecting this way.  Currently, this only happens when
+            // changing locations from the GUI while already connected.  This
+            // isn't presented as a "connect" action, so the connection state
+            // should still reflect the automation trigger.  All other
+            // connection sources clear or update the trigger.
+            auto automationLastTrigger = _state.automationLastTrigger();
+            Error err = connectVPN();
+            _state.automationLastTrigger(automationLastTrigger);
+            if(err)
+            {
+                // This is unlikely since the VPN was already enabled, if it
+                // does happen somehow just trace it.
+                qWarning() << "Unable to reconnect to apply settings:" << err;
+            }
         }
         else
         {
             qInfo() << "Setting change had reconnectIfNeeded=true, but no reconnect was needed - enabled:"
                 << _state.vpnEnabled() << "- needsReconnect:" << _connection->needsReconnect();
         }
+    }
+
+    // If automation was just disabled, clear the current trigger rule (but
+    // don't change stage).  Although the current connection/disconnection was
+    // caused by a trigger, it's odd if this stays around, and there's no way to
+    // clear it other than manually disconnecting or connecting.
+    if(wasAutomationEnabled && !_settings.automationEnabled())
+        _state.automationLastTrigger({});
+    // If automation was just enabled, apply the current rule.
+    if(!wasAutomationEnabled && _settings.automationEnabled())
+    {
+        qInfo() << "Apply current automation rule due to enabling automation";
+        applyCurrentAutomationRule();
     }
 }
 
@@ -1026,16 +1079,11 @@ void Daemon::RPC_dismissDedicatedIpChange()
 
 void Daemon::RPC_connectVPN()
 {
-    // Cannot connect when no active client is connected (there'd be no way for
-    // the daemon to know if the user logs out, etc.)
-    if(!isActive())
-        throw Error{HERE, Error::Code::DaemonRPCDaemonInactive};
-    // Cannot connect when not logged in
-    if(!_account.loggedIn())
-        throw Error{HERE, Error::Code::DaemonRPCNotLoggedIn};
-
-    _snoozeTimer.forceStopSnooze();
-    connectVPN();
+    Error err = connectVPN();
+    // If we can't connect now (not logged in or daemon is inactive), forward
+    // the error to the client.  The CLI has specific support for these errors.
+    if(err)
+        throw err;
 
     // Increment the session counter, if ratings_1 flag is set
     if(_data.hasFlag(QStringLiteral("ratings_1")) &&
@@ -1048,7 +1096,8 @@ void Daemon::RPC_connectVPN()
 
 void Daemon::RPC_disconnectVPN()
 {
-    _snoozeTimer.forceStopSnooze();
+    // There's no additional logic needed for a manual disconnect.  This can't
+    // fail, we don't count these, etc.
     disconnectVPN();
 }
 
@@ -1127,9 +1176,18 @@ void DiagnosticsFile::writeCommand(const QString &commandName,
                                    const QStringList &args,
                                    const ProcessOutputFunction &processOutput)
 {
-    QProcess cmd;
+    UidGidProcess cmd;
     cmd.setArguments(args);
     cmd.setProgram(command);
+    // Drop the "piavpn" group for diagnostic processes on Linux/Mac - there are
+    // firewall rules to specifically permit piavpn, and the ping/dig tests are
+    // intended to indicate the behavior of non-PIA processes.  This is ignored
+    // on Windows.
+#if defined(Q_OS_MAC)
+    cmd.setGroup(QStringLiteral("staff"));
+#elif defined(Q_OS_LINUX)
+    cmd.setGroup(QStringLiteral("root"));
+#endif
     execAndWriteOutput(cmd, commandName, processOutput);
 }
 
@@ -1327,7 +1385,7 @@ void Daemon::RPC_notifyClientActivate()
     pClient->setActive(true);
 
     if(!wasActive && isActive())
-        emit firstClientConnected();
+        emit daemonActivated();
 }
 
 void Daemon::RPC_notifyClientDeactivate()
@@ -1361,7 +1419,7 @@ void Daemon::RPC_notifyClientDeactivate()
 
     // If it was the last interactive client, shut down
     if(!isActive())
-        emit lastClientDisconnected();
+        emit daemonDeactivated();
 }
 
 Async<void> Daemon::RPC_emailLogin(const QString &email)
@@ -1392,6 +1450,9 @@ Async<void> Daemon::RPC_setToken(const QString &token)
                 _account.openvpnPassword(token.right(token.length() - (token.length() / 2)));
                 _account.assign(account);
                 _account.loggedIn(true);
+                // We're now logged in, apply automation rules if they already
+                // exist.
+                applyCurrentAutomationRule();
             })
             ->except(this, [](const Error& error) {
                 throw error;
@@ -1430,6 +1491,9 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
                             _account.openvpnPassword(token.right(token.length() - (token.length() / 2)));
                             _account.assign(account);
                             _account.loggedIn(true);
+                            // We're now logged in, apply automation rules if
+                            // they already exist.
+                            applyCurrentAutomationRule();
                         });
             })
             ->except(this, [this, username, password](const Error& error) {
@@ -1443,6 +1507,9 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
                 _account.openvpnUsername(username);
                 _account.openvpnPassword(password);
                 _account.loggedIn(true);
+                // We're now logged in, apply automation rules if they already
+                // exist.
+                applyCurrentAutomationRule();
             })
             .abortable();
     return _pLoginRequest;
@@ -1645,7 +1712,7 @@ void Daemon::clientConnected(IPCConnection* connection)
                     _state.invalidClientExit(true);
                 }
                 // This causes the daemon to remain active (we don't emit
-                // lastClientDisconnected())
+                // daemonDeactivated())
                 Q_ASSERT(isActive());
             }
         }
@@ -2369,11 +2436,18 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
     // Relevant only to macOS
     QString macosPrimaryServiceKey;
 
+    // Automation rule conditions representing any currently connected wireless
+    // networks
+    std::vector<AutomationRuleCondition> wifiNetworkConditions;
+
     int netIdx=0;
     for(const auto &network : networks)
     {
         qInfo() << "Network" << netIdx;
         qInfo() << " - itf:" << network.networkInterface();
+        qInfo() << " - med:" << traceEnum(network.medium());
+        qInfo() << " - enc:" << network.wifiEncrypted();
+        qInfo() << " - ssid:" << network.wifiSsid();
         qInfo() << " - def4:" << network.defaultIpv4();
         qInfo() << " - def6:" << network.defaultIpv6();
         qInfo() << " - gw4:" << network.gatewayIpv4();
@@ -2427,6 +2501,14 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
             else
                 defaultConnection.ipAddress6({});
         }
+
+        if(!network.wifiSsid().isEmpty())
+        {
+            wifiNetworkConditions.push_back({});
+            wifiNetworkConditions.back().ruleType(QStringLiteral("ssid"));
+            wifiNetworkConditions.back().ssid(network.wifiSsid());
+        }
+
         ++netIdx;
     }
 
@@ -2439,6 +2521,8 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
 
     // Relevant only to macOS
     _state.macosPrimaryServiceKey(macosPrimaryServiceKey);
+
+    _state.automationCurrentNetworks(std::move(wifiNetworkConditions));
 
     // Emit this here so it'll run callbacks before firewall rules update
     emit networksChanged();
@@ -3314,20 +3398,149 @@ void Daemon::logRoutingTable()
 #endif
 }
 
-void Daemon::connectVPN()
+void Daemon::applyCurrentAutomationRule()
 {
+    if(!_state.automationCurrentMatch())
+    {
+        qInfo() << "No automation rule is active, nothing to do";
+        return;
+    }
+
+    if(!_settings.automationEnabled())
+    {
+        qInfo() << "Automation rules are not enabled, not applying action";
+        return;
+    }
+
+    // Don't apply rules when not logged in.  They wouldn't really have any
+    // effect (connect would fail, disconnect would be a no-op), but this is
+    // more robust.
+    if(!_account.loggedIn())
+    {
+        qInfo() << "Not logged in, not applying action";
+        return;
+    }
+
+    const AutomationRule &currentRule = _state.automationCurrentMatch().get();
+
+    Error err{};
+    if(currentRule.action().connection() == QStringLiteral("enable"))
+    {
+        if(!_state.vpnEnabled())
+        {
+            qInfo() << "Connect now due to automation rule:" << currentRule;
+            // connectVPN() can fail if no account is logged in, etc. - in that
+            // case, trace that the trigger failed.
+            err = connectVPN();
+        }
+        else
+        {
+            qInfo() << "Automation rule triggered while already connected:"
+                << currentRule;
+            // Don't call connectVPN() when the VPN is already enabled, the only
+            // thing it could do is reconnect to apply settings, which we don't
+            // really want here.  Connect rules can end a snooze, but in that
+            // state the VPN isn't enabled.
+        }
+    }
+    else if(currentRule.action().connection() == QStringLiteral("disable"))
+    {
+        if(_state.vpnEnabled())
+        {
+            qInfo() << "Disconnect now due to automation rule:" << currentRule;
+        }
+        else
+        {
+            qInfo() << "Automation rule triggered while already disconnected:"
+                << currentRule;
+        }
+        // Call disconnectVPN() even if the VPN is already disabled, because it
+        // can also end a snooze.
+        disconnectVPN();
+    }
+    else
+    {
+        qWarning() << "Unknown automation connect action:"
+            << currentRule.action().connection();
+    }
+
+    // If the trigger failed (only possible with connect), don't set the last
+    // trigger, and trace that the trigger failed.
+    if(err)
+    {
+        qWarning() << "Automation rule trigger failed:" << err;
+    }
+    else
+    {
+        // Connect/disconnect request succeeded, or we were already in the
+        // desired state, indicate the most recent trigger
+        _state.automationLastTrigger(currentRule);
+    }
+}
+
+void Daemon::onAutomationRuleTriggered(const nullable_t<AutomationRule> &currentRule,
+                                       Automation::Trigger trigger)
+{
+    qInfo() << "Rule triggered (" << traceEnum(trigger) << "):"
+        << currentRule;
+
+    // Always update automationCurrentMatch.  This shows the
+    // "connected" indicator in Settings.
+    _state.automationCurrentMatch(currentRule);
+
+    // Check if we need to apply the current rule's action - the
+    // daemon must be active, automation rules must be enabled, and there must
+    // be a matching rule
+    if(!isActive())
+    {
+        qInfo() << "Daemon is not active, not applying action";
+    }
+    else
+    {
+        applyCurrentAutomationRule();
+    }
+}
+
+Error Daemon::connectVPN()
+{
+    // Cannot connect when no active client is connected (there'd be no way for
+    // the daemon to know if the user logs out, etc.)
+    if(!isActive())
+        return {HERE, Error::Code::DaemonRPCDaemonInactive};
+    // Cannot connect when not logged in
+    if(!_account.loggedIn())
+        return {HERE, Error::Code::DaemonRPCNotLoggedIn};
+
+    // Stop any snooze that's active, since soemthing wants to connect the VPN.
+    // If this _is_ due to snooze, it updates the snooze state again after we
+    // start reconnecting.
+    _snoozeTimer.forceStopSnooze();
+
     emit aboutToConnect();
 
     _state.vpnEnabled(true);
 
     _connection->connectVPN(_state.needsReconnect());
     _state.needsReconnect(false);
+
+    // Clear any previous automation trigger since we've connected for some
+    // other reason.  If this _was_ due to an automation trigger, then
+    // applyCurrentAutomationRule() overwrites this with the triggering rule.
+    _state.automationLastTrigger({});
+
+    return {};
 }
 
 void Daemon::disconnectVPN()
 {
+    _snoozeTimer.forceStopSnooze();
     _state.vpnEnabled(false);
     _connection->disconnectVPN();
+
+    // As in connectVPN(), clear any previous automation trigger.  If this
+    // _was_ due to an automation trigger, then applyCurrentAutomationRule()
+    // overwrites this with the triggering rule.
+    _state.automationLastTrigger({});
 }
 
 ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistry* registry, QObject *parent)
@@ -3384,16 +3597,32 @@ SnoozeTimer::SnoozeTimer(Daemon *daemon) : QObject(nullptr)
 void SnoozeTimer::startSnooze(qint64 seconds)
 {
     qInfo() << "Starting snooze for" << seconds << "seconds";
-    g_state.snoozeEndTime(0);
-    _snoozeLength = seconds;
+    // Disconnect the VPN.  Note that this calls forceStopSnooze().
     _daemon->disconnectVPN();
+    // Indicate that this disconnection is for snooze.
+    g_state.snoozeEndTime(0);
+    // Store the snooze length so we can start the timer after disconnect completes
+    _snoozeLength = seconds;
 }
 
 void SnoozeTimer::stopSnooze()
 {
     qInfo() << "Ending snooze";
-    _snoozeTimer.stop();
-    _daemon->connectVPN();
+    // Connect now, but keep the snooze time since we're resuming from snooze
+    // (all other connections reset snooze - note that this calls
+    // forceStopSnooze(), which also stops the snooze timer)
+    auto snoozeEndTime = g_state.snoozeEndTime();
+    Error err = _daemon->connectVPN();
+    if(err)
+    {
+        // Can't resume from snooze, connect was not possible.  (Should rarely
+        // happen since we clear snooze when deactivating or logging out.)  If
+        // it does happen somehow, leave the snoozeEndTime at -1 and trace the
+        // error.
+        qWarning() << "Unable to reconnect after snooze:" << err;
+    }
+    else
+        g_state.snoozeEndTime(snoozeEndTime);
 }
 
 // Discard any active snooze timer and reset snooze end time

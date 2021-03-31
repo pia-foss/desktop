@@ -81,7 +81,7 @@ public:
     QString toString() const;
 
     // Get the raw data for re-injection
-    ip * toRaw() { return _ipHdr; }
+    ip * toRaw() const { return _ipHdr; }
 
 private:
     std::uint16_t csum(const std::uint16_t *buf, int words);
@@ -130,7 +130,7 @@ public:
     QString toString() const;
 
     // Get the raw data for re-injection
-    ip6_hdr * toRaw() { return _ipHdr; }
+    ip6_hdr * toRaw() const { return _ipHdr; }
 
 private:
     // Actual packet data buffer (_ipHdr and _transportHdr point to this)
