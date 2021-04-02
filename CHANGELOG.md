@@ -1,5 +1,8 @@
 # Changelog
 
+### v2.8.1
+* Fixed an issue in macOS split tunnel that prevented the VPN from connecting when the killswitch was set to Always
+
 ### v2.8.0
 * Automation rules can now be created in Settings to automatically connect or disconnect when joining networks
 * Fixed macOS split tunnel issues preventing access to LAN devices or bypassed subnets on some systems

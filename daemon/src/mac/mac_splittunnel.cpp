@@ -661,9 +661,6 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     if(_params.blockAll && !_params.isConnected)
     {
         defaultPorts.clear();
-        // Ensure we wipe out firewall state - otherwise
-        // some pre-existing connections could continue to hang around
-        PFFirewall::flushState();
     }
 
     _defaultRuleUpdater.update(IPv4, defaultPorts);
