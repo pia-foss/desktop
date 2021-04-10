@@ -23,6 +23,7 @@
 #include "daemon.h"
 #include "path.h"
 #include "ipaddress.h"
+#include <QStandardPaths>
 
 HelperIpcConnection::HelperIpcConnection(QLocalSocket *pConnection)
     : _pConnection{pConnection}
