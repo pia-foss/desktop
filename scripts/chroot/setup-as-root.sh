@@ -160,14 +160,57 @@ mkdir -p /etc/schroot/piabuild
 
 # Packages needed for host architecture
 # For desktop:
-HOST_PACKAGES_DTOP=(build-essential rake clang-7 git arch-test)
+HOST_PACKAGES_DTOP=(
+    build-essential
+    rake
+    clang-7
+    git
+    arch-test
+)
 # For desktop-dep-build:
-HOST_PACKAGES_DEP=(curl pv bison automake libtool python gperf)
+HOST_PACKAGES_DEP=(
+    curl
+    pv
+    bison
+    automake
+    libtool
+    python
+    python-docutils
+    gperf
+    xutils-dev
+)
 # Packages needed for target architecture(s)
 # For desktop:
-TARGET_PACKAGES_DTOP=(mesa-common-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev zlib1g libglib2.0-0)
+TARGET_PACKAGES_DTOP=(
+    mesa-common-dev
+    libnl-3-dev
+    libnl-route-3-dev
+    libnl-genl-3-dev
+    zlib1g
+    libglib2.0-0
+)
 # For desktop-dep-build:
-TARGET_PACKAGES_DEP=(libmnl-dev libclang-dev libssl-dev libxkbcommon-x11-dev libxi-dev libxrender-dev libxext-dev libx11-dev libx11-xcb-dev libxcb1-dev libfontconfig1-dev libfreetype6-dev libsm-dev libice-dev libglib2.0-dev libpq-dev libatspi2.0-dev libgl-dev libegl1-mesa-dev xutils-dev)
+TARGET_PACKAGES_DEP=(
+    libmnl-dev
+    libclang-dev
+    libssl-dev
+    libxkbcommon-x11-dev
+    libxi-dev
+    libxrender-dev
+    libxext-dev
+    libx11-dev
+    libx11-xcb-dev
+    libxcb1-dev
+    libfontconfig1-dev
+    libfreetype6-dev
+    libsm-dev
+    libice-dev
+    libglib2.0-dev
+    libpq-dev
+    libatspi2.0-dev
+    libgl-dev
+    libegl1-mesa-dev
+)
 
 echo "Install host arch packages"
 # Enter the chroot and install additional packages
@@ -179,6 +222,7 @@ ARCH_DEPS=("${ARCH_SUFFIX:+cross}build-essential$ARCH_SUFFIX")
 for pkg in "${TARGET_PACKAGES_DTOP[@]}" "${TARGET_PACKAGES_DEP[@]}"; do
     ARCH_DEPS+=("$pkg${CROSS_TARGET:+:$CROSS_TARGET}")
 done
+echo schroot -c "piabuild-stretch$ARCH_SUFFIX" -- bash -c "${CROSS_TARGET:+dpkg --add-architecture $CROSS_TARGET && apt-get update &&} apt-get install -y ${ARCH_DEPS[*]}"
 schroot -c "piabuild-stretch$ARCH_SUFFIX" -- bash -c "${CROSS_TARGET:+dpkg --add-architecture $CROSS_TARGET && apt-get update &&} apt-get install -y ${ARCH_DEPS[*]}"
 # Set up clang 7 in /usr/local/bin so we can build Qt with clang 7.
 #

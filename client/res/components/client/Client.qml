@@ -208,11 +208,16 @@ QtObject {
   // write diagnostics.  (Even if this fails, the log uploader is still
   // started.)
   function startLogUploader() {
+    if(uiState.settings.gatheringDiagnostics)
+      return;
     // Log that we're trying to start an upload - there aren't any timeouts on
     // daemon RPCs, so if the daemon hangs (but the connection is not lost),
     // this will wait indefinitely.
     console.info("Requesting diagnostic dump to start log uploader")
+    uiState.settings.gatheringDiagnostics = true;
+
     Daemon.writeDiagnostics(function(error, result) {
+      uiState.settings.gatheringDiagnostics = false;
       if(error) {
         console.warn("Couldn't write diagnostics: " + error)
         // Start the tool anyway with no diagnostics file

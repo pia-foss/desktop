@@ -28,6 +28,7 @@
 #include "ipaddress.h"
 #include "exec.h"
 #include "brand.h"
+#include "locations.h"
 
 #if defined(Q_OS_MACOS)
 #include <sys/types.h>
@@ -51,6 +52,8 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+
+#include <QDir>
 
 #define VPN_GROUP BRAND_CODE "vpn"
 
@@ -683,6 +686,40 @@ void scutilDNSDiagnostics(DiagnosticsFile &file)
     file.writeText("scutil State:PIA:OldStateDNS", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess/OldStateDNS\nd.show' | scutil"));
     file.writeText("scutil State:PIA:OldSetupDNS", Exec::bashWithOutput("echo 'get State:/Network/PrivateInternetAccess/OldSetupDNS\nd.show' | scutil"));
 }
+
+// Get the ip/port for a 'meta' server so we can use
+// it as an endpoint for collecting tcpdump diagnostics.
+// The tcpdump diagnostics trace the TCP 3-way handshake
+// which is all we are interested in, so it doesn't matter if
+// the request fails, so long as the 3-way handshake completes.
+// These diagnostics are useful for debugging split tunnel issues on MacOS.
+auto tcpdumpMetaEndpoint(const DaemonState &state)
+{
+    struct MetaInfo
+    {
+        std::uint16_t port;
+        QString ip;
+    };
+
+    NearestLocations nearest(state.availableLocations());
+    QSharedPointer<Location> pMetaRegion = nearest.getBestMatchingLocation([](const Location &loc)
+    {
+        return loc.hasService(Service::Meta);
+    });
+
+    const Server *pMetaServer{};
+    if(pMetaRegion)
+        pMetaServer = pMetaRegion->randomServerForService(Service::Meta);
+
+    MetaInfo info{};
+    if(pMetaServer)
+    {
+        info.port = pMetaServer->randomServicePort(Service::Meta);
+        info.ip = pMetaServer->ip();
+    }
+
+    return info;
+}
 #endif
 
 void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
@@ -690,6 +727,44 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     QStringList emptyArgs;
 
 #if defined(Q_OS_MAC)
+    // Wipe out pre-existing pcaps
+    if(QDir{Path::PcapDir}.exists())
+    {
+        qInfo() << "Recursively removing pcap folder" << Path::PcapDir;
+        QDir{Path::PcapDir}.removeRecursively();
+    }
+    // Ensure pcap folder exists
+    Path::PcapDir.mkpath();
+
+    const auto metaInfo = tcpdumpMetaEndpoint(_state);
+    QProcess tcpdumpPhys, tcpdumpUtun7, tcpdumpUtun8, tcpdumpVpn;
+
+    // Collect tcpdump diagnostics
+    if(metaInfo.port)
+    {
+        const auto filterExpression = QStringLiteral("(dst %1 or src %1) and port %2").arg(metaInfo.ip).arg(metaInfo.port);
+
+        auto startTcpDump = [&](QProcess &tcpdumpProcess, const QString &interfaceName, const QString &outputFileName)
+        {
+            tcpdumpProcess.setProgram("tcpdump");
+            tcpdumpProcess.setArguments({filterExpression, "-vvvUi", interfaceName, "-w", outputFileName});
+            tcpdumpProcess.start();
+        };
+        // Physical interface
+        startTcpDump(tcpdumpPhys, _state.originalInterface(), Path::PcapDir / "pia_phys_pcap.txt");
+        // Split tunnel interface
+        startTcpDump(tcpdumpUtun7, "utun7", Path::PcapDir / "pia_utun7_pcap.txt");
+        // Split tunnel interface (alternative - since we cycle between them)
+        startTcpDump(tcpdumpUtun8, "utun8", Path::PcapDir / "pia_utun8_pcap.txt");
+        // VPN interface - will be empty when not connected
+        if(!_state.tunnelDeviceName().isEmpty())
+            startTcpDump(tcpdumpVpn, _state.tunnelDeviceName(), Path::PcapDir / "pia_vpn_pcap.txt");
+    }
+    else
+    {
+        qWarning() << "Tcpdump diagnostics not collected, could not find a meta endpoint";
+    }
+
     file.writeCommand("OS Version", "sw_vers", emptyArgs);
     file.writeText("Overview", diagnosticsOverview());
     file.writeText("Translation status", translationDiagnostic());
@@ -722,6 +797,10 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         QStringLiteral("-c1"), QStringLiteral("-W1"), QStringLiteral("-n")});
     file.writeCommand("System log (last 4s)", "log", QStringList{"show", "--last",  "4s"});
     file.writeCommand("Third-party kexts", "/bin/bash", QStringList{QStringLiteral("-c"), QStringLiteral("kextstat | grep -v com.apple")});
+    // This curl request is used to generate traffic for tcpdump - useful for diagnosing split tunnel issues. We use a meta server endpoint as we control it
+    // - we also don't care about the response, just that the TCP threeway handshake takes place
+    if(metaInfo.port)
+        file.writeText("tcpdump endpoint", Exec::bashWithOutput(QStringLiteral("curl -vI https://%1:%2 --max-time 2 2>&1").arg(metaInfo.ip).arg(metaInfo.port)));
     file.writeCommand("System Extensions", "systemextensionsctl", QStringList{QStringLiteral("list")});
     file.writeCommand("DNS (scutil --dns)", "scutil", QStringList{QStringLiteral("--dns")});
     file.writeCommand("HTTP Proxy (scutil --proxy)", "scutil", QStringList{QStringLiteral("--proxy")});

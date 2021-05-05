@@ -95,7 +95,7 @@ namespace
 
     // Resource path for the modern regions list.  This is a placeholder until
     // this actually exists.
-    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v5")};
+    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v6")};
 
     // Resource path for region meta
     const QString modernRegionMetaResource{QStringLiteral("vpninfo/regions/v2")};
@@ -857,9 +857,10 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
 
     // If the settings affect location choices, rebuild locations from servers
     // lists
-    if(settings.contains(QLatin1String("includeGeoOnly")))
+    if(settings.contains(QLatin1String("includeGeoOnly")) ||
+       settings.contains(QLatin1String("manualServer")))
     {
-        qInfo() << "includeGeoOnly changed, rebuild locations";
+        qInfo() << "Settings affect possible locations, rebuild locations";
         rebuildActiveLocations();
     }
     // Otherwise, If the settings affect the location choices, recompute them.
@@ -2361,7 +2362,8 @@ bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
     LocationsById newLocations = buildModernLocations(_data.modernLatencies(),
                                                       regionsObj,
                                                       legacyShadowsocksObj,
-                                                      _account.dedicatedIps());
+                                                      _account.dedicatedIps(),
+                                                      _settings.manualServer());
 
     // Like the legacy list, if no regions are found, treat this as an error
     // and keep the data we have (which might still be usable).
@@ -2585,7 +2587,7 @@ void Daemon::applyDedicatedIpJson(const QJsonObject &tokenData,
         dipInfo.expire(newExpire);
     }
     dipInfo.regionId(json_cast<QString>(tokenData["id"], HERE));
-    dipInfo.serviceGroups(json_cast<QStringList>(tokenData["groups"], HERE));
+    dipInfo.serviceGroups(json_cast<std::vector<QString>>(tokenData["groups"], HERE));
     dipInfo.ip(json_cast<QString>(tokenData["ip"], HERE));
     dipInfo.cn(json_cast<QString>(tokenData["cn"], HERE));
     // If the dedicated IP was known and has changed, set the last change
@@ -3233,6 +3235,13 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
             _settings.debugLogging(DaemonSettings::defaultDebugLogging);
         }
     }
+
+    // CBC cipher mode were removed in 2.9, upgrade these to the corresponding
+    // GCM-mode cipher.
+    if(_settings.cipher() == QStringLiteral("AES-128-CBC"))
+        _settings.cipher(QStringLiteral("AES-128-GCM"));
+    else if(_settings.cipher() == QStringLiteral("AES-256-CBC"))
+        _settings.cipher(QStringLiteral("AES-256-GCM"));
 }
 
 void Daemon::calculateLocationPreferences()

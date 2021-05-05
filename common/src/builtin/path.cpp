@@ -75,6 +75,7 @@ Path Path::WireguardServiceExecutable;
 Path Path::WireguardConfigFile;
 #elif defined(Q_OS_MAC)
 Path Path::SplitTunnelKextPath;
+Path Path::PcapDir;
 #endif
 #ifdef Q_OS_LINUX
 Path Path::VpnExclusionsFile;
@@ -302,6 +303,7 @@ void Path::initializePostApp()
     WireguardConfigFile = DaemonDataDir / "wg" BRAND_CODE "0.conf";
 #elif defined(Q_OS_MAC)
     SplitTunnelKextPath = ExecutableDir / "../Resources/PiaKext.kext";
+    PcapDir = DaemonDataDir + "/pia_pcap";
 #endif
 #ifdef Q_OS_LINUX
     // Currently only tested on Ubuntu

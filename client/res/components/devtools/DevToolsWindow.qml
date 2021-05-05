@@ -51,6 +51,9 @@ SecondaryWindow {
       text: "Actions"
     }
     TabButton {
+      text: "Servers"
+    }
+    TabButton {
       text: "Paths"
     }
     TabButton {
@@ -69,6 +72,10 @@ SecondaryWindow {
       height: parent.height
     }
     ActionsTool {
+      width: parent.width
+      height: parent.height
+    }
+    ServersTool {
       width: parent.width
       height: parent.height
     }

@@ -373,10 +373,10 @@ class tst_nearestlocations : public QObject
 
 public:
     tst_nearestlocations(QObject *parent = NULL) : QObject(parent)
-      , locs{buildModernLocations({}, samples::locations, samples::emptyShadowsocks, {})}
-      , locsNoPF{buildModernLocations({}, samples::locationsNoPF, samples::emptyShadowsocks, {})}
-      , locsNoAutoRegions{buildModernLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks, {})}
-      , locsGeo{buildModernLocations({}, samples::locationsGeo, samples::emptyShadowsocks, {})} {
+      , locs{buildModernLocations({}, samples::locations, samples::emptyShadowsocks, {}, {})}
+      , locsNoPF{buildModernLocations({}, samples::locationsNoPF, samples::emptyShadowsocks, {}, {})}
+      , locsNoAutoRegions{buildModernLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks, {}, {})}
+      , locsGeo{buildModernLocations({}, samples::locationsGeo, samples::emptyShadowsocks, {}, {})} {
 
     }
 

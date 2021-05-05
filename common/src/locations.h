@@ -30,11 +30,12 @@
 // the latencies and modern regions list.
 // The legacy Shadowsocks list is also taken so we can leverage legacy
 // Shadowsocks servers; the modern infrastructure does not have Shadowsocks yet.
-// Dedicated IPs are added as additional regions.
+// Dedicated IPs and the dev manual server are added as additional regions.
 COMMON_EXPORT LocationsById buildModernLocations(const LatencyMap &latencies,
                                                  const QJsonObject &regionsObj,
                                                  const QJsonObject &legacyShadowsocksObj,
-                                                 const std::vector<AccountDedicatedIp> &dedicatedIps);
+                                                 const std::vector<AccountDedicatedIp> &dedicatedIps,
+                                                 const ManualServer &manualServer);
 
 // Build the grouped and sorted locations from the flat locations.
 COMMON_EXPORT void buildGroupedLocations(const LocationsById &locations,

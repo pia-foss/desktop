@@ -64,7 +64,7 @@ NotificationStatus {
     return []
   }
 
-  embedLinkClicked: function() { Qt.openUrlExternally("https://www.trustpilot.com/review/privateinternetaccess.com") }
+  embedLinkClicked: function() { Qt.openUrlExternally("https://www.trustpilot.com/evaluate/privateinternetaccess.com") }
 
   displayIcon: false
   dismissible: true

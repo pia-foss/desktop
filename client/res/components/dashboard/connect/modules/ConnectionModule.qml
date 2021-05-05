@@ -126,9 +126,9 @@ MovableModule {
       metricValue: {
         if(showWireguard)
           return "Poly1305"
-        if(Daemon.displayConnectionConfig.openvpnCipher.endsWith("GCM"))
-          return "GCM"
-        return "SHA256"
+        // Only GCM ciphers are supported for OpenVPN since 2.9; data
+        // authentication is part of the GCM construction
+        return "GCM"
       }
       bottomRow: true
     }

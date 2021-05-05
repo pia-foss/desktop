@@ -753,7 +753,11 @@ void IpTablesFirewall::updateRules(const FirewallParams &params)
 
     // Manage DNS for forwarded packets
     SplitDNSInfo::SplitDNSType routedDns = SplitDNSInfo::SplitDNSType::VpnOnly;
-    if(params.enableSplitTunnel && !g_daemon->settings().routedPacketsOnVPN())
+
+    // We only want to use bypass DNS for routed packets if:
+    // - Routed packets are set to bypass
+    // - Split tunnel Name Servers are set to "Follow App Rules"
+    if(params.enableSplitTunnel && !g_daemon->settings().routedPacketsOnVPN() && g_daemon->settings().splitTunnelDNS())
         routedDns = SplitDNSInfo::SplitDNSType::Bypass;
     SplitDNSInfo routedDnsInfo = SplitDNSInfo::infoFor(params, state, routedDns);
 

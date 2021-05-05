@@ -85,7 +85,7 @@ private slots:
 
     void testPreferred()
     {
-        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {})};
+        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {}, {})};
         Location &location = *locs.at(QStringLiteral("nz"));
 
         TransportSelector transportSelector;
@@ -111,7 +111,7 @@ private slots:
         QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
 
-        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {})};
+        LocationsById locs{buildModernLocations({}, samples::locationJson, samples::emptyJson, {}, {})};
         Location &location = *locs.at(QStringLiteral("nz"));
 
         // We don't want to wait before trying an alternate transport

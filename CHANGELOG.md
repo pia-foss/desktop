@@ -1,5 +1,16 @@
 # Changelog
 
+### v2.9.0
+* Updated to OpenVPN 2.5.1 and OpenSSL 1.1.1k
+* Improved accessibility of the "Add Automation Rule" dialog
+* Split tunnel on Linux now applies the Split Tunnel Name Servers setting to DNS requests routed through the host (most containers / VMs)
+* "Submit Debug Logs" now shows an indicator while collecting diagnostics
+* Added additional split tunnel diagnostics for macOS
+* Linux installations no longer require ifconfig
+* ip no longer has to be at /sbin/ip on Linux
+* The PIA daemon on Linux OpenRC systems no longer waits for a network connection before starting
+* Fixed restarting the PIA daemon after an upgrade on Linux SysVinit systems
+
 ### v2.8.1
 * Fixed an issue in macOS split tunnel that prevented the VPN from connecting when the killswitch was set to Always
 

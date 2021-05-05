@@ -158,7 +158,7 @@ jsonFetched = Build.new('json-fetched')
 {
     'servers.json': 'https://www.privateinternetaccess.com/vpninfo/servers?version=1002&client=x-alpha',
     'shadowsocks.json': 'https://www.privateinternetaccess.com/vpninfo/shadowsocks_servers',
-    'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/new',
+    'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/v6',
     'modern_region_meta.json': 'https://serverlist.piaservers.net/vpninfo/regions/v2'
 }.each do |k, v|
     fetchedFile = jsonFetched.artifact(k.to_s)

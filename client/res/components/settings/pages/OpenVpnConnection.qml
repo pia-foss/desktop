@@ -179,9 +179,7 @@ Item {
         setting: DaemonSetting { name: "cipher" }
         model: [
           { name: "AES-128 (GCM)", value: "AES-128-GCM" },
-          { name: "AES-128 (CBC)", value: "AES-128-CBC" },
-          { name: "AES-256 (GCM)", value: "AES-256-GCM" },
-          { name: "AES-256 (CBC)", value: "AES-256-CBC" }
+          { name: "AES-256 (GCM)", value: "AES-256-GCM" }
         ]
         warning: setting.sourceValue === 'none' ? uiTranslate("ConnectionPage", "Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.") : ""
       }

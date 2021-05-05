@@ -117,6 +117,9 @@ static stack_st* (*OPENSSL_sk_new_reserve)(OPENSSL_sk_compfunc, int);
 static int (*OPENSSL_sk_push)(stack_st*, const void*) = nullptr;
 static void (*OPENSSL_sk_free)(stack_st*) = nullptr;
 
+static unsigned long (*OpenSSL_version_num)() = nullptr;
+static const char *(*OpenSSL_version)(int) = nullptr;
+
 static bool checkOpenSSL()
 {
     static bool attempted = false, successful = false;
@@ -198,10 +201,43 @@ static bool checkOpenSSL()
     RESOLVE_OPENSSL_FUNCTION(OPENSSL_sk_free);
     RESOLVE_OPENSSL_FUNCTION(OPENSSL_sk_push);
 
+    RESOLVE_OPENSSL_FUNCTION(OpenSSL_version_num);
+    RESOLVE_OPENSSL_FUNCTION(OpenSSL_version);
+
 #undef RESOLVE_OPENSSL_FUNCTION
 #undef TRY_RESOLVE_OPENSSL_FUNCTION
 
     successful = true;
+
+    unsigned long libVersion{OpenSSL_version_num()};
+    // The OpenSSL version number has the form:
+    // 0xMNNFFPPS
+    //   || | | ^status (f == release)
+    //   || | ^patch
+    //   || ^ fix
+    //   |^ minor
+    //   ^ major
+    auto patchChar = [](unsigned idx) -> char
+    {
+        if(idx == 0)
+            return ' '; // No letter
+        if(idx <= 26)
+            return ('a' - 1) + idx;
+        return '?';
+    };
+    // Trace the numeric version number from OpenSSL.  This should match the
+    // text version returned by OpenSSL later.
+    qInfo().nospace() << "Loaded OpenSSL " << (libVersion >> 28) << '.'
+        << ((libVersion >> 20) & 0xFF) << '.'
+        << ((libVersion >> 12) & 0xFF)
+        << patchChar((libVersion >> 4 & 0xFF));
+    if((libVersion & 0xF) != 0xF)
+        qWarning() << "Not a final release: status" << (libVersion & 0xF);
+
+    // Trace some build info from OpenSSL.  Print everything available, ranging
+    // from OPENSSL_VERSION (0) to OPENSSL_ENGINES_DIR (5)
+    for(int i=0; i<6; ++i)
+        qInfo() << "  " << QLatin1String(OpenSSL_version(i));
 
     return true;
 }

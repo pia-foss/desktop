@@ -2,133 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <source>SettingsWindow -- setting-title-compact --- Automation</source>
-        
-        <translation>自動功能</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>一般</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>帳戶</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>私隱</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>網路</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>連線</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <source>SettingsWindow -- setting-title --- Automation</source>
-        
-        <translation>自動功能</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>專屬 IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>幫助</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>一般設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>帳戶資料</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>私隱設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>網路設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>連線設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
-        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
-        
-        <translation>自動功能偏好設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>專屬 IP 喜好設定</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>幫助</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>提示</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>設定</translation>
-    </message>
-</context>
-<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -257,23 +130,27 @@
         <translation>網路</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
-        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+    <source>AutomationAddRuleDialog --- Automation Rule Types</source>
         <translation>「自動化規則」類型</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="213"/>
         <source>AutomationAddRuleDialog --- RULE EXISTS</source>
         <translation>已設定規則</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
-        <source>AutomationAddRuleDialog --- Rule</source>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="225"/>
+        <source>AutomationAddRuleDialog --- %1 - rule exists</source>
+        <extracomment>Screen reader annotation used when an automation rule already exists. Here, &quot;%1&quot; will refer to a network type (Wired Network), etc.</extracomment>
+        <translation>%1 - 已設定規則</translation>
+    </message>
+    <message>
+    <source>AutomationAddRuleDialog --- Rule</source>
         <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
         <translation>規則</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="256"/>
         <source>AutomationAddRuleDialog --- Action</source>
         <translation>行動</translation>
     </message>
@@ -1005,82 +882,82 @@
         <translation>決定在 TAP 適配器上如何設置地址。如果您遇到連線問題，另一種設置方式可能更可靠。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="166"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>警告：你的傳輸資料未經加密，可能有外洩風險。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="187"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="217"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>SOCKS5 代理伺服器……</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="228"/>
         <source>ConnectionPage --- None</source>
         <translation>無</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="246"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>SOCKS5 代理伺服器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="271"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>伺服器 IP 位址</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="281"/>
         <source>ConnectionPage --- Port</source>
         <translation>連接埠</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="284"/>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
         <source>ConnectionPage --- Default</source>
         <translation>預設</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="290"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>使用者（非必填）</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="297"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>密碼（非必填）</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="395"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>使用小封包</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="399"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>為 VPN 連線設定較少 MTU 值。這樣會降低傳輸速度，但連線狀態不佳的情況會得到改善。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="403"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>嘗試交替設定</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="412"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>若上方的連線類型及遠端連接埠無法運作，將自動嘗試其他設定。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="420"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>當設定了代理伺服器時，無法使用替代設定。</translation>
@@ -1639,73 +1516,73 @@
         <translation>儲存錯誤偵測記錄，然後提交到技術支援可幫助解決問題。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>提交錯誤偵測記錄</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
         <source>HelpPage --- Support Portal</source>
         <translation>支援中心</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
         <source>HelpPage --- Maintenance</source>
         <translation>維護</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>重新安裝 OpenVPN 網路介面卡</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>正在重新安裝 OpenVPN 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>重新安裝 WireGuard 網路介面卡</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>正在重新安裝 WireGuard 網路介面卡...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="322"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>正在重新安裝通道分割篩選器…</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="323"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>重新安裝通道分割篩選器</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="362"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>已重新安裝通道分割篩選器。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="387"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>移除 Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="428"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>無法在虛擬終端機中執行指令。請安裝與 x-terminal-emulator 相容的虛擬終端機。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="430"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>無法開啟虛擬終端機</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -2627,19 +2504,19 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="172"/>
         <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
 <source>ProxyPage --- Configure...</source>
         <translation>設定...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="212"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks：%1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="224"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 代理伺服器：%1</translation>
@@ -3007,6 +2884,133 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>檢閱所有設定...</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>一般</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>帳戶</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>私隱</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>網路</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>連線</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>自動功能</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>專屬 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>幫助</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>自動功能</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>一般設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>帳戶資料</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>私隱設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>網路設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>連線設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>自動功能偏好設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>專屬 IP 喜好設定</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>幫助</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>提示</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>設定</translation>
     </message>
 </context>
 <context>

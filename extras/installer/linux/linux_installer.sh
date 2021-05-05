@@ -121,6 +121,10 @@ function configureSysvinit() {
     sudo cp "$root/installfiles/piavpn.sysvinit.service" "$sysvinitServiceLocation"
     sudo chmod 755 "$sysvinitServiceLocation"
     sudo update-rc.d "$serviceName" defaults
+    # If this is an upgrade, the daemon exited when we deleted the file (it
+    # detects that), but the init script still has a PID file and won't start
+    # it again until we stop it first.  Ignore failures from the stop, also.
+    sudo service "$serviceName" stop 2>/dev/null || true
     sudo service "$serviceName" start
 
     echoPass "Created $serviceName sysvinit service"
@@ -171,12 +175,9 @@ function removeLegacyPia() {
 # Test whether dependencies are present.  Returns nonzero if any dependency is
 # missing.
 function hasDependencies() {
-    # Check for ifconfig, libxkbcommon-x11, libxkbcommon, and libxcb-xkb
-    # Note that ifconfig must be at /sbin/ifconfig since OpenVPN finds the
-    # absolute path to ifconfig at build time.
+    # Check for libxkbcommon-x11, libxkbcommon, and libxcb-xkb
 
     # Wrap each test in `if ...; then return 1; fi` to play nicely with set -e
-    if ! [ -x /sbin/ifconfig ]; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libxkbcommon-x11.so.0; then return 1; fi
     if ! ldconfig -p | grep -q libnl-3.so.200; then return 1; fi
@@ -187,14 +188,8 @@ function hasDependencies() {
     return 0
 }
 
-function promptNetTools() {
-    echo "Could not install package 'net-tools'."
-    echo "Please install the package manually and ensure 'ifconfig' command exists."
-}
-
 function promptManualDependencies() {
     echo "Could not install dependencies.  Please install these packages:"
-    echo " - net-tools (ifconfig)"
     echo " - libxkbcommon-x11 (libxkbcommon-x11.so.0, libxkbcommon.so.0)"
     echo " - libnl-3-200"
     echo " - libnl-route-3-200, libnl-genl-3-200 (may be included in libnl-3-200)"
@@ -209,30 +204,18 @@ function installDependencies() {
 
     if hash yum 2>/dev/null; then
         # libnsl is no longer part of of the glibc package on Fedora
-        sudo yum -y install net-tools libxkbcommon-x11 libnl3 libnsl
+        sudo yum -y install libxkbcommon-x11 libnl3 libnsl
     elif hash pacman 2>/dev/null; then
-        sudo pacman -S --noconfirm net-tools libxkbcommon-x11 libnl
+        sudo pacman -S --noconfirm libxkbcommon-x11 libnl
     elif hash zypper 2>/dev/null; then
         sudo zypper install libxkbcommon-x11-0
-        # We can't set up ifconfig on openSUSE; our OpenVPN build has a
-        # hard-coded path to /sbin/ifconfig, but openSUSE installs it to
-        # /usr/bin/ifconfig.  We don't want to mess with the user's sbin
-        # directory, the user will have to make the symlink themselves.
-        echoFail "ifconfig not installed - please ensure net-tools-deprecated is installed and symlink ifconfig to /sbin/ifconfig"
     # Check for apt-get last.  Apparently some RPM-based distributions (such as
     # openSUSE) have an RPM port of apt in addition to their preferred package
     # manager.  This check uses Debian package names though that aren't
     # necessarily the same on other distributions.
     elif hash apt-get 2>/dev/null; then
         APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200"
-        # A few releases do not have the net-tools package at all, still try to
-        # install other dependencies
-        if [[ $(apt-cache search --names-only net-tools) ]]; then
-            sudo apt-get install --yes net-tools $APT_PKGS
-        else
-            sudo apt-get install --yes $APT_PKGS
-            promptNetTools
-        fi
+        sudo apt-get install --yes $APT_PKGS
     else
         promptManualDependencies
         return 0 # Skip "installed packages" output

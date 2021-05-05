@@ -24,6 +24,18 @@
 
 namespace
 {
+    // Constants used for the manual region if one is created
+    const QString manualRegionId{QStringLiteral("manual")};
+    // Although service groups can be changed at any time by Ops (these are just
+    // intended to abbreviate the regions list), defaults are present for a
+    // manual region, as this is a dev tool only.  If the groups change, the
+    // sevice groups can be specified in the override.
+    const std::vector<QString> manualRegionDefaultGroups{
+        QStringLiteral("ovpntcp"),
+        QStringLiteral("ovpnudp"),
+        QStringLiteral("wg")
+    };
+
     // The "geo" flag was added in legacy regions list v1002 and isn't yet
     // available in the modern regions list.  Tolerate issues when parsing this
     // - a missing flag is fine and defaults to false, any unexpected value is
@@ -139,8 +151,15 @@ void readModernServer(const Server &groupTemplate, std::vector<Server> &servers,
         Server newServer{groupTemplate};
         newServer.ip(json_cast<QString>(serverObj["ip"], HERE));
         newServer.commonName(json_cast<QString>(serverObj["cn"], HERE));
-        // TODO - Need Shadowsocks key/cipher for servers with Shadowsocks
-        // service
+        // The OpenVPN cipher negotation type (NCP or pia-signal-settings) is
+        // indicated by the "van" property (short for "vanilla" - i.e. the
+        // server has "vanilla OpenVPN" without the pia-signal-settings patch).
+        //
+        // This defaults to 'true' so that in the long term when the whole fleet
+        // is on vanilla, we won't have any servers list bloat from this
+        // property.  (If the property doesn't exist, serverObject["van"]
+        // returns an undefined QJsonValue.)
+        newServer.openvpnNcpSupport(serverObj["van"].toBool(true));
         servers.push_back(newServer);
     }
     catch(const Error &ex)
@@ -218,6 +237,65 @@ QSharedPointer<Location> readModernLocation(const QJsonObject &regionObj,
     return pLocation;
 }
 
+// Build a set of Servers from a specific IP/CN and a set of service groups that
+// apply to them.  This is used for Dedicated IP regions and the manual region.
+// The region ID is just used for tracing.
+std::vector<Server> buildServersFromGroups(const std::vector<QString> &groups,
+                                           const QString &ip, const QString &cn,
+                                           bool openvpnNcpSupport,
+                                           const QString &regionId,
+                                           const std::unordered_map<QString, Server> &groupTemplates)
+{
+    std::vector<Server> servers;
+    for(const auto &group : groups)
+    {
+        // Find the group template
+        auto itTemplate = groupTemplates.find(group);
+        if(itTemplate == groupTemplates.end())
+        {
+            qWarning() << "Group" << group << "not known in location"
+                << regionId;
+            // Skip this group
+        }
+        // Ignore groups that have no services used by Desktop, this can be
+        // normal if it had other services that we don't care about
+        else if(itTemplate->second.hasNonLatencyService())
+        {
+            // Create a server for this group using the DIP IP/CN
+            Server newServer{itTemplate->second};
+            newServer.ip(ip);
+            newServer.commonName(cn);
+            newServer.openvpnNcpSupport(openvpnNcpSupport);
+            servers.push_back(std::move(newServer));
+        }
+    }
+    return servers;
+}
+
+// Copy the 'meta' servers from the given region to the servers vector.  Only
+// 'meta' services are copied, even if a server has both 'meta' and some other
+// service.
+void copyRegionMetaServers(const Location &correspondingLocation,
+                           std::vector<Server> &servers)
+{
+    // Use the 'meta' service from server(s) in the corresponding location,
+    // but not any other services
+    for(const auto &correspondingServer : correspondingLocation.servers())
+    {
+        if(correspondingServer.hasService(Service::Meta))
+        {
+            // Create a new server and copy over just the 'meta' info; do
+            // not take any other services that might be offered on this
+            // server.
+            Server metaServer{};
+            metaServer.ip(correspondingServer.ip());
+            metaServer.commonName(correspondingServer.commonName());
+            metaServer.metaPorts(correspondingServer.metaPorts());
+            servers.push_back(std::move(metaServer));
+        }
+    }
+}
+
 // Build a Location from a dedicated IP.  Location metadata (name, country,
 // geo, PF, etc.) are taken from the corresponding normal location.
 QSharedPointer<Location> buildDedicatedIpLocation(const LocationsById &modernLocations,
@@ -234,28 +312,14 @@ QSharedPointer<Location> buildDedicatedIpLocation(const LocationsById &modernLoc
     pLocation->dedicatedIp(dip.ip());
     pLocation->dedicatedIpExpire(dip.expire());
     pLocation->dedicatedIpCorrespondingRegion(dip.regionId());
-    std::vector<Server> servers;
-    for(const auto &group : dip.serviceGroups())
-    {
-        // Find the group template
-        auto itTemplate = groupTemplates.find(group);
-        if(itTemplate == groupTemplates.end())
-        {
-            qWarning() << "Group" << group << "not known in location"
-                << pLocation->id();
-            // Skip this group
-        }
-        // Ignore groups that have no services used by Desktop, this can be
-        // normal if it had other services that we don't care about
-        else if(itTemplate->second.hasNonLatencyService())
-        {
-            // Create a server for this group using the DIP IP/CN
-            Server newServer{itTemplate->second};
-            newServer.ip(dip.ip());
-            newServer.commonName(dip.cn());
-            servers.push_back(std::move(newServer));
-        }
-    }
+    // Dedicated IP servers are still using 'pia-signal-settings' cipher
+    // negotiation, we'll add an indication for this in a later API revision so
+    // these can eventually migrate
+    std::vector<Server> servers{buildServersFromGroups(dip.serviceGroups(),
+                                                       dip.ip(), dip.cn(),
+                                                       false,
+                                                       pLocation->id(),
+                                                       groupTemplates)};
 
     // Try to find the corresponding location for metadata
     auto itCorrespondingLocation = modernLocations.find(dip.regionId());
@@ -274,24 +338,82 @@ QSharedPointer<Location> buildDedicatedIpLocation(const LocationsById &modernLoc
         pLocation->country(itCorrespondingLocation->second->country());
         pLocation->portForward(itCorrespondingLocation->second->portForward());
         pLocation->geoOnly(itCorrespondingLocation->second->geoOnly());
-
-        // Use the 'meta' service from server(s) in the corresponding location,
-        // but not any other services
-        for(const auto &correspondingServer : itCorrespondingLocation->second->servers())
-        {
-            if(correspondingServer.hasService(Service::Meta))
-            {
-                // Create a new server and copy over just the 'meta' info; do
-                // not take any other services that might be offered on this
-                // server.
-                Server metaServer{};
-                metaServer.ip(correspondingServer.ip());
-                metaServer.commonName(correspondingServer.commonName());
-                metaServer.metaPorts(correspondingServer.metaPorts());
-                servers.push_back(std::move(metaServer));
-            }
-        }
+        copyRegionMetaServers(*itCorrespondingLocation->second, servers);
     }
+
+    pLocation->servers(std::move(servers));
+    return pLocation;
+}
+
+// If a manual location has been specified, build it.
+QSharedPointer<Location> buildManualLocation(const LocationsById &modernLocations,
+                                             const std::unordered_map<QString, Server> &groupTemplates,
+                                             const ManualServer &manualServer)
+{
+    // If all parts of the manual location are empty, ignore it without tracing,
+    // this is normal.
+    if(manualServer.ip().isEmpty() && manualServer.cn().isEmpty() &&
+        manualServer.serviceGroups().empty() &&
+        manualServer.correspondingRegionId().isEmpty())
+    {
+        return {};
+    }
+
+    // If, somehow, there's already a region with this ID, keep that one
+    if(modernLocations.count(manualRegionId) > 0)
+    {
+        qWarning() << "Can't build manual region, region with ID"
+            << manualRegionId << "already exists";
+        return {};
+    }
+
+    // If the IP and CN aren't both set, the manual server isn't correctly
+    // configured
+    if(manualServer.ip().isEmpty() || manualServer.cn().isEmpty())
+    {
+        qWarning() << "Can't build manual region"
+            << QJsonDocument{manualServer.toJsonObject()}.toJson()
+            << "- need both IP and CN";
+        return {};
+    }
+
+    // Build the region
+    QSharedPointer<Location> pLocation{new Location{}};
+    pLocation->id(manualRegionId);
+    pLocation->autoSafe(false); // Never selected automatically
+    pLocation->name(manualServer.cn() + ' ' + manualServer.ip());
+    // Just a dummy country code, 'ZZ' is reserved to be user-assigned
+    pLocation->country(QStringLiteral("ZZ"));
+    // Always allow port forwarding to try it, even if the corresponding region
+    // says it doesn't offer it
+    pLocation->portForward(true);
+    pLocation->geoOnly(false);
+    const std::vector<QString> &groups = manualServer.serviceGroups().empty() ?
+        manualRegionDefaultGroups : manualServer.serviceGroups();
+    auto servers = buildServersFromGroups(groups, manualServer.ip(),
+                                          manualServer.cn(),
+                                          manualServer.openvpnNcpSupport(),
+                                          manualRegionId,
+                                          groupTemplates);
+
+    // If OpenVPN UDP/TCP ports were set, override the ports from the servers
+    // list with the specified ports.
+    // If more one server group was specified that offers OpenVpnUdp/OpenVpnTcp,
+    // this might create multiple identical servers, since they're all
+    // overridden to the same value.  That's fine, the client has no problem
+    // with that.
+    for(auto &server : servers)
+    {
+        if(server.hasService(Service::OpenVpnUdp) && !manualServer.openvpnUdpPorts().empty())
+            server.servicePorts(Service::OpenVpnUdp, manualServer.openvpnUdpPorts());
+        if(server.hasService(Service::OpenVpnTcp) && !manualServer.openvpnTcpPorts().empty())
+            server.servicePorts(Service::OpenVpnTcp, manualServer.openvpnTcpPorts());
+    }
+
+    // Find the corresponding region if given for meta servers
+    auto itCorrespondingLocation = modernLocations.find(manualServer.correspondingRegionId());
+    if(itCorrespondingLocation != modernLocations.end())
+        copyRegionMetaServers(*itCorrespondingLocation->second, servers);
 
     pLocation->servers(std::move(servers));
     return pLocation;
@@ -312,7 +434,8 @@ void applyLatency(Location &location, const LatencyMap &latencies)
 LocationsById buildModernLocations(const LatencyMap &latencies,
                                    const QJsonObject &regionsObj,
                                    const QJsonObject &legacyShadowsocksObj,
-                                   const std::vector<AccountDedicatedIp> &dedicatedIps)
+                                   const std::vector<AccountDedicatedIp> &dedicatedIps,
+                                   const ManualServer &manualServer)
 {
     // Build template Server objects for each "group" given in the regions list.
     // These will be used later to construct the actual servers by filling in
@@ -374,6 +497,15 @@ LocationsById buildModernLocations(const LatencyMap &latencies,
             applyLatency(*pLocation, latencies);
             newLocations[pLocation->id()] = std::move(pLocation);
         }
+    }
+
+    // Build the manual location if one is specified
+    auto pManualLocation = buildManualLocation(newLocations, groupTemplates,
+                                               manualServer);
+    if(pManualLocation)
+    {
+        applyLatency(*pManualLocation, latencies);
+        newLocations[pManualLocation->id()] = std::move(pManualLocation);
     }
 
     return newLocations;

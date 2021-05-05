@@ -64,6 +64,7 @@ QtObject {
   readonly property bool ratingEnabled: NativeDaemon.settings.ratingEnabled
   readonly property int lastDismissedAppMessageId: NativeDaemon.settings.lastDismissedAppMessageId
   readonly property bool showAppMessages: NativeDaemon.settings.showAppMessages
+  readonly property var manualServer: NativeDaemon.settings.manualServer
   readonly property var automationRules: NativeDaemon.settings.automationRules
   readonly property bool automationEnabled: NativeDaemon.settings.automationEnabled
 

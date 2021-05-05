@@ -36,4 +36,8 @@ QtObject {
     //   mode)
     property bool shown: false
   }
+
+  readonly property var settings: QtObject {
+    property bool gatheringDiagnostics: false
+  }
 }

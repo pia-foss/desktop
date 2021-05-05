@@ -2,133 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>SettingsWindow</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
-        <source>SettingsWindow -- setting-title-compact --- Automation</source>
-        
-        <translation>Automazione</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- General</source>
-        
-        <translation>Generali</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Account</source>
-        
-        <translation>Account</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>Privacy</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>Rete</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Connection</source>
-        
-        <translation>Connessione</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
-        <source>SettingsWindow -- setting-title --- Automation</source>
-        
-        <translation>Automazione</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>IP dedicato</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Help</source>
-        
-        <translation>Guida</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- General Preferences</source>
-        
-        <translation>Preferenza generali</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Account Information</source>
-        
-        <translation>Dati sull&apos;account</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
-        
-        <translation>Preferenze di privacy</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Network Preferences</source>
-        
-        <translation>Preferenze di rete</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
-        
-        <translation>Preferenze di connessione</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
-        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
-        
-        <translation>Preferenze d&apos;automazione</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
-        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
-        
-        <translation>Preferenze dell&apos;IP dedicato</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
-        <extracomment>setting-heading</extracomment>
-<source>SettingsWindow -- setting-heading --- Help</source>
-        
-        <translation>Guida</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
-        <source>SettingsWindow --- Alert</source>
-        <translation>Avviso</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
-        <source>SettingsWindow --- Settings</source>
-        <translation>Impostazioni</translation>
-    </message>
-</context>
-<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -257,23 +130,27 @@
         <translation>Rete</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
-        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+    <source>AutomationAddRuleDialog --- Automation Rule Types</source>
         <translation>Tipi di regole d&apos;automazione</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="213"/>
         <source>AutomationAddRuleDialog --- RULE EXISTS</source>
         <translation>ESISTE REGOLA</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
-        <source>AutomationAddRuleDialog --- Rule</source>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="225"/>
+        <source>AutomationAddRuleDialog --- %1 - rule exists</source>
+        <extracomment>Screen reader annotation used when an automation rule already exists. Here, &quot;%1&quot; will refer to a network type (Wired Network), etc.</extracomment>
+        <translation>%1 - regola esistente</translation>
+    </message>
+    <message>
+    <source>AutomationAddRuleDialog --- Rule</source>
         <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
         <translation>Regola</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="256"/>
         <source>AutomationAddRuleDialog --- Action</source>
         <translation>Azione</translation>
     </message>
@@ -1005,82 +882,82 @@
         <translation>Stabilisci il metodo di configurazione degli indirizzi sull&apos;adattatore TAP. In caso di problemi di connessione, un altro metodo potrebbe essere più affidabile.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="166"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>Attenzione: il tuo traffico è inviato senza criptaggio ed è vulnerabile alle intercettazioni.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="187"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>Proxy</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="217"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>SOCKS5 Proxy...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="228"/>
         <source>ConnectionPage --- None</source>
         <translation>Nessuno</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="246"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>SOCKS5 Proxy</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="271"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>Indirizzo IP server</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="281"/>
         <source>ConnectionPage --- Port</source>
         <translation>Porta</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="284"/>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
         <source>ConnectionPage --- Default</source>
         <translation>Predefinito</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="290"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>Utente  (facoltativo)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="297"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>Password (facoltativo)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="395"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
         <source>ConnectionPage --- Use Small Packets</source>
         <translation>Usa pacchetti piccoli</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="399"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
         <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>Imposta una MTU più piccola per la connessione VPN. Questo può comportare una minore velocità di trasferimento ma una maggiore affidabilità per le connessioni deboli.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="403"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>Prova impostazioni alternative</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="412"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>Se il tipo di connessione e la porta remota in alto non funzionano, prova automaticamente altre impostazioni.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="420"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>Quando un proxy è configurato, non è possibile usare impostazioni alternative.</translation>
@@ -1639,73 +1516,73 @@
         <translation>Salva i log dei debug che possono essere inviati al supporto tecnico per aiutare a risolvere problemi.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>Invia log dei debug</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
         <source>HelpPage --- Support Portal</source>
         <translation>Portale di assistenza</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
         <source>HelpPage --- Maintenance</source>
         <translation>Manutenzione</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>Reinstalla l&apos;adattatore di rete di OpenVPN</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>Reinstallazione dell&apos;adattatore di rete di OpenVPN in corso...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>Reinstalla l&apos;adattatore di rete di WireGuard</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>Reinstallazione dell&apos;adattatore di rete di WireGuard in corso...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="322"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>Reinstallazione Filtro Split Tunnel...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="323"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>Reinstalla Filtro Split Tunnel</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="362"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>Il filtro split tunnel è stato reinstallato.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="387"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>Disinstalla Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="428"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>Avvio del comando sul terminale non riuscito. Installa un terminale compatibile con x-terminal-emulator.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="430"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>Impossibile aprire il terminale</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -2627,19 +2504,19 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="172"/>
         <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
 <source>ProxyPage --- Configure...</source>
         <translation>Configura...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="212"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>Shadowsocks - %1</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="224"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>SOCKS5 Proxy - %1</translation>
@@ -3007,6 +2884,133 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>Vedi tutte le impostazioni...</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- General</source>
+        
+        <translation>Generali</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Account</source>
+        
+        <translation>Account</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>Privacy</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>Rete</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Connection</source>
+        
+        <translation>Connessione</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>Automazione</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>IP dedicato</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Help</source>
+        
+        <translation>Guida</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>Automazione</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- General Preferences</source>
+        
+        <translation>Preferenza generali</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Account Information</source>
+        
+        <translation>Dati sull&apos;account</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
+        
+        <translation>Preferenze di privacy</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Network Preferences</source>
+        
+        <translation>Preferenze di rete</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Connection Preferences</source>
+        
+        <translation>Preferenze di connessione</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
+        
+        <translation>Preferenze d&apos;automazione</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
+        
+        <translation>Preferenze dell&apos;IP dedicato</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <extracomment>setting-heading</extracomment>
+<source>SettingsWindow -- setting-heading --- Help</source>
+        
+        <translation>Guida</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <source>SettingsWindow --- Alert</source>
+        <translation>Avviso</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <source>SettingsWindow --- Settings</source>
+        <translation>Impostazioni</translation>
     </message>
 </context>
 <context>

@@ -71,6 +71,7 @@ public:
         latencyPorts(other.latencyPorts());
         shadowsocksKey(other.shadowsocksKey());
         shadowsocksCipher(other.shadowsocksCipher());
+        openvpnNcpSupport(other.openvpnNcpSupport());
         return *this;
     }
 
@@ -84,7 +85,8 @@ public:
             metaPorts() == other.metaPorts() &&
             latencyPorts() == other.latencyPorts() &&
             shadowsocksKey() == other.shadowsocksKey() &&
-            shadowsocksCipher() == other.shadowsocksCipher();
+            shadowsocksCipher() == other.shadowsocksCipher() &&
+            openvpnNcpSupport() == other.openvpnNcpSupport();
     }
     bool operator!=(const Server &other) const {return !(*this == other);}
 
@@ -112,6 +114,13 @@ public:
     // connect
     JsonField(QString, shadowsocksKey, {})
     JsonField(QString, shadowsocksCipher, {})
+
+    // For servers with the OpenVPN service, whether we use NCP cipher
+    // negotiation (the default), or pia-signal-settings negotiation.
+    // We're transitioning away from pia-signal-settings - the client currently
+    // supports both, but eventually we'll start deploying servers without the
+    // patch, at which point the client will use NCP cipher negotiation.
+    JsonField(bool, openvpnNcpSupport, true)
 
 public:
     // Check whether this server has any service known to Desktop other than
@@ -584,7 +593,7 @@ public:
     // any significance to the group names themselves, which can be freely
     // changed by Ops.  This is just used to find the service and port
     // information from the servers list.
-    JsonField(QStringList, serviceGroups, {})
+    JsonField(std::vector<QString>, serviceGroups, {})
 
     // The dedicated IP itself.  This is both the VPN endpoint and the VPN IP.
     // It provides all services identified by serviceGroups.
@@ -829,6 +838,70 @@ public:
     JsonField(QString, mode, QStringLiteral("exclude"), { "exclude", "include" })
 };
 
+// A single manual server can be specified in DaemonSettings - this is a dev
+// tool only to facilitate testing specific servers.  This becomes a region with
+// ID "manual".
+//
+// An IP and CN must be specified for the region to be shown.  Service groups
+// and corresponding region ID are optional.
+//
+// This is similar to the way Dedicated IP servers are integrated into the
+// regions model, although manual servers use regular token auth (not DIP auth).
+class COMMON_EXPORT ManualServer : public NativeJsonObject
+{
+    Q_OBJECT
+public:
+    ManualServer() {}
+    ManualServer(const ManualServer &other) {*this = other;}
+    ManualServer &operator=(const ManualServer &other)
+    {
+        ip(other.ip());
+        cn(other.cn());
+        openvpnNcpSupport(other.openvpnNcpSupport());
+        openvpnUdpPorts(other.openvpnUdpPorts());
+        openvpnTcpPorts(other.openvpnTcpPorts());
+        serviceGroups(other.serviceGroups());
+        correspondingRegionId(other.correspondingRegionId());
+        return *this;
+    }
+    bool operator==(const ManualServer &other) const
+    {
+        return ip() == other.ip() && cn() == other.cn() &&
+            openvpnNcpSupport() == other.openvpnNcpSupport() &&
+            openvpnUdpPorts() == other.openvpnUdpPorts() &&
+            openvpnTcpPorts() == other.openvpnTcpPorts() &&
+            serviceGroups() == other.serviceGroups() &&
+            correspondingRegionId() == other.correspondingRegionId();
+    }
+    bool operator!=(const ManualServer &other) const {return !(*this == other);}
+
+    // The manual server's IP address.  This is used for all services included
+    // in the service groups.  This should be a valid IPv4 address, but invalid
+    // addresses can still be added to the regions list (as with normal regions
+    // from the servers list).
+    JsonField(QString, ip, {})
+    // The certificate CN to expect from this server.
+    JsonField(QString, cn, {})
+    // Whether to use NCP.  (If this is false, pia-signal-settings is used to
+    // indicate ciphers.)  See Server::openvpnNcpSupport().
+    JsonField(bool, openvpnNcpSupport, false)
+    // Override OpenVPN UDP/TCP ports for this server.
+    // If set, this overrides the ports for the OpenVpnTcp / OpenVpnUdp
+    // services for this server.  If these are empty, the corresponding port
+    // list from the server list group is used.
+    JsonField(std::vector<quint16>, openvpnUdpPorts, {})
+    JsonField(std::vector<quint16>, openvpnTcpPorts, {})
+    // The service groups from the servers list to apply to this server.  If
+    // not specified, this defaults to the current set of service groups
+    // excluding "meta", which are:
+    //  "ovpntcp", "ovpnudp", "wg"
+    JsonField(std::vector<QString>, serviceGroups, {})
+    // The corresponding PIA region - if specified, 'meta' servers from this
+    // region are used for the manual region.  This is optional; if it is not
+    // given, then the region does not have any known 'meta' addresses.
+    JsonField(QString, correspondingRegionId, {})
+};
+
 // Automation rules
 //
 // Automation rules are composed of a "condition" and an "action".  The
@@ -1005,7 +1078,7 @@ public:
     JsonField(uint, remotePortTCP, 0) // 0 == auto
     JsonField(uint, localPort, 0) // 0 == auto
     JsonField(uint, mtu, 0) // 0 == unspecified
-    JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM", "AES-128-CBC", "AES-256-CBC" })
+    JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM" })
     // On Windows, the method to use to configure the TAP adapter's IP addresses
     // and DNS servers.
     // - dhcp - use "ip-win32 dhcp", DNS servers applied as DHCP options
@@ -1115,6 +1188,9 @@ public:
 
     // Whether to show in-app communication messages to the user
     JsonField(bool, showAppMessages, true)
+
+    // Manual server dev setting - for testing specific servers
+    JsonField(ManualServer, manualServer, {})
 };
 
 // Compare QSharedPointer<Location>s by value; used by ServiceLocations

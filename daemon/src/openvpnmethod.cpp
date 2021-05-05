@@ -372,7 +372,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     if (!_connectingConfig.vpnLocation())
         return false;
 
-    out << "pia-signal-settings" << endl;
     out << "client" << endl;
     out << "dev tun" << endl;
 
@@ -554,9 +553,27 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         out << "lport " << _connectingConfig.localPort() << endl;
 
     out << "cipher " << sanitize(_connectingConfig.openvpnCipher()) << endl;
-    if (!_connectingConfig.openvpnCipher().endsWith("GCM"))
-        out << "auth SHA256" << endl;
 
+    // We support both NCP cipher negotiation and pia-signal-settings right now
+    // as we transition from pia-signal-settings to unpatched vanilla OpenVPN.
+    // Use whatever method was indicated for this server.
+    if(vpnServer.openvpnNcpSupport())
+    {
+        // NCP mode.  Permit only the configured cipher.
+        out << "ncp-ciphers " << sanitize(_connectingConfig.openvpnCipher()) << endl;
+        // "cipher" was still set above.  This isn't strictly necessary but is
+        // good for robustness, OpenVPN's settings have been somewhat fragile in
+        // the past, and this ensures we won't fall back to BF-CBC if (say)
+        // NCP stops working on the server, etc.
+    }
+    else
+    {
+        out << "pia-signal-settings" << endl;
+        // Explicitly disable NCP.  The OpenVPN NCP logic still otherwise thinks
+        // the server is using BF-CBC (it's not really fully aware of
+        // pia-signal-settings) and fails the connection.
+        out << "ncp-disable" << endl;
+    }
 
     if (_connectingConfig.mtu() > 0)
     {

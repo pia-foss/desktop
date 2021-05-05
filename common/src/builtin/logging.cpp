@@ -174,7 +174,7 @@ class LoggerPrivate
 
     QFile logFile;
     qint64 logSize;
-    qint64 logFileLimit;
+    qint64 logFileLimit = standardLogFileLimit;
     QStringList filters;
     QFileSystemWatcher watcher;
     Path logFilePath;

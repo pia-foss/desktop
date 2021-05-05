@@ -68,23 +68,23 @@ OverlayDialog {
       Layout.bottomMargin: 5
     }
 
-    TableBase {
-      label: uiTr("Automation Rule Types")
-      readonly property int rowHeight: 30
+    Rectangle {
       id: ruleTypesTable
-      contentHeight: ruleTypeRepeater.count * rowHeight + 10
+      readonly property int rowHeight: 30
+      color: Theme.settings.hbarBackgroundColor
+      border.color: Theme.settings.hbarBottomBorderColor
+      border.width: 1
+      activeFocusOnTab: true
       Layout.fillWidth: true
+      readonly property int contentHeight: ruleTypeRepeater.count * rowHeight + 10
       Layout.preferredHeight: contentHeight
-      keyboardRow: {
-        return buildRowId("wired")
-      }
-      keyboardColumnCount: 1
       property string selectedRuleType: ""
       property string selectedRuleSsid: ""  // Only relevant when an SSID rule is selected
 
       ColumnLayout {
         spacing: 0
         width: parent.width
+
 
         Repeater {
           id: ruleTypeRepeater
@@ -150,7 +150,7 @@ OverlayDialog {
             return model;
           }
 
-          delegate: TableRowBase {
+          delegate: Item {
             id: ruleRow
             Layout.fillWidth: true
             Layout.preferredHeight: ruleTypesTable.rowHeight
@@ -158,39 +158,23 @@ OverlayDialog {
             property string ruleName: modelData.name
             property string ruleType: modelData.type
             property string ruleSsid: modelData.ssid
-            parentTable: ruleTypesTable
-            rowId: buildRowId(modelData.type)
-            effectiveColumnFor: function(column){
-              return column}
-            keyboardSelect: function(column) {
+            function keyboardSelect(column) {
               markRowSelected();
             }
 
             readonly property bool isSelected: {
-              return parentTable.selectedRuleType === ruleType &&
-                parentTable.selectedRuleSsid === ruleSsid
+              return ruleTypesTable.selectedRuleType === ruleType &&
+                ruleTypesTable.selectedRuleSsid === ruleSsid
             }
 
             function markRowSelected () {
               if(ruleEnabled) {
-                parentTable.selectedRuleType = ruleType;
-                parentTable.selectedRuleSsid = ruleSsid;
+                ruleTypesTable.selectedRuleType = ruleType;
+                ruleTypesTable.selectedRuleSsid = ruleSsid;
               }
             }
 
-            readonly property var keyColumns: ({name: 0})
-            readonly property int keyColumnCount: 1
-            property var accNameCell: NativeAcc.TableCellText {
-              name: ruleName
-              item: nameTextItem
-            }
-            accRow: NativeAcc.TableRow {
-              name: ruleName
-              item: ruleRow
-              selected: isSelected
-              outlineExpanded: false
-              outlineLevel: 0
-            }
+
             Rectangle {
               color: Theme.settings.inputDropdownSelectedColor
               anchors.fill: parent
@@ -253,8 +237,14 @@ OverlayDialog {
 
 
 
-            MouseArea {
+            RadioButtonArea {
+              //: Screen reader annotation used when an automation rule already exists.
+              //: Here, "%1" will refer to a network type (Wired Network), etc.
+              name: ruleEnabled ? ruleName : uiTr("%1 - rule exists").arg(ruleName)
               anchors.fill: parent
+              checked: isSelected
+              enabled: ruleEnabled
+
               onClicked: {
                 markRowSelected()
               }
@@ -274,37 +264,10 @@ OverlayDialog {
               visible: highlightColumn === keyColumns.name
               inside: true
             }
-          } // TableRowBase delegae
+          }
         } // Repeater
       } // ColumnLayout
-      property NativeAcc.TableColumn nameColumn: NativeAcc.TableColumn {
-        //: Screen reader annotation for the "Rule" column of the Automation Rules Table (First column from the left)
-        name: uiTr("Rule")
-        item: ruleTypesTable
-      }
-
-      accColumns: [{
-          "property": "accNameCell",
-          "column": nameColumn
-        }]
-      accTable: {
-        var table = [];
-
-        for(var i = 0; i < ruleTypeRepeater.count; ++i) {
-          var typeItem = ruleTypeRepeater.itemAt(i);
-          if(!typeItem)
-            continue
-
-          table.push({
-                       row: buildRowId(typeItem.ruleType),
-                       name: typeItem.ruleName,
-                       item: typeItem
-                     })
-        }
-
-        return table;
-      }
-    } // TableBase ruleListTable
+    }
 
     Text {
       Layout.topMargin: 6

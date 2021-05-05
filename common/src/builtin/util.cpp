@@ -122,6 +122,19 @@ void startSupportTool (const QString &mode, const QString &diagFile)
     args << "--log" << Path::UpdownLogFile;
     if(!diagFile.isEmpty())
         args << "--file" << diagFile;
+
+#ifdef Q_OS_MACOS
+    // Attach pcap files (MacOS only for now)
+    // Note these have a .txt extension because currently unknown extensions (such as .pcap)
+    // are ignored by CSI. This is fine as tcpdump/wireshak do not care about file extensions.
+    QDir pcapDir{Path::PcapDir};
+    for(const auto &pcapFile : pcapDir.entryList({"*.txt"}))
+    {
+        QString fullName = Path::PcapDir / pcapFile;
+        args << "--file" << fullName;
+    }
+#endif
+
     args << "--client-crashes" << Path::ClientDataDir / "crashes";
     args << "--daemon-crashes" << Path::DaemonDataDir / "crashes";
     args << "--client-settings" << Path::ClientSettingsDir / "clientsettings.json";

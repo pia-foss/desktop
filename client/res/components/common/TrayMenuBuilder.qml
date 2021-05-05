@@ -205,7 +205,7 @@ Item {
                      //: Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.
                      { text: uiTr("Enable Debug Logging"), code: 'toggle-debug-logging', checked: Daemon.settings.debugLogging !== null },
                      //: Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.
-                     { text: uiTr("Submit Debug Logs..."), code: 'submit-debug-logs' },
+                     { text: uiTr("Submit Debug Logs..."), code: 'submit-debug-logs' , enabled: !Client.uiState.settings.gatheringDiagnostics},
                      { separator: true },
                      //: Menu command to display a list of changes introduced in each version of the application.
                      { text: uiTr("Changelog"), code: 'show-changelog' },

@@ -250,6 +250,8 @@ public:
 
 #ifdef Q_OS_MAC
     static Path SplitTunnelKextPath;
+    // For tcpdump pcap files (used in diagnostics)
+    static Path PcapDir;
 #endif
 
 

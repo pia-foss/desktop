@@ -251,11 +251,33 @@ Page {
       }
     }
 
-    TextLink {
-      text: uiTr("Submit Debug Logs")
-      underlined: true
-      onClicked: Client.startLogUploader()
+    RowLayout {
+      Layout.topMargin: 4
+      TextLink {
+        text: uiTr("Submit Debug Logs")
+        enabled: !Client.uiState.settings.gatheringDiagnostics
+        underlined: true
+        onClicked: Client.startLogUploader()
+      }
+
+      Image {
+        Layout.leftMargin: 0
+        id: spinnerImage
+        Layout.preferredHeight: 14
+        Layout.preferredWidth: 14
+        source: Theme.login.buttonSpinnerImage
+        visible: Client.uiState.settings.gatheringDiagnostics
+        RotationAnimator {
+          target: spinnerImage
+          running: spinnerImage.visible
+          from: 0;
+          to: 360;
+          duration: 1000
+          loops: Animation.Infinite
+        }
+      }
     }
+
 
     TextLink {
       text: uiTr("Support Portal")
