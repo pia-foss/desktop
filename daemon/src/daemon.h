@@ -539,6 +539,8 @@ private:
     // or the setting value that we connected with
     void updatePortForwarder();
 
+    void traceMemory();
+
     // Set _state.overridesActive() or _state.overridesFailed() and log
     // appropriately
     void setOverrideActive(const QString &resourceName);
@@ -619,6 +621,7 @@ protected:
     QTimer _dedicatedIpRefreshTimer;
 
     QTimer _checkForAppMessagesTimer;
+    QTimer _memTraceTimer;
 
     // Ongoing login attempt.  If we try to log in again or log out, we need to
     // abort the prior attempt.  This is an AbortableTask so it'll still

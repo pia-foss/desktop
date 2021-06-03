@@ -28,6 +28,8 @@ elif [ -x /usr/bin/konsole ]; then
     TERMCMD=/usr/bin/konsole
 elif [ -x /usr/bin/xterm ]; then
     TERMCMD=/usr/bin/xterm
+elif [ -x /usr/bin/xfce4-terminal ]; then
+    TERMCMD=/usr/bin/xfce4-terminal
 else
     exit 3
 fi

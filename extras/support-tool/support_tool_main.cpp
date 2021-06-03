@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     Path::initializePostApp();
     parser.process(app);
 
-    AppSingleton runGuard(Path::SupportToolExecutable);
+    AppSingleton runGuard;
     if(runGuard.isAnotherInstanceRunning() > 0) {
         qWarning () << "Exiting because another instance appears to be running";
         app.quit();

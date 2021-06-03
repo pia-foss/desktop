@@ -225,7 +225,7 @@ function installDependencies() {
 
 function addGroups() {
     for group in "$@"; do
-        if ! grep -q $group /etc/group; then
+        if ! getent group $group >/dev/null 2>&1; then
             sudo groupadd $group || true
             echoPass "Added group $group"
         fi
@@ -294,7 +294,9 @@ function installPia() {
     fi
     sudo cp "$root/installfiles/piavpn.desktop" "/usr/share/applications/${brandCode}vpn.desktop"
     if hash update-desktop-database 2>/dev/null; then
-        sudo update-desktop-database
+        # Silence output from update-desktop-database; it dumps errors for _any_
+        # quirks in installed .desktop files, not just ours.
+        sudo update-desktop-database 2>/dev/null
     fi
     echoPass "Created desktop entry"
 

@@ -1,19 +1,5 @@
-*.exe filter=lfs diff=lfs merge=lfs -text
-*.dll filter=lfs diff=lfs merge=lfs -text
-*.sys filter=lfs diff=lfs merge=lfs -text
-*.cat filter=lfs diff=lfs merge=lfs -text
-pia-openvpn filter=lfs diff=lfs merge=lfs -text
-*.ttf filter=lfs diff=lfs merge=lfs -text
-*.ico filter=lfs diff=lfs merge=lfs -text
-*.bmp filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-# Causes issues with .so symlinks when checked out on Windows
-#*.so filter=lfs diff=lfs merge=lfs -text
-*.bin filter=lfs diff=lfs merge=lfs -text
-*.msi filter=lfs diff=lfs merge=lfs -text
 *.ts text eol=lf
 /CHANGELOG.md merge=union eol=lf text
-
 *.sh text eol=lf
 
 # Diff UTF-16LE *.rc Windows resource scripts
@@ -21,3 +7,28 @@ pia-openvpn filter=lfs diff=lfs merge=lfs -text
 # Add to your ~/.gitconfig:
 #[diff "rcdiff"]
 #        textconv = "iconv -f utf-16le -t utf-8"
+
+# Use LFS for everything under deps/built/
+# While file extension globs are pretty good for most LFS files,
+# these directories contain macOS/Linux executables with no
+# extension, which can't be easily globbed.
+deps/built/*/** filter=lfs diff=lfs merge=lfs -text
+
+# dump_syms binaries - similar to deps/built, contains
+# extensionless macOS binary
+deps/dump_syms/** filter=lfs diff=lfs merge=lfs -text
+
+# File types to store in LFS
+*.sys filter=lfs diff=lfs merge=lfs -text
+*.cat filter=lfs diff=lfs merge=lfs -text
+*.ttf filter=lfs diff=lfs merge=lfs -text
+*.ico filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.msi filter=lfs diff=lfs merge=lfs -text
+*.icns filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.otf filter=lfs diff=lfs merge=lfs -text
+*.sketch filter=lfs diff=lfs merge=lfs -text
+*.sym filter=lfs diff=lfs merge=lfs -text

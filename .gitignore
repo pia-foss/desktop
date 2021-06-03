@@ -3,13 +3,22 @@
 /build-*/
 # Default build directory when opening CMake glue project in most IDEs
 /build/
-# Qt Creator project preferences
-*.user
 .DS_Store
 *.qm
 node_modules
 releases
 *.qmlc
+# Various IDEs
+# Qt Creator project preferences
+*.user
+# KDevelop / Kate
 *.kdev4
 *.swp
+# IntelliJ IDEA
 .idea/*
+# Visual Studio
+/.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+/Debug/

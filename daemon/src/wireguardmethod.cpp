@@ -662,7 +662,7 @@ unsigned WireguardMethod::determinePosixMtu(const QHostAddress &host)
     // Find the MTU for the interface used to reach the remote host.
     mtu = findHostMtu(host.toString());
     // Default to 1500 if no MTU was found.
-    if(!mtu)
+    if(!mtu || mtu > 1500)
         mtu = 1500;
     // Subtract 80 bytes for encapsulation.
     mtu -= 80;

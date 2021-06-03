@@ -258,7 +258,7 @@ MovableModule {
     // Show this focus cue on the inside, since it fills the full module
     focusCueInside: true
     onClicked: {
-      pageManager.setPage("region")
+      pageManager.setPage(pageManager.pageIndices.region)
     }
   }
 }

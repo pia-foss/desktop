@@ -76,7 +76,7 @@ static void terminateHandler()
 int main(int argc, char** argv)
 {
     setUtf8LocaleCodec();
-    Logger::initialize(true);
+    Logger::initialize(isatty(2));
 
     FUNCTION_LOGGING_CATEGORY("posix.main");
 

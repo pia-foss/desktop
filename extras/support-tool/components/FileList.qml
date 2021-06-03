@@ -24,8 +24,9 @@ import PIA.ReportHelper 1.0
 import QtQuick.Dialogs 1.3
 
 Item {
-  height: 320
-  ColumnLayout {
+  height: fileListLayout.height
+  Column {
+    id: fileListLayout
     width: parent.width
     spacing: 0
 
@@ -55,7 +56,7 @@ Item {
     Rectangle {
       border.color: "#889099"
       height: 30
-      Layout.fillWidth: true
+      width: parent.width
       Text {
         anchors.left: parent.left
         anchors.top: parent.top
@@ -86,7 +87,7 @@ Item {
     Rectangle {
       id: fileListContainer
       opacity: 0.8
-      Layout.fillWidth: true
+      width: parent.width
       height: fileList.height
       border.color: "#d7d8d9"
       ListView {

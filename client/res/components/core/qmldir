@@ -8,6 +8,12 @@
 # cases - if a particular tweak only applies "most of the time" or "some of the
 # time", it probably belongs in "common" instead as a specifically named type.
 #
+# == Conventions ==
+#
+# Since many of these components override QtQuick types (and hence use the same
+# names), Qt imports are always qualified with the module name - for example,
+# `import QtQuick 2.11 as QtQuick` and later `QtQuick.Text`.
+#
 # == Arabic / RTL ==
 #
 # These tweaks mainly pertain to layout fixups for Arabic (text alignment and
@@ -24,5 +30,16 @@
 # the text content.  (See Text.qml.)  The default behavior is unusable even
 # without layout mirroring, because Text objects become a hodgepodged mess by
 # default, since the effect of the automatic alignment depends on how the Text
-# bounds are specified.  Layout mirroring mirrors this for RTL (if/when RTL is
-# actually supported).
+# bounds are specified.  Layout mirroring mirrors this for RTL.
+#
+# == Loader cleanup ==
+#
+# PIA tries to unload as much UI as it can when not being used to avoid
+# hogging resources (though there is still room for more improvement).  QtQuick
+# by default caches aggressively though and does not let go of most resources
+# until explicitly told to.  In particular, the QML cache is never cleaned by
+# default after a Loader deactivates.  The Loader override spies on Loader
+# deactivations to trigger cleanups after UI is unloaded.  LoaderCleaner is the
+# singleton containing the timers and signal used for this purpose.
+module PIA.Core
+singleton LoaderCleaner LoaderCleaner.qml

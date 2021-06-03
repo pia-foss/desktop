@@ -50,14 +50,14 @@ FocusScope {
       // Choose this location, and reconnect if we were connected to a
       // different one
       VpnConnection.selectLocation(locationId)
-      pageManager.setPage('connect')
+      pageManager.setPage(pageManager.pageIndices.connect)
     }
   }
 
   function beforeExit() {
   }
   function backButton() {
-    pageManager.setPage('connect')
+    pageManager.setPage(pageManager.pageIndices.connect)
   }
   function onEnter() {
     headerBar.logoCentered = true
@@ -69,7 +69,7 @@ FocusScope {
   Connections {
     target: ClientNotifications
     function onShowRegions() {
-      pageManager.setPage('region')
+      pageManager.setPage(pageManager.pageIndices.region)
     }
   }
 }

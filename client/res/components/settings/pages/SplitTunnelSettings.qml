@@ -98,6 +98,7 @@ TableBase {
         Layout.fillWidth: true
         showAppIcons: Qt.platform.os !== 'linux'
         appPath: modelData.path
+        linkTarget: modelData.linkTarget
         appMode: modelData.mode
         appName: SplitTunnelManager.getNameFromPath(appPath)
         parentTable: splitTunnelSettings

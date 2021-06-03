@@ -28,30 +28,34 @@ Item {
     anchors.margins: 2
     anchors.rightMargin: 10
     contentWidth: width
+    contentHeight: infoContents.height
     clip: true
 
+    Flickable {
+      anchors.fill: parent
+      // Disable bouncy overscroll, which is a bizarre default for desktop
+      // platforms
+      boundsBehavior: Flickable.StopAtBounds
 
-    ColumnLayout {
-      id: infoContents
-      width: parent.width
-      Text {
-        visible: params.mode == "logs"
-        text: "<p>" + ReportHelper.getBrandParam("brandName") + " will upload debug logs and some information about your network setup. This information doesn't contain any information about your internet usage.</p>"
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.topMargin: 10
-      }
-      Text {
-        visible: params.mode == "crash"
-        text: "<p>Please re-start the application. If problem persists, please contact support.</p><br/><p>If you have a killswitch enabled your internet might not be accessible. Restarting the application should correct this.</p>"
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.topMargin: 10
-      }
-      FileList {
-        Layout.rightMargin: 20
-        Layout.topMargin: 10
-        Layout.fillWidth: true
+      Column {
+        id: infoContents
+        width: parent.width - 20
+        spacing: 10
+        Text {
+          visible: params.mode == "logs"
+          text: "<p>" + ReportHelper.getBrandParam("brandName") + " will upload debug logs and some information about your network setup. This information doesn't contain any information about your internet usage.</p>"
+          wrapMode: Text.Wrap
+          width: parent.width
+        }
+        Text {
+          visible: params.mode == "crash"
+          text: "<p>Please re-start the application. If problem persists, please contact support.</p><br/><p>If you have a killswitch enabled your internet might not be accessible. Restarting the application should correct this.</p>"
+          wrapMode: Text.Wrap
+          width: parent.width
+        }
+        FileList {
+          width: parent.width
+        }
       }
     }
   }

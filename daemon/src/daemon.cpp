@@ -50,6 +50,8 @@
 #include <QDateTime>
 #include <QRegularExpression>
 #include <QRandomGenerator>
+#include <QRegExp>
+#include <QStringView>
 
 #if defined(Q_OS_WIN)
 #include <Windows.h>
@@ -57,6 +59,8 @@
 #include "win/win_util.h"
 #include <AclAPI.h>
 #include <AccCtrl.h>
+#include <TlHelp32.h>
+#include <Psapi.h>
 #pragma comment(lib, "advapi32.lib")
 #endif
 
@@ -444,6 +448,9 @@ Daemon::Daemon(QObject* parent)
     _checkForAppMessagesTimer.setInterval(msec(appMessagesCheckInterval));
     connect(&_checkForAppMessagesTimer, &QTimer::timeout, this, &Daemon::checkForAppMessages);
 
+    _memTraceTimer.setInterval(msec(std::chrono::minutes(5)));
+    connect(&_memTraceTimer, &QTimer::timeout, this, &Daemon::traceMemory);
+
     auto connectPropertyChanges = [this](NativeJsonObject &object, QSet<QString> Daemon::* pSet)
     {
         connect(&object, &NativeJsonObject::propertyChanged, this,
@@ -657,6 +664,9 @@ Daemon::Daemon(QObject* parent)
                                                _environment.getRegionsListPublicKey(),
                                                _data.modernRegionMeta());
         _updateDownloader.run(true, _environment.getUpdateApi());
+
+        _memTraceTimer.start();
+        traceMemory();
 
         // Refresh metadata right away too
         RPC_refreshMetadata();
@@ -1360,6 +1370,7 @@ void Daemon::RPC_refreshMetadata()
 {
     refreshDedicatedIps();
     checkForAppMessages();
+    refreshAccountInfo();
     _updateDownloader.refreshUpdate();
 }
 
@@ -1645,6 +1656,7 @@ void Daemon::start()
         _accountRefreshTimer.start();
         refreshAccountInfo();
     }
+    traceMemory();
 
     qInfo() << "Daemon started and waiting for connections...";
 
@@ -3550,6 +3562,139 @@ void Daemon::disconnectVPN()
     // _was_ due to an automation trigger, then applyCurrentAutomationRule()
     // overwrites this with the triggering rule.
     _state.automationLastTrigger({});
+}
+
+#ifdef Q_OS_UNIX
+void logMetricsForProcessUnix (const QString &identifier, uint pid) {
+        QProcess psProcess;
+        psProcess.start(QStringLiteral("/bin/ps"), QStringList ()
+                        << QStringLiteral("-p") << QString::number(pid)
+                        << QStringLiteral("-o") << QStringLiteral("rss=,pcpu="));
+        psProcess.waitForFinished();
+
+        if(psProcess.exitCode() != 0)
+            return;
+
+        auto psParts = QString::fromUtf8(psProcess.readAllStandardOutput()).trimmed().split(QRegularExpression("\\s+"));
+        if(psParts.count() == 2) {
+            // Write metrics to the log with the format:
+            // "Metrics: client_mem=13251,client_cpu=0.2"
+
+            qInfo() << QStringLiteral("Metrics: %1_mem=%2,%1_cpu=%3").arg(identifier).arg(psParts[0]).arg(psParts[1]);
+        } else {
+            qWarning () << "Unexpected output from ps - " << psParts;
+            return;
+        }
+
+}
+void logProcessMemoryUnix (const QString &identifier, const QString &name) {
+    // Determine the PID of the process using pgrep
+    QProcess pgrepProcess;
+    pgrepProcess.start(QStringLiteral("pgrep"), QStringList () << name);
+    pgrepProcess.waitForFinished();
+    // Found at-least one process
+    if(pgrepProcess.exitCode() == 0) {
+        auto lines = pgrepProcess.readAllStandardOutput().split('\n');
+
+        for(int i = 0; i < lines.size(); ++i) {
+            bool ok = true;
+            auto pid = lines.at(i).trimmed().toUInt(&ok);
+            // We are logging metrics for all processes which match this name.
+            // ideally, there should be just one process. However, if there are more,
+            // a suffix is added to the identifier
+            if(ok) {
+                logMetricsForProcessUnix(
+                            i == 0 ? identifier : QStringLiteral("%1_%2").arg(identifier).arg(i),
+                            pid);
+            }
+        }
+    }
+}
+#endif
+
+
+#ifdef Q_OS_WIN
+void logProcessMemoryWindows(const QString &id, DWORD pid) {
+    WinHandle clientProcess{::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ,
+                                          false, pid)};
+    DWORD dwError{ERROR_SUCCESS};
+    if(!clientProcess)
+        dwError = ::GetLastError();
+    PROCESS_MEMORY_COUNTERS_EX procMem{};
+    procMem.cb = sizeof(procMem);
+    BOOL gotMemory = FALSE;
+    if(clientProcess)
+    {
+        gotMemory = ::GetProcessMemoryInfo(clientProcess.get(),
+                                           reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&procMem),
+                                           procMem.cb);
+        if(!gotMemory)
+            dwError = ::GetLastError();
+    }
+
+    if(gotMemory)
+    {
+        qInfo () << QStringLiteral("Metrics: %1_privatemem=%2,%1_nonpaged_pool=%3,%1_paged_pool=%4,%1_workingset=%5")
+                    .arg(id)
+                    .arg(procMem.PrivateUsage)
+                    .arg(procMem.QuotaNonPagedPoolUsage)
+                    .arg(procMem.QuotaPagedPoolUsage)
+                    .arg(procMem.WorkingSetSize);
+    }
+    else
+    {
+        qWarning() << "Could not access memory for " << id;
+    }
+}
+#endif
+
+void Daemon::traceMemory() {
+    qDebug () << "Tracing memory";
+#ifdef Q_OS_MACOS
+    logProcessMemoryUnix(QStringLiteral("client"), QStringLiteral(BRAND_NAME));
+    logProcessMemoryUnix(QStringLiteral("daemon"), QStringLiteral(BRAND_CODE "-daemon"));
+    logProcessMemoryUnix(QStringLiteral("openvpn"), QStringLiteral(BRAND_CODE "-openvpn"));
+    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-wireguard-go"));
+#endif
+
+#ifdef Q_OS_LINUX
+    logProcessMemoryUnix(QStringLiteral("client"), QStringLiteral(BRAND_CODE "-client"));
+    logProcessMemoryUnix(QStringLiteral("daemon"), QStringLiteral(BRAND_CODE "-daemon"));
+    logProcessMemoryUnix(QStringLiteral("openvpn"), QStringLiteral(BRAND_CODE "-openvpn"));
+    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-wireguard-go"));
+#endif
+
+#ifdef Q_OS_WIN
+    std::unordered_map<QStringView, QString> targets;
+
+    targets[QStringView{BRAND_CODE L"-client.exe"}] = QStringLiteral("client");
+    targets[QStringView{BRAND_CODE L"-service.exe"}] = QStringLiteral("daemon");
+    targets[QStringView{BRAND_CODE L"-openvpn.exe"}] = QStringLiteral("openvpn");
+    targets[QStringView{BRAND_CODE L"-wgservice.exe"}] = QStringLiteral("wireguard");
+
+    WinHandle procSnapshot{::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)};
+
+    PROCESSENTRY32W proc{};
+    proc.dwSize = sizeof(proc);
+
+    BOOL nextProc = ::Process32FirstW(procSnapshot.get(), &proc);
+    while(nextProc)
+    {
+        // Avoid wchar_t[] constructor for QStringView which assumes the string
+        // fills the entire array
+        QStringView processName{&proc.szExeFile[0]};
+        auto itTarget = targets.find(processName);
+        if(itTarget != targets.end()) {
+           logProcessMemoryWindows(itTarget->second, proc.th32ProcessID);
+        }
+        nextProc = ::Process32NextW(procSnapshot.get(), &proc);
+    }
+    DWORD dwError = ::GetLastError();
+    if(dwError != ERROR_SUCCESS && dwError != ERROR_NO_MORE_FILES)
+    {
+        qWarning() << "Unable to enumerate processes:" << WinErrTracer{dwError};
+    }
+#endif
 }
 
 ClientConnection::ClientConnection(IPCConnection *connection, LocalMethodRegistry* registry, QObject *parent)

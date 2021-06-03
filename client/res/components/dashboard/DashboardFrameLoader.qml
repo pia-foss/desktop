@@ -19,6 +19,7 @@
 import QtQuick 2.9
 import QtQuick.Window 2.10
 import PIA.NativeHelpers 1.0
+import "../core"
 
 QtObject {
   id: dashFrameLoader

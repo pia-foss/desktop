@@ -39,5 +39,6 @@ QtObject {
 
   readonly property var settings: QtObject {
     property bool gatheringDiagnostics: false
+    property int currentPage: 0
   }
 }

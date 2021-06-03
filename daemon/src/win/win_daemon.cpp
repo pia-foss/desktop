@@ -398,19 +398,6 @@ WinDaemon::WinDaemon(QObject* parent)
         _wfpCalloutMonitor.doManualCheck();
     });
 
-    _clientMemTraceTimer.setInterval(msec(std::chrono::minutes(5)));
-    connect(&_clientMemTraceTimer, &QTimer::timeout, this, &WinDaemon::traceClientMemory);
-
-    connect(this, &WinDaemon::daemonActivated, this, [this]()
-    {
-        _clientMemTraceTimer.start();
-        traceClientMemory();
-    });
-    connect(this, &WinDaemon::daemonDeactivated, this, [this]()
-    {
-        _clientMemTraceTimer.stop();
-    });
-
     // Split tunnel support errors are platform-dependent, nothing else adds
     // them (otherwise we'd have to do a proper get-append-set below)
     Q_ASSERT(_state.splitTunnelSupportErrors().empty());
@@ -1599,73 +1586,6 @@ public:
 private:
     std::size_t _mem;
 };
-
-void WinDaemon::traceClientMemory()
-{
-    WinHandle procSnapshot{::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)};
-
-    PROCESSENTRY32W proc{};
-    proc.dwSize = sizeof(proc);
-
-    QStringView clientModule{BRAND_CODE L"-client.exe"};
-    QStringView cliModule{BRAND_CODE L"ctl.exe"};
-
-    int clientProcesses{0};
-
-    BOOL nextProc = ::Process32FirstW(procSnapshot.get(), &proc);
-    while(nextProc)
-    {
-        // Avoid wchar_t[] constructor for QStringView which assumes the string
-        // fills the entire array
-        QStringView processName{&proc.szExeFile[0]};
-        if(clientModule == processName || cliModule == processName)
-        {
-            ++clientProcesses;
-            WinHandle clientProcess{::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ,
-                                                  false, proc.th32ProcessID)};
-            DWORD dwError{ERROR_SUCCESS};
-            if(!clientProcess)
-                dwError = ::GetLastError();
-            PROCESS_MEMORY_COUNTERS_EX procMem{};
-            procMem.cb = sizeof(procMem);
-            BOOL gotMemory = FALSE;
-            if(clientProcess)
-            {
-                gotMemory = ::GetProcessMemoryInfo(clientProcess.get(),
-                                                   reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&procMem),
-                                                   procMem.cb);
-                if(!gotMemory)
-                    dwError = ::GetLastError();
-            }
-
-            if(gotMemory)
-            {
-                qInfo() << "PID" << proc.th32ProcessID
-                    << processName
-                    << "- Private mem:" << TraceMemSize{procMem.PrivateUsage}
-                    << "- Nonpaged pool:" << TraceMemSize{procMem.QuotaNonPagedPoolUsage}
-                    << "- Paged pool:" << TraceMemSize{procMem.QuotaPagedPoolUsage}
-                    << "- Working set:" << TraceMemSize{procMem.WorkingSetSize};
-            }
-            else
-            {
-                qInfo() << "PID" << proc.th32ProcessID
-                    << QStringView{proc.szExeFile}
-                    << "- can't access memory usage -"
-                    << WinErrTracer{dwError};
-            }
-        }
-        nextProc = ::Process32NextW(procSnapshot.get(), &proc);
-    }
-
-    DWORD dwError = ::GetLastError();
-    if(dwError != ERROR_SUCCESS && dwError != ERROR_NO_MORE_FILES)
-    {
-        qWarning() << "Unable to enumerate processes:" << WinErrTracer{dwError};
-    }
-
-    qInfo() << "Found" << clientProcesses << "running client processes";
-}
 
 void WinDaemon::wireguardServiceFailed()
 {

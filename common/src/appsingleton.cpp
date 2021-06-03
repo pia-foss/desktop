@@ -19,16 +19,19 @@
 #include "appsingleton.h"
 #include "brand.h"
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
 #pragma comment(lib, "Kernel32.lib")
 #include <Windows.h>
 #include <psapi.h>
 #include <array>
+#elif defined(Q_OS_LINUX)
+#include <unistd.h> // readlink()
 #endif
 
 #include <QFileInfo>
 #include <QProcess>
 #include <QRegularExpression>
+#include <algorithm>
 
 const int RESOURCE_LENGTH_LIMIT = 4000;
 
@@ -46,12 +49,11 @@ bool AppSingleton::unlockResourceShare()
     return _resourceShare.unlock();
 }
 
-AppSingleton::AppSingleton(const QString &executableName, QObject *parent) :
-    QObject(parent),
-    _pidShare(executableName),
-    _resourceShare(executableName + QStringLiteral("_RESOURCE")),
-    _executableName(executableName) {
-
+AppSingleton::AppSingleton()
+    : _executablePath{QCoreApplication::applicationFilePath()},
+      _pidShare{_executablePath},
+      _resourceShare{_executablePath + QStringLiteral("_RESOURCE")}
+{
     _resourceShare.create(RESOURCE_LENGTH_LIMIT);
 
     if(_resourceShare.error() == QSharedMemory::NoError || _resourceShare.error() == QSharedMemory::AlreadyExists) {
@@ -71,8 +73,9 @@ AppSingleton::~AppSingleton()
 
 // Returns true if finds a process with the pid
 // Returns false on any error or if unable
-bool findRunningProcess (qint64 pid, const QString &processName) {
-#ifdef Q_OS_WIN
+bool findRunningProcess (qint64 pid, const QString &processPath) {
+    qInfo() << "This process:" << processPath;
+#if defined(Q_OS_WIN)
     HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION |
                                        PROCESS_VM_READ,
                                        FALSE, (DWORD)pid);
@@ -81,25 +84,25 @@ bool findRunningProcess (qint64 pid, const QString &processName) {
         GetModuleFileNameExW(hProcess, NULL, szProcessName.data(), szProcessName.size());
 
         // GetModuleFileName returns a file path with back slashes. We need to convert that
-        // to forward slashes which is the parameter of processName
+        // to forward slashes which is the parameter of processPath
         QString winProcName = QString::fromWCharArray(szProcessName.data())
                 .replace(QStringLiteral("\\"), QStringLiteral("/"))
                 .trimmed();
 
         CloseHandle(hProcess);
 
-        if(processName == winProcName)
+        qInfo() << "PID" << pid << "-" << winProcName;
+
+        if(processPath == winProcName)
             return true;
         else
-            qDebug () << "Found a process " << processName << " running with PID " << pid << " instead.";
+            qDebug () << "Found a process " << processPath << " running with PID " << pid << " instead.";
     } else
         qDebug () << "Unable to open process " << pid;
     return false;
 
-#endif
-
-    // For mac and Linux
-#ifdef Q_OS_UNIX
+#elif defined(Q_OS_MACOS)
+    // For mac, use ps to get the executable for this PID
     QProcess ps;
     ps.setProgram(QStringLiteral("ps"));
     QStringList args;
@@ -112,9 +115,9 @@ bool findRunningProcess (qint64 pid, const QString &processName) {
     // ps -p <pid> -o comm=
     // Prints a full path to the running process. This should ideally be equal.
     QString stdout = QString::fromUtf8(ps.readAllStandardOutput()).trimmed();
-    qDebug () << "ps -p returns " << stdout;
+    qInfo() << "PID" << pid << "-" << stdout;
 
-    // processName contains an absolute path to the process according to the `Path` class
+    // processPath contains an absolute path to the process according to the `Path` class
     //
     // ps -p can return /opt/piavpn/bin/vpn-client or ./vpn-client
     // or even simply 'vpn-client' if app was restarted from support tool
@@ -123,10 +126,23 @@ bool findRunningProcess (qint64 pid, const QString &processName) {
     // solid guarantee that this will always return the full path
 
 
-    QFileInfo procInfo(processName), psInfo(stdout);
+    QFileInfo procInfo(processPath), psInfo(stdout);
     // Ensure that the filenames are same for both the process and the output from `ps`
     // Also if the path is invalid, `fileName` will return an empty string. Check that this isn't empty.
     return (procInfo.fileName() == psInfo.fileName()) && !procInfo.fileName().isEmpty();
+#elif defined(Q_OS_LINUX)
+    // Linux process names are limited to 15 chars (16 including a terminating
+    // null char).  Read /proc/####/exe to get the process executable.
+    QString procExePath{QStringLiteral("/proc/%1/exe").arg(pid)};
+    std::string procExe{};
+    procExe.resize(2048);
+    ssize_t exeLen = ::readlink(qPrintable(procExePath), &procExe[0], procExe.size());
+    procExe.resize(std::max(ssize_t{0}, exeLen));
+    QString procExeU16{QString::fromUtf8(procExe.c_str())};
+
+    qInfo() << "PID" << pid << "-" << procExeU16;
+
+    return processPath == procExeU16;
 #endif
 
     return false;
@@ -161,7 +177,7 @@ qint64 AppSingleton::isAnotherInstanceRunning()
     bool processFound = false;
     qDebug () << "Value of shared memory data is " << *data;
     if(*data > 0)
-        processFound = findRunningProcess(*data, _executableName);
+        processFound = findRunningProcess(*data, _executablePath);
 
     // If no other instance is found, write the current PID as the primary running application.
     if(!processFound)

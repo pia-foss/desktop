@@ -47,6 +47,9 @@ QtObject {
     }
   }
 
+  // The loaded window, once it has been loaded by open()
+  property alias window: loader.item
+
   function open() {
     switch(loader.status) {
       case Loader.Null:

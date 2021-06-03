@@ -20,6 +20,7 @@ import QtQuick 2.10
 import "./settings"
 import "./dashboard"
 import "./common"
+import "./core"
 import "./devtools"
 import "../javascript/app.js" as App
 import PIA.NativeHelpers 1.0
@@ -100,10 +101,7 @@ QtObject {
     interval: 1
     repeat: false
     running: false
-    onTriggered: {
-      wChangeLog.show();
-      wChangeLog.centerOnActiveScreen();
-    }
+    onTriggered: wChangeLog.open()
   }
 
   // Qt has issues when the theme is changed while the dashboard is hidden
@@ -140,5 +138,46 @@ QtObject {
     sequence: "Ctrl+Shift+I"
     context: Qt.ApplicationShortcut
     onActivated: wDevToolsLoader.open()
+  }
+ 
+  function cleanUpResources() {
+    console.info("trimming component cache")
+    NativeHelpers.trimComponentCache()
+    console.info("release window resources: settings")
+    NativeHelpers.releaseWindowResources(wSettings)
+    console.info("release window resources: changelog")
+    NativeHelpers.releaseWindowResources(wChangeLog)
+    console.info("release window resources: onboarding")
+    NativeHelpers.releaseWindowResources(wOnboarding)
+    if(wDevToolsLoader.window) {
+      console.info("release window resources: dev tools")
+      NativeHelpers.releaseWindowResources(wDevToolsLoader.window)
+    }
+    if(dashboard.window) {
+      console.info("release window resources: dashboard")
+      NativeHelpers.releaseWindowResources(dashboard.window)
+    }
+    console.info("running GC")
+    gc()
+    console.info("Trim and GC complete")
+  }
+
+  // Ctrl+Shift+G runs all the cleanup and garbage collection.  This is mainly
+  // for dev but there's no harm having the shortcut around all the time.  We
+  // don't really want to require opening dev tools to do this, since we
+  // normally use it to see if something has left around a bunch of GC-able
+  // memory, and opening dev tools itself consumes a lot of memory.
+  property var gcShortcut: Shortcut {
+    sequence: "Ctrl+Shift+G"
+    context: Qt.ApplicationShortcut
+    onActivated: cleanUpResources()
+  }
+
+  // Clean up when LoaderCleaner triggers it due to Loaders having deactivated
+  property var loaderCleanerConnections: Connections {
+    target: LoaderCleaner
+    function onCleanupTriggered() {
+      cleanUpResources()
+    }
   }
 }

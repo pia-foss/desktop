@@ -37,6 +37,7 @@ SplitTunnelRowBase {
 
   property bool showAppIcons: true
   property string appPath
+  property string linkTarget
 
   // Mode [exclude/include]
   property string appMode
@@ -172,6 +173,9 @@ SplitTunnelRowBase {
         // There isn't anything meaningful we can display for a UWP app
         if(appPath.startsWith("uwp:"))
           return uiTr("Microsoft Store app")
+        if (linkTarget) {
+          return linkTarget.replace(/\//g, '\\')
+        }
 
         // Normalize to backslashes on Windows.  The backend tolerates
         // either, but slashes look out of place on Windows.

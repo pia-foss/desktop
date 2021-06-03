@@ -23,6 +23,7 @@ import QtQuick.Window 2.10
 import PIA.NativeHelpers 1.0
 import '../theme'
 import '../common'
+import '../core'
 
 SecondaryWindow {
   id: onboardingWindow
@@ -41,9 +42,13 @@ SecondaryWindow {
 
   visible: false
 
-  PageController {
-      id: pageController
-      width: contentLogicalWidth
-      height: contentLogicalHeight
+  Loader {
+    id: pageControllerLoader
+    width: contentLogicalWidth
+    height: contentLogicalHeight
+    // We don't need to apply onboardingWindow.positioningForShow here,
+    // because this window's size doesn't depend on the content.
+    active: onboardingWindow.visible
+    sourceComponent: Component { PageController {} }
   }
 }

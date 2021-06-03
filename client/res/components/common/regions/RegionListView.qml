@@ -493,7 +493,7 @@ Rectangle {
       // The country has more than one region, and the country name doesn't
       // match.  Filter the individual regions.
       else {
-        var filteredRegions = countries[i].locations.filter(function(loc) {
+        var filteredRegions = filteredLocations.filter(function(loc) {
           return matchesSearchTerm(Daemon.getLocationName(loc))
         })
         // If at least one region matched, include the country with the filtered

@@ -46,6 +46,16 @@ PiaWindow {
   readonly property real actualLogicalWidth: maxSize.effectiveSize.width
   readonly property real actualLogicalHeight: maxSize.effectiveSize.height
 
+  // Indicator that we're sizing and centering the window just before it's
+  // shown.  Most PIA windows try to unload some or all of their content when
+  // they're not being shown.  Just binding Loader.active to Window.visible
+  // nearly works, _except_ when we need the content to determine the window's
+  // size just before it's centered and shown.
+  //
+  // If the content is needed to determine the window size, load the content
+  // when either Window.active or DecoratedWindow.positioningForShow is true.
+  property bool positioningForShow: false
+
   // Properties provided by all top-level windows - see DashboardPopup
 
   // Content scale - needed for some overlay-layer components.
@@ -130,6 +140,13 @@ PiaWindow {
     }
   }
 
+  property var centerWindowTimer: Timer {
+    interval: 0
+    repeat: false
+    running: false
+    onTriggered: decoratedWindow.centerOnActiveScreen()
+  }
+
   // Replacement for show() that additionally positions the window and raises it,
   // which is normally what you want for a secondary modeless dialog window.
   function open() {
@@ -138,7 +155,10 @@ PiaWindow {
       // Going to position the window based on its size, the scale and size must
       // be initialized before we do this (needed for Linux)
       NativeHelpers.initScaling()
-      centerOnActiveScreen();
+      // If the content is loaded dynamically, tell the window that we're
+      // centering so the content is loaded
+      positioningForShow = true
+      centerOnActiveScreen()
 
       // If the window isn't visible already and doesn't have a focused control,
       // focus the first focusable control.  (Keep the existing focus if there
@@ -155,6 +175,8 @@ PiaWindow {
     // whereas requestActivate() does the trick on Windows.
     raise();
     requestActivate();
+    // The window is now visible, we're done positioning for the initial show
+    positioningForShow = false
   }
 
   function getScreenContainingMouseCursor() {

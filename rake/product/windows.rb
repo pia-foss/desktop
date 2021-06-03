@@ -322,6 +322,9 @@ module PiaWindows
         Executable.new("#{Build::Brand}-closegui")
             .source('tools/closegui')
             .install(toolsStage, :bin)
+        Executable.new("win-httpstunnel")
+            .source('tools/win-httpstunnel')
+            .install(toolsStage, :bin)
     end
 
     def self.collectSymbols(version, stage, debugSymbols)

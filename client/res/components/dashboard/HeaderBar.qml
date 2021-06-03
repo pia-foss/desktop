@@ -401,9 +401,9 @@ Item {
     target: Daemon.account
     function onLoggedInChanged() {
       if (!Daemon.account.loggedIn) {
-        pm.setPage('login')
+        pm.setPage(pm.pageIndices.login)
       } else {
-        pm.setPage('connect')
+        pm.setPage(pm.pageIndices.connect)
       }
     }
   }

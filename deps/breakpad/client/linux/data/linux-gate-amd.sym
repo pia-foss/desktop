@@ -1,3 +1,3 @@
-MODULE Linux x86 B8CFDE93002D54DA1900A40AA1BD67690 linux-gate.so
-PUBLIC 400 0 __kernel_vsyscall
-STACK WIN 4 400 100 1 1 0 0 0 0 0 1
+version https://git-lfs.github.com/spec/v1
+oid sha256:240e0f7005f84106d7ae89d6fd10e4b9b819e1c240328a9cae4a9ee657bac619
+size 132

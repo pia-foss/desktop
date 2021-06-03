@@ -1,5 +1,16 @@
 # Changelog
 
+### v2.10.0
+* Reduced memory and CPU usage of the graphical client
+* The split tunnel UI on Windows now displays executable paths instead of link paths for Start Menu apps
+* WireGuard now works correctly on macOS and Linux when jumbo frames are enabled on the network interface
+* The PIA daemon on Linux no longer writes to stderr when run as a service to avoid flooding system logs
+* In-app updates on Linux now detect xfce4-terminal on systems without an x-terminal-emulator symlink
+* Fixed a crash on Windows caused by some older OpenGL drivers
+* Fixed an install issue on Linux that prevented creation of the piavpn group in some cases
+* Fixed an issue causing the support tool to appear more than once on Linux in some cases
+* Fixed libxcb dependencies in Linux arm64 build
+
 ### v2.9.0
 * Updated to OpenVPN 2.5.1 and OpenSSL 1.1.1k
 * Improved accessibility of the "Add Automation Rule" dialog

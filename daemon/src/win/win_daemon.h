@@ -231,9 +231,6 @@ private:
     // some circumstances.
     void checkWintunInstallation();
 
-    // Trace memory usage of client processes.
-    void traceClientMemory();
-
 public:
     // WireguardServiceBackend calls these methods to hint to us to consider
     // re-checking the WinTUN installation state.
@@ -330,9 +327,6 @@ protected:
     WinAppMonitor _appMonitor;
 
     SubnetBypass _subnetBypass;
-
-    // Trace memory usage of client processes periodically
-    QTimer _clientMemTraceTimer;
 };
 
 #undef g_daemon

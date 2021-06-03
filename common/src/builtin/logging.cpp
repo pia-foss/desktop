@@ -596,6 +596,18 @@ static QString buildLogFilePrefix(QDateTime now, QtMsgType type,
 
 void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+#if defined(Q_OS_WIN)
+    // We force ANGLE in client/src/main.cpp to avoid Qt loading OpenGL, which
+    // crashes on certain buggy drivers.  However, this means that it logs
+    // errors relating to the failure to load OpenGL.  These can safely be
+    // ignored since we don't use OpenGL.
+    if(msg.startsWith("Failed to load libEGL") ||
+        msg.startsWith("QWindowsEGLStaticContext::create: Failed to load and resolve libEGL functions"))
+    {
+        return; // Silently ignore this trace
+    }
+#endif
+
     // Override with simpler endl; gets converted by text file handling anyway
     const char endl = '\n';
 

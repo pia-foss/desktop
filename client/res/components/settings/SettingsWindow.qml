@@ -37,8 +37,20 @@ import "./pages"
 SecondaryWindow {
   id: settings
 
-  contentLogicalWidth: tabLayout.item.implicitWidth
-  contentLogicalHeight: tabLayout.item.implicitHeight
+  // The Settings window's size is determined by its content (it can depend on
+  // the size of translations), but the content is unloaded when the window
+  // isn't shown.
+  //
+  // When the content is loaded, use the content's size.  This happens in the
+  // right order when the window is shown, the initial "dummy" size isn't
+  // displayed.
+  //
+  // When the content is unloaded, remember the last size it reported.  This
+  // _is_ important to preserve the window size as it's being hidden; if we
+  // reverted to a dummy size when the content was unloaded, the dummy size
+  // would be visible during the "close" animation from the window manager.
+  contentLogicalWidth: 200
+  contentLogicalHeight: 200
 
   // The "dedicated IP" page currently is shown based on a feature toggle, or
   // if any dedicated IPs have already been added.
@@ -148,7 +160,7 @@ SecondaryWindow {
   function selectPage(id) {
     var index = pages.findIndex(page => page.name === id)
     if(index >= 0)
-      tabLayout.item.selectPage(index)
+      Client.uiState.settings.currentPage = index
   }
 
   property var currentAlert
@@ -211,12 +223,21 @@ SecondaryWindow {
   function showSettings() {
     open()
   }
+    
+  function updateWindowSize() {
+    if(tabLayout.item) {
+      settings.contentLogicalWidth = tabLayout.item.implicitWidth
+      settings.contentLogicalHeight = tabLayout.item.implicitHeight
+    }
+  }
 
   Component {
     id: hbarComponent
     HorizontalTabLayout {
       pages: settings.pages
       pageTitleFunc: getPageTitle
+      onImplicitWidthChanged: settings.updateWindowSize()
+      onImplicitHeightChanged: settings.updateWindowSize()
     }
   }
   Component {
@@ -225,6 +246,8 @@ SecondaryWindow {
       pages: settings.pages
       pageTitleFunc: getPageTitle
       pageHeadingFunc: getHeadingTitle
+      onImplicitWidthChanged: settings.updateWindowSize()
+      onImplicitHeightChanged: settings.updateWindowSize()
     }
   }
 
@@ -233,6 +256,8 @@ SecondaryWindow {
     sourceComponent: Theme.settings.horizontal ? hbarComponent : vbarComponent
     width: parent.width
     height: parent.height
+    active: settings.visible || settings.positioningForShow
+    onItemChanged: settings.updateWindowSize()
   }
 
   Component {

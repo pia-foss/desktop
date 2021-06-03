@@ -27,6 +27,7 @@
 #include <QWindow>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>
+#include <QQuickWindow>
 
 #ifdef Q_OS_WIN
 #include <QWinEventNotifier>
@@ -79,15 +80,19 @@ public:
 
     // Do native initialization on the popup-style dashboard window.
     // On OS X, sets the dashboard window to appear on all workspaces.
-    Q_INVOKABLE void initDashboardPopup(QWindow *pDashboard);
+    Q_INVOKABLE void initDashboardPopup(QQuickWindow *pDashboard);
 
     // Do native initialization on decorated windows - settings and changelog
     // windows (pretty much anything other than the popup dashboard).
     // On Windows, sets the window icons
-    Q_INVOKABLE void initDecoratedWindow(QWindow *pWindow);
+    Q_INVOKABLE void initDecoratedWindow(QQuickWindow *pWindow);
 
     // Stack the second item after the first.  See QQuickItem::stackAfter()
     Q_INVOKABLE void itemStackAfter(QQuickItem *pFirst, QQuickItem *pSecond);
+
+    // Release cached graphics resources owned by a window.  See
+    // QQuickWindow::releaseResources()
+    Q_INVOKABLE void releaseWindowResources(QQuickWindow *pWindow);
 
     // Get the client's build version.
     Q_INVOKABLE QString getClientVersion();
@@ -110,10 +115,10 @@ public:
 
     Q_INVOKABLE void setDockVisibility (bool enabled);
 
-// TODO: only ensure this runs on _DEBUG
-// #ifdef _DEBUG
     // Trigger a crash on the client. Used to test the crash handler
     Q_INVOKABLE void crashClient();
+
+    Q_INVOKABLE void trimComponentCache();
 
     // Write around 1 mb of dummy logs to test log overflow
     Q_INVOKABLE void writeDummyLogs();

@@ -334,6 +334,11 @@ int clientMain(int argc, char *argv[])
             qunsetenv("QT_D3D_ADAPTER_INDEX");
         }
     }
+    // In Qt 5.15.2, the 'threaded' render loop is still the default for RHI on
+    // D3D11, but it has threading issues with resource cleanup and can
+    // deadlock.  This was changed in 6.0, the 'basic' render loop is now
+    // always used for RHI/D3D11.
+    qputenv("QSG_RENDER_LOOP", "basic");
     // The environment variables above must be set before setting the scene
     // graph backend, this causes Qt Quick to create the RHI interface, which
     // checks the environment then.
@@ -357,6 +362,20 @@ int clientMain(int argc, char *argv[])
     // This has to occur before creating the QApplication.
     LinuxEnv::preAppInit();
     linuxLanguagePreAppInit();
+#endif
+
+#ifdef Q_OS_WIN
+    // D3D is forced on Windows, but Qt may still load OpenGL just to check for
+    // some driver workarounds, which causes a crash on certain buggy drivers.
+    //
+    // This env var avoids the test and crash, which don't matter for us since
+    // we use D3D.  This is the only value that always avoids it; "software"
+    // or "desktop" both can still end up doing the test.
+    //
+    // This means that Qt will fail to load OpenGL since we do not actually
+    // ship ANGLE, which is fine - it handles the static GL context gracefully,
+    // and we don't use OpenGL otherwise.
+    ::qputenv("QT_OPENGL", QByteArrayLiteral("angle"));
 #endif
 
     PiaClientApplication app{argc, argv};
@@ -389,7 +408,7 @@ int clientMain(int argc, char *argv[])
     QGuiApplication::setApplicationDisplayName(QStringLiteral(PIA_PRODUCT_NAME));
     QGuiApplication::setQuitOnLastWindowClosed(false);
 
-    AppSingleton runGuard(Path::ClientExecutable);
+    AppSingleton runGuard;
     qint64 runningInstancePid = runGuard.isAnotherInstanceRunning();
     if(runningInstancePid > 0) {
         qWarning () << "Exiting because another instance appears to be running";

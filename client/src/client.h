@@ -255,6 +255,9 @@ public:
     void handleURL (const QString &url);
     void checkForURL();
 
+    // Trim the QML component cache.
+    void trimComponentCache() {_engine.trimComponentCache();}
+
     IMPLEMENT_NOTIFICATIONS(Client)
 
 private:

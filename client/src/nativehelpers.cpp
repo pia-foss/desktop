@@ -22,6 +22,7 @@
 #include "nativehelpers.h"
 #include "balancetext.h"
 #include "clientsettings.h"
+#include "client.h"
 #include "path.h"
 #include "version.h"
 #include "brand.h"
@@ -160,7 +161,7 @@ NativeHelpers::NativeHelpers()
         &NativeHelpers::logToFileChanged);
 }
 
-void NativeHelpers::initDashboardPopup(QWindow *pDashboard)
+void NativeHelpers::initDashboardPopup(QQuickWindow *pDashboard)
 {
     if(!pDashboard)
     {
@@ -180,13 +181,19 @@ void NativeHelpers::initDashboardPopup(QWindow *pDashboard)
 #endif
 }
 
-void NativeHelpers::initDecoratedWindow(QWindow *pWindow)
+void NativeHelpers::initDecoratedWindow(QQuickWindow *pWindow)
 {
     if(!pWindow)
     {
         qWarning() << "Invalid value for pWindow in initDecoratedWindow()";
         return;
     }
+
+    // Tell Qt to release any resources that it can when they're not needed.
+    // It's normal to run PIA in the background for a long time with no
+    // windows open, try not to hog resources.
+    pWindow->setPersistentSceneGraph(false);
+    pWindow->setPersistentOpenGLContext(false);
 
 #if defined(Q_OS_WIN)
     winSetIcon(*pWindow);
@@ -204,6 +211,14 @@ void NativeHelpers::itemStackAfter(QQuickItem *pFirst, QQuickItem *pSecond)
     }
 
     pSecond->stackAfter(pFirst);
+}
+
+void NativeHelpers::releaseWindowResources(QQuickWindow *pWindow)
+{
+    // Tell Qt to release graphical resources for this window that are no
+    // longer needed.
+    if(pWindow)
+        pWindow->releaseResources();
 }
 
 QString NativeHelpers::getClientVersion()
@@ -325,7 +340,11 @@ void NativeHelpers::crashClient()
     testCrash();
 }
 
-
+void NativeHelpers::trimComponentCache()
+{
+    if(g_client)
+        g_client->trimComponentCache();
+}
 
 void NativeHelpers::writeDummyLogs()
 {

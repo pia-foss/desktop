@@ -22,6 +22,7 @@
 #include "util.h"
 #include "error.h"
 #include "path.h"
+#include "version.h"
 
 #ifdef PIA_CRASH_REPORTING
 #if defined(Q_OS_MACOS)
@@ -153,6 +154,19 @@ void setUtf8LocaleCodec()
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 }
 
+QString getVersionInfo()
+{
+    QString version_info;
+    QString timestamp = QDateTime::currentDateTime().toUTC().toString("yyyyMMddhhmmss");
+#if defined(PIA_CLIENT)
+    version_info = "client";
+#elif defined(PIA_DAEMON)
+    version_info = "daemon";
+#endif
+    version_info += QString("-") + PIA_VERSION + "-" + timestamp;
+    return version_info;
+}
+
 #ifdef PIA_CRASH_REPORTING
 
 
@@ -170,17 +184,22 @@ bool DumpCallback(const char *dump_dir,
                   void *context, bool succeeded) {
     Q_UNUSED(context);
 
-    QString path = QString::fromUtf8(dump_dir) + QLatin1String("/") + QString::fromUtf8(minidump_id) + ".dmp";
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(path));
+    QString old_path = QString::fromUtf8(dump_dir) + QLatin1String("/") +
+                       QString::fromUtf8(minidump_id) + ".dmp";
+    QString new_path = QString::fromUtf8(dump_dir) + QLatin1String("/") +
+                       getVersionInfo() + "-" +
+                       QString::fromUtf8(minidump_id) + ".dmp";
+    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
 
     if(succeeded) {
+        QFile::rename(old_path, new_path);
 #ifdef PIA_CLIENT
         startSupportTool(QStringLiteral("crash"), {});
 #endif
 
 #if defined(PIA_DAEMON)
-        QFile::setPermissions(path, QFileDevice::ReadUser|QFileDevice::ReadGroup);
+        QFile::setPermissions(new_path, QFileDevice::ReadUser|QFileDevice::ReadGroup);
 #endif
     }
     return succeeded;
@@ -196,10 +215,15 @@ bool DumpCallback(const wchar_t* dump_dir,
     Q_UNUSED(assertion);
     Q_UNUSED(exinfo);
 
-    QString path = QString::fromWCharArray(dump_dir) + QLatin1String("/") + QString::fromWCharArray(minidump_id) + ".dmp";
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(path));
+    QString old_path = QString::fromWCharArray(dump_dir) + QLatin1String("/") +
+                       QString::fromWCharArray(minidump_id) + ".dmp";
+    QString new_path = QString::fromWCharArray(dump_dir) + QLatin1String("/") +
+                       getVersionInfo() + "-" +
+                       QString::fromWCharArray(minidump_id) + ".dmp";
+    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
     if(succeeded) {
+        QFile::rename(old_path, new_path);
         startSupportTool("crash", {});
     }
 
@@ -209,12 +233,15 @@ bool DumpCallback(const wchar_t* dump_dir,
 bool DumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
                                     void* context,
                   bool succeeded) {
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", descriptor.path());
+    QString new_path = QString::fromUtf8(descriptor.directory().c_str()) + QLatin1String("/") +
+                       getVersionInfo() + ".dmp";
+    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
     if(succeeded) {
 #if defined(PIA_DAEMON)
         QFile::setPermissions(descriptor.path(), QFileDevice::ReadUser|QFileDevice::ReadGroup);
 #endif
+        QFile::rename(descriptor.path(), new_path);
         startSupportTool("crash", {});
     }
 
@@ -288,7 +315,7 @@ void monitorDaemonDumps()
                 // to write diagnostics, but this would be relatively complex to handle
                 // all the possibilities of it failing and ensure that we still report
                 // the problem.
-                startSupportTool(QStringLiteral("crash"), {});
+                startSupportTool(QStringLiteral("logs"), {});
                 break;
             }
         }

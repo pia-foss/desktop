@@ -140,27 +140,15 @@ void PayloadBuilder::addFile(const QString &fullPath)
 void PayloadBuilder::addClientDumpFile(const QString &fullPath)
 {
     QFileInfo fi(fullPath);
-    // For the dump file, there's no way to tell exactly when the crash happened
-    // from the dmp file itself.
-    // Instead of including a separate manifest containing this meta data, for now
-    // we can re-name the file to include the timestamp
-
-    //
-    // Also, some platforms (like Linux) doesn't always support timestamps on the
-    // filesystems. So we include a random string in the filename so
-    // there's always a valid filename. The first 5 characters of the filename
-    // should be good enough
-    addFileToPayload(fullPath, QStringLiteral("client-crash/%1-%2.dmp")
-                     .arg(fi.fileName().left(5))
-                     .arg(fi.birthTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss"))));
+    addFileToPayload(fullPath, QStringLiteral("client-crash/%1.dmp")
+                     .arg(fi.fileName()));
 }
 
 void PayloadBuilder::addDaemonDumpFile(const QString &fullPath)
 {
     QFileInfo fi(fullPath);
-    addFileToPayload(fullPath, QStringLiteral("daemon-crash/%1-%2.dmp")
-                     .arg(fi.fileName().left(5))
-                     .arg(fi.birthTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss"))));
+    addFileToPayload(fullPath, QStringLiteral("daemon-crash/%1.dmp")
+                     .arg(fi.fileName()));
 }
 
 void PayloadBuilder::addFileToPayload(const QString &sourcePath, const QString &targetName)

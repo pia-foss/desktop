@@ -36,177 +36,199 @@ DecoratedWindow {
   color: Theme.dashboard.backgroundColor
 
   readonly property real contentMargin: 20
-  windowLogicalWidth: newsContent.width
-  windowLogicalHeight: newsContent.height + tabBar.height
+  readonly property real contentWidth: 680
+  windowLogicalWidth: contentWidth
+  // Just like SettingsWindow, the content of this window is only loaded when
+  // needed, so the window size is set when the content becomes active, or when
+  // the content's size changes (possible when changing language).  (Unlike
+  // SettingsWindow, this window's width is fixed, only the height changes.)
+  windowLogicalHeight: 200
 
   // Default to the actual changelog since we haven't updated What's New in
   // some time.
   property int activePage: 1
   readonly property int pageCount: 2
 
+  function updateWindowSize() {
+    if(contentLoader.item)
+      changelog.windowLogicalHeight = contentLoader.item.contentHeight
+  }
+
+  Loader {
+    id: contentLoader
+    anchors.fill: parent
+    active: changelog.visible || changelog.positioningForShow
+    sourceComponent: contentComponent
+    onItemChanged: changelog.updateWindowSize()
+  }
+
   // Have to wrap everything in an Item so we can attach a Keys.onPressed
   // handler that covers both the tabs and the content
-  Item {
-    anchors.fill: parent
+  Component {
+    id: contentComponent
+      Item {
+      readonly property int contentHeight: newsContent.height + tabBar.height
+      onContentHeightChanged: changelog.updateWindowSize()
 
-    Rectangle {
-      id: tabBar
-      color: Theme.changelog.tabBackgroundColor
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.top: parent.top
-      height: 40
-
-      // Highlight indicator
       Rectangle {
-        readonly property var currentItem: {
-          // Depend on tabsRepeater's children (both these are needed to ensure
-          // the bindings are reevaluated)
-          var dummy = tabsRepeater.children
-          var dummy2 = tabsRepeater.count
-          return tabsRepeater.itemAt(changelog.activePage)
-        }
-        x: tabsRow.x + (currentItem ? currentItem.x : 0)
-        y: tabBar.height - height
-        width: currentItem ? currentItem.width : 10
-        height: 2
-        color: Theme.changelog.tabHighlightColor
+        id: tabBar
+        color: Theme.changelog.tabBackgroundColor
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 40
 
-        Behavior on x {
-          SmoothedAnimation {
-            duration: 200
+        // Highlight indicator
+        Rectangle {
+          readonly property var currentItem: {
+            // Depend on tabsRepeater's children (both these are needed to ensure
+            // the bindings are reevaluated)
+            var dummy = tabsRepeater.children
+            var dummy2 = tabsRepeater.count
+            return tabsRepeater.itemAt(changelog.activePage)
           }
-          enabled: changelog.visible
-        }
-        Behavior on width {
-          SmoothedAnimation {
-            duration: 200
-          }
-          enabled: changelog.visible
-        }
-      }
+          x: tabsRow.x + (currentItem ? currentItem.x : 0)
+          y: tabBar.height - height
+          width: currentItem ? currentItem.width : 10
+          height: 2
+          color: Theme.changelog.tabHighlightColor
 
-      Row {
-        id: tabsRow
-        x: 23
-        y: 12
-        height: parent.height - y
-
-        NativeAcc.TabList.name: changelog.title
-
-        spacing: 16
-        activeFocusOnTab: true
-
-        Repeater {
-          id: tabsRepeater
-          model: [
-            // Don't actually translate the content of the model; this avoids
-            // rebuilding the repeater content when the language changes
-            {label: QT_TR_NOOP("What's new")},
-            {label: QT_TR_NOOP("Changelog")}
-          ]
-
-          Item {
-            id: tabBound
-
-            width: tabText.width + tabText.x*2
-            height: parent.height
-            readonly property int tabIndex: index
-
-            NativeAcc.Tab.name: tabText.text
-            NativeAcc.Tab.checked: changelog.activePage === tabIndex
-            NativeAcc.Tab.onActivated: mouseClick()
-
-            function mouseClick() {
-              tabsRow.forceActiveFocus(Qt.MouseFocusReason)
-              changelog.activePage = tabIndex
+          Behavior on x {
+            SmoothedAnimation {
+              duration: 200
             }
-
-            Text {
-              id: tabText
-              x: 3 // sets both horizontal margins due to tabBound.width calculation
-              y: (tabBound.height - height)/2
-              color: Theme.changelog.tabTextColor
-              text: uiTr(modelData.label)
-              font.pixelSize: 12
+            enabled: changelog.visible
+          }
+          Behavior on width {
+            SmoothedAnimation {
+              duration: 200
             }
-            MouseArea {
-              anchors.fill: parent
-              onClicked: mouseClick()
+            enabled: changelog.visible
+          }
+        }
+
+        Row {
+          id: tabsRow
+          x: 23
+          y: 12
+          height: parent.height - y
+
+          NativeAcc.TabList.name: changelog.title
+
+          spacing: 16
+          activeFocusOnTab: true
+
+          Repeater {
+            id: tabsRepeater
+            model: [
+              // Don't actually translate the content of the model; this avoids
+              // rebuilding the repeater content when the language changes
+              {label: QT_TR_NOOP("What's new")},
+              {label: QT_TR_NOOP("Changelog")}
+            ]
+
+            Item {
+              id: tabBound
+
+              width: tabText.width + tabText.x*2
+              height: parent.height
+              readonly property int tabIndex: index
+
+              NativeAcc.Tab.name: tabText.text
+              NativeAcc.Tab.checked: changelog.activePage === tabIndex
+              NativeAcc.Tab.onActivated: mouseClick()
+
+              function mouseClick() {
+                tabsRow.forceActiveFocus(Qt.MouseFocusReason)
+                changelog.activePage = tabIndex
+              }
+
+              Text {
+                id: tabText
+                x: 3 // sets both horizontal margins due to tabBound.width calculation
+                y: (tabBound.height - height)/2
+                color: Theme.changelog.tabTextColor
+                text: uiTr(modelData.label)
+                font.pixelSize: 12
+              }
+              MouseArea {
+                anchors.fill: parent
+                onClicked: mouseClick()
+              }
+            }
+          }
+
+          Keys.onPressed: {
+            var pagesTranslated = tabsRepeater.model.map(function(page) {
+              return uiTr(page.label)
+            })
+            var nextIndex = KeyUtil.handleHorzKeyEvent(event, pagesTranslated,
+                                                       undefined,
+                                                       changelog.activePage)
+            if(nextIndex !== -1) {
+              changelog.activePage = nextIndex
+              tabsFocusCue.reveal()
             }
           }
         }
 
-        Keys.onPressed: {
-          var pagesTranslated = tabsRepeater.model.map(function(page) {
-            return uiTr(page.label)
-          })
-          var nextIndex = KeyUtil.handleHorzKeyEvent(event, pagesTranslated,
-                                                     undefined,
-                                                     changelog.activePage)
-          if(nextIndex !== -1) {
-            changelog.activePage = nextIndex
-            tabsFocusCue.reveal()
-          }
+        OutlineFocusCue {
+          id: tabsFocusCue
+          anchors.fill: tabsRow
+          control: tabsRow
         }
       }
 
-      OutlineFocusCue {
-        id: tabsFocusCue
-        anchors.fill: tabsRow
-        control: tabsRow
-      }
-    }
-
-    // Handle Ctrl+[Shift]+Tab anywhere in the tabs or the page content
-    Keys.onPressed: {
-      var nextIndex = KeyUtil.handleSettingsTabKeyEvent(event, changelog.activePage,
-                                                        changelog.pageCount)
-      if(nextIndex >= 0) {
-        changelog.activePage = nextIndex
-        // If this _was_ from the list view, show its focus; this has no effect if
-        // it isn't focused.
-        tabsFocusCue.reveal()
-      }
-    }
-
-    FocusScope {
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.top: tabBar.bottom
-      anchors.bottom: parent.bottom
-
-      StackLayout {
-        id: pagesStack
-        anchors.fill: parent
-        currentIndex: changelog.activePage
-        clip: true
-
-        WindowScrollView {
-          id: newsScrollView
-          contentWidth: newsContent.width
-          contentHeight: newsContent.height
-          label: uiTr("What's new")
-
-          WhatsNewContent {
-            id: newsContent
-            width: 680
-          }
+      // Handle Ctrl+[Shift]+Tab anywhere in the tabs or the page content
+      Keys.onPressed: {
+        var nextIndex = KeyUtil.handleSettingsTabKeyEvent(event, changelog.activePage,
+                                                          changelog.pageCount)
+        if(nextIndex >= 0) {
+          changelog.activePage = nextIndex
+          // If this _was_ from the list view, show its focus; this has no effect if
+          // it isn't focused.
+          tabsFocusCue.reveal()
         }
+      }
 
-        WindowScrollView {
-          id: changelogScrollView
-          contentWidth: changelogText.width
-          contentHeight: changelogText.height
-          label: uiTr("Changelog")
+      FocusScope {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: tabBar.bottom
+        anchors.bottom: parent.bottom
 
-          MarkdownPage {
-            id: changelogText
-            width: pagesStack.width
-            margins: contentMargin
-            fontPixelSize: 14
-            text: uiBrand(NativeHelpers.readResourceText("qrc:/CHANGELOG.md"))
-            color: Theme.dashboard.textColor
+        StackLayout {
+          id: pagesStack
+          anchors.fill: parent
+          currentIndex: changelog.activePage
+          clip: true
+
+          WindowScrollView {
+            id: newsScrollView
+            contentWidth: newsContent.width
+            contentHeight: newsContent.height
+            label: uiTr("What's new")
+
+            WhatsNewContent {
+              id: newsContent
+              width: 680
+            }
+          }
+
+          WindowScrollView {
+            id: changelogScrollView
+            contentWidth: changelogText.width
+            contentHeight: changelogText.height
+            label: uiTr("Changelog")
+
+            MarkdownPage {
+              id: changelogText
+              width: pagesStack.width
+              margins: contentMargin
+              fontPixelSize: 14
+              text: uiBrand(NativeHelpers.readResourceText("qrc:/CHANGELOG.md"))
+              color: Theme.dashboard.textColor
+            }
           }
         }
       }

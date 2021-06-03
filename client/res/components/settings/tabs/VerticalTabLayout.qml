@@ -24,6 +24,7 @@ import "../pages"
 import "../../theme"
 import "../../common"
 import "../../core"
+import "../../client"
 import "qrc:/javascript/keyutil.js" as KeyUtil
 import PIA.NativeAcc 1.0 as NativeAcc
 import PIA.NativeHelpers 1.0
@@ -39,10 +40,6 @@ FocusScope {
   anchors.fill: parent
   implicitWidth: Theme.settings.vbarWidth + Theme.settings.vbarContentLeftMargin + Theme.settings.contentWidth + Theme.settings.vbarContentRightMargin
   implicitHeight: Theme.settings.headingHeight + Theme.settings.vbarContentTopMargin + Theme.settings.contentHeight + Theme.settings.vbarContentBottomMargin
-
-  function selectPage(index) {
-    listView.currentIndex = index
-  }
 
   TabLayoutCommon {
     id: common
@@ -66,7 +63,11 @@ FocusScope {
   Rectangle {
     x: 0
     y: {
-      var currentItem = pagesRepeater.itemAt(listView.currentIndex)
+      // These dummy dependencies are needed to recalculate y when
+      // pagesRepeater.itemAt() changes while the tabs are loaded
+      var tabsDep = pagesRepeater.children
+      var tabsDep2 = pagesRepeater.count
+      var currentItem = pagesRepeater.itemAt(Client.uiState.settings.currentPage)
       return listView.y + (currentItem ? currentItem.y : 0)
     }
     width: Theme.settings.vbarWidth
@@ -97,7 +98,7 @@ FocusScope {
 
     activeFocusOnTab: true
 
-    property int currentIndex: 0
+    readonly property int currentIndex: Client.uiState.settings.currentPage
 
     Repeater {
       id: pagesRepeater
@@ -113,14 +114,14 @@ FocusScope {
 
         function mouseClick() {
           listView.forceActiveFocus(Qt.MouseFocusReason)
-          listView.currentIndex = index
+          Client.uiState.settings.currentPage = index
         }
 
         TabIcon {
           id: tabIcon
           x: 20
           anchors.verticalCenter: parent.verticalCenter
-          active: listView.currentIndex == index
+          active: listView.currentIndex === index
         }
         Text {
           id: tabText
@@ -145,7 +146,7 @@ FocusScope {
                                                  undefined,
                                                  listView.currentIndex)
       if(nextIndex !== -1) {
-        listView.currentIndex = nextIndex
+        Client.uiState.settings.currentPage = nextIndex
         focusCue.reveal()
       }
     }
@@ -191,6 +192,7 @@ FocusScope {
               source: "../pages/" + modelData.component
               width: parent.width
               height: parent.height
+              active: visible
             }
           }
           Layout.fillWidth: true
@@ -216,7 +218,7 @@ FocusScope {
     var nextIndex = KeyUtil.handleSettingsTabKeyEvent(event, listView.currentIndex,
                                                       pagesRepeater.count)
     if(nextIndex >= 0) {
-      listView.currentIndex = nextIndex
+      Client.uiState.settings.currentPage = nextIndex
       // If this _was_ from the list view, show its focus; this has no effect if
       // it isn't focused.
       focusCue.reveal()
