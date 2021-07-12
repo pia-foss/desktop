@@ -19,6 +19,7 @@
 #include "daemon/src/apiclient.h"
 #include "testshim.h"
 #include "src/mocknetwork.h"
+#include "src/callbackspy.h"
 #include <QtTest>
 
 namespace TestData {
@@ -39,71 +40,29 @@ const QByteArray success{R"(
 }
 )"};
 
-// Check that a QSignalSpy has exactly one signal; print a message if it doesn't.
-bool checkSingle(const QSignalSpy &spy)
+// Check a success result in a completed signal spy for the specific port value
+// above
+bool checkSuccessPort(const CallbackSpy &resultSpy)
 {
-    if(spy.size() != 1)
-    {
-        qWarning() << "Got" << spy.size() << "signals, expected 1";
-        return false;
-    }
+    return resultSpy.checkSuccessJson([](const QJsonDocument &resultJson)
+        {
+            // Check the arbitrary value in the response
+            const auto &replyPort = resultJson[QStringLiteral("port")].toInt();
+            if(replyPort != successPort)
+            {
+                qWarning() << "Unexpected JSON result:" << resultJson.toJson();
+                return false;
+            }
 
-    return true;
-}
-
-// Check the error code of an ApiClient result.
-bool checkError(const QSignalSpy &resultSpy, Error::Code code)
-{
-    if(!checkSingle(resultSpy))
-        return false;
-
-    // Verify that the Error code is correct.
-    //
-    // This is also used for success to check that the error code is Success.
-    // QVariant::value() returns a default constructed value if the value isn't
-    // of the expected type, so make sure it's really an Error to ensure that an
-    // unexpected type results in a failure in that case.
-    if(!resultSpy[0][0].canConvert<Error>())
-    {
-        qWarning() << "Result wasn't an error, expected code" << code << "- got"
-            << resultSpy[0][0];
-        return false;
-    }
-
-    if(resultSpy[0][0].value<Error>().code() != code)
-    {
-        qWarning() << "Expected error code" << code << "- got"
-            << resultSpy[0][0].value<Error>();
-        return false;
-    }
-
-    return true;
-}
-
-// Check a success result in a completed signal spy
-bool checkSuccess(const QSignalSpy &resultSpy)
-{
-    // Verify that the Error is Success.
-    if(!checkError(resultSpy, Error::Code::Success))
-        return false;
-
-    QJsonDocument resultJson = resultSpy[0][1].value<QJsonDocument>();
-    // Check the arbitrary value in the response
-    const auto &replyPort = resultJson[QStringLiteral("port")].toInt();
-    if(replyPort != successPort)
-    {
-        qWarning() << "Unexpected JSON result:" << resultJson.toJson();
-        return false;
-    }
-
-    return true;
+            return true;
+        });
 }
 
 // Check that a mock reply was consumed with the right hostname (used when
 // verifying the API base memory)
 bool checkConsumedHost(const QSignalSpy &consumedSpy, const QString &host)
 {
-    if(!checkSingle(consumedSpy))
+    if(consumedSpy.size() != 1)
         return false;
 
     const auto &url = consumedSpy[0][0].value<QNetworkRequest>().url();
@@ -117,69 +76,6 @@ bool checkConsumedHost(const QSignalSpy &consumedSpy, const QString &host)
 }
 
 }
-
-// Adapt a callback to a QObject signal so it can be spied in unit tests; used
-// to implement CallbackSpy.
-class CallbackAdapter : public QObject
-{
-    Q_OBJECT
-
-public:
-    // The callback functor returned by callback() - this is movable/copiable;
-    // when called it causes CallbackAdapter::called() to be emitted
-    class Callback
-    {
-    public:
-        Callback(CallbackAdapter &adapter) : _pAdapter{&adapter} {}
-        // Callback for non-void results
-        template<class ResultT>
-        void operator()(const Error &err, const ResultT &result) const
-        {
-            if(_pAdapter)
-                emit _pAdapter->called(err, QVariant::fromValue(result));
-        }
-        // Callback for void results
-        void operator()(const Error &err) const
-        {
-            if(_pAdapter)
-                emit _pAdapter->called(err, {});
-        }
-    private:
-        QPointer<CallbackAdapter> _pAdapter;
-    };
-
-signals:
-    // Spy on the 'called' signal to observe when a callback is called.
-    // QObject doesn't support templates, so the result here is in a QVariant.
-    // This is normally used with QSignalSpy, so this doesn't really impact
-    // usability.
-    void called(const Error &err, const QVariant &result);
-
-public:
-    // Pass the object returned by callback() to a method expecting a callback
-    // functor
-    Callback callback() {return {*this};}
-};
-
-// Spy on a callback.
-// Use callback() to get a callback functor to pass to an API, and use spy() to
-// get the QSignalSpy hooked up to that callback.
-// Also a QObject so it can be used as the owning object for callback.
-class CallbackSpy : public QObject
-{
-public:
-    CallbackSpy()
-        : _adapter{}, _spy{&_adapter, &CallbackAdapter::called}
-    {}
-
-public:
-    auto callback() {return _adapter.callback();}
-    QSignalSpy &spy() {return _spy;}
-
-private:
-    CallbackAdapter _adapter;
-    QSignalSpy _spy;
-};
 
 // An ApiClient with its own Environment.
 class TestApiClient : public DaemonState, public Environment, public ApiClient
@@ -232,7 +128,7 @@ private slots:
         pReply4->finishNetError();
 
         // Make sure we got a rate limiting error.
-        QVERIFY(TestData::checkError(resultSpy.spy(), Error::Code::ApiRateLimitedError));
+        QVERIFY(resultSpy.checkError(Error::Code::ApiRateLimitedError));
     }
 
     // Test an auth error.
@@ -264,7 +160,7 @@ private slots:
         pReply3->finishAuthError();
 
         // Make sure we got a rate limiting error.
-        QVERIFY(TestData::checkError(resultSpy.spy(), Error::Code::ApiUnauthorizedError));
+        QVERIFY(resultSpy.checkError(Error::Code::ApiUnauthorizedError));
     }
 
     // Test that ApiClient remembers the last successful API base.
@@ -299,7 +195,7 @@ private slots:
         // Success on the alternate host
         emit pHeadReply2->finished();
         // Just check that the error code is Success, there's no result for HEAD
-        QVERIFY(TestData::checkError(headSpy.spy(), Error::Code::Success));
+        QVERIFY(headSpy.checkSuccess());
 
         // Now, do a GET and verify that it starts on piaproxy.net.
         CallbackSpy getSpy;
@@ -311,7 +207,7 @@ private slots:
         consumeSpy.clear();
 
         emit pGetReply->finished();
-        QVERIFY(TestData::checkSuccess(getSpy.spy()));
+        QVERIFY(TestData::checkSuccessPort(getSpy));
     }
 };
 

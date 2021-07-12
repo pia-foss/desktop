@@ -102,24 +102,27 @@ namespace CliHarness
         execute({"disconnect"});
     }
 
-    void resetSettings(bool enableLogging)
-    {
-        execute({"resetsettings"});
-        if(enableLogging)
-            execute({"set", "debuglogging", "true"});
-    }
-
     QString get(const QString &type)
     {
         return executeWithOutput({"get", type});
+    }
+
+    void set(const QString &type, const QString &value)
+    {
+        execute({"set", type, value});
     }
 
     void applySetting(const QString &name, const QJsonValue &value)
     {
         QJsonObject settings;
         settings.insert(name, value);
-        auto settingsJson = QJsonDocument{settings}.toJson(QJsonDocument::JsonFormat::Compact);
-        execute({"--unstable", "applysettings", settingsJson});
+        applySettings(settings);
+    }
+
+    void applySettings(const QJsonObject &settings)
+    {
+        execute({"--unstable", "applysettings",
+            QJsonDocument{settings}.toJson(QJsonDocument::JsonFormat::Compact)});
     }
 
     bool waitFor(const QString &monitorType, const QString &value,

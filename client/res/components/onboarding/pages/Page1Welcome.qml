@@ -22,6 +22,7 @@ import QtQuick.Layouts 1.3
 import "../../theme"
 import "../../common"
 import "../../core"
+import "../../client"
 import PIA.NativeHelpers 1.0
 
 Item {
@@ -37,46 +38,29 @@ Item {
     y: 98
     label: NativeHelpers.productName
     source: Theme.onboarding.logoImage
-    width: 368
-    height: 38
-    anchors.horizontalCenter: parent.horizontalCenter
+    readonly property double scaleFactor: 0.6
+    width: sourceSize.width * scaleFactor
+    height: sourceSize.height * scaleFactor
+    anchors.left: parent.left
+    anchors.leftMargin: 286
   }
 
   Image {
     y: 219
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 130
-    height: 134
+    readonly property double scaleFactor: 0.5 * 0.5 // Source image is at 2x. Scale down by additional 50% to compensate
+    width: sourceSize.width * scaleFactor
+    height: sourceSize.height * scaleFactor
     source: Theme.onboarding.spacemanImage
   }
 
-  Item {
+  PagePrimaryButton {
     focus: true
     y: 402
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 268
-    height: 48
-
-    Image {
-      anchors.fill: parent
-      source: Theme.onboarding.primaryButtonImage
-    }
-
-    Text {
-      id: quickTourText
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: uiTr("QUICK TOUR")
-      y: 13
-      color: Theme.onboarding.primaryButtonTextColor
-    }
-
-    ButtonArea {
-      anchors.fill: parent
-      name: quickTourText.text
-      cursorShape: Qt.PointingHandCursor
-      onClicked: {
-        currentPage = 1
-      }
+    text: uiTr("QUICK TOUR")
+    onClicked: {
+      Client.uiState.onboarding.currentPage = 1
     }
   }
 

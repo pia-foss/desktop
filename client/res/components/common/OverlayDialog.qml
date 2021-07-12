@@ -266,6 +266,8 @@ Dialog {
       }
 
       onClicked: {
+        if(exit.running)
+          this.disabled=true
         var buttonModel = button.buttonModel
 
         // The 'clicked' property seems to be lost on buttonModel, probably the

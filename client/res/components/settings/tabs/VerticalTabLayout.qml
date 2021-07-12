@@ -39,7 +39,7 @@ FocusScope {
   property var pageHeadingFunc
   anchors.fill: parent
   implicitWidth: Theme.settings.vbarWidth + Theme.settings.vbarContentLeftMargin + Theme.settings.contentWidth + Theme.settings.vbarContentRightMargin
-  implicitHeight: Theme.settings.headingHeight + Theme.settings.vbarContentTopMargin + Theme.settings.contentHeight + Theme.settings.vbarContentBottomMargin
+  implicitHeight: Theme.settings.headingHeight + Theme.settings.vbarContentTopMargin + stack.pageImplicitHeight + Theme.settings.vbarContentBottomMargin
 
   TabLayoutCommon {
     id: common
@@ -54,9 +54,9 @@ FocusScope {
     source: Theme.settings.vbarHeaderImage
     label: NativeHelpers.productName
     x: (Theme.settings.vbarWidth - width) / 2
-    y: 40
-    height: 24
-    width: 160
+    y: 25
+    height: sourceSize.height / 2
+    width: sourceSize.width / 2
   }
 
   // Highlight indicator
@@ -184,6 +184,10 @@ FocusScope {
         anchors.rightMargin: Theme.settings.vbarContentRightMargin
         anchors.bottomMargin: Theme.settings.vbarContentBottomMargin
         currentIndex: listView.currentIndex
+        readonly property int pageImplicitHeight: {
+          var page = pageContentRepeater.itemAt(currentIndex)
+          return page ? page.implicitHeight : Theme.settings.contentHeight
+        }
         Repeater {
           id: pageContentRepeater
           model: pages

@@ -93,15 +93,10 @@ namespace
     // Check for new messages
     const std::chrono::minutes appMessagesCheckInterval{10};
 
-    //Resource path used to retrieve regions
-    const QString regionsResource{QStringLiteral("vpninfo/servers?version=1002&client=x-alpha")};
-    const QString shadowsocksRegionsResource{QStringLiteral("vpninfo/shadowsocks_servers")};
-
-    // Resource path for the modern regions list.  This is a placeholder until
-    // this actually exists.
+    // Resource paths for various regions-related resource (relative to the API
+    // base)
+    const QString shadowsocksRegionsResource{QStringLiteral("shadow_socks")};
     const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v6")};
-
-    // Resource path for region meta
     const QString modernRegionMetaResource{QStringLiteral("vpninfo/regions/v2")};
 
     // Old default debug logging setting, 1.0 (and earlier) until 1.2-beta.2
@@ -376,15 +371,15 @@ Daemon::Daemon(QObject* parent)
     , _apiClient{}
     , _modernLatencyTracker{}
     , _portForwarder{_apiClient, _account, _state, _environment}
-    , _shadowsocksRefresher{QStringLiteral("Shadowsocks regions"),
-                            shadowsocksRegionsResource,
-                            regionsInitialLoadInterval, regionsRefreshInterval}
     , _modernRegionRefresher{QStringLiteral("modern regions"),
                              modernRegionsResource, regionsInitialLoadInterval,
                              regionsRefreshInterval}
     , _modernRegionMetaRefresher{QStringLiteral("modern regions meta"),
                              modernRegionMetaResource, regionsInitialLoadInterval,
                              modernRegionsMetaRefreshInterval}
+    , _shadowsocksRefresher{QStringLiteral("Shadowsocks regions"),
+                            shadowsocksRegionsResource,
+                            regionsInitialLoadInterval, regionsRefreshInterval}
     , _snoozeTimer(this)
     , _pendingSerializations(0)
 {
@@ -554,6 +549,7 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(writeDummyLogs));
     _methodRegistry->add(RPC_METHOD(crash));
     _methodRegistry->add(RPC_METHOD(refreshMetadata));
+    _methodRegistry->add(RPC_METHOD(sendServiceQualityEvents));
     _methodRegistry->add(RPC_METHOD(notifyClientActivate));
     _methodRegistry->add(RPC_METHOD(notifyClientDeactivate));
     _methodRegistry->add(RPC_METHOD(emailLogin));
@@ -618,12 +614,6 @@ Daemon::Daemon(QObject* parent)
     connect(&_environment, &Environment::overrideFailed, this,
             &Daemon::setOverrideFailed);
 
-    connect(&_shadowsocksRefresher, &JsonRefresher::contentLoaded, this,
-            &Daemon::shadowsocksRegionsLoaded);
-    connect(&_shadowsocksRefresher, &JsonRefresher::overrideActive, this,
-            [this](){Daemon::setOverrideActive(QStringLiteral("shadowsocks list"));});
-    connect(&_shadowsocksRefresher, &JsonRefresher::overrideFailed, this,
-            [this](){Daemon::setOverrideFailed(QStringLiteral("shadowsocks list"));});
     connect(&_modernRegionRefresher, &JsonRefresher::contentLoaded, this,
             &Daemon::modernRegionsLoaded);
     connect(&_modernRegionRefresher, &JsonRefresher::overrideActive, this,
@@ -637,6 +627,12 @@ Daemon::Daemon(QObject* parent)
             [this](){Daemon::setOverrideActive(QStringLiteral("modern regions meta"));});
     connect(&_modernRegionMetaRefresher, &JsonRefresher::overrideFailed, this,
             [this](){Daemon::setOverrideFailed(QStringLiteral("modern regions meta"));});
+    connect(&_shadowsocksRefresher, &JsonRefresher::contentLoaded, this,
+            &Daemon::shadowsocksRegionsLoaded);
+    connect(&_shadowsocksRefresher, &JsonRefresher::overrideActive, this,
+            [this](){Daemon::setOverrideActive(QStringLiteral("shadowsocks list"));});
+    connect(&_shadowsocksRefresher, &JsonRefresher::overrideFailed, this,
+            [this](){Daemon::setOverrideFailed(QStringLiteral("shadowsocks list"));});
 
     connect(this, &Daemon::daemonActivated, this, [this]() {
         // Reset override states since we are (re)activating
@@ -648,21 +644,21 @@ Daemon::Daemon(QObject* parent)
         _modernLatencyTracker.start();
         _dedicatedIpRefreshTimer.start();
         _checkForAppMessagesTimer.start();
-        _shadowsocksRefresher.startOrOverride(environment().getRegionsListApi(),
-                                              Path::LegacyShadowsocksOverride,
-                                              Path::LegacyShadowsocksBundle,
-                                              _environment.getRegionsListPublicKey(),
-                                              _data.cachedLegacyShadowsocksList());
         _modernRegionRefresher.startOrOverride(environment().getModernRegionsListApi(),
                                                Path::ModernRegionOverride,
                                                Path::ModernRegionBundle,
                                                _environment.getRegionsListPublicKey(),
-                                               _data.cachedModernRegionsList());
+                                               QJsonDocument{_data.cachedModernRegionsList()});
         _modernRegionMetaRefresher.startOrOverride(environment().getModernRegionsListApi(),
                                                Path::ModernRegionMetaOverride,
                                                Path::ModernRegionMetaBundle,
                                                _environment.getRegionsListPublicKey(),
-                                               _data.modernRegionMeta());
+                                               QJsonDocument{_data.modernRegionMeta()});
+        _shadowsocksRefresher.startOrOverride(environment().getModernRegionsListApi(),
+                                              Path::ModernShadowsocksOverride,
+                                              Path::ModernShadowsocksBundle,
+                                              _environment.getRegionsListPublicKey(),
+                                              QJsonDocument{_data.cachedModernShadowsocksList()});
         _updateDownloader.run(true, _environment.getUpdateApi());
 
         _memTraceTimer.start();
@@ -681,9 +677,9 @@ Daemon::Daemon(QObject* parent)
 
     connect(this, &Daemon::daemonDeactivated, this, [this]() {
         _updateDownloader.run(false, _environment.getUpdateApi());
-        _shadowsocksRefresher.stop();
         _modernRegionRefresher.stop();
         _modernRegionMetaRefresher.stop();
+        _shadowsocksRefresher.stop();
         _dedicatedIpRefreshTimer.stop();
         _modernLatencyTracker.stop();
         _checkForAppMessagesTimer.stop();
@@ -765,13 +761,24 @@ Daemon::Daemon(QObject* parent)
         connect(_pNetworkMonitor.get(), &NetworkMonitor::networksChanged,
                 &_automation, &Automation::setNetworks);
     }
-    // TODO - otherwise, need to indicate that automation rules are not available
 
     // Only keep the last 5 daemon crash dumps.
     // This is important as in rare circumstances the daemon could go into a
     // cycling crash loop and the dumps generated could fill up the user's available HD.
     auto daemonCrashDir = Path::DaemonDataDir / QStringLiteral("crashes");
     daemonCrashDir.cleanDirFiles(5);
+
+    _pServiceQuality.emplace(_apiClient, _environment, _account, _data,
+                             _settings.sendServiceQualityEvents() &&
+                             _data.hasFlag(QStringLiteral("service_quality_events")));
+    auto updateEventsEnabled = [this]()
+    {
+        _pServiceQuality->enable(_settings.sendServiceQualityEvents() &&
+                                 _data.hasFlag(QStringLiteral("service_quality_events")));
+    };
+    connect(&_settings, &DaemonSettings::sendServiceQualityEventsChanged, this,
+            updateEventsEnabled);
+    connect(&_data, &DaemonData::flagsChanged, this, updateEventsEnabled);
 }
 
 Daemon::~Daemon()
@@ -781,9 +788,7 @@ Daemon::~Daemon()
 
 void Daemon::reportError(Error error)
 {
-    // TODO: Send error event to all clients
     qCritical() << error;
-    _rpc->post(QStringLiteral("error"), error.toJsonObject());
 }
 
 OriginalNetworkScan Daemon::originalNetwork() const
@@ -917,7 +922,7 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
             // should still reflect the automation trigger.  All other
             // connection sources clear or update the trigger.
             auto automationLastTrigger = _state.automationLastTrigger();
-            Error err = connectVPN();
+            Error err = connectVPN(ServiceQuality::ConnectionSource::Manual);
             _state.automationLastTrigger(automationLastTrigger);
             if(err)
             {
@@ -934,7 +939,7 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
     }
 
     // If automation was just disabled, clear the current trigger rule (but
-    // don't change stage).  Although the current connection/disconnection was
+    // don't change state).  Although the current connection/disconnection was
     // caused by a trigger, it's odd if this stays around, and there's no way to
     // clear it other than manually disconnecting or connecting.
     if(wasAutomationEnabled && !_settings.automationEnabled())
@@ -954,26 +959,9 @@ void Daemon::RPC_resetSettings()
     // place (the needs-reconnect and chosen/next location state fields).
     QJsonObject defaultsJson = DaemonSettings{}.toJsonObject();
 
-    // Don't reset these values - remove them before applying the defaults
-
-    // Last daemon version - not a setting
-    defaultsJson.remove(QStringLiteral("lastUsedVersion"));
-
-    // Location - not presented as a "setting"
-    defaultsJson.remove(QStringLiteral("location"));
-
-    // Help page settings are not reset, as they were most likely changed for
-    // troubleshooting.
-    defaultsJson.remove(QStringLiteral("debugLogging"));
-    defaultsJson.remove(QStringLiteral("offerBetaUpdates"));
-
-    // Persist Daemon - not presented as a "setting"
-    defaultsJson.remove(QStringLiteral("persistDaemon"));
-
-    defaultsJson.remove(QStringLiteral("ratingEnabled"));
-    defaultsJson.remove(QStringLiteral("sessionCount"));
-
-    defaultsJson.remove(QStringLiteral("lastDismissedAppMessageId"));
+    // Some settings are excluded - remove them before applying the defaults
+    for(const auto &excludedSetting : DaemonSettings::settingsExcludedFromReset())
+        defaultsJson.remove(excludedSetting);
 
     RPC_applySettings(defaultsJson, false);
 }
@@ -1090,7 +1078,7 @@ void Daemon::RPC_dismissDedicatedIpChange()
 
 void Daemon::RPC_connectVPN()
 {
-    Error err = connectVPN();
+    Error err = connectVPN(ServiceQuality::ConnectionSource::Manual);
     // If we can't connect now (not logged in or daemon is inactive), forward
     // the error to the client.  The CLI has specific support for these errors.
     if(err)
@@ -1109,7 +1097,7 @@ void Daemon::RPC_disconnectVPN()
 {
     // There's no additional logic needed for a manual disconnect.  This can't
     // fail, we don't count these, etc.
-    disconnectVPN();
+    disconnectVPN(ServiceQuality::ConnectionSource::Manual);
 }
 
 void Daemon::RPC_startSnooze(qint64 seconds)
@@ -1372,6 +1360,11 @@ void Daemon::RPC_refreshMetadata()
     checkForAppMessages();
     refreshAccountInfo();
     _updateDownloader.refreshUpdate();
+}
+
+void Daemon::RPC_sendServiceQualityEvents()
+{
+    _pServiceQuality->sendEventsNow();
 }
 
 void Daemon::RPC_notifyClientActivate()
@@ -2041,8 +2034,8 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
         // reconnect.  Usually the request right after connecting covers this,
         // but this is still helpful in case we were not able to load the
         // resource then.
-        _shadowsocksRefresher.refresh();
         _modernRegionRefresher.refresh();
+        _shadowsocksRefresher.refresh();
     }
     else
     {
@@ -2091,8 +2084,8 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
             _portForwarder.updateConnectionState(PortForwarder::State::ConnectedUnsupported);
 
         // Perform a refresh immediately after connect so we get a new IP on reconnect.
-        _shadowsocksRefresher.refresh();
         _modernRegionRefresher.refresh();
+        _shadowsocksRefresher.refresh();
 
         // If we haven't obtained a token yet, try to do that now that we're
         // connected (the API is likely reachable through the tunnel).
@@ -2179,6 +2172,12 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     // we disconnect occasionally.
     if(state == VPNConnection::State::Connected)
         queueNotification(&Daemon::logRoutingTable);
+
+    // Inform ServiceQuality of the Connected and Disconnected states
+    if(state == VPNConnection::State::Connected)
+        _pServiceQuality->vpnConnected();
+    else if(state == VPNConnection::State::Disconnected)
+        _pServiceQuality->vpnDisconnected();
 
     queueApplyFirewallRules();
 }
@@ -2369,11 +2368,11 @@ void Daemon::applyBuiltLocations(const LocationsById &newLocations)
 }
 
 bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
-                                    const QJsonObject &legacyShadowsocksObj)
+                                    const QJsonArray &shadowsocksObj)
 {
     LocationsById newLocations = buildModernLocations(_data.modernLatencies(),
                                                       regionsObj,
-                                                      legacyShadowsocksObj,
+                                                      shadowsocksObj,
                                                       _account.dedicatedIps(),
                                                       _settings.manualServer());
 
@@ -2393,12 +2392,12 @@ bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
 void Daemon::rebuildActiveLocations()
 {
     rebuildModernLocations(_data.cachedModernRegionsList(),
-                            _data.cachedLegacyShadowsocksList());
+                            _data.cachedModernShadowsocksList());
 }
 
 void Daemon::shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc)
 {
-    const auto &shadowsocksRegionsObj = shadowsocksRegionsJsonDoc.object();
+    const auto &shadowsocksRegionsObj = shadowsocksRegionsJsonDoc.array();
 
     // It's unlikely that the Shadowsocks regions list could totally hose us,
     // but the same resiliency is here for robustness.
@@ -2406,13 +2405,13 @@ void Daemon::shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJso
     {
         qWarning() << "Shadowsocks location data could not be loaded.  Received"
             << shadowsocksRegionsJsonDoc.toJson();
-        // Don't update cachedLegacyShadowsocksList, keep the last content
+        // Don't update cachedModernShadowsocksList, keep the last content
         // (which might still be usable, the new content is no good).
         // Don't treat this as a successful load (don't notify JsonRefresher)
         return;
     }
 
-    _data.cachedLegacyShadowsocksList(shadowsocksRegionsObj);
+    _data.cachedModernShadowsocksList(shadowsocksRegionsObj);
     _shadowsocksRefresher.loadSucceeded();
 }
 
@@ -2420,8 +2419,11 @@ void Daemon::modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc)
 {
     const auto &modernRegionsObj = modernRegionsJsonDoc.object();
 
-    // As above, if this results in an empty list, don't cache the unusable data
-    if(!rebuildModernLocations(modernRegionsObj, _data.cachedLegacyShadowsocksList()))
+    // If this results in an empty list, don't cache the unusable data.  This
+    // would totally hose the client and more likely indicates a problem in the
+    // servers list - keep whatever content we had before even though it's
+    // older.
+    if(!rebuildModernLocations(modernRegionsObj, _data.cachedModernShadowsocksList()))
     {
         qWarning() << "Modern location data could not be loaded.  Received"
             << modernRegionsJsonDoc.toJson();
@@ -3452,7 +3454,7 @@ void Daemon::applyCurrentAutomationRule()
             qInfo() << "Connect now due to automation rule:" << currentRule;
             // connectVPN() can fail if no account is logged in, etc. - in that
             // case, trace that the trigger failed.
-            err = connectVPN();
+            err = connectVPN(ServiceQuality::ConnectionSource::Automatic);
         }
         else
         {
@@ -3477,7 +3479,7 @@ void Daemon::applyCurrentAutomationRule()
         }
         // Call disconnectVPN() even if the VPN is already disabled, because it
         // can also end a snooze.
-        disconnectVPN();
+        disconnectVPN(ServiceQuality::ConnectionSource::Automatic);
     }
     else
     {
@@ -3522,7 +3524,7 @@ void Daemon::onAutomationRuleTriggered(const nullable_t<AutomationRule> &current
     }
 }
 
-Error Daemon::connectVPN()
+Error Daemon::connectVPN(ServiceQuality::ConnectionSource source)
 {
     // Cannot connect when no active client is connected (there'd be no way for
     // the daemon to know if the user logs out, etc.)
@@ -3531,6 +3533,12 @@ Error Daemon::connectVPN()
     // Cannot connect when not logged in
     if(!_account.loggedIn())
         return {HERE, Error::Code::DaemonRPCNotLoggedIn};
+
+    // Note that for the rest of this logic, it is possible that the VPN is
+    // already enabled (_state.vpnEnabled() is already true).  We still want to
+    // apply most of the remaining logic, and in particular
+    // VpnConnection::connectVPN() will start a reconnect if one is needed to
+    // apply settings.
 
     // Stop any snooze that's active, since soemthing wants to connect the VPN.
     // If this _is_ due to snooze, it updates the snooze state again after we
@@ -3541,7 +3549,23 @@ Error Daemon::connectVPN()
 
     _state.vpnEnabled(true);
 
-    _connection->connectVPN(_state.needsReconnect());
+
+    // VpnConnection::connectVPN() returns false if the VPN was already
+    // enabled and no reconnect was needed.  In that case, do not log an
+    // attempt event, since this request had no effect.
+    if(_connection->connectVPN(_state.needsReconnect()))
+    {
+        // A new connection attempt started - either the VPN wasn't enabled, or
+        // it was and a reconnect was needed.
+        //
+        // If this is a reconnect while still connecting, the previous "attempt"
+        // event is left unresolved, since it was neither canceled nor
+        // established.
+        ServiceQuality::VpnProtocol protocol{ServiceQuality::VpnProtocol::OpenVPN};
+        if(_settings.method() == QStringLiteral("wireguard"))
+            protocol = ServiceQuality::VpnProtocol::WireGuard;
+        _pServiceQuality->vpnEnabled(protocol, source);
+    }
     _state.needsReconnect(false);
 
     // Clear any previous automation trigger since we've connected for some
@@ -3552,10 +3576,13 @@ Error Daemon::connectVPN()
     return {};
 }
 
-void Daemon::disconnectVPN()
+void Daemon::disconnectVPN(ServiceQuality::ConnectionSource source)
 {
     _snoozeTimer.forceStopSnooze();
     _state.vpnEnabled(false);
+
+    _pServiceQuality->vpnDisabled(source);
+
     _connection->disconnectVPN();
 
     // As in connectVPN(), clear any previous automation trigger.  If this
@@ -3587,10 +3614,20 @@ void logMetricsForProcessUnix (const QString &identifier, uint pid) {
         }
 
 }
-void logProcessMemoryUnix (const QString &identifier, const QString &name) {
+void logProcessMemoryUnix (const QString &identifier, const QString &name)
+{
     // Determine the PID of the process using pgrep
     QProcess pgrepProcess;
-    pgrepProcess.start(QStringLiteral("pgrep"), QStringList () << name);
+    QStringList pgrepArgs
+    {
+#ifdef Q_OS_MAC
+        // BSD pgrep by default excludes its own ancestors.  Since we use this
+        // to trace pia-daemon itself, include ancestors with -a
+        QStringLiteral("-a"),
+#endif
+        name
+    };
+    pgrepProcess.start(QStringLiteral("pgrep"), std::move(pgrepArgs));
     pgrepProcess.waitForFinished();
     // Found at-least one process
     if(pgrepProcess.exitCode() == 0) {
@@ -3752,7 +3789,13 @@ void SnoozeTimer::startSnooze(qint64 seconds)
 {
     qInfo() << "Starting snooze for" << seconds << "seconds";
     // Disconnect the VPN.  Note that this calls forceStopSnooze().
-    _daemon->disconnectVPN();
+    // This is considered an "automatic" disconnect even though "snooze" is a
+    // user interaction, because it doesn't likely indicate a problem if the
+    // connection was still in progress (which is probably unlikely to occur
+    // anyway for snooze).  The user didn't really ask to "disconnect", they
+    // asked to "snooze" and "disconnect" is just how we implement the first
+    // part of the snooze.
+    _daemon->disconnectVPN(ServiceQuality::ConnectionSource::Automatic);
     // Indicate that this disconnection is for snooze.
     g_state.snoozeEndTime(0);
     // Store the snooze length so we can start the timer after disconnect completes
@@ -3766,7 +3809,7 @@ void SnoozeTimer::stopSnooze()
     // (all other connections reset snooze - note that this calls
     // forceStopSnooze(), which also stops the snooze timer)
     auto snoozeEndTime = g_state.snoozeEndTime();
-    Error err = _daemon->connectVPN();
+    Error err = _daemon->connectVPN(ServiceQuality::ConnectionSource::Automatic);
     if(err)
     {
         // Can't resume from snooze, connect was not possible.  (Should rarely

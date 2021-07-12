@@ -94,12 +94,12 @@ Page {
       setting: ClientSetting { name: "iconSet" }
       info: {
         if(Client.settings.iconSet === "auto")
-          return uiTr("The 'Auto' setting chooses an icon based on your desktop theme.")
+          return uiTr("The 'System' setting chooses an icon based on your desktop theme.")
         return ""
       }
       model: {
         var themeNames = {
-          auto: uiTr("Auto", "icon-theme"),
+          auto: uiTr("System", "icon-theme"),
           light: uiTr("Light", "icon-theme"),
           dark: uiTr("Dark", "icon-theme"),
           colored: uiTr("Colored", "icon-theme"),
@@ -112,7 +112,8 @@ Page {
           return {
             name: themeNames[choice],
             value: choice,
-            icon: NativeHelpers.iconPreviewResource(choice)
+            icon: NativeHelpers.iconPreviewResource(choice),
+            backdropFlag: true
           }
         })
       }

@@ -137,6 +137,9 @@ QtObject {
   function refreshMetadata() {
     call("refreshMetadata", arguments)
   }
+  function sendServiceQualityEvents() {
+    call("sendServiceQualityEvents", arguments)
+  }
   function emailLogin(email) {
     call("emailLogin", arguments);
   }

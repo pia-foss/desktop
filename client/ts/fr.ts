@@ -44,32 +44,32 @@
 <context>
     <name>AccountPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="26"/>
         <source>AccountPage --- Username</source>
         <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="43"/>
         <source>AccountPage --- Subscription</source>
         <translation>Abonnement</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="50"/>
         <source>AccountPage --- Expired</source>
         <translation>Expiré</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="57"/>
         <source>AccountPage --- (expired on %1)</source>
         <translation>(expiré le %1)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="59"/>
         <source>AccountPage --- (renews on %1)</source>
         <translation>(se renouvelle le %1)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="61"/>
         <source>AccountPage --- (expires on %1)</source>
         <translation>(expire le %1)</translation>
     </message>
@@ -130,10 +130,6 @@
         <translation>Réseau</translation>
     </message>
     <message>
-    <source>AutomationAddRuleDialog --- Automation Rule Types</source>
-        <translation>Types de règle d&apos;automatisation</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="213"/>
         <source>AutomationAddRuleDialog --- RULE EXISTS</source>
         <translation>LA RÈGLE EXISTE</translation>
@@ -143,11 +139,6 @@
         <source>AutomationAddRuleDialog --- %1 - rule exists</source>
         <extracomment>Screen reader annotation used when an automation rule already exists. Here, &quot;%1&quot; will refer to a network type (Wired Network), etc.</extracomment>
         <translation>%1 - la règle existe</translation>
-    </message>
-    <message>
-    <source>AutomationAddRuleDialog --- Rule</source>
-        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
-        <translation>Règle</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="256"/>
@@ -274,14 +265,14 @@
     <name>ChangelogWindow</name>
     <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="109"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="203"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>Journal des modifications</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="108"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="192"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>Nouveautés</translation>
     </message>
@@ -1274,15 +1265,14 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="79"/>
-        <source>GeneralPage --- The &apos;Auto&apos; setting chooses an icon based on your desktop theme.</source>
-        <translation>Le paramètre « Auto » choisit une icône selon le thème de votre bureau.</translation>
+        <source>GeneralPage --- The &apos;System&apos; setting chooses an icon based on your desktop theme.</source>
+        <translation>Le paramètre « Système » choisit une icône en fonction du thème de votre bureau.</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
-        <extracomment>icon-theme</extracomment>
-<source>GeneralPage -- icon-theme --- Auto</source>
+        <source>GeneralPage -- icon-theme --- System</source>
         
-        <translation>Auto</translation>
+        <translation>Système</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
@@ -1313,35 +1303,35 @@
         <translation>Classique</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="105"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="106"/>
         <source>GeneralPage --- Dashboard Appearance</source>
         <extracomment>Setting controlling how the dashboard is displayed - either as a popup attached to the system tray or as an ordinary window.</extracomment>
         <translation>Apparence du tableau de bord</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="111"/>
         <source>GeneralPage --- Attached to Tray</source>
         <extracomment>Setting value indicating that the dashboard is a popup attached to the system tray.</extracomment>
         <translation>Attachée zone de notif.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="112"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="113"/>
         <source>GeneralPage --- Window</source>
         <extracomment>Setting value indicating that the dashboard is an ordinary window</extracomment>
         <translation>Fenêtre</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="116"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="117"/>
         <source>GeneralPage --- Attached mode may not work with all desktop environments, and it requires a system tray. If you can&apos;t find the dashboard, start Private Internet Access again to show it, and switch back to Window mode in Settings.</source>
         <translation>Le mode attaché ne fonctionnera peut-être pas avec tous les environnements de bureau, et il requiert une zone de notifications. Si vous ne trouvez pas le tableau de bord, relancez Private Internet Access pour l&apos;afficher, et repassez en mode Fenêtre dans les Paramètres.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="130"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="131"/>
         <source>GeneralPage --- Reset All Settings</source>
         <translation>Réinitialiser tous les paramètres</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="133"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="134"/>
         <source>GeneralPage --- Reset all settings to their default values?</source>
         <translation>Réinitialiser tous les paramètres à leurs valeurs par défaut ?</translation>
     </message>
@@ -1375,59 +1365,59 @@
         <translation>Retour</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="268"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="269"/>
         <source>HeaderBar --- RESUMING</source>
         <translation>REPRISE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="270"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="271"/>
         <source>HeaderBar --- SNOOZING</source>
         <translation>EN VEILLE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="272"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="273"/>
         <source>HeaderBar --- SNOOZED</source>
         <translation>MIS EN VEILLE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="283"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="284"/>
         <source>HeaderBar --- CONNECTING</source>
         <translation>CONNEXION</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="285"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="286"/>
         <source>HeaderBar --- DISCONNECTING</source>
         <translation>DÉCONNEXION</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="287"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="288"/>
         <source>HeaderBar --- CONNECTED</source>
         <translation>CONNECTÉ</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="344"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="345"/>
         <source>HeaderBar --- Menu</source>
         <extracomment>Screen reader annotation for the &quot;Menu&quot; button in the header. This button displays a popup menu.</extracomment>
         <translation>Menu</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="351"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="352"/>
         <source>HeaderBar --- Menu, update available</source>
         <extracomment>Screen reader annotation for the &quot;Menu&quot; button in the header when it displays the &quot;update available&quot; badge. The button still displays the normal popup menu, and the &quot;Menu&quot; translation should come first since that&apos;s its action. &quot;Update available&quot; is added as an additional description of the update badge.</extracomment>
         <translation>Menu, mise à jour disponible</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="408"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="409"/>
         <source>HeaderBar --- Settings</source>
         <translation>Paramètres</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="412"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="413"/>
         <source>HeaderBar --- Logout</source>
         <translation>Déconnexion</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="418"/>
         <source>HeaderBar --- Quit</source>
         <translation>Quitter</translation>
     </message>
@@ -1450,139 +1440,174 @@
         <translation>Daemon :</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="97"/>
         <source>HelpPage --- Changelog</source>
         <translation>Journal des modifications</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="111"/>
         <source>HelpPage --- Quick Tour</source>
         <extracomment>This link displays the tour that users see initially after installation.</extracomment>
         <translation>Visite rapide</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="122"/>
         <source>HelpPage --- Receive Beta Updates</source>
         <translation>Recevoir les mises à jours bêta</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="123"/>
         <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
         <translation>Rejoignez notre programme bêta pour tester les nouvelles fonctionnalités et donner votre avis.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="168"/>
         <source>HelpPage --- Show service communication messages</source>
         <translation>Afficher les messages de communication de service</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="179"/>
         <source>HelpPage --- Network</source>
         <translation>Réseau</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="186"/>
         <source>HelpPage --- Include Geo-Located Regions</source>
         <translation>Inclure les régions géo-localisées</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
         <source>HelpPage --- Support</source>
         <translation>Assistance</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="205"/>
         <source>HelpPage --- Disable Accelerated Graphics</source>
         <translation>Désactiver l&apos;accélération graphique</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
         <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
         <translation>Redémarrez Private Internet Access pour appliquer ce paramètre</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="222"/>
         <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
         <translation>L&apos;accélération graphique réduit l&apos;utilisation du processeur et active les effets graphiques mais elle peut provoquer des erreurs avec certaines cartes ou pilotes graphiques.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="227"/>
         <source>HelpPage --- Enable Debug Logging</source>
         <translation>Activer la journalisation de debug</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="228"/>
         <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
         <translation>Enregistrez les journaux de debug qui peuvent être envoyés à l&apos;assistance technique afin d&apos;aider à dépanner les problèmes.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="248"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>Envoyer les journaux de debug</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
         <source>HelpPage --- Support Portal</source>
         <translation>Portail d&apos;assistance</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="283"/>
+        <source>HelpPage --- Help Improve PIA</source>
+        <translation>Aidez à améliorer PIA</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="284"/>
+        <source>HelpPage --- Help ensure our service&apos;s performance by sharing connection stats with us.</source>
+        <translation>Contribuez à garantir les performances de notre service en partageant des statistiques de connexion avec nous.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="297"/>
+        <source>HelpPage --- Connection Events</source>
+        <translation>Événements de connexion</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="318"/>
+        <source>HelpPage --- No events have been stored recently.</source>
+        <translation>Aucun événement n&apos;a été enregistré récemment.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="319"/>
+        <source>HelpPage --- Turn on the &quot;Help Improve PIA&quot; setting, then connect to see events.</source>
+        <translation>Activez le paramètre « Aidez à améliorer PIA », puis connectez-vous pour voir les événements.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
+        <source>HelpPage --- Find out more</source>
+        <translation>En savoir plus</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="348"/>
+        <source>HelpPage --- View shared data</source>
+        <translation>Afficher les données partagées</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="361"/>
         <source>HelpPage --- Maintenance</source>
         <translation>Maintenance</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="371"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>Réinstaller l&apos;adaptateur réseau OpenVPN</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="372"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>Réinstallation de l&apos;adaptateur OpenVPN...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="382"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>Réinstaller l&apos;adaptateur réseau WireGuard</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="383"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>Réinstallation de l&apos;adaptateur réseau WireGuard...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="322"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>Réinstallation du filtre de tunnel divisé...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="323"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="407"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>Réinstaller le filtre de tunnel divisé</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="362"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="446"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>Le filtre de tunnel divisé a été réinstallé.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="387"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="471"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>Désinstaller Private Internet Access</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="428"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="512"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>Échec de l&apos;exécution de la commande dans le terminal. Veuillez installer un terminal compatible avec x-terminal-emulator.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="430"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="514"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>Impossible d&apos;ouvrir le terminal</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="523"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -1904,7 +1929,7 @@
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="87"/>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="142"/>
         <source>NetworkPage --- Use Existing DNS</source>
-        <translation>Utilsier le DNS existant</translation>
+        <translation>Utiliser le DNS existant</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="88"/>
@@ -2060,7 +2085,7 @@
 <context>
     <name>OnboardingWindow</name>
     <message>
-        <location filename="../../../client/res/components/onboarding/OnboardingWindow.qml" line="13"/>
+        <location filename="../../../client/res/components/onboarding/OnboardingWindow.qml" line="15"/>
         <source>OnboardingWindow --- Quick Tour</source>
         <translation>Visite rapide</translation>
     </message>
@@ -2196,12 +2221,12 @@
         <translation>Bienvenue sur</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="50"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="42"/>
         <source>Page1Welcome --- QUICK TOUR</source>
         <translation>VISITE RAPIDE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="80"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="63"/>
         <source>Page1Welcome --- LOG IN</source>
         <translation>CONNEXION</translation>
     </message>
@@ -2286,19 +2311,58 @@
     </message>
 </context>
 <context>
+    <name>Page5HelpUsImprove</name>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="19"/>
+        <source>Page5HelpUsImprove --- Checklist</source>
+        <extracomment>Screen reader annotation for the graphic on the &quot;help us improve&quot; page, which is a checklist.</extracomment>
+        <translation>Liste de contrôle</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="28"/>
+        <source>Page5HelpUsImprove --- Help us improve our service</source>
+        <translation>Aidez-nous à améliorer notre service</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="41"/>
+        <source>Page5HelpUsImprove --- To help us ensure our service&apos;s connection performance, you can anonymously share your connection stats with us.</source>
+        <translation>Pour nous aider à garantir les performances de connexion de notre service, vous pouvez partager vos statistiques de connexion de manière anonyme avec nous.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="43"/>
+        <source>Page5HelpUsImprove --- These reports do not contain any personally identifiable information.</source>
+        <translation>Ces rapports ne contiennent aucune information personnellement identifiable.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="58"/>
+        <source>Page5HelpUsImprove --- Find out more</source>
+        <translation>En savoir plus</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="67"/>
+        <source>Page5HelpUsImprove --- ACCEPT</source>
+        <translation>ACCEPTER</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="77"/>
+        <source>Page5HelpUsImprove --- NO THANKS</source>
+        <translation>NON MERCI</translation>
+    </message>
+</context>
+<context>
     <name>PageFooter</name>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="15"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="18"/>
         <source>PageFooter --- SKIP TOUR</source>
         <translation>PASSER LA VISITE</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- LOG IN</source>
         <translation>CONNEXION</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- NEXT</source>
         <translation>SUIVANT</translation>
     </message>
@@ -2523,6 +2587,255 @@
     </message>
 </context>
 <context>
+    <name>QualityEventsInfoDialog</name>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="11"/>
+        <source>QualityEventsInfoDialog --- About Connection Events</source>
+        <translation>À propos des événements de connexion</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="23"/>
+        <source>QualityEventsInfoDialog --- This minimal information assists us in identifying and fixing potential connection issues. Note that sharing this information requires consent and manual activation as it is turned off by default.</source>
+        <translation>Ces informations minimales nous aident à identifier et à résoudre les problèmes de connexion potentiels. Notez que le partage de ces informations nécessite un consentement et une activation manuelle car ils sont désactivés par défaut.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="25"/>
+        <source>QualityEventsInfoDialog --- We will collect information about the following events:</source>
+        <translation>Nous collecterons des informations sur les événements suivants :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="27"/>
+        <source>QualityEventsInfoDialog --- Connection Attempt</source>
+        <translation>Tentative de connexion</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="28"/>
+        <source>QualityEventsInfoDialog --- Connection Canceled</source>
+        <translation>Connexion annulée</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="29"/>
+        <source>QualityEventsInfoDialog --- Connection Established</source>
+        <translation>Connexion établie</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="31"/>
+        <source>QualityEventsInfoDialog --- For all of these events, we will collect the following information:</source>
+        <translation>Pour tous ces événements, nous collecterons les informations suivantes :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="33"/>
+        <source>QualityEventsInfoDialog --- Platform</source>
+        <translation>Plateforme</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="34"/>
+        <source>QualityEventsInfoDialog --- App version</source>
+        <translation>Version de l&apos;application</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="35"/>
+        <source>QualityEventsInfoDialog --- App type (pre-release or not)</source>
+        <translation>Type d&apos;application (pré-version ou non)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="36"/>
+        <source>QualityEventsInfoDialog --- Protocol used</source>
+        <translation>Protocole utilisé</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="37"/>
+        <source>QualityEventsInfoDialog --- Connection source (manual or using automation)</source>
+        <translation>Source de connexion (manuelle ou à l&apos;aide de l&apos;automatisation)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="39"/>
+        <source>QualityEventsInfoDialog --- All events will contain a unique ID, which is randomly generated. This ID is not associated with your user account. This unique ID is re-generated daily for privacy purposes.</source>
+        <translation>Tous les événements contiendront un identifiant unique généré aléatoirement. Cet ID n&apos;est pas associé à votre compte utilisateur. Cet ID unique est régénéré quotidiennement à des fins de confidentialité.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="41"/>
+        <source>QualityEventsInfoDialog --- You will always be in control. You can see what data we’ve collected from Settings, and you can turn it off at any time.</source>
+        <translation>Vous aurez toujours le contrôle. Vous pouvez voir quelles données nous avons collectées à partir des Paramètres, et vous pouvez les désactiver à tout moment.</translation>
+    </message>
+</context>
+<context>
+    <name>QualityEventsList</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="17"/>
+        <source>QualityEventsList --- Connection Events</source>
+        <extracomment>Screen reader label for the list of connection events</extracomment>
+        <translation>Événements de connexion</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="104"/>
+        <source>QualityEventsList --- Event</source>
+        <extracomment>Screen reader annotation for the &quot;event&quot; column of the Connection Events table, which displays the event type.</extracomment>
+        <translation>Événement</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="112"/>
+        <source>QualityEventsList --- Time</source>
+        <extracomment>Screen reader annotation for the &quot;time&quot; column of the Connection Events table, which displays the time when the event was generated (both date and time of day).</extracomment>
+        <translation>Heure</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="119"/>
+        <source>QualityEventsList --- Expand</source>
+        <extracomment>Screen reader annotation for the &quot;expand&quot; column of the Connection Events list, which displays the &quot;expand&quot; buttons for each event</extracomment>
+        <translation>Agrandir</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="128"/>
+        <source>QualityEventsList --- Platform</source>
+        <extracomment>Screen reader annotation for the &quot;platform&quot; column of the Connection Events list, which displays the client platform (&quot;Windows&quot;, &quot;macOS&quot;, or &quot;Linux&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Plateforme</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="138"/>
+        <source>QualityEventsList --- Prerelease</source>
+        <extracomment>Screen reader annotation for the &quot;prerelease&quot; column of the Connection Events list, which indicates whether the client is a prerelease client or not (&quot;Yes&quot; or &quot;No&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Pré-sortie :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="148"/>
+        <source>QualityEventsList --- Protocol</source>
+        <extracomment>Screen reader annotation for the &quot;protocol&quot; column of the Connection Events list, which indicates the VPN protocol used for that connection (&quot;OpenVPN&quot; or &quot;WireGuard&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Protocole</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="158"/>
+        <source>QualityEventsList --- Source</source>
+        <extracomment>Screen reader annotation for the &quot;source&quot; column of the Connection Events list, which indicates whether the connection was started manually or automatically (&quot;Manual&quot; or &quot;Automatic&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Source</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="167"/>
+        <source>QualityEventsList --- Version</source>
+        <extracomment>Screen reader annotation for the &quot;version&quot; column of the Connection Events list, which displays the client version (such as 2.8.1+06339). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="178"/>
+        <source>QualityEventsList --- User Agent</source>
+        <extracomment>Screen reader annotation for the &quot;user agent&quot; column of the Connection Events list, which indicates the User Agent string for that client version (https://en.wikipedia.org/wiki/User_agent - for example, &quot;PIA/2.8.1+06339 (Linux; x86_64)&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>Agent utilisateur</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="188"/>
+        <source>QualityEventsList --- Aggregation ID</source>
+        <extracomment>Screen reader annotation for the &quot;aggregation ID&quot; column of the Connection Events list, which shows the aggregation ID used for that event (a UUID). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>ID d&apos;agrégation</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="197"/>
+        <source>QualityEventsList --- Event ID</source>
+        <extracomment>Screen reader annotation for the &quot;event ID ID&quot; column of the Connection Events list, which shows the event&apos;s unique ID (a UUID). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>ID de l&apos;événement</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="207"/>
+        <source>QualityEventsList --- Product ID</source>
+        <extracomment>Screen reader annotation for the &quot;product ID&quot; column of the Connection Events list, which indicates the product family that the client belongs to (a UUID, which represents the product &quot;PIA Desktop production&quot;, etc.) The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>ID produit</translation>
+    </message>
+</context>
+<context>
+    <name>QualityEventsRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="33"/>
+        <source>QualityEventsRow --- Connection attempt</source>
+        <translation>Tentative de connexion</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="35"/>
+        <source>QualityEventsRow --- Connection established</source>
+        <translation>Connexion établie</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="37"/>
+        <source>QualityEventsRow --- Connection canceled</source>
+        <translation>Connexion annulée</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="72"/>
+        <source>QualityEventsRow --- Expand</source>
+        <extracomment>Screen reader annotation for the &quot;expand&quot; button shown on a connection event row that is not expanded</extracomment>
+        <translation>Agrandir</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="75"/>
+        <source>QualityEventsRow --- Collapse</source>
+        <extracomment>Screen reader annotation for the &quot;collapse&quot; button shown on a connection event row that is expanded</extracomment>
+        <translation>Réduire</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="252"/>
+        <source>QualityEventsRow --- Platform:</source>
+        <translation>Plateforme :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="268"/>
+        <source>QualityEventsRow --- Prerelease:</source>
+        <translation>Pré-sortie :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="276"/>
+        <source>QualityEventsRow --- Yes</source>
+        <translation>Oui</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="276"/>
+        <source>QualityEventsRow --- No</source>
+        <translation>Non</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="293"/>
+        <source>QualityEventsRow --- Protocol:</source>
+        <translation>Protocole :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="309"/>
+        <source>QualityEventsRow --- Source:</source>
+        <translation>Source :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="317"/>
+        <source>QualityEventsRow --- Manual</source>
+        <translation>Manuel</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="317"/>
+        <source>QualityEventsRow --- Automatic</source>
+        <translation>Automatique</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="335"/>
+        <source>QualityEventsRow --- Version:</source>
+        <translation>Version :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="351"/>
+        <source>QualityEventsRow --- User Agent:</source>
+        <translation>Agent utilisateur :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="367"/>
+        <source>QualityEventsRow --- Aggregation ID:</source>
+        <translation>ID d&apos;agrégation :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="383"/>
+        <source>QualityEventsRow --- Event ID:</source>
+        <translation>ID de l&apos;événement :</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="401"/>
+        <source>QualityEventsRow --- Product ID:</source>
+        <translation>ID du produit :</translation>
+    </message>
+</context>
+<context>
     <name>QuickConnectButton</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="157"/>
@@ -2554,12 +2867,12 @@
 <context>
     <name>RatingControl</name>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="106"/>
         <source>RatingControl --- Loading</source>
         <translation>Chargement</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="119"/>
         <source>RatingControl --- Something went wrong.</source>
         <translation>Un problème est survenu.</translation>
     </message>
@@ -2889,126 +3202,126 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>Général</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>Compte</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>Intimité</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>Réseau</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Connection</source>
         
         <translation>Connexion</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>Automatisation</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>IP dédiée</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title-compact --- Automation</source>
         
         <translation>Automatisation</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="75"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- General Preferences</source>
         
         <translation>Préférences générales</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="76"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Account Information</source>
         
         <translation>Informations de compte</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="77"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
         
         <translation>Préférences de intimité</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="78"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Network Preferences</source>
         
         <translation>Préférences de réseau</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="79"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Connection Preferences</source>
         
         <translation>Préférences de connexion</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="80"/>
         <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
         
         <translation>Preférences d&apos;automatisation</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="81"/>
         <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
         
         <translation>Préférences d&apos;adresse IP dédiée</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="82"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Help</source>
         
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="166"/>
         <source>SettingsWindow --- Alert</source>
         <translation>Alerte</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="200"/>
         <source>SettingsWindow --- Settings</source>
         <translation>Paramètres</translation>
     </message>
@@ -3186,18 +3499,18 @@
 <context>
     <name>SplitTunnelAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="116"/>
         <source>SplitTunnelAppRow --- Remove</source>
         <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel app rule. (Should be labeled like a normal command button.)</extracomment>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="157"/>
         <source>SplitTunnelAppRow --- Microsoft Store app</source>
         <translation>Application Microsoft Store</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="165"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="169"/>
         <source>SplitTunnelAppRow --- App Store, Mail, Safari and others</source>
         <translation>App store, E-mail, Safari et autres</translation>
     </message>
@@ -3276,25 +3589,25 @@
 <context>
     <name>SplitTunnelSettings</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="178"/>
         <source>SplitTunnelSettings --- App</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app names.</extracomment>
         <translation>Application</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="186"/>
         <source>SplitTunnelSettings --- Path</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app file paths. (These are visually placed below the app names, but they&apos;re annotated as a separate column.)</extracomment>
         <translation>Chemin</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="192"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="193"/>
         <source>SplitTunnelSettings --- Behavior</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays the behavior selected for a specific app.</extracomment>
         <translation>Comportement</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="199"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="200"/>
         <source>SplitTunnelSettings --- Remove</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that removes a selected app.</extracomment>
         <translation>Supprimer</translation>

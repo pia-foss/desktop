@@ -28,8 +28,10 @@ QtObject {
   readonly property string betaChannelVersion: NativeDaemon.data.betaChannelVersion
   readonly property string betaChannelVersionUri: NativeDaemon.data.betaChannelVersionUri
   readonly property var modernRegionMeta: NativeDaemon.data.modernRegionMeta
-
+  readonly property string qualityAggId: NativeDaemon.data.qualityAggId
+  readonly property int qualityAggIdRotateTime: NativeDaemon.data.qualityAggIdRotateTime
+  readonly property var qualityEventsQueued: NativeDaemon.data.qualityEventsQueued
+  readonly property var qualityEventsSent: NativeDaemon.data.qualityEventsSent
   readonly property var flags: NativeDaemon.data.flags
-
   readonly property var appMessage: NativeDaemon.data.appMessage
 }

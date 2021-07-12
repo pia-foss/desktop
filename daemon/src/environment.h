@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("environment.h")
-
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include "common.h"
 #include "util.h"
 #include "apibase.h"
 #include "openssl.h"
@@ -106,9 +104,6 @@ public:
     // Base URIs for authv2.  This has the same defaults as the PIA API, but it
     // also can leverage meta services in next-gen.
     const std::shared_ptr<ApiBase> &getApiv2() {Q_ASSERT(_pApiv2); return _pApiv2;}
-    // Base URIs for the regions list.  (Default is the same as the PIA API, but
-    // this is separated so it can be overridden separately.)
-    const std::shared_ptr<ApiBase> &getRegionsListApi() {Q_ASSERT(_pRegionsListApi); return _pRegionsListApi;}
     // Base URIs for the modern regions list.
     const std::shared_ptr<ApiBase> &getModernRegionsListApi() {Q_ASSERT(_pModernRegionsListApi); return _pModernRegionsListApi;}
     // Base URI for API requests that fetch the user's IP address.
@@ -123,8 +118,6 @@ public:
     // This is part of the PIA web API for the PIA brand, but for other brands
     // it is provided by that brand.
     const std::shared_ptr<ApiBase> &getUpdateApi() {Q_ASSERT(_pUpdateApi); return _pUpdateApi;}
-    // Base URI for port forward requests
-    const std::shared_ptr<ApiBase> &getPortForwardApi() {Q_ASSERT(_pPortForwardApi); return _pPortForwardApi;}
 
 signals:
     // An override was loaded by reload().
@@ -139,9 +132,8 @@ private:
     QByteArray _regionsListPublicKey;
     // API bases - these are always valid.  They're in shared_ptrs so callers
     // using them can keep the object alive even if we replace them.
-    std::shared_ptr<ApiBase> _pApiv1, _pApiv2, _pRegionsListApi,
-        _pModernRegionsListApi, _pIpAddrApi, _pIpProxyApi, _pUpdateApi,
-        _pPortForwardApi;
+    std::shared_ptr<ApiBase> _pApiv1, _pApiv2, _pModernRegionsListApi,
+        _pIpAddrApi, _pIpProxyApi, _pUpdateApi;
 };
 
 #endif

@@ -49,7 +49,7 @@ FocusScope {
   // spacing), but fortunately the first and last tabs are reasonably short in
   // all languages.
   implicitWidth: Math.max(minimumWidth, listView.width + 2*minimumTabEndMargins)
-  implicitHeight: Theme.settings.hbarHeight + Theme.settings.hbarContentTopMargin + Theme.settings.contentHeight + Theme.settings.hbarContentBottomMargin
+  implicitHeight: Theme.settings.hbarHeight + Theme.settings.hbarContentTopMargin + stack.pageImplicitHeight + Theme.settings.hbarContentBottomMargin
 
   TabLayoutCommon {
     id: common
@@ -218,6 +218,10 @@ FocusScope {
         anchors.rightMargin: Theme.settings.hbarContentRightMargin
         anchors.bottomMargin: Theme.settings.hbarContentBottomMargin
         currentIndex: listView.currentIndex
+        readonly property int pageImplicitHeight: {
+          var page = pageContentRepeater.itemAt(currentIndex)
+          return page ? page.implicitHeight : Theme.settings.contentHeight
+        }
         Repeater {
           id: pageContentRepeater
           model: pages

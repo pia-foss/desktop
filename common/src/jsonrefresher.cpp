@@ -24,6 +24,8 @@
 #include "openssl.h"
 #include <QNetworkReply>
 #include <QDir>
+#include <QJsonArray>
+#include <QJsonObject>
 
 JsonRefresher::JsonRefresher(QString name, QString resource,
                              std::chrono::milliseconds initialInterval,
@@ -160,6 +162,34 @@ void JsonRefresher::emitReply(QByteArray responsePayload)
         emit contentLoaded(doc);
 }
 
+bool JsonRefresher::processOverrideFile(const QString &overridePath)
+{
+    QFile overrideRegionFile{overridePath};
+
+    if(overrideRegionFile.open(QFile::ReadOnly))
+    {
+        qInfo() << "Loading" << _name << "from override file";
+        QJsonParseError parseError;
+        const auto &jsonDoc = QJsonDocument::fromJson(overrideRegionFile.readAll(), &parseError);
+        if(parseError.error == QJsonParseError::NoError)
+        {
+            emit contentLoaded(jsonDoc);
+            qInfo() << "Override for" << _name << "loaded successfully";
+            emit overrideActive();
+            return true; // Don't start refreshes since regions are overridden
+        }
+    }
+    return false;
+}
+
+bool JsonRefresher::isCacheValid(const QJsonDocument &cache)
+{
+    // Both QJsonDocument::object() and QJsonDocument::array() return an empty
+    // object/array if the document isn't of that type; we don't have to
+    // specifically check what type it is.
+    return !cache.object().isEmpty() || !cache.array().isEmpty();
+}
+
 void JsonRefresher::start(std::shared_ptr<ApiBase> pApiBaseUris)
 {
     Q_ASSERT(pApiBaseUris); // Ensured by caller
@@ -187,31 +217,11 @@ void JsonRefresher::start(std::shared_ptr<ApiBase> pApiBaseUris)
     _refreshTimer.start();
 }
 
-bool JsonRefresher::processOverrideFile(const QString &overridePath)
-{
-    QFile overrideRegionFile{overridePath};
-
-    if(overrideRegionFile.open(QFile::ReadOnly))
-    {
-        qInfo() << "Loading" << _name << "from override file";
-        QJsonParseError parseError;
-        const auto &jsonDoc = QJsonDocument::fromJson(overrideRegionFile.readAll(), &parseError);
-        if(parseError.error == QJsonParseError::NoError)
-        {
-            emit contentLoaded(jsonDoc);
-            qInfo() << "Override for" << _name << "loaded successfully";
-            emit overrideActive();
-            return true; // Don't start refreshes since regions are overridden
-        }
-    }
-    return false;
-}
-
 void JsonRefresher::startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
                                     const QString &overridePath,
                                     const QString &bundledPath,
                                     const QByteArray &signatureKey,
-                                    const QJsonObject &cache)
+                                    const QJsonDocument &cache)
 {
     Q_ASSERT(pApiBaseUris); // Ensured by caller
 
@@ -237,10 +247,10 @@ void JsonRefresher::startOrOverride(std::shared_ptr<ApiBase> pApiBaseUris,
     // then start normally.
     QFile bundledRegionFile{bundledPath};
     // Prefer the cache if it's present
-    if(!cache.isEmpty())
+    if(isCacheValid(cache))
     {
         qInfo() << "Using cached data for initial" << _name;
-        emit contentLoaded(QJsonDocument{cache});
+        emit contentLoaded(cache);
     }
     // Otherwise, use the bundled data if it's present.  Note that this still
     // enforces the signature on the bundled data (it is exactly the same data

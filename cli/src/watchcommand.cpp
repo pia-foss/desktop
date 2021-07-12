@@ -65,6 +65,7 @@ const std::unordered_set<QString> JsonChangePrinter::propertyBlacklist{
     QStringLiteral("modernLatencies"),
     QStringLiteral("cachedLegacyRegionsList"),
     QStringLiteral("cachedLegacyShadowsocksList"),
+    QStringLiteral("cachedModernShadowsocksList"),
     QStringLiteral("cachedModernRegionsList")
 };
 

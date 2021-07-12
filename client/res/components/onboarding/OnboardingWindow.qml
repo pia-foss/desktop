@@ -24,6 +24,7 @@ import PIA.NativeHelpers 1.0
 import '../theme'
 import '../common'
 import '../core'
+import '../client'
 
 SecondaryWindow {
   id: onboardingWindow
@@ -32,6 +33,9 @@ SecondaryWindow {
   title: uiTr("Quick Tour")
 
   function showOnboarding () {
+    // Reset to the first page if the window isn't already open
+    if(!onboardingWindow.visible)
+      Client.uiState.onboarding.currentPage = 0
     onboardingWindow.open();
   }
 

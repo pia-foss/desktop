@@ -16,18 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("settings.h")
-
 #ifndef SETTINGS_H
 #define SETTINGS_H
-#pragma once
 
+#include "common.h"
 #include "json.h"
+#include "version.h"
 #include <QVector>
 #include <QHostAddress>
 #include <set>
 #include <unordered_set>
+#include <deque>
 
 // These are the services advertised by the regions list that are used by Desktop.
 enum class Service
@@ -39,10 +38,6 @@ enum class Service
     // The "meta" service provides access to servers lists and the web API in
     // the modern infrastructure.
     Meta,
-    // The "latency" service is a UDP echo service used to measure latency to
-    // a specific server.  This is only used in legacy - in modern we use ICMP
-    // echoes, which can be sent to any server.
-    Latency
 };
 
 // The available connection ports are listed and attempted in descending order.
@@ -68,7 +63,6 @@ public:
         wireguardPorts(other.wireguardPorts());
         shadowsocksPorts(other.shadowsocksPorts());
         metaPorts(other.metaPorts());
-        latencyPorts(other.latencyPorts());
         shadowsocksKey(other.shadowsocksKey());
         shadowsocksCipher(other.shadowsocksCipher());
         openvpnNcpSupport(other.openvpnNcpSupport());
@@ -83,7 +77,6 @@ public:
             wireguardPorts() == other.wireguardPorts() &&
             shadowsocksPorts() == other.shadowsocksPorts() &&
             metaPorts() == other.metaPorts() &&
-            latencyPorts() == other.latencyPorts() &&
             shadowsocksKey() == other.shadowsocksKey() &&
             shadowsocksCipher() == other.shadowsocksCipher() &&
             openvpnNcpSupport() == other.openvpnNcpSupport();
@@ -106,7 +99,6 @@ public:
     JsonField(std::vector<quint16>, wireguardPorts, {})
     JsonField(std::vector<quint16>, shadowsocksPorts, {})
     JsonField(std::vector<quint16>, metaPorts, {})
-    JsonField(std::vector<quint16>, latencyPorts, {})
 
     // Service-specific additional fields
 
@@ -282,11 +274,9 @@ public:
     // ICMP pings (for the modern infrastructure).
     // This picks any random server with any VPN service (servers with only
     // Shadowsocks or UdpLatency are ignored).
-    // Only servers with a VPN service are used because the legacy Shadowsocks
-    // servers are also included in the modern environment (Shadowsocks isn't
-    // yet available in modern), but they may not be representative of the
-    // latency to the VPN servers in the modern environment, which is much more
-    // important.
+    // Only servers with a VPN service are used because the Shadowsocks run on
+    // separate infrastructure and may not be representative of the latency to
+    // the VPN servers, which is much more important.
     const Server *randomIcmpLatencyServer() const;
 
     // Get a random server that has a given service (nullptr if there are none)
@@ -610,20 +600,167 @@ public:
     JsonField(quint64, lastIpChange, 0)
 };
 
+// Event properties for ServiceQualityEvents - in an object property as expected
+// by the API.  This would make more sense as a nested class, but moc doesn't
+// support nested classes.
+class EventProperties : public NativeJsonObject
+{
+    Q_OBJECT
+public:
+    EventProperties() = default;
+    EventProperties(const EventProperties &other) { *this = other; }
+    EventProperties &operator=(const EventProperties &other)
+    {
+        user_agent(other.user_agent());
+        platform(other.platform());
+        version(other.version());
+        vpn_protocol(other.vpn_protocol());
+        connection_source(other.connection_source());
+        return *this;
+    }
+    bool operator==(const EventProperties &other) const
+    {
+        return user_agent() == other.user_agent() &&
+            platform() == other.platform() &&
+            version() == other.version() &&
+            vpn_protocol() == other.vpn_protocol() &&
+            connection_source() == other.connection_source();
+    }
+    bool operator!=(const EventProperties &other) const {return !(*this == other);}
+
+public:
+    // User agent; client information
+    JsonField(QString, user_agent, QStringLiteral(PIA_USER_AGENT))
+    JsonField(QString, platform, QStringLiteral(PIA_PLATFORM_NAME))
+    JsonField(QString, version, QStringLiteral(PIA_VERSION))
+    JsonField(bool, prerelease, PIA_VERSION_IS_PRERELEASE)
+    // The VPN protocol being used
+    JsonField(QString, vpn_protocol, {}, {"OpenVPN", "WireGuard"})
+    // The source of the connection:
+    // - "Manual" - The user directly initiated this connection (e.g. by
+    //   clicking the Connect button).  CLI "connect" is also interpreted
+    //   as manual.
+    // - "Automatic" - The connection was initiated automatically (e.g. by
+    //   ending Snooze or an automation rule.)
+    JsonField(QString, connection_source, {}, {"Manual", "Automatic"})
+};
+
+// If the user has opted in to providing service quality information back to us
+// (see DaemonSettings::sendServiceQualityEvents), service quality events are
+// stored using this format.  We usually batch up to 20 events before sending
+// them, and then hold onto events that were sent for up to 24 hours so they
+// can be shown in the UI.
+//
+// Everything sent with an event is stored here, even though the
+// version/platform/user agent/etc. rarely change, to ensure that we don't
+// inadvertently send old events with a newer version, etc., after upgrading.
+// This also conveniently means that we can make this match the format expected
+// by the API.  (That's why the properties here use snake_case instead of our
+// usual camelCase.)
+class COMMON_EXPORT ServiceQualityEvent : public NativeJsonObject
+{
+    Q_OBJECT
+
+public:
+    ServiceQualityEvent() = default;
+    ServiceQualityEvent(const ServiceQualityEvent &other) { *this = other; }
+    ServiceQualityEvent &operator=(const ServiceQualityEvent &other)
+    {
+        aggregated_id(other.aggregated_id());
+        event_unique_id(other.event_unique_id());
+        event_name(other.event_name());
+        event_time(other.event_time());
+        event_token(other.event_token());
+        event_properties(other.event_properties());
+        return *this;
+    }
+    bool operator==(const ServiceQualityEvent &other) const
+    {
+        return aggregated_id() == other.aggregated_id() &&
+            event_unique_id() == other.event_unique_id() &&
+            event_name() == other.event_name() &&
+            event_time() == other.event_time() &&
+            event_token() == other.event_token() &&
+            event_properties() == other.event_properties();
+    }
+    bool operator!=(const ServiceQualityEvent &other) const {return !(*this == other);}
+
+public:
+    // Aggregation ID at the time this event was generated - needed so we can
+    // differentiate a large number of errors from a few users vs. a few errors
+    // from a lot of users.  See DaemonState::qualityAggId, which is rotated
+    // every 24 hours for privacy.
+    JsonField(QString, aggregated_id, {})
+    // Unique ID for this event.  This ensures a given event is only stored once
+    // even if an API error causes us to retry a request after the API actually
+    // received the payload.
+    JsonField(QString, event_unique_id, {})
+    // The event that occurred:
+    // - Attempt - the VPN connection has been enabled.  Note that this is
+    //   different from an "attempt" used elsewhere in PIA Desktop; this does
+    //   _not_ count each connection attempt before a connection is established,
+    //   and it does not count reconnects.
+    // - Established - We successfully established the VPN connection after
+    //   previously generating an "attempt" (i.e. after the connection was
+    //   enabled, does not count reconnects)
+    // - Canceled - The VPN connection was disabled before having established
+    //   a connection (i.e. the user canceled).
+    //
+    // Note that connections in PIA Desktop rarely ever fail completely, in
+    // most circumstances we just keep trying forever.  Mostly this occurs for
+    // an authentication failure as there is no point retrying that error.  If
+    // these occur in any significant number, they're apparent as the residual
+    // (attempt - (established + canceled)).
+    JsonField(QString, event_name, {}, {"VPN_CONNECTION_ATTEMPT",
+        "VPN_CONNECTION_ESTABLISHED", "VPN_CONNECTION_CANCELED"})
+    // Event timestamp - UTC Unix time in _seconds_ (not milliseconds like we
+    // use elsewhere).
+    // Note that PIA only stores timestamps with hourly granularity for privacy.
+    JsonField(qint64, event_time, 0)
+    // "Event token" - this identifies the product being used (here, PIA Desktop)
+    // and the environment (staging or production, which for us corresponds to
+    // prerelease builds vs. general releases).  This is shown as "Product ID"
+    // in the UI.
+#if PIA_VERSION_IS_PRERELEASE
+    #if defined(Q_OS_WIN)
+        #define PIA_PRODUCT_EVENT_TOKEN "b3fc3640ac22aedba0983c2cb38d60a3"  // Windows staging
+    #elif defined(Q_OS_MACOS)
+        #define PIA_PRODUCT_EVENT_TOKEN "3f670cc9ed90701ae79097eff72bc103"  // macOS staging
+    #elif defined(Q_OS_LINUX)
+        #define PIA_PRODUCT_EVENT_TOKEN "2b6487b0b55f39fd72214f47a8075179"  // Linux staging
+    #endif
+#else
+    #if defined(Q_OS_WIN)
+        #define PIA_PRODUCT_EVENT_TOKEN "c4f380b3d4b3a8c25402324f960911e2"  // Windows production
+    #elif defined(Q_OS_MACOS)
+        #define PIA_PRODUCT_EVENT_TOKEN "f3ccd0c159f102d2c5fd3383cb3b354d"  // macOS production
+    #elif defined(Q_OS_LINUX)
+        #define PIA_PRODUCT_EVENT_TOKEN "fd40e5dc1611d76649607f86334f27ea"  // Linux production
+    #endif
+#endif
+    JsonField(QString, event_token, QStringLiteral(PIA_PRODUCT_EVENT_TOKEN))
+
+    JsonObjectField(EventProperties, event_properties, {})
+};
+
 // Class encapsulating 'data' properties of the daemon; these are cached
 // and persist between daemon instances.
 //
-// These are all fetched from servers at runtime in some way (regions lists,
+// Most of these are fetched from servers at runtime in some way (regions lists,
 // update metadata, latency measurements); they're cached for use in case we
 // aren't able to fetch the data at some point in the future, and so we (likely)
 // have some data to work with at startup.
 //
 // Cached data are stored in the original format received from the server, not
-// an internalized format.  The caches may be reused even after a daemon update -
-// internalized formats are likely to change in an update, but the format from
-// the server is unlikely to change.
+// an internalized format.  The caches may be reused even after a daemon update
+// - internalized formats are likely to change in an update, but the format from
+// the server is unlikely to change.  Internalized versions of the same data are
+// provided in DaemonState.
 //
-// Internalized versions of the same data are provided in DaemonState.
+// Some data here is not fetched but instead calculated by the daemon
+// (latencies, winDnscacheOriginalPath, service quality data).  We usually
+// preserve these on updates, but they can be discarded with little impact if
+// the format changes.
 class COMMON_EXPORT DaemonData : public NativeJsonObject
 {
     Q_OBJECT
@@ -635,9 +772,12 @@ public:
     // values.
     JsonField(LatencyMap, modernLatencies, {})
 
-    JsonField(QJsonObject, cachedLegacyShadowsocksList, {})
-
-    // Cached region list content for the modern infrastructure.
+    // Cached regions lists.  This is the exact JSON content from the actual
+    // regions list; it hasn't been digested or interpreted by the daemon.  This
+    // works well when the daemon is upgraded; the API format doesn't change so
+    // we can re-interpret the existing cache even if the internal model has
+    // changed.
+    JsonField(QJsonArray, cachedModernShadowsocksList, {})
     JsonField(QJsonObject, cachedModernRegionsList, {})
 
     JsonField(QJsonObject, modernRegionMeta, {})
@@ -685,16 +825,46 @@ public:
     // In-app communication message
     JsonField(AppMessage, appMessage, {})
 
+    // Service quality events - only used if the user has opted in to providing
+    // service quality information back to us (see
+    // DaemonSettings::sendServiceQualityEvents).  If that setting is not
+    // enabled, these are all empty.
+
+    // Current aggregation ID - needed so we can differentiate a large number of
+    // errors from a few users vs. a few errors from a lot of users.  Rotated
+    // every 24 hours for privacy (see qualityAggIdRotateTime).
+    JsonField(QString, qualityAggId, {})
+    // The next time we should rotate serviceAggId (UTC Unix time, ms)
+    JsonField(qint64, qualityAggIdRotateTime, 0)
+    // Events that have been generated but not sent yet.  We try to send the
+    // events when 20 have been batched, but this could have more than 20 events
+    // if we weren't able to send them at that time (we'll try again later).
+    //
+    // This is a deque because we add to the back and remove from the front;
+    // events are removed once they're sent, but more events might already have
+    // been generated.
+    JsonField(std::deque<ServiceQualityEvent>, qualityEventsQueued, {})
+    // Events that have been generated and sent in the last 24 hours.  These are
+    // retained just so the UI can display them.
+    //
+    // Deque for the same reason - we add sent events to the back and remove
+    // from the front as they roll off.
+    JsonField(std::deque<ServiceQualityEvent>, qualityEventsSent, {})
+
     // Check if a single flag exists on the list of flags
     bool hasFlag (const QString &flag) const;
 };
 
 
-// Class encapsulating 'account' properties of the daemon; these are the
-// user's account credentials (e.g. authentication token) as well as basic
-// information about their account. This provides a single easy container
-// to wipe in order to cleanly log out / remove user information.
+// Class encapsulating 'account' properties of the daemon.  This includes:
+// * user's access credentials (auth token, or actual credentials if we are
+//   not able to reach the API)
+// * cached account information (plan, expiration date, etc., just for display)
+// * other unique identifiers - not connected to the account, but that should
+//   be protected from other apps (port forward token, dedicated IPs)
 //
+// The file storing these data is accessible only to Administrators (Windows) /
+// root (Mac/Linux).
 class COMMON_EXPORT DaemonAccount : public NativeJsonObject
 {
     Q_OBJECT
@@ -1035,6 +1205,10 @@ private:
 public:
     // Default value for debugLogging when enabling logging.
     static const QStringList defaultDebugLogging;
+    // Several settings aren't reset by "reset all settings" for various
+    // reasons (things that aren't really presented as "settings", and a few
+    // settings that are specifically for troubleshooting).
+    static const std::unordered_set<QString> &settingsExcludedFromReset();
     // Same value for QML as a QJsonValue.  (Note: QML uses an invokable method
     // rather than a property to avoid interfering with resetSettings.)
     Q_INVOKABLE QJsonValue getDefaultDebugLogging();
@@ -1130,6 +1304,8 @@ public:
     JsonField(QString, betaUpdateChannel,defaultReleaseChannelBeta)
     // Whether the user wants beta updates.
     JsonField(bool, offerBetaUpdates, false)
+    // Whether to store and send service quality information.
+    JsonField(bool, sendServiceQualityEvents, false)
 
     // Whether split tunnel is enabled
     JsonField(bool, splitTunnelEnabled, false)

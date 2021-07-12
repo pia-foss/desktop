@@ -99,6 +99,7 @@ OverlayDialog {
               margins: 10
               text: NativeHelpers.readResourceText("qrc:/BETA_AGREEMENT.md")
               color: Theme.settings.inputTextboxTextColor
+              rtlAlignmentMirror: false   // This is English-only
             }
 
             Keys.onPressed: {

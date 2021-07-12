@@ -1,0 +1,50 @@
+#! /usr/bin/env bash
+
+# Copyright (c) 2021 Private Internet Access, Inc.
+#
+# This file is part of the Private Internet Access Desktop Client.
+#
+# The Private Internet Access Desktop Client is free software: you can
+# redistribute it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# The Private Internet Access Desktop Client is distributed in the hope that
+# it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with the Private Internet Access Desktop Client.  If not, see
+# <https://www.gnu.org/licenses/>.
+
+set -e
+
+TOOLDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$TOOLDIR"
+
+# Checks en_US translations to see if any differ from the en_US name in the regions list.
+
+source ./util/region_names.sh
+
+init_check "$@" || exit 1
+
+load_servers
+
+IFS=$'\n'
+
+function check_en_us_name() {
+  source="$1"
+  translation="$(get_translation "$source" "en-US")"
+  if [ "$translation" != '""' ] && [ "$source" != "$translation" ]; then
+    echo "$source ---> $translation" >&2
+  fi
+}
+
+for r in $(get_region_names); do
+  check_en_us_name "$r"
+done
+
+for r in $(get_country_names); do
+  check_en_us_name "$r"
+done

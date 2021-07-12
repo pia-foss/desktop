@@ -77,4 +77,6 @@ QtObject {
   // Footer/navigation
   readonly property color skipTourColor: primaryColor
   readonly property string nextButtonImage: Theme.imagePathCommon + "/onboarding/btn/next.png"
+
+  readonly property string helpUsImproveImage: Theme.imagePathCommon + "/onboarding/checklist-icon.png"
 }

@@ -42,10 +42,9 @@
 //
 // When connected to the VPN in the modern infra, we can get meta information
 // from an internal service on the current server, using 10.0.0.1:443.  In that
-// case, fixed bases are not needed at all (10.0.0.1:443 can't be blocked since
-// it is internal to the VPN server).
-//
-// When connected in legacy, we use fixed bases only.
+// case, fixed bases are only used as a fallback in case of a problem with the
+// meta service (10.0.0.1:443 can't be blocked since it is internal to the VPN
+// server).
 class COMMON_EXPORT MetaServiceApiBase : public ApiBase
 {
 public:

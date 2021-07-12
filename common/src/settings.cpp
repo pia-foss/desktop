@@ -71,8 +71,6 @@ const std::vector<quint16> &Server::servicePorts(Service service) const
             return shadowsocksPorts();
         case Service::Meta:
             return metaPorts();
-        case Service::Latency:
-            return latencyPorts();
     }
 }
 
@@ -97,9 +95,6 @@ void Server::servicePorts(Service service, std::vector<quint16> ports)
             return;
         case Service::Meta:
             metaPorts(std::move(ports));
-            return;
-        case Service::Latency:
-            latencyPorts(std::move(ports));
             return;
     }
 }
@@ -520,6 +515,30 @@ const QStringList DaemonSettings::defaultDebugLogging
     QStringLiteral("qt.scenegraph.general*=true"),
     QStringLiteral("qt.rhi.general*=true")
 };
+
+const std::unordered_set<QString> &DaemonSettings::settingsExcludedFromReset()
+{
+    static const std::unordered_set<QString> _settingsExcluded
+    {
+        // Last daemon version - not a setting
+        QStringLiteral("lastUsedVersion"),
+        // Location - not presented as a "setting"
+        QStringLiteral("location"),
+        // Help page settings are not reset, as they were most likely changed for
+        // troubleshooting.
+        QStringLiteral("debugLogging"),
+        QStringLiteral("offerBetaUpdates"),
+        // Persist Daemon - not presented as a "setting"
+        QStringLiteral("persistDaemon"),
+        // Rating / session count - not settings (don't show a rating request
+        // again after resetting settings)
+        QStringLiteral("ratingEnabled"),
+        QStringLiteral("sessionCount"),
+        // Last dismissed service message - not a setting (don't show it again)
+        QStringLiteral("lastDismissedAppMessageId")
+    };
+    return _settingsExcluded;
+}
 
 QJsonValue DaemonSettings::getDefaultDebugLogging()
 {

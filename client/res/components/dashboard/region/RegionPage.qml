@@ -25,6 +25,7 @@ import "../../theme"
 import "../../common"
 import "../../common/regions"
 import "../../core"
+import "../../client"
 import "../../vpnconnection"
 import PIA.NativeAcc 1.0 as NativeAcc
 
@@ -46,6 +47,8 @@ FocusScope {
     portForwardEnabled: Daemon.settings.portForward
     canFavorite: true
     collapsedCountriesSettingName: "vpnCollapsedCountries"
+    scrollStateGroupName: "dashboard"
+    scrollStatePropertyName: "regionsScrollPos"
     onRegionSelected: {
       // Choose this location, and reconnect if we were connected to a
       // different one

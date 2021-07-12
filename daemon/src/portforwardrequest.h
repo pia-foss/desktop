@@ -25,8 +25,9 @@
 #include "settings.h"
 #include "apiclient.h"
 
-// PortForwardRequest is the interface to the legacy and modern port forwarding
-// methods used by PortForwarder.
+// PortForwardRequest is the interface to the port forwarding implementation.
+// Historically there was an alternate implementation for the legacy
+// infrastructure - now this is just implemented by PortForwardRequestModern.
 //
 // PortForwardRequest should start a port forwarding attempt as soon as it is
 // created.  PortForwarder will set the current state to 'Attempting' after

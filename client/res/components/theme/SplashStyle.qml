@@ -18,7 +18,7 @@
 
 import QtQuick 2.10
 QtObject {
-  readonly property int height: 200
+  readonly property int height: 260
 
   readonly property int windowRadius: 12
 

@@ -423,10 +423,9 @@ function updateAccKeyboardRow(accTable, lastAccTable, lastKeyboardRow) {
     return accTable.findIndex(function(row){return row.row === keyboardRow})
   }
 
-  // The new table shouldn't be empty - all accessibilty tables currently have
-  // at least an "add" row - but if it is, bail out.
+  // If the table is empty, there is nothing to select
   if(accTable.length <= 0)
-    return
+    return ""
 
   var oldKeyboardIdx = findAccKeyboardIndex(lastAccTable, lastKeyboardRow)
 

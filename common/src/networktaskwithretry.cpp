@@ -131,16 +131,17 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
 
 
     const BaseUri &nextBase = _baseUriSequence.getNextUri();
-    QNetworkRequest request(nextBase.uri + _resource);
+    ApiResource requestResource{nextBase.uri + _resource};
+    QUrl requestUri{requestResource};
+    QNetworkRequest request(requestUri);
     if (!_authHeaderVal.isEmpty())
         setAuth(request, _authHeaderVal);
 
     // The URL for each request is logged to indicate if there is trouble with
-    // specific API URLs, etc.  The resources we request don't contain any
-    // query parameters, so this won't contain anything identifiable.
+    // specific API URLs, etc.  Query parameters are redacted by ApiResource.
     if(nextBase.pCA && !nextBase.peerVerifyName.isEmpty())
     {
-        qDebug() << "requesting:" << ApiResource{request.url().toString()}
+        qDebug() << "requesting:" << requestResource
             << "using peer name" << nextBase.peerVerifyName;
         // Since we're using a custom CA and peer name, do not use the default
         // CAs.  Copy the SSL configuration and explicitly set an empty CA list.
@@ -154,8 +155,19 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     }
     else
     {
-        qDebug() << "requesting:" << ApiResource{request.url().toString()};
+        qDebug() << "requesting:" << requestResource;
     }
+    
+    // Permit same-origin redirects.  Qt does not follow redirects by default,
+    // which has resulted in some near-misses in the past when load balancers,
+    // meta proxies, etc. have been reconfigured.
+    //
+    // Only same-origin redirects are allowed; there's no reason to allow
+    // cross-origin redirects.  Do this with a user handler since Qt normally
+    // distinguishes `https://host/` and `https://host:443/`; treat these as the
+    // same.
+    request.setAttribute(QNetworkRequest::Attribute::RedirectPolicyAttribute, 
+                         QNetworkRequest::RedirectPolicy::UserVerifiedRedirectPolicy);
 
     // Seems like QNetworkAccessManager could provide this, but the closest
     // thing it has is sendCustomRequest().  It looks like that would produce a
@@ -188,6 +200,35 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // Abort the request if it doesn't complete within a certain interval
     Q_ASSERT(_pRetryStrategy);  // Class invariant
     QTimer::singleShot(msec(_pRetryStrategy->beginAttempt(_resource)), reply.get(), &QNetworkReply::abort);
+    
+    // Handle redirects by permitting same-origin HTTPS redirects only
+    connect(reply.get(), &QNetworkReply::redirected, this,
+        [this, reply, requestUri](const QUrl &url)
+        {
+            // Resolve the redirect URL if it's relative.  Typical relative
+            // paths as URLs won't affect the scheme/host/port and will be
+            // accepted since they are unchanged, but if something odd like a
+            // protocol-relative URL shows up, this will handle it properly.
+            const auto &targetResolved = requestUri.resolved(url);
+            if(targetResolved.scheme() == QStringLiteral("https") &&
+                targetResolved.host() == requestUri.host() &&
+                targetResolved.port(443) == requestUri.port(443))
+            {
+                qInfo() << "Accepted redirect from"
+                    << ApiResource{requestUri.toString()} << "to"
+                    << ApiResource{url.toString()} << "(resolved:"
+                    << ApiResource{targetResolved.toString()} << ")";
+                reply->redirectAllowed();
+            }
+            else
+            {
+                qInfo() << "Rejected redirect from"
+                    << ApiResource{requestUri.toString()} << "to"
+                    << ApiResource{url.toString()} << "(resolved:"
+                    << ApiResource{targetResolved.toString()} << ")";
+                reply->abort();
+            }
+        });
 
     // If a custom CA and peer name are specified, handle SSL errors by
     // validating the cert manually

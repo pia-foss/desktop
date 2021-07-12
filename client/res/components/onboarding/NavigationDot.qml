@@ -21,6 +21,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import "../common"
 import "../theme"
+import "../client"
 import PIA.NativeAcc 1.0 as NativeAcc
 
 Rectangle {
@@ -45,7 +46,7 @@ Rectangle {
     checked: active
 
     onClicked: {
-      currentPage = targetPage;
+      Client.uiState.onboarding.currentPage = targetPage;
     }
   }
 }

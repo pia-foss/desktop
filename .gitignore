@@ -1,6 +1,8 @@
 /qbs/
 /out/
 /build-*/
+# Local build variable defaults (see rake/util/buildenv.rb)
+.buildenv
 # Default build directory when opening CMake glue project in most IDEs
 /build/
 .DS_Store

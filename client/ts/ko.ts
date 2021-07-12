@@ -44,32 +44,32 @@
 <context>
     <name>AccountPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="26"/>
         <source>AccountPage --- Username</source>
         <translation>사용자 이름</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="43"/>
         <source>AccountPage --- Subscription</source>
         <translation>구독</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="50"/>
         <source>AccountPage --- Expired</source>
         <translation>만료</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="57"/>
         <source>AccountPage --- (expired on %1)</source>
         <translation>(%1에 만료됨)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="59"/>
         <source>AccountPage --- (renews on %1)</source>
         <translation>(%1에 갱신)</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="61"/>
         <source>AccountPage --- (expires on %1)</source>
         <translation>(%1에 만료)</translation>
     </message>
@@ -130,10 +130,6 @@
         <translation>네트워크</translation>
     </message>
     <message>
-    <source>AutomationAddRuleDialog --- Automation Rule Types</source>
-        <translation>자동화 규칙 유형</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="213"/>
         <source>AutomationAddRuleDialog --- RULE EXISTS</source>
         <translation>규칙이 존재함</translation>
@@ -143,11 +139,6 @@
         <source>AutomationAddRuleDialog --- %1 - rule exists</source>
         <extracomment>Screen reader annotation used when an automation rule already exists. Here, &quot;%1&quot; will refer to a network type (Wired Network), etc.</extracomment>
         <translation>%1 - 규칙 존재</translation>
-    </message>
-    <message>
-    <source>AutomationAddRuleDialog --- Rule</source>
-        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
-        <translation>규칙</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="256"/>
@@ -274,14 +265,14 @@
     <name>ChangelogWindow</name>
     <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="109"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="203"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>변경 로그</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="108"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="192"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>새로운 기능</translation>
     </message>
@@ -1274,15 +1265,14 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="79"/>
-        <source>GeneralPage --- The &apos;Auto&apos; setting chooses an icon based on your desktop theme.</source>
-        <translation>&apos;자동&apos; 설정은 데스크톱 테마에 따라 아이콘을 선택합니다.</translation>
+        <source>GeneralPage --- The &apos;System&apos; setting chooses an icon based on your desktop theme.</source>
+        <translation>&apos;시스템&apos; 설정은 데스크톱 테마에 따라 아이콘을 선택합니다.</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
-        <extracomment>icon-theme</extracomment>
-<source>GeneralPage -- icon-theme --- Auto</source>
+        <source>GeneralPage -- icon-theme --- System</source>
         
-        <translation>자동</translation>
+        <translation>시스템</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
@@ -1313,35 +1303,35 @@
         <translation>클래식</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="105"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="106"/>
         <source>GeneralPage --- Dashboard Appearance</source>
         <extracomment>Setting controlling how the dashboard is displayed - either as a popup attached to the system tray or as an ordinary window.</extracomment>
         <translation>대시보드 모양</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="111"/>
         <source>GeneralPage --- Attached to Tray</source>
         <extracomment>Setting value indicating that the dashboard is a popup attached to the system tray.</extracomment>
         <translation>트레이에 부착</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="112"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="113"/>
         <source>GeneralPage --- Window</source>
         <extracomment>Setting value indicating that the dashboard is an ordinary window</extracomment>
         <translation>창</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="116"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="117"/>
         <source>GeneralPage --- Attached mode may not work with all desktop environments, and it requires a system tray. If you can&apos;t find the dashboard, start Private Internet Access again to show it, and switch back to Window mode in Settings.</source>
         <translation>부착 모드는 일부 데스크톱 환경에서 작동하지 않을 수 있으며, 시스템 트레이를 필요로 합니다. 대시보드를 찾을 수 없을 경우 Private Internet Access를 다시 시작한 후 설정에서 창 모드로 전환하세요.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="130"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="131"/>
         <source>GeneralPage --- Reset All Settings</source>
         <translation>모든 설정 초기화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="133"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="134"/>
         <source>GeneralPage --- Reset all settings to their default values?</source>
         <translation>모든 설정을 기본값으로 다시 설정하시겠습니까?</translation>
     </message>
@@ -1375,59 +1365,59 @@
         <translation>뒤로</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="268"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="269"/>
         <source>HeaderBar --- RESUMING</source>
         <translation>재개 중</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="270"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="271"/>
         <source>HeaderBar --- SNOOZING</source>
         <translation>스누즈 중</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="272"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="273"/>
         <source>HeaderBar --- SNOOZED</source>
         <translation>스누즈됨</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="283"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="284"/>
         <source>HeaderBar --- CONNECTING</source>
         <translation>연결 중</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="285"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="286"/>
         <source>HeaderBar --- DISCONNECTING</source>
         <translation>연결 해제 중</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="287"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="288"/>
         <source>HeaderBar --- CONNECTED</source>
         <translation>연결됨</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="344"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="345"/>
         <source>HeaderBar --- Menu</source>
         <extracomment>Screen reader annotation for the &quot;Menu&quot; button in the header. This button displays a popup menu.</extracomment>
         <translation>메뉴</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="351"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="352"/>
         <source>HeaderBar --- Menu, update available</source>
         <extracomment>Screen reader annotation for the &quot;Menu&quot; button in the header when it displays the &quot;update available&quot; badge. The button still displays the normal popup menu, and the &quot;Menu&quot; translation should come first since that&apos;s its action. &quot;Update available&quot; is added as an additional description of the update badge.</extracomment>
         <translation>메뉴, 업데이트 이용 가능</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="408"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="409"/>
         <source>HeaderBar --- Settings</source>
         <translation>설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="412"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="413"/>
         <source>HeaderBar --- Logout</source>
         <translation>로그아웃</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="417"/>
+        <location filename="../../../client/res/components/dashboard/HeaderBar.qml" line="418"/>
         <source>HeaderBar --- Quit</source>
         <translation>종료</translation>
     </message>
@@ -1450,139 +1440,174 @@
         <translation>데몬:</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="97"/>
         <source>HelpPage --- Changelog</source>
         <translation>변경 로그</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="111"/>
         <source>HelpPage --- Quick Tour</source>
         <extracomment>This link displays the tour that users see initially after installation.</extracomment>
         <translation>퀵 투어</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="122"/>
         <source>HelpPage --- Receive Beta Updates</source>
         <translation>베타 업데이트 받기</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="123"/>
         <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
         <translation>베타 프로그램에 참여하여 새로운 기능을 테스트하고 피드백을 제공해 주세요.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="168"/>
         <source>HelpPage --- Show service communication messages</source>
         <translation>서비스 연락 메시지 표시</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="179"/>
         <source>HelpPage --- Network</source>
         <translation>네트워크</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="186"/>
         <source>HelpPage --- Include Geo-Located Regions</source>
         <translation>지리적 위치 기반 지역 포함</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
         <source>HelpPage --- Support</source>
         <translation>지원</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="205"/>
         <source>HelpPage --- Disable Accelerated Graphics</source>
         <translation>그래픽 가속 비활성화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
         <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
         <translation>이 설정을 적용하려면 Private Internet Access를 다시 시작하세요</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="222"/>
         <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
         <translation>그래픽 가속을 사용하면 CPU 사용량이 줄어들고 그래픽 효과가 활성화되지만, 일부 그래픽 카드 또는 드라이브에서 문제가 발생할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="227"/>
         <source>HelpPage --- Enable Debug Logging</source>
         <translation>디버그 로깅 활성화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="228"/>
         <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
         <translation>문제 해결을 돕기 위하여 기술 지원팀에 제출할 디버그 로그를 저장합니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="239"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="248"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>디버그 로그 제출</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
         <source>HelpPage --- Support Portal</source>
         <translation>지원 포털</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="283"/>
+        <source>HelpPage --- Help Improve PIA</source>
+        <translation>PIA 개선 작업 지원하기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="284"/>
+        <source>HelpPage --- Help ensure our service&apos;s performance by sharing connection stats with us.</source>
+        <translation>저희와 연결 상태를 공유하여 저희 서비스의 성능을 개선하도록 도와 주세요.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="297"/>
+        <source>HelpPage --- Connection Events</source>
+        <translation>연결 이벤트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="318"/>
+        <source>HelpPage --- No events have been stored recently.</source>
+        <translation>최근에 저장된 이벤트가 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="319"/>
+        <source>HelpPage --- Turn on the &quot;Help Improve PIA&quot; setting, then connect to see events.</source>
+        <translation>&quot;PIA 개선 작업 지원하기&quot; 설정을 켠 다음, 연결하여 이벤트를 확인합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="338"/>
+        <source>HelpPage --- Find out more</source>
+        <translation>자세히 보기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="348"/>
+        <source>HelpPage --- View shared data</source>
+        <translation>공유된 데이터 보기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="361"/>
         <source>HelpPage --- Maintenance</source>
         <translation>유지 관리</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="287"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="371"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>OpenVPN 네트워크 어댑터 다시 설치</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="372"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>OpenVPN 네트워크 어댑터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="382"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>WireGuard 네트워크 어댑터 다시 설치</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="383"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>WireGuard 네트워크 어댑터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="322"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>분할 터널 필터를 다시 설치하는 중...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="323"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="407"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>분할 터널 필터 다시 설치</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="362"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="446"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>분할 터널 필터가 다시 설치되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="387"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="471"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>Private Internet Access 제거</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="428"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="512"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>터미널에서 명령을 실행하지 못했습니다. x-terminal-emulator와 호환되는 터미널을 설치하세요.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="430"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="514"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>터미널을 열 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="523"/>
         <source>HelpPage --- v%1</source>
         <translation>v%1</translation>
     </message>
@@ -2060,7 +2085,7 @@
 <context>
     <name>OnboardingWindow</name>
     <message>
-        <location filename="../../../client/res/components/onboarding/OnboardingWindow.qml" line="13"/>
+        <location filename="../../../client/res/components/onboarding/OnboardingWindow.qml" line="15"/>
         <source>OnboardingWindow --- Quick Tour</source>
         <translation>퀵 투어</translation>
     </message>
@@ -2196,12 +2221,12 @@
         <translation>환영합니다</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="50"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="42"/>
         <source>Page1Welcome --- QUICK TOUR</source>
         <translation>퀵 투어</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="80"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="63"/>
         <source>Page1Welcome --- LOG IN</source>
         <translation>로그인</translation>
     </message>
@@ -2286,19 +2311,58 @@
     </message>
 </context>
 <context>
+    <name>Page5HelpUsImprove</name>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="19"/>
+        <source>Page5HelpUsImprove --- Checklist</source>
+        <extracomment>Screen reader annotation for the graphic on the &quot;help us improve&quot; page, which is a checklist.</extracomment>
+        <translation>체크리스트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="28"/>
+        <source>Page5HelpUsImprove --- Help us improve our service</source>
+        <translation>저희 서비스를 개선하도록 도와 주세요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="41"/>
+        <source>Page5HelpUsImprove --- To help us ensure our service&apos;s connection performance, you can anonymously share your connection stats with us.</source>
+        <translation>연결 상태를 저희와 익명으로 공유해 주시면 저희 서비스의 연결 성능을 개선하는 데 도움이 됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="43"/>
+        <source>Page5HelpUsImprove --- These reports do not contain any personally identifiable information.</source>
+        <translation>이 보고서에는 개인 식별 정보가 포함되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="58"/>
+        <source>Page5HelpUsImprove --- Find out more</source>
+        <translation>자세히 보기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="67"/>
+        <source>Page5HelpUsImprove --- ACCEPT</source>
+        <translation>수락</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="77"/>
+        <source>Page5HelpUsImprove --- NO THANKS</source>
+        <translation>아니요</translation>
+    </message>
+</context>
+<context>
     <name>PageFooter</name>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="15"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="18"/>
         <source>PageFooter --- SKIP TOUR</source>
         <translation>투어 건너뛰기</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- LOG IN</source>
         <translation>로그인</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- NEXT</source>
         <translation>다음</translation>
     </message>
@@ -2523,6 +2587,255 @@
     </message>
 </context>
 <context>
+    <name>QualityEventsInfoDialog</name>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="11"/>
+        <source>QualityEventsInfoDialog --- About Connection Events</source>
+        <translation>연결 이벤트 정보</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="23"/>
+        <source>QualityEventsInfoDialog --- This minimal information assists us in identifying and fixing potential connection issues. Note that sharing this information requires consent and manual activation as it is turned off by default.</source>
+        <translation>이 최소한의 정보는 잠재적인 연결 문제를 식별하고 해결하는 데 도움이 됩니다. 이 정보를 공유하려면 기본적으로 해제되어 있는 승인과 수동 활성화가 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="25"/>
+        <source>QualityEventsInfoDialog --- We will collect information about the following events:</source>
+        <translation>저희가 수집하는 이벤트에 관한 정보는 다음과 같습니다. </translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="27"/>
+        <source>QualityEventsInfoDialog --- Connection Attempt</source>
+        <translation>연결 시도</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="28"/>
+        <source>QualityEventsInfoDialog --- Connection Canceled</source>
+        <translation>취소된 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="29"/>
+        <source>QualityEventsInfoDialog --- Connection Established</source>
+        <translation>수립된 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="31"/>
+        <source>QualityEventsInfoDialog --- For all of these events, we will collect the following information:</source>
+        <translation>이러한 이벤트에 관하여 저희가 수집하는 정보는 다음과 같습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="33"/>
+        <source>QualityEventsInfoDialog --- Platform</source>
+        <translation>플랫폼</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="34"/>
+        <source>QualityEventsInfoDialog --- App version</source>
+        <translation>앱 버전</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="35"/>
+        <source>QualityEventsInfoDialog --- App type (pre-release or not)</source>
+        <translation>앱 유형 (사전 출시 여부)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="36"/>
+        <source>QualityEventsInfoDialog --- Protocol used</source>
+        <translation>사용된 프로토콜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="37"/>
+        <source>QualityEventsInfoDialog --- Connection source (manual or using automation)</source>
+        <translation>연결 소스 (수동 또는 자동 사용)</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="39"/>
+        <source>QualityEventsInfoDialog --- All events will contain a unique ID, which is randomly generated. This ID is not associated with your user account. This unique ID is re-generated daily for privacy purposes.</source>
+        <translation>모든 이벤트에는 무작위로 생성된 고유 ID가 포함됩니다. 이 ID는 사용자 계정과 연결되지 않습니다. 이 고유 ID는 개인 정보 보호 목적을 위하여 매일 다시 생성됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/QualityEventsInfoDialog.qml" line="41"/>
+        <source>QualityEventsInfoDialog --- You will always be in control. You can see what data we’ve collected from Settings, and you can turn it off at any time.</source>
+        <translation>회원님은 언제나 이를 통제할 수 있습니다. 설정에서 저희가 수집하는 데이터를 확인하고, 언제든지 해제하실 수 있습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>QualityEventsList</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="17"/>
+        <source>QualityEventsList --- Connection Events</source>
+        <extracomment>Screen reader label for the list of connection events</extracomment>
+        <translation>연결 이벤트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="104"/>
+        <source>QualityEventsList --- Event</source>
+        <extracomment>Screen reader annotation for the &quot;event&quot; column of the Connection Events table, which displays the event type.</extracomment>
+        <translation>이벤트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="112"/>
+        <source>QualityEventsList --- Time</source>
+        <extracomment>Screen reader annotation for the &quot;time&quot; column of the Connection Events table, which displays the time when the event was generated (both date and time of day).</extracomment>
+        <translation>시간</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="119"/>
+        <source>QualityEventsList --- Expand</source>
+        <extracomment>Screen reader annotation for the &quot;expand&quot; column of the Connection Events list, which displays the &quot;expand&quot; buttons for each event</extracomment>
+        <translation>확대</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="128"/>
+        <source>QualityEventsList --- Platform</source>
+        <extracomment>Screen reader annotation for the &quot;platform&quot; column of the Connection Events list, which displays the client platform (&quot;Windows&quot;, &quot;macOS&quot;, or &quot;Linux&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>플랫폼</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="138"/>
+        <source>QualityEventsList --- Prerelease</source>
+        <extracomment>Screen reader annotation for the &quot;prerelease&quot; column of the Connection Events list, which indicates whether the client is a prerelease client or not (&quot;Yes&quot; or &quot;No&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>사전 출시</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="148"/>
+        <source>QualityEventsList --- Protocol</source>
+        <extracomment>Screen reader annotation for the &quot;protocol&quot; column of the Connection Events list, which indicates the VPN protocol used for that connection (&quot;OpenVPN&quot; or &quot;WireGuard&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>프로토콜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="158"/>
+        <source>QualityEventsList --- Source</source>
+        <extracomment>Screen reader annotation for the &quot;source&quot; column of the Connection Events list, which indicates whether the connection was started manually or automatically (&quot;Manual&quot; or &quot;Automatic&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>소스</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="167"/>
+        <source>QualityEventsList --- Version</source>
+        <extracomment>Screen reader annotation for the &quot;version&quot; column of the Connection Events list, which displays the client version (such as 2.8.1+06339). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>버전</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="178"/>
+        <source>QualityEventsList --- User Agent</source>
+        <extracomment>Screen reader annotation for the &quot;user agent&quot; column of the Connection Events list, which indicates the User Agent string for that client version (https://en.wikipedia.org/wiki/User_agent - for example, &quot;PIA/2.8.1+06339 (Linux; x86_64)&quot;). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>사용자 에이전트</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="188"/>
+        <source>QualityEventsList --- Aggregation ID</source>
+        <extracomment>Screen reader annotation for the &quot;aggregation ID&quot; column of the Connection Events list, which shows the aggregation ID used for that event (a UUID). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>집계 ID</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="197"/>
+        <source>QualityEventsList --- Event ID</source>
+        <extracomment>Screen reader annotation for the &quot;event ID ID&quot; column of the Connection Events list, which shows the event&apos;s unique ID (a UUID). The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>이벤트 ID</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsList.qml" line="207"/>
+        <source>QualityEventsList --- Product ID</source>
+        <extracomment>Screen reader annotation for the &quot;product ID&quot; column of the Connection Events list, which indicates the product family that the client belongs to (a UUID, which represents the product &quot;PIA Desktop production&quot;, etc.) The details fields are modeled as columns for screen readers, although they are not visually organized as a single column.</extracomment>
+        <translation>제품 ID</translation>
+    </message>
+</context>
+<context>
+    <name>QualityEventsRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="33"/>
+        <source>QualityEventsRow --- Connection attempt</source>
+        <translation>연결 시도</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="35"/>
+        <source>QualityEventsRow --- Connection established</source>
+        <translation>수립된 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="37"/>
+        <source>QualityEventsRow --- Connection canceled</source>
+        <translation>취소된 연결</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="72"/>
+        <source>QualityEventsRow --- Expand</source>
+        <extracomment>Screen reader annotation for the &quot;expand&quot; button shown on a connection event row that is not expanded</extracomment>
+        <translation>확대</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="75"/>
+        <source>QualityEventsRow --- Collapse</source>
+        <extracomment>Screen reader annotation for the &quot;collapse&quot; button shown on a connection event row that is expanded</extracomment>
+        <translation>축소</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="252"/>
+        <source>QualityEventsRow --- Platform:</source>
+        <translation>플랫폼:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="268"/>
+        <source>QualityEventsRow --- Prerelease:</source>
+        <translation>사전 출시:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="276"/>
+        <source>QualityEventsRow --- Yes</source>
+        <translation>예</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="276"/>
+        <source>QualityEventsRow --- No</source>
+        <translation>아니요</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="293"/>
+        <source>QualityEventsRow --- Protocol:</source>
+        <translation>프로토콜:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="309"/>
+        <source>QualityEventsRow --- Source:</source>
+        <translation>소스:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="317"/>
+        <source>QualityEventsRow --- Manual</source>
+        <translation>수동</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="317"/>
+        <source>QualityEventsRow --- Automatic</source>
+        <translation>자동</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="335"/>
+        <source>QualityEventsRow --- Version:</source>
+        <translation>버전:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="351"/>
+        <source>QualityEventsRow --- User Agent:</source>
+        <translation>사용자 에이전트:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="367"/>
+        <source>QualityEventsRow --- Aggregation ID:</source>
+        <translation>집계 ID:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="383"/>
+        <source>QualityEventsRow --- Event ID:</source>
+        <translation>이벤트 ID:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/QualityEventsRow.qml" line="401"/>
+        <source>QualityEventsRow --- Product ID:</source>
+        <translation>제품 ID:</translation>
+    </message>
+</context>
+<context>
     <name>QuickConnectButton</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="157"/>
@@ -2554,12 +2867,12 @@
 <context>
     <name>RatingControl</name>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="106"/>
         <source>RatingControl --- Loading</source>
         <translation>불러오는 중</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="119"/>
         <source>RatingControl --- Something went wrong.</source>
         <translation>문제가 발생했습니다.</translation>
     </message>
@@ -2889,126 +3202,126 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>일반</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>계정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>프라이버시</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>네트워크</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Connection</source>
         
         <translation>연결</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>자동화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>전용 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title-compact --- Automation</source>
         
         <translation>자동화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="75"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- General Preferences</source>
         
         <translation>일반 환경 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="76"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Account Information</source>
         
         <translation>계정 정보</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="77"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
         
         <translation>프라이버시 환경 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="78"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Network Preferences</source>
         
         <translation>네트워크 환경 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="79"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Connection Preferences</source>
         
         <translation>연결 환경 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="80"/>
         <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
         
         <translation>자동화 기본 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="81"/>
         <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
         
         <translation>전용 IP 기본 설정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="82"/>
         <extracomment>setting-heading</extracomment>
 <source>SettingsWindow -- setting-heading --- Help</source>
         
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="166"/>
         <source>SettingsWindow --- Alert</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="200"/>
         <source>SettingsWindow --- Settings</source>
         <translation>설정</translation>
     </message>
@@ -3186,18 +3499,18 @@
 <context>
     <name>SplitTunnelAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="116"/>
         <source>SplitTunnelAppRow --- Remove</source>
         <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a split tunnel app rule. (Should be labeled like a normal command button.)</extracomment>
         <translation>제거</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="157"/>
         <source>SplitTunnelAppRow --- Microsoft Store app</source>
         <translation>Microsoft 스토어 앱</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="165"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelAppRow.qml" line="169"/>
         <source>SplitTunnelAppRow --- App Store, Mail, Safari and others</source>
         <translation>App Store, 메일, Safari 등</translation>
     </message>
@@ -3276,25 +3589,25 @@
 <context>
     <name>SplitTunnelSettings</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="178"/>
         <source>SplitTunnelSettings --- App</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app names.</extracomment>
         <translation>앱</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="186"/>
         <source>SplitTunnelSettings --- Path</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays app file paths. (These are visually placed below the app names, but they&apos;re annotated as a separate column.)</extracomment>
         <translation>경로</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="192"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="193"/>
         <source>SplitTunnelSettings --- Behavior</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that displays the behavior selected for a specific app.</extracomment>
         <translation>동작</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="199"/>
+        <location filename="../../../client/res/components/settings/pages/SplitTunnelSettings.qml" line="200"/>
         <source>SplitTunnelSettings --- Remove</source>
         <extracomment>Screen reader annotation for the column in the split tunnel app list that removes a selected app.</extracomment>
         <translation>제거</translation>

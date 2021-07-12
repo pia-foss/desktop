@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("jsonrefresher.h")
-
 #ifndef JSONREFRESHER_H
 #define JSONREFRESHER_H
 
+#include "common.h"
 #include "apibase.h"
 #include "async.h"
 #include "testshim.h"
@@ -64,6 +62,16 @@ private:
     void emitReply(QByteArray responsePayload);
 
     bool processOverrideFile(const QString &overridePath);
+
+    // Test if a JSON cache is valid (non-trivial since it could be an object or
+    // array).  (If the cache is invalid, we fall back to the bundled file if it
+    // exists.)
+    //
+    // The cache is valid if it is a non-empty object or non-empty array.  (It's
+    // empty if it is an empty/null QJsonDocument, empty object, or empty
+    // array.)
+    bool isCacheValid(const QJsonDocument &cache);
+
 public:
     // Start trying to load the resource.
     void start(std::shared_ptr<ApiBase> pApiBaseUris);
@@ -90,7 +98,7 @@ public:
                          const QString &overridePath,
                          const QString &bundledPath,
                          const QByteArray &signatureKey,
-                         const QJsonObject &cache);
+                         const QJsonDocument &cache);
     // Stop refreshing the resource.  If a request was in-flight, it is
     // canceled (contentLoaded() cannot be emitted while stopped).
     void stop();

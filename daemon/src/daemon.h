@@ -32,6 +32,7 @@
 #include "portforwarder.h"
 #include "socksserverthread.h"
 #include "updatedownloader.h"
+#include "servicequality.h"
 #include "vpn.h"
 #include "apiclient.h"
 #include "automation.h"
@@ -384,6 +385,8 @@ protected:
     // dedicated IPs, update information, client notifications, etc.  Used for
     // testing to avoid waiting on long timers.
     void RPC_refreshMetadata();
+    // Send service quality events early (if enabled, used by a dev tool)
+    void RPC_sendServiceQualityEvents();
 
     // Client activation
     void RPC_notifyClientActivate();
@@ -483,18 +486,15 @@ private:
     // dependent properties - used by rebuild*Location().
     void applyBuiltLocations(const LocationsById &newLocations);
 
-    // Build the locations list from the modern regions list.  Like
-    // rebuildLegacyLocations(), returns true if the new locations list is not
-    // empty, meaning the new data can be cached.
-    //
-    // If the modern infrastructure is selected, the new locations are applied,
-    // like rebuildLegacyLocations().
+    // Build the locations list from the modern regions list.  Returns true if
+    // the new locations list is not empty, meaning the new data can be cached.
+    // The new locations are also applied.
     //
     // regionsObj can be the cached object from DaemonData or new data retrieved
     // (which should then be cached if successful).  Latencies from DaemonData
     // are used.
     bool rebuildModernLocations(const QJsonObject &regionsObj,
-                                const QJsonObject &legacyShadowsocksObj);
+                                const QJsonArray &shadowsocksObj);
 
     // Rebuild either the legacy or modern locations from the cached data,
     // depending on the infrastructure setting.  Used when latencies are updated
@@ -564,8 +564,8 @@ private:
     void onAutomationRuleTriggered(const nullable_t<AutomationRule> &currentRule,
                                    Automation::Trigger trigger);
 
-    Error connectVPN();
-    void disconnectVPN();
+    Error connectVPN(ServiceQuality::ConnectionSource source);
+    void disconnectVPN(ServiceQuality::ConnectionSource source);
 protected:
     bool _started, _stopping;
 
@@ -602,12 +602,15 @@ protected:
 
     LatencyTracker _modernLatencyTracker;
     PortForwarder _portForwarder;
-    JsonRefresher _shadowsocksRefresher, _modernRegionRefresher, _modernRegionMetaRefresher;
+    JsonRefresher _modernRegionRefresher, _modernRegionMetaRefresher,
+                  _shadowsocksRefresher;
     SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;
     std::unique_ptr<NetworkMonitor> _pNetworkMonitor;
     Automation _automation;
+    // ServiceQuality is created after the data/settings are loaded
+    nullable_t<ServiceQuality> _pServiceQuality;
 
     QSet<QString> _dataChanges;
     QSet<QString> _accountChanges;

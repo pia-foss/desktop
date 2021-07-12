@@ -62,6 +62,9 @@ Rectangle {
   // The client setting name used to store the collapsed country groups
   property string collapsedCountriesSettingName
 
+  property alias scrollStateGroupName: regionListFlickable.stateGroupName
+  property alias scrollStatePropertyName: regionListFlickable.statePropertyName
+
   // A region has been selected
   signal regionSelected(string locationId)
 
@@ -131,7 +134,7 @@ Rectangle {
     anchors.fill: parent
     clip: true
 
-    Flickable {
+    PersistentFlickable {
       id: regionListFlickable
       boundsBehavior: Flickable.StopAtBounds
       // don't allow horizontal scrolling.

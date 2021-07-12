@@ -1,3 +1,4 @@
+require_relative './rake/util/buildenv.rb' # Before all others, this injects env vars from .buildenv
 require_relative './rake/model/build.rb'
 require_relative './rake/executable.rb'
 require_relative './rake/install.rb'
@@ -156,8 +157,7 @@ serverDataProbe.file('serverdata.txt', "#{ENV['SERVER_DATA_DIR']}")
 jsonFetched = Build.new('json-fetched')
 # These are the assets we need to fetch and the URIs we get them from
 {
-    'servers.json': 'https://www.privateinternetaccess.com/vpninfo/servers?version=1002&client=x-alpha',
-    'shadowsocks.json': 'https://www.privateinternetaccess.com/vpninfo/shadowsocks_servers',
+    'modern_shadowsocks.json': 'https://serverlist.piaservers.net/shadow_socks',
     'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/v6',
     'modern_region_meta.json': 'https://serverlist.piaservers.net/vpninfo/regions/v2'
 }.each do |k, v|
@@ -170,8 +170,9 @@ jsonFetched = Build.new('json-fetched')
             # Use the copy provided instead of fetching (for reproducing a build)
             File.copy(File.join(serverDataDir, k), fetchedFile)
         else
-            # Fetch from the web API
-            File.write(t.name, Net::HTTP.get(URI(v)))
+            # Fetch from the web API (write with "binary" mode so LF is not
+            # converted to CRLF on Windows)
+            File.binwrite(t.name, Net::HTTP.get(URI(v)))
         end
     end
     stage.install(fetchedFile, :res)
@@ -273,7 +274,7 @@ task :installer do |t|
     puts "built installer"
 end
 
-desc "Run integration tests"
+desc "Build integration test artifact"
 task :integtest do |t|
     puts "built integration tests"
 end

@@ -127,13 +127,16 @@ FocusScope {
       // you if you put children in the ScrollView directly.  If you put a
       // Flickable in it instead, it uses that one and does not make one on its
       // own.)
-      Flickable {
+      PersistentFlickable {
         id: scrollWrapperFlickable
         boundsBehavior: Flickable.StopAtBounds
 
         // Tab stop only when scrolling is actually needed - most of the time,
         // it isn't.
         activeFocusOnTab: contentHeight > height
+
+        stateGroupName: "dashboard"
+        statePropertyName: "connectScrollPos"
 
         NumberAnimation {
           id: expandScrollToAnimation

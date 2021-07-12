@@ -33,7 +33,8 @@ namespace
         {GetSetType::debugLogging, QStringLiteral("Enable or disable debug logging")},
         {GetSetType::protocol, QStringLiteral("Select a VPN protocol")},
         {GetSetType::region, QStringLiteral("Select a region (or \"auto\")")},
-        {GetSetType::requestPortForward, QStringLiteral("Whether to request a forwarded port on the next connection attempt")}
+        {GetSetType::requestPortForward, QStringLiteral("Whether to request a forwarded port on the next connection attempt")},
+        {GetSetType::allowLAN, QStringLiteral("Whether to allow LAN traffic")}
     };
 
     QJsonArray buildRpcArgs(CliClient &client, const QStringList &params)
@@ -78,6 +79,14 @@ namespace
             QJsonValue newValue = enabled;
             QJsonObject newSettings;
             newSettings.insert(QStringLiteral("portForward"), newValue);
+            return {newSettings};
+        }
+        else if (params[1] == GetSetType::allowLAN)
+        {
+            bool enabled = GetSetValue::parseBooleanParam(params[2]);
+            QJsonValue newValue = enabled;
+            QJsonObject newSettings;
+            newSettings.insert(QStringLiteral("allowLAN"), newValue);
             return {newSettings};
         }
 

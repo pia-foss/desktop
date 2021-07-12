@@ -19,14 +19,33 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.11
 import "./pages"
 import "../core"
 import '../theme'
+import "../daemon"
+import "../client"
 
 Item {
   id: root
-  property int currentPage: 0
-  property int numPages: 4
+  readonly property int currentPage: Client.uiState.onboarding.currentPage
+  readonly property bool showHelpImprove: Daemon.data.flags.includes("service_quality_events")
+  property int numPages: showHelpImprove ? 5 : 4
+
+  // In the extreme case that showHelpImprove becomes false while we're actually
+  // on that page, go back to the prior page.
+  onShowHelpImproveChanged: {
+    if(!showHelpImprove && Client.uiState.onboarding.currentPage == pageIndices.helpimprove)
+      Client.uiState.onboarding.currentPage = pageIndices.finish
+  }
+
+  readonly property var pageIndices: ({
+    welcome: 0,
+    theme: 1,
+    customize: 2,
+    finish: 3,
+    helpimprove: 4
+  })
 
   Item {
     id: backdrop
@@ -38,6 +57,7 @@ Item {
         easing.type: Easing.InOutQuad
         duration: Theme.animation.normalDuration
       }
+      enabled: root.Window.window && root.Window.window.visible
     }
     Image {
         id: backdropImage
@@ -71,10 +91,15 @@ Item {
     pageIndex: 3
     Page4Finish {}
   }
+  PageWrapper {
+    anchors.fill: parent
+    pageIndex: 4
+    Page5HelpUsImprove {anchors.fill: parent}
+  }
 
   PageFooter {
     visible: opacity > 0
-    opacity: currentPage > 0
+    opacity: currentPage !== pageIndices.welcome && currentPage !== pageIndices.helpimprove
     Behavior on opacity {
       NumberAnimation {
         duration: Theme.animation.normalDuration
@@ -88,5 +113,7 @@ Item {
     anchors.bottomMargin: 48
     anchors.rightMargin: 58
     anchors.leftMargin: 58
+
+    showHelpImprove: root.showHelpImprove
   }
 }

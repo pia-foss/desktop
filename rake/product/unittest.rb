@@ -18,6 +18,7 @@ module PiaUnitTest
         'localsockets',
         'nearestlocations',
         'networkmonitor',
+        'networktaskwithretry',
         'nodelist',
         'nullable_t',
         'originalnetworkscan',
@@ -60,6 +61,7 @@ module PiaUnitTest
             .useQt('Quick')
             .useQt('QuickControls2')
             .useQt('Gui')
+            .useQt('Test')
             .define('PIA_DAEMON', :export) # Daemon
             .source('daemon/src')
             .source('deps/embeddable-wg-library/src')

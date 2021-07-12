@@ -150,6 +150,35 @@ namespace
                        reinterpret_cast<LPARAM>(largeAppIcon.getHandle()));
     }
 #endif
+
+    // The local date, time, and date-time formats are cached - the client must
+    // be restarted to pick up changes in the system locale.  In the absence of
+    // actually detecting changes to the system locale, this is preferred over
+    // incompletely changing strings to the new format as they're re-rendered.
+
+    QString localDateTimeFormat()
+    {
+        static const QString format{QLocale::system().dateTimeFormat(QLocale::FormatType::ShortFormat)};
+        return format;
+    }
+    QString localDateFormat()
+    {
+        static const QString format{QLocale::system().dateFormat(QLocale::FormatType::ShortFormat)};
+        return format;
+    }
+    QString localTimeFormat()
+    {
+        static const QString format{QLocale::system().timeFormat(QLocale::FormatType::ShortFormat)};
+        return format;
+    }
+    // Render a UTC time specified by a timestamp in milliseconds to a local
+    // time using the format string given.
+    QString renderTimestampToLocal(qint64 timestampMs, const QString &format)
+    {
+        const auto &timestamp =
+            QDateTime::fromMSecsSinceEpoch(timestampMs, Qt::TimeSpec::UTC).toLocalTime();
+        return QLocale::system().toString(timestamp, format);
+    }
 }
 
 NativeHelpers::NativeHelpers()
@@ -583,7 +612,7 @@ QString NativeHelpers::iconPreviewResource(const QString &theme)
 {
 #if defined(Q_OS_MACOS)
     if(theme == QStringLiteral("auto"))
-        return QStringLiteral("qrc:/img/tray/sample-auto.png");
+        return QStringLiteral("qrc:/img/tray/wide-monochrome-connected.png");
     if(theme == QStringLiteral("light"))
         return QStringLiteral("qrc:/img/tray/wide-light-connected.png");
     if(theme == QStringLiteral("dark"))
@@ -747,6 +776,21 @@ QString NativeHelpers::cleanSsidDisplay(const QString &ssid)
             cval = ' ';
     }
     return cleaned;
+}
+
+QString NativeHelpers::renderDateTime(qint64 timestampMs)
+{
+    return renderTimestampToLocal(timestampMs, localDateTimeFormat());
+}
+
+QString NativeHelpers::renderDate(qint64 timestampMs)
+{
+    return renderTimestampToLocal(timestampMs, localDateFormat());
+}
+
+QString NativeHelpers::renderTime(qint64 timestampMs)
+{
+    return renderTimestampToLocal(timestampMs, localTimeFormat());
 }
 
 void NativeHelpers::onFocusWindowChanged(QWindow *pFocusWindow)

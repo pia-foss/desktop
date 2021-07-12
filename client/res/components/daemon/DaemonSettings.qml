@@ -52,6 +52,7 @@ QtObject {
   readonly property string updateChannel: NativeDaemon.settings.updateChannel
   readonly property string betaUpdateChannel: NativeDaemon.settings.betaUpdateChannel
   readonly property bool offerBetaUpdates: NativeDaemon.settings.offerBetaUpdates
+  readonly property bool sendServiceQualityEvents: NativeDaemon.settings.sendServiceQualityEvents
   readonly property bool splitTunnelEnabled: NativeDaemon.settings.splitTunnelEnabled
   readonly property bool splitTunnelDNS: NativeDaemon.settings.splitTunnelDNS
   readonly property var splitTunnelRules: NativeDaemon.settings.splitTunnelRules

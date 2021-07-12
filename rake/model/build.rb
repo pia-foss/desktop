@@ -13,7 +13,7 @@ class Build
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
     # dash), or empty string if none
-    VersionPrerelease = 'beta.1'
+    VersionPrerelease = ''
 
     # Select a build configuration based on environment variables, or use
     # defaults for the host platform if unspecified

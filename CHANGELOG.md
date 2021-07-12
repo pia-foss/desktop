@@ -2,6 +2,9 @@
 
 ### v2.10.0
 * Reduced memory and CPU usage of the graphical client
+* Updated icons and graphics
+* Connection stats can be sent to PIA on an opt-in basis to help improve our service
+* Added a CLI get/set type for the Allow LAN setting
 * The split tunnel UI on Windows now displays executable paths instead of link paths for Start Menu apps
 * WireGuard now works correctly on macOS and Linux when jumbo frames are enabled on the network interface
 * The PIA daemon on Linux no longer writes to stderr when run as a service to avoid flooding system logs

@@ -44,74 +44,192 @@
 <context>
     <name>AccountPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="24"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="25"/>
         <source>AccountPage --- Username</source>
         <translation>[&#x130;&#x429;_Úsérnámé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="41"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="42"/>
         <source>AccountPage --- Subscription</source>
         <translation>[&#x130;&#x429;&#x30A2;Súbscríptíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="49"/>
         <source>AccountPage --- Expired</source>
         <translation>[&#x130;&#x429;Éxpíréd]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="55"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="56"/>
         <source>AccountPage --- (expired on %1)</source>
         <translation>[&#x130;&#x429;&#x30A2;_(éxpíréd ón %1)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="58"/>
         <source>AccountPage --- (renews on %1)</source>
         <translation>[&#x130;&#x429;&#x30A2;_(rénéws ón %1)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="60"/>
         <source>AccountPage --- (expires on %1)</source>
         <translation>[&#x130;&#x429;&#x30A2;_(éxpírés ón %1)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
         <source>AccountPage --- Renews in %1 days</source>
         <translation>[&#x130;&#x429;&#x30A2;_Rénéws ín %1 dáys_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="74"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="75"/>
         <source>AccountPage --- Expires in %1 days</source>
         <translation>[&#x130;&#x429;&#x30A2;_Éxpírés ín %1 dáys]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
         <source>AccountPage --- Purchase Subscription</source>
         <translation>[&#x130;&#x429;&#x30A2;__Púrchásé Súbscríptíón_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
         <source>AccountPage --- Manage Subscription</source>
         <translation>[&#x130;&#x429;&#x30A2;_Mánágé Súbscríptíón_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="78"/>
         <source>AccountPage --- Renew Subscription</source>
         <translation>[&#x130;&#x429;&#x30A2;_Rénéw Súbscríptíón_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="90"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="91"/>
         <source>AccountPage --- Manage My Account</source>
         <translation>[&#x130;&#x429;&#x30A2;_Mánágé My Áccóúnt_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="95"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="96"/>
         <source>AccountPage --- Logout / Switch Account</source>
         <translation>[&#x130;&#x429;&#x30A2;__Lógóút / Swítch Áccóúnt_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="108"/>
+        <location filename="../../../client/res/components/settings/pages/AccountPage.qml" line="109"/>
         <source>AccountPage --- Not logged in</source>
         <translation>[&#x130;&#x429;&#x30A2;Nót lóggéd ín]</translation>
+    </message>
+</context>
+<context>
+    <name>ActiveRuleDisplay</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/connect/ActiveRuleDisplay.qml" line="117"/>
+        <source>ActiveRuleDisplay --- Open Automation Rule Settings</source>
+        <translation>[&#x130;&#x429;&#x30A2;___Ópén Áútómátíón Rúlé Séttíngs__]</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleDialog</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="48"/>
+        <source>AutomationAddRuleDialog --- Network</source>
+        <translation>[&#x130;&#x429;Nétwórk]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="54"/>
+        <source>AutomationAddRuleDialog --- Automation Rule Types</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Áútómátíón Rúlé Typés_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="229"/>
+        <source>AutomationAddRuleDialog --- RULE EXISTS</source>
+        <translation>[&#x130;&#x429;&#x30A2;RÚLÉ ÉXÍSTS]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="264"/>
+        <source>AutomationAddRuleDialog --- Rule</source>
+        <extracomment>Screen reader annotation for the &quot;Rule&quot; column of the Automation Rules Table (First column from the left)</extracomment>
+        <translation>[&#x130;_Rúlé]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleDialog.qml" line="293"/>
+        <source>AutomationAddRuleDialog --- Action</source>
+        <translation>[&#x130;&#x429;Áctíón]</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationAddRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationAddRuleRow.qml" line="21"/>
+        <source>AutomationAddRuleRow --- Add Automation Rule</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Ádd Áútómátíón Rúlé_]</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationPage</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="23"/>
+        <source>AutomationPage --- Connection Automation</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Cónnéctíón Áútómátíón_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="29"/>
+        <source>AutomationPage --- Create rules to automatically connect or disconnect the VPN when you join a particular network.</source>
+        <extracomment>Text displayed in a tooltip for connection automation</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;____________Créáté rúlés tó áútómátícálly cónnéct ór díscónnéct thé VPN whén yóú jóín á pártícúlár nétwórk.____________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationPage.qml" line="32"/>
+        <source>AutomationPage --- Help</source>
+        <extracomment>Help link for automation page</extracomment>
+        <translation>[&#x130;_Hélp]</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationRuleRow</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="23"/>
+        <source>AutomationRuleRow --- Remove</source>
+        <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
+        <translation>[&#x130;&#x429;Rémóvé]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="106"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>[&#x130;&#x429;ÁCTÍVÉ]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="187"/>
+        <source>AutomationRuleRow --- Remove Automation Rule</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Rémóvé Áútómátíón Rúlé__]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationRuleRow.qml" line="197"/>
+        <source>AutomationRuleRow --- Remove %1?</source>
+        <extracomment>Message shown when removing an automation rule. &quot;%1&quot; is the name of a rule, which can be a standard rule like &quot;Protected Wi-Fi&quot;, &quot;Open Wi-Fi&quot;, or &quot;Wired&quot;, or it can be a network SSID for a rule created for a specific wireless network. For example - &quot;Remove Protected Wi-Fi?&quot;, or &quot;Remove Steve&apos;s House?&quot;</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;Rémóvé %1?]</translation>
+    </message>
+</context>
+<context>
+    <name>AutomationTable</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="27"/>
+        <source>AutomationTable --- Automation Rules</source>
+        <extracomment>Screen reader annotation for the name of the table</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;_Áútómátíón Rúlés]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="86"/>
+        <source>AutomationTable --- Condition</source>
+        <extracomment>Name of the &quot;Condition&quot; table column, in the Automation table</extracomment>
+        <translation>[&#x130;&#x429;_Cóndítíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="92"/>
+        <source>AutomationTable --- Action</source>
+        <extracomment>Name of the &quot;Action&quot; table column, in the automation table</extracomment>
+        <translation>[&#x130;&#x429;Áctíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/AutomationTable.qml" line="98"/>
+        <source>AutomationTable --- Remove</source>
+        <extracomment>Name of the &quot;Remove&quot; table column, containing the remove button, in the automation table</extracomment>
+        <translation>[&#x130;&#x429;Rémóvé]</translation>
     </message>
 </context>
 <context>
@@ -152,14 +270,14 @@
     <name>ChangelogWindow</name>
     <message>
         <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="17"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="86"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="181"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="88"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="183"/>
         <source>ChangelogWindow --- Changelog</source>
         <translation>[&#x130;&#x429;_Chángélóg]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="85"/>
-        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="169"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="87"/>
+        <location filename="../../../client/res/components/changelog/ChangelogWindow.qml" line="171"/>
         <source>ChangelogWindow --- What&apos;s new</source>
         <translation>[&#x130;&#x429;&#x30A2;_Whát&apos;s néw]</translation>
     </message>
@@ -264,7 +382,7 @@
 <context>
     <name>Client</name>
     <message>
-        <location filename="../../../client/res/components/client/Client.qml" line="99"/>
+        <location filename="../../../client/res/components/client/Client.qml" line="161"/>
         <source>Client --- %1 - Best</source>
         <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
         <translation>[&#x130;&#x429;_%1 - Bést]</translation>
@@ -290,292 +408,295 @@
         <translation>[&#x130;&#x429;&#x30A2;___Dównlóád óf vérsíón %1 fáíléd.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="103"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>[&#x130;&#x429;&#x30A2;______________Thís ópérátíng systém vérsíón ís nó lóngér súppórtéd.  Pléásé úpgrádé tó récéívé thé látést PÍÁ úpdátés._____________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
         <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé TÁP ádáptér fór thé VPN túnnél ís nót ínstálléd.  Yóú cán réínstáll ít fróm Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="115"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="145"/>
         <source>ClientNotifications --- Restart to complete installation.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Réstárt tó cómplété ínstállátíón.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="116"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="146"/>
         <source>ClientNotifications --- The system must be restarted before you can connect.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Thé systém múst bé réstártéd béfóré yóú cán cónnéct.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="134"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="164"/>
         <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
         <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;____________Thé WínTÚN ádáptér fór thé VPN túnnél ís nót ínstálléd.  Yóú cán réínstáll ít fróm Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="147"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="177"/>
         <source>ClientNotifications --- The split tunnel filter is not installed.</source>
         <translation>[&#x130;&#x429;&#x30A2;____Thé splít túnnél fíltér ís nót ínstálléd.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="148"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="178"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé Ápp Éxclúsíón féátúré réqúírés thé splít túnnél fíltér.  Réínstáll ít fróm Séttíngs.__________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="159"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="189"/>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
         <source>ClientNotifications --- Reinstall</source>
         <translation>[&#x130;&#x429;_Réínstáll]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="173"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="203"/>
         <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Thé Ápp Éxclúsíón féátúré réqúírés thé splít túnnél fíltér.  Réstárt tó fínísh ínstállátíón.__________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="188"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="218"/>
         <source>ClientNotifications --- Connection refused.</source>
         <translation>[&#x130;&#x429;&#x30A2;_Cónnéctíón réfúséd._]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="194"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="224"/>
         <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
         <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_________________Thé sérvér réfúséd thé cónnéctíón.  Pléásé chéck yóúr úsérnámé ánd pásswórd, ánd vérífy thát yóúr áccóúnt ís nót éxpíréd.________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="203"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="233"/>
         <source>ClientNotifications --- Could not configure DNS.</source>
         <translation>[&#x130;&#x429;&#x30A2;__Cóúld nót cónfígúré DNS.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="204"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="234"/>
         <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Énáblé débúg lóggíng ánd chéck thé dáémón lóg fór spécífíc détáíls.________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="207"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="237"/>
         <source>ClientNotifications --- Daemon Log</source>
         <translation>[&#x130;&#x429;&#x30A2;Dáémón Lóg]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="209"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="241"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="256"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="326"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="404"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="239"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="271"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="286"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="356"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="434"/>
         <source>ClientNotifications --- Settings</source>
         <translation>[&#x130;&#x429;Séttíngs]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="247"/>
         <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
         <translation>[&#x130;&#x429;&#x30A2;_________Fáíléd tó rún /úsr/bín/xdg-ópén.  Pléásé ópén thé dáémón lóg fílé fróm:________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="234"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="264"/>
         <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
         <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cán&apos;t cónnéct tó Hándsháké.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="238"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="268"/>
         <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
         <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;______________Cán&apos;t sét úp námé résólútíón wíth Hándsháké.  Cóntínúé wáítíng, ór try á dífférént Námé Sérvér séttíng.______________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="252"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="282"/>
         <source>ClientNotifications --- There may be a problem with the connection.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Théré máy bé á próblém wíth thé cónnéctíón.____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="253"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="283"/>
         <source>ClientNotifications --- Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____________Cónnéctéd tó thé VPN, bút cán&apos;t réách thé Íntérnét.  Chéck Nétwórk ánd Cónnéctíón séttíngs.____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="278"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="308"/>
         <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Rúnníng PÍÁ ás ádmínístrátór ís nót récómméndéd._____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="279"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="309"/>
         <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______________Rúnníng PÍÁ ás ádmínístrátór cán prévént Láúnch ón Systém Stártúp fróm wórkíng ánd máy cáúsé óthér próbléms._______________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="291"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="321"/>
         <source>ClientNotifications --- KILLSWITCH ENABLED</source>
         <translation>[&#x130;&#x429;&#x30A2;__KÍLLSWÍTCH ÉNÁBLÉD_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="322"/>
         <source>ClientNotifications --- Killswitch is enabled.</source>
         <translation>[&#x130;&#x429;&#x30A2;_Kíllswítch ís énábléd._]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="293"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
         <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___________Áccéss tó thé Íntérnét ís blóckéd bécáúsé thé kíllswítch féátúré ís énábléd ín Séttíngs.___________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="326"/>
         <source>ClientNotifications --- Change</source>
         <translation>[&#x130;&#x429;Chángé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="309"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="339"/>
         <source>ClientNotifications --- RECONNECTING...</source>
         <translation>[&#x130;&#x429;&#x30A2;_RÉCÓNNÉCTÍNG...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="310"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="340"/>
         <source>ClientNotifications --- The connection to the VPN server was lost.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Thé cónnéctíón tó thé VPN sérvér wás lóst.____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="319"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="337"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="349"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="367"/>
         <source>ClientNotifications --- CONNECTING...</source>
         <translation>[&#x130;&#x429;&#x30A2;_CÓNNÉCTÍNG...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="322"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="352"/>
         <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
         <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cán&apos;t cónnéct tó thé próxy.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="353"/>
         <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____________Thé próxy cán&apos;t bé réáchéd.  Chéck yóúr próxy séttíngs, ánd chéck thát thé próxy ís áváíláblé.____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="338"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="368"/>
         <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Cán&apos;t réách thé VPN sérvér.  Pléásé chéck yóúr cónnéctíón._______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="347"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="377"/>
         <source>ClientNotifications --- RECONNECT NEEDED</source>
         <translation>[&#x130;&#x429;&#x30A2;__RÉCÓNNÉCT NÉÉDÉD_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="348"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="378"/>
         <source>ClientNotifications --- Reconnect to apply settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Récónnéct tó ápply séttíngs.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="349"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="379"/>
         <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
         <translation>[&#x130;&#x429;&#x30A2;______________Sómé séttíngs chángés wón&apos;t táké éfféct úntíl thé néxt tímé yóú cónnéct. Clíck tó récónnéct nów._____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="358"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="388"/>
         <source>ClientNotifications --- Connected with OpenVPN.</source>
         <translation>[&#x130;&#x429;&#x30A2;__Cónnéctéd wíth ÓpénVPN.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="361"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="391"/>
         <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
         <translation>[&#x130;&#x429;&#x30A2;__________Cónnéctéd wíth ÓpénVPN tó lóg ín fór thé fírst tímé. Récónnéct tó úsé WíréGúárd.__________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="363"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="393"/>
         <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Cónnéctéd wíth ÓpénVPN tó lóg ín fór thé fírst tímé._____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="382"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="412"/>
         <source>ClientNotifications --- Connected using %1 port %2.</source>
         <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Cónnéctéd úsíng %1 pórt %2.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="391"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="421"/>
         <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
         <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;________________Try Áltérnáté Séttíngs ís énábléd.  Thé sérvér cóúld nót bé réáchéd ón thé défáúlt %1 pórt, só %2 pórt %3 wás úséd ínstéád.________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="399"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="429"/>
         <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
         <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_______________Try Áltérnáté Séttíngs ís énábléd.  Thé sérvér cóúld nót bé réáchéd ón %1 pórt %2, só %3 pórt %4 wás úséd ínstéád._______________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="413"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="443"/>
         <source>ClientNotifications --- Subscription expires in %1 days.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Súbscríptíón éxpírés ín %1 dáys.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="416"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
         <source>ClientNotifications --- Renew</source>
         <translation>[&#x130;&#x429;Rénéw]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="424"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
         <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;____Yóúr dédícátéd ÍP wíll éxpíré ín %1 dáys.____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="427"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;____Yóúr dédícátéd ÍP wíll éxpíré ín 1 dáy.___]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;___Yóúr dédícátéd ÍP wíll éxpíré tódáy.___]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
         <source>ClientNotifications --- Get a new one</source>
         <translation>[&#x130;&#x429;&#x30A2;Gét á néw óné]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="439"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
         <source>ClientNotifications --- Your dedicated IP was updated.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Yóúr dédícátéd ÍP wás úpdátéd.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="455"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
         <source>ClientNotifications --- Unable to reach login server.</source>
         <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Únáblé tó réách lógín sérvér.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="459"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="508"/>
         <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
         <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___________Yóúr áccóúnt détáíls áré únáváíláblé, bút yóú máy stíll bé áblé tó cónnéct tó thé VPN.__________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="463"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="512"/>
         <source>ClientNotifications --- Retry</source>
         <translation>[&#x130;&#x429;Rétry]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="520"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>[&#x130;&#x429;&#x30A2;____Príváté Íntérnét Áccéss wás úpdátéd.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="474"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="523"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>[&#x130;&#x429;&#x30A2;__Séé whát&apos;s néw_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="491"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="540"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_________Thé ápplícátíón qúít únéxpéctédly. Yóúr VPN cónnéctíón wás présérvéd.________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="502"/>
-        <source>ClientNotifications --- Approve the split tunnel extension to enable split tunnel.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_______Áppróvé thé splít túnnél éxténsíón tó énáblé splít túnnél.______]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="503"/>
-        <source>ClientNotifications --- The split tunnel feature is blocked by macOS until it is manually approved. Split tunnel rules will not take effect.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_______________Thé splít túnnél féátúré ís blóckéd by mácÓS úntíl ít ís mánúálly áppróvéd. Splít túnnél rúlés wíll nót táké éfféct.______________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="507"/>
-        <source>ClientNotifications --- Security Preferences</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Sécúríty Préféréncés_]</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
@@ -686,163 +807,156 @@
         <translation>[&#x130;&#x429;&#x30A2;_WíréGúárd® Séttíngs_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="133"/>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="157"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="171"/>
         <source>ConnectionPage --- Trademarks</source>
         <translation>[&#x130;&#x429;&#x30A2;Trádémárks]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="147"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="151"/>
+        <source>ConnectionPage --- Handshake and Authentication Settings</source>
+        <translation>[&#x130;&#x429;&#x30A2;____Hándsháké ánd Áúthéntícátíón Séttíngs____]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="160"/>
         <source>ConnectionPage --- What do these settings mean?</source>
         <translation>[&#x130;&#x429;&#x30A2;___Whát dó thésé séttíngs méán?__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="165"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="179"/>
         <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
         <translation>[&#x130;&#x429;&#x30A2;________________________Áll pródúct ánd cómpány námés áré trádémárks™ ór régístéréd® trádémárks óf théír réspéctívé hóldérs. Úsé óf thém dóés nót ímply ány áffílíátíón wíth ór éndórsémént by thém.________________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="167"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="181"/>
         <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______ÓpénVPN® ís á trádémárk óf ÓpénVPN Téchnólógíés, Ínc.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="168"/>
+        <location filename="../../../client/res/components/settings/pages/ConnectionPage.qml" line="182"/>
         <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
         <translation>[&#x130;&#x429;&#x30A2;________WíréGúárd® ís á trádémárk óf Jásón Á. Dónénféld, án índívídúál._______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="76"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="89"/>
         <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Thé Shádówsócks próxy séttíng réqúírés TCP._____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="102"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="119"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="21"/>
         <source>ConnectionPage --- Local Port</source>
         <translation>[&#x130;&#x429;_Lócál Pórt]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="114"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="131"/>
         <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="33"/>
         <source>ConnectionPage --- Auto</source>
         <translation>[&#x130;_Áútó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="118"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="135"/>
         <source>ConnectionPage --- Configuration Method</source>
         <translation>[&#x130;&#x429;&#x30A2;__Cónfígúrátíón Méthód_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="125"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="142"/>
         <source>ConnectionPage --- DHCP</source>
         <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
         <translation>[&#x130;&#x429;DHCP]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="129"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="146"/>
         <source>ConnectionPage --- Static</source>
         <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
         <translation>[&#x130;&#x429;Státíc]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="134"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="151"/>
         <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
         <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__________________Détérmínés hów áddréssés áré cónfígúréd ón thé TÁP ádáptér.  Íf yóú hávé tróúblé cónnéctíng, á dífférént méthód máy bé móré rélíáblé.__________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="150"/>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="164"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="66"/>
-        <source>ConnectionPage --- None</source>
-        <translation>[&#x130;&#x429;Nóné]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="152"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="168"/>
         <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
         <translation>[&#x130;&#x429;&#x30A2;__________Wárníng: Yóúr tráffíc ís sént únéncryptéd ánd ís vúlnéráblé tó éávésdróppíng._________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="166"/>
-        <source>ConnectionPage --- Warning: Your traffic is unauthenticated and is vulnerable to manipulation.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_________Wárníng: Yóúr tráffíc ís únáúthéntícátéd ánd ís vúlnéráblé tó mánípúlátíón._________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="188"/>
-        <source>ConnectionPage --- This handshake relies on an Elliptic Curve endorsed by US standards bodies.</source>
-        <translation>[&#x130;&#x429;&#x30A2;__________Thís hándsháké rélíés ón án Éllíptíc Cúrvé éndórséd by ÚS stándárds bódíés._________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="199"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
-        <source>ConnectionPage --- Use Small Packets</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Úsé Smáll Páckéts_]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="203"/>
-        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_________________Sét á smállér MTÚ fór thé VPN cónnéctíón. Thís cán résúlt ín lówér tránsfér spééds bút ímpróvéd rélíábílíty ón póór cónnéctíóns._________________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="207"/>
-        <source>ConnectionPage --- Try Alternate Settings</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Try Áltérnáté Séttíngs_]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="216"/>
-        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
-        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;____________Íf thé cónnéctíón typé ánd rémóté pórt ábóvé dó nót wórk, try óthér séttíngs áútómátícálly.___________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="224"/>
-        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
-        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;________Áltérnáté séttíngs cán&apos;t bé úséd whén á próxy ís cónfígúréd.________]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="21"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="189"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>[&#x130;&#x429;Próxy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="55"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="219"/>
         <source>ConnectionPage --- SOCKS5 Proxy...</source>
         <translation>[&#x130;&#x429;&#x30A2;_SÓCKS5 Próxy...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="114"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="230"/>
+        <source>ConnectionPage --- None</source>
+        <translation>[&#x130;&#x429;Nóné]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="248"/>
         <source>ConnectionPage --- SOCKS5 Proxy</source>
         <translation>[&#x130;&#x429;&#x30A2;SÓCKS5 Próxy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="139"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="273"/>
         <source>ConnectionPage --- Server IP Address</source>
         <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Sérvér ÍP Áddréss]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="149"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="283"/>
         <source>ConnectionPage --- Port</source>
         <translation>[&#x130;_Pórt]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="152"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="286"/>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
         <source>ConnectionPage --- Default</source>
         <translation>[&#x130;&#x429;Défáúlt]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="158"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="292"/>
         <source>ConnectionPage --- User (optional)</source>
         <translation>[&#x130;&#x429;&#x30A2;Úsér (óptíónál)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="165"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="299"/>
         <source>ConnectionPage --- Password (optional)</source>
         <translation>[&#x130;&#x429;&#x30A2;_Pásswórd (óptíónál)_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="397"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="47"/>
+        <source>ConnectionPage --- Use Small Packets</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Úsé Smáll Páckéts_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="401"/>
+        <location filename="../../../client/res/components/settings/pages/WireguardConnection.qml" line="51"/>
+        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+        <translation>[&#x130;&#x429;&#x30A2;_________________Sét á smállér MTÚ fór thé VPN cónnéctíón. Thís cán résúlt ín lówér tránsfér spééds bút ímpróvéd rélíábílíty ón póór cónnéctíóns._________________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="405"/>
+        <source>ConnectionPage --- Try Alternate Settings</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Try Áltérnáté Séttíngs_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="414"/>
+        <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
+        <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;____________Íf thé cónnéctíón typé ánd rémóté pórt ábóvé dó nót wórk, try óthér séttíngs áútómátícálly.___________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="422"/>
+        <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
+        <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;________Áltérnáté séttíngs cán&apos;t bé úséd whén á próxy ís cónfígúréd.________]</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
@@ -873,42 +987,42 @@
 <context>
     <name>DaemonAccount</name>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="23"/>
         <source>DaemonAccount --- Deactivated</source>
         <translation>[&#x130;&#x429;&#x30A2;Déáctívátéd]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="25"/>
         <source>DaemonAccount --- One Month Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;_Óné Mónth Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="26"/>
         <source>DaemonAccount --- Three Month Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;_Thréé Mónth Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="32"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="27"/>
         <source>DaemonAccount --- Six Month Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;_Síx Mónth Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="33"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="28"/>
         <source>DaemonAccount --- One Year Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;Óné Yéár Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="34"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="29"/>
         <source>DaemonAccount --- Two Year Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;Twó Yéár Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="35"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="30"/>
         <source>DaemonAccount --- Three Year Plan</source>
         <translation>[&#x130;&#x429;&#x30A2;_Thréé Yéár Plán]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="36"/>
+        <location filename="../../../client/res/components/daemon/DaemonAccount.qml" line="31"/>
         <source>DaemonAccount --- Trial</source>
         <translation>[&#x130;_Tríál]</translation>
     </message>
@@ -937,36 +1051,37 @@
     <message>
         <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="110"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
-        <extracomment>The [[double square brackets]] are replaced by a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
+        <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___________________Pásté yóúr tókén bélów.  Íf yóú&apos;vé récéntly púrcháséd á dédícátéd ÍP, yóú cán généráté thé tókén by góíng tó thé [[My Áccóúnt]] págé.__________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="158"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="160"/>
         <source>DedicatedIpAddRow --- Your token has expired.</source>
+        <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Yóúr tókén hás éxpíréd._]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="159"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="161"/>
         <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______Yóú cán púrchásé á néw óné fróm thé My Áccóúnt págé.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="171"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="173"/>
         <source>DedicatedIpAddRow --- Your token is invalid.</source>
         <translation>[&#x130;&#x429;&#x30A2;_Yóúr tókén ís ínválíd._]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="172"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="174"/>
         <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Máké súré yóú hávé éntéréd thé tókén córréctly._____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="184"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="186"/>
         <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Cóúldn&apos;t chéck thé tókén.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpAddRow.qml" line="187"/>
         <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
         <translation>[&#x130;&#x429;&#x30A2;_________Cán&apos;t réách thé sérvér tó chéck thé tókén.  Pléásé try ágáín látér.________]</translation>
     </message>
@@ -974,24 +1089,19 @@
 <context>
     <name>DedicatedIpList</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="17"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="18"/>
         <source>DedicatedIpList --- Dedicated IPs</source>
+        <extracomment>Screen reader label for the list of Dedicated IPs.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Dédícátéd ÍPs]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="83"/>
         <source>DedicatedIpList --- Region</source>
         <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays region names.</extracomment>
         <translation>[&#x130;&#x429;Régíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="67"/>
-        <source>DedicatedIpList --- IP Address</source>
-        <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays the IP address for that dedicated IP.</extracomment>
-        <translation>[&#x130;&#x429;_ÍP Áddréss]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="74"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpList.qml" line="97"/>
         <source>DedicatedIpList --- Remove</source>
         <extracomment>Screen reader annotation for the column in the Dedicated IP list that removes a dedicated IP.</extracomment>
         <translation>[&#x130;&#x429;Rémóvé]</translation>
@@ -1000,17 +1110,17 @@
 <context>
     <name>DedicatedIpPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="34"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="35"/>
         <source>DedicatedIpPage --- Dedicated IP</source>
         <translation>[&#x130;&#x429;&#x30A2;Dédícátéd ÍP]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="43"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="44"/>
         <source>DedicatedIpPage --- Secure your remote connections to any asset with a dedicated IP from a country of your choice.  During your subscription, this IP will be yours and yours alone, protecting your data transfers with the strongest encryption out there.</source>
         <translation>[&#x130;&#x429;&#x30A2;________________________________Sécúré yóúr rémóté cónnéctíóns tó ány ássét wíth á dédícátéd ÍP fróm á cóúntry óf yóúr chóícé.  Dúríng yóúr súbscríptíón, thís ÍP wíll bé yóúrs ánd yóúrs álóné, prótéctíng yóúr dátá tránsférs wíth thé stróngést éncryptíón óút théré.________________________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="45"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpPage.qml" line="46"/>
         <source>DedicatedIpPage --- Get Your Dedicated IP</source>
         <translation>[&#x130;&#x429;&#x30A2;__Gét Yóúr Dédícátéd ÍP_]</translation>
     </message>
@@ -1018,29 +1128,47 @@
 <context>
     <name>DedicatedIpRegion</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/DedicatedIpRegion.qml" line="105"/>
-        <source>DedicatedIpRegion --- DEDICATED IP</source>
-        <translation>[&#x130;&#x429;&#x30A2;DÉDÍCÁTÉD ÍP]</translation>
+        <location filename="../../../client/res/components/common/regions/DedicatedIpRegion.qml" line="57"/>
+        <source>DedicatedIpRegion --- %1 (Dedicated IP)</source>
+        <extracomment>Screen reader annotation for the &quot;detail&quot; line of a Dedicated IP row, which displays the IP address and the &quot;Dedicated IP&quot; tag. %1 is an IPv4 address, such as 100.200.100.200.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;_%1 (Dédícátéd ÍP)]</translation>
     </message>
 </context>
 <context>
     <name>DedicatedIpRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="57"/>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="70"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="27"/>
         <source>DedicatedIpRow --- Remove</source>
-        <extracomment>Screen reader annotation for the &quot;remove&quot; button (&quot;X&quot; icon) next to a dedicated IP. (Should be labeled like a normal command button.)</extracomment>
+        <extracomment>&quot;Remove&quot; button label - used as the screen reader annotation for the &quot;X&quot; button next to a dedicated IP, and for the confirmation button on the prompt presented when removing a dedicated IP.</extracomment>
         <translation>[&#x130;&#x429;Rémóvé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="72"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="80"/>
         <source>DedicatedIpRow --- Remove Dedicated IP</source>
         <translation>[&#x130;&#x429;&#x30A2;_Rémóvé Dédícátéd ÍP_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRow.qml" line="87"/>
         <source>DedicatedIpRow --- Remove %1 - %2?</source>
+        <extracomment>Confirmation prompt to remove a dedicated IP. %1 is the translated region name, %2 is an IP address, such as 100.200.100.200.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Rémóvé %1 - %2?]</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpRowBase</name>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/DedicatedIpRowBase.qml" line="23"/>
+        <source>DedicatedIpRowBase --- IP Address</source>
+        <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays the IP address for that dedicated IP.</extracomment>
+        <translation>[&#x130;&#x429;_ÍP Áddréss]</translation>
+    </message>
+</context>
+<context>
+    <name>DedicatedIpSubtitle</name>
+    <message>
+        <location filename="../../../client/res/components/common/DedicatedIpSubtitle.qml" line="42"/>
+        <source>DedicatedIpSubtitle --- DEDICATED IP</source>
+        <translation>[&#x130;&#x429;&#x30A2;DÉDÍCÁTÉD ÍP]</translation>
     </message>
 </context>
 <context>
@@ -1100,111 +1228,111 @@
 <context>
     <name>GeneralPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="21"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="22"/>
         <source>GeneralPage --- Launch on System Startup</source>
         <translation>[&#x130;&#x429;&#x30A2;__Láúnch ón Systém Stártúp__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="37"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="38"/>
         <source>GeneralPage --- Connect on Launch</source>
         <translation>[&#x130;&#x429;&#x30A2;_Cónnéct ón Láúnch_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="41"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="42"/>
         <source>GeneralPage --- Show Desktop Notifications</source>
         <translation>[&#x130;&#x429;&#x30A2;__Shów Désktóp Nótífícátíóns__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="47"/>
         <source>GeneralPage --- Language</source>
         <translation>[&#x130;&#x429;_Lángúágé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="63"/>
         <source>GeneralPage --- Theme</source>
         <translation>[&#x130;&#x429;Thémé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="66"/>
         <source>GeneralPage --- Dark</source>
         <translation>[&#x130;_Dárk]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="67"/>
         <source>GeneralPage --- Light</source>
         <translation>[&#x130;&#x429;Líght]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="73"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="74"/>
         <source>GeneralPage --- Tray Icon Style</source>
         <extracomment>This setting allows the user to choose a style for the icon shown in the system tray / notification area. It should use the typical desktop terminology for the &quot;tray&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Tráy Ícón Stylé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="79"/>
         <source>GeneralPage --- The &apos;Auto&apos; setting chooses an icon based on your desktop theme.</source>
         <translation>[&#x130;&#x429;&#x30A2;__________Thé &apos;Áútó&apos; séttíng chóósés án ícón báséd ón yóúr désktóp thémé._________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="83"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
         <source>GeneralPage -- icon-theme --- Auto</source>
         
         <translation>[&#x130;_Áútó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="84"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
         <source>GeneralPage -- icon-theme --- Light</source>
         
         <translation>[&#x130;&#x429;Líght]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="85"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
         <source>GeneralPage -- icon-theme --- Dark</source>
         
         <translation>[&#x130;_Dárk]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="86"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
         <source>GeneralPage -- icon-theme --- Colored</source>
         
         <translation>[&#x130;&#x429;Cólóréd]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="87"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="88"/>
         <source>GeneralPage -- icon-theme --- Classic</source>
         
         <translation>[&#x130;&#x429;Clássíc]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="104"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="105"/>
         <source>GeneralPage --- Dashboard Appearance</source>
         <extracomment>Setting controlling how the dashboard is displayed - either as a popup attached to the system tray or as an ordinary window.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Dáshbóárd Áppéáráncé_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="109"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="110"/>
         <source>GeneralPage --- Attached to Tray</source>
         <extracomment>Setting value indicating that the dashboard is a popup attached to the system tray.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Áttáchéd tó Tráy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="111"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="112"/>
         <source>GeneralPage --- Window</source>
         <extracomment>Setting value indicating that the dashboard is an ordinary window</extracomment>
         <translation>[&#x130;&#x429;Wíndów]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="115"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="116"/>
         <source>GeneralPage --- Attached mode may not work with all desktop environments, and it requires a system tray. If you can&apos;t find the dashboard, start Private Internet Access again to show it, and switch back to Window mode in Settings.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______________________________Áttáchéd módé máy nót wórk wíth áll désktóp énvírónménts, ánd ít réqúírés á systém tráy. Íf yóú cán&apos;t fínd thé dáshbóárd, stárt Príváté Íntérnét Áccéss ágáín tó shów ít, ánd swítch báck tó Wíndów módé ín Séttíngs.______________________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="129"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="130"/>
         <source>GeneralPage --- Reset All Settings</source>
         <translation>[&#x130;&#x429;&#x30A2;_Rését Áll Séttíngs]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="132"/>
+        <location filename="../../../client/res/components/settings/pages/GeneralPage.qml" line="133"/>
         <source>GeneralPage --- Reset all settings to their default values?</source>
         <translation>[&#x130;&#x429;&#x30A2;____Rését áll séttíngs tó théír défáúlt válúés?____]</translation>
     </message>
@@ -1220,13 +1348,13 @@
 <context>
     <name>HeaderBar</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="11"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="12"/>
         <source>HeaderBar --- Alpha pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Alpha&quot; banner shown in alpha prerelease builds</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Álphá pré-réléásé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="14"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="15"/>
         <source>HeaderBar --- Beta pre-release</source>
         <extracomment>Screen reader annotation for the &quot;Beta&quot; banner shown in beta prerelease builds</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Bétá pré-réléásé]</translation>
@@ -1298,159 +1426,154 @@
 <context>
     <name>HelpPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="31"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="39"/>
         <source>HelpPage --- Version</source>
         <translation>[&#x130;&#x429;Vérsíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="65"/>
         <source>HelpPage --- Client:</source>
         <translation>[&#x130;&#x429;Clíént:]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="72"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="80"/>
         <source>HelpPage --- Daemon:</source>
         <translation>[&#x130;&#x429;_Dáémón:]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="87"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="95"/>
         <source>HelpPage --- Changelog</source>
         <translation>[&#x130;&#x429;_Chángélóg]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="96"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="104"/>
         <source>HelpPage --- Quick Tour</source>
         <extracomment>This link displays the tour that users see initially after installation.</extracomment>
         <translation>[&#x130;&#x429;_Qúíck Tóúr]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="106"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="114"/>
         <source>HelpPage --- Receive Beta Updates</source>
         <translation>[&#x130;&#x429;&#x30A2;__Récéívé Bétá Úpdátés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="107"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="115"/>
         <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Jóín óúr bétá prógrám tó tést néw féátúrés ánd próvídé féédbáck._______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="158"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="160"/>
+        <source>HelpPage --- Show service communication messages</source>
+        <translation>[&#x130;&#x429;&#x30A2;____Shów sérvícé cómmúnícátíón mésságés____]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="171"/>
         <source>HelpPage --- Network</source>
         <translation>[&#x130;&#x429;Nétwórk]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="196"/>
-        <source>HelpPage --- Current</source>
-        <translation>[&#x130;&#x429;Cúrrént]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="199"/>
-        <source>HelpPage --- Next Generation</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Néxt Générátíón]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="210"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="178"/>
         <source>HelpPage --- Include Geo-Located Regions</source>
         <translation>[&#x130;&#x429;&#x30A2;___Ínclúdé Géó-Lócátéd Régíóns__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="221"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="189"/>
         <source>HelpPage --- Support</source>
         <translation>[&#x130;&#x429;Súppórt]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="229"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="197"/>
         <source>HelpPage --- Disable Accelerated Graphics</source>
         <translation>[&#x130;&#x429;&#x30A2;___Dísáblé Áccélérátéd Gráphícs__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="238"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="206"/>
         <source>HelpPage --- Restart Private Internet Access to apply this setting</source>
         <translation>[&#x130;&#x429;&#x30A2;______Réstárt Príváté Íntérnét Áccéss tó ápply thís séttíng_____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="246"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="214"/>
         <source>HelpPage --- Accelerated graphics reduce CPU usage and enable graphical effects, but can cause issues with certain graphics cards or drivers.</source>
         <translation>[&#x130;&#x429;&#x30A2;_________________Áccélérátéd gráphícs rédúcé CPÚ úságé ánd énáblé gráphícál éffécts, bút cán cáúsé íssúés wíth cértáín gráphícs cárds ór drívérs._________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="250"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="219"/>
         <source>HelpPage --- Enable Debug Logging</source>
         <translation>[&#x130;&#x429;&#x30A2;__Énáblé Débúg Lóggíng_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="251"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="220"/>
         <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
         <translation>[&#x130;&#x429;&#x30A2;____________Sávé débúg lógs whích cán bé súbmíttéd tó téchnícál súppórt tó hélp tróúbléshóót próbléms.____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="267"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="237"/>
         <source>HelpPage --- Submit Debug Logs</source>
         <translation>[&#x130;&#x429;&#x30A2;_Súbmít Débúg Lógs_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="273"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="243"/>
         <source>HelpPage --- Support Portal</source>
         <translation>[&#x130;&#x429;&#x30A2;Súppórt Pórtál]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="288"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="255"/>
         <source>HelpPage --- Maintenance</source>
         <translation>[&#x130;&#x429;&#x30A2;Máínténáncé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="298"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="265"/>
         <source>HelpPage --- Reinstall OpenVPN Network Adapter</source>
         <translation>[&#x130;&#x429;&#x30A2;____Réínstáll ÓpénVPN Nétwórk Ádáptér___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="299"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="266"/>
         <source>HelpPage --- Reinstalling OpenVPN Network Adapter...</source>
         <translation>[&#x130;&#x429;&#x30A2;____Réínstállíng ÓpénVPN Nétwórk Ádáptér...____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="309"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="276"/>
         <source>HelpPage --- Reinstall WireGuard Network Adapter</source>
         <translation>[&#x130;&#x429;&#x30A2;____Réínstáll WíréGúárd Nétwórk Ádáptér___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="310"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="277"/>
         <source>HelpPage --- Reinstalling WireGuard Network Adapter...</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Réínstállíng WíréGúárd Nétwórk Ádáptér...____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="333"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="300"/>
         <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
         <translation>[&#x130;&#x429;&#x30A2;___Réínstállíng Splít Túnnél Fíltér...__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="334"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="301"/>
         <source>HelpPage --- Reinstall Split Tunnel Filter</source>
         <translation>[&#x130;&#x429;&#x30A2;__Réínstáll Splít Túnnél Fíltér__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="373"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="340"/>
         <source>HelpPage --- The split tunnel filter was reinstalled.</source>
         <translation>[&#x130;&#x429;&#x30A2;____Thé splít túnnél fíltér wás réínstálléd.___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="398"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="365"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>[&#x130;&#x429;&#x30A2;___Únínstáll Príváté Íntérnét Áccéss___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="439"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="406"/>
         <source>HelpPage --- Failed to run command in terminal. Please install a terminal compatible with x-terminal-emulator.</source>
         <extracomment>&quot;Terminal&quot; refers to a terminal emulator in the Linux build, such as xterm, GNOME Terminal, Konsole, etc. This should use the typical desktop terminology.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_____________Fáíléd tó rún cómmánd ín térmínál. Pléásé ínstáll á térmínál cómpátíblé wíth x-térmínál-émúlátór.____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="441"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="408"/>
         <source>HelpPage --- Unable to open terminal</source>
         <translation>[&#x130;&#x429;&#x30A2;__Únáblé tó ópén térmínál_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="450"/>
+        <location filename="../../../client/res/components/settings/pages/HelpPage.qml" line="417"/>
         <source>HelpPage --- v%1</source>
         <translation>[&#x130;_v%1]</translation>
     </message>
@@ -1520,13 +1643,13 @@
         <translation>[&#x130;&#x429;&#x30A2;Pórt fórwárd]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="175"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="163"/>
         <source>IPModule --- Failed</source>
         <extracomment>Port forward - label used in IP widget when request fails</extracomment>
         <translation>[&#x130;&#x429;Fáíléd]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="178"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="166"/>
         <source>IPModule --- Not Available</source>
         <extracomment>Port forward - label used in IP widget when not available for this region</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Nót Áváíláblé]</translation>
@@ -1622,6 +1745,36 @@
     </message>
 </context>
 <context>
+    <name>Messages</name>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="49"/>
+        <source>Messages --- Wired Connection</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Wíréd Cónnéctíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="51"/>
+        <source>Messages --- Open Wi-Fi</source>
+        <translation>[&#x130;&#x429;_Ópén Wí-Fí]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="53"/>
+        <source>Messages --- Protected Wi-Fi</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Prótéctéd Wí-Fí]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="63"/>
+        <source>Messages --- Connect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>[&#x130;&#x429;Cónnéct]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/Messages.qml" line="66"/>
+        <source>Messages --- Disconnect</source>
+        <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
+        <translation>[&#x130;&#x429;_Díscónnéct]</translation>
+    </message>
+</context>
+<context>
     <name>ModuleLoader</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/MovableModule.qml" line="265"/>
@@ -1672,13 +1825,13 @@
 <context>
     <name>NativeAcc::TableCellCheckButtonImpl</name>
     <message>
-        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="133"/>
+        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="122"/>
         <source>NativeAcc::TableCellCheckButtonImpl --- checked</source>
         <extracomment>Value indicator for a toggle button in the &quot;checked&quot; state. Should use normal terminology for a check box or toggle button. (Screen reader annotation for &quot;Favorite region&quot; table cell button on Windows.)</extracomment>
         <translation>[&#x130;&#x429;chéckéd]</translation>
     </message>
     <message>
-        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="141"/>
+        <location filename="../../../client/src/nativeacc/tablecells.cpp" line="130"/>
         <source>NativeAcc::TableCellCheckButtonImpl --- unchecked</source>
         <extracomment>Value indicator for a toggle button in the &quot;unchecked&quot; state. Should use normal terminology for a check box or toggle button. (Screen reader annotation for &quot;Favorite region&quot; table cell button on Windows.)</extracomment>
         <translation>[&#x130;&#x429;_únchéckéd]</translation>
@@ -1687,13 +1840,13 @@
 <context>
     <name>NativeAcc::ValueTextAttached</name>
     <message>
-        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="65"/>
+        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="21"/>
         <source>NativeAcc::ValueTextAttached --- Copies the value</source>
         <extracomment>Screen reader description of the &quot;copy&quot; action for IP address/port fields, etc. &quot;Copies&quot; refers to copying to the system clipboard and should use the OS&apos;s normal terminology. Grammatically, the implied subject is the accessibility action, &quot;[This action] copies the value [to the clipboard]&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Cópíés thé válúé]</translation>
     </message>
     <message>
-        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="78"/>
+        <location filename="../../../client/src/nativeacc/valuetext.cpp" line="30"/>
         <source>NativeAcc::ValueTextAttached --- Copy</source>
         <extracomment>Screen reader annotation to describe the &quot;copy&quot; action on the IP address and port fields, etc. Copies the text to the clipboard, should be a verb or short verb phrase.</extracomment>
         <translation>[&#x130;_Cópy]</translation>
@@ -1797,72 +1950,61 @@
         <translation>[&#x130;&#x429;&#x30A2;_________________Fórwárds á pórt fróm thé VPN ÍP tó yóúr cómpútér. Thé pórt wíll bé séléctéd fór yóú. Nót áll lócátíóns súppórt pórt fórwárdíng.________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="202"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="193"/>
         <source>NetworkPage --- Allow LAN Traffic</source>
         <translation>[&#x130;&#x429;&#x30A2;_Állów LÁN Tráffíc]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="203"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="194"/>
         <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____________Álwáys pérmíts tráffíc bétwéén dévícés ón yóúr lócál nétwórk, évén whén úsíng thé VPN kíllswítch.____________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="216"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="207"/>
         <source>NetworkPage --- Choose which applications use the VPN.</source>
         <extracomment>Description for the split tunnel setting.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;____Chóósé whích ápplícátíóns úsé thé VPN.____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="220"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="211"/>
         <source>NetworkPage --- Bypass VPN - App always connects directly to the Internet</source>
         <extracomment>Description for the &quot;Bypass VPN&quot; split tunnel mode that can be applied to a specific app. These apps do not use the VPN connection, they connect directly to the Internet.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_______Bypáss VPN - Ápp álwáys cónnécts díréctly tó thé Íntérnét______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="225"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="216"/>
         <source>NetworkPage --- Only VPN - App can only connect when PIA is open and the VPN is connected</source>
         <extracomment>Description for the &quot;Only VPN&quot; split tunnel mode that can be applied to a specific app. These apps are only allowed to connect via the VPN, they are blocked if the VPN is not connected (even if PIA is not running).</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__________Ónly VPN - Ápp cán ónly cónnéct whén PÍÁ ís ópén ánd thé VPN ís cónnéctéd_________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="231"/>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="324"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="221"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>[&#x130;&#x429;&#x30A2;Splít Túnnél]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="251"/>
-        <source>NetworkPage --- Approve the split tunnel extension to enable this feature.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_______Áppróvé thé splít túnnél éxténsíón tó énáblé thís féátúré.______]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="266"/>
-        <source>NetworkPage --- Security Preferences</source>
-        <translation>[&#x130;&#x429;&#x30A2;_Sécúríty Préféréncés_]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="379"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="276"/>
         <source>NetworkPage --- Installing split tunnel filter...</source>
         <translation>[&#x130;&#x429;&#x30A2;__Ínstállíng splít túnnél fíltér...__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="388"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="285"/>
         <source>NetworkPage --- Enabling this feature will install the split tunnel filter.</source>
         <translation>[&#x130;&#x429;&#x30A2;______Énáblíng thís féátúré wíll ínstáll thé splít túnnél fíltér.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="395"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="292"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Thé splít túnnél fíltér ís nót ínstálléd.  Réínstáll ít ón thé Hélp págé.________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="456"/>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="461"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="353"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="358"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>[&#x130;&#x429;&#x30A2;_Ápp Éxclúsíóns]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="504"/>
+        <location filename="../../../client/res/components/settings/pages/NetworkPage.qml" line="401"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______Ápps máy nééd tó bé réstártéd fór chángés tó bé ápplíéd.______]</translation>
     </message>
@@ -1900,7 +2042,7 @@
         <translation>[&#x130;&#x429;&#x30A2;_Dísmíss mésságé: %1_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="215"/>
+        <location filename="../../../client/res/components/dashboard/connect/notifications/Notification.qml" line="216"/>
         <source>Notification --- Stop</source>
         <extracomment>Screen reader annotation for the square &quot;Stop&quot; button on the message used to download an update.</extracomment>
         <translation>[&#x130;_Stóp]</translation>
@@ -2028,12 +2170,12 @@
         <translation>[&#x130;&#x429;&#x30A2;Wélcómé tó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="50"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="39"/>
         <source>Page1Welcome --- QUICK TOUR</source>
         <translation>[&#x130;&#x429;&#x30A2;QÚÍCK TÓÚR]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="80"/>
+        <location filename="../../../client/res/components/onboarding/pages/Page1Welcome.qml" line="60"/>
         <source>Page1Welcome --- LOG IN</source>
         <translation>[&#x130;&#x429;LÓG ÍN]</translation>
     </message>
@@ -2118,19 +2260,57 @@
     </message>
 </context>
 <context>
+    <name>Page5HelpUsImprove</name>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="17"/>
+        <source>Page5HelpUsImprove --- Checklist</source>
+        <translation>[&#x130;&#x429;_Chécklíst]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="25"/>
+        <source>Page5HelpUsImprove --- Help us improve our service</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Hélp ús ímpróvé óúr sérvícé__]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="38"/>
+        <source>Page5HelpUsImprove --- To help us ensure our service&apos;s connection performance, you can anonymously share your connection stats with us.</source>
+        <translation>[&#x130;&#x429;&#x30A2;________________Tó hélp ús énsúré óúr sérvícé&apos;s cónnéctíón pérfórmáncé, yóú cán ánónymóúsly sháré yóúr cónnéctíón státs wíth ús.________________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="40"/>
+        <source>Page5HelpUsImprove --- These reports do not contain any personally identifiable information.</source>
+        <translation>[&#x130;&#x429;&#x30A2;________Thésé répórts dó nót cóntáín ány pérsónálly ídéntífíáblé ínfórmátíón.________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="55"/>
+        <source>Page5HelpUsImprove --- Find out more</source>
+        <translation>[&#x130;&#x429;&#x30A2;Fínd óút móré]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="64"/>
+        <source>Page5HelpUsImprove --- ACCEPT</source>
+        <translation>[&#x130;&#x429;ÁCCÉPT]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="74"/>
+        <source>Page5HelpUsImprove --- NO THANKS</source>
+        <translation>[&#x130;&#x429;&#x30A2;NÓ THÁNKS]</translation>
+    </message>
+</context>
+<context>
     <name>PageFooter</name>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="15"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="18"/>
         <source>PageFooter --- SKIP TOUR</source>
         <translation>[&#x130;&#x429;_SKÍP TÓÚR]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- LOG IN</source>
         <translation>[&#x130;&#x429;LÓG ÍN]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="66"/>
+        <location filename="../../../client/res/components/onboarding/PageFooter.qml" line="88"/>
         <source>PageFooter --- NEXT</source>
         <translation>[&#x130;&#x429;NÉXT]</translation>
     </message>
@@ -2259,76 +2439,76 @@
 <context>
     <name>PrivacyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="26"/>
         <source>PrivacyPage --- VPN Killswitch</source>
         <extracomment>Label for the setting that controls the VPN killswitch, a privacy feature that prevents network traffic from leaving the user&apos;s computer unless it is going through the VPN. The term &quot;killswitch&quot; is a recognizable term in the VPN industry that gets used in marketing and can be left unlocalized if there is no clear translation for the concept.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;VPN Kíllswítch]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="27"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="28"/>
         <source>PrivacyPage --- Prevent leaks by blocking traffic outside the VPN</source>
         <extracomment>Descriptive label for the VPN killswitch setting.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;______Prévént léáks by blóckíng tráffíc óútsídé thé VPN_____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="35"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="36"/>
         <source>PrivacyPage --- Off: Don&apos;t block any traffic</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Off&quot;. No network traffic is blocked and the user&apos;s privacy can potentially be compromised if the VPN connection unexpectedly drops.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;___Óff: Dón&apos;t blóck ány tráffíc___]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="40"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="41"/>
         <source>PrivacyPage --- Auto: Block outside traffic when the VPN is on</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Auto&quot;. Network traffic that tries to go outside the VPN is blocked as long as the user has turned on the VPN, including if the actual VPN connection itself unexpectedly drops.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_____Áútó: Blóck óútsídé tráffíc whén thé VPN ís ón_____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="45"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="46"/>
         <source>PrivacyPage --- Always: Also block all traffic when the VPN is off</source>
         <extracomment>Setting value description for when the VPN killswitch is set to &quot;Always&quot;. Network traffic that tries to go outside the VPN is always blocked, even when the user has switched off the VPN. This effectively disables the user&apos;s internet connection whenever they are not connected to the VPN.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_____Álwáys: Álsó blóck áll tráffíc whén thé VPN ís óff_____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage -- privacy-killswitch --- Off</source>
         
         <extracomment>These values are used for the Killswitch setting.</extracomment>
         <translation>[&#x130;_Óff]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage --- Auto</source>
         <translation>[&#x130;_Áútó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="49"/>
         <source>PrivacyPage --- Always</source>
         <translation>[&#x130;&#x429;Álwáys]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="68"/>
         <source>PrivacyPage --- PIA MACE requires using PIA DNS in order to function.</source>
         <translation>[&#x130;&#x429;&#x30A2;______PÍÁ MÁCÉ réqúírés úsíng PÍÁ DNS ín órdér tó fúnctíón.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="71"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
         <source>PrivacyPage --- PIA MACE</source>
         <translation>[&#x130;&#x429;_PÍÁ MÁCÉ]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="72"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="73"/>
         <source>PrivacyPage --- Block domains used for ads, trackers, and malware</source>
         <translation>[&#x130;&#x429;&#x30A2;______Blóck dómáíns úséd fór áds, tráckérs, ánd málwáré_____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="79"/>
         <source>PrivacyPage -- privacy-mace --- Off</source>
         
         <extracomment>These values are used for the MACE setting.</extracomment>
         <translation>[&#x130;_Óff]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/PrivacyPage.qml" line="79"/>
         <source>PrivacyPage --- On</source>
         <translation>[&#x130;_Ón]</translation>
     </message>
@@ -2336,40 +2516,33 @@
 <context>
     <name>ProxyPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="32"/>
-        <source>ProxyPage --- Redirect the VPN connection through an additional location</source>
-        <translation>[&#x130;&#x429;&#x30A2;_______Rédíréct thé VPN cónnéctíón thróúgh án áddítíónál lócátíón_______]</translation>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="174"/>
+        <source>ProxyPage --- Configure...</source>
+        <translation>[&#x130;&#x429;_Cónfígúré...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="214"/>
         <source>ProxyPage --- Shadowsocks - %1</source>
         <extracomment>Label for the Shadowsocks proxy choice. &quot;Shadowsocks&quot; is a proper noun and shouldn&apos;t be translated, but the dash should match the other proxy choice labels. %1 is a description of the selected region, such as &quot;Japan&quot; or &quot;Auto (US East)&quot;, this uses the localizations defined for the region module.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Shádówsócks - %1_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/pages/OpenVpnConnection.qml" line="226"/>
         <source>ProxyPage --- SOCKS5 Proxy - %1</source>
         <extracomment>Label for the custom SOCKS5 proxy choice when a proxy has been configured. %1 is the configured proxy (host or host:port), such as &quot;SOCKS5 Proxy: 127.0.0.1&quot; or &quot;SOCKS5 Proxy: 172.16.24.18:9080&quot;</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_SÓCKS5 Próxy - %1_]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="70"/>
-        <location filename="../../../client/res/components/settings/pages/ProxyPage.qml" line="77"/>
-        <source>ProxyPage --- Configure...</source>
-        <extracomment>Opens a dialog to specify the custom proxy host/port/credentials.</extracomment>
-        <translation>[&#x130;&#x429;_Cónfígúré...]</translation>
     </message>
 </context>
 <context>
     <name>QuickConnectButton</name>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="115"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="157"/>
         <source>QuickConnectButton --- Connect to favorite %1</source>
         <extracomment>Screen reader annotation for a Quick Connect button with a heart icon, which is used for a favorite region. %1 is a region name.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Cónnéct tó fávóríté %1_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="120"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="162"/>
         <source>QuickConnectButton --- Connect to %1</source>
         <extracomment>Screen reader annotation for a Quick Connect button without a heart icon, which is for a recently-used or nearby location. %1 is a region name.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Cónnéct tó %1]</translation>
@@ -2392,12 +2565,12 @@
 <context>
     <name>RatingControl</name>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="101"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="104"/>
         <source>RatingControl --- Loading</source>
         <translation>[&#x130;&#x429;Lóádíng]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingControl.qml" line="114"/>
+        <location filename="../../../client/res/components/common/RatingControl.qml" line="117"/>
         <source>RatingControl --- Something went wrong.</source>
         <translation>[&#x130;&#x429;&#x30A2;__Sóméthíng wént wróng._]</translation>
     </message>
@@ -2405,22 +2578,28 @@
 <context>
     <name>RatingRequestNotificationStatus</name>
     <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="27"/>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="20"/>
         <source>RatingRequestNotificationStatus --- Rate your experience with PIA.</source>
         <translation>[&#x130;&#x429;&#x30A2;___Ráté yóúr éxpéríéncé wíth PÍÁ.__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="29"/>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="28"/>
+        <source>RatingRequestNotificationStatus --- Thank you for your feedback! We would appreciate it if you rate us on [[Trustpilot]].</source>
+        <extracomment>Shown after the user submits a positive rating to ask if they would rate us on Trustpilot. The text between brackets ([[....]]) is a link, please preserve the brackets around the corresponding text. Do not translate &apos;Trustpilot&apos; since it is a brand (even though link text is normally translated in PIA.)</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;__________Thánk yóú fór yóúr féédbáck! Wé wóúld ápprécíáté ít íf yóú ráté ús ón [[Trústpílót]].__________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="30"/>
         <source>RatingRequestNotificationStatus --- Thank you for your feedback!</source>
         <translation>[&#x130;&#x429;&#x30A2;___Thánk yóú fór yóúr féédbáck!__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="31"/>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="32"/>
         <source>RatingRequestNotificationStatus --- Thank you! If you encounter any problems, please contact support.</source>
         <translation>[&#x130;&#x429;&#x30A2;________Thánk yóú! Íf yóú éncóúntér ány próbléms, pléásé cóntáct súppórt.________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="38"/>
+        <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
         <source>RatingRequestNotificationStatus --- Contact Support</source>
         <translation>[&#x130;&#x429;&#x30A2;_Cóntáct Súppórt]</translation>
     </message>
@@ -2459,12 +2638,12 @@
 <context>
     <name>RegionDelegate</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="31"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="26"/>
         <source>RegionDelegate --- Port forwarding is not available for this location.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Pórt fórwárdíng ís nót áváíláblé fór thís lócátíón._____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowBase.qml" line="32"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="27"/>
         <source>RegionDelegate --- Port forwarding is not available for this country.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Pórt fórwárdíng ís nót áváíláblé fór thís cóúntry._____]</translation>
     </message>
@@ -2472,71 +2651,77 @@
 <context>
     <name>RegionListView</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="684"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="24"/>
+        <source>RegionListView --- Region list</source>
+        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
+        <translation>[&#x130;&#x429;_Régíón líst]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="714"/>
         <source>RegionListView --- Region</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
         <translation>[&#x130;&#x429;Régíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="690"/>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="723"/>
+        <source>RegionListView --- Detail</source>
+        <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
+        <translation>[&#x130;&#x429;Détáíl]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
         <source>RegionListView --- Latency</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
         <translation>[&#x130;&#x429;Láténcy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="696"/>
+        <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
         <source>RegionListView --- Favorite</source>
         <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
         <translation>[&#x130;&#x429;Fávóríté]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/region/RegionPage.qml" line="34"/>
-        <source>RegionListView --- Region list</source>
-        <extracomment>Screen reader annotation for the region list on the regions page, where users can choose a region and mark regions as favorites. (Also used to describe the scroll bar for the region list.)</extracomment>
-        <translation>[&#x130;&#x429;_Régíón líst]</translation>
     </message>
 </context>
 <context>
     <name>RegionModule</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="32"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="33"/>
         <source>RegionModule --- Auto</source>
         <translation>[&#x130;_Áútó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="34"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="35"/>
         <source>RegionModule --- Auto (%1)</source>
         <translation>[&#x130;&#x429;_Áútó (%1)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="20"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="27"/>
         <source>RegionModule --- Region tile</source>
         <extracomment>Screen reader annotation for the Region tile, which users can click to go to the Region page and choose a region.</extracomment>
         <translation>[&#x130;&#x429;_Régíón tílé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="50"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="70"/>
         <source>RegionModule --- VPN SERVER</source>
         <translation>[&#x130;&#x429;&#x30A2;VPN SÉRVÉR]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="139"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="179"/>
         <source>RegionModule --- VIA SOCKS5 PROXY</source>
         <translation>[&#x130;&#x429;&#x30A2;_VÍÁ SÓCKS5 PRÓXY_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="141"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="181"/>
         <source>RegionModule --- VIA SHADOWSOCKS</source>
         <translation>[&#x130;&#x429;&#x30A2;_VÍÁ SHÁDÓWSÓCKS_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="185"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="225"/>
         <source>RegionModule --- Select region</source>
         <extracomment>Screen reader annotation for the button that makes up the Region tile, which users can click to go to the Region page and select a region. Should be a short description of the &quot;select region&quot; action.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Séléct régíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="190"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/RegionModule.qml" line="236"/>
         <source>RegionModule --- Select region, %1 is selected</source>
         <extracomment>Screen reader description for the Region tile button. Should begin with the &quot;Select region&quot; translation, since that&apos;s what the button does. This also includes the currently-selected region, which the button displays. %1 is a region name.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Séléct régíón, %1 ís séléctéd__]</translation>
@@ -2545,17 +2730,23 @@
 <context>
     <name>RegionPage</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="71"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="19"/>
+        <source>RegionPage --- Region list sort</source>
+        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;_Régíón líst sórt]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="79"/>
         <source>RegionPage --- Search...</source>
         <translation>[&#x130;&#x429;_Séárch...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="94"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="102"/>
         <source>RegionPage --- Name</source>
         <translation>[&#x130;&#x429;Námé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="98"/>
+        <location filename="../../../client/res/components/common/regions/RegionList.qml" line="106"/>
         <source>RegionPage --- Latency</source>
         <translation>[&#x130;&#x429;Láténcy]</translation>
     </message>
@@ -2565,46 +2756,119 @@
         <extracomment>Screen reader description of the &quot;Back&quot; button in the header when the user is on the Region page. This is a slightly longer description of the button&apos;s action, which in this case returns to the Connect page.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Báck tó Cónnéct págé_]</translation>
     </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/region/RegionPage.qml" line="29"/>
-        <source>RegionPage --- Region list sort</source>
-        <extracomment>Screen reader annotation for the &quot;Name / Latency&quot; heading above the region list, which sorts by either name or latency. The screen reader will indicate that this is a group of controls.</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;_Régíón líst sórt]</translation>
-    </message>
 </context>
 <context>
     <name>RegionRowBase</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="103"/>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="71"/>
+        <source>RegionRowBase --- %1, geo-located region, does not support port forwarding</source>
+        <extracomment>Screen reader annotation used for a region that is a geo-only region and does not support port forwarding. Corresponds to the two badges shown in the regions list. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;_______%1, géó-lócátéd régíón, dóés nót súppórt pórt fórwárdíng______]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="78"/>
+        <source>RegionRowBase --- %1, geo-located region</source>
+        <extracomment>Screen reader annotation used for a region that is a geo-only region. Corresponds to the globe badge shown in the regions list. %1 is a translated region name. The region name should come first</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;__%1, géó-lócátéd régíón_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="86"/>
+        <source>RegionRowBase --- %1, does not support port forwarding</source>
+        <extracomment>Screen reader annotation used for a region that does not support port forwarding when the feature is enabled. Corresponds to the &quot;slashed-arrow&quot; indicator and &quot;Port forwarding is not supported by this region/country.&quot; tips. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;____%1, dóés nót súppórt pórt fórwárdíng___]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="119"/>
         <source>RegionRowBase --- Favorite region</source>
         <extracomment>Screen reader annotation for the &quot;favorite&quot; button (heart icon) next to regions in the regions list. (The screen reader will indicate whether the button is &quot;on&quot; or &quot;off&quot;.)</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Fávóríté régíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="252"/>
+        <source>RegionRowBase --- %1 ms</source>
+        <translation>[&#x130;&#x429;%1 ms]</translation>
     </message>
 </context>
 <context>
     <name>RegionRowLabels</name>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="69"/>
-        <source>RegionRowLabels --- %1, geo-located region, does not support port forwarding</source>
-        <extracomment>Screen reader annotation used for a region that is a geo-only region and does not support port forwarding. Corresponds to the two badges shown in the regions list. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;_______%1, géó-lócátéd régíón, dóés nót súppórt pórt fórwárdíng______]</translation>
+        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="102"/>
+        <source>RegionRowLabels --- offline</source>
+        <extracomment>Screen reader annotation for the &quot;offline&quot; image displayed when a region is temporarily unavailable</extracomment>
+        <translation>[&#x130;&#x429;ófflíné]</translation>
+    </message>
+</context>
+<context>
+    <name>ServiceEventsInfoDialog</name>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="11"/>
+        <source>ServiceEventsInfoDialog --- About Connection Events</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Ábóút Cónnéctíón Événts__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="76"/>
-        <source>RegionRowLabels --- %1, geo-located region</source>
-        <extracomment>Screen reader annotation used for a region that is a geo-only region. Corresponds to the globe badge shown in the regions list. %1 is a translated region name. The region name should come first</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;__%1, géó-lócátéd régíón_]</translation>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="23"/>
+        <source>ServiceEventsInfoDialog --- This minimal information assists us in identifying and fixing potential connection issues. Note that sharing this information requires consent and manual activation as it is turned off by default.</source>
+        <translation>[&#x130;&#x429;&#x30A2;___________________________Thís mínímál ínfórmátíón ássísts ús ín ídéntífyíng ánd fíxíng póténtíál cónnéctíón íssúés. Nóté thát sháríng thís ínfórmátíón réqúírés cónsént ánd mánúál áctívátíón ás ít ís túrnéd óff by défáúlt.__________________________]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="84"/>
-        <source>RegionRowLabels --- %1, does not support port forwarding</source>
-        <extracomment>Screen reader annotation used for a region that does not support port forwarding when the feature is enabled. Corresponds to the &quot;slashed-arrow&quot; indicator and &quot;Port forwarding is not supported by this region/country.&quot; tips. %1 is a translated region name. The region name should come first so the screen reader reads it first.</extracomment>
-        <translation>[&#x130;&#x429;&#x30A2;____%1, dóés nót súppórt pórt fórwárdíng___]</translation>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="25"/>
+        <source>ServiceEventsInfoDialog --- We will collect information about the following events:</source>
+        <translation>[&#x130;&#x429;&#x30A2;______Wé wíll cólléct ínfórmátíón ábóút thé fóllówíng événts:______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/regions/RegionRowLabels.qml" line="224"/>
-        <source>RegionRowLabels --- %1 ms</source>
-        <translation>[&#x130;&#x429;%1 ms]</translation>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="27"/>
+        <source>ServiceEventsInfoDialog --- Connection Attempt</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Cónnéctíón Áttémpt_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="28"/>
+        <source>ServiceEventsInfoDialog --- Connection Canceled</source>
+        <translation>[&#x130;&#x429;&#x30A2;_Cónnéctíón Cáncéléd_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="29"/>
+        <source>ServiceEventsInfoDialog --- Connection Established</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Cónnéctíón Éstáblíshéd_]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="31"/>
+        <source>ServiceEventsInfoDialog --- For all of these events, we will collect the following information:</source>
+        <translation>[&#x130;&#x429;&#x30A2;________Fór áll óf thésé événts, wé wíll cólléct thé fóllówíng ínfórmátíón:_______]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="39"/>
+        <source>ServiceEventsInfoDialog --- All events will contain a unique ID, which is randomly generated. This ID is not associated with your user account. This unique ID is re-generated daily for privacy purposes.</source>
+        <translation>[&#x130;&#x429;&#x30A2;________________________Áll événts wíll cóntáín á úníqúé ÍD, whích ís rándómly générátéd. Thís ÍD ís nót ássócíátéd wíth yóúr úsér áccóúnt. Thís úníqúé ÍD ís ré-générátéd dáíly fór prívácy púrpósés._______________________]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="33"/>
+        <source>ServiceEventsInfoDialog --- Platform</source>
+        <translation>[&#x130;&#x429;_Plátfórm]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="34"/>
+        <source>ServiceEventsInfoDialog --- App version</source>
+        <translation>[&#x130;&#x429;&#x30A2;Ápp vérsíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="35"/>
+        <source>ServiceEventsInfoDialog --- App type (pre-release or not)</source>
+        <translation>[&#x130;&#x429;&#x30A2;__Ápp typé (pré-réléásé ór nót)__]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="36"/>
+        <source>ServiceEventsInfoDialog --- Protocol used</source>
+        <translation>[&#x130;&#x429;&#x30A2;Prótócól úséd]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="37"/>
+        <source>ServiceEventsInfoDialog --- Connection source (manual or using automation)</source>
+        <translation>[&#x130;&#x429;&#x30A2;______Cónnéctíón sóúrcé (mánúál ór úsíng áútómátíón)_____]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ServiceEventsInfoDialog.qml" line="41"/>
+        <source>ServiceEventsInfoDialog --- You will always be in control. You can see what data we’ve collected from Settings, and you can turn it off at any time.</source>
+        <translation>[&#x130;&#x429;&#x30A2;________________Yóú wíll álwáys bé ín cóntról. Yóú cán séé whát dátá wé’vé cólléctéd fróm Séttíngs, ánd yóú cán túrn ít óff át ány tímé._______________]</translation>
     </message>
 </context>
 <context>
@@ -2621,30 +2885,30 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires macOS 10.15 or earlier.</source>
-        <translation>[&#x130;&#x429;&#x30A2;_____Thís féátúré réqúírés mácÓS 10.15 ór éárlíér.____]</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
         <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
         <translation>[&#x130;&#x429;&#x30A2;_______Thís féátúré réqúírés Wíndóws 7 Sérvícé Páck 1 ór látér.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="22"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
         <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
         <translation>[&#x130;&#x429;&#x30A2;_____Thís féátúré réqúírés íptáblés 1.6.1 ór látér.____]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="25"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
         <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
         <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_______Thís féátúré réqúírés líbnl-3, líbnl-róúté-3, ánd líbnl-génl-3.______]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
         <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
         <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;______Thís féátúré réqúírés nét_cls tó bé áváíláblé át %1._____]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
+        <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>[&#x130;&#x429;&#x30A2;_____Thís féátúré réqúírés kérnél prócéss événts.____]</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
@@ -2686,22 +2950,22 @@
         <translation>[&#x130;&#x429;&#x30A2;_Pórt Fórwárdíng]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="75"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="74"/>
         <source>SettingsModule --- Allow LAN</source>
         <translation>[&#x130;&#x429;_Állów LÁN]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="82"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="81"/>
         <source>SettingsModule --- Debug Logging</source>
         <translation>[&#x130;&#x429;&#x30A2;Débúg Lóggíng]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="100"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="99"/>
         <source>SettingsModule --- Light Theme</source>
         <translation>[&#x130;&#x429;&#x30A2;Líght Thémé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="111"/>
+        <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="110"/>
         <source>SettingsModule --- View All Settings...</source>
         <translation>[&#x130;&#x429;&#x30A2;_Víéw Áll Séttíngs..._]</translation>
     </message>
@@ -2709,108 +2973,114 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="46"/>
         <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>[&#x130;&#x429;Générál]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="47"/>
         <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>[&#x130;&#x429;Áccóúnt]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="54"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="48"/>
         <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>[&#x130;&#x429;Prívácy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="55"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="49"/>
         <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>[&#x130;&#x429;Nétwórk]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="56"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="50"/>
         <source>SettingsWindow -- setting-title --- Connection</source>
         
         <translation>[&#x130;&#x429;_Cónnéctíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="57"/>
-        <source>SettingsWindow -- setting-title --- Proxy</source>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="51"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
         
-        <translation>[&#x130;&#x429;Próxy]</translation>
+        <translation>[&#x130;&#x429;_Áútómátíón]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="58"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="52"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>[&#x130;&#x429;&#x30A2;Dédícátéd ÍP]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="53"/>
         <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>[&#x130;_Hélp]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <source>SettingsWindow -- setting-title-compact --- Automation</source>
+        
+        <translation>[&#x130;&#x429;_Áútómátíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
         <source>SettingsWindow -- setting-heading --- General Preferences</source>
         
         <translation>[&#x130;&#x429;&#x30A2;_Générál Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
         <source>SettingsWindow -- setting-heading --- Account Information</source>
         
         <translation>[&#x130;&#x429;&#x30A2;_Áccóúnt Ínfórmátíón_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <source>SettingsWindow -- setting-heading --- Privacy Preferences</source>
         
         <translation>[&#x130;&#x429;&#x30A2;_Prívácy Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
         <source>SettingsWindow -- setting-heading --- Network Preferences</source>
         
         <translation>[&#x130;&#x429;&#x30A2;_Nétwórk Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
         <source>SettingsWindow -- setting-heading --- Connection Preferences</source>
         
         <translation>[&#x130;&#x429;&#x30A2;__Cónnéctíón Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
-        <source>SettingsWindow -- setting-heading --- Proxy Preferences</source>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <source>SettingsWindow -- setting-heading --- Automation Preferences</source>
         
-        <translation>[&#x130;&#x429;&#x30A2;_Próxy Préféréncés]</translation>
+        <translation>[&#x130;&#x429;&#x30A2;__Áútómátíón Préféréncés_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
         <source>SettingsWindow -- setting-heading --- Dedicated IP Preferences</source>
         
         <translation>[&#x130;&#x429;&#x30A2;__Dédícátéd ÍP Préféréncés__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
         <source>SettingsWindow -- setting-heading --- Help</source>
         
         <translation>[&#x130;_Hélp]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="138"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="154"/>
         <source>SettingsWindow --- Alert</source>
         <translation>[&#x130;_Álért]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="172"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="188"/>
         <source>SettingsWindow --- Settings</source>
         <translation>[&#x130;&#x429;Séttíngs]</translation>
     </message>
@@ -3112,37 +3382,37 @@
 <context>
     <name>ThemedTextField</name>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="74"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="116"/>
         <source>ThemedTextField --- Undo</source>
         <translation>[&#x130;&#x429;Úndó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="82"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="124"/>
         <source>ThemedTextField --- Redo</source>
         <translation>[&#x130;&#x429;Rédó]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="93"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="135"/>
         <source>ThemedTextField --- Cut</source>
         <translation>[&#x130;_Cút]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="101"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="143"/>
         <source>ThemedTextField --- Copy</source>
         <translation>[&#x130;_Cópy]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="109"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="151"/>
         <source>ThemedTextField --- Paste</source>
         <translation>[&#x130;&#x429;Pásté]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="117"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="159"/>
         <source>ThemedTextField --- Delete</source>
         <translation>[&#x130;&#x429;Délété]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="126"/>
+        <location filename="../../../client/res/components/common/ThemedTextField.qml" line="168"/>
         <source>ThemedTextField --- Select All</source>
         <translation>[&#x130;&#x429;_Séléct Áll]</translation>
     </message>
@@ -3271,139 +3541,145 @@
 <context>
     <name>TrayMenuBuilder</name>
     <message>
-        <location filename="../../../client/res/components/common/Messages.qml" line="23"/>
+        <location filename="../../../client/res/components/common/Messages.qml" line="24"/>
         <source>TrayMenuBuilder --- Help</source>
         <extracomment>Help label used for the Help tray menu as well as help links on some settings</extracomment>
         <translation>[&#x130;_Hélp]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="47"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
         <source>TrayMenuBuilder --- Show Window</source>
         <extracomment>Menu command to display the main app window/dashboard.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Shów Wíndów]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="54"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
         <source>TrayMenuBuilder --- Resume Connection</source>
         <translation>[&#x130;&#x429;&#x30A2;_Résúmé Cónnéctíón_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="57"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
         <source>TrayMenuBuilder --- Connect (Auto)</source>
         <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Cónnéct (Áútó)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="59"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
         <source>TrayMenuBuilder --- Connect (%1)</source>
         <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Cónnéct (%1)]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="71"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
         <source>TrayMenuBuilder --- Disconnect</source>
         <extracomment>Menu command to disconnect from the VPN.</extracomment>
         <translation>[&#x130;&#x429;_Díscónnéct]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
         <source>TrayMenuBuilder --- Snooze</source>
         <translation>[&#x130;&#x429;Snóózé]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="75"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
         <source>TrayMenuBuilder --- 5 Minutes</source>
         <translation>[&#x130;&#x429;_5 Mínútés]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="76"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
         <source>TrayMenuBuilder --- 10 Minutes</source>
         <translation>[&#x130;&#x429;_10 Mínútés]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
         <source>TrayMenuBuilder --- 15 Minutes</source>
         <translation>[&#x130;&#x429;_15 Mínútés]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="78"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
         <source>TrayMenuBuilder --- 30 Minutes</source>
         <translation>[&#x130;&#x429;_30 Mínútés]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="123"/>
-        <source>TrayMenuBuilder --- Connect to</source>
-        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
-        <translation>[&#x130;&#x429;_Cónnéct tó]</translation>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+        <source>TrayMenuBuilder --- Connect to dedicated IP</source>
+        <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;__Cónnéct tó dédícátéd ÍP_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="129"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+        <source>TrayMenuBuilder --- Connect to region</source>
+        <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
+        <translation>[&#x130;&#x429;&#x30A2;_Cónnéct tó régíón]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
         <source>TrayMenuBuilder --- Log In</source>
         <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
         <translation>[&#x130;&#x429;Lóg Ín]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="140"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
         <source>TrayMenuBuilder --- Settings...</source>
         <extracomment>Menu command to open the settings dialog.</extracomment>
         <translation>[&#x130;&#x429;_Séttíngs...]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="144"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
         <source>TrayMenuBuilder --- Enable Debug Logging</source>
         <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Énáblé Débúg Lóggíng_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="146"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
         <source>TrayMenuBuilder --- Submit Debug Logs...</source>
         <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Súbmít Débúg Lógs..._]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="149"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
         <source>TrayMenuBuilder --- Changelog</source>
         <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
         <translation>[&#x130;&#x429;_Chángélóg]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="152"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
         <source>TrayMenuBuilder --- Support Portal</source>
         <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Súppórt Pórtál]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="154"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
         <source>TrayMenuBuilder --- Blog</source>
         <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
         <translation>[&#x130;_Blóg]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="162"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
         <source>TrayMenuBuilder --- Copy Public IP (%1)</source>
         <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Cópy Públíc ÍP (%1)_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="168"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
         <source>TrayMenuBuilder --- Copy Public IP</source>
         <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;Cópy Públíc ÍP]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="176"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
         <source>TrayMenuBuilder --- Copy Forwarded Port (%1)</source>
         <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;__Cópy Fórwárdéd Pórt (%1)__]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
         <source>TrayMenuBuilder --- Copy Forwarded Port</source>
         <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
         <translation>[&#x130;&#x429;&#x30A2;_Cópy Fórwárdéd Pórt_]</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+        <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
         <source>TrayMenuBuilder --- Quit</source>
         <extracomment>Menu command to quit the application.</extracomment>
         <translation>[&#x130;_Qúít]</translation>

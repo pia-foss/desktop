@@ -21,7 +21,7 @@ QtObject {
     readonly property bool horizontal: Qt.platform.os !== 'windows'
 
     readonly property int contentWidth: 520
-    readonly property int contentHeight: Theme.settings.horizontal ? 390 : 430
+    readonly property int contentHeight: Theme.settings.horizontal ? 410 : 430
 
     readonly property color backgroundColor: Theme.dark ? "#323642" : "#eeeeee"
 
@@ -73,7 +73,7 @@ QtObject {
     readonly property color vbarHiglightBarColor: Theme.dark ? "#5ddf5a" : "#4cb649"
     readonly property color vbarTextColor: Theme.dark ? "#ffffff" : "#22252e"
     readonly property int vbarTextPx: 12
-    readonly property string vbarHeaderImage: Theme.imagePath + "/settings-logo.png"
+    readonly property string vbarHeaderImage: Theme.imagePath + "/logo-78.png"
     readonly property int vbarContentTopMargin: 20
     readonly property int vbarContentLeftMargin: 60
     readonly property int vbarContentRightMargin: 60
@@ -116,6 +116,7 @@ QtObject {
     readonly property color inputDropdownArrowBorderColor: "#4cb649"
     readonly property color inputDropdownArrowDisabledBackgroundColor: Theme.dark ? "#889098" : "#c2c5c8"
     readonly property color inputDropdownArrowDisabledBorderColor: "#889099"
+    readonly property color inputDropdownIconBackdropColor: Theme.dark ? "#5a6371" : "#aaaaaa";
     readonly property string inputDropdownArrowImage: Theme.imagePathCommon + "/settings/dropdown-arrow.png"
     readonly property string inputDropdownArrowDisabledImage: Theme.imagePathCommon + "/settings/dropdown-arrow-disabled.png"
     readonly property string inputDropdownShadowImage: Theme.imagePathCommon + "/settings/shadow-dropdown.png"
@@ -173,4 +174,10 @@ QtObject {
     readonly property string reconnectShadowImage: Theme.imagePathCommon + "/settings/shadow-reconnect.png"
 
     readonly property string dedicatedIpPageImage: Theme.imagePath + "/settings/dedicatedip-page.png"
+
+    readonly property string connEventAttemptImage: Theme.imagePath + "/settings/conn-event-attempt.png"
+    readonly property string connEventEstablishedImage: Theme.imagePath + "/settings/conn-event-established.png"
+    readonly property string connEventCanceledImage: Theme.imagePath + "/settings/conn-event-canceled.png"
+    readonly property string connEventExpandButton: Theme.imagePath + "/settings/conn-event-expand.png"
+    readonly property string connEventExpandButtonHover: Theme.imagePath + "/settings/conn-event-expand-hover.png"
 }

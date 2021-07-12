@@ -28,8 +28,8 @@
 void linuxSetWindowIcon(QWindow &window)
 {
     // If installed properly this file should exist
-    if(QFile::exists(QStringLiteral("/usr/share/pixmaps/pia.png")))
+    if(QFile::exists(QStringLiteral("/usr/share/pixmaps/piavpn.png")))
     {
-        window.setIcon(QIcon(QStringLiteral("/usr/share/pixmaps/pia.png")));
+        window.setIcon(QIcon(QStringLiteral("/usr/share/pixmaps/piavpn.png")));
     }
 }

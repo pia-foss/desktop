@@ -19,9 +19,11 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.11
 import '../theme'
 
 Item {
+  id: pageWrapper
   property int pageIndex
   readonly property int current: parent.currentPage
 
@@ -40,12 +42,14 @@ Item {
       easing.type: Easing.InOutQuad
       duration: Theme.animation.normalDuration
     }
+    enabled: pageWrapper.Window.window && pageWrapper.Window.window.visible
   }
   Behavior on opacity {
     NumberAnimation {
       duration: Theme.animation.normalDuration
       easing.type: Easing.InOutQuad
     }
+    enabled: pageWrapper.Window.window && pageWrapper.Window.window.visible
   }
 
   visible: pageIndex == current

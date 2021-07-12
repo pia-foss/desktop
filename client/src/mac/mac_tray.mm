@@ -366,11 +366,10 @@ namespace
             baseName = iconSet;
             templateImg = true;
         }
-        // Auto (or invalid theme name) - detect OS theme
-        else if(isMacDarkModeEnabled())
-            baseName = QStringLiteral("light"); // Dark mode - use light icons
-        else
-            baseName = QStringLiteral("dark");  // Light mode - use dark icons
+        else { // "auto" or fallback
+            baseName = QStringLiteral("monochrome");
+            templateImg = true;
+        }
 
         QString stateName;
         switch(icon)

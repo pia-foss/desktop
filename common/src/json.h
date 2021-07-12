@@ -27,6 +27,7 @@
 #include <exception>
 #include <limits>
 #include <vector>
+#include <deque>
 #include <unordered_map>
 #include <set>
 
@@ -52,6 +53,19 @@
 // https://bugs.llvm.org/show_bug.cgi?id=31815
 QT_WARNING_DISABLE_CLANG("-Wunused-lambda-capture")
 
+// Newer version of clang emit this warning:
+//   implicit conversion from 'unsigned long' to 'double' changes value from 18446744073709551615 to 18446744073709551616
+//
+// This occurs when instantiating the integer json_cast<>() with a 64-bit
+// integer type, the maximum 64-bit value that it checks against can't be
+// represented as a double.
+//
+// This is technically an issue, because we test '... > max()', and due to the
+// max increasing, if we got max+1, we would try to convert it to a 64-bit
+// integer even though it can't actually be represented.  This should be
+// addressed, but right now the mass of warnings is hiding other more important
+// issues.
+QT_WARNING_DISABLE_CLANG("-Wimplicit-const-int-float-conversion")
 
 // Forward declaration
 class COMMON_EXPORT NativeJsonObject;
@@ -252,6 +266,7 @@ IMPLEMENT_JSON_CAST_ARRAY(QList<T>)
 IMPLEMENT_JSON_CAST_ARRAY(QLinkedList<T>)
 IMPLEMENT_JSON_CAST_ARRAY(QVector<T>)
 IMPLEMENT_JSON_CAST_ARRAY(std::vector<T>)
+IMPLEMENT_JSON_CAST_ARRAY(std::deque<T>)
 IMPLEMENT_JSON_CAST_ARRAY(std::set<T>)
 IMPLEMENT_JSON_CAST_ARRAY(std::set<T, std::greater<T>>)
 

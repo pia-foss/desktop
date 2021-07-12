@@ -40,6 +40,9 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+set -e
+set -x
+
 BRANDS_DIR_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 BRAND=$1
 TRAY_SVG_DIR="${BRANDS_DIR_ROOT}/${BRAND}/tray_svg/"
@@ -67,6 +70,17 @@ fi
 inkscape_cli=$(command -v inkscape || echo /Applications/Inkscape.app/Contents/Resources/bin/inkscape)
 gimp=$(command -v gimp || echo /Applications/GIMP.app/Contents/MacOS/GIMP)
 
+# Inkscape's CLI changed significantly between 0.9 and 1.0.
+# In 0.9*, use "-z --export-png=<file>" (-z=--without-gui).
+# In 1.*, use "--batch-process --export-filename=<file>" (file type inferred from extension)
+if [[ "$($inkscape_cli --version)" =~ "Inkscape 0.9" ]]; then
+  INKSCAPE_ARGS=("-z")
+  INKSCAPE_EXPORT="--export-png="
+else
+  INKSCAPE_ARGS=("--batch-process")
+  INKSCAPE_EXPORT="--export-filename="
+fi
+
 TRAY_TMP_DIR="${BRANDS_DIR_ROOT}/tray_tmp"
 PNG_TMP_DIR="$TRAY_TMP_DIR/png"
 ICO_TMP_DIR="$TRAY_TMP_DIR/ico"
@@ -79,7 +93,14 @@ for themedir in "$TRAY_SVG_DIR"/wide-*; do
         echo "$theme"
         for img in "$themedir"/*; do
                 RESULT_FILE="$PNG_TMP_DIR/$theme-$(basename "$img" .svg).png"
-                $inkscape_cli -z -e "$RESULT_FILE" -w 40 -h 30 "$img"
+                # The source svgs are 34x30 px for their source size.
+                # We could just resize this to 40x30 by adding some extra padding using "-3:0:37:30" which goes from -3,0 to 37,30 - giving us a few extra pixels of width
+                # however there is a bit of spare vertical padding around images. To compensate for this, change
+                # the export area to skip the top 2 and bottom 2 vertical pixels. We'll have to compensate the x-coordinate of export rectangle accordingly
+                # in order to maintain the 4:3 aspect ratio.
+                #
+                # the final coordinates of export rectangle are 1,2 to 33,28
+                $inkscape_cli "--export-area=-1:1:35:28" "${INKSCAPE_ARGS[@]}" "$INKSCAPE_EXPORT$RESULT_FILE" -w 40 -h 30 "$img"
         done
     fi
 done
@@ -92,7 +113,23 @@ for themedir in "$TRAY_SVG_DIR"/square-*; do
                 # These samples are only used in the Tray Icon dropdown itself;
                 # 20px height + 2x scale for high DPI
                 RESULT_FILE="$PNG_TMP_DIR/$theme-$(basename "$img" .svg).png"
-                $inkscape_cli -z -e "$RESULT_FILE" -w 40 -h 40 "$img"
+                if [ "$theme" = "square-classic" ]; then
+                    # square-classic images are 34x30. Add 2 px extra padding on top and bottom to get a properly scaled square
+                    EXPORT_AREA=2:-1:34:31
+                elif [[ "$theme" =~ "no-outline" ]]; then
+                    EXPORT_AREA=2:1:16:15
+                    if [[ $img =~ .+alert.+ ]]; then
+                        echo "Compensating for alert image"
+                        EXPORT_AREA=3:1:17:15
+                    fi
+                else
+                    EXPORT_AREA=1:0:17:16
+                    if [[ $img =~ .+alert.+ ]]; then
+                        echo "Compensating for alert image"
+                        EXPORT_AREA=2:0:18:16
+                    fi
+                fi
+                $inkscape_cli "${INKSCAPE_ARGS[@]}" "--export-area=$EXPORT_AREA" "$INKSCAPE_EXPORT$RESULT_FILE" -w 40 -h 40 "$img"
 
                 # The actual Linux icons should occupy ~75% of the image bound.
                 # Otherwise, they run right up to the edge of the taskbar and
@@ -102,19 +139,19 @@ for themedir in "$TRAY_SVG_DIR"/square-*; do
                 # The icons are designed at 16x16, so export [-2,-2 - 18,18] to
                 # create the margins.  (Except for Classic, which is 30x30.)
                 if [ "$theme" = "square-classic" ]; then
-                    EXPORT_AREA=-4:-4:34:34
+                    EXPORT_AREA=1:-3:37:33
                 else
-                    EXPORT_AREA=-2:-2:18:18
+                    EXPORT_AREA=-1:-2:19:18
                 fi
                 RESULT_FILE="$PNG_TMP_DIR/$theme-margins-$(basename "$img" .svg).png"
-                $inkscape_cli -z -e "$RESULT_FILE" -a "$EXPORT_AREA" -w 88 -h 88 "$img"
+                $inkscape_cli "${INKSCAPE_ARGS[@]}" "$INKSCAPE_EXPORT$RESULT_FILE" "--export-area=$EXPORT_AREA" -w 88 -h 88 "$img"
         done
     fi
 done
 
 for img in "$TRAY_SVG_DIR/samples"/*; do
         RESULT_FILE="$PNG_TMP_DIR/sample-$(basename "$img" .svg).png"
-        $inkscape_cli -z -e "$RESULT_FILE" -w 40 -h 30 "$img"
+        $inkscape_cli "${INKSCAPE_ARGS[@]}" "$INKSCAPE_EXPORT$RESULT_FILE" -w 40 -h 30 "$img"
 done
 
 
@@ -126,17 +163,37 @@ if [ ! "$GENERATE_ICO" = "" ]; then
     # Only do this for the themes actually needed, GIMP ICO compression is
     # tedious and time-consuming
     ico_themes=(square-classic square-colored-no-outline square-colored-with-dark-outline square-light-no-outline square-light-with-dark-outline)
+    # ico_themes=(square-colored-no-outline)
 
     for theme in "${ico_themes[@]}"; do
+
+
         if [ -d "$TRAY_SVG_DIR/$theme" ]; then
             echo "$theme"
             for img in "$TRAY_SVG_DIR/$theme"/*; do
                     RESULT_FILE="$ICO_TMP_DIR/$theme-$(basename "$img" .svg).ico"
+                    if [ "$theme" = "square-classic" ]; then
+                        # square-classic images are 34x30. Add 2 px extra padding on top and bottom to get a properly scaled square
+                        EXPORT_AREA=2:-1:34:31
+                    elif [[ "$theme" =~ "no-outline" ]]; then
+                        EXPORT_AREA=2:1:16:15
+                        if [[ $img =~ .+alert.+ ]]; then
+                            echo "Compensating for alert image"
+                            EXPORT_AREA=3:1:17:15
+                        fi
+                    else
+                        EXPORT_AREA=1:0:17:16
+                        if [[ $img =~ .+alert.+ ]]; then
+                            echo "Compensating for alert image"
+                            EXPORT_AREA=2:0:18:16
+                        fi
+                    fi
+
                     ico_png_temp="$ICO_TMP_DIR/png_temp"
                     rm -rf "$ico_png_temp"
                     mkdir -p "$ico_png_temp"
                             for size in "${ico_sizes[@]}"; do
-                                    $inkscape_cli -z -e "$ico_png_temp/render_$size.png" -w "$size" -h "$size" "$img"
+                                    $inkscape_cli "${INKSCAPE_ARGS[@]}" "$INKSCAPE_EXPORT$ico_png_temp/render_$size.png" "--export-area=$EXPORT_AREA" -w "$size" -h "$size" "$img"
                             done
                             convert "$ico_png_temp"/*.png "$RESULT_FILE"
                             # GIMP's scripting interface doesn't let us control the

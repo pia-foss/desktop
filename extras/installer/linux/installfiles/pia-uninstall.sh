@@ -148,7 +148,7 @@ if [[ "$1" == "startuninstall" ]] ; then
     fi
 
     [ -f "~/.config/autostart/${brandCode}vpn.desktop" ] && rm "~/.config/autostart/${brandCode}vpn.desktop"
-    [ -f "/usr/share/pixmaps/${brandCode}.png" ] && sudo rm "/usr/share/pixmaps/${brandCode}.png"
+    [ -f "/usr/share/pixmaps/${brandCode}vpn.png" ] && sudo rm "/usr/share/pixmaps/${brandCode}vpn.png"
     [ -f "/etc/apport/blacklist.d/${brandCode}vpn" ] && sudo rm "/etc/apport/blacklist.d/${brandCode}vpn"
     [ -e ~/.config/privateinternetaccess ] && rm -rf ~/.config/privateinternetaccess/
     echoPass "Removed $appName System files"

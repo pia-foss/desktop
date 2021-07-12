@@ -221,13 +221,17 @@ Item {
 
     StaticImage {
       id: logoImg
-      source: Theme.dashboard.headerLogoImage
+      // This image animates between 111x34 (for connect/region pages) and
+      // 131x39 (for the login page).  To make sure it renders cleanly at each
+      // size, there are separate assets for each size (at 2x, so 222x68 and
+      // 262x78).  When animating, we scale down the larger size asset.
+      source: (width === 111) ? Theme.dashboard.headerLogoImageSmall : Theme.dashboard.headerLogoImageLarge
       label: NativeHelpers.productName
-      height: logoCentered ? 22.67 : 28
-      width: logoCentered ? 160 : 200
+      height: logoCentered ? 34 : 39
+      width: logoCentered ? 111 : 131
       visible: title.text === ""
       anchors.horizontalCenter: parent.horizontalCenter
-      y: logoCentered ? 19 : 32
+      y: logoCentered ? 9 : 12
       Behavior on y {
         SmoothedAnimation {
           duration: Theme.animation.normalDuration

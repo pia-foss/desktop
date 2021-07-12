@@ -338,7 +338,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
 }
 )").object();
 
-    const auto emptyShadowsocks = QJsonDocument::fromJson("{}").object();
+    const QJsonArray emptyShadowsocks{};
 }
 
 class tst_nearestlocations : public QObject

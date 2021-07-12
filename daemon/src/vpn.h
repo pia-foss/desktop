@@ -437,12 +437,8 @@ public:
     // least one entry for Custom.  Not provided for any other type.
     const QStringList &customDns() const {return _customDns;}
 
-    // Get the effective DNS server addresses to use.
-    //
-    // For the modern infrastructure, this applies MACE (by selecting a
-    // different PIA DNS address).  (piaLegacyDnsOverride is not used.)
-    //
-    // For the legacy infrastructure, MACE is not applied.
+    // Get the effective DNS server addresses to use.  This applies MACE (by
+    // selecting a different PIA DNS address).
     QStringList getDnsServers() const;
 
     // Whether MACE is enabled.  Only permitted with PIA DNS and OpenVPN.
@@ -590,7 +586,22 @@ public:
     void scheduleDnsCacheFlush();
 
 public slots:
-    void connectVPN(bool force);
+    // Enable the VPN connection.
+    // - If it's not already enabled, start connecting to the VPN.
+    // - If it is already enabled, but 'force' is set, reconnect now (e.g. to
+    //   apply new settings)
+    // - Otherwise, nothing happens - already connecting/connected and force
+    //   wasn't set.
+    //
+    // The return value indicates whether we actually initiated a connection,
+    // which is relevant for service quality events.
+    //
+    // In the rare event that we try to start connecting but hit a hard failure
+    // due to invalid settings (copySettings() fails), this still returns true
+    // because we tried to connect.  (This is the rare state where
+    // DaemonState::vpnEnabled() is set, but we're in the Disconnected state,
+    // similar to a hard error due to auth failure.)
+    bool connectVPN(bool force);
     void disconnectVPN();
 
 private:

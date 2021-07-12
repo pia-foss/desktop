@@ -37,6 +37,7 @@ namespace GetSetType
     const QString regions{QStringLiteral("regions")};
     const QString vpnIp{QStringLiteral("vpnip")};
     const QString pubIp{QStringLiteral("pubip")};
+    const QString allowLAN{ QStringLiteral("allowlan") };
     const QString daemonState{QStringLiteral("daemon-state")};
     const QString daemonSettings{QStringLiteral("daemon-settings")};
     const QString daemonData{QStringLiteral("daemon-data")};
@@ -162,6 +163,7 @@ namespace
         {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
         {GetSetType::pubIp, {QStringLiteral("Current public IP address"), {}}},
+        {GetSetType::allowLAN, {QStringLiteral("Whether to allow LAN traffic"), {}}},
         {GetSetType::region, {QStringLiteral("Currently selected region (or \"auto\")"), {}}}
     };
 
@@ -340,6 +342,12 @@ namespace
             document.setObject(client.connection().account.toJsonObject());
             return document.toJson(QJsonDocument::Indented);
         }
+        else if (type == GetSetType::allowLAN)
+        {
+            // Print the status of allowLAN
+            bool enabled = client.connection().settings.allowLAN();
+            return GetSetValue::getBooleanText(enabled);
+        }
         else
         {
             // exec() prevents this by checking the type with checkParams()
@@ -398,6 +406,11 @@ namespace
         else if(_type  == GetSetType::pubIp)
         {
             QObject::connect(&client.connection().state, &DaemonState::externalIpChanged,
+                             this, func);
+        }
+        else if (_type == GetSetType::allowLAN)
+        {
+            QObject::connect(&client.connection().settings, &DaemonSettings::allowLANChanged,
                              this, func);
         }
         else

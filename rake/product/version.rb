@@ -105,6 +105,28 @@ class PiaVersion
         migration = '' if migration == nil
         versionh.defineRawString('RUBY_MIGRATION', migration)
         versionh.defineLiteral('INCLUDE_FEATURE_HANDSHAKE', '0')
+        # The build is considered a "prerelease" if it either has prerelease
+        # tags or is a debug build.  This is used for service quality events;
+        # prerelease builds use a "staging" product token and are indicated
+        # with "prerelease":true.
+        versionh.defineLiteral('PIA_VERSION_IS_PRERELEASE',
+            (Build::VersionPrerelease != '' || Build::Variant != :release) ? 'true' : 'false')
+        # The platform name is used by service quality events and the user
+        # agent string.  Don't use this for platform tests in code; Q_OS_* is
+        # better for that.
+        platformName = Build::selectPlatform('Windows', 'macOS', 'Linux')
+        versionh.defineString('PIA_PLATFORM_NAME', platformName)
+        # The user agent includes:
+        #   product/version
+        #     (Product is the brand short name, cleaned to include only
+        #     a-zA-Z0-9-_.  Version is the full semantic version.)
+        #   (platformName; architecture; prerelease; debug)
+        #     (prerelease and debug are included when applicable)
+        versionh.defineString('PIA_USER_AGENT',
+            "#{@productShortName.tr("^a-zA-Z0-9-_", "")}/#{version} " +
+            "(#{platformName}; #{Build::TargetArchitecture}" +
+            "#{Build::VersionPrerelease == '' ? '' : '; prerelease'}" +
+            "#{Build::Variant == :release ? '' : '; debug'})")
         # Windows-style four-part version number used in VERSIONINFO.
         # This can't completely encode a semantic version, so we use the
         # fourth field to express alpha/beta/GA:

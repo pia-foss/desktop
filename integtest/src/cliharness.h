@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("cliharness.h")
-
 #ifndef CLIHARNESS_H
 #define CLIHARNESS_H
 
+#include "common.h"
 #include "linebuffer.h"
 #include <QProcess>
 
@@ -43,13 +41,15 @@ namespace CliHarness
     void connectVpn();
     // Disconnect from the VPN
     void disconnectVpn();
-    // Reset all settings to defaults.  By default, debug logging is enabled
-    // after resetting (since this is for tests)
-    void resetSettings(bool enableLogging = true);
     // Get a value.  (Trims the terminating line break.)
     QString get(const QString &type);
-    // Change a single setting value
+    // Set a value.
+    void set(const QString &type, const QString &value);
+    // Change a single setting value (just constructs a QJsonObject and calls
+    // applySettings()).
     void applySetting(const QString &name, const QJsonValue &value);
+    // Change any number of settings
+    void applySettings(const QJsonObject &settings);
 
     // Wait for a specific monitored state value.  Success is checked using
     // VERIFY_CONTINUE.

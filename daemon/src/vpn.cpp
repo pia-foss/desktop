@@ -969,7 +969,7 @@ void VPNConnection::updateNetwork(const OriginalNetworkScan &newNetwork)
         _method->updateNetwork(newNetwork);
 }
 
-void VPNConnection::connectVPN(bool force)
+bool VPNConnection::connectVPN(bool force)
 {
     switch (_state)
     {
@@ -977,19 +977,19 @@ void VPNConnection::connectVPN(bool force)
         Q_ASSERT(_connectedConfig.vpnLocation()); // Valid in this state
         // If settings haven't changed, there's nothing to do.
         if (!force && !needsReconnect())
-            return;
+            return false;
 
         // Otherwise, change to DisconnectingToReconnect
         copySettings(State::DisconnectingToReconnect, State::Disconnecting);
 
         Q_ASSERT(_method); // Valid in this state
         _method->shutdown();
-        return;
+        return true;
     case State::Connecting:
     case State::Reconnecting:
         // If settings haven't changed, there's nothing to do.
         if (!force && !needsReconnect())
-            return;
+            return false;   // Still in same connection attempt
         // fallthrough
         if (_method)
         {
@@ -1006,11 +1006,19 @@ void VPNConnection::connectVPN(bool force)
             // We already queued a connection attempt when entering the
             // Interrupted state; nothing else to do.
         }
-        return;
+        return true;
     case State::DisconnectingToReconnect:
-        // If we're already disconnecting to reconnect, there's nothing to do.
-        // We'll reconnect as planned with the new settings when OpenVPN exits.
-        return;
+    case State::Interrupted:
+        // In these states, we're already waiting for the VPN method to shut
+        // down in order to start a new connection attempt.  There's nothing to
+        // do.  We'll reconnect as planned with the new settings when the method
+        // shuts down.
+        //
+        // The return value is still 'true' in this case if force was set, just
+        // as if we had been in the Connecting state, because a reconnect was
+        // still requested and we're doing it - it just happened that we didn't
+        // actually have to initiate a reconnect due to timing.
+        return force || needsReconnect();
     default:
         qWarning() << "Connecting in unhandled state " << _state;
         // fallthrough
@@ -1020,7 +1028,7 @@ void VPNConnection::connectVPN(bool force)
         _connectedServer = {};
         if(copySettings(State::Connecting, State::Disconnected))
             queueConnectionAttempt();
-        return;
+        return true;
     }
 }
 

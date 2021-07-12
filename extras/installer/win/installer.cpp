@@ -1183,7 +1183,7 @@ void Installer::doPaint()
 
     SelectObject(mem, _logoBitmap);
     GetObject(_logoBitmap, sizeof(bitmap), &bitmap);
-    BitBlt(dc, (WINDOW_WIDTH - bitmap.bmWidth) / 2, 100, bitmap.bmWidth, bitmap.bmHeight, mem, 0, 0, SRCCOPY);
+    BitBlt(dc, (WINDOW_WIDTH - bitmap.bmWidth) / 2 + 5, 100, bitmap.bmWidth, bitmap.bmHeight, mem, 0, 0, SRCCOPY);
 
     int inset;
 

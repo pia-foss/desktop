@@ -13,6 +13,12 @@
 # these directories contain macOS/Linux executables with no
 # extension, which can't be easily globbed.
 deps/built/*/** filter=lfs diff=lfs merge=lfs -text
+# Don't use LFS for symlinks (used for .so and .so.# in Linux
+# deps).  This isn't needed on Unix platforms as Git LFS already
+# knows to ignore symlinks, but on Windows, symlinks are not used
+# by default, which confuses LFS into trying to convert them.
+deps/built/linux/**/*.so !filter !diff !merge
+deps/built/linux/**/*.so.? !filter !diff !merge
 
 # dump_syms binaries - similar to deps/built, contains
 # extensionless macOS binary

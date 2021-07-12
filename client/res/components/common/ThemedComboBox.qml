@@ -76,6 +76,10 @@ Item {
     var iconPath = model && model[index] && model[index].icon
     return iconPath || ""
   }
+  function getBackdropFlagForIndex(index) {
+    var backdropFlag = model && model[index] && model[index].backdropFlag
+    return !!backdropFlag;
+  }
 
   BorderImage {
     anchors.fill: control
@@ -214,14 +218,17 @@ Item {
         anchors.fill: parent
 
         property bool hasIcon: !!iconPath
+        property bool hasBackdrop: !!modelData.backdropFlag
         property string iconPath: modelData.icon || ""
 
-        Item {
+        Rectangle {
+          opacity: 0.8
           visible: parent.hasIcon
-          x: 5
+          x: 0
           y: 0
-          width: 20
+          width: 25
           height: parent.height
+          color: parent.hasBackdrop ? Theme.settings.inputDropdownIconBackdropColor : "transparent"
 
           Image {
             anchors.centerIn: parent
@@ -334,15 +341,17 @@ Item {
 
     contentItem: Item {
       property bool hasIcon: !!iconPath
+      property bool hasBackdrop: themedComboBox.getBackdropFlagForIndex(control.currentIndex)
       property string iconPath: themedComboBox.getIconForIndex(control.currentIndex)
 
-      Item {
+      Rectangle {
+        opacity: 0.8
         visible: parent.hasIcon
-        x: 5
-        y: 0
-        width: 20
-        height: parent.height
-
+        x: 1
+        y: 1
+        width: 24
+        height: parent.height - 2
+        color: parent.hasBackdrop ? Theme.settings.inputDropdownIconBackdropColor : "transparent"
         Image {
           anchors.centerIn: parent
           source: parent.parent.iconPath

@@ -58,7 +58,7 @@ public:
 
 public:
     // Create PortForwarder with the DaemonAccount, which is used to load/store
-    // the client ID (legacy infra) or PF token (modern infra).
+    // the PF token.
     //
     // The ApiClient will be used to make API requests, it must outlive
     // PortForwarder.

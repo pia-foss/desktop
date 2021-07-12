@@ -188,8 +188,8 @@ module PiaLinux
             end
 
             # Copy app icon
-            FileUtils.copy_entry("brands/#{Build::Brand}/icons/app.png",
-                                 File.join(pkg, 'installfiles/app.png'))
+            FileUtils.copy_entry("brands/#{Build::Brand}/icons/app-linux.png",
+                                 File.join(pkg, 'installfiles/app-icon.png'))
         end
 
         # Build the installer artifact
@@ -225,6 +225,7 @@ module PiaLinux
                 .lib('thai')
                 .install(toolsStage, :bin)
             toolsStage.install('tools/thaibreak/thai_ts.sh', :bin)
+            toolsStage.install('tools/onesky_import/import_translations.sh', :bin)
         else
             puts "skipping thaibreak utility, install libthai-dev to build thaibreak"
         end

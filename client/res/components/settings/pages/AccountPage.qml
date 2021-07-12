@@ -29,6 +29,7 @@ import "../../theme"
 import "qrc:/javascript/util.js" as Util
 import PIA.NativeAcc 1.0 as NativeAcc
 import PIA.BrandHelper 1.0
+import PIA.NativeHelpers 1.0
 
 Page {
   ColumnLayout {
@@ -77,8 +78,7 @@ Page {
           else
             linkMsg = uiTr("(expires on %1)")
 
-          var expDate = new Date(Daemon.account.expirationTime)
-          var expDateStr = expDate.toLocaleString(Qt.locale(Client.state.activeLanguage.locale), Locale.ShortFormat)
+          var expDateStr = NativeHelpers.renderDateTime(Daemon.account.expirationTime)
           linkMsg = linkMsg.arg(expDateStr)
 
           text += '&nbsp; <font color="%1">%2</font>'.arg(linkColor).arg(linkMsg)

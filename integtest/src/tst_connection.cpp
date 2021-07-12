@@ -36,13 +36,46 @@ class TestConnection : public IntegTestCase
     Q_OBJECT
 
 private:
-    // Reset settings for a connection test
-    void resetSettings()
+    // Set up some specific settings for a connection test
+    void initSettings()
     {
-        CliHarness::resetSettings();
+        // Ensure debug logging is on
+        CliHarness::set(QStringLiteral("debuglogging"), QStringLiteral("true"));
         // Disable "Try Alternate Settings" since we are checking specific
         // configurations
         CliHarness::applySetting(QStringLiteral("automaticTransport"), false);
+    }
+
+    // Reset settings for a connection test
+    void resetSettings()
+    {
+        // Although there is a 'resetsettings' CLI command that uses the
+        // resetSettings RPC, here we need to exclude a few additional settings.
+        QJsonObject defaultsJson{DaemonSettings{}.toJsonObject()};
+        // Remove settings that are normally excluded
+        for(const auto &excludedSetting : DaemonSettings::settingsExcludedFromReset())
+            defaultsJson.remove(excludedSetting);
+
+        // Also exclude settings that were specifically set up by initSettings()
+        defaultsJson.remove(QStringLiteral("automaticTransport"));
+        // Debug logging is already excluded by default in settingsExcludedFromReset()
+
+        // Also exclude the update channels.  The GA update channel must
+        // sometimes be overridden during tests to run the test with feature
+        // flags that aren't yet published.  (The beta update channel doesn't
+        // impact feature flags, but it'd strange to reset one and not the
+        // other.)
+        defaultsJson.remove(QStringLiteral("updateChannel"));
+        defaultsJson.remove(QStringLiteral("betaUpdateChannel"));
+
+        // Exclude the service quality events setting - if this has been turned
+        // on, keep it on.  Currently, we're testing events with integ tests.
+        // In the future this may stay on since we typically run integ tests
+        // against builds using the "staging" (prerelease) product ID, although
+        // we should avoid sending production events from integ tests.
+        defaultsJson.remove(QStringLiteral("sendServiceQualityEvents"));
+
+        CliHarness::applySettings(defaultsJson);
     }
 
     // Check connectivity by expecting a request to be routed either on-VPN or
@@ -142,6 +175,7 @@ private slots:
         // testProtocolChoices() since it's the default setting
         for(const auto &port : tcpPorts)
         {
+            qInfo() << "Test OpenVPN TCP" << port;
             CliHarness::applySetting(QStringLiteral("remotePortTCP"), static_cast<int>(port));
             runConnectionTest();
         }
@@ -150,6 +184,7 @@ private slots:
         CliHarness::applySetting(QStringLiteral("protocol"), QStringLiteral("udp"));
         for(const auto &port : udpPorts)
         {
+            qInfo() << "Test OpenVPN UDP" << port;
             CliHarness::applySetting(QStringLiteral("remotePortUDP"), static_cast<int>(port));
             runConnectionTest();
         }

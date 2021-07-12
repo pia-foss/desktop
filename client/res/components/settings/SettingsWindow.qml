@@ -29,6 +29,7 @@ import "qrc:/javascript/util.js" as Util
 import "../theme"
 import "../common"
 import "../core"
+import "../client"
 import "../daemon"
 
 import './tabs'
@@ -223,7 +224,7 @@ SecondaryWindow {
   function showSettings() {
     open()
   }
-    
+
   function updateWindowSize() {
     if(tabLayout.item) {
       settings.contentLogicalWidth = tabLayout.item.implicitWidth

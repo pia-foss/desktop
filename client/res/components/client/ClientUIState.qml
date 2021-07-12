@@ -35,10 +35,19 @@ QtObject {
     //   before the dashboard loaded (even if the app was launched in quiet
     //   mode)
     property bool shown: false
+
+    // Scroll positions for dashboard pages; held here since the pages are
+    // unloaded when not visible.
+    property real connectScrollPos: 0
+    property real regionsScrollPos: 0
   }
 
   readonly property var settings: QtObject {
     property bool gatheringDiagnostics: false
+    property int currentPage: 0
+  }
+
+  readonly property var onboarding: QtObject {
     property int currentPage: 0
   }
 }

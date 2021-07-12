@@ -46,6 +46,7 @@ Item {
   property real fontPixelSize: 13
   property string text
   property color color
+  property bool rtlAlignmentMirror: true
 
   implicitHeight: elementColumn.totalImplicitHeight + 2*margins
 
@@ -81,7 +82,7 @@ Item {
       if(priorElement && (priorElement.type !== 'listitem' || nextElement.type !== 'listitem')) {
         priorElement.padBelow = fontPixelSize
 
-        // Slightly light less padding for heading->list item.  This was
+        // Slightly less padding for heading->list item.  This was
         // measured and might be specific to the changelog font size.
         if(priorElement.type === 'heading' && nextElement.type === 'listitem')
             priorElement.padBelow -= 2
@@ -136,9 +137,9 @@ Item {
           wrapMode: Text.WordWrap
           textFormat: Text.RichText
 
-          // Never mirror the alignment.  This is used for the changelog and beta
-          // agreement, which are always in English.
-          rtlAlignmentMirror: false
+          // Some MarkdownPages are used for text that's always in English; they
+          // disable alignment mirroring.
+          rtlAlignmentMirror: markdownPage.rtlAlignmentMirror
 
           NativeAcc.Text.name: modelData.content
 

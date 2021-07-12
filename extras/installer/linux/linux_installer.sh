@@ -286,7 +286,8 @@ function installPia() {
     if [ ! -d "/usr/share/pixmaps" ]; then
         sudo mkdir -p /usr/share/pixmaps/
     fi
-    sudo cp "$root/installfiles/app.png" "/usr/share/pixmaps/${brandCode}.png"
+    sudo cp "$root/installfiles/app-icon.png" "/usr/share/pixmaps/${brandCode}vpn.png"
+    [ -e "/usr/share/pixmaps/${brandCode}.png" ] && sudo rm -rf "/usr/share/pixmaps/${brandCode}.png"
     echoPass "Installed icon"
 
     if [ ! -d "/usr/share/applications" ]; then

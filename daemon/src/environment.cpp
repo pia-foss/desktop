@@ -250,13 +250,9 @@ void Environment::loadApiBases()
                     QStringLiteral("https://www.privateinternetaccess.com/api/client/v2/"),
                     QStringLiteral("https://www.piaproxy.net/api/client/v2/")
                 });
-    loadApiBase(overridePresent, apiOverride, _pRegionsListApi, QStringLiteral("regions_list_api"),
-                QStringLiteral("regions list API"), {
-                    QStringLiteral("https://www.privateinternetaccess.com/"),
-                    QStringLiteral("https://www.piaproxy.net/")
-                });
 
-    loadDynamicApiBase(overridePresent, apiOverride, _pModernRegionsListApi, QStringLiteral("modern_regions_list_api"),
+    loadDynamicApiBase(overridePresent, apiOverride, _pModernRegionsListApi,
+                QStringLiteral("modern_regions_list_api"),
                 QStringLiteral("modern regions list API"), QStringLiteral("/"), {
                     QStringLiteral("https://serverlist.piaservers.net")
                 });
@@ -272,10 +268,6 @@ void Environment::loadApiBases()
     loadApiBase(overridePresent, apiOverride, _pUpdateApi, QStringLiteral("update_api"),
                 QStringLiteral("update API"), {
                     BRAND_UPDATE_APIS
-                });
-    loadApiBase(overridePresent, apiOverride, _pPortForwardApi, QStringLiteral("port_forward_api"),
-                QStringLiteral("port forward API"), {
-                    QStringLiteral("http://209.222.18.222:2000/")
                 });
 }
 

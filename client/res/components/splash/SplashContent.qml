@@ -58,7 +58,7 @@ Rectangle {
       anchors.right: parent.right
       height: sourceSize.height / sourceSize.width * width
 
-      source: Theme.dashboard.headerLogoImage
+      source: Theme.dashboard.splashLogoImage
     }
 
     Item {

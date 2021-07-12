@@ -212,6 +212,16 @@ public:
     // problems.
     Q_INVOKABLE QString cleanSsidDisplay(const QString &ssid);
 
+    // Render dates and times.  In all cases, the value given is a Unix
+    // timestamp in milliseconds, in UTC.  (The date part is unimportant for
+    // renderTime(), and the time part is unimportant for renderDate().)  The
+    // result is a date/time/date-time string in the local time zone.
+    //
+    // This uses the system locale, not the language selected in PIA.
+    Q_INVOKABLE QString renderDateTime(qint64 timestampMs);
+    Q_INVOKABLE QString renderDate(qint64 timestampMs);
+    Q_INVOKABLE QString renderTime(qint64 timestampMs);
+
 signals:
     // Emitted when the application loses focus (no window in the application is
     // focused).

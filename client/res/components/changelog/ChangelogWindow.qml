@@ -214,7 +214,6 @@ DecoratedWindow {
               width: 680
             }
           }
-
           WindowScrollView {
             id: changelogScrollView
             contentWidth: changelogText.width
@@ -228,6 +227,7 @@ DecoratedWindow {
               fontPixelSize: 14
               text: uiBrand(NativeHelpers.readResourceText("qrc:/CHANGELOG.md"))
               color: Theme.dashboard.textColor
+              rtlAlignmentMirror: false // Changelog is English-only
             }
           }
         }

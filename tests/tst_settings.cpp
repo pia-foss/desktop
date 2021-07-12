@@ -344,7 +344,7 @@ private slots:
     void testTwoValid()
     {
         LocationsById locs{buildModernLocations({}, sample_docs::twoLocations,
-                           sample_docs::emptyJson, {}, {})};
+                           {}, {}, {})};
         QVERIFY(locs.size() == 2);
 
         //The locations don't have to be in the same order as the original
@@ -396,17 +396,17 @@ private slots:
         LocationsById locs;
 
         //Attempt to load empty JSON
-        locs = buildModernLocations({}, sample_docs::emptyJson, sample_docs::emptyJson, {}, {});
+        locs = buildModernLocations({}, sample_docs::emptyJson, {}, {}, {});
         QCOMPARE(locs.empty(), true);
         //Attempt to load non-object JSON
-        locs = buildModernLocations({}, sample_docs::arrayJson, sample_docs::emptyJson, {}, {});
+        locs = buildModernLocations({}, sample_docs::arrayJson, {}, {}, {});
         QCOMPARE(locs.empty(), true);
     }
 
     //Load one valid location
     void testOneValid()
     {
-        LocationsById locs{buildModernLocations({}, sample_docs::oneLocation, sample_docs::emptyJson, {}, {})};
+        LocationsById locs{buildModernLocations({}, sample_docs::oneLocation, {}, {}, {})};
         QVERIFY(locs.size() == 1);
 
         const auto &pAl = locs.at(QStringLiteral("al"));
@@ -433,7 +433,7 @@ private slots:
     void testPartialInvalid()
     {
         //Load one valid location.  The invalid location should be ignored.
-        LocationsById locs{buildModernLocations({}, sample_docs::partialInvalid, sample_docs::emptyJson, {}, {})};
+        LocationsById locs{buildModernLocations({}, sample_docs::partialInvalid, {}, {}, {})};
         QVERIFY(locs.size() == 1);
 
         const auto &pAl = locs.at(QStringLiteral("al"));
@@ -463,7 +463,7 @@ private slots:
         LatencyMap latencies;
         latencies["al"] = alLatency;
 
-        LocationsById updatedLocs{buildModernLocations(latencies, sample_docs::oneLocationNewIps, sample_docs::emptyJson, {}, {})};
+        LocationsById updatedLocs{buildModernLocations(latencies, sample_docs::oneLocationNewIps, {}, {}, {})};
         QVERIFY(updatedLocs.size() == 1);
 
         const auto &pAlUpd = updatedLocs.at(QStringLiteral("al"));

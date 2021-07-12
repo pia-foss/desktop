@@ -1,76 +1,15 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16px"
-   height="16px"
-   viewBox="0 0 16 16"
-   version="1.1"
-   id="svg8"
-   sodipodi:docname="down.svg"
-   inkscape:version="0.91 r13725">
-  <metadata
-     id="metadata14">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>icon/windows-white/disconnected@2x</dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <defs
-     id="defs12" />
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1017"
-     inkscape:window-height="964"
-     id="namedview10"
-     showgrid="true"
-     inkscape:pagecheckerboard="true"
-     inkscape:zoom="29.5"
-     inkscape:cx="8.0418708"
-     inkscape:cy="8.1720424"
-     inkscape:window-x="0"
-     inkscape:window-y="1"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="icon/windows-white/disconnected">
-    <inkscape:grid
-       type="xygrid"
-       id="grid821"
-       spacingx="0.5"
-       spacingy="0.5"
-       empspacing="2" />
-  </sodipodi:namedview>
-  <!-- Generator: Sketch 52.6 (67491) - http://www.bohemiancoding.com/sketch -->
-  <title
-     id="title2">icon/windows-white/disconnected@2x</title>
-  <desc
-     id="desc4">Created with Sketch.</desc>
-  <g
-     id="icon/windows-white/disconnected"
-     stroke="none"
-     stroke-width="1"
-     fill="none"
-     fill-rule="evenodd">
-    <path
-       d="M1.09906767,13.5243032 C0.96850432,13.3434808 0.891887087,13.1247696 0.891887087,12.8898102 C0.891887087,12.7841396 0.907211211,12.6818935 0.936219419,12.5848331 C0.689957157,12.3824934 0.533333333,12.0833868 0.533333333,11.7506711 L0.533333333,7.19069022 C0.533333333,6.58528561 1.05225225,6.0879977 1.68648649,6.0879977 L2.67512312,6.0879977 L2.67512312,4.73120647 C2.67512312,3.430088 3.27378899,2.24716408 4.23828629,1.3898133 C5.20288609,0.532266843 6.53336857,0 7.9967968,0 C9.88236804,0 11.5469357,0.883520933 12.4927467,2.20789613 L14.7157191,0 L16,1.38408304 L1.28428094,16 L0,14.615917 L1.09906767,13.5243032 Z M11.0289139,3.66180121 C10.4589346,2.6070049 9.30493099,1.88152415 7.98193393,1.88152415 C7.03998719,1.88152415 6.18357878,2.24936555 5.56292613,2.84205055 C4.94201722,3.43453986 4.55655656,4.25201954 4.55655656,5.15119827 L4.55655656,6.0879977 L8.58615059,6.0879977 L11.0289139,3.66180121 Z M3.43218135,16 L13.4118659,6.0879977 L14.3135135,6.0879977 C14.9477477,6.0879977 15.4666667,6.58528561 15.4666667,7.19069022 L15.4666667,11.7506711 C15.4666667,12.0833868 15.3101453,12.3824934 15.0638831,12.5848331 C15.0925838,12.6818935 15.1081642,12.7841396 15.1081642,12.8898102 C15.1081642,13.5074453 14.57879,14.0128052 13.9317429,14.0128052 L13.3184705,14.0128052 L13.3184705,15.6330881 C13.3184705,15.8348897 13.1454975,16 12.9340861,16 L9.87776897,16 L8.51571572,14.4834309 L7.47787788,14.4834309 L6.11592713,16 L3.43218135,16 Z"
-       id="Icon"
-       fill="#B2352D"
-       style="fill:#d74035;fill-opacity:1" />
-  </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="16px" viewBox="0 0 18 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Down</title>
+    <g id="Down" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Brand_Mascot-Copy-8" transform="translate(2.812500, 1.000000)" fill="#E93B76" fill-rule="nonzero">
+            <g id="Brand_Mascot" transform="translate(-0.000000, -0.000000)">
+                <g id="Pia_Logo_Vertical" transform="translate(-0.000000, -0.000000)">
+                    <g id="Lock" transform="translate(-0.000000, -0.000000)">
+                        <path d="M5.68711338,-1.64313008e-14 C7.90939209,-1.64313008e-14 9.71497352,1.82584719 9.71497352,4.07807406 L9.71497352,4.07807406 L9.714,4.181 L11.2876254,2.74953678 L12.2727273,3.72272017 L0.985101857,13.9995368 L-7.63833441e-14,13.0263534 L0.872469552,12.2324367 C0.777419798,12.065377 0.715781451,11.8776493 0.695159371,11.6794915 L0.687499955,11.5312626 L0.687499955,6.46868632 C0.687499955,6.1644289 0.784900866,5.86836818 0.965273061,5.62501267 C0.965233047,5.40124409 1.0530121,5.18662886 1.20929136,5.02840058 C1.33222131,4.90393752 1.48961073,4.82241229 1.65875378,4.79328579 L1.65927209,4.07807406 C1.65927209,1.82584719 3.46483466,-1.64313008e-14 5.68711338,-1.64313008e-14 Z M10.6489997,6.13961607 C10.6659783,6.21106367 10.6774486,6.28397557 10.6831965,6.35770159 L10.6875,6.46881993 L10.6875,11.5312626 C10.687076,12.1574686 10.2776412,12.7079018 9.68332013,12.881255 C9.59425381,13.2101904 9.31955542,13.4482255 8.99264076,13.4925431 L8.88191828,13.4999999 L7.63199609,13.4999999 C7.31827376,13.4999999 7.03489706,13.3218568 6.89342385,13.0455616 L6.84724101,12.9375062 L4.52787181,12.9375062 C4.42331699,13.2368522 4.16335542,13.4481245 3.85909342,13.4916827 L3.74313559,13.4999999 L2.56349991,13.4993376 L10.6489997,6.13961607 Z M5.68711338,1.40622454 C4.23196263,1.40622454 3.04819393,2.60490918 3.04819393,4.07807406 L3.04819393,4.07807406 L3.048,4.781 L3.60419251,4.78133888 C3.80142842,4.78121796 3.99085387,4.85229962 4.1395357,4.97962665 L4.22359211,5.06265265 L7.15014448,5.06265265 C7.28153808,4.91319454 7.46037684,4.81718408 7.65357829,4.78957589 L7.77095802,4.78133888 L8.326,4.781 L8.32607053,4.09594009 C8.32607053,2.66227487 7.23157496,1.49886492 5.85375928,1.41149266 Z" id="Combined-Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
 </svg>

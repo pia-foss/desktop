@@ -34,8 +34,19 @@ import PIA.BrandHelper 1.0
 
 Page {
   id: helpPage
+  // On some systems, the Arabic language may pick a font with an unusually
+  // large line height, which causes this page to overflow.  Indicate the
+  // actual height up to the Settings window, so we can at least extend the
+  // window to ensure that all the elements are visible.
+  implicitHeight: Math.max(Theme.settings.contentHeight, contentLayout.height)
   ColumnLayout {
-    anchors.fill: parent
+    id: contentLayout
+    // The top/left/right are all anchored to the page, but the bottom adjusts
+    // to the size of the content, so we can express that size back up to the
+    // Settings window.
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.leftMargin: Theme.settings.narrowPageLeftMargin
     // In Russian, the "Include Geo-Located Regions" translation just _barely_
     // runs over the right margin (<5 pixels), which causes it to wrap in the
@@ -109,21 +120,29 @@ Page {
       }
     }
 
-    TextLink {
+    Row {
+      spacing: 6
+      TextLink {
         text: uiTr("Changelog")
         underlined: true
         onClicked: {
-            wChangeLog.open();
+          wChangeLog.open();
         }
-    }
-    TextLink {
+      }
+      Text {
+        text: "|"
+        color: Theme.login.linkColor
+        font.pixelSize: Theme.login.linkTextPx
+      }
+      TextLink {
         //: This link displays the tour that users see initially after
         //: installation.
         text: uiTr("Quick Tour")
         underlined: true
         onClicked: {
-            wOnboarding.showOnboarding();
+          wOnboarding.showOnboarding();
         }
+      }
     }
 
     CheckboxInput {
@@ -251,20 +270,20 @@ Page {
       }
     }
 
-    RowLayout {
-      Layout.topMargin: 4
+    Row {
+      spacing: 6
       TextLink {
+        id: submitDebugLogsLink
         text: uiTr("Submit Debug Logs")
-        enabled: !Client.uiState.settings.gatheringDiagnostics
         underlined: true
         onClicked: Client.startLogUploader()
       }
 
       Image {
-        Layout.leftMargin: 0
         id: spinnerImage
-        Layout.preferredHeight: 14
-        Layout.preferredWidth: 14
+        height: 14
+        width: 14
+        anchors.verticalCenter: submitDebugLogsLink.verticalCenter
         source: Theme.login.buttonSpinnerImage
         visible: Client.uiState.settings.gatheringDiagnostics
         RotationAnimator {
@@ -276,13 +295,90 @@ Page {
           loops: Animation.Infinite
         }
       }
+
+      Text {
+        text: "|"
+        color: Theme.login.linkColor
+        font.pixelSize: Theme.login.linkTextPx
+      }
+      TextLink {
+        text: uiTr("Support Portal")
+        underlined: true
+        link: BrandHelper.getBrandParam("helpDeskLink")
+      }
     }
 
+    CheckboxInput {
+      label: uiTr("Help Improve PIA")
+      info: uiTr("Help ensure our service's performance by sharing connection stats with us.")
+      infoShowBelow: false
+      setting: DaemonSetting { name: 'sendServiceQualityEvents' }
+      visible: Daemon.data.flags.includes("service_quality_events")
+    }
 
-    TextLink {
-      text: uiTr("Support Portal")
-      underlined: true
-      link: BrandHelper.getBrandParam("helpDeskLink")
+    QualityEventsInfoDialog {
+      id: qualityEventsInfoDialog
+    }
+
+    OverlayDialog {
+      id: qualityEventsListDialog
+      buttons: [ Dialog.Ok ]
+      title: uiTr("Connection Events")
+      contentWidth: 500
+      contentHeight: 350
+      visible: false
+
+      QualityEventsList {
+        id: qualityEventsList
+        anchors.fill: parent
+      }
+
+      // Placeholder text shown when there are no events.  (Outside of the list
+      // itself since the list's accessibility annotation is toggled off when
+      // this becomes visible; it's more robust if this doesn't have to change
+      // parent elements when the list's element is destroyed.)
+      StaticText {
+        anchors.fill: qualityEventsList
+        anchors.margins: 10
+        visible: qualityEventsList.qualityEvents.length === 0
+        horizontalAlignment: Text.AlignHCenter
+        color: Theme.settings.inputListItemSecondaryTextColor
+        wrapMode: Text.WordWrap
+        text: {
+          return uiTr("No events have been stored recently.") + "\n" +
+            uiTr("Turn on the \"Help Improve PIA\" setting, then connect to see events.")
+        }
+      }
+    }
+
+    // If the settings window is closed while the event list is open, close
+    // the events list
+    Connections {
+      target: helpPage.Window.window
+      function onVisibleChanged() {
+        if(!helpPage.Window.window || !helpPage.Window.window.visible)
+          qualityEventsListDialog.close()
+      }
+    }
+
+    Row {
+      spacing: 6
+      visible: Daemon.data.flags.includes("service_quality_events")
+      TextLink {
+        text: uiTr("Find out more")
+        underlined: true
+        onClicked: qualityEventsInfoDialog.open()
+      }
+      Text {
+        text: "|"
+        color: Theme.login.linkColor
+        font.pixelSize: Theme.login.linkTextPx
+      }
+      TextLink {
+        text: uiTr("View shared data")
+        underlined: true
+        onClicked: qualityEventsListDialog.open()
+      }
     }
 
     // Spacer between groups

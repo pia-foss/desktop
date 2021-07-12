@@ -46,6 +46,8 @@ Item {
   property alias portForwardEnabled: regionListView.portForwardEnabled
   property alias canFavorite: regionListView.canFavorite
   property alias collapsedCountriesSettingName: regionListView.collapsedCountriesSettingName
+  property alias scrollStateGroupName: regionListView.scrollStateGroupName
+  property alias scrollStatePropertyName: regionListView.scrollStatePropertyName
   signal regionSelected(string locationId)
 
   function clearSearch() {

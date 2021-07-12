@@ -35,6 +35,8 @@ Item {
   property int currentState: uiState.pending
 
   function triggerStarClick (value) {
+    if (currentState === uiState.error_unknown)
+      return;
     currentState = uiState.loading;
     Daemon.submitRating(value, function(error) {
       if (error) {
