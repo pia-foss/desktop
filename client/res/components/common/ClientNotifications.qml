@@ -372,7 +372,7 @@ Item {
     severity: severities.warning
     links: [{
       text: uiTr("Settings"),
-      clicked: function() {showConnectionPage()}
+      clicked: function() {showMultihopPage()}
     }]
     dismissible: false
     timestampValue: Daemon.state.proxyUnreachable
@@ -682,6 +682,8 @@ Item {
   signal showNetworkPage()
   // Show the connection page
   signal showConnectionPage()
+  // Show the multihop page
+  signal showMultihopPage()
   // Show the help page
   signal showHelpPage()
   // Changelog (for the post-update notification)

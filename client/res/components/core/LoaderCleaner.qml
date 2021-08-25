@@ -60,7 +60,6 @@ QtQml.QtObject {
     // Do the first cleanup after no loaders have deactivated for 30 seconds.
     // (If we had done the first cleanup and were waiting to do the second,
     // reset back to the short interval.)
-    console.info("Loader deactivated, clean up in " + loaderCleaner.initialCleanupTime + " ms")
     cleanupTimer.interval = loaderCleaner.initialCleanupTime
     cleanupTimer.restart()
   }

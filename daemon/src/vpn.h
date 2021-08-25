@@ -337,6 +337,12 @@ public:
         Wireguard,
     };
     Q_ENUM(Method);
+    enum class Protocol
+    {
+        UDP,
+        TCP,
+    };
+    Q_ENUM(Protocol);
     enum class DnsType
     {
         Pia,
@@ -417,6 +423,12 @@ public:
 
     // Cryptographic settings for OpenVPN; only captured when method is OpenVPN
     QString openvpnCipher() const {return _openvpnCipher;}
+    // Preferred protocol and port (collectively "transport") for OpenVPN.  Note
+    // that the actual transport can differ if "Try Alternate Settings" is
+    // enabled and this transport isn't reachable.
+    // Port 0 indicates the "default" selection.
+    Protocol openvpnProtocol() const {return _openvpnProtocol;}
+    quint16 openvpnRemotePort() const {return _openvpnRemotePort;}
 
     // For the WireGuard method only, whether to use kernel support if available
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
@@ -511,6 +523,8 @@ private:
     bool _vpnLocationAuto{false};
     QString _vpnUsername, _vpnPassword, _vpnToken;
     QString _openvpnCipher;
+    Protocol _openvpnProtocol{Protocol::UDP};
+    quint16 _openvpnRemotePort{};
     bool _wireguardUseKernel{false};
     quint16 _localPort{0};
     uint _mtu{0};

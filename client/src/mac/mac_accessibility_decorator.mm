@@ -28,18 +28,27 @@
 // Qt uses.
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
+// Get the base class's implementation of a method
+template<class FuncT>
+FuncT getBaseMethod(Class baseClass, SEL selector)
+{
+    Method baseMethod = class_getInstanceMethod(baseClass, selector);
+    Q_ASSERT(baseMethod);   // Class must have this method
+
+    FuncT baseImpl = reinterpret_cast<FuncT>(method_getImplementation(baseMethod));
+    Q_ASSERT(baseImpl); // Methods always have a valid implementation
+    return baseImpl;
+}
+
 // Create a method on subclass corresponding to a method of baseClass, and
 // return baseClass's implementation.
 template<class FuncT>
 FuncT subclassMethod(Class subclass, Class baseClass, SEL selector,
                      FuncT implFunc, const char *funcTypes)
 {
-    Method baseMethod = class_getInstanceMethod(baseClass, selector);
-    Q_ASSERT(baseMethod);   // Class must have this method
+    FuncT baseImpl = getBaseMethod<FuncT>(baseClass, selector);
     class_addMethod(subclass, selector, reinterpret_cast<IMP>(implFunc),
                     funcTypes);
-    FuncT baseImpl = reinterpret_cast<FuncT>(method_getImplementation(baseMethod));
-    Q_ASSERT(baseImpl); // Methods always have a valid implementation
     return baseImpl;
 }
 
@@ -75,6 +84,9 @@ AccessibilityRoleFunc baseAccessibilityRole = nil;
 
 using AccessibilityValueFunc = id(*)(id, SEL);
 AccessibilityValueFunc baseAccessibilityValue = nil;
+
+using AccessibilityChildrenFunc = id(*)(id, SEL);
+AccessibilityChildrenFunc baseAccessibilityChildren = nil;
 
 using AccessibilityParameterizedAttributeNamesFunc = NSArray<NSString*>*(*)(id, SEL);
 AccessibilityParameterizedAttributeNamesFunc baseAccessibilityParameterizedAttributeNames = nil;
@@ -164,6 +176,14 @@ NSArray<QMacAccessibilityElement*> *emptyMacElements()
 Class macElementSubclass = nil;
 
 /*** Attribute accessor overrides ***/
+
+NSArray *accessibilityChildrenInNavigationOrder(id self, SEL _cmd)
+{
+    // We already return children in the proper navigation order, and we really
+    // want VoiceOver to use that order.  This is important for two-column
+    // layouts on Settings pages in particular.
+    return baseAccessibilityChildren(self, _cmd);
+}
 
 /*** Role/subrole fixups ***/
 
@@ -570,6 +590,34 @@ void accessibilityPerformAction(id self, SEL _cmd, NSAccessibilityActionName act
     }
 }
 
+/*** Base methods of QNSPanel ***/
+
+// The base class itself.
+Class macPanelBaseClass = nil;
+
+using AccessibilityAttributeValueFunc = id(*)(id, SEL, NSString*);
+AccessibilityAttributeValueFunc panelBaseAccessibilityAttributeValue = nil;
+
+/*** Additional methods added at runtime ***/
+
+NSArray *panelAccessibilityChildrenInNavigationOrder(id self, SEL _cmd)
+{
+    // Enforce navigation order for QNSPanel too.  This is important so that
+    // top-level controls are navigated in the proper order in our windows.
+    //
+    // We have to do this on QNSPanel, because it's the next non-ignored element
+    // in the heirarchy above our top-level controls.  Although there is an
+    // element for the "window" associated with our QQuickWindow/WindowAccImpl,
+    // it is ignored for accessibility, and that means that the QNSPanel above
+    // it provides the children in navigation order.
+    //
+    // Additionally, QNSPanel still uses the legacy NSAccessibility protocol,
+    // which doesn't have a "children in navigation order" attribute.
+    // Fortunately, we seem to be able to add on the new-style method and it is
+    // used properly.
+    return panelBaseAccessibilityAttributeValue(self, _cmd, NSAccessibilityChildrenAttribute);
+}
+
 // Create the subclass for QMacAccessibilityElement.
 void macInitElementSubclass()
 {
@@ -646,6 +694,15 @@ void macInitElementSubclass()
             macElementBaseClass, @selector(accessibilityValue),
             &accessibilityValue, "@@:");
 
+        // accessibilityChildren isn't overridden, we just need the base
+        // method to hook it up to accessibilityChildrenInNavigationOrder
+        baseAccessibilityChildren = getBaseMethod<AccessibilityChildrenFunc>(macElementBaseClass,
+            @selector(accessibilityChildren));
+
+        addMethod(macElementSubclass, macElementBaseClass,
+            @selector(accessibilityChildrenInNavigationOrder),
+            &accessibilityChildrenInNavigationOrder, "@@:");
+
         baseAccessibilityParameterizedAttributeNames = subclassMethod(macElementSubclass,
             macElementBaseClass, @selector(accessibilityParameterizedAttributeNames),
             &accessibilityParameterizedAttributeNames, "@@:");
@@ -667,6 +724,25 @@ void macInitElementSubclass()
             &accessibilityPerformAction, "v@:@");
 
         objc_registerClassPair(macElementSubclass);
+    }
+}
+
+void macInitPanelSubclass()
+{
+    if(!macPanelBaseClass)
+    {
+        macPanelBaseClass = objc_getClass("QNSPanel");
+
+        panelBaseAccessibilityAttributeValue = getBaseMethod<AccessibilityAttributeValueFunc>(macPanelBaseClass,
+            @selector(accessibilityAttributeValue:));
+
+        // Unlike the accessibility elements, we don't have any good point where
+        // we can subclass the QNSPanel.  We just need to add one method to
+        // enforce children navigation order though, so add it directly to the
+        // QNSPanel class.
+        subclassMethod(macPanelBaseClass, macPanelBaseClass,
+            @selector(accessibilityChildrenInNavigationOrder),
+            &panelAccessibilityChildrenInNavigationOrder, "@@:");
     }
 }
 
@@ -725,6 +801,33 @@ void macPostAccNotification(QAccessibleInterface &element, NSAccessibilityNotifi
         NSAccessibilityPostNotification(pMacElement, event);
 }
 
+// Apply the subclass to an Objective-C object
+void macSubclass(NSObject *object, Class expectedBase, Class subclass)
+{
+    if(!object)
+    {
+        qWarning() << "Cannot decorate invalid object";
+        return;
+    }
+
+    Class actualElementClass = [object class];
+
+    // If it's already subclassed, there's nothing to do.  This applies if the
+    // object generates more than one 'created' event (it's destroyed and
+    // recreated).
+    if(actualElementClass == subclass)
+        return;
+
+    if(actualElementClass != expectedBase)
+    {
+        qWarning() << "Cannot subclass object of type:"
+            << class_getName(actualElementClass);
+        return;
+    }
+
+    object_setClass(object, subclass);
+}
+
 // Apply the subclass to a QMacAccessibilityElement.
 void macSubclassElement(QMacAccessibilityElement *element)
 {
@@ -732,31 +835,10 @@ void macSubclassElement(QMacAccessibilityElement *element)
     Q_ASSERT(macElementBaseClass);
     Q_ASSERT(macElementSubclass);
 
-    if(!element)
-    {
-        qWarning() << "Cannot decorate invalid element";
-        return;
-    }
-
     // We don't actually have the definition of QMacAccessibilityElement, so
     // reinterpret_cast to NSObject *.  This is valid because we know it's an
     // NSObject, and Objective-C does not support multiple inheritance.
     NSObject *elementObj = reinterpret_cast<NSObject *>(element);
 
-    Class actualElementClass = [elementObj class];
-
-    // If it's already subclassed, there's nothing to do.  This applies if the
-    // object generates more than one 'created' event (it's destroyed and
-    // recreated).
-    if(actualElementClass == macElementSubclass)
-        return;
-
-    if(actualElementClass != macElementBaseClass)
-    {
-        qWarning() << "Cannot subclass object of type:"
-            << class_getName(actualElementClass);
-        return;
-    }
-
-    object_setClass(elementObj, macElementSubclass);
+    macSubclass(elementObj, macElementBaseClass, macElementSubclass);
 }

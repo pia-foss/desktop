@@ -50,6 +50,7 @@
 // Initialize the Mac accessibility helpers
 void macAccInit();
 
+void macSubclassInterfaceElement(QAccessibleInterface &element);
 void macPostAccCreated(QAccessibleInterface &element);
 void macPostAccDestroyed(QAccessibleInterface &element);
 

@@ -105,6 +105,10 @@ class PiaVersion
         migration = '' if migration == nil
         versionh.defineRawString('RUBY_MIGRATION', migration)
         versionh.defineLiteral('INCLUDE_FEATURE_HANDSHAKE', '0')
+
+        qml_reload_entry = ENV["QML_RELOAD_ENTRY"]
+        versionh.defineString("QML_RELOAD_ENTRY", qml_reload_entry) if qml_reload_entry != nil
+
         # The build is considered a "prerelease" if it either has prerelease
         # tags or is a debug build.  This is used for service quality events;
         # prerelease builds use a "staging" product token and are indicated

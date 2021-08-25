@@ -33,9 +33,17 @@ MovableModule {
   NativeAcc.Group.name: tileName
 
   function formatUsageBytes(bytes) {
-    var megabytes = Math.round(bytes / (1024 * 1024));
-    return uiTr("%1 MB").arg(megabytes);
-  }
+      var sizes = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      // Break the size down into <mantissa> * 1024^<exponent> to
+      // find the most appropriate prefix
+      var exponent = (Math.floor(Math.log(bytes) / Math.log(1024)));
+      // We don't display "bytes", if we haven't transferred a whole KB
+      // yet, say "0 KB"
+      if(exponent < 1)
+        return "0 KB"
+      // Calculate the mantissa and pick a unit with the exponent
+      return Math.round(bytes / Math.pow(1024, exponent), 2) + ' ' + sizes[exponent-1];
+}
 
   Text {
     text: uiTr("USAGE")

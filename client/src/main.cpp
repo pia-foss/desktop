@@ -503,7 +503,7 @@ int clientMain(int argc, char *argv[])
     //
     // This depends on Path initialization, etc., but we do this before starting
     // the main event loop since it may decide to exit if an install occurred.
-    macCheckInstallation();
+   macCheckInstallation();
 #endif
 
     client.setupFonts();

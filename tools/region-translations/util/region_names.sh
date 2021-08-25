@@ -105,7 +105,7 @@ function get_country_names() {
 
   for country in "${used_countries[@]}"; do
     name="$(jq ".${country,,}" <./country_groups.json)"
-    if [ -z "$name" ]; then
+    if [ "$name" == "null" ] || [ -z "$name" ]; then
       echo "missing group: ${country,,}" >&2
     else
       echo "$name"

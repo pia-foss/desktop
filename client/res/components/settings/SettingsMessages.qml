@@ -62,7 +62,7 @@ QtObject {
 
   // Labels for connection settings - used on Connection page and in Connection
   // tile
-  readonly property string connectionTypeSetting: uiTranslate("ConnectionPage", "Connection Type")
+  readonly property string connectionTypeSetting: uiTranslate("ConnectionPage", "Transport")
   readonly property string remotePortSetting: uiTranslate("ConnectionPage", "Remote Port")
   readonly property string dataEncryptionSetting: uiTranslate("ConnectionPage", "Data Encryption")
   readonly property string dataAuthenticationSetting: uiTranslate("ConnectionPage", "Data Authentication")

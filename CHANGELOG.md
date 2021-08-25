@@ -1,5 +1,14 @@
 # Changelog
 
+### v3.0.0
+* Redesigned the Settings window to improve categorization and allow for future growth
+* Separated the three “Kill Switch” setting choices into two separate settings - “VPN Kill Switch” and “Advanced Kill Switch”
+* Automation rule triggers on the dashboard are now removed if the rule is deleted
+* The “Usage” tile now adjusts units based on the amount of data transferred
+* Fixed navigation order issues with VoiceOver on macOS in some Settings pages
+* Fixed navigation order of overlay dialogs in Settings window for Windows screen readers
+* Fixed an issue causing overlay tips to stop working after removing an Automation rule
+
 ### v2.10.0
 * Reduced memory and CPU usage of the graphical client
 * Updated icons and graphics

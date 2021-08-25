@@ -950,6 +950,18 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
         qInfo() << "Apply current automation rule due to enabling automation";
         applyCurrentAutomationRule();
     }
+    // If automation rule was removed from list, the entry on the dashboard is also removed.
+    bool lastTriggerStillExists{false};
+    for(const auto &rule : _settings.automationRules())
+    {
+        if (_state.automationLastTrigger() && *_state.automationLastTrigger() == rule)
+        {
+            lastTriggerStillExists = true; // Found the last trigger, it's still here
+            break; // Found it, no need to keep looking
+        }
+    }
+    if (!lastTriggerStillExists)
+        _state.automationLastTrigger({}); // The triggered rule was removed, clear the trigger
 }
 
 void Daemon::RPC_resetSettings()
@@ -3256,6 +3268,26 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
         _settings.cipher(QStringLiteral("AES-128-GCM"));
     else if(_settings.cipher() == QStringLiteral("AES-256-CBC"))
         _settings.cipher(QStringLiteral("AES-256-GCM"));
+
+    // The "proxy" setting was split up into "proxyEnabled" and "proxyType" in
+    // 3.0 for consistency with split tunnel, automation, etc.
+    if(previous <= SemVersion{3, 0, 0})
+    {
+        // If there was no "proxy" value or it wasn't a string, we'll get an
+        // empty value here, which is ignored.
+        const auto &legacyProxyValue = _settings.get("proxy").toString();
+        if(legacyProxyValue == QStringLiteral("none"))
+        {
+            _settings.proxyType(QStringLiteral("shadowsocks"));
+            _settings.proxyEnabled(false);
+        }
+        else if(legacyProxyValue == QStringLiteral("custom") ||
+            legacyProxyValue == QStringLiteral("shadowsocks"))
+        {
+            _settings.proxyType(legacyProxyValue);
+            _settings.proxyEnabled(true);
+        }
+    }
 }
 
 void Daemon::calculateLocationPreferences()

@@ -68,11 +68,4 @@ FocusScope {
 
     regionList.clearSearch()
   }
-
-  Connections {
-    target: ClientNotifications
-    function onShowRegions() {
-      pageManager.setPage(pageManager.pageIndices.region)
-    }
-  }
 }

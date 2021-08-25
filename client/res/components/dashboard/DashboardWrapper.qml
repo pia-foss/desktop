@@ -24,6 +24,7 @@ import "../../javascript/app.js" as App
 import "../theme"
 import "../daemon"
 import "../client"
+import "../common"
 
 Item {
   id: wrapper
@@ -88,6 +89,13 @@ Item {
         anchors.right: parent.right
         layoutHeight: wrapper.layoutHeight - headerBar.height
       }
+    }
+  }
+
+  Connections {
+    target: ClientNotifications
+    function onShowRegions() {
+      pageManager.setPage(pageManager.pageIndices.region)
     }
   }
 

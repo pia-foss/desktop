@@ -393,3 +393,9 @@ function compToStr(comp) {
 function colorToStr(c) {
   return '#' + compToStr(c.r) + compToStr(c.g) + compToStr(c.b)
 }
+
+// Mix two values with a blend factor.  'blend' should be in range [0.0, 1.0] -
+// 0.0 results in 'a' while 1.0 results in 'b'.
+function mix(a, b, blend) {
+  return (1.0 - blend) * a + blend * b
+}

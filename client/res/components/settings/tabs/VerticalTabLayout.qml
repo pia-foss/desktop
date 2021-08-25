@@ -39,7 +39,17 @@ FocusScope {
   property var pageHeadingFunc
   anchors.fill: parent
   implicitWidth: Theme.settings.vbarWidth + Theme.settings.vbarContentLeftMargin + Theme.settings.contentWidth + Theme.settings.vbarContentRightMargin
-  implicitHeight: Theme.settings.headingHeight + Theme.settings.vbarContentTopMargin + stack.pageImplicitHeight + Theme.settings.vbarContentBottomMargin
+  implicitHeight: Theme.settings.headingHeight + Theme.settings.vbarContentTopMargin + Theme.settings.contentHeight + Theme.settings.vbarContentBottomMargin
+  readonly property int menuLeftMargin: 35
+
+  // Get the current page - used by SettingsWindow to invoke actions on some
+  // pages from external sources, like client notifications
+  function getCurrentPage() {
+    // The page repeater contains Loaders, which load their page only when
+    // visible
+    let loader = pageContentRepeater.itemAt(Client.uiState.settings.currentPage)
+    return loader && loader.item
+  }
 
   TabLayoutCommon {
     id: common
@@ -50,17 +60,19 @@ FocusScope {
     color: Theme.settings.vbarBackgroundColor
   }
 
-  StaticImage {
-    source: Theme.settings.vbarHeaderImage
-    label: NativeHelpers.productName
-    x: (Theme.settings.vbarWidth - width) / 2
-    y: 25
-    height: sourceSize.height / 2
-    width: sourceSize.width / 2
+  StaticText {
+    text: uiTranslate("SettingsWindow", "Settings")
+    x: menuLeftMargin
+    y: 43
+    font.pixelSize: 22
+    font.bold: true
+    color: Theme.settings.vbarTextColor
+    opacity:0.7
   }
 
-  // Highlight indicator
+//  // Highlight indicator
   Rectangle {
+    readonly property int padding: 2
     x: 0
     y: {
       // These dummy dependencies are needed to recalculate y when
@@ -68,23 +80,18 @@ FocusScope {
       var tabsDep = pagesRepeater.children
       var tabsDep2 = pagesRepeater.count
       var currentItem = pagesRepeater.itemAt(Client.uiState.settings.currentPage)
-      return listView.y + (currentItem ? currentItem.y : 0)
+      return listView.y + (currentItem ? currentItem.y : 0) + padding
     }
     width: Theme.settings.vbarWidth
-    height: Theme.settings.vbarItemHeight
-    color: Theme.settings.vbarActiveBackgroundColor
-    Rectangle {
-      width: 3
-      height: parent.height
-      color: Theme.settings.vbarHiglightBarColor
-    }
+    height: Theme.settings.vbarItemHeight - 2*padding
+    color: Theme.settings.vbarHighlightBarColor
 
-    Behavior on y {
-      SmoothedAnimation {
-        duration: 200
-      }
-      enabled: tabLayout.Window.window.visible
-    }
+//    Behavior on y {
+//      SmoothedAnimation {
+//        duration: 200
+//      }
+//      enabled: tabLayout.Window.window.visible
+//    }
   }
 
   Column {
@@ -107,6 +114,7 @@ FocusScope {
       Item {
         width: listView.width
         height: Theme.settings.vbarItemHeight
+        readonly property bool isActive: listView.currentIndex === index
 
         NativeAcc.Tab.name: tabText.text
         NativeAcc.Tab.checked: tabIcon.active
@@ -119,16 +127,18 @@ FocusScope {
 
         TabIcon {
           id: tabIcon
-          x: 20
+          x: menuLeftMargin
           anchors.verticalCenter: parent.verticalCenter
-          active: listView.currentIndex === index
+          active: parent.isActive
         }
         Text {
           id: tabText
-          color: Theme.settings.vbarTextColor
+          color: parent.isActive ? Theme.settings.vbarActiveTextColor : Theme.settings.vbarTextColor
           anchors.verticalCenter: parent.verticalCenter
           text: pageTitleFunc(modelData.name)
-          x: 58
+          x: menuLeftMargin + 28
+          opacity: parent.isActive ? 1 : 0.7
+          font.bold: parent.isActive
           font.pixelSize: Theme.settings.vbarTextPx
         }
         MouseArea {
@@ -159,18 +169,11 @@ FocusScope {
 
     StaticText {
       x: Theme.settings.vbarContentLeftMargin
-      y: Theme.settings.headingHeight - 40
+      y: Theme.settings.headingHeight - 60
       color: Theme.settings.headingTextColor
       font.weight: Font.Light
       font.pixelSize: Theme.settings.headingTextPx
       text: pageHeadingFunc(pages[listView.currentIndex].name)
-    }
-    Rectangle {
-      x: Theme.settings.vbarContentLeftMargin
-      y: Theme.settings.headingHeight - 1
-      width: parent.width - Theme.settings.vbarContentLeftMargin - Theme.settings.vbarContentRightMargin
-      height: 1
-      color: Theme.settings.headingLineColor
     }
 
     // As in the horizontal tabs...we need a focus scope around the StackLayout

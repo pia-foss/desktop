@@ -51,23 +51,15 @@
 #endif
 
 // List of settings which require a reconnection.
+// TODO - Eliminate this and just compare ConnectionConfigs to determine when
+// a reconnect is needed.  This remains for now because a few settings aren't
+// handled by ConnectionConfig yet (mainly transport, handled by
+// TransportSelector.)
 static std::initializer_list<const char*> g_connectionSettingNames = {
-    "location",
-    "protocol",
     "remotePortUDP",
     "remotePortTCP",
-    "localPort",
-    "automaticTransport",
-    "cipher",
-    "overrideDNS",
-    "defaultRoute",
     "blockIPv6",
-    "mtu",
-    "enableMACE",
-    "windowsIpMethod",
-    "proxy",
-    "proxyCustom",
-    "proxyShadowsocksLocation"
+    "windowsIpMethod"
 };
 
 namespace
@@ -659,9 +651,11 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     if(_method == Method::OpenVPN)
     {
         _openvpnCipher = settings.cipher();
+        if(settings.protocol() == QStringLiteral("tcp"))
+            _openvpnProtocol = Protocol::TCP;
 
         // Proxy and automatic transport require OpenVPN.
-        if(settings.proxy() == QStringLiteral("custom"))
+        if(settings.proxyEnabled() && settings.proxyType() == QStringLiteral("custom"))
         {
             _proxyType = ProxyType::Custom;
             _customProxy = settings.proxyCustom();
@@ -672,14 +666,26 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
             // nonfatal error later.
             _socksHostAddress = parseIpv4Host(_customProxy.host());
         }
-        else if(settings.proxy() == QStringLiteral("shadowsocks"))
+        else if(settings.proxyEnabled() && settings.proxyType() == QStringLiteral("shadowsocks"))
         {
             _proxyType = ProxyType::Shadowsocks;
+            // PIA's Shadowsocks servers don't have UDP enabled, force TCP.
+            _openvpnProtocol = Protocol::TCP;
             _socksHostAddress = QHostAddress{0x7f000001}; // 127.0.0.1
             if(state.shadowsocksLocations().nextLocation())
                 _pShadowsocksLocation.reset(new Location{*state.shadowsocksLocations().nextLocation()});
             _shadowsocksLocationAuto = !state.shadowsocksLocations().chosenLocation();
         }
+        else
+        {
+            _proxyType = ProxyType::None;
+        }
+        
+        // The protocol might have been forced to TCP if Shadowsocks was enabled.
+        if(_openvpnProtocol == Protocol::TCP)
+            _openvpnRemotePort = settings.remotePortTCP();
+        else
+            _openvpnRemotePort = settings.remotePortUDP();
 
         // Automatic transport - can't be used with a proxy (we could not be
         // confident that a failure to connect is due to a port being
@@ -786,22 +792,25 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         userFixedPart != otherUserFixedPart ||
         vpnPassword() != other.vpnPassword() ||
         vpnToken() != other.vpnToken() ||
-        dnsType() != other.dnsType() ||
-        customDns() != other.customDns() ||
+        openvpnCipher() != other.openvpnCipher() ||
+        openvpnProtocol() != other.openvpnProtocol() ||
+        openvpnRemotePort() != other.openvpnRemotePort() ||
+        wireguardUseKernel() != other.wireguardUseKernel() ||
         localPort() != other.localPort() ||
         mtu() != other.mtu() ||
-        otherAppsUseVpn() != other.otherAppsUseVpn() ||
-        setDefaultRoute() != other.setDefaultRoute() ||
+        automaticTransport() != other.automaticTransport() ||
+        dnsType() != other.dnsType() ||
+        customDns() != other.customDns() ||
+        requestMace() != other.requestMace() ||
         setDefaultDns() != other.setDefaultDns() ||
         forceVpnOnlyDns() != other.forceVpnOnlyDns() ||
         forceBypassDns() != other.forceBypassDns() ||
+        otherAppsUseVpn() != other.otherAppsUseVpn() ||
+        setDefaultRoute() != other.setDefaultRoute() ||
         proxyType() != other.proxyType() ||
         socksHost() != other.socksHost() ||
         customProxy() != other.customProxy() ||
-        automaticTransport() != other.automaticTransport() ||
         requestPortForward() != other.requestPortForward() ||
-        requestMace() != other.requestMace() ||
-        wireguardUseKernel() != other.wireguardUseKernel() ||
         vpnLocationId != otherVpnLocationId ||
         vpnLocationAuto() != other.vpnLocationAuto() ||
         ssLocationId != otherSsLocationId;
@@ -1213,33 +1222,6 @@ void VPNConnection::doConnect()
 
     if (_connectionAttemptCount == 0)
     {
-        // We shouldn't have any problems json_cast()ing these values since they
-        // came from DaemonSettings; just use defaults if it does happen
-        // somehow.
-        QString protocol;
-        uint selectedPort;
-        if(!json_cast(_connectionSettings.value("protocol"), protocol))
-            protocol = QStringLiteral("udp");
-        // Shadowsocks proxies require TCP; UDP relays aren't enabled on PIA
-        // servers.
-        if(_connectingConfig.proxyType() == ConnectionConfig::ProxyType::Shadowsocks &&
-            protocol != QStringLiteral("tcp"))
-        {
-            qInfo() << "Using TCP transport due to Shadowsocks proxy setting";
-            protocol = QStringLiteral("tcp");
-        }
-
-        if(protocol == QStringLiteral("udp"))
-        {
-            if(!json_cast(_connectionSettings.value("remotePortUDP"), selectedPort))
-                selectedPort = 0;
-        }
-        else
-        {
-            if(!json_cast(_connectionSettings.value("remotePortTCP"), selectedPort))
-                selectedPort = 0;
-        }
-
         Q_ASSERT(_connectingConfig.vpnLocation());  // Postcondition of copySettings() above
 
         // Reset the transport selection sequence.
@@ -1257,7 +1239,10 @@ void VPNConnection::doConnect()
         // the UI will indicate that we used a different transport (since the
         // preferred transport still indicates the user's selection, due to
         // Transport::resolveDefaultPort()).
-        _transportSelector.reset(protocol, selectedPort,
+        QString protocolName{QStringLiteral("udp")};
+        if(_connectingConfig.openvpnProtocol() == ConnectionConfig::Protocol::TCP)
+            protocolName = QStringLiteral("tcp");
+        _transportSelector.reset(protocolName, _connectingConfig.openvpnRemotePort(),
                                  _connectingConfig.automaticTransport(),
                                  _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnUdp),
                                  _connectingConfig.vpnLocation()->allPortsForService(Service::OpenVpnTcp));

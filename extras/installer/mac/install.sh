@@ -259,6 +259,9 @@ EOF
 elif [[ "$1" == "show-install-failure" ]]; then
     dialog "Error: Installation failed.\n\nContact support if this problem reoccurs." 'buttons {"Exit"} default button "Exit"'
 
+elif [[ "$1" == "show-failure-helper" ]]; then
+    dialog "Error: Installation failed.\n\nThe install helper has been disabled by another application\nTo enable it, open a terminal and run:\n     sudo launchctl enable system/com.privateinternetaccess.vpn.installhelper\nThen try installing again." 'buttons {"Exit"} default button "Exit"'
+
 elif [[ "$1" == "uninstall" ]] ; then ##########################################
 
     [[ $EUID -eq 0 ]] || fail "Not running as root"

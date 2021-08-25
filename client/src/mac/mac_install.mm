@@ -37,6 +37,13 @@
 #import <stdlib.h>
 #import <dlfcn.h>
 
+enum class MacAuthorizeResult
+{
+    Success,
+    JobDisabledFailure,
+    OtherFailure,
+};
+
 namespace xpc
 {
     // Connect to the install helper and send an Install or Uninstall request.
@@ -122,11 +129,11 @@ bool macCheckInstallation()
 
 // Execute an elevated command with authorization. Called after AuthorizationCopyRights,
 // with the error code of that function in 'err'. The AuthorizationRef will get freed.
-bool macExecuteWithAuthorization(AuthorizationRef authorizationRef, OSStatus err, MacInstall::Action action, const QString &appPath)
+MacAuthorizeResult macExecuteWithAuthorization(AuthorizationRef authorizationRef, OSStatus err, MacInstall::Action action, const QString &appPath)
 {
     CFErrorRef blessError{nullptr};
 
-    bool result = false;
+    MacAuthorizeResult result = MacAuthorizeResult::OtherFailure;
     if (err == errAuthorizationCanceled)
     {
         qCritical() << "Authorization canceled";
@@ -139,7 +146,11 @@ bool macExecuteWithAuthorization(AuthorizationRef authorizationRef, OSStatus err
     {
         if(blessError)
         {
-            qCritical() << "Failed to authorize installer:" << CFErrorGetCode(blessError);
+            int errCode = CFErrorGetCode(blessError);
+            if (errCode == kSMErrorJobMustBeEnabled) {
+                result = MacAuthorizeResult::JobDisabledFailure;
+            }
+            qCritical() << "Failed to authorize installer:" << errCode;
             qCritical() << "domain:" << CFErrorGetDomain(blessError);
             qCritical() << "description:" << CFErrorCopyDescription(blessError);
             qCritical() << "reason:" << CFErrorCopyFailureReason(blessError);
@@ -156,13 +167,13 @@ bool macExecuteWithAuthorization(AuthorizationRef authorizationRef, OSStatus err
     else
     {
         qInfo() << "Succeeded authorizing installer!";
-        result = true;
+        result = MacAuthorizeResult::Success;
     }
     AuthorizationFree(authorizationRef, kAuthorizationFlagDefaults);
     return result;
 }
 
-bool macRequestAuthorization(MacInstall::Action action, const QString &appPath)
+MacAuthorizeResult macRequestAuthorization(MacInstall::Action action, const QString &appPath)
 {
     if (![NSApp isActive])
         [NSApp activateIgnoringOtherApps:YES];
@@ -180,7 +191,7 @@ bool macRequestAuthorization(MacInstall::Action action, const QString &appPath)
     if (err != errAuthorizationSuccess)
     {
         qCritical() << "Failed to initialize authorization context:" << err;
-        return -2;
+        return MacAuthorizeResult::OtherFailure;
     }
 
     return macExecuteWithAuthorization(authorizationRef, AuthorizationCopyRights(authorizationRef, &authorizationRights, &authorizationEnvironment, authorizationFlags, NULL), action, appPath);
@@ -230,19 +241,23 @@ bool macExecuteInstaller()
         return false;
     }
 
-    if(macRequestAuthorization(MacInstall::Action::Install, originalAppPath))
+    MacAuthorizeResult auth_res = macRequestAuthorization(MacInstall::Action::Install, originalAppPath);
+    if (auth_res == MacAuthorizeResult::Success)
     {
         // Success - relaunch client from installation
         QProcess::execute(Path::InstallationDir / "Contents/Resources/relaunch.sh", { QString::number(getpid()), originalAppPath });
         return true;
     }
 
-    QProcess::execute(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/vpn-installer.sh"), {QStringLiteral("show-install-failure")});
+    if (auth_res == MacAuthorizeResult::JobDisabledFailure)
+        QProcess::execute(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/vpn-installer.sh"), {QStringLiteral("show-failure-helper")});
+    else
+        QProcess::execute(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/vpn-installer.sh"), {QStringLiteral("show-install-failure")});
 
     return false;
 }
 
 bool macExecuteUninstaller()
 {
-    return macRequestAuthorization(MacInstall::Action::Uninstall, Path::BaseDir);
+    return (MacAuthorizeResult::Success == macRequestAuthorization(MacInstall::Action::Uninstall, Path::BaseDir));
 }

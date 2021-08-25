@@ -44,6 +44,7 @@
 @class QMacAccessibilityElement;
 
 void macInitElementSubclass();
+void macInitPanelSubclass();
 
 // Get the QMacAccessibilityElement for a given ID, including creating it if it
 // doesn't yet exist.

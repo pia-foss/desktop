@@ -43,7 +43,8 @@ QtObject {
   readonly property int mtu: NativeDaemon.settings.mtu
   readonly property string cipher: NativeDaemon.settings.cipher
   readonly property string windowsIpMethod: NativeDaemon.settings.windowsIpMethod
-  readonly property string proxy: NativeDaemon.settings.proxy
+  readonly property string proxyType: NativeDaemon.settings.proxyType
+  readonly property bool proxyEnabled: NativeDaemon.settings.proxyEnabled
   readonly property var proxyCustom: NativeDaemon.settings.proxyCustom
   readonly property string proxyShadowsocksLocation: NativeDaemon.settings.proxyShadowsocksLocation
   readonly property bool automaticTransport: NativeDaemon.settings.automaticTransport

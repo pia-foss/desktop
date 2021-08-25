@@ -34,6 +34,6 @@ function copy_tab_icon
     cp ./png_$size/light/$1-tabinactive.png ../../client/res/img/light/settings/$2-inactive.png
 }
 
-for type in connection general help privacy proxy dedicatedip network automation; do
+for type in account automation "dedicated-ip" "general" "help" "multihop" "network" "privacy" "protocol" "split-tunnel"; do
     copy_tab_icon $type $type
 done

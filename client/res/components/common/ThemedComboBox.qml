@@ -99,7 +99,8 @@ Item {
     id: control
     anchors.fill: parent
 
-    font.pixelSize: 13
+    font.pixelSize: Theme.settings.inputLabelTextPx
+    height: 50
     activeFocusOnTab: !!themedComboBox.accessibleName
     displayText: (model && model[currentIndex] && model[currentIndex].name) || ""
 
@@ -200,7 +201,7 @@ Item {
       id: choiceDelegate
 
       width: control.actualPopupWidth
-      height: 22
+      height: themedComboBox.implicitHeight
 
       NativeAcc.DropDownMenuItem.name: itemText.text
       NativeAcc.DropDownMenuItem.checked: control.currentIndex === index
@@ -226,20 +227,20 @@ Item {
           visible: parent.hasIcon
           x: 0
           y: 0
-          width: 25
+          width: 40
           height: parent.height
           color: parent.hasBackdrop ? Theme.settings.inputDropdownIconBackdropColor : "transparent"
 
           Image {
             anchors.centerIn: parent
             source: parent.parent.iconPath
-            width: 20
-            height: Qt.platform.os === 'osx' ? 15 : 16
+            width: 25
+            height: Qt.platform.os === 'osx' ? 19 : 20
             fillMode: Image.PreserveAspectFit
           }
         }
         Text {
-          x: parent.hasIcon ? 25 : 0
+          x: parent.hasIcon ? 42 : 0
           id: itemText
           leftPadding: 6
           rightPadding: 6
@@ -274,68 +275,14 @@ Item {
       anchors.right: control.right
       anchors.top: control.top
       anchors.bottom: control.bottom
-      width: 17
+      anchors.rightMargin: 15
+      width: 12      // Draw the arrow indicator
 
-      // The button frame is rounded on the right side and square on the left
-      // side.  To do this, draw a rounded rectangle and a square rectangle, but
-      // clip the rounded one on the right side of the button and the square one
-      // on the left side.
-      //
-      // At scale factors >100%, the two rectangles' edges do not line up
-      // perfectly - clip the two right at the edge of the rounded corner so
-      // this isn't noticeable (just looks like the transition from the rounded
-      // to straight edge).
-
-      // Right side - rounded
-      // Draw the button frame
-      Item {
-        id: roundedIndicatorClip
-        clip: true
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: background.radius
-
-        Rectangle {
-          id: roundedIndicator
-          // 'anchors.fill: indicator' is really what we want, but QML cannot
-          // anchor an item to an item that isn't an immediate parent/sibling
-          anchors.right: parent.right
-          anchors.top: parent.top
-          anchors.bottom: parent.bottom
-          width: indicator.width
-          color: control.enabled ? Theme.settings.inputDropdownArrowBackgroundColor : Theme.settings.inputDropdownArrowDisabledBackgroundColor
-          border.color: control.enabled ? Theme.settings.inputDropdownArrowBorderColor : Theme.settings.inputDropdownArrowDisabledBorderColor
-          border.width: background.border.width
-          radius: background.radius
-        }
-      }
-
-      Item {
-        clip: true
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: parent.width - roundedIndicatorClip.width + 1 // Fudge by 1 due to rounding error at non-integer scale
-
-        Rectangle {
-          // again - would be 'anchors.fill: indicator' if QML supported it
-          anchors.left: parent.left
-          anchors.top: parent.top
-          anchors.bottom: parent.bottom
-          width: indicator.width
-          color: roundedIndicator.color
-          border.color: roundedIndicator.border.color
-          border.width: roundedIndicator.border.width
-        }
-      }
-
-      // Draw the arrow indicator
       Image {
         anchors.centerIn: parent
-        source: control.enabled ? Theme.settings.inputDropdownArrowImage : Theme.settings.inputDropdownArrowDisabledImage
-        width: 17
-        height: 24
+        source: Theme.dashboard.moduleExpandImage
+        width: parent.width
+        height: 7
       }
     }
 
@@ -349,22 +296,22 @@ Item {
         visible: parent.hasIcon
         x: 1
         y: 1
-        width: 24
+        width: 40
         height: parent.height - 2
         color: parent.hasBackdrop ? Theme.settings.inputDropdownIconBackdropColor : "transparent"
         Image {
           anchors.centerIn: parent
           source: parent.parent.iconPath
-          width: 20
-          height: Qt.platform.os === 'osx' ? 15 : 16
+          width: 25
+          height: Qt.platform.os === 'osx' ? 19 : 20
           fillMode: Image.PreserveAspectFit
         }
       }
 
       Text {
         leftPadding: 7
-        x: parent.hasIcon ? 25 : 0
-        rightPadding: control.indicator.width + control.spacing + x
+        x: parent.hasIcon ? 42 : 0
+        rightPadding: 15 + control.indicator.width + control.spacing + x
         width: control.width
         anchors.verticalCenter: parent.verticalCenter
         text: control.displayText
@@ -395,15 +342,31 @@ Item {
       id: popup
 
       // The selected index when the popup is opened determines the Y coordinate
-      // of the popup (to align the selected item with the combo box itself)
+      // of the popup (to align the selected item with the combo box itself).
+      //
+      // This can't cause the popup to extend outside the window; the fixup
+      // functions apply the window edges and margins to determine the final
+      // position.
       property int popupShowInitialIndex: 0
       x: Util.popupXBindingFixup(popup, popup.parent.Window.window,
                                  popup.parent.Overlay.overlay, 0)
       y: Util.popupYBindingFixup(popup, popup.parent.Window.window,
                                  popup.parent.Overlay.overlay,
-                                 -popupShowInitialIndex * 22)
+                                 -popupShowInitialIndex * themedComboBox.implicitHeight)
       width: control.actualPopupWidth
+      // Popup does not correctly limit apply the window size and margins when
+      // the window scale is not 1.0 - see Util.popupYBindingFixup().  Since
+      // this popup could be taller than the whole window (the Language popup
+      // does this), we have to limit the height manually too.
+      height: {
+        let itemsHeight = 2*padding + control.count * themedComboBox.implicitHeight
+        let window = popup.parent.Window.window
+        let maxHeight = window ? window.actualLogicalHeight : 200
+        maxHeight -= 2*margins
+        return Math.min(itemsHeight, maxHeight)
+      }
       padding: 1
+      margins: 20
 
       contentItem: ListView {
         id: popupContent
@@ -417,17 +380,44 @@ Item {
         // VoiceOver doesn't like that annotation and works better with just the
         // items annotated.
 
+        ScrollBar.vertical: ScrollBar {
+          policy: {
+            let itemsHeight = 2*popup.padding + control.count * themedComboBox.implicitHeight
+            let window = popup.parent.Window.window
+            let maxHeight = window ? window.actualLogicalHeight : 200
+            maxHeight -= 2*popup.margins
+
+            return itemsHeight > maxHeight ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+          }
+          contentItem: ThemedScrollBarContent {
+          }
+        }
+
         ScrollIndicator.vertical: ScrollIndicator {
         }
       }
 
-      background: Rectangle {
-        id: popupBackground
-        implicitWidth: control.width
-        implicitHeight: popupContent.implicitHeight + 2
-        border.color: Theme.settings.inputDropdownBorderColor
-        color: Theme.settings.inputDropdownBackgroundColor
-        radius: 3
+      // Split up the actual background we draw (popupBackground) from the item
+      // controlled by Popup (popupBackgroundWrapper).
+      //
+      // Popup really wants to be able to set size of the the background,
+      // content, etc., whenever it wants - and in the case of a popup that has
+      // to scroll due to exceeding the window height, it's hard to reliably get
+      // the size that the background would be for our animation.  Splitting
+      // these up gives Popup full control over the wrapper's position, and we
+      // can animate the actual background inside it.
+      background: Item {
+        id: popupBackgroundWrapper
+        Rectangle {
+          id: popupBackground
+          width: parent.width
+          property real heightBlend: 0
+          height: Util.mix(themedComboBox.implicitHeight,
+            popupBackgroundWrapper.height, heightBlend)
+          border.color: Theme.settings.inputDropdownBorderColor
+          color: Theme.settings.inputDropdownBackgroundColor
+          radius: 3
+        }
       }
 
       readonly property real popupActualY: {
@@ -437,14 +427,46 @@ Item {
         return actualPos.y
       }
 
+      // Set the initial scroll position.  This only matters for a popup that
+      // is larger than the window, since popups smaller than the window don't
+      // have to scroll.
+      function setInitialScrollPos() {
+        // We want the initially selected index to be as close as possible to
+        // the combo box control under the popup.  Figure out how many items
+        // appear between the top edge of the popup and the top edge of the
+        // combo box.
+        let aboveItems = Math.round(-popup.popupActualY / themedComboBox.implicitHeight)
+        // The top index will be an item preceding the current index, offset by
+        // the number of items above the control.  A negative topIndex indicates
+        // that one of the top few items is selected and we will be at the top
+        // of the view, just use 0 in that case.
+        let topIndex = control.currentIndex - aboveItems
+        // The list view says that it will prevent us from scrolling beyond the
+        // ends of the view, but avoid giving it invalid indices out of
+        // paranoia
+        if(topIndex < 0)
+          popupContent.positionViewAtBeginning()
+        else if(topIndex >= popupContent.count)
+          popupContent.positionViewAtEnd()
+        else
+          popupContent.positionViewAtIndex(topIndex, ListView.Beginning)
+        // It's rarely possible that if the window is so small that it scrolls,
+        // the drop down could be outside of the popup - if the drop down is
+        // just barely visible at the edge of the window, etc.  In that case,
+        // we might have just placed the selected item outside of the view, so
+        // ensure above all else that the selected item is visible.
+        popupContent.positionViewAtIndex(control.currentIndex, ListView.Contain)
+      }
+
       enter: Transition {
         SequentialAnimation {
           PropertyAction { target: popupContent; property: "opacity"; value: 0.0 }
           PropertyAction { target: popupContent; property: "enabled"; value: true }
           PropertyAction { target: control; property: "unhighlightedItemOpacity"; value: 1.0 }
+          ScriptAction { script: popup.setInitialScrollPos() }
           ParallelAnimation {
             NumberAnimation { target: popupBackground; property: "y"; from: -popup.popupActualY; to: 0; duration: 150 }
-            NumberAnimation { target: popupBackground; property: "height"; from: 24; to: popupContent.implicitHeight + 2; duration: 150 }
+            NumberAnimation { target: popupBackground; property: "heightBlend"; from: 0.0; to: 1.0; duration: 150 }
             NumberAnimation { target: popupBackground; property: "opacity"; from: 0.0; to: 1.0; duration: 150 }
           }
           NumberAnimation { target: popupContent; property: "opacity"; from: 0.0; to: 1.0; duration: 150 }
@@ -458,7 +480,7 @@ Item {
           ParallelAnimation {
             NumberAnimation { target: popupBackground; property: "opacity"; from: 1.0; to: 0.0; duration: 200; easing.type: Easing.InQuad }
             NumberAnimation { target: popupBackground; property: "y"; from: 0; to: -popup.popupActualY; duration: 200 }
-            NumberAnimation { target: popupBackground; property: "height"; from: popupContent.implicitHeight + 2; to: 24; duration: 200 }
+            NumberAnimation { target: popupBackground; property: "heightBlend"; from: 1.0; to: 0.0; duration: 200 }
           }
         }
       }

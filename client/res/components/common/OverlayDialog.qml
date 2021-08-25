@@ -26,11 +26,13 @@ import "../theme"
 import "qrc:/javascript/util.js" as Util
 import "qrc:/javascript/keyutil.js" as KeyUtil
 import PIA.NativeAcc 1.0 as NativeAcc
+import PIA.NativeHelpers 1.0
 
 // This draws a themed dialog in the overlay layer of the current window.
 // The window should be a SecondaryWindow; OverlayDialog uses its
 // actualLogicalWidth and actualLogicalHeight properties to center itself
 Dialog {
+  id: dialog
 
   // The buttons at the bottom of the dialog. Each button in the array can be
   // described in three ways:
@@ -80,6 +82,33 @@ Dialog {
   // complete button object here; the 'code' property indicates standard button
   // role if applicable.)
   signal clicked(var button)
+
+  onAboutToShow: {
+    // Ensure the stacking order is correct, since it affects keyboard nav /
+    // accessibility.
+    // QQuickPopupItem doesn't ensure its footer is stacked after the content
+    // (otherwise all the buttons appear before the content in nav order)
+    NativeHelpers.itemStackAfter(dialog.contentItem, dialog.footer)
+    // Ensure all buttons in the button box are stacked correctly (most
+    // important on macOS where the button order is reversed)
+    // dialogButtonBox.contentItem is a ListView
+    dialogButtonBox.contentItem.forceLayout()
+    let priorItem
+    for(let i=0; i<dialogButtonBox.contentItem.count; ++i) {
+      let nextItem = dialogButtonBox.contentItem.itemAtIndex(i)
+      // Whenever we have a valid pair of items, stack them correctly, even if
+      // we skipped some positions due to empty entries in the ListView
+      if(priorItem && nextItem)
+        NativeHelpers.itemStackAfter(priorItem, nextItem)
+      // If we got an item, keep it in priorItem so we can stack the next item
+      // after it.  In theory, any position in the ListView can be undefined,
+      // but that's unlikely for this one since it does not scroll.  Even so,
+      // if some items were empty, we still stack all present items in the right
+      // order.
+      if(nextItem)
+        priorItem = nextItem
+    }
+  }
 
   readonly property var defaultButtons: {
     var dict = {};
@@ -141,8 +170,6 @@ Dialog {
     return dict;
   }
 
-  id: dialog
-
   modal: true
   parent: Overlay.overlay
   Overlay.modal: Rectangle {
@@ -163,27 +190,34 @@ Dialog {
 
   closePolicy: actualButtons.some(function(i) { return i.role === DialogButtonBox.RejectRole; }) ? Popup.CloseOnEscape : Popup.NoAutoClose;
   opacity: 0.0
-  padding: 20
   topPadding: 15
-  bottomPadding: 15
+  bottomPadding: 10
+  leftPadding: 25
+  rightPadding: 25
   header: Rectangle {
-    color: Theme.popup.dialogFrameColor
-    implicitHeight: 40
+    color: "transparent"
+    implicitHeight: 50
+    // Use the titleText's right edge; add the left margin again for symmetry
+    implicitWidth: titleText.x * 2 + titleText.width
     Text {
-      anchors.fill: parent
-      anchors.leftMargin: 20
-      anchors.rightMargin: 20
+      id: titleText
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: 25
       text: dialog.title
-      font: dialog.font
-      color: Theme.popup.dialogTitleTextColor
+      font.pixelSize: 24
+      color: Theme.popup.dialogTextColor
+      font.bold: true
       horizontalAlignment: Text.AlignLeft
-      verticalAlignment: Text.AlignVCenter
+      verticalAlignment: Text.AlignBottom
     }
   }
   background: Rectangle {
     color: Theme.popup.dialogBackgroundColor
     border.width: 1
     border.color: Theme.popup.dialogFrameColor
+    radius: 15
   }
   // Setting a DialogButtonBox as the 'footer' implicitly connects the button
   // box's accepted(), rejected() and clicked() signals to handlers in the
@@ -206,45 +240,69 @@ Dialog {
       alignment: Qt.AlignRight
       background: null
       padding: 20
-      topPadding: 15
-      spacing: 5
+      topPadding: 20
+      spacing: 10
       Repeater {
         model: dialog.actualButtons
         delegate: Button {
           id: dialogButton
 
           readonly property var buttonModel: modelData
+          readonly property bool primaryButton: modelData.role === DialogButtonBox.AcceptRole
 
           text: modelData.text
           property int standardButton: modelData.code !== undefined ? modelData.code : DialogButtonBox.NoButton
           DialogButtonBox.buttonRole: modelData.role !== undefined ? modelData.role : DialogButtonBox.AcceptRole
           enabled: !buttonsDisabled[DialogButtonBox.buttonRole]
-          leftPadding: 20
-          rightPadding: 20
+          leftPadding: 22
+          rightPadding: 22
+          topPadding: 8
+          bottomPadding: 8
+          font.bold: modelData.role === DialogButtonBox.AcceptRole
           background: Rectangle {
             color: {
-              if (!enabled)
-                Theme.settings.inputButtonDisabledBackgroundColor
-              else if (parent.down)
-                Theme.settings.inputButtonPressedBackgroundColor
-              else
-                Theme.settings.inputButtonBackgroundColor
+              if(modelData.role === DialogButtonBox.AcceptRole) {
+                  if (!enabled)
+                    Theme.popup.acceptDisabledColor
+                  else if (parent.down)
+                    Theme.popup.acceptDownColor
+                  else
+                    Theme.popup.acceptBackgroundColor
+              } else {
+                  if (!enabled)
+                    Theme.settings.inputButtonDisabledBackgroundColor
+                  else if (parent.down)
+                    Theme.settings.buttonBorderColor
+                  else
+                    Theme.popup.dialogBackgroundColor
+              }
             }
-            radius: 3
+            radius: height/2
             border.width: 2
             border.color: {
-              if (!enabled)
-                Theme.settings.inputButtonDisabledBorderColor
-              else if (parent.activeFocus)
-                Theme.settings.inputButtonFocusBorderColor
-              else
-                color
+              if(modelData.role === DialogButtonBox.AcceptRole) {
+                return "transparent"
+              } else {
+                if (!enabled)
+                  Theme.settings.inputButtonDisabledBorderColor
+                else if (parent.activeFocus)
+                  Theme.settings.buttonBorderColor
+                else
+                  Theme.settings.buttonBorderColor
+              }
             }
           }
           contentItem: Text {
             text: parent.text
             font: parent.font
-            color: parent.enabled ? Theme.settings.inputButtonTextColor : Theme.settings.inputButtonDisabledTextColor
+            color:{
+              if(parent.enabled) {
+                return parent.primaryButton ? Theme.settings.inputPrimaryButtonTextColor : Theme.settings.inputButtonTextColor
+              } else {
+                return parent.primaryButton ? Theme.settings.inputPrimaryButtonDisabledTextColor : Theme.settings.inputButtonDisabledTextColor
+
+              }
+            }
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
           }

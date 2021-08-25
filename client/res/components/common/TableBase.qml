@@ -46,6 +46,7 @@ Rectangle {
   // bind the content height to the layout's implicit height.
   property int contentWidth: tableBase.width
   property int contentHeight: tableBase.height
+  property bool hideTableFocusCue: false
 
   // Contents are placed inside the scroll view's Flickable
   default property alias listContent: scrollViewContent.data
@@ -260,7 +261,7 @@ Rectangle {
     anchors.fill: parent
     control: tableBase
     // Fade - the rows/cells also show a focus cue
-    opacity: 0.6
+    opacity: hideTableFocusCue ? 0 : 0.6
   }
 
   NativeAcc.Table.name: label

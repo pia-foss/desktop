@@ -140,10 +140,10 @@ MovableModule {
   }
 
   function displayConnectionProxy(config) {
-    // Proxy is only supported for OpenVPN currently
-    if(config.method !== "openvpn")
-      return {type: 'none', dest: ''}
-
+    // We don't need any complex logic for displaying the proxy setting
+    // described by ConnectionConfig; any interacting settings are handled by
+    // ConnectionConfig in the daemon (it'll force the effective proxy to 'none'
+    // when using WireGuard, etc.)
     switch(config.proxy) {
       case 'custom':
         return {type: 'custom', dest: config.proxyCustom}
@@ -166,10 +166,15 @@ MovableModule {
 
     // Otherwise, display the configured proxy
     // Only supported for OpenVPN currently
-    if(Daemon.settings.method !== "openvpn")
+    //
+    // TODO - This duplicates logic from ConnectionConfig.  It'd be better for
+    // the daemon to express a ConnectionConfig describing the "next"
+    // connection state too, so the UI just renders a ConnectionConfig in all
+    // cases.
+    if(Daemon.settings.method !== "openvpn" || !Daemon.settings.proxyEnabled)
       return {type: 'none', dest: ''}
 
-    switch(Daemon.settings.proxy) {
+    switch(Daemon.settings.proxyType) {
       case 'custom':
         var host = Daemon.settings.proxyCustom.host
         if(Daemon.settings.proxyCustom.port) {
@@ -184,7 +189,6 @@ MovableModule {
                                                        Daemon.state.shadowsocksLocations.bestLocation)
         return {type: 'shadowsocks', dest: region}
       default:
-      case 'none':
         return {type: 'none', dest: ''}
     }
   }

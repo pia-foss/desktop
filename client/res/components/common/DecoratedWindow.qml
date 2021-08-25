@@ -42,6 +42,10 @@ PiaWindow {
   // have issues.)
   property bool resizeable: false
 
+
+  // Whether this window needs to always be on top
+  property bool onTop: false
+
   // The actual logical size of the window
   readonly property real actualLogicalWidth: maxSize.effectiveSize.width
   readonly property real actualLogicalHeight: maxSize.effectiveSize.height
@@ -85,6 +89,9 @@ PiaWindow {
       flags |= Qt.WindowMaximizeButtonHint
     else
       flags |= Qt.MSWindowsFixedSizeDialogHint
+
+    if(onTop)
+      flags |= Qt.WindowStaysOnTopHint
     return flags
   }
 

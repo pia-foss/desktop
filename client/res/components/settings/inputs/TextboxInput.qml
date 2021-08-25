@@ -44,7 +44,8 @@ FocusScope {
 
   width: parent.width;
   implicitWidth: control.implicitWidth
-  implicitHeight: control.implicitHeight + labelHeight
+  implicitHeight: control.implicitHeight + labelHeight + textBoxVerticalPadding
+  property int textBoxVerticalPadding: 0
 
   onCurrentValueChanged: control.text = currentValue
 
@@ -61,6 +62,7 @@ FocusScope {
   }
 
   SettingsTextField {
+    textBoxVerticalPadding: parent.textBoxVerticalPadding
     id: control
     anchors.fill: parent
     anchors.topMargin: root.labelHeight

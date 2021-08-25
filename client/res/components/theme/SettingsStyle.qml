@@ -18,10 +18,10 @@
 
 import QtQuick 2.0
 QtObject {
-    readonly property bool horizontal: Qt.platform.os !== 'windows'
+    readonly property bool horizontal: false
 
-    readonly property int contentWidth: 520
-    readonly property int contentHeight: Theme.settings.horizontal ? 410 : 430
+    readonly property int contentWidth: 620
+    readonly property int contentHeight: 500
 
     readonly property color backgroundColor: Theme.dark ? "#323642" : "#eeeeee"
 
@@ -43,19 +43,39 @@ QtObject {
     readonly property int hbarContentRightMargin: 60
     readonly property int hbarContentBottomMargin: 30
 
-    readonly property var pageImages: ({
-      'general': [ Theme.imagePathCommon + "/settings/general-active.png", Theme.imagePath + "/settings/general-inactive.png" ],
-      'account': [ Theme.imagePathCommon + "/settings/account-active.png", Theme.imagePath + "/settings/account-inactive.png" ],
-      'privacy': [ Theme.imagePathCommon + "/settings/privacy-active.png", Theme.imagePath + "/settings/privacy-inactive.png" ],
-      'network': [ Theme.imagePathCommon + "/settings/network-active.png", Theme.imagePath + "/settings/network-inactive.png" ],
-      'connection': [ Theme.imagePathCommon + "/settings/connection-active.png", Theme.imagePath + "/settings/connection-inactive.png" ],
-      'automation': [ Theme.imagePathCommon + "/settings/automation-active.png", Theme.imagePath + "/settings/automation-inactive.png" ],
-      'dedicatedip': [ Theme.imagePathCommon + "/settings/dedicatedip-active.png", Theme.imagePath + "/settings/dedicatedip-inactive.png" ],
-      'help': [ Theme.imagePathCommon + "/settings/help-active.png", Theme.imagePath + "/settings/help-inactive.png" ],
-    })
+    readonly property var pageImages: {
+      var result = {};
+      var pages = [
+            'general',
+            'protocol',
+            'network',
+            'privacy',
+            'dedicated-ip',
+            'automation',
+            'split-tunnel',
+            'multihop',
+            'account',
+            'help'
+      ];
+
+      for(var i = 0; i < pages.length; i++) {
+        var key = pages[i];
+        result[key] = [
+              Theme.imagePathCommon + "/settings/" + key + "-active.png",
+              Theme.imagePath+ "/settings/" + key + "-inactive.png",
+        ]
+      }
+
+      return result;
+    }
+
     readonly property var buttonIcons: ({
-      'configure': Theme.imagePath + "/icons/configure.png"
+      'configure': Theme.imagePath + "/icons/configure.png",
+      'edit': Theme.imagePath + "/icons/edit.png",
+      'add': Theme.imagePath + "/icons/add.png",
+      'star': Theme.imagePath + "/icons/star.png",
     })
+
 
     readonly property var ruleTypeImages: ({
       'wired': Theme.imagePath + "/settings/automation-rule-types/wired.png",
@@ -63,17 +83,26 @@ QtObject {
       'protectedWifi': Theme.imagePath + "/settings/automation-rule-types/protectedWifi.png",
       'ssid': Theme.imagePath + "/settings/automation-rule-types/ssid.png",
     })
+
+    readonly property var splitTunnelRuleTypeImages: ({
+                                                        'ip-address': Theme.imagePath + "/settings/split-tunnel/ip-address.png",
+                                                        'name-servers': Theme.imagePath + "/settings/split-tunnel/name-servers.png",
+                                                        'no-icon': Theme.imagePath + "/settings/split-tunnel/no-icon.png",
+                                                        'other-apps': Theme.imagePath + "/settings/split-tunnel/other-apps.png",
+                                                        'routed-packets': Theme.imagePath + "/settings/split-tunnel/routed-packets.png",
+                                                      })
     readonly property color pageIconBgInactiveColor: Theme.dark ? "#323642" : "#9a9da5"
     readonly property color pageIconBgActiveColor: "#4cb649"
 
-    readonly property int vbarWidth: 200
-    readonly property int vbarItemHeight: 48
-    readonly property color vbarBackgroundColor: Theme.dark ? "#22252e" : "#d7d8d9"
+    readonly property int vbarWidth: 240
+    readonly property int vbarItemHeight: 44
+    readonly property color vbarBackgroundColor: Theme.dark ? "#262935" : "#dadbdc"
     readonly property color vbarActiveBackgroundColor: Theme.dark ? "#171920" : "#c2c5c8"
-    readonly property color vbarHiglightBarColor: Theme.dark ? "#5ddf5a" : "#4cb649"
+    readonly property color vbarHighlightBarColor: Theme.dark ? "#3ab54a" : "#39b54a"
     readonly property color vbarTextColor: Theme.dark ? "#ffffff" : "#22252e"
-    readonly property int vbarTextPx: 12
-    readonly property string vbarHeaderImage: Theme.imagePath + "/logo-78.png"
+    readonly property color vbarActiveTextColor: Theme.dark ? "#ffffff" : "#ffffff"
+    readonly property int vbarTextPx: 13
+    readonly property string vbarHeaderImage: Theme.imagePath + "/settings-logo.png"
     readonly property int vbarContentTopMargin: 20
     readonly property int vbarContentLeftMargin: 60
     readonly property int vbarContentRightMargin: 60
@@ -82,10 +111,10 @@ QtObject {
     // Extra left margin for pages with relatively narrow content
     readonly property int narrowPageLeftMargin: horizontal ? 80 : 0
 
-    readonly property int headingHeight: 90
+    readonly property int headingHeight: 95
     readonly property color headingLineColor: Theme.dark ? "#484a55" : "#d7d8d9"
     readonly property color headingTextColor: Theme.dark ? "#ffffff" : "#22252e"
-    readonly property int headingTextPx: 24
+    readonly property int headingTextPx: 32
 
     readonly property color inputLabelColor: Theme.dark ? "#ffffff" : "#323642"
     readonly property color inputLabelDisabledColor: "#889099"
@@ -116,7 +145,7 @@ QtObject {
     readonly property color inputDropdownArrowBorderColor: "#4cb649"
     readonly property color inputDropdownArrowDisabledBackgroundColor: Theme.dark ? "#889098" : "#c2c5c8"
     readonly property color inputDropdownArrowDisabledBorderColor: "#889099"
-    readonly property color inputDropdownIconBackdropColor: Theme.dark ? "#5a6371" : "#aaaaaa";
+    readonly property color inputDropdownIconBackdropColor: Theme.dark ? "#5a6371" : "#ababab";
     readonly property string inputDropdownArrowImage: Theme.imagePathCommon + "/settings/dropdown-arrow.png"
     readonly property string inputDropdownArrowDisabledImage: Theme.imagePathCommon + "/settings/dropdown-arrow-disabled.png"
     readonly property string inputDropdownShadowImage: Theme.imagePathCommon + "/settings/shadow-dropdown.png"
@@ -124,11 +153,11 @@ QtObject {
     readonly property color inputListItemPrimaryTextColor: Theme.dark ? "#ffffff" : "#22252e"
     readonly property color inputListItemSecondaryTextColor: "#889099"
 
-    readonly property color inputPrivacyBackgroundColor: Theme.dark ? "#22252e" : "#d7d8d9"
+    readonly property color inputPrivacyBackgroundColor: Theme.dark ? "#22252e" : "#e4e4e5"
     readonly property color inputPrivacyTextColor: Theme.dark ? "#ffffff" : "#323642"
     readonly property color inputPrivacySelectedTextColor: "#ffffff"
-    readonly property color inputPrivacySelectedBackgroundColor: "#5ddf5a"
-    readonly property color inputPrivacySelectedBorderColor: "#4cb649"
+    readonly property color inputPrivacySelectedBackgroundColor: Theme.dark ? "#39b54a" : "#39b54a"
+    readonly property color inputPrivacySelectedBorderColor: Theme.dark ? "#39b54a" : "#39b54a"
     readonly property color inputPrivacyDisabledBackgroundColor: "#889099"
     readonly property color inputPrivacyDisabledBorderColor: "#889099"
 
@@ -136,8 +165,10 @@ QtObject {
     readonly property color inputButtonBackgroundColor: Theme.dark ? "#2b2e39" : "#d7d8d9"
     readonly property color inputButtonDisabledBackgroundColor: Theme.dark ? "#323642" : "#eeeeee"
     readonly property color inputButtonPressedBackgroundColor: Theme.dark ? "#22252e" : "#c2c5c8"
-    readonly property color inputButtonTextColor: inputLabelColor
+    readonly property color inputButtonTextColor:  inputLabelColor
     readonly property color inputButtonDisabledTextColor: inputLabelDisabledColor
+    readonly property color inputPrimaryButtonTextColor: Theme.dark ? inputLabelColor : "#ffffff"
+    readonly property color inputPrimaryButtonDisabledTextColor: Theme.dark ? inputLabelDisabledColor : "#d7d8d9"
     readonly property color inputButtonDisabledBorderColor: Theme.dark ? "#2b2e39" : "#d7d8d9"
     readonly property color inputButtonFocusBorderColor: Theme.dark ? "#22252e" : "#c2c5c8"
 
@@ -175,6 +206,16 @@ QtObject {
 
     readonly property string dedicatedIpPageImage: Theme.imagePath + "/settings/dedicatedip-page.png"
 
+    readonly property color buttonBorderColor: Theme.dark ? "#59596D" : "#CDCDCD"
+    readonly property color disabledButtonBorderColor : Theme.dark ? "#444555" : "#EDEAEA"
+
+
+    readonly property color inlayRegionColor: Theme.dark ? "#1A1E26" : "#ffffff"
+    readonly property color transparentInlayRegionBackground: Theme.dark ? "#979797" : "#979797"
+
+    // Spacing for settings
+    readonly property int controlGridDefaultColSpacing: 10
+    readonly property int controlGridDefaultRowSpacing: 10
     readonly property string connEventAttemptImage: Theme.imagePath + "/settings/conn-event-attempt.png"
     readonly property string connEventEstablishedImage: Theme.imagePath + "/settings/conn-event-established.png"
     readonly property string connEventCanceledImage: Theme.imagePath + "/settings/conn-event-canceled.png"

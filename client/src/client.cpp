@@ -806,7 +806,18 @@ void Client::createSplashScreen()
 void Client::createMainWindow()
 {
     SplitTunnelManager::installImageHandler(&_engine);
+#ifdef QML_RELOAD_ENTRY
+    qDebug () << "Setting QML Reload Entry Point: " << QML_RELOAD_ENTRY;
+    loadQml(QStringLiteral("qrc:/components/reloader.qml"));
+    auto params = _engine.rootObjects().last()->findChild<QObject *>("params");
+    if(params) {
+       params->setProperty("qml_reload_entry", QStringLiteral(QML_RELOAD_ENTRY));
+    } else {
+        qWarning () << "Could not get params object";
+    }
+#else
     loadQml(QStringLiteral("qrc:/components/main.qml"));
+#endif
 }
 
 void Client::init()

@@ -269,6 +269,7 @@ module PiaMacOS
             FileUtils.cp_r(File.join(stage.dir, '.'), bundle)
 
             macdeploy(bundle, ['client/res/components', 'extras/support-tool/components'])
+            Dir.glob(File.join(bundle, "Contents/**/*.dSYM/**/*.dylib")).each { |f| File.delete(f) }
         end
 
         task :macsign => :macdeploy do |t|

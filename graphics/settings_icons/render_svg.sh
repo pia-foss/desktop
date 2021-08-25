@@ -66,7 +66,7 @@ function generate_shade {
     pushd ./svg_processed/dark >/dev/null
     for icon in icon-dark-active-*.svg; do
         icon_name="$(echo "$icon" | sed -n 's/^icon-[a-z]*-[a-z]*-\(.*\)\.svg/\1/p')"
-        sed -e "s|fill=\"#323642\"|fill=\"#$NEWCOLOR\"|" -e "s|fill:#323642\([;\"]\)|fill:#$NEWCOLOR\1|" "$icon" > "../$THEME/icon-$THEME-$NEWNAME-$icon_name.svg"
+        sed -e "s|fill=\"#FFFFFF\"|fill=\"#$NEWCOLOR\"|" -e "s|fill:#FFFFFF\([;\"]\)|fill:#$NEWCOLOR\1|" "$icon" > "../$THEME/icon-$THEME-$NEWNAME-$icon_name.svg"
     done
     popd
 }
@@ -77,7 +77,7 @@ generate_shade FFFFFF color common
 # 889099 - inactive settings tab, dark theme
 generate_shade 889099 tabinactive dark
 # EEEEEE - inactive settings tab, light theme
-generate_shade EEEEEE tabinactive light
+generate_shade 838389 tabinactive light
 # "active dark" is generated above from the original source SVG
 # 5B6370 - active quick settings button, light theme
 generate_shade 5B6370 active light

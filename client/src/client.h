@@ -258,6 +258,9 @@ public:
     // Trim the QML component cache.
     void trimComponentCache() {_engine.trimComponentCache();}
 
+    // Clear QML component cache
+    void clearComponentCache() {_engine.clearComponentCache();}
+
     IMPLEMENT_NOTIFICATIONS(Client)
 
 private:

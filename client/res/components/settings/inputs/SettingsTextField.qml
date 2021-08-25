@@ -20,8 +20,10 @@ import QtQuick 2.9
 import QtQuick.Controls 2.4
 import "../../theme"
 import "../../common"
+import "../../core"
 
 ThemedTextField {
+  property int textBoxVerticalPadding: 0
   id: control
 
   readonly property color defaultBorderColor: Theme.settings.inputTextboxBorderColor
@@ -29,8 +31,8 @@ ThemedTextField {
 
   font.pixelSize: 13
   color: control.enabled ? Theme.settings.inputTextboxTextColor : Theme.settings.inputTextboxTextDisabledColor
-  topPadding: 0
-  bottomPadding: 0
+  topPadding: textBoxVerticalPadding
+  bottomPadding: textBoxVerticalPadding
   leftPadding: 7
   rightPadding: 7
 
@@ -40,6 +42,6 @@ ThemedTextField {
     border.width: control.activeFocus ? 2 : 1
     border.color: control.borderColor
     implicitWidth: 100
-    implicitHeight: 24
+    implicitHeight: 24 + 2*textBoxVerticalPadding
   }
 }

@@ -21,19 +21,17 @@ import QtQuick.Controls 2.3
 import "../../core"
 import "../../theme"
 
-Rectangle {
+Item {
   property bool active
 
-  implicitWidth: 28
-  implicitHeight: 28
-  color: active ? Theme.settings.pageIconBgActiveColor : Theme.settings.pageIconBgInactiveColor
-  radius: width / 2
+  implicitWidth: 20
+  implicitHeight: 20
 
   Image {
     id: iconImg
     source: Theme.settings.pageImages[modelData.name][active ? 0 : 1]
     anchors.centerIn: parent
-    height: sourceSize.width/2
-    width: sourceSize.height/2
+    height: sourceSize.width*0.3
+    width: sourceSize.height*0.3
   }
 }

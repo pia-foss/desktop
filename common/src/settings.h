@@ -614,6 +614,7 @@ public:
         user_agent(other.user_agent());
         platform(other.platform());
         version(other.version());
+        prerelease(other.prerelease());
         vpn_protocol(other.vpn_protocol());
         connection_source(other.connection_source());
         return *this;
@@ -623,6 +624,7 @@ public:
         return user_agent() == other.user_agent() &&
             platform() == other.platform() &&
             version() == other.version() &&
+            prerelease() == other.prerelease() &&
             vpn_protocol() == other.vpn_protocol() &&
             connection_source() == other.connection_source();
     }
@@ -1265,11 +1267,13 @@ public:
     JsonField(QString, windowsIpMethod, QStringLiteral("dhcp"), {"dhcp", "static"})
 
     // Proxy setting
-    //  - "none" - No proxy
     //  - "custom" - Use proxyCustom
     //  - "shadowsocks" - Use a PIA shadowsocks region - proxyShadowsocksLocation
     // May have additional values in the future, such as using a PIA region.
-    JsonField(QString, proxy, QStringLiteral("none"), {"none", "custom", "shadowsocks"})
+    JsonField(QString, proxyType, QStringLiteral("shadowsocks"), {"custom", "shadowsocks"})
+
+    // Whether a proxy is enabled, used in conjunction with "proxyType"
+    JsonField(bool, proxyEnabled, false)
 
     // Custom proxy - used when proxy is "custom", persisted even when "none" is
     // selected
@@ -1493,7 +1497,8 @@ public:
             dnsType() == other.dnsType() &&
             openvpnCipher() == other.openvpnCipher() &&
             otherAppsUseVpn() == other.otherAppsUseVpn() &&
-            proxy() == other.proxy() && proxyCustom() == other.proxyCustom() &&
+            proxy() == other.proxy() &&
+            proxyCustom() == other.proxyCustom() &&
             compareLocationsValue(proxyShadowsocks(), other.proxyShadowsocks()) &&
             proxyShadowsocksLocationAuto() == other.proxyShadowsocksLocationAuto() &&
             portForward() == other.portForward();
@@ -1524,7 +1529,9 @@ public:
     // disabled).
     JsonField(bool, otherAppsUseVpn, true)
     // The proxy type used for this connection - same values as
-    // DaemonSettings::proxy (when set)
+    // DaemonSettings::proxyType when enabled, or "none" when disabled
+    // (historical value of combined `DaemonSettings::proxy` setting for no
+    // proxy)
     JsonField(QString, proxy, {})
     // If proxy is 'custom', the custom proxy hostname:port that were used
     JsonField(QString, proxyCustom, {})

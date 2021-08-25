@@ -117,7 +117,7 @@ FocusScope {
     onModelChanged: control.currentIndex = mapValueToIndex(currentValue)
 
     implicitWidth: 230
-    implicitHeight: 24
+    implicitHeight: 38
 
     accessibleName: label
 

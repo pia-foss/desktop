@@ -40,4 +40,8 @@ QtObject {
   readonly property color dialogFrameColor: Theme.dark ? "#22252e" : "#c2c5c8"
   readonly property color dialogTitleTextColor: Theme.dark ? "#889099" : "#5c6370"
   readonly property color dialogTextColor: Theme.dark ? "#ffffff" : "#323642"
+
+  readonly property color acceptBackgroundColor: "#52c44e"
+  readonly property color acceptDownColor: "#45a643"
+  readonly property color acceptDisabledColor: "#005c1c"
 }

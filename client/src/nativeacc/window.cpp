@@ -24,6 +24,10 @@
 #include "accessibleitem.h"
 #include <QGuiApplication>
 
+#ifdef Q_OS_MAC
+#include "mac/mac_accessibility.h"
+#endif
+
 namespace NativeAcc {
 
 namespace
@@ -246,9 +250,14 @@ QList<QAccessibleInterface*> WindowAccImpl::getActiveChildren() const
 
 void WindowAccImpl::childCreatedDestroyed()
 {
+#ifdef Q_OS_MAC
+    // Subclass the QMacAccessibilityElement for the window itself
+    macSubclassInterfaceElement(*this);
+#endif
+
     // This is a somewhat naive implementation - if we're showing the overlay,
     // just check if there are no more overlay children; or if we're not showing
-    // the overlay, check if ther are overlay children now.
+    // the overlay, check if there are overlay children now.
     //
     // In principle, this check could be optimized, such as by checking where
     // the item is in the heirarchy (only direct accessibility descendants in

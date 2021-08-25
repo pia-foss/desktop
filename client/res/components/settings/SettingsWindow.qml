@@ -75,71 +75,60 @@ SecondaryWindow {
   // translated strings out of the model.
   readonly property var pageTitles: {
     'general': QT_TR_NOOP("General", 'setting-title'),
-    'account': QT_TR_NOOP("Account", 'setting-title'),
-    'privacy': QT_TR_NOOP("Privacy", 'setting-title'),
+    'protocol': QT_TR_NOOP("Protocols", 'setting-title'),
     'network': QT_TR_NOOP("Network", 'setting-title'),
-    'connection': QT_TR_NOOP("Connection", 'setting-title'),
+    'privacy': QT_TR_NOOP("Privacy", 'setting-title'),
+    'dedicated-ip': QT_TR_NOOP("Dedicated IP", 'setting-title'),
     'automation': QT_TR_NOOP("Automation", 'setting-title'),
-    'dedicatedip': QT_TR_NOOP("Dedicated IP", 'setting-title'),
+    'split-tunnel': QT_TR_NOOP("Split Tunnel", 'setting-title'),
+    'multihop': QT_TR_NOOP("Multi-Hop", 'setting-title'),
+    'account': QT_TR_NOOP("Account", 'setting-title'),
     'help': QT_TR_NOOP("Help", 'setting-title'),
   }
 
-  // The Russian titles for "Connection", "Automation", and "Dedicated IP" are
-  // all too long to fit in the horizontal layout.  "Automation" is abbreviated
-  // to allow them to fit, but the abbreviation does not look good in the
-  // vertical layout, so this page has different horizontal/vertical titles.
-  readonly property var automationTitleCompact: QT_TR_NOOP("Automation", 'setting-title-compact')
-
-  readonly property var pageHeadings: {
-    'general': QT_TR_NOOP("General Preferences", 'setting-heading'),
-    'account': QT_TR_NOOP("Account Information", 'setting-heading'),
-    'privacy': QT_TR_NOOP("Privacy Preferences", 'setting-heading'),
-    'network': QT_TR_NOOP("Network Preferences", 'setting-heading'),
-    'connection': QT_TR_NOOP("Connection Preferences", 'setting-heading'),
-    'automation': QT_TR_NOOP("Automation Preferences", 'setting-heading'),
-    'dedicatedip': QT_TR_NOOP("Dedicated IP Preferences", 'setting-heading'),
-    'help': QT_TR_NOOP("Help", 'setting-heading'),
-  }
   property var pages: {
     var p = [
       {
         name: 'general',
-        component: "GeneralPage.qml"
+        component: "general/GeneralPage.qml"
       },
       {
-        name: 'account',
-        component: "AccountPage.qml"
-      },
-      {
-        name: 'privacy',
-        component: "PrivacyPage.qml"
+        name: 'protocol',
+        component: "protocol/ProtocolPage.qml"
       },
       {
         name: 'network',
-        component: "NetworkPage.qml"
+        component: "network/NetworkPage.qml"
       },
       {
-        name: 'connection',
-        component: "ConnectionPage.qml"
+        name: 'privacy',
+        component: "privacy/PrivacyPage.qml"
+      },
+      {
+        name: 'dedicated-ip',
+        component: "dedicated-ip/DedicatedIpPage.qml"
       },
       {
         name: 'automation',
-        component: "AutomationPage.qml"
-      }
+        component: "automation/AutomationPage.qml"
+      },
+      {
+        name: 'split-tunnel',
+        component: "split-tunnel/SplitTunnelPage.qml"
+      },
+      {
+        name: 'multihop',
+        component: "multihop/MultihopPage.qml"
+      },
+      {
+        name: 'account',
+        component: "account/AccountPage.qml"
+      },
+      {
+        name: 'help',
+        component: "help/HelpPage.qml"
+      },
     ]
-
-    if(showDedicatedIp) {
-      p.push({
-        name: 'dedicatedip',
-        component: "DedicatedIpPage.qml"
-      })
-    }
-
-    // Help is always last
-    p.push({
-      name: 'help',
-      component: "HelpPage.qml"
-    })
 
     return p
   }
@@ -148,14 +137,10 @@ SecondaryWindow {
   // QT_TR_NOOP() in order to translate correctly, these functions are passed
   // into the tab layouts to translate strings.
   function getPageTitle(pageId) {
-    // Use the compact translation for 'automation' in the horizontal layout
-    // (see automationTitleCompact above)
-    if(pageId === 'automation' && Theme.settings.horizontal)
-      return uiTr(pageTitles[pageId], 'setting-title-compact')
     return uiTr(pageTitles[pageId], 'setting-title')
   }
   function getHeadingTitle(pageId) {
-    return uiTr(pageHeadings[pageId], 'setting-heading')
+    return uiTr(pageTitles[pageId], 'setting-title')
   }
 
   function selectPage(id) {
@@ -172,8 +157,7 @@ SecondaryWindow {
   function alert() {
     var args = Array.prototype.slice.call(arguments);
     var obj = {};
-    if (args.length && typeof args[args.length - 1] === 'function') {
-      obj.cb = args.pop();
+    if (args.length && typeof args[args.length - 1] === 'function') { obj.cb = args.pop();
     }
     if (args.length && Array.isArray(args[args.length - 1])) {
       obj.buttons = args.pop();
@@ -231,16 +215,6 @@ SecondaryWindow {
       settings.contentLogicalHeight = tabLayout.item.implicitHeight
     }
   }
-
-  Component {
-    id: hbarComponent
-    HorizontalTabLayout {
-      pages: settings.pages
-      pageTitleFunc: getPageTitle
-      onImplicitWidthChanged: settings.updateWindowSize()
-      onImplicitHeightChanged: settings.updateWindowSize()
-    }
-  }
   Component {
     id: vbarComponent
     VerticalTabLayout {
@@ -254,7 +228,7 @@ SecondaryWindow {
 
   Loader {
     id: tabLayout
-    sourceComponent: Theme.settings.horizontal ? hbarComponent : vbarComponent
+    sourceComponent: vbarComponent
     width: parent.width
     height: parent.height
     active: settings.visible || settings.positioningForShow
@@ -309,12 +283,34 @@ SecondaryWindow {
       showSettings()
     }
     function onShowConnectionPage() {
-      selectPage('connection')
+      selectPage('protocol')
+      showSettings()
+    }
+    function onShowMultihopPage() {
+      selectPage('multihop')
       showSettings()
     }
     function onShowHelpPage() {
       selectPage('help')
       showSettings()
+    }
+
+    function startDriverReinstall(driverName) {
+      selectPage('help')
+      showSettings()
+      let helpPage = tabLayout.item && tabLayout.item.getCurrentPage()
+      if(helpPage)
+        helpPage.startDriverReinstall(driverName)
+    }
+
+    function onReinstallTapAdapter() {
+      startDriverReinstall('tap')
+    }
+    function onReinstallWintun() {
+      startDriverReinstall('wintun')
+    }
+    function onReinstallSplitTunnel() {
+      startDriverReinstall('callout')
     }
     function onShowHelpAlert(msg, title, level) {
       selectPage('help')

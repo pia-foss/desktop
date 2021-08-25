@@ -57,6 +57,15 @@ FocusScope {
   property string linkText
   property string linkTarget
 
+  // Called when an embedded link in the message ('[[...]]') is clicked
+  property alias embedLinkClicked: descriptionText.embedLinkClicked
+
+  // When a property is disabled, should it be unchecked?
+  property bool uncheckWhenDisabled: false
+
+  // Should the checkbox be forcibly unchecked
+  readonly property bool forceUncheck: uncheckWhenDisabled && !enabled
+
   // Beta features are tagged with a "beta" badge.
   property bool isBeta: false
 
@@ -65,7 +74,11 @@ FocusScope {
   Layout.fillWidth: true
   implicitHeight: desc ? (descriptionText.y + descriptionText.height) : text.contentHeight
 
-  onCurrentValueChanged: control.checkState = (currentValue === onValue) ? Qt.Checked : (currentValue === offValue) ? Qt.Unchecked : Qt.PartiallyChecked
+  onCurrentValueChanged: {
+    control.checkState = (currentValue === onValue) ? Qt.Checked : (currentValue === offValue) ? Qt.Unchecked : Qt.PartiallyChecked
+    if(forceUncheck)
+      control.checkState = Qt.Unchecked
+  }
 
   function mapValueToState(value) {
     return (value === onValue) ? Qt.Checked : (value === offValue) ? Qt.Unchecked : Qt.PartiallyChecked;
@@ -81,13 +94,14 @@ FocusScope {
     font.pixelSize: 13
     padding: 0
     anchors.top: parent.top
+    spacing: 8
 
     // This doesn't account for the InfoTip's width, it's allowed to spill into
     // the right margin
     width: Math.min(root.width, text.implicitWidth)
 
     NativeAcc.CheckButton.name: label
-    NativeAcc.CheckButton.checked: control.checkState === Qt.Checked
+    NativeAcc.CheckButton.checked: control.checkState === Qt.Checked && !forceUncheck
     NativeAcc.CheckButton.onActivated: {
       // Advance the state before calling updateState(); this is baked into the
       // button's key/mouse event handler normally.  toggle() isn't exactly the
@@ -111,8 +125,8 @@ FocusScope {
       id: indicator
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      height: 14
-      width: 14
+      height: 20
+      width: 20
       source: control.checked ? Theme.settings.inputCheckboxOnImage : Theme.settings.inputCheckboxOffImage
       opacity: root.enabled ? 1.0 : 0.3
     }
@@ -199,7 +213,7 @@ FocusScope {
     links: desc ? descLinks : []
     wrapMode: Text.WordWrap
     color: Theme.settings.inputDescriptionColor
-    width: Math.min(parent.width, implicitWidth)
+    width: Math.min(parent.width - indicator.width - control.spacing, implicitWidth)
 
     linkColor: Theme.settings.inputDescLinkColor
     linkHoverColor: Theme.settings.inputDescLinkHoverColor
@@ -209,5 +223,8 @@ FocusScope {
 
   Component.onCompleted: {
     control.checkState = mapValueToState(currentValue)
+
+    if(forceUncheck)
+      control.checkState = Qt.Unchecked
   }
 }

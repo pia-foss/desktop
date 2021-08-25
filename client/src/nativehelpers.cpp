@@ -375,6 +375,12 @@ void NativeHelpers::trimComponentCache()
         g_client->trimComponentCache();
 }
 
+void NativeHelpers::clearComponentCache()
+{
+    if(g_client)
+        g_client->clearComponentCache();
+}
+
 void NativeHelpers::writeDummyLogs()
 {
     qDebug () << "Writing client dummy logs";

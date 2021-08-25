@@ -119,6 +119,7 @@ public:
     Q_INVOKABLE void crashClient();
 
     Q_INVOKABLE void trimComponentCache();
+    Q_INVOKABLE void clearComponentCache();
 
     // Write around 1 mb of dummy logs to test log overflow
     Q_INVOKABLE void writeDummyLogs();

@@ -30,6 +30,7 @@ void macAccInit()
 {
     // Init the accessibility element subclass
     macInitElementSubclass();
+    macInitPanelSubclass();
 }
 
 void macSubclassInterfaceElement(QAccessibleInterface &element)

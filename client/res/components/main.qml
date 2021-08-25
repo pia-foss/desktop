@@ -31,9 +31,11 @@ import "./onboarding"
 import "./changelog"
 
 QtObject {
+  property bool reloaderActive: false
   property var wSettings: SettingsWindow {
     objectName: "wSettings"
-    visible: false
+    visible: reloaderActive
+    onTop: reloaderActive
   }
 
   property var dashboard: DashboardFrameLoader {
@@ -70,7 +72,6 @@ QtObject {
   }
 
   property var wOnboarding: OnboardingWindow {
-
   }
 
   property Connections showDashboardHandler: Connections {
@@ -141,13 +142,9 @@ QtObject {
   }
  
   function cleanUpResources() {
-    console.info("trimming component cache")
     NativeHelpers.trimComponentCache()
-    console.info("release window resources: settings")
     NativeHelpers.releaseWindowResources(wSettings)
-    console.info("release window resources: changelog")
     NativeHelpers.releaseWindowResources(wChangeLog)
-    console.info("release window resources: onboarding")
     NativeHelpers.releaseWindowResources(wOnboarding)
     if(wDevToolsLoader.window) {
       console.info("release window resources: dev tools")
@@ -157,9 +154,7 @@ QtObject {
       console.info("release window resources: dashboard")
       NativeHelpers.releaseWindowResources(dashboard.window)
     }
-    console.info("running GC")
     gc()
-    console.info("Trim and GC complete")
   }
 
   // Ctrl+Shift+G runs all the cleanup and garbage collection.  This is mainly
