@@ -1,5 +1,8 @@
 # Changelog
 
+### v3.0.1
+* Fixed an issue migrating proxy settings from 2.10 or earlier
+
 ### v3.0.0
 * Redesigned the Settings window to improve categorization and allow for future growth
 * Separated the three “Kill Switch” setting choices into two separate settings - “VPN Kill Switch” and “Advanced Kill Switch”

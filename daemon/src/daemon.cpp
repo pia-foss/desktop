@@ -3271,7 +3271,7 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
 
     // The "proxy" setting was split up into "proxyEnabled" and "proxyType" in
     // 3.0 for consistency with split tunnel, automation, etc.
-    if(previous <= SemVersion{3, 0, 0})
+    if(previous < SemVersion{3, 0, 0})
     {
         // If there was no "proxy" value or it wasn't a string, we'll get an
         // empty value here, which is ignored.
@@ -3287,6 +3287,13 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
             _settings.proxyType(legacyProxyValue);
             _settings.proxyEnabled(true);
         }
+    }
+    if (_settings.proxyType() == QStringLiteral("custom") &&
+        _settings.proxyCustom().host().isEmpty()) {
+        //  if proxy type "custom" is selected but the SOCKS5 host is
+        //  empty, revert proxy type to "shadowsocks" just to avoid
+        //  the situation where the connection fails silently. PP-1062
+        _settings.proxyType(QStringLiteral("shadowsocks"));
     }
 }
 
