@@ -19,8 +19,8 @@
 #include "authcommand.h"
 #include "output.h"
 #include "cliclient.h"
-#include "settings.h"
 #include "brand.h"
+#include <QFile>
 
 namespace
 {

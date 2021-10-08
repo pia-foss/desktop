@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("mac_timestamp.cpp")
+#include "timestamp.h"
 
 #include <mach/mach.h>
 #include <mach/mach_time.h>

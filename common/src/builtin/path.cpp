@@ -22,6 +22,7 @@
 #include "path.h"
 #include "version.h"
 #include "brand.h"
+#include "product.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -49,7 +50,8 @@ Path Path::UpdownLogFile;
 Path Path::DaemonDiagnosticsDir;
 Path Path::DaemonLocalSocket;
 Path Path::DaemonHelperIpcSocket;
-Path Path::CrashReportDir;
+Path Path::ClientCrashReportDir;
+Path Path::DaemonCrashReportDir;
 Path Path::SupportToolExecutable;
 Path Path::OpenVPNWorkingDir;
 Path Path::OpenVPNExecutable;
@@ -82,7 +84,6 @@ Path Path::VpnExclusionsFile;
 Path Path::VpnOnlyFile;
 Path Path::ParentVpnExclusionsFile;
 #endif
-#ifdef PIA_CLIENT
 Path Path::ClientDataDir;
 Path Path::ClientSettingsDir;
 Path Path::ClientLogFile;
@@ -96,9 +97,6 @@ Path Path::ClientLaunchAgentPlist;
 Path Path::ClientAutoStartFile;
 #endif // Q_OS_LINUX
 
-#endif // PIA_CLIENT
-Path Path::DataDir;
-Path Path::SettingsDir;
 Path Path::DebugFile;
 
 #if defined(Q_OS_WIN)
@@ -167,14 +165,12 @@ void Path::initializePreApp()
 #elif defined(Q_OS_LINUX)
     QCoreApplication::setApplicationName(QStringLiteral(BRAND_LINUX_APP_NAME));
 #endif
-    QCoreApplication::setApplicationVersion(QStringLiteral(PIA_VERSION));
+    QCoreApplication::setApplicationVersion(Version::semanticVersion());
 
     // Only ClientSettingsDir is needed before QCoreApplication right now, but
     // other paths can be moved here as needed if they do not depend on
     // QCoreApplication.
-#ifdef PIA_CLIENT
     ClientSettingsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-#endif
 }
 
 void Path::initializePostApp()
@@ -220,7 +216,6 @@ void Path::initializePostApp()
         LibraryDir = unitTestLibDir;
 #endif
 
-#ifdef PIA_CLIENT
     ClientDataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     ClientLogFile = ClientDataDir / "client.log";
     CliLogFile = ClientDataDir / "cli.log";
@@ -229,15 +224,11 @@ void Path::initializePostApp()
     ClientLaunchAgentPlist = Path{QStandardPaths::writableLocation(QStandardPaths::HomeLocation)} / "Library/LaunchAgents/" BRAND_IDENTIFIER ".client.plist";
 #endif
 
-    #ifdef Q_OS_LINUX
-        ClientAutoStartFile = Path { QStandardPaths::writableLocation(QStandardPaths::HomeLocation) } / ".config" / "autostart" / BRAND_CODE "-client.desktop";
-    #endif // Q_OS_LINUX
-    CrashReportDir = ClientDataDir / "crashes";
-#else // (ifdef PIA_CLIENT)
-    CrashReportDir = DaemonDataDir / "crashes";
-#endif
-
-
+#ifdef Q_OS_LINUX
+    ClientAutoStartFile = Path { QStandardPaths::writableLocation(QStandardPaths::HomeLocation) } / ".config" / "autostart" / BRAND_CODE "-client.desktop";
+#endif // Q_OS_LINUX
+    ClientCrashReportDir = ClientDataDir / "crashes";
+    DaemonCrashReportDir = DaemonDataDir / "crashes";
 
     OpenVPNWorkingDir = ExecutableDir;
 
@@ -312,17 +303,7 @@ void Path::initializePostApp()
     ParentVpnExclusionsFile = Path { "/sys/fs/cgroup/net_cls/cgroup.procs" };
 #endif
 
-#if defined(PIA_CLIENT) && !defined(PIA_DAEMON)
-    DataDir = ClientDataDir;
-    SettingsDir = ClientSettingsDir;
-#else
-    DataDir = DaemonDataDir;
-    SettingsDir = DaemonSettingsDir;
-#endif
-
-#ifdef PIA_CLIENT
     ClientExecutable = QCoreApplication::applicationFilePath();
-#endif
 }
 
 Path Path::operator/(const QString& child) const &

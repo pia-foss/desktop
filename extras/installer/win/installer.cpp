@@ -22,7 +22,7 @@
 #include "tun_inl.h"
 #include "safemode_inl.h"
 #include "tasks.h"
-#include "version.h"
+#include "product.h"
 #include "tasks/callout.h"
 #include "tasks/file.h"
 #include "tasks/function.h"

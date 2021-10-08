@@ -99,32 +99,32 @@
         <translation>继续订阅</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="175"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="191"/>
         <source>AccountPage --- REFER A FRIEND. GET 30 DAYS FREE.</source>
         <translation>推荐朋友。获得免费 30 天礼遇。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="183"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="204"/>
         <source>AccountPage --- Refer your friends and family. For every signup we’ll give you both 30 days free.</source>
         <translation>推荐您的朋友和家人。每次注册，我们会给你们双方赠送 30 天的免费时间。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="193"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="231"/>
         <source>AccountPage --- Refer a Friend</source>
         <translation>推荐朋友</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="236"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="273"/>
         <source>AccountPage --- You&apos;re not logged in</source>
         <translation>您没有登录</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="247"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="284"/>
         <source>AccountPage --- To view your account details, please log in to your account</source>
         <translation>要查看账户详情，请登录您的账户</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="259"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="296"/>
         <source>AccountPage --- Log in to your account</source>
         <translation>登录到您的帐户</translation>
     </message>
@@ -164,8 +164,10 @@
 <context>
     <name>AutomationAddRuleRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleDialog.qml" line="48"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleRow.qml" line="23"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="111"/>
         <source>AutomationAddRuleRow --- Add Automation Rule</source>
         <translation>添加自动化规则</translation>
     </message>
@@ -173,6 +175,7 @@
 <context>
     <name>AutomationPage</name>
     <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="55"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="30"/>
         <source>AutomationPage --- Connection Automation</source>
         <translation>连接自动化</translation>
@@ -297,101 +300,44 @@
         <translation>新功能</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="23"/>
         <source>ChangelogWindow --- Checkmark bullet</source>
         <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
         <translation>选中标记项目符号</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
-        <source>ChangelogWindow --- Try WireGuard® today!</source>
-        <translation>立即试用 WireGuard®！</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
-        <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
-        <translation>这是更有效的全新 VPN 协议，可提供：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
-        <source>ChangelogWindow --- Better performance</source>
-        <translation>更出色的性能</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="183"/>
-        <source>ChangelogWindow --- Lower CPU usage</source>
-        <translation>更低的 CPU 使用率</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="200"/>
-        <source>ChangelogWindow --- Longer battery life</source>
-        <translation>更长的电池寿命</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="232"/>
-        <source>ChangelogWindow --- WireGuard® is enabled</source>
-        <translation>WireGuard® 已启用</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="234"/>
-        <source>ChangelogWindow --- Try WireGuard® now</source>
-        <translation>立即试用 WireGuard®</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
-        <source>ChangelogWindow --- Learn more</source>
-        <translation>了解更多</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
-        <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
-        <translation>请重新连接以激活 WireGuard®</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuard 功能：坐火箭的机器人</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
-        <source>ChangelogWindow --- Split tunnel feature</source>
-        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
-        <translation>分离通道功能</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="387"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="66"/>
         <source>ChangelogWindow --- Control which apps use our VPN!</source>
         <translation>控制哪些应用程序使用我们的 VPN！</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="400"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="70"/>
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>借助我们全面的分离通道功能，您可以控制哪些应用程序使用 VPN 以及何时使用。看看我们的分离通道 [[应用程序示例]]，看看能够实现什么功能。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>命令行界面功能</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>分离通道功能</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="83"/>
         <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
         <translation>您是否试用过我们的命令行界面 (CLI)？</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="474"/>
-        <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="85"/>
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
+<source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <translation>PIA 桌面应用程序附带 CLI 以提供更多功能。不妨调用“ piactl”并立即体验！您可以执行下列操作：控制 PIA、集成 PIA 热键、使用脚本实现 PIA 功能自动化，或进行自定义集成等等。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="489"/>
-        <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
-        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
-        <translation>想使用 CLI 搞一些炫酷的操作吗？在 [[PIA Forum]] 好好展示一下吧！</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
+        <translation>命令行界面功能</translation>
     </message>
 </context>
 <context>
@@ -698,17 +644,17 @@
         <translation>重试</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="520"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="525"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Access 已等新。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="523"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="528"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>查看新特征</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="540"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="545"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>应用程序意外退出。您的 VPN 连接已保留。</translation>
@@ -1026,17 +972,17 @@
 <context>
     <name>DedicatedIpAdd</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="72"/>
         <source>DedicatedIpAdd --- Activate Your Dedicated IP</source>
         <translation>激活您的专用 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="115"/>
         <source>DedicatedIpAdd --- Paste in your token here</source>
         <translation>在此粘贴您的令牌</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="137"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
         <source>DedicatedIpAdd --- Activate</source>
         <translation>激活</translation>
     </message>
@@ -1044,44 +990,44 @@
 <context>
     <name>DedicatedIpAddRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
         <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>在下方粘贴令牌。如果您最近购买了专用 IP，可以访问 [[My Account]] 页面生成令牌。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="100"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
         <source>DedicatedIpAddRow --- Dedicated IP Token</source>
         <translation>专用 IP 令牌</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="163"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
         <source>DedicatedIpAddRow --- Your token has expired.</source>
         <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
         <translation>您的令牌已过期。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="164"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="169"/>
         <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
         <translation>您可以从“我的帐户”页面购买新的令牌。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="176"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="181"/>
         <source>DedicatedIpAddRow --- Your token is invalid.</source>
         <translation>您的令牌无效。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="182"/>
         <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
         <translation>请确保您输入的令牌正确无误。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="194"/>
         <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
         <translation>无法检查令牌。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="190"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="195"/>
         <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
         <translation>无法访问服务器以检查令牌。请稍后再试。</translation>
     </message>
@@ -1647,6 +1593,49 @@
     </message>
 </context>
 <context>
+    <name>HeroCard</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="24"/>
+        <source>HeroCard --- Get Your Dedicated IP!</source>
+        <translation>获取您的专用 IP！</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="25"/>
+        <source>HeroCard --- Get your own unique IP without sacrificing any of your privacy or security. Enjoy all the benefits of a fully anonymous dedicated IP:</source>
+        <translation>获得您自己的专用 IP，丝毫不影响您的隐私或安全。充分享受全匿名专用 IP 的所有好处：</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="27"/>
+        <source>HeroCard --- Stop triggering security warnings</source>
+        <translation>不再触发安全警告</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="28"/>
+        <source>HeroCard --- Smoother account access</source>
+        <translation>更顺畅的账户访问</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="29"/>
+        <source>HeroCard --- See fewer CAPTCHAs</source>
+        <translation>减少验证码出现次数</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="30"/>
+        <source>HeroCard --- Protect your IoT devices</source>
+        <translation>保护您的物联网设备</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="32"/>
+        <source>HeroCard --- GET YOUR DEDICATED IP</source>
+        <translation>获取您的专用 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="142"/>
+        <source>HeroCard --- Dedicated IP feature</source>
+        <translation>专用 IP 功能</translation>
+    </message>
+</context>
+<context>
     <name>IPModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="20"/>
@@ -2061,7 +2050,8 @@
         <translation>App 排除</translation>
     </message>
     <message>
-    <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="246"/>
+        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>可能需要重新启动 App 才能使更改生效。</translation>
     </message>
 </context>
@@ -3177,77 +3167,77 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>一般</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
         <source>SettingsWindow -- setting-title --- Protocols</source>
         
         <translation>协议</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>网络</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>隐私</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>专用 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>自动化</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="71"/>
         <source>SettingsWindow -- setting-title --- Split Tunnel</source>
         
         <translation>分离通道</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title --- Multi-Hop</source>
         
         <translation>多跳</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="73"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>账户</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="74"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>帮助</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="151"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="157"/>
         <source>SettingsWindow --- Alert</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="191"/>
         <location filename="../../../client/res/components/settings/tabs/VerticalTabLayout.qml" line="46"/>
         <source>SettingsWindow --- Settings</source>
         <translation>设置</translation>
@@ -3344,7 +3334,8 @@
 <context>
     <name>SplitTunnelAddAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="213"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="214"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>添加应用程序</translation>
     </message>
@@ -3363,7 +3354,7 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="222"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>添加 IP 地址</translation>
     </message>
@@ -3939,6 +3930,36 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
         <source>UsageModule --- Upload</source>
         <translation>上传</translation>
+    </message>
+</context>
+<context>
+    <name>WhatsNewContent</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="34"/>
+        <source>WhatsNewContent --- WireGuard Protocol</source>
+        <translation>WireGuard 协议</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="35"/>
+        <source>WhatsNewContent --- It&apos;s a new, more efficient protocol that offers better performance, lower CPU usage, and longer battery life.  [[Try it now]]</source>
+        <translation>更有效的全新协议，可提高性能、降低 CPU 使用率并延长电池寿命。[[立即试用]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="50"/>
+        <source>WhatsNewContent --- WireGuard feature</source>
+        <extracomment>Screen reader annotation for the WireGuard image in the What&apos;s New view</extracomment>
+        <translation>WireGuard 功能</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="56"/>
+        <source>WhatsNewContent --- Create rules to automatically connect or disconnect the VPN when you join a particular network.  [[Go to Settings]]</source>
+        <translation>创建规则，在您加入特定的网络时自动连接或断开 VPN。[[前往设置]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="61"/>
+        <source>WhatsNewContent --- Automation feature</source>
+        <extracomment>Screen reader annotation for the automation image in the What&apos;s New view</extracomment>
+        <translation>自动化功能</translation>
     </message>
 </context>
 <context>

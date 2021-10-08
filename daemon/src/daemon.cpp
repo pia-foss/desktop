@@ -64,17 +64,6 @@
 #pragma comment(lib, "advapi32.lib")
 #endif
 
-#ifndef UNIT_TEST
-// Hook global error reporting function into daemon instance
-void reportError(Error error)
-{
-    if (auto daemon = g_daemon)
-        daemon->reportError(std::move(error));
-    else
-        qCritical() << error;
-}
-#endif
-
 namespace
 {
     //Initially, we try to load the regions every 15 seconds, until they've been
@@ -384,7 +373,7 @@ Daemon::Daemon(QObject* parent)
     , _pendingSerializations(0)
 {
 #ifdef PIA_CRASH_REPORTING
-    initCrashReporting();
+    initCrashReporting(false);
 #endif
 
     // Redact dedicated IP addresses and tokens from logs.  We can't just avoid
@@ -535,7 +524,7 @@ Daemon::Daemon(QObject* parent)
     // but piactl exposes them and user scripts might be using this.
     rebuildActiveLocations();
 
-    #define RPC_METHOD(name, ...) LocalMethod(QStringLiteral(#name), this, &THIS_CLASS::RPC_##name)
+    #define RPC_METHOD(name, ...) LocalMethod(QStringLiteral(#name), this, &Daemon::RPC_##name)
     _methodRegistry->add(RPC_METHOD(applySettings).defaultArguments(false));
     _methodRegistry->add(RPC_METHOD(resetSettings));
     _methodRegistry->add(RPC_METHOD(addDedicatedIp));
@@ -784,11 +773,6 @@ Daemon::Daemon(QObject* parent)
 Daemon::~Daemon()
 {
     qInfo() << "Daemon shutdown complete";
-}
-
-void Daemon::reportError(Error error)
-{
-    qCritical() << error;
 }
 
 OriginalNetworkScan Daemon::originalNetwork() const
@@ -1514,11 +1498,11 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
                         });
             })
             ->except(this, [this, username, password](const Error& error) {
+                resetAccountInfo();
                 if (error.code() == Error::ApiUnauthorizedError)
                     throw error;
                 // Proceed with empty account info; the client can still connect
                 // if the naked username/password is valid for OpenVPN auth.
-                resetAccountInfo();
                 _account.username(username);
                 _account.password(password);
                 _account.openvpnUsername(username);
@@ -1617,7 +1601,7 @@ Async<void> Daemon::RPC_submitRating(int rating)
                           { QStringLiteral("rating"), rating},
                           { QStringLiteral("application"), QStringLiteral("desktop")},
                           { QStringLiteral("platform"), UpdateChannel::platformName},
-                          { QStringLiteral("version"), QStringLiteral(PIA_VERSION)}
+                          { QStringLiteral("version"), Version::semanticVersion()}
                   })), ApiClient::tokenAuth(_account.token()))
             ->then(this, [this](const QJsonDocument& json) {
         Q_UNUSED(json);
@@ -2815,7 +2799,7 @@ AppMessage Daemon::parseAppMessage(const QJsonObject &messageJson) const
 
 void Daemon::checkForAppMessages()
 {
-    const auto version = SemVersion{u"" PIA_VERSION};
+    const auto version = SemVersion{Version::semanticVersion()};
     // Strip off pre-release tag leaving only major.minor.patch
     const auto versionString = QStringLiteral("%1.%2.%3").arg(version.major()).arg(version.minor()).arg(version.patch());
     const QString queryParams = QStringLiteral("version=%1&client=%2").arg(versionString).arg(UpdateChannel::platformName);
@@ -2882,7 +2866,6 @@ void Daemon::resetAccountInfo()
 {
     // Reset all fields except loggedIn
     QJsonObject blank = DaemonAccount().toJsonObject();
-    blank.remove(QStringLiteral("loggedIn"));
     blank.remove(QStringLiteral("dedicatedIps"));
     _account.assign(blank);
 }
@@ -3115,9 +3098,9 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     SemVersion previous = [](const QString& p) -> SemVersion {
         auto result = SemVersion::tryParse(p);
         return result != nullptr ? std::move(*result) : SemVersion(1, 0, 0);
-    }(existingSettingsFile ? _settings.lastUsedVersion() : QStringLiteral(PIA_VERSION));
+    }(existingSettingsFile ? _settings.lastUsedVersion() : Version::semanticVersion());
     // Always write the current version for any future settings upgrades.
-    _settings.lastUsedVersion(QStringLiteral(PIA_VERSION));
+    _settings.lastUsedVersion(Version::semanticVersion());
 
     // If the user has manually installed a beta release, typically by opting
     // into the beta via the web site, enable beta updates.  This occurs when
@@ -3127,12 +3110,12 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     // We don't do any other change though (such as switching back) - users that
     // have opted into beta may receive GA releases when there isn't an active
     // beta, and they should continue to receive betas.
-    auto daemonVersion = SemVersion::tryParse(u"" PIA_VERSION);
+    auto daemonVersion = SemVersion::tryParse(Version::semanticVersion());
     if (daemonVersion && daemonVersion->isPrereleaseType(u"beta") &&
         !_settings.offerBetaUpdates() &&
         (!previous.isPrereleaseType(u"beta") || !existingSettingsFile))
     {
-        qInfo() << "Enabling beta updates due to installing" << PIA_VERSION;
+        qInfo() << "Enabling beta updates due to installing" << Version::semanticVersion();
         _settings.offerBetaUpdates(true);
     }
 

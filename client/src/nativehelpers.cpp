@@ -26,6 +26,7 @@
 #include "path.h"
 #include "version.h"
 #include "brand.h"
+#include "product.h"
 #include "exec.h"
 #include "locations.h"
 
@@ -252,7 +253,7 @@ void NativeHelpers::releaseWindowResources(QQuickWindow *pWindow)
 
 QString NativeHelpers::getClientVersion()
 {
-    return QStringLiteral(PIA_VERSION);
+    return Version::semanticVersion();
 }
 
 bool NativeHelpers::getStartOnLogin()

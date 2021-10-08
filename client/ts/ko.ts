@@ -99,32 +99,32 @@
         <translation>구독 갱신</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="175"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="191"/>
         <source>AccountPage --- REFER A FRIEND. GET 30 DAYS FREE.</source>
         <translation>친구 추천. 30일 무료 이용.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="183"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="204"/>
         <source>AccountPage --- Refer your friends and family. For every signup we’ll give you both 30 days free.</source>
         <translation>친구와 가족에게 추천하세요. 친구나 가족이 가입할 때마다 두 분 모두에게 30일 무료 이용 혜택을 제공해 드립니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="193"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="231"/>
         <source>AccountPage --- Refer a Friend</source>
         <translation>친구에게 추천하기</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="236"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="273"/>
         <source>AccountPage --- You&apos;re not logged in</source>
         <translation>로그인 중이 아닙니다</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="247"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="284"/>
         <source>AccountPage --- To view your account details, please log in to your account</source>
         <translation>계정 정보를 보려면 계정에 로그인하세요</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="259"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="296"/>
         <source>AccountPage --- Log in to your account</source>
         <translation>계정에 로그인</translation>
     </message>
@@ -164,8 +164,10 @@
 <context>
     <name>AutomationAddRuleRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleDialog.qml" line="48"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleRow.qml" line="23"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="111"/>
         <source>AutomationAddRuleRow --- Add Automation Rule</source>
         <translation>자동화 규칙 추가</translation>
     </message>
@@ -173,6 +175,7 @@
 <context>
     <name>AutomationPage</name>
     <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="55"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="30"/>
         <source>AutomationPage --- Connection Automation</source>
         <translation>연결 자동화</translation>
@@ -297,101 +300,44 @@
         <translation>새로운 기능</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="23"/>
         <source>ChangelogWindow --- Checkmark bullet</source>
         <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
         <translation>체크 표시 글머리 기호</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
-        <source>ChangelogWindow --- Try WireGuard® today!</source>
-        <translation>지금 WireGuard®를 사용해 보세요!</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
-        <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
-        <translation>새롭고 더 효율적인 VPN 프로토콜입니다. 주요 특징:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
-        <source>ChangelogWindow --- Better performance</source>
-        <translation>더 우수한 성능</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="183"/>
-        <source>ChangelogWindow --- Lower CPU usage</source>
-        <translation>더 낮은 CPU 사용량</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="200"/>
-        <source>ChangelogWindow --- Longer battery life</source>
-        <translation>더 긴 배터리 수명</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="232"/>
-        <source>ChangelogWindow --- WireGuard® is enabled</source>
-        <translation>WireGuard®가 활성화되었습니다</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="234"/>
-        <source>ChangelogWindow --- Try WireGuard® now</source>
-        <translation>지금 WireGuard® 사용해 보기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
-        <source>ChangelogWindow --- Learn more</source>
-        <translation>자세히 보기</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
-        <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
-        <translation>WireGuard®를 활성화하려면 다시 연결하세요</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuard 기능: 로켓을 탄 로봇</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
-        <source>ChangelogWindow --- Split tunnel feature</source>
-        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
-        <translation>분할 터널 기능</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="387"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="66"/>
         <source>ChangelogWindow --- Control which apps use our VPN!</source>
         <translation>VPN을 사용할 앱을 관리하세요!</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="400"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="70"/>
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>완벽한 분할 터널 기능을 사용해 VPN을 사용할 앱과 그 시간을 관리할 수 있습니다. 분할 터널 [[앱 예시]] 페이지에서 자세한 사항을 확인해 보세요.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>커맨드 라인 인터페이스 기능</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>분할 터널 기능</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="83"/>
         <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
         <translation>당사의 커맨드 라인 인터페이스(CLI)를 사용해 보셨습니까?</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="474"/>
-        <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="85"/>
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
+<source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <translation>PIA 데스크톱 앱은 기능이 추가된 CLI을 제공합니다. 지금 &quot;piactl&quot;을 호출하여 기능을 확인해 보세요! PIA 제어, PIA 핫키 통합, 스크립트를 사용한 PIA 기능 자동화, 사용자 지정 통합 생성 등 다양한 작업을 수행할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="489"/>
-        <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
-        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
-        <translation>CLI로 멋진 기능을 만드셨나요? [[PIA 포럼]]에서 자랑해 보세요!</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
+        <translation>커맨드 라인 인터페이스 기능</translation>
     </message>
 </context>
 <context>
@@ -698,17 +644,17 @@
         <translation>다시 시도</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="520"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="525"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Access가 업데이트되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="523"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="528"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>새로운 기능 보기</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="540"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="545"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>애플리케이션이 예기치 않게 종료되었습니다. VPN 연결은 보존되었습니다.</translation>
@@ -1026,17 +972,17 @@
 <context>
     <name>DedicatedIpAdd</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="72"/>
         <source>DedicatedIpAdd --- Activate Your Dedicated IP</source>
         <translation>전용 IP 활성화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="115"/>
         <source>DedicatedIpAdd --- Paste in your token here</source>
         <translation>여기에 토큰을 붙여넣으세요</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="137"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
         <source>DedicatedIpAdd --- Activate</source>
         <translation>활성화</translation>
     </message>
@@ -1044,44 +990,44 @@
 <context>
     <name>DedicatedIpAddRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
         <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>아래에 토큰을 붙여넣으세요. 최근에 전용 IP를 구입하신 경우 [[내 계정]] 페이지에서 토큰을 생성하실 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="100"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
         <source>DedicatedIpAddRow --- Dedicated IP Token</source>
         <translation>전용 IP 토큰</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="163"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
         <source>DedicatedIpAddRow --- Your token has expired.</source>
         <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
         <translation>토큰이 만료되었습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="164"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="169"/>
         <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
         <translation>&apos;내 계정&apos; 페이지에서 새로 구입하실 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="176"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="181"/>
         <source>DedicatedIpAddRow --- Your token is invalid.</source>
         <translation>토큰이 유효하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="182"/>
         <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
         <translation>올바른 토큰을 입력했는지 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="194"/>
         <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
         <translation>토큰을 확인할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="190"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="195"/>
         <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
         <translation>서버에 접속하여 토큰을 확인할 수 없습니다. 나중에 다시 시도하세요.</translation>
     </message>
@@ -1647,6 +1593,49 @@
     </message>
 </context>
 <context>
+    <name>HeroCard</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="24"/>
+        <source>HeroCard --- Get Your Dedicated IP!</source>
+        <translation>나만의 전용 IP를 받으세요!</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="25"/>
+        <source>HeroCard --- Get your own unique IP without sacrificing any of your privacy or security. Enjoy all the benefits of a fully anonymous dedicated IP:</source>
+        <translation>프라이버시나 보안을 희생하지 않고 나만의 고유한 IP를 획득하세요. 완전한 익명성이 보장되는 전용 IP의 혜택을 누려 보세요:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="27"/>
+        <source>HeroCard --- Stop triggering security warnings</source>
+        <translation>보안 경고 유발 중지</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="28"/>
+        <source>HeroCard --- Smoother account access</source>
+        <translation>더 부드러운 계정 액세스</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="29"/>
+        <source>HeroCard --- See fewer CAPTCHAs</source>
+        <translation>더 적은 CAPTCHA 출현</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="30"/>
+        <source>HeroCard --- Protect your IoT devices</source>
+        <translation>자신의 IoT 기기 보호</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="32"/>
+        <source>HeroCard --- GET YOUR DEDICATED IP</source>
+        <translation>전용 IP 받기</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="142"/>
+        <source>HeroCard --- Dedicated IP feature</source>
+        <translation>전용 IP 기능</translation>
+    </message>
+</context>
+<context>
     <name>IPModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="20"/>
@@ -2061,7 +2050,8 @@
         <translation>앱 제외</translation>
     </message>
     <message>
-    <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="246"/>
+        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>변경 사항이 적용되려면 앱을 다시 시작해야 할 수 있습니다.</translation>
     </message>
 </context>
@@ -3177,77 +3167,77 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>일반</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
         <source>SettingsWindow -- setting-title --- Protocols</source>
         
         <translation>프로토콜</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>네트워크</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>프라이버시</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>전용 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>자동화</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="71"/>
         <source>SettingsWindow -- setting-title --- Split Tunnel</source>
         
         <translation>분할 터널</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title --- Multi-Hop</source>
         
         <translation>멀티홉</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="73"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>계정</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="74"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="151"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="157"/>
         <source>SettingsWindow --- Alert</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="191"/>
         <location filename="../../../client/res/components/settings/tabs/VerticalTabLayout.qml" line="46"/>
         <source>SettingsWindow --- Settings</source>
         <translation>설정</translation>
@@ -3344,7 +3334,8 @@
 <context>
     <name>SplitTunnelAddAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="213"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="214"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>애플리케이션 추가</translation>
     </message>
@@ -3363,7 +3354,7 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="222"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>IP 주소 추가</translation>
     </message>
@@ -3939,6 +3930,36 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
         <source>UsageModule --- Upload</source>
         <translation>업로드</translation>
+    </message>
+</context>
+<context>
+    <name>WhatsNewContent</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="34"/>
+        <source>WhatsNewContent --- WireGuard Protocol</source>
+        <translation>WireGuard 프로토콜</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="35"/>
+        <source>WhatsNewContent --- It&apos;s a new, more efficient protocol that offers better performance, lower CPU usage, and longer battery life.  [[Try it now]]</source>
+        <translation>새롭고 더 효율적인 VPN 프로토콜을 통해 더 우수한 성능, 더 적은 CPU 사용량 및 더 긴 배터리 수명을 제공합니다.  [[지금 체험해 보기]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="50"/>
+        <source>WhatsNewContent --- WireGuard feature</source>
+        <extracomment>Screen reader annotation for the WireGuard image in the What&apos;s New view</extracomment>
+        <translation>WireGuard 기능</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="56"/>
+        <source>WhatsNewContent --- Create rules to automatically connect or disconnect the VPN when you join a particular network.  [[Go to Settings]]</source>
+        <translation>특정 네트워크에 접속할 때 VPN을 자동으로 연결 또는 연결 해제할지에 대한 규칙을 설정하세요.  [[설정으로 이동]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="61"/>
+        <source>WhatsNewContent --- Automation feature</source>
+        <extracomment>Screen reader annotation for the automation image in the What&apos;s New view</extracomment>
+        <translation>자동화 기능</translation>
     </message>
 </context>
 <context>

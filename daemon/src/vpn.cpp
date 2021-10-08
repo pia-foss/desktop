@@ -1781,3 +1781,21 @@ bool VPNConnection::copySettings(State successState, State failureState)
     setState(successState);
     return true;
 }
+
+// Local 127/8 address used by a local resolver.  We can't put this on 127.0.0.1
+// because port 53 may already be in use on that address.
+const QString resolverLocalAddress()
+{
+    static QString value{QStringLiteral("127.80.73.65")};
+    return value;
+}
+const QString piaModernDnsVpnMace()
+{
+    static QString value{QStringLiteral("10.0.0.241")};
+    return value;
+}
+const QString piaModernDnsVpn()
+{
+    static QString value{QStringLiteral("10.0.0.243")};
+    return value;
+}

@@ -51,7 +51,7 @@ DecoratedWindow {
 
   function updateWindowSize() {
     if(contentLoader.item)
-      changelog.windowLogicalHeight = contentLoader.item.contentHeight
+      changelog.windowLogicalHeight = Math.min(contentLoader.item.contentHeight, 850)
   }
 
   Loader {

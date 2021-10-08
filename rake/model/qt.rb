@@ -135,6 +135,7 @@ class Qt
             .libPath(File.join(@targetQtRoot, "lib"))
         @core.lib('qtmain') if Build.windows? && Build.release?
         @core.lib('qtmaind') if Build.windows? && Build.debug?
+        @core.lib('Shell32') if Build.windows? # Required by qtmain for CommandLineToArgvW
         if(Build.macos?)
             # Specify Qt framework path on Mac
             @core.frameworkPath(File.join(@targetQtRoot, "lib")) if Build.macos?

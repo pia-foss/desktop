@@ -43,7 +43,9 @@ QtObject {
 
   readonly property string splitTunnelImage: Theme.imagePath + "/changelog/split-tunnel.png"
   readonly property string terminalImage: Theme.imagePath + "/changelog/terminal.png"
-  readonly property color wireguardWarningColor: dark ? "#ff8f00" : "#ff8f00"
-  readonly property color wireguardCtaTextColor: Theme.login.buttonEnabledTextColor
-  readonly property color wireguardCtaDisabledTextColor: dark ? "#ffffff" : "#323642"
+  readonly property string dedicatedIpImage: Theme.imagePathCommon + "/changelog/dedicated-ip-globe.png"
+  readonly property string automationImage: Theme.imagePathCommon + "/changelog/automation.png"
+  readonly property string wireguardImage: Theme.imagePathCommon + "/changelog/wireguard.png"
+  readonly property color heroCtaTextColor: Theme.login.buttonEnabledTextColor
+  readonly property color heroCtaDisabledTextColor: dark ? "#ffffff" : "#323642"
 }

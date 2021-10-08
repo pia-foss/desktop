@@ -25,8 +25,8 @@
 // In the daemon, logging is performed with qInfo().
 
 // PIA_PRODUCT_NAME is defined on the compiler command line in the installer,
-// but it's in version.h in the daemon.
-#include "version.h"
+// but it's in product.h in the daemon.
+#include "product.h"
 
 #define TAP_LOG qInfo
 #include "../../../extras/installer/win/tap.inl"

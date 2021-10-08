@@ -23,7 +23,6 @@
 #define NATIVEHELPERS_H
 #pragma once
 
-#include "settings.h"
 #include <QWindow>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>

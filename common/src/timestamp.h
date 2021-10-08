@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line HEADER_FILE("timestamp.h")
-
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
 

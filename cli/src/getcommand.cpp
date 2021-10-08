@@ -22,7 +22,8 @@
 #include "getcommand.h"
 #include "output.h"
 #include "cliclient.h"
-#include "settings.h"
+#include "settings/daemonstate.h"
+#include "settings/daemonsettings.h"
 #include "vpnstate.h"
 #include <map>
 

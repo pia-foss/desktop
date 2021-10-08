@@ -31,7 +31,8 @@
 #include <Security/CodeSigning.h>
 #include <Security/SecCode.h>
 #include "brand.h"
-#include "version.h"
+#include "product.h"
+#include "version_literal.h"
 
 // Linked in from vpn-installer-sh.cpp, generated from xxd -i on branded install
 // script
@@ -261,7 +262,7 @@ namespace xpc
 
         SecRequirementCreateWithString(CFSTR("identifier " BRAND_IDENTIFIER " "
                                              "and certificate leaf[subject.CN] = \"" PIA_CODESIGN_CERT "\" "
-                                             "and info [" BRAND_IDENTIFIER ".version] = \"" PIA_VERSION "\""),
+                                             "and info [" BRAND_IDENTIFIER ".version] = \"" PIA_VERSION_LITERAL "\""),
                                        kSecCSDefaultFlags, &isLtm);
 
         // "Strict" validation is necessary to ensure that files haven't been

@@ -20,6 +20,7 @@
 #line SOURCE_FILE("win_ping.cpp")
 
 #include "win_ping.h"
+#include <QHostAddress>
 #include <iphlpapi.h>
 #include <IcmpAPI.h>
 #include <WinSock2.h>

@@ -495,10 +495,10 @@ inline bool NativeJsonObject::validate(const T& value, const std::initializer_li
 
 namespace impl {
     template<size_t Size, size_t Align, typename... Types>
-    class COMMON_EXPORT JsonVariantImpl;
+    class JsonVariantImpl;
 
     template<size_t Size, size_t Align, typename First, typename... Rest>
-    class COMMON_EXPORT JsonVariantImpl<Size, Align, First, Rest...> : public JsonVariantImpl<(sizeof(First) > Size ? sizeof(First) : Size), (Q_ALIGNOF(First) > Align ? Q_ALIGNOF(First) : Align), Rest...>
+    class JsonVariantImpl<Size, Align, First, Rest...> : public JsonVariantImpl<(sizeof(First) > Size ? sizeof(First) : Size), (Q_ALIGNOF(First) > Align ? Q_ALIGNOF(First) : Align), Rest...>
     {
         typedef JsonVariantImpl<(sizeof(First) > Size ? sizeof(First) : Size), (Q_ALIGNOF(First) > Align ? Q_ALIGNOF(First) : Align), Rest...> base;
         enum { ID = sizeof...(Rest) + 1 };
@@ -572,7 +572,7 @@ namespace impl {
     };
 
     template<size_t Size, size_t Align>
-    class COMMON_EXPORT JsonVariantImpl<Size, Align>
+    class JsonVariantImpl<Size, Align>
     {
         enum NoSuchOverload {};
     public:
@@ -597,7 +597,7 @@ namespace impl {
 // deserialized.
 //
 template<typename... Types>
-class COMMON_EXPORT JsonVariant : private impl::JsonVariantImpl<0, 0, Types...>
+class JsonVariant : private impl::JsonVariantImpl<0, 0, Types...>
 {
     typedef impl::JsonVariantImpl<0, 0, Types...> base;
 public:

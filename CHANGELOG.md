@@ -1,5 +1,12 @@
 # Changelog
 
+### v3.1.0
+
+* Added support for Wayland display server on Linux
+* Improved OpenVPN TCP timeouts when the server isn't reachable
+* Improved macOS Split Tunnel to protect against looping packets
+* Fixed an issue where client might not automatically start on macOS Big Sur
+
 ### v3.0.1
 * Fixed an issue migrating proxy settings from 2.10 or earlier
 

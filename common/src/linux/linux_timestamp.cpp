@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("linux_timestamp.cpp")
+#include "timestamp.h"
 
 #include <time.h>
 

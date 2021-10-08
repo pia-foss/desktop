@@ -314,11 +314,21 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
     connect(_openvpn, &OpenVPNProcess::exited, this, &OpenVPNMethod::openvpnExited);
     connect(_openvpn, &OpenVPNProcess::error, this, &OpenVPNMethod::raiseError);
 
+    _connectingTimer.setSingleShot(true);
+    _connectingTimer.setInterval(13 * 1000); //slightly longer than
+                                             //server-poll-timeout passed
+                                             //to openvpn
+    connect(&_connectingTimer, &QTimer::timeout, this, [this]() {
+                                                         qInfo() << "connecting timeout.";
+                                                         raiseError({HERE, Error::Code::OpenVPNError});
+                                                       });
+    _connectingTimer.start();
     _openvpn->run(arguments);
 }
 
 void OpenVPNMethod::shutdown()
 {
+    _connectingTimer.stop();
     if(_openvpn)
         _openvpn->shutdown();
     else
@@ -653,6 +663,7 @@ void OpenVPNMethod::openvpnStateChanged()
             advanceState(State::Connecting);
             break;
         case OpenVPNProcess::State::Connected:
+            _connectingTimer.stop();
             advanceState(State::Connected);
             break;
         case OpenVPNProcess::State::Reconnecting:
@@ -662,9 +673,11 @@ void OpenVPNMethod::openvpnStateChanged()
             shutdown();
             break;
         case OpenVPNProcess::State::Exiting:
+            _connectingTimer.stop();
             advanceState(State::Exiting);
             break;
         case OpenVPNProcess::State::Exited:
+            _connectingTimer.stop();
             advanceState(State::Exited);
             break;
         default:

@@ -37,6 +37,7 @@
 #include "semversion.h"
 #include "version.h"
 #include "brand.h"
+#include "product.h"
 #include "nativeacc/nativeacc.h"
 #include "splittunnelmanager.h"
 #include "appsingleton.h"
@@ -164,8 +165,8 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
 
     // Read the last used version, and set the current version as the last used version
     QString lastUsedVersion = _settings.lastUsedVersion();
-    _settings.lastUsedVersion(PIA_VERSION);
-    SemVersion currentVersion{QStringLiteral(PIA_VERSION)};
+    _settings.lastUsedVersion(Version::semanticVersion());
+    SemVersion currentVersion{Version::semanticVersion()};
 
     SemVersion previousVersion = [&]() -> SemVersion {
         auto actual = SemVersion::tryParse(lastUsedVersion);
@@ -192,9 +193,9 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
         qInfo() << "Clean QML cache directory" << cachePath;
         QDir{cachePath}.removeRecursively();
     }
-    // The current What's New content was introduced in 2.3.0, show this if
+    // The current What's New content was introduced in 3.1.0, show this if
     // upgrading from an older version
-    if(previousVersion < SemVersion{2, 3, 0})
+    if(previousVersion < SemVersion{3, 1, 0})
         _state.showWhatsNew(true);
 
     // clientMain() already enabled safe mode if necessary, but set the client

@@ -24,7 +24,7 @@
 
 #include <windows.h>
 #include "../../../extras/installer/win/service_inl.h"
-#include "settings.h"
+#include "settings/daemonstate.h"
 #include <QObject>
 
 // SERVICE_NOTIFY_2W that also cleans up its pszServiceNames when destroyed.

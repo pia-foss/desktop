@@ -85,6 +85,16 @@ struct LocalMethodWrapper<Async<void>, ArgsTuple>
     }
 };
 
+template<typename Class, typename Ptr, typename Return, typename... Args>
+static inline auto bind_this(Return (Class::*fn)(Args...), Ptr instance)
+{
+    return [instance = std::move(instance), fn](Args&&... args) -> Return { return ((*instance).*fn)(std::forward<Args>(args)...); };
+}
+template<typename Class, typename Ptr, typename... Args>
+static inline auto bind_this(void (Class::*fn)(Args...), Ptr instance)
+{
+    return [instance = std::move(instance), fn](Args&&... args) { ((*instance).*fn)(std::forward<Args>(args)...); };
+}
 
 // Encapsulates a local function, member function, functor or lambda
 // so that it can be invoked by a JSON-RPC request.
@@ -274,8 +284,6 @@ private:
     double _lastId;
 };
 
-
-#if defined(PIA_CLIENT) || defined(UNIT_TEST)
 // Convenience class for the "client" side (makes calls, receives notifications)
 class COMMON_EXPORT ClientSideInterface : public RemoteCallInterface
 {
@@ -289,10 +297,7 @@ public slots:
 private:
     LocalNotificationInterface _local;
 };
-#endif
 
-
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
 // Convenience class for the "server" side (receives calls, posts notifications)
 class COMMON_EXPORT ServerSideInterface : public RemoteNotificationInterface
 {
@@ -306,8 +311,6 @@ public slots:
 private:
     LocalCallInterface _local;
 };
-#endif
-
 
 // Inline function definitions
 

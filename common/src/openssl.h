@@ -32,7 +32,7 @@ bool COMMON_EXPORT verifySignature(const QByteArray& publicKeyPem, const QByteAr
 
 // PrivateCA can be used to validate a certificate chain issued from a private
 // CA certificate.
-class PrivateCA
+class COMMON_EXPORT PrivateCA
 {
 private:
     struct data;
@@ -57,6 +57,6 @@ enum
     // Required buffer size for public / private keys in genCurve25519KeyPair()
     Curve25519KeySize = 32,
 };
-bool genCurve25519KeyPair(unsigned char *pPubkey, unsigned char *pPrivkey);
+bool COMMON_EXPORT genCurve25519KeyPair(unsigned char *pPubkey, unsigned char *pPrivkey);
 
 #endif // OPENSSL_H

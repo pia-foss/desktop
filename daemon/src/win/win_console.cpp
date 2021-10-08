@@ -24,6 +24,7 @@
 #include "path.h"
 #include "win.h"
 #include "version.h"
+#include "product.h"
 #include "brand.h"
 #include "exec.h"
 #include "../../../extras/installer/win/tap_inl.h"
@@ -293,7 +294,7 @@ void WinConsole::stopDaemon()
 int WinConsole::showHelp()
 {
     QTextStream(stdout)
-            << PIA_PRODUCT_NAME << " Service v" << PIA_VERSION << endl
+            << PIA_PRODUCT_NAME << " Service v" << Version::semanticVersion() << endl
             << endl
             << "Usage:" << endl
             << "  " BRAND_CODE "-service <command>" << endl

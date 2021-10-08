@@ -27,18 +27,29 @@ stage = Install.new(Build.macos? ? "stage/#{version.productName}.app" : 'stage')
 # Artifacts - These are the final outputs preserved from CI builds
 artifacts = Install.new('artifacts')
 
-clientlib = Executable.new("#{Build::Brand}-clientlib", :dynamic)
+versionlib = Executable.new("#{Build::Brand}-version", :static)
+    .source(version.artifact(''))
+    .useQt(nil)
+
+commonlib = Executable.new("#{Build::Brand}-commonlib", :dynamic)
     .define('BUILD_COMMON')
-    .define('BUILD_CLIENTLIB')
     .define('DYNAMIC_COMMON', :export)
-    .define('DYNAMIC_CLIENTLIB', :export)
-    .define('PIA_CLIENT', :export)
     .source('common/src')
     .source('common/src/builtin')
-    .source('clientlib/src')
-    .use(version.export)
+    .source('common/src/settings', :none)
+    .use(versionlib.export)
     .useQt('Network')
     .tap {|v| PiaBreakpad::add(v)}
+    .install(stage, :lib)
+
+clientlib = Executable.new("#{Build::Brand}-clientlib", :dynamic)
+    .define('BUILD_CLIENTLIB')
+    .define('DYNAMIC_CLIENTLIB', :export)
+    .define('PIA_CLIENT', :export)
+    .source('clientlib/src')
+    .use(versionlib.export)
+    .use(commonlib.export)
+    .useQt('Network')
     .install(stage, :lib)
 
 if(Build.macos?)
@@ -48,7 +59,8 @@ end
 cli = Executable.new("#{Build::Brand}ctl", :executable)
     .source('cli/src')
     .use(clientlib.export)
-    .use(version.export)
+    .use(versionlib.export)
+    .use(commonlib.export)
     .useQt('Network')
     .install(stage, :bin)
 
@@ -56,9 +68,10 @@ clientName = Build.macos? ? version.productName : "#{Build::Brand}-client"
 client = Executable.new(clientName, :executable)
     .gui
     .source('client/src')
-    .source('client/src/nativeacc')
+    .source('client/src/nativeacc', :none)
     .use(clientlib.export)
-    .use(version.export)
+    .use(versionlib.export)
+    .use(commonlib.export)
     .resource('client/res', ['**/*'],
         ['**/*.qrc', '**/*.svg', '**/*.sh', '**/*.otf',
          '**/RobotoCondensed-*.ttf', '**/Roboto-*Italic.ttf',
@@ -98,12 +111,10 @@ defineTranslationTargets(stage, artifacts)
 
 supportTool = Executable.new("#{Build::Brand}-support-tool", :executable)
     .gui
-    .define('BUILD_COMMON')
-    .source('common/src')
-    .source('common/src/builtin')
     .source('extras/support-tool')
     .resource('extras/support-tool', ['components/**/*', 'qtquickcontrols2.conf'])
-    .use(version.export)
+    .use(versionlib.export)
+    .use(commonlib.export)
     .useQt('Network')
     .useQt('Quick')
     .useQt('Gui')
@@ -114,17 +125,13 @@ supportTool = Executable.new("#{Build::Brand}-support-tool", :executable)
 
 daemonName = Build.windows? ? "#{Build::Brand}-service" : "#{Build::Brand}-daemon"
 daemon = Executable.new(daemonName, :executable)
-    .define('BUILD_COMMON')
     .define('BUILD_CLIENTLIB')
-    .define('PIA_DAEMON')
-    .source('common/src')
-    .source('common/src/builtin')
     .source('daemon/src')
     .source('deps/embeddable-wg-library/src')
     .resource('daemon/res', ['ca/*.crt'])
-    .use(version.export)
+    .use(versionlib.export)
+    .use(commonlib.export)
     .useQt('Network')
-    .tap {|v| PiaBreakpad::add(v)}
     .install(stage, :bin)
 
 if(Build.windows?)
@@ -220,7 +227,8 @@ clientlib.install(integtestStage, :lib)
 integtestBin = Executable.new("#{Build::Brand}-integtest")
     .source('integtest/src')
     .use(clientlib.export)
-    .use(version.export)
+    .use(versionlib.export)
+    .use(commonlib.export)
     .useQt('Network')
     .useQt('Test')
     .install(integtestStage, :bin)
@@ -249,7 +257,7 @@ if(Build.windows?)
     task :default => :windeploy
 elsif(Build.macos?)
     require_relative('./rake/product/macos.rb')
-    PiaMacOS::defineTargets(version, stage)
+    PiaMacOS::defineTargets(version, commonlib, stage)
     PiaMacOS::defineIntegtestArtifact(version, integtestStage, artifacts)
     PiaMacOS::defineInstaller(version, stage, artifacts)
     task :default => :stage
@@ -263,7 +271,7 @@ elsif(Build.linux?)
 end
 
 # Define unit test targets
-PiaUnitTest.defineTargets(version, artifacts)
+PiaUnitTest.defineTargets(versionlib, artifacts)
 
 task :stage => stage.target do |t|
     puts "staged installation"

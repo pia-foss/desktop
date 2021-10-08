@@ -18,7 +18,7 @@
 
 #include "common.h"
 #include "packet.h"
-#line SOURCE_FILE("mac/packet.cpp")
+#include <QHostAddress>
 
 nullable_t<Packet> Packet::createFromData(std::vector<unsigned char> data,
                                           unsigned skipBytes)

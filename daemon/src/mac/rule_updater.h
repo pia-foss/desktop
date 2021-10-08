@@ -33,7 +33,6 @@
 #include "mac/mac_splittunnel_types.h"
 #include "mac/utun.h"
 #include "processrunner.h"
-#include "settings.h"
 #include "exec.h"
 #include "vpn.h"
 

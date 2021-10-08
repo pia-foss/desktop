@@ -17,9 +17,8 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("testresource.cpp")
-
 #include "testresource.h"
+#include <QFile>
 
 // Qt says this must be in global namespace, presumably due to crude Qt macros
 void initAllTestsLibRes()

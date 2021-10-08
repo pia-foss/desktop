@@ -42,6 +42,7 @@
 #include "rule_updater.h"
 #include "mac/mac_splittunnel_types.h"
 #include "packet.h"
+#include "mac/flow_tracker.h"
 
 class AppCache
 {
@@ -160,8 +161,6 @@ private:
     QString _ipForwarding6;
     bool _routesUp{false};
 
-    using AddressPair = QPair<quint32, quint16>;
-    AddressPair _lastPacketAddress4{};
-    quint32 _lastPacketCount4{0};
+    FlowTracker _flowTracker;
 };
 #endif

@@ -30,8 +30,6 @@
 
 class COMMON_EXPORT IPCConnection;
 
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
 /**
  * @brief The IPCServer class handles the server side of a UTF-8 message
  * based IPC protocol.
@@ -56,8 +54,6 @@ signals:
 protected:
     QSet<IPCConnection*> _connections;
 };
-
-#endif // defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 /**
  * @brief The IPCConnection class handles a connection of a UTF-8 message
@@ -111,8 +107,6 @@ public:
 
 // Implementation using QLocalServer / QLocalSocket ////////////////////////////
 
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
 class COMMON_EXPORT LocalSocketIPCServer : public IPCServer
 {
     Q_OBJECT
@@ -127,8 +121,6 @@ private:
 
     friend class LocalSocketIPCConnection;
 };
-
-#endif // defined(PIA_DAEMON) || defined(UNIT_TEST)
 
 class COMMON_EXPORT LocalSocketIPCConnection : public ClientIPCConnection
 {

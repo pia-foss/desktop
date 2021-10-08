@@ -32,13 +32,10 @@
 class COMMON_EXPORT ContinuousElapsedTime
 {
 public:
-    ContinuousElapsedTime() : _startTimestamp{getContinuousTimestamp()} {}
+    ContinuousElapsedTime();
 
 public:
-    std::chrono::milliseconds elapsed() const
-    {
-        return elapsedBetweenTimestamps(_startTimestamp, getContinuousTimestamp());
-    }
+    std::chrono::milliseconds elapsed() const;
 
 private:
     quint64 _startTimestamp;

@@ -17,6 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
+#include "nodelist.h"
 #include <QtTest>
 
 class tst_nodelist : public QObject

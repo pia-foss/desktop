@@ -25,6 +25,7 @@
 #include <QObject>
 #include "windowmaxsize.h"
 #include "nativewindowscaler.h"
+#include "staticsignal.h"
 #include <QProcessEnvironment>
 
 class LinuxWindowScaler : public NativeWindowScaler

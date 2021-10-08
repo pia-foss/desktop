@@ -56,4 +56,6 @@ private:
     std::unique_ptr<QNetworkAccessManager> _pAccessManager;
 };
 
+extern template class COMMON_EXPORT_TMPL_SPEC_DECL AutoSingleton<ApiNetwork>;
+
 #endif

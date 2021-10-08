@@ -30,7 +30,7 @@
 // watch a path that actually exists.  If the file specified doesn't exist,
 // FileWatcher will walk up the directory heirarchy to the first directory that
 // does exist, and watch that to detect when the file might be created.
-class FileWatcher : public QObject
+class COMMON_EXPORT FileWatcher : public QObject
 {
     Q_OBJECT
 

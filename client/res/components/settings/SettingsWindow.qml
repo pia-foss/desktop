@@ -63,6 +63,12 @@ SecondaryWindow {
   // layouts)
   readonly property int infoTipMaxWidth: 500
 
+  // Open the Settings window to a particular page
+  function showPage(page) {
+    selectPage(page)
+    showSettings()
+  }
+
   // Although the 'pages' model is an array and could use uiTr(), it's also used
   // as the model for a Repeater containing the settings pages, meaning all the
   // settings pages would be destroyed and recreated when it changes.
@@ -271,33 +277,26 @@ SecondaryWindow {
   Connections {
     target: ClientNotifications
     function onShowPage(pageName) {
-        selectPage(pageName)
-        showSettings()
+      settings.showPage(pageName)
     }
     function onShowPrivacyPage(){
-      selectPage('privacy')
-      showSettings()
+      settings.showPage('privacy')
     }
     function onShowNetworkPage() {
-      selectPage('network')
-      showSettings()
+      settings.showPage('network')
     }
     function onShowConnectionPage() {
-      selectPage('protocol')
-      showSettings()
+      settings.showPage('protocol')
     }
     function onShowMultihopPage() {
-      selectPage('multihop')
-      showSettings()
+      settings.showPage('multihop')
     }
     function onShowHelpPage() {
-      selectPage('help')
-      showSettings()
+      settings.showPage('help')
     }
 
     function startDriverReinstall(driverName) {
-      selectPage('help')
-      showSettings()
+      settings.showPage('help')
       let helpPage = tabLayout.item && tabLayout.item.getCurrentPage()
       if(helpPage)
         helpPage.startDriverReinstall(driverName)
@@ -313,8 +312,7 @@ SecondaryWindow {
       startDriverReinstall('callout')
     }
     function onShowHelpAlert(msg, title, level) {
-      selectPage('help')
-      showSettings()
+      settings.showPage('help')
       alert(msg, title, level)
     }
   }

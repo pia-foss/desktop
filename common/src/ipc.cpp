@@ -27,6 +27,8 @@
 #include <QDataStream>
 #include <QString>
 #include <QUuid>
+#include <QFile>
+#include <QLocalServer>
 
 // The IPC layer provides basic message framing for UTF-8-encoded payloads.
 // (The JSON-RPC implementation is connected to this IPC layer to transport its
@@ -86,8 +88,6 @@ namespace
     };
 }
 
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
 void IPCServer::sendMessageToAllClients(const QByteArray &msg)
 {
     for (const auto& connection : _connections)
@@ -96,10 +96,6 @@ void IPCServer::sendMessageToAllClients(const QByteArray &msg)
             connection->sendMessage(msg);
     }
 }
-
-#endif // defined(PIA_DAEMON) || defined(UNIT_TEST)
-
-
 
 // Implementation using QLocalServer / QLocalSocket ////////////////////////////
 
@@ -147,11 +143,6 @@ static const char* scanForMagic(const char* begin, const char* end)
     }
     return nullptr;
 }
-
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
-#include <QFile>
-#include <QLocalServer>
 
 LocalSocketIPCServer::LocalSocketIPCServer(QObject *parent)
     : IPCServer(parent), _server(nullptr)
@@ -204,9 +195,6 @@ void LocalSocketIPCServer::stop()
         _server = nullptr;
     }
 }
-
-#endif // defined(PIA_DAEMON) || defined(UNIT_TEST)
-
 
 LocalSocketIPCConnection::LocalSocketIPCConnection(QLocalSocket *socket, QObject *parent)
     : ClientIPCConnection{parent}, _socket{socket}, _payloadReceived{0},

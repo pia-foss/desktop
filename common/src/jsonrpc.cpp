@@ -502,8 +502,6 @@ Async<QJsonValue> RemoteCallInterface::callWithParams(const QString &method, con
     return result;
 }
 
-#if defined(PIA_CLIENT) || defined(UNIT_TEST)
-
 ClientSideInterface::ClientSideInterface(LocalMethodRegistry *methods, QObject *parent)
     : RemoteCallInterface(parent), _local(methods)
 {
@@ -524,10 +522,6 @@ bool ClientSideInterface::processMessage(const QByteArray &msg)
     }
 }
 
-#endif
-
-#if defined(PIA_DAEMON) || defined(UNIT_TEST)
-
 ServerSideInterface::ServerSideInterface(LocalMethodRegistry *methods, QObject *parent)
     : RemoteNotificationInterface(parent), _local(methods)
 {
@@ -538,5 +532,3 @@ bool ServerSideInterface::processMessage(const QByteArray &msg)
 {
     return _local.processMessage(msg);
 }
-
-#endif

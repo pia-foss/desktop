@@ -46,7 +46,7 @@
 // To avoid this issue, this falls back to short-polling every 100ms on macOS.
 // This isn't ideal, but the current uses of RecursiveWatcher are very short-
 // lived anyway, so it is reasonable.
-class RecursiveWatcher : public QObject
+class COMMON_EXPORT RecursiveWatcher : public QObject
 {
     Q_OBJECT
 

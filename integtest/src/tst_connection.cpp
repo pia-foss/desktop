@@ -21,7 +21,7 @@
 
 #include "integtestcase.h"
 #include "cliharness.h"
-#include "settings.h"
+#include "settings/daemonsettings.h"
 #include "tunnelcheckstatus.h"
 
 // Connection tests

@@ -143,3 +143,5 @@ QNetworkAccessManager &ApiNetwork::getAccessManager() const
 
     return *_pAccessManager;
 }
+
+template class COMMON_EXPORT AutoSingleton<ApiNetwork>;

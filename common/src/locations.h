@@ -22,8 +22,9 @@
 #ifndef LOCATIONS_H
 #define LOCATIONS_H
 
-#include "settings.h"
-
+#include "settings/connection.h"
+#include "settings/locations.h"
+#include "settings/dedicatedip.h"
 
 
 // Build Location and Server objects for the modern region infrastructure from

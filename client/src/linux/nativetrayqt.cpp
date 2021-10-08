@@ -21,7 +21,7 @@
 
 #include "nativetrayqt.h"
 #include "brand.h"
-#include "version.h"
+#include "product.h"
 #include "client.h"
 #include "platformscreens.h"
 #include <QGuiApplication>

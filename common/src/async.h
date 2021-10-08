@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("async.h")
-
 #ifndef ASYNC_H
 #define ASYNC_H
 #pragma once
+
+#include "common.h"
+#include "nodelist.h"
 
 #include <QObject>
 #include <QSharedPointer>
@@ -378,7 +378,7 @@ protected:
     // Try to figure out the name of the result type if possible.
     virtual const char* typeName() const;
     // Pretty print the task when debugging.
-    friend QDebug operator<<(QDebug debug, const BaseTask* task);
+    friend QDebug COMMON_EXPORT operator<<(QDebug debug, const BaseTask* task);
 
     virtual void connectNotify(const QMetaMethod &signal) override;
 

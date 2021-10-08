@@ -23,7 +23,7 @@
 #define LATENCYTRACKER_H
 
 #include "thread.h"
-#include "settings.h"
+#include "settings/locations.h"
 #include "vpn.h"
 #include <QObject>
 #include <QElapsedTimer>
@@ -31,6 +31,15 @@
 #include <QTimer>
 #include <QUdpSocket>
 #include <chrono>
+
+namespace std
+{
+    template<>
+    struct hash<QHostAddress>
+    {
+        std::size_t operator()(const QHostAddress &addr) const {return qHash(addr);}
+    };
+}
 
 //Key for a map/set containing both a host address and a port number.  (Used in
 //both LatencyTracker and unit tests.)

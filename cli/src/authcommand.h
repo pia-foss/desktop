@@ -23,7 +23,6 @@
 #define AUTHCOMMAND_H
 
 #include "clicommand.h"
-#include "settings.h"
 
 // Read a credential file consisting of newline-delimited credential components
 // (user/password, tokens, etc.).  Trailing CRs are trimmed if present.  If the

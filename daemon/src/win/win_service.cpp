@@ -22,7 +22,6 @@
 #include "win_service.h"
 #include "path.h"
 #include "win.h"
-#include "version.h"
 #include "brand.h"
 #include "../../../extras/installer/win/service_inl.h"
 #include "../../../extras/installer/win/tun_inl.h"

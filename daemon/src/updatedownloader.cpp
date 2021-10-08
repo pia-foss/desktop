@@ -277,11 +277,11 @@ UpdateDownloader::UpdateDownloader()
     // doesn't prevent the app from running.
     try
     {
-        _daemonVersion = SemVersion{u"" PIA_VERSION};
+        _daemonVersion = SemVersion{Version::semanticVersion()};
     }
     catch(const Error &ex)
     {
-        qCritical() << "Daemon version" << PIA_VERSION
+        qCritical() << "Daemon version" << Version::semanticVersion()
             << "is invalid, can't check for updates -" << ex;
     }
 

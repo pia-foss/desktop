@@ -34,7 +34,6 @@ QtObject {
   property bool reloaderActive: false
   property var wSettings: SettingsWindow {
     objectName: "wSettings"
-    visible: reloaderActive
     onTop: reloaderActive
   }
 
@@ -69,6 +68,8 @@ QtObject {
   }
 
   property var wChangeLog: ChangelogWindow {
+    onTop: reloaderActive
+    visible: reloaderActive
   }
 
   property var wOnboarding: OnboardingWindow {
@@ -102,7 +103,10 @@ QtObject {
     interval: 1
     repeat: false
     running: false
-    onTriggered: wChangeLog.open()
+    onTriggered: {
+      wChangeLog.activePage = 0 // What's New
+      wChangeLog.open()
+    }
   }
 
   // Qt has issues when the theme is changed while the dashboard is hidden
@@ -140,7 +144,7 @@ QtObject {
     context: Qt.ApplicationShortcut
     onActivated: wDevToolsLoader.open()
   }
- 
+
   function cleanUpResources() {
     NativeHelpers.trimComponentCache()
     NativeHelpers.releaseWindowResources(wSettings)

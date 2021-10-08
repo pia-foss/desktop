@@ -16,12 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("configwriter.h")
-
 #ifndef CONFIGWRITER_H
 #define CONFIGWRITER_H
 
+#include "common.h"
+#include <QFile>
 #include <utility>
 
 // ConfigWriter is used to write a line-delimited configuration file.  It

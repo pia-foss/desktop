@@ -21,7 +21,7 @@
 
 #include "win_registry.h"
 #include "path.h"
-#include "version.h"
+#include "product.h"
 
 #include <QDir>
 

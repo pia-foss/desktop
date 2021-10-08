@@ -23,7 +23,8 @@
 #define GETCOMMAND_H
 
 #include "clicommand.h"
-#include "settings.h"
+#include "settings/locations.h"
+#include "settings/daemonstate.h"
 
 // "Type" keywords used by get, set, and monitor
 namespace GetSetType

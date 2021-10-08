@@ -1,6 +1,6 @@
 #include <winver.h>
 #include "../../client/src/win/win_resources.h"
-#include "version.h"
+#include "version_win.h"
 
 IDI_APP ICON "./icons/win_app.ico"
 

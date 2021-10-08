@@ -99,32 +99,32 @@
         <translation>サブスクリプションを更新する</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="175"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="191"/>
         <source>AccountPage --- REFER A FRIEND. GET 30 DAYS FREE.</source>
         <translation>お友達を紹介すると、30日無料でご利用いただけます。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="183"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="204"/>
         <source>AccountPage --- Refer your friends and family. For every signup we’ll give you both 30 days free.</source>
         <translation>お友達やご家族を紹介してください。サインアップするごとに、あなたとご登録者の両方に30日間無料サービスをプレゼントします。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="193"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="231"/>
         <source>AccountPage --- Refer a Friend</source>
         <translation>お友達を紹介してください。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="236"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="273"/>
         <source>AccountPage --- You&apos;re not logged in</source>
         <translation>ログインしていません</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="247"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="284"/>
         <source>AccountPage --- To view your account details, please log in to your account</source>
         <translation>アカウントの詳細を表示するには、アカウントにログインしてください</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="259"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="296"/>
         <source>AccountPage --- Log in to your account</source>
         <translation>アカウントにログイン</translation>
     </message>
@@ -164,8 +164,10 @@
 <context>
     <name>AutomationAddRuleRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleDialog.qml" line="48"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleRow.qml" line="23"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="111"/>
         <source>AutomationAddRuleRow --- Add Automation Rule</source>
         <translation>自動化ルールを追加</translation>
     </message>
@@ -173,6 +175,7 @@
 <context>
     <name>AutomationPage</name>
     <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="55"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="30"/>
         <source>AutomationPage --- Connection Automation</source>
         <translation>接続の自動化</translation>
@@ -297,101 +300,44 @@
         <translation>新着情報</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="23"/>
         <source>ChangelogWindow --- Checkmark bullet</source>
         <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
         <translation>箇条書きチェックマーク</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
-        <source>ChangelogWindow --- Try WireGuard® today!</source>
-        <translation>WireGuard®を今すぐお試しください！</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
-        <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
-        <translation>新しいより効率的なVPNプロトコル。次の機能を提供します:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
-        <source>ChangelogWindow --- Better performance</source>
-        <translation>より良いパフォーマンス</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="183"/>
-        <source>ChangelogWindow --- Lower CPU usage</source>
-        <translation>より少ないCPU使用率</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="200"/>
-        <source>ChangelogWindow --- Longer battery life</source>
-        <translation>より長いバッテリー寿命</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="232"/>
-        <source>ChangelogWindow --- WireGuard® is enabled</source>
-        <translation>WireGuard®有効化済み</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="234"/>
-        <source>ChangelogWindow --- Try WireGuard® now</source>
-        <translation>今すぐ WireGuard®を試す</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
-        <source>ChangelogWindow --- Learn more</source>
-        <translation>詳しく知る</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
-        <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
-        <translation>WireGuard®を有効にするには再接続してください</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuardの機能: ロケットに乗ったロボット</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
-        <source>ChangelogWindow --- Split tunnel feature</source>
-        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
-        <translation>スプリットトンネル機能</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="387"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="66"/>
         <source>ChangelogWindow --- Control which apps use our VPN!</source>
         <translation>どのアプリが弊社のVPNを使用するかを制御！</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="400"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="70"/>
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>弊社の包括的なスプリットトンネリング機能を使用すると、どのアプリがいつVPNを使用するかを制御できます。スプリットトンネル[[アプリの例]]をチェックして、何が可能かご覧ください。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>コマンドライン インターフェイス機能</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>スプリットトンネル機能</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="83"/>
         <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
         <translation>弊社のコマンドラインインターフェース（CLI）を試したことはありますか？</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="474"/>
-        <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="85"/>
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
+<source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <translation>PIAデスクトップアプリにはCLIが搭載されており、追加機能を使用することができます。 「piactl」を呼び出して、今すぐチェックしてみましょう！ PIAの制御、PIAホットキーの統合、さらにはPIA機能をスクリプトで自動化したり、カスタム統合を行ったりすることができます。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="489"/>
-        <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
-        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
-        <translation>CLIで何かクールなものを作ってみませんか？ [[PIAフォーラム]]でそれを自慢しましょう！</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
+        <translation>コマンドライン インターフェイス機能</translation>
     </message>
 </context>
 <context>
@@ -698,17 +644,17 @@
         <translation>再試行</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="520"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="525"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Private Internet Accessがアップデートされました。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="523"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="528"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>最新情報を見る</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="540"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="545"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>アプリケーションが予期せず終了しました。お客様のVPN接続は保持されました。</translation>
@@ -1026,17 +972,17 @@
 <context>
     <name>DedicatedIpAdd</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="72"/>
         <source>DedicatedIpAdd --- Activate Your Dedicated IP</source>
         <translation>専用IPをアクティベート</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="115"/>
         <source>DedicatedIpAdd --- Paste in your token here</source>
         <translation>トークンをここに貼り付け</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="137"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
         <source>DedicatedIpAdd --- Activate</source>
         <translation>アクティベート</translation>
     </message>
@@ -1044,44 +990,44 @@
 <context>
     <name>DedicatedIpAddRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
         <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>下にトークンを貼り付けてください。最近専用IPを購入した場合は、[[マイアカウント]]ページからトークンを生成できます。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="100"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
         <source>DedicatedIpAddRow --- Dedicated IP Token</source>
         <translation>専用IPトークン</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="163"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
         <source>DedicatedIpAddRow --- Your token has expired.</source>
         <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
         <translation>トークンの期限が切れています。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="164"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="169"/>
         <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
         <translation>新しいトークンは[アカウントページ]から購入することができます。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="176"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="181"/>
         <source>DedicatedIpAddRow --- Your token is invalid.</source>
         <translation>トークンが無効です。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="182"/>
         <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
         <translation>トークンが正しく入力されていることを確認してください。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="194"/>
         <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
         <translation>トークンを確認できませんでした。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="190"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="195"/>
         <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
         <translation>サーバーに接続できないためトークンを確認できません。後でもう一度お試しください。</translation>
     </message>
@@ -1647,6 +1593,49 @@
     </message>
 </context>
 <context>
+    <name>HeroCard</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="24"/>
+        <source>HeroCard --- Get Your Dedicated IP!</source>
+        <translation>専用IPを入手しましょう！</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="25"/>
+        <source>HeroCard --- Get your own unique IP without sacrificing any of your privacy or security. Enjoy all the benefits of a fully anonymous dedicated IP:</source>
+        <translation>プライバシーやセキュリティを一切損なわずに、自分専用のIPを入手することができます。完全匿名性の専用IPの特典を余さずご利用ください:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="27"/>
+        <source>HeroCard --- Stop triggering security warnings</source>
+        <translation>セキュリティ警告が表示されなくなる</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="28"/>
+        <source>HeroCard --- Smoother account access</source>
+        <translation>アカウントへのアクセスがよりスムーズにできる</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="29"/>
+        <source>HeroCard --- See fewer CAPTCHAs</source>
+        <translation>CAPTCHAの表示が減る</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="30"/>
+        <source>HeroCard --- Protect your IoT devices</source>
+        <translation>IoTデバイスの保護</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="32"/>
+        <source>HeroCard --- GET YOUR DEDICATED IP</source>
+        <translation>専用IPを入手する</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="142"/>
+        <source>HeroCard --- Dedicated IP feature</source>
+        <translation>専用IPの機能</translation>
+    </message>
+</context>
+<context>
     <name>IPModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="20"/>
@@ -2061,7 +2050,8 @@
         <translation>アプリ除外</translation>
     </message>
     <message>
-    <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="246"/>
+        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>変更内容を適用するには、アプリを再起動する必要がある場合があります。</translation>
     </message>
 </context>
@@ -3177,77 +3167,77 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>一般</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
         <source>SettingsWindow -- setting-title --- Protocols</source>
         
         <translation>プロトコル</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>ネットワーク</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>プライバシー</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>専用IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>自動化</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="71"/>
         <source>SettingsWindow -- setting-title --- Split Tunnel</source>
         
         <translation>スプリットトンネル</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title --- Multi-Hop</source>
         
         <translation>マルチホップ</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="73"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>アカウント</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="74"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="151"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="157"/>
         <source>SettingsWindow --- Alert</source>
         <translation>アラート</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="191"/>
         <location filename="../../../client/res/components/settings/tabs/VerticalTabLayout.qml" line="46"/>
         <source>SettingsWindow --- Settings</source>
         <translation>設定</translation>
@@ -3344,7 +3334,8 @@
 <context>
     <name>SplitTunnelAddAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="213"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="214"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>アプリケーションを追加</translation>
     </message>
@@ -3363,7 +3354,7 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="222"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>IPアドレスを追加</translation>
     </message>
@@ -3939,6 +3930,36 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
         <source>UsageModule --- Upload</source>
         <translation>アップロード</translation>
+    </message>
+</context>
+<context>
+    <name>WhatsNewContent</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="34"/>
+        <source>WhatsNewContent --- WireGuard Protocol</source>
+        <translation>WireGuardプロトコル</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="35"/>
+        <source>WhatsNewContent --- It&apos;s a new, more efficient protocol that offers better performance, lower CPU usage, and longer battery life.  [[Try it now]]</source>
+        <translation>より優れたパフォーマンス、より低いCPU使用率、およびより長いバッテリー寿命を提供する、新しくより効率的なプロトコルです。[[今すぐ試してみる]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="50"/>
+        <source>WhatsNewContent --- WireGuard feature</source>
+        <extracomment>Screen reader annotation for the WireGuard image in the What&apos;s New view</extracomment>
+        <translation>WireGuardの機能</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="56"/>
+        <source>WhatsNewContent --- Create rules to automatically connect or disconnect the VPN when you join a particular network.  [[Go to Settings]]</source>
+        <translation>ルールを作成して、特定のネットワークに入った時にVPNへの接続または切断を自動的に行います。[[設定を開く]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="61"/>
+        <source>WhatsNewContent --- Automation feature</source>
+        <extracomment>Screen reader annotation for the automation image in the What&apos;s New view</extracomment>
+        <translation>自動化機能</translation>
     </message>
 </context>
 <context>

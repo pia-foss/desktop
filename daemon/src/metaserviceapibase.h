@@ -22,7 +22,7 @@
 #ifndef METASERVICEAPIBASE_H
 #define METASERVICEAPIBASE_H
 
-#include "settings.h"
+#include "settings/daemonstate.h"
 #include "apibase.h"
 
 // ApiBase that generates base URIs from "meta" services in the modern servers
@@ -45,7 +45,7 @@
 // case, fixed bases are only used as a fallback in case of a problem with the
 // meta service (10.0.0.1:443 can't be blocked since it is internal to the VPN
 // server).
-class COMMON_EXPORT MetaServiceApiBase : public ApiBase
+class MetaServiceApiBase : public ApiBase
 {
 public:
     // Construct MetaServiceApiBase with:

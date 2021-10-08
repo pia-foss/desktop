@@ -1,3 +1,17 @@
+class LineContent
+    def initialize()
+        @content = ''
+    end
+
+    def line(code)
+        @content << code + "\n"
+    end
+
+    def content()
+        @content
+    end
+end
+
 # Generate the content for a C++ header.  Used to generate version.h/brand.h,
 # primarily useful for defining macros containing build information.
 class CppHeader
@@ -5,10 +19,15 @@ class CppHeader
     # 'version' or 'brand'
     def initialize(name)
         guard = "#{name.upcase}_H"
-        @content = ''
-        @content << '#ifndef ' + guard + "\n"
-        @content << '#define ' + guard + "\n"
-        @content << "\n"
+        @content = LineContent.new
+        @content.line '#ifndef ' + guard
+        @content.line '#define ' + guard
+        @content.line ''
+    end
+
+    # Add an arbitrary line of code.
+    def line(code)
+        @content.line code
     end
 
     # Define a macro with a string value.  The value given becomes the content
@@ -18,7 +37,7 @@ class CppHeader
     # strings that don't need to be used in resource scripts, defineRawString()
     # can write the string as a raw string literal.
     def defineString(macro, value)
-        @content << '#define ' + macro + ' ' + value.dump + "\n"
+        @content.line '#define ' + macro + ' ' + value.dump
     end
 
     # Define a macro with a string value, using a raw string literal to
@@ -27,18 +46,18 @@ class CppHeader
     # support raw string literals, so this can't be used for values used in
     # Windows resource scripts.
     def defineRawString(macro, value)
-        @content << '#define ' + macro + ' R"(' + value + ')"' + "\n"
+        @content.line '#define ' + macro + ' R"(' + value + ')"'
     end
 
     # Define a macro with a literal value - the value given is written verbatim
     # into the header.
     def defineLiteral(macro, value)
-        @content << '#define ' + macro + ' ' + value + "\n"
+        @content.line '#define ' + macro + ' ' + value
     end
 
     # Get the final content of the header file
     def content
         # Add the final #endif to close the include guard
-        @content + '#endif' + "\n"
+        @content.content + '#endif' + "\n"
     end
 end

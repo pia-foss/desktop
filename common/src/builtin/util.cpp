@@ -55,6 +55,19 @@
 # endif
 #endif
 
+namespace
+{
+    // Whether this is the client or daemon - affects some aspects of crash
+    // handling; see initCrashReporting().
+    // Note that this is always 'false' for components that don't initialize
+    // crash handling.
+    bool isClient{};
+    const Path &getCrashReportDir()
+    {
+        return isClient ? Path::ClientCrashReportDir : Path::DaemonCrashReportDir;
+    }
+}
+
 QString traceMsec(qint64 time)
 {
     Q_ASSERT(time >= 0);
@@ -101,17 +114,8 @@ int waitForExitCode(QProcess& process)
         return process.exitCode();
 }
 
-
-void throwIfEnumCastFailed(bool result, const char* name)
-{
-    if (!result)
-        throw Error(HERE, Error::InvalidEnumValue, { QString(name) });
-}
-
-
 void startSupportTool (const QString &mode, const QString &diagFile)
 {
-#ifdef PIA_CLIENT
     QProcess crashReportProcess;
     QStringList args;
 
@@ -146,7 +150,6 @@ void startSupportTool (const QString &mode, const QString &diagFile)
     crashReportProcess.setProgram(Path::SupportToolExecutable);
     crashReportProcess.setArguments(args);
     crashReportProcess.startDetached();
-#endif
 }
 
 void setUtf8LocaleCodec()
@@ -158,17 +161,17 @@ QString getVersionInfo()
 {
     QString version_info;
     QString timestamp = QDateTime::currentDateTime().toUTC().toString("yyyyMMddhhmmss");
-#if defined(PIA_CLIENT)
-    version_info = "client";
-#elif defined(PIA_DAEMON)
-    version_info = "daemon";
-#endif
-    version_info += QString("-") + PIA_VERSION + "-" + timestamp;
+    version_info = isClient ? QStringLiteral("client") : QStringLiteral("daemon");
+    version_info += QString("-") + Version::semanticVersion() + "-" + timestamp;
     return version_info;
 }
 
-#ifdef PIA_CRASH_REPORTING
+bool isClientOpenGLFailureTrace(const QString &msg)
+{
+    return isClient && msg.contains(QStringLiteral("Failed to create OpenGL context"));
+}
 
+#ifdef PIA_CRASH_REPORTING
 
 // Different implementations of `DumpCallback for each platform.
 // None of these attempt to write out diagnostics.
@@ -192,15 +195,13 @@ bool DumpCallback(const char *dump_dir,
     qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
 
-    if(succeeded) {
+    if(succeeded)
+    {
         QFile::rename(old_path, new_path);
-#ifdef PIA_CLIENT
-        startSupportTool(QStringLiteral("crash"), {});
-#endif
-
-#if defined(PIA_DAEMON)
-        QFile::setPermissions(new_path, QFileDevice::ReadUser|QFileDevice::ReadGroup);
-#endif
+        if(isClient)
+            startSupportTool(QStringLiteral("crash"), {});
+        else
+            QFile::setPermissions(new_path, QFileDevice::ReadUser|QFileDevice::ReadGroup);
     }
     return succeeded;
 }
@@ -222,9 +223,11 @@ bool DumpCallback(const wchar_t* dump_dir,
                        QString::fromWCharArray(minidump_id) + ".dmp";
     qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
-    if(succeeded) {
+    if(succeeded)
+    {
         QFile::rename(old_path, new_path);
-        startSupportTool("crash", {});
+        if(isClient)
+            startSupportTool("crash", {});
     }
 
     return succeeded;
@@ -238,11 +241,11 @@ bool DumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
     qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
 
     if(succeeded) {
-#if defined(PIA_DAEMON)
-        QFile::setPermissions(descriptor.path(), QFileDevice::ReadUser|QFileDevice::ReadGroup);
-#endif
+        if(!isClient)
+            QFile::setPermissions(descriptor.path(), QFileDevice::ReadUser|QFileDevice::ReadGroup);
         QFile::rename(descriptor.path(), new_path);
-        startSupportTool("crash", {});
+        if(isClient)
+            startSupportTool("crash", {});
     }
 
     return succeeded;
@@ -250,8 +253,13 @@ bool DumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
 #endif
 
 // Initialize crash reporting. Please ensure Path is initialized before this
-void initCrashReporting()
+//
+// 'isClient' indicates whether this is the client or daemon - which crash
+// directory we use, whether we start the support tool after crashing, etc.
+void initCrashReporting(bool isClient)
 {
+    ::isClient = isClient;
+
     if(isDebuggerPresent())
     {
         qInfo() << "Being debugged - not handling crashes";
@@ -260,19 +268,19 @@ void initCrashReporting()
 
     qInfo() << "Initializing crash handler";
 
-    Path::CrashReportDir.mkpath();
+    getCrashReportDir().mkpath();
     // Create a pointer to exception handler. Since only one object
     // is created, and is long running, no need to store reference for clearing/usage later
 #if defined(Q_OS_MAC)
-    new google_breakpad::ExceptionHandler(QString(Path::CrashReportDir).toStdString(),
+    new google_breakpad::ExceptionHandler(QString(getCrashReportDir()).toStdString(),
                                           /*FilterCallback*/ 0,
                                           DumpCallback, /*context*/ 0, true, NULL);
 #elif defined(Q_OS_WIN)
-    new google_breakpad::ExceptionHandler(QString(Path::CrashReportDir).toStdWString(), /*FilterCallback*/ 0,
+    new google_breakpad::ExceptionHandler(QString(getCrashReportDir()).toStdWString(), /*FilterCallback*/ 0,
                                           DumpCallback, /*context*/ 0,
                                           google_breakpad::ExceptionHandler::HANDLER_ALL);
 #elif defined(Q_OS_LINUX)
-    new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(QString(Path::CrashReportDir).toStdString()),
+    new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(QString(getCrashReportDir()).toStdString()),
                                                             /*FilterCallback*/ 0,
                                                             DumpCallback,
                                                             /*context*/ 0,

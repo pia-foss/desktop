@@ -19,7 +19,7 @@
 #include "common.h"
 #line SOURCE_FILE("posix/posix_main.cpp")
 
-#if defined(PIA_CLIENT) || defined(UNIT_TEST)
+#if defined(UNIT_TEST)
 
 // Entry point shouldn't be included for these projects
 void dummyPosixMain() {}
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     }
     if(parser.isSet(QStringLiteral("version")))
     {
-        QTextStream{stdout} << QStringLiteral(PIA_VERSION) << Qt::endl;
+        QTextStream{stdout} << Version::semanticVersion() << Qt::endl;
         return 0;
     }
     Logger logSingleton{Path::DaemonLogFile};

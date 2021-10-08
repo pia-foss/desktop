@@ -19,7 +19,8 @@
 #include "registry.h"
 #include "file.h"
 #include "brand.h"
-#include "version.h"
+#include "product.h"
+#include "version_literal.h"
 #include <cassert>
 
 namespace
@@ -205,7 +206,7 @@ bool WriteUninstallRegistryTask::updateKey(HKEY hkey)
     writeRegistry(hkey, L"InstallLocation", REG_EXPAND_SZ, g_installPath);
     writeRegistry(hkey, L"UninstallString", REG_EXPAND_SZ, g_installPath + L"\\uninstall.exe");
     writeRegistry(hkey, L"Publisher", REG_SZ, L"Private Internet Access, Inc.");
-    writeRegistry(hkey, L"DisplayVersion", REG_SZ, L"" PIA_VERSION);
+    writeRegistry(hkey, L"DisplayVersion", REG_SZ, L"" PIA_VERSION_LITERAL);
     writeRegistry(hkey, L"DisplayIcon", REG_EXPAND_SZ, g_installPath + L"\\" BRAND_CODE "-client.exe");
     writeRegistry(hkey, L"URLInfoAbout", REG_SZ, L"https://www.privateinternetaccess.com/");
     if (g_installationSize)

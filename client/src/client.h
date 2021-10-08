@@ -16,13 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("client.h")
-
 #ifndef CLIENT_H
 #define CLIENT_H
 #pragma once
 
+#include "common.h"
 #include "clientsettings.h"
 #include "clientqmlcontext.h"
 #include "daemonconnection.h"

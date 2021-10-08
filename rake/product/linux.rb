@@ -146,12 +146,14 @@ module PiaLinux
                 'libQt5Quick.so.5',
                 'libQt5QuickShapes.so.5',
                 'libQt5QuickTemplates2.so.5',
+                'libQt5WaylandClient.so.5',
                 'libQt5Widgets.so.5',
                 'libQt5XcbQpa.so.5'
             ], [
                 'platforms',
                 'egldeviceintegrations',
-                'xcbglintegrations'
+                'xcbglintegrations',
+                'wayland-shell-integration'
             ], [
                 'builtins.qmltypes',
                 'QtGraphicalEffects',

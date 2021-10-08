@@ -99,32 +99,32 @@
         <translation>Aboneliği Yenile</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="175"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="191"/>
         <source>AccountPage --- REFER A FRIEND. GET 30 DAYS FREE.</source>
         <translation>BİR ARKADAŞINIZA ÖNERİN. 30 GÜN ÜCRETSİZ KULLANIM KAZANIN.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="183"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="204"/>
         <source>AccountPage --- Refer your friends and family. For every signup we’ll give you both 30 days free.</source>
         <translation>Arkadaşlarınızı ve ailenizi aramıza katın. Her kayıt için hem size hem onlara 30 gün ücretsiz kullanım verelim.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="193"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="231"/>
         <source>AccountPage --- Refer a Friend</source>
         <translation>Bir arkadaşınıza önerin</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="236"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="273"/>
         <source>AccountPage --- You&apos;re not logged in</source>
         <translation>Giriş yapmadınız</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="247"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="284"/>
         <source>AccountPage --- To view your account details, please log in to your account</source>
         <translation>Hesap ayrıntılarınızı görüntülemek için lütfen hesabınıza giriş yapın</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="259"/>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="296"/>
         <source>AccountPage --- Log in to your account</source>
         <translation>Hesabınıza giriş yapın</translation>
     </message>
@@ -164,8 +164,10 @@
 <context>
     <name>AutomationAddRuleRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleDialog.qml" line="48"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationAddRuleRow.qml" line="23"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="57"/>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="111"/>
         <source>AutomationAddRuleRow --- Add Automation Rule</source>
         <translation>Otomasyon Kuralı Ekle</translation>
     </message>
@@ -173,6 +175,7 @@
 <context>
     <name>AutomationPage</name>
     <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="55"/>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationPage.qml" line="30"/>
         <source>AutomationPage --- Connection Automation</source>
         <translation>Bağlantı Otomasyonu</translation>
@@ -297,101 +300,44 @@
         <translation>Yenilikler</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="27"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="23"/>
         <source>ChangelogWindow --- Checkmark bullet</source>
         <extracomment>Screen reader annotation for the &quot;checkmark&quot; bullets used in the What&apos;s New view</extracomment>
         <translation>İşaret madde imi</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="136"/>
-        <source>ChangelogWindow --- Try WireGuard® today!</source>
-        <translation>Bugün WireGuard® protokolünü deneyin!</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="146"/>
-        <source>ChangelogWindow --- It&apos;s a new, more efficient VPN protocol that offers:</source>
-        <translation>Daha verimli çalışan bu yeni VPN protokolü size şunları sunuyor:</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="166"/>
-        <source>ChangelogWindow --- Better performance</source>
-        <translation>Daha iyi performans</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="183"/>
-        <source>ChangelogWindow --- Lower CPU usage</source>
-        <translation>Daha düşük işlemci kullanımı</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="200"/>
-        <source>ChangelogWindow --- Longer battery life</source>
-        <translation>Daha uzun pil ömrü</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="232"/>
-        <source>ChangelogWindow --- WireGuard® is enabled</source>
-        <translation>WireGuard® etkinleştirildi</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="234"/>
-        <source>ChangelogWindow --- Try WireGuard® now</source>
-        <translation>Hemen WireGuard® protokolünü deneyin</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="257"/>
-        <source>ChangelogWindow --- Learn more</source>
-        <translation>Daha çok bilgi</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="273"/>
-        <source>ChangelogWindow --- Please reconnect to activate WireGuard®</source>
-        <translation>WireGuard®&apos;ı etkinleştirmek için lütfen tekrar bağlanın</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="311"/>
-        <source>ChangelogWindow --- WireGuard feature: robot on a rocket</source>
-        <extracomment>Screen reader annotation for the WireGuard feature image on the What&apos;s New view</extracomment>
-        <translation>WireGuard özelliği: roketteki robot</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="369"/>
-        <source>ChangelogWindow --- Split tunnel feature</source>
-        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
-        <translation>Ayrık tünel özelliği</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="387"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="66"/>
         <source>ChangelogWindow --- Control which apps use our VPN!</source>
         <translation>Hangi uygulamaların VPN kullandığını kontrol edin!</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="400"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="70"/>
         <source>ChangelogWindow --- With our comprehensive split tunneling functionality, you can control which apps use the VPN and when. Check out our Split Tunnel [[app examples]] to see what&apos;s possible.</source>
         <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
         <translation>Kapsamlı ayrık tünelleme işlevselliğimiz sayesinde, hangi uygulamaların ne zaman VPN kullanacağını kontrol edebilirsiniz. Neler yapabileceğinizi görmek için, Ayrık Tünelleme [[uygulama örneklerimize]] göz atın.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="442"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface feature on the What&apos;s New view</extracomment>
-        <translation>Komut satırı arayüzü özelliği</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>Ayrık tünel özelliği</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="457"/>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="83"/>
         <source>ChangelogWindow --- Have you tried our command-line interface (CLI)?</source>
         <translation>Komut satırı arayüzümüzü (CLI) denediniz mi?</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="474"/>
-        <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="85"/>
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
+<source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <translation>PIA masaüstü uygulamasına CLI işlevselliği eklenmiştir. &quot;piactl&quot; komutunu kullanarak bugün kendiniz deneyin! PIA kontrolü, PIA kısayol tuşlarının entegrasyonu ve hatta PIA işlevselliğinin komut dosyalarıyla otomatikleştirilmesi ya da özel entegrasyon gibi şeyler yapabilirsiniz.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="489"/>
-        <source>ChangelogWindow --- Make something cool with the CLI? Show it off on the [[PIA Forum]]!</source>
-        <extracomment>The [[double square brackets]] are replaced by a link. Please use them for the relavant link text.</extracomment>
-        <translation>CLI ile havalı bir şey mi yaptınız? [[PIA Forum]] üzerinden herkese gösterin!</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
+        <translation>Komut satırı arayüzü özelliği</translation>
     </message>
 </context>
 <context>
@@ -698,17 +644,17 @@
         <translation>Tekrar Dene</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="520"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="525"/>
         <source>ClientNotifications --- Private Internet Access was updated.</source>
         <translation>Özel İnternet Erişimi güncellendi.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="523"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="528"/>
         <source>ClientNotifications --- See what&apos;s new</source>
         <translation>Yeniliklere bakın</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="540"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="545"/>
         <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
         <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
         <translation>Uygulama beklenmedik bir şekilde sonlandı. VPN bağlantınız korundu.</translation>
@@ -1026,17 +972,17 @@
 <context>
     <name>DedicatedIpAdd</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="72"/>
         <source>DedicatedIpAdd --- Activate Your Dedicated IP</source>
         <translation>Özel IP&apos;nizi Etkinleştirin</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="110"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="115"/>
         <source>DedicatedIpAdd --- Paste in your token here</source>
         <translation>Belirtecinizi buraya yapıştırın</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="137"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
         <source>DedicatedIpAdd --- Activate</source>
         <translation>Etkinleştir</translation>
     </message>
@@ -1044,44 +990,44 @@
 <context>
     <name>DedicatedIpAddRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
         <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>Belirtecinizi aşağı yapıştırın. Kısa süre önce bir özel IP aldıysanız [[Hesabım]] sayfasına giderek belirteci üretebilirsiniz.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="100"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
         <source>DedicatedIpAddRow --- Dedicated IP Token</source>
         <translation>Özel IP Belirteci</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="163"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
         <source>DedicatedIpAddRow --- Your token has expired.</source>
         <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
         <translation>Belirtecinizin süresi doldu.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="164"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="169"/>
         <source>DedicatedIpAddRow --- You can purchase a new one from the My Account page.</source>
         <translation>Hesabım sayfasından yenisini satın alabilirsiniz.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="176"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="181"/>
         <source>DedicatedIpAddRow --- Your token is invalid.</source>
         <translation>Belirteciniz geçersiz.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="177"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="182"/>
         <source>DedicatedIpAddRow --- Make sure you have entered the token correctly.</source>
         <translation>Belirteci doğru şekilde girdiğinizden emin olun.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="189"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="194"/>
         <source>DedicatedIpAddRow --- Couldn&apos;t check the token.</source>
         <translation>Belirteç kontrol edilemedi.</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="190"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="195"/>
         <source>DedicatedIpAddRow --- Can&apos;t reach the server to check the token.  Please try again later.</source>
         <translation>Belirtecin kontrolü için sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.</translation>
     </message>
@@ -1647,6 +1593,49 @@
     </message>
 </context>
 <context>
+    <name>HeroCard</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="24"/>
+        <source>HeroCard --- Get Your Dedicated IP!</source>
+        <translation>Özel IP&apos;nizi Alın!</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="25"/>
+        <source>HeroCard --- Get your own unique IP without sacrificing any of your privacy or security. Enjoy all the benefits of a fully anonymous dedicated IP:</source>
+        <translation>Gizliliğinizden veya güvenliğinizden ödün vermeden kendi benzersiz IP&apos;nizi alın. Tamamen anonim, özel bir IP&apos;nin tüm avantajlarından faydalanın:</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="27"/>
+        <source>HeroCard --- Stop triggering security warnings</source>
+        <translation>Güvenlik uyarılarını tetiklemeyi durdurun</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="28"/>
+        <source>HeroCard --- Smoother account access</source>
+        <translation>Daha sorunsuz hesap erişimi</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="29"/>
+        <source>HeroCard --- See fewer CAPTCHAs</source>
+        <translation>Daha az CAPTCHA görün</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="30"/>
+        <source>HeroCard --- Protect your IoT devices</source>
+        <translation>IoT cihazlarınızı koruyun</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="32"/>
+        <source>HeroCard --- GET YOUR DEDICATED IP</source>
+        <translation>ÖZEL IP&apos;NİZİ ALIN</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="142"/>
+        <source>HeroCard --- Dedicated IP feature</source>
+        <translation>Özel IP özelliği</translation>
+    </message>
+</context>
+<context>
     <name>IPModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/IPModule.qml" line="20"/>
@@ -2061,7 +2050,8 @@
         <translation>Uygulamaları Hariç Tut</translation>
     </message>
     <message>
-    <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="246"/>
+        <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>Değişikliklerin uygulanması için uygulamaların yeniden başlatılması gerekebilir.</translation>
     </message>
 </context>
@@ -3177,77 +3167,77 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="59"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- General</source>
         
         <translation>Genel</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="60"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
         <source>SettingsWindow -- setting-title --- Protocols</source>
         
         <translation>Protokoller</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="61"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Network</source>
         
         <translation>Ağ</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="62"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Privacy</source>
         
         <translation>Gizlilik</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="63"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
         <source>SettingsWindow -- setting-title --- Dedicated IP</source>
         
         <translation>Özel IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="64"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
         <source>SettingsWindow -- setting-title --- Automation</source>
         
         <translation>Otomasyon</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="71"/>
         <source>SettingsWindow -- setting-title --- Split Tunnel</source>
         
         <translation>Ayrık Tünelleme</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="66"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="72"/>
         <source>SettingsWindow -- setting-title --- Multi-Hop</source>
         
         <translation>Çoklu Atlama</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="73"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>Hesap</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="74"/>
         <extracomment>setting-title</extracomment>
 <source>SettingsWindow -- setting-title --- Help</source>
         
         <translation>Yardım</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="151"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="157"/>
         <source>SettingsWindow --- Alert</source>
         <translation>Uyarı</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="185"/>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="191"/>
         <location filename="../../../client/res/components/settings/tabs/VerticalTabLayout.qml" line="46"/>
         <source>SettingsWindow --- Settings</source>
         <translation>Ayarlar</translation>
@@ -3344,7 +3334,8 @@
 <context>
     <name>SplitTunnelAddAppRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="213"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="156"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="214"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>Uygulama Ekle</translation>
     </message>
@@ -3363,7 +3354,7 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="222"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>IP Adresi Ekle</translation>
     </message>
@@ -3939,6 +3930,36 @@
         <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
         <source>UsageModule --- Upload</source>
         <translation>Yükle</translation>
+    </message>
+</context>
+<context>
+    <name>WhatsNewContent</name>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="34"/>
+        <source>WhatsNewContent --- WireGuard Protocol</source>
+        <translation>WireGuard Protokolü</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="35"/>
+        <source>WhatsNewContent --- It&apos;s a new, more efficient protocol that offers better performance, lower CPU usage, and longer battery life.  [[Try it now]]</source>
+        <translation>Bu; daha iyi performans, daha düşük CPU kullanımı ve daha uzun pil ömrü sunan yeni, daha etkili bir protokoldür. [[Şimdi deneyin]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="50"/>
+        <source>WhatsNewContent --- WireGuard feature</source>
+        <extracomment>Screen reader annotation for the WireGuard image in the What&apos;s New view</extracomment>
+        <translation>WireGuard özelliği</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="56"/>
+        <source>WhatsNewContent --- Create rules to automatically connect or disconnect the VPN when you join a particular network.  [[Go to Settings]]</source>
+        <translation>Belirli bir ağa katıldığınızda VPN&apos;e otomatik olarak bağlanmak veya bağlantıyı sonlandırmak için kurallar oluşturun. [[Ayarlara gidin]]</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="61"/>
+        <source>WhatsNewContent --- Automation feature</source>
+        <extracomment>Screen reader annotation for the automation image in the What&apos;s New view</extracomment>
+        <translation>Otomasyon özelliği</translation>
     </message>
 </context>
 <context>

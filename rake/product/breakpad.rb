@@ -64,6 +64,7 @@ module PiaBreakpad
         executable.include(Include)
         executable.sourceFiles(WindowsSources) if Build.windows?
         executable.sourceFiles(MacSources) if Build.macos?
+        executable.framework('AppKit') if Build.macos?
         executable.sourceFiles(LinuxSources) if Build.linux?
         executable.sourceFiles(PosixSources) if Build.posix?
     end

@@ -23,6 +23,7 @@
 
 #include "path.h"
 #include "brand.h"
+#include "product.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -103,6 +104,9 @@ namespace xpc
 
 bool macCheckInstallation()
 {
+#ifdef MACOS_SKIP_INSTALL_CHECK
+    return true;
+#endif
     int installCheck = QProcess::execute(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/vpn-installer.sh"), { QStringLiteral("check") });
 
     if (0 != installCheck)

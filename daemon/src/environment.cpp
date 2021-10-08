@@ -23,6 +23,7 @@
 #include "path.h"
 #include "metaserviceapibase.h"
 #include "brand.h"
+#include <QFile>
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QJsonDocument>

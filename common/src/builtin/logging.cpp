@@ -485,7 +485,8 @@ bool LoggerPrivate::openLogFile(bool newSession)
                 }
                 logSize = logFile.size();
             }
-            qInfo() << "Starting log session (v" PIA_VERSION ")";
+            qInfo().nospace() << "Starting log session (v"
+                << Version::semanticVersion() << ")";
         }
         return true;
     }
@@ -659,14 +660,14 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
         // Abort - treat this as an unclean exit.  Also gives a chance to debug
         // in debug builds (this is how failed asserts are handled).
 
-#if defined(Q_OS_LINUX) && PIA_CLIENT
-        if(msg.contains(QStringLiteral("Failed to create OpenGL context"))) {
+#if defined(Q_OS_LINUX)
+        if(isClientOpenGLFailureTrace(msg)) {
 #ifdef PIA_CRASH_REPORTING
             stopCrashReporting();
 #endif // PIA_CRASH_REPORTING
             Exec::bashDetached(Path::ExecutableDir / "error-notice.sh");
         }
-#endif // defined(Q_OS_LINUX) && PIA_CLIENT
+#endif // defined(Q_OS_LINUX)
         std::abort();
     }
 }

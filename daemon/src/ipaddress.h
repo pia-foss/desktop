@@ -20,6 +20,7 @@
 #define IPADDRESS_H
 
 #include "common.h"
+#include <QHostAddress>
 
 // IPv4 address.  QHostAddress can hold an IPv4 address, but when we require an
 // IPv4 address specifically, this makes more sense than holding a QHostAddress

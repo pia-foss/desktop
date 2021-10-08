@@ -28,7 +28,7 @@
 
 namespace Files
 {
-    extern const QString wireguardGoBasename;
+    extern const COMMON_EXPORT QString wireguardGoBasename;
 }
 
 class COMMON_EXPORT Path
@@ -120,10 +120,12 @@ public:
     // daemon.
     static Path DaemonHelperIpcSocket;
 
-    // Directory to store crash reports
-    // All (Client): <ClientDataDir>/crashes/
+    // Directory to store client crash reports
+    // All: <ClientDataDir>/crashes/
+    static Path ClientCrashReportDir;
+    // Directory to store daemon crash reports
     // Daemon: <DaemonDataDir>/crashes/
-    static Path CrashReportDir;
+    static Path DaemonCrashReportDir;
 
     // Crash reporter tool
     // Windows: <ExecutableDir>/pia-support-tool.exe
@@ -206,7 +208,6 @@ public:
     static Path ParentVpnExclusionsFile;
 #endif
 
-#ifdef PIA_CLIENT
     // Per-user writable temporary data directory for client use
     // Windows: C:/Users/<USER>/AppData/Local/Private Internet Access
     // macOS: ~/Library/Application Support/com.privateinternetaccess.vpn
@@ -246,23 +247,12 @@ public:
     // Usually ~/.config/autostart/pia-client.desktop
     static Path ClientAutoStartFile;
 #endif
-#endif
 
 #ifdef Q_OS_MAC
     static Path SplitTunnelKextPath;
     // For tcpdump pcap files (used in diagnostics)
     static Path PcapDir;
 #endif
-
-
-
-    // Writable temporary data directory
-    // All: <DaemonDataDir> or <ClientDataDir> depending on context
-    static Path DataDir;
-
-    // Writable persistent settings directory
-    // All: <DaemonSettingsDir> or <ClientSettingsDir> depending on context
-    static Path SettingsDir;
 
     // Debug log config file
     static Path DebugFile;

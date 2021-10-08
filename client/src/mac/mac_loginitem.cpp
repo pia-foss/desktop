@@ -22,7 +22,6 @@
 #include "mac_loginitem.h"
 #include "brand.h"
 #include "path.h"
-#include "version.h"
 #include <QFile>
 #include <QTextStream>
 

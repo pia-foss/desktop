@@ -20,7 +20,8 @@
 #define SERVICEQUALITY_H
 
 #include "common.h"
-#include "settings.h"
+#include "settings/daemonaccount.h"
+#include "settings/daemondata.h"
 #include "apiclient.h"
 #include "environment.h"
 

@@ -20,7 +20,7 @@
 #line SOURCE_FILE("trayiconmanager.cpp")
 
 #include "trayiconmanager.h"
-#include "version.h"
+#include "product.h"
 #include "client.h"
 #include "clientsettings.h"
 #include "platformscreens.h"

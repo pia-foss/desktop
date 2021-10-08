@@ -21,6 +21,7 @@
 
 #include "linux_modsupport.h"
 #include "exec.h"
+#include <QFile>
 #include <QTimer>
 #include <sys/utsname.h>
 

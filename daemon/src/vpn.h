@@ -16,14 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("vpn.h")
-
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef VPN_H
+#define VPN_H
 #pragma once
 
-#include "settings.h"
+#include "common.h"
+#include "settings/connection.h"
+#include "settings/daemonaccount.h"
+#include "settings/daemonsettings.h"
+#include "settings/daemonstate.h"
 #include "processrunner.h"
 #include "vpnstate.h"
 #include "elapsedtime.h"
@@ -734,4 +735,12 @@ private:
     bool _needsReconnect;
 };
 
-#endif // CONNECTION_H
+// The 127/8 loopback address used for local DNS.
+COMMON_EXPORT const QString resolverLocalAddress();
+
+// The IP used for PIA DNS in the modern infrastructure - on-VPN, and with MACE.
+COMMON_EXPORT const QString piaModernDnsVpnMace();
+// The IP used for PIA DNS in the modern infrastructure - on-VPN (no MACE).
+COMMON_EXPORT const QString piaModernDnsVpn();
+
+#endif

@@ -22,7 +22,7 @@
 #include "win_firewall.h"
 #include "brand.h"
 #include "win.h"
-#include "version.h"
+#include "product.h"
 #include <QUuid>
 
 GUID zeroGuid = {0};

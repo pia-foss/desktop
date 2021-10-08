@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#include "settings.h"
+#include "settings/locations.h"
 #include "common/src/locations.h"
 #include <QtTest>
 

@@ -26,11 +26,12 @@ void dummyClientMain() {}
 
 #else
 
+#include "brand.h"
 #include "client.h"
 #include "clientsettings.h"
 #include "path.h"
 #include "semversion.h"
-#include "version.h"
+#include "product.h"
 #include "nativehelpers.h"
 #include "appsingleton.h"
 #include "apiretry.h"
@@ -68,14 +69,6 @@ void dummyClientMain() {}
 #ifdef Q_OS_MACOS
 #include "mac/mac_app.h"
 #include "mac/mac_install.h"
-#endif
-
-#ifdef PIA_DAEMON
-#ifdef Q_OS_WIN
-#include "win/win_daemon.h"
-#else
-#include "posix/posix_daemon.h"
-#endif
 #endif
 
 #ifdef Q_OS_UNIX
@@ -397,7 +390,7 @@ int clientMain(int argc, char *argv[])
     }
 
 #ifdef PIA_CRASH_REPORTING
-    initCrashReporting();
+    initCrashReporting(true);
     monitorDaemonDumps();
 #else
     qInfo() << "Not initializing crash handler - built without crash reporting support.";
@@ -407,6 +400,12 @@ int clientMain(int argc, char *argv[])
 
     QGuiApplication::setApplicationDisplayName(QStringLiteral(PIA_PRODUCT_NAME));
     QGuiApplication::setQuitOnLastWindowClosed(false);
+
+#ifdef Q_OS_LINUX
+    // This fixes the application icon under Wayland.
+    // On Wayland the compositor maps the window icon from the desktop file.
+    QGuiApplication::setDesktopFileName(BRAND_CODE "vpn");
+#endif
 
     AppSingleton runGuard;
     qint64 runningInstancePid = runGuard.isAnotherInstanceRunning();
@@ -457,28 +456,6 @@ int clientMain(int argc, char *argv[])
             #endif
                 QStringLiteral("translations.rcc")
                 );
-
-#ifdef PIA_DAEMON
-    // Run an embedded version of the daemon as part of the client-portable
-    // project; the client needs to run as root, but doesn't need any installed
-    // background service. Since it's not multi-process based, this version is
-    // significantly easier to debug.
-    //
-    // TODO: Offer a configurable version that communicates directly with the
-    // daemon, without relying on the same local sockets IPC.
-    //
-    QStringList daemonArguments;
-    bool daemonStopped = false;
-#ifdef Q_OS_WIN
-    WinDaemon daemon(daemonArguments);
-#else
-    setUidAndGid();
-    PosixDaemon daemon(daemonArguments);
-#endif
-    QObject::connect(&daemon, &Daemon::stopped, [&] { daemonStopped = true; });
-    QObject::connect(&app, &QGuiApplication::aboutToQuit, [&] { if (!daemonStopped) daemon.stop(); });
-    daemon.start();
-#endif
 
     // --safe-mode was already applied if it's set, but we still pass the flag to
     // Client so it can set the permanent client setting (including writing the
@@ -542,16 +519,6 @@ int clientMain(int argc, char *argv[])
 
 #ifdef Q_OS_LINUX
     linuxCleanlyExited();
-#endif
-
-#ifdef PIA_DAEMON
-    if (!daemonStopped)
-    {
-        QObject::connect(&daemon, &Daemon::stopped, [] { QGuiApplication::quit(); });
-        daemon.stop();
-        int daemonResult = app.exec();
-        if (!result) result = daemonResult;
-    }
 #endif
 
     return result;

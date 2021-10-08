@@ -20,7 +20,7 @@
 #define AUTOMATION_H
 
 #include "common.h"
-#include "settings.h"
+#include "settings/automation.h"
 #include "networkmonitor.h"
 
 // Automation applies a set of rules to the current network detected by

@@ -41,10 +41,23 @@ if [ -n "$PID" ] && [[ $PID =~ ^[0-9]+$ ]] ; then
         # Wait for parent process to die
         while kill -0 "$PID" 2> /dev/null ; do sleep 0.2 ; done
         # Launch new app as the logged in user (not root)
-        open "$appDir"
+
+        # Try opening the app a number of times before giving up -
+        # Big Sur sometimes fails to find the executable (with error: kLSNoExecutableErr)
+        # on the first few attempts.
+        for i in $(seq 1 10); do
+          echo "attempt $i to open $appDir"
+          if open "$appDir"; then
+            break
+          fi
+          sleep 0.2
+        done
+
+        # Remove the installer copy of the app
         if [ -n "$ORIGAPP" ]; then
-            rm -rf "$ORIGAPP" || true
+          rm -rf "$ORIGAPP" || true
         fi
+
     ) & disown
 else
     # Just launch directly

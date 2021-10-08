@@ -22,7 +22,8 @@
 #ifndef PORTFORWARDREQUEST_H
 #define PORTFORWARDREQUEST_H
 
-#include "settings.h"
+#include "settings/daemonaccount.h"
+#include "settings/daemonstate.h"
 #include "apiclient.h"
 
 // PortForwardRequest is the interface to the port forwarding implementation.

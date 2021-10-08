@@ -26,10 +26,6 @@
 #include <QtDebug>
 #include <QLoggingCategory>
 #include <QMetaEnum>
-#include <QObject>
-#include <QFile>
-#include <QDeadlineTimer>
-#include <QHostAddress>
 
 #include <functional>
 #include <memory>
@@ -37,46 +33,7 @@
 #include <system_error>
 #include <type_traits>
 
-#if defined(Q_COMPILER_TEMPLATE_AUTO)
-#define TEMPLATE_AUTO_DECL(name)     auto name
-#define TEMPLATE_AUTO(value)         value
-#define TEMPLATE_AUTO_DECLTYPE(name) decltype(name)
-#else
-#define TEMPLATE_AUTO_DECL(name)     typename CONCAT(TYPE_,name), CONCAT(TYPE_,name) name
-#define TEMPLATE_AUTO(value)         decltype(value), value
-#define TEMPLATE_AUTO_DECLTYPE(name) CONCAT(TYPE_,name)
-#endif
-
 class Error;
-
-class noncopyable;
-class nonmovable;
-template<typename Handle> class raii_dynamic_t;
-template<typename Handle, Handle Null = 0> class raii_dynamic_nullable_t;
-template<typename Handle, typename FreeFnType, FreeFnType FreeFn> class raii_static_t;
-template<typename Handle, typename FreeFnType, FreeFnType FreeFn, Handle Null = 0> class raii_static_nullable_t;
-
-
-// Helper base class to force subclass to be noncopyable.
-//
-class COMMON_EXPORT noncopyable
-{
-    noncopyable(const noncopyable&) = delete;
-    noncopyable& operator=(const noncopyable&) = delete;
-protected:
-    noncopyable() {}
-};
-
-// Helper base class to force subclass to be nonmovable.
-//
-class COMMON_EXPORT nonmovable
-{
-    nonmovable(nonmovable&&) = delete;
-    nonmovable& operator=(nonmovable&&) = delete;
-protected:
-    nonmovable() {}
-};
-
 
 template<typename T>
 class nullable_t;
@@ -84,27 +41,9 @@ class nullable_t;
 template<typename T>
 struct get_nullable;
 
-/*
-template<typename T> static inline nullable_t<T> make_nullable(T&& value);
-template<typename T> static inline T* make_nullable(T* ptr) { return ptr; }
-template<typename T, typename D> static inline std::shared_ptr<T, D> make_nullable(std::shared_ptr<T, D> ptr) { return ptr; }
-template<typename T, typename D> static inline std::unique_ptr<T, D> make_nullable(std::shared_ptr<T, D> ptr) { return ptr; }
-*/
-
 template<typename Handle, typename FreeFnType = int, FreeFnType... FreeFn>
 class raii_t;
 
-
-template<typename Class, typename Ptr, typename Return, typename... Args>
-static inline auto bind_this(Return (Class::*fn)(Args...), Ptr instance)
-{
-    return [instance = std::move(instance), fn](Args&&... args) -> Return { return ((*instance).*fn)(std::forward<Args>(args)...); };
-}
-template<typename Class, typename Ptr, typename... Args>
-static inline auto bind_this(void (Class::*fn)(Args...), Ptr instance)
-{
-    return [instance = std::move(instance), fn](Args&&... args) { ((*instance).*fn)(std::forward<Args>(args)...); };
-}
 
 
 namespace impl {
@@ -304,8 +243,6 @@ inline QDebug& operator<<(QDebug &d, const nullable_t<T> &nullable)
 // same scope, they will run in reverse order.
 //
 #define RAII_SENTINEL(...) auto CONCAT(_raii_sentinel_,__LINE__) = raii_sentinel([&](){ __VA_ARGS__; })
-#define FINALLY RAII_SENTINEL
-#define CLEANUP RAII_SENTINEL
 #define AT_SCOPE_EXIT RAII_SENTINEL
 
 // Silence pedantic clang warnings related to extra semicolons after a block
@@ -489,7 +426,7 @@ static inline constexpr int raii_free_helper() { return 0; }
 // Helper type for implementing RAII_SENTINEL.
 //
 template<typename FnType>
-class raii_sentinel_t : noncopyable
+class raii_sentinel_t
 {
     FnType _fn;
 public:
@@ -504,74 +441,6 @@ public:
 template<typename FnType>
 static Q_ALWAYS_INLINE raii_sentinel_t<FnType> raii_sentinel(FnType&& fn) { return std::forward<FnType>(fn); }
 
-
-
-// A lightweight framework to handle errors in an exception-like
-// fashion, but local to the current function (e.g. when calling
-// a lot of platform APIs and wanting to bail out of a sequence
-// early when an error is encountered). C++ scopes are respected
-// allowing RAII style resource handling.
-//
-// Usage:
-//   LOCAL_TRY(int)
-//   {
-//       if (!callFunction())
-//           LOCAL_THROW(errno);
-//       return true;
-//   }
-//   LOCAL_CATCH(error)
-//   {
-//       qWarning() << "Got error" << error;
-//       return false;
-//   }
-//
-// Notes:
-// - You can have at most one LOCAL_TRY block in a function.
-//
-#define LOCAL_TRY(...) if (::impl::check_error_holder<__VA_ARGS__> _local_error_holder = nullptr)
-#define LOCAL_THROW(error) do { _local_error_holder.set(error); goto _local_error_exit; } while(0)
-#define LOCAL_CATCH(var) else _local_error_exit: if (bool _local_error_guard = false) {} else for (auto& var = _local_error_holder.error(); !_local_error_guard; _local_error_guard = true) if (const bool _local_error_holder = false) {} else
-
-
-
-// Evaluates to the class type of the current 'this' pointer
-#define THIS_CLASS std::decay_t<decltype(*this)>
-// Creates a closure of a member function, taking the same arguments
-#define THIS_FUNCTION(name) ::bind_this(&THIS_CLASS::name, this)
-
-
-// Wrapper for passing an arbitrary std::function to a platform
-// function that takes a callback function pointer plus context
-// pointer. The position of the context pointer in the callback
-// parameter list is passed as the second template parameter,
-// and is spliced out of the parameter list passed to the inner
-// callable.
-//
-// Usage:
-//   extern void callCallback(void(*fn)(void*), void* ctx);
-//   callback<void(void*), 0> cb = [&]() { /* ... */ };
-//   callCallback(cb, cb);
-//
-template<typename Signature, size_t ContextArgIndex = 0>
-class callback_signature_t;
-
-#define IMPLEMENT_CALLBACK(...) \
-    template<size_t ContextArgIndex, typename Return, typename... Args> \
-    class callback_signature_t<Return __VA_ARGS__ (Args...), ContextArgIndex> : public ::impl::select_callback_impl<ContextArgIndex, Return, Args...> \
-    { \
-        typedef ::impl::select_callback_impl<ContextArgIndex, Return, Args...> base; \
-    public: \
-        using base::base; \
-        using base::operator=; \
-    };
-
-ITERATE_CALLING_CONVENTIONS(IMPLEMENT_CALLBACK)
-
-#undef IMPLEMENT_CALLBACK
-
-
-template<typename Signature, size_t ContextArgIndex = 0>
-using callback_t = callback_signature_t<std::remove_pointer_t<Signature>, ContextArgIndex>;
 
 // Base class to implement the singleton pattern; used for classes for which
 // there should only be a single instance. The class must still be manually
@@ -630,57 +499,12 @@ public:
     static Derived* instance() { if (auto i = Singleton<Derived>::instance()) return i; else return new Derived(); }
 };
 
-
-void throwIfEnumCastFailed(bool result, const char* name);
-
 // Get the name of a value in a registered Q_ENUM enum
 template<typename Enum>
 static inline QLatin1String qEnumToString(Enum value)
 {
     static QMetaEnum meta = QMetaEnum::fromType<Enum>();
     return QLatin1String(meta.valueToKey(static_cast<int>(value)));
-}
-
-// Get the names of a set of values in a registered Q_FLAG enum
-template<typename Flags>
-static inline QByteArray qFlagsToString(Flags flags)
-{
-    static QMetaEnum meta = QMetaEnum::fromType<Flags>();
-    return meta.valueToKeys(static_cast<int>(flags));
-}
-
-// Parse the value of a name in a registered Q_ENUM enum
-template<typename Enum>
-static inline bool qStringToEnum(const char* name, Enum& value)
-{
-    static QMetaEnum meta = QMetaEnum::fromType<Enum>();
-    bool ok;
-    value = meta.keyToValue(name, &ok);
-    return ok;
-}
-template<typename Enum>
-static inline Enum qStringToEnum(const char* name) throws(Error)
-{
-    Enum value;
-    throwIfEnumCastFailed(qStringToEnum(name, value), name);
-    return value;
-}
-
-// Parse the value of a set of names in a registered Q_FLAG enum
-template<typename Flags>
-static inline bool qStringToFlags(const char* names, Flags& values)
-{
-    static QMetaEnum meta = QMetaEnum::fromType<Flags>();
-    bool ok;
-    values = meta.keysToValue(names, &ok);
-    return ok;
-}
-template<typename Flags>
-static inline Flags qStringToFlags(const char* names) throws(Error)
-{
-    Flags values;
-    throwIfEnumCastFailed(qStringToFlags(names, values), names);
-    return values;
 }
 
 // CRTP QDebug tracer - implement trace() to provide operator<<
@@ -780,143 +604,6 @@ inline QString traceMsec(const std::chrono::milliseconds &time)
     return traceMsec(msec(time));
 }
 
-
-// Simple collection type for a linked list where the list overhead is
-// embedded into the held type itself, meaning zero heap overhead and
-// O(1) time complexity for both insert and remove by reference.
-
-template<class T> class Node;
-template<class T> class NodeList;
-
-template<class T>
-class Node
-{
-    friend class NodeList<T>;
-    Node<T>* _prev = nullptr;
-    Node<T>* _next = nullptr;
-    NodeList<T>* _list = nullptr;
-public:
-    T* prev() { return static_cast<T*>(_prev); }
-    T* next() { return static_cast<T*>(_next); }
-    NodeList<T>* list() { return _list; }
-public:
-    Node() {}
-    Node(const Node&) = delete;
-    Node(Node&&) = delete;
-    ~Node() { remove(); }
-    // Move the node to before another node.
-    inline void insertBefore(Node<T>* node);
-    // Move the node to after another node.
-    inline void insertAfter(Node<T>* node);
-    // Move the node to first in a list.
-    inline void insertFirst(NodeList<T>* list);
-    // Move the node to last in a list.
-    inline void insertLast(NodeList<T>* list);
-    // Remove the node from any list.
-    inline void remove();
-};
-
-template<class T>
-class NodeList
-{
-    friend class Node<T>;
-    Node<T>* _first = nullptr;
-    Node<T>* _last = nullptr;
-    int _count = 0;
-public:
-    T* first() { return static_cast<T*>(_first); }
-    T* last() { return static_cast<T*>(_last); }
-    int count() { return _count; }
-public:
-    NodeList() {}
-    NodeList(const NodeList&) = delete;
-    NodeList(NodeList&&) = delete;
-    ~NodeList() { clear(); }
-    // Unlink all nodes in the list.
-    inline void clear();
-    // Check if a given node is inside this list.
-    inline bool contains(const Node<T>* node) const;
-};
-
-template<class T>
-inline void Node<T>::insertBefore(Node<T>* node)
-{
-    remove();
-    if ((_prev = std::exchange(node->_prev, this)))
-        _prev->_next = this;
-    else if (node->_list)
-        node->_list->_first = this;
-    _next = node;
-    if ((_list = node->_list))
-        _list->_count++;
-}
-template<class T>
-inline void Node<T>::insertAfter(Node<T>* node)
-{
-    remove();
-    if ((_next = std::exchange(node->_next, this)))
-        _next->_prev = this;
-    else if (node->_list)
-        node->_list->_last = this;
-    _prev = node;
-    if ((_list = node->_list))
-        _list->_count++;
-}
-template<class T>
-inline void Node<T>::insertFirst(NodeList<T>* list)
-{
-    remove();
-    if ((_next = std::exchange(list->_first, this)))
-        _next->_prev = this;
-    else
-        list->_last = this;
-    _list = list;
-    _list->_count++;
-}
-template<class T>
-inline void Node<T>::insertLast(NodeList<T>* list)
-{
-    remove();
-    if ((_prev = std::exchange(list->_last, this)))
-        _prev->_next = this;
-    else
-        list->_first = this;
-    _list = list;
-    _list->_count++;
-}
-template<class T>
-inline void Node<T>::remove()
-{
-    if (_prev)
-        _prev->_next = _next;
-    else if (_list)
-        _list->_first = _next;
-    if (_next)
-        _next->_prev = _prev;
-    else if (_list)
-        _list->_last = _prev;
-    if (_list)
-        --_list->_count;
-    _prev = nullptr;
-    _next = nullptr;
-    _list = nullptr;
-}
-
-template<class T>
-inline void NodeList<T>::clear()
-{
-    while (_first)
-    {
-        _first->remove();
-    }
-}
-template<class T>
-inline bool NodeList<T>::contains(const Node<T>* node) const
-{
-    return node->_list == this;
-}
-
-
 // After starting a process (and writing any necessary input), call this
 // convenience function to correctly wait for it to terminate with the same
 // logic as QProcess::execute (with crashes and other error conditions
@@ -998,23 +685,6 @@ public:
     bool operator!=(const Comparable &other) const {return typeCompare(other)!=0;}
 };
 
-// Class that can be used to define a "static" signal in a class.  Qt doesn't
-// have any concept of a static signal; it has to be in an object.
-//
-// Instead, a static object of this type can be created and used as a plain
-// signal.  Usually, the object should be named for the signal, such as:
-//   - static StaticSignal myStaticVarChange;
-//   ...meanwhile...
-//   - QObject::connect(&myStaticVarChange, &StaticSignal::signal, this, ...);
-//   ...elsewhere...
-//   - emit myStaticVarChange.signal()
-class COMMON_EXPORT StaticSignal : public QObject
-{
-    Q_OBJECT
-signals:
-    void signal();
-};
-
 // Returns true if a debugger is attached at process start
 COMMON_EXPORT bool isDebuggerPresent();
 
@@ -1048,8 +718,13 @@ COMMON_EXPORT void startSupportTool(const QString &mode, const QString &diagFile
 // streams (including the Logger) have been created.
 COMMON_EXPORT void setUtf8LocaleCodec();
 
+// Used by the logger to detect a Qt trace that indicates that OpenGL couldn't
+// be initialized on Linux.  This is only detected for the client, not the
+// daemon or other components that don't use crash reporting.
+bool isClientOpenGLFailureTrace(const QString &msg);
+
 #ifdef PIA_CRASH_REPORTING
-COMMON_EXPORT void initCrashReporting ();
+COMMON_EXPORT void initCrashReporting(bool isClient);
 // Monitor for dumps from the daemon to automatically start the support tool
 COMMON_EXPORT void monitorDaemonDumps();
 
@@ -1063,54 +738,5 @@ qint64 COMMON_EXPORT getMonotonicTime();
 // Intentionally crash - for testing crash reporting.  (Exported from common
 // so it's possible to test debug symbols for common in a dynamic library.)
 void COMMON_EXPORT testCrash();
-
-namespace std {
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    // QString doesn't provide a std::hash<> specialization.  It provides
-    // qHash(), but QHash/QMultiHash are poor container choices:
-    // - they require the types to be copy-assignable, this breaks value type
-    //   invariants
-    // - QHash doesn't provide an invariant that it doesn't have duplicate
-    //   key entries, unlike std::unordered_map.
-    // - the iterator semantics are odd, they're iterator-to-value and the
-    //   iterator itself has a key() method
-    template<>
-    struct hash<QString>
-    {
-        std::size_t operator()(const QString &str) const {return qHash(str);}
-    };
-    // Also, for QLatin1String
-    template<>
-    struct hash<QLatin1String>
-    {
-        std::size_t operator()(const QLatin1String &str) const {return qHash(str);}
-    };
-#endif
-    template<>
-    struct hash<QHostAddress>
-    {
-        std::size_t operator()(const QHostAddress &addr) const {return qHash(addr);}
-    };
-}
-
-// Returns a rate-limited wrapper for a given function
-// auto debouncedFoo = debounce(foo, 1000);
-// debouncedFoo() can then be invoked at most once every 1000 ms
-template <typename Func_t>
-auto debounce(Func_t func, qint64 timeout)
-{
-    QDeadlineTimer timer;
-    return [=](auto&&...args) mutable {
-        // Since hasExpired() is true for a default-constructed object
-        // func() will be executed the first time the debounced function is called
-        // Successive calls will be rate-limited
-        if(timer.hasExpired())
-        {
-             timer.setRemainingTime(timeout);
-             func(std::forward<decltype(args)>(args)...);
-        }
-    };
-}
 
 #endif // BUILTIN_UTIL_H

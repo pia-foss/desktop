@@ -19,7 +19,6 @@
 #include "common.h"
 #line SOURCE_FILE("linux/linux_loginitem.cpp")
 #include "path.h"
-#include "version.h"
 #include "brand.h"
 
 #include <QFile>

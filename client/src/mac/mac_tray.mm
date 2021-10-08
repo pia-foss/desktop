@@ -23,7 +23,7 @@
 #include "client.h"
 #include "platformuistrings.h"
 #include "brand.h"
-#include "version.h"
+#include "product.h"
 
 #include <QFile>
 #include <QHash>

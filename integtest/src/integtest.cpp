@@ -30,10 +30,10 @@ int main(int argc, char **argv)
     auto piactlVersion = CliHarness::getVersion();
     // Exact match required, including build tags - the integration test
     // artifact should come from the same build.
-    if(piactlVersion != PIA_VERSION)
+    if(piactlVersion != Version::semanticVersion())
     {
         outln() << "WARNING: Integration test version mismatch";
-        outln() << "Test version:" << PIA_VERSION;
+        outln() << "Test version:" << Version::semanticVersion();
         outln() << "Installed version:" << piactlVersion;
         if(qgetenv("PIA_INTEG_MISMATCH") == QByteArrayLiteral("1"))
         {
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         }
     }
 
-    outln() << "Running tests for version:" << PIA_VERSION;
+    outln() << "Running tests for version:" << Version::semanticVersion();
 
     IntegTestCaseDefBase::executeAll(argc, argv);
     return 0;

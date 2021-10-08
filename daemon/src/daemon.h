@@ -316,8 +316,6 @@ public:
     DaemonSettings& settings() { return _settings; }
     DaemonState& state() { return _state; }
 
-    void reportError(Error error);
-
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() = 0;
 
     // Get the _state.original* fields as an OriginalNetworkScan

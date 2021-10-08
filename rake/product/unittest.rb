@@ -39,10 +39,13 @@ module PiaUnitTest
             t << 'wfp_filters'
         elsif Build.linux?
             t << 'splitdnsinfo'
+        elsif Build.macos?
+           t << 'constrainedhash'
+           t << 'flow_tracker'
         end
     end
 
-    def self.defineTargets(version, artifacts)
+    def self.defineTargets(versionlib, artifacts)
         # The all-tests-lib library compiles all client and daemon code once to
         # be shared by all unit tests.
         # This duplicates the source directories and dependencies from the
@@ -51,25 +54,25 @@ module PiaUnitTest
             .define('BUILD_COMMON') # Common
             .source('common/src')
             .source('common/src/builtin')
+            .source('common/src/settings', :none)
             .useQt('Network')
             .define('BUILD_CLIENTLIB') # Clientlib
             .source('clientlib/src')
             .define('PIA_CLIENT', :export) # Client (resources not needed)
             .source('client/src')
-            .source('client/src/nativeacc')
+            .source('client/src/nativeacc', :none)
             .useQt('Qml')
             .useQt('Quick')
             .useQt('QuickControls2')
             .useQt('Gui')
             .useQt('Test')
-            .define('PIA_DAEMON', :export) # Daemon
-            .source('daemon/src')
+            .source('daemon/src') # Daemon
             .source('deps/embeddable-wg-library/src')
             .resource('daemon/res', ['ca/*.crt'])
             .define('UNIT_TEST', :export) # Unit test
             .source('tests/src') # Unit test source
             .resource('tests/res', ['**/*']) # Unit test resources
-            .use(version.export)
+            .use(versionlib.export)
             .coverage(true) # Generate coverage information when possible
         if(Build.windows?)
             allTestsLib
@@ -97,7 +100,7 @@ module PiaUnitTest
         Tests.each do |t|
             testExec = Executable.new("test-#{t}", :executable)
                 .use(allTestsLib.export)
-                .use(version.export)
+                .use(versionlib.export)
                 .useQt('Network') # Common
                 .useQt('Qml') # Client
                 .useQt('Quick')
@@ -180,7 +183,7 @@ module PiaUnitTest
             # support.  Just build the tests.
             testTarget = :build_all_tests
         elsif(Executable::Tc.coverageAvailable?)
-            defineCoverageTargets(version, artifacts, coverageRawBuild, anyTestBin)
+            defineCoverageTargets(artifacts, coverageRawBuild, anyTestBin)
             # Hook up the 'test' target for use from the command line - include
             # coverage measurements in this target
             testTarget = :coverage
@@ -195,7 +198,7 @@ module PiaUnitTest
         end
     end
 
-    def self.defineCoverageTargets(version, artifacts, coverageRawBuild, anyTestBin)
+    def self.defineCoverageTargets(artifacts, coverageRawBuild, anyTestBin)
         # Merge and analyze coverage data if it was generated.  This depends on
         # all tests; it doesn't have specific file dependencies on the raw data
         # files because they can't be generated in all cases (requires clang>=6)

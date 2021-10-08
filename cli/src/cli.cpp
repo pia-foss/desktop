@@ -88,7 +88,7 @@ int cliMain(int argc, char *argv[])
 
     if(parser.isSet("version"))
     {
-        outln() << PIA_VERSION;
+        outln() << Version::semanticVersion();
         return CliExitCode::Success;
     }
 

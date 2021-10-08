@@ -35,6 +35,8 @@ Item {
   property string text
   property color color
   property color linkColor
+  property alias textLineHeight: messageText.lineHeight
+  property alias textLineHeightMode: messageText.lineHeightMode
   signal linkActivated()
 
   implicitWidth: messageText.implicitWidth

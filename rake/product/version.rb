@@ -94,43 +94,101 @@ class PiaVersion
         @probe.file('brand.txt', "#{@productName}\n#{Build::Brand}\n#{Build::ProductIdentifier}\n#{Build::BrandInfo['helpDeskLink']}\n")
         @probe.file('architecture.txt', "#{Build::TargetArchitecture}")
 
-        # Build version.h
-        versionh = CppHeader.new('version')
-        versionh.defineString('PIA_PRODUCT_NAME', @productName)
-        versionh.defineString('PIA_VERSION', version)
+        # Build product.h
+        # This file contains various values pertaining to the product - name,
+        # macOS certificate, features, etc.
+        # These values all rarely change.  Don't add anything to this file that
+        # changes a lot, as it is referenced a lot, and changes cause a lot of
+        # the application to be rebuilt.
+        producth = CppHeader.new('product')
+        producth.defineString('PIA_PRODUCT_NAME', @productName)
         cert = ENV['PIA_CODESIGN_CERT']
         cert = "Unknown" if cert == nil
-        versionh.defineString('PIA_CODESIGN_CERT', cert)
+        producth.defineString('PIA_CODESIGN_CERT', cert)
         migration = ENV['RUBY_MIGRATION']
         migration = '' if migration == nil
-        versionh.defineRawString('RUBY_MIGRATION', migration)
-        versionh.defineLiteral('INCLUDE_FEATURE_HANDSHAKE', '0')
+        producth.defineRawString('RUBY_MIGRATION', migration)
+        producth.defineLiteral('INCLUDE_FEATURE_HANDSHAKE', '0')
 
         qml_reload_entry = ENV["QML_RELOAD_ENTRY"]
-        versionh.defineString("QML_RELOAD_ENTRY", qml_reload_entry) if qml_reload_entry != nil
+        producth.defineString("QML_RELOAD_ENTRY", qml_reload_entry) if qml_reload_entry != nil
+
+        producth.defineString("MACOS_SKIP_INSTALL_CHECK", "1") if ENV["MACOS_SKIP_INSTALL_CHECK"] != nil
 
         # The build is considered a "prerelease" if it either has prerelease
         # tags or is a debug build.  This is used for service quality events;
         # prerelease builds use a "staging" product token and are indicated
         # with "prerelease":true.
-        versionh.defineLiteral('PIA_VERSION_IS_PRERELEASE',
+        producth.defineLiteral('PIA_VERSION_IS_PRERELEASE',
             (Build::VersionPrerelease != '' || Build::Variant != :release) ? 'true' : 'false')
         # The platform name is used by service quality events and the user
         # agent string.  Don't use this for platform tests in code; Q_OS_* is
         # better for that.
         platformName = Build::selectPlatform('Windows', 'macOS', 'Linux')
-        versionh.defineString('PIA_PLATFORM_NAME', platformName)
+        producth.defineString('PIA_PLATFORM_NAME', platformName)
+        @probe.file('product.h', producth.content)
+
+        # Build version.h
+        # This provides the actual version of the product, although the actual
+        # value is defined in a source file so the header still does not change
+        # often.
+        versionh = CppHeader.new('version')
+        # The full semantic version and user agent string are externalized, as
+        # these are used a lot and change with every commit.  By externalizing
+        # these, version.h itself does not change often, which minimizes build
+        # impact of changing version.
+        versionh.line('class QString;')
+        versionh.line('namespace Version')
+        versionh.line('{')
+        versionh.line('    const QString &semanticVersion();')
+        versionh.line('    const QString &userAgent();')
+        versionh.line('}')
+        @probe.file('version.h', versionh.content)
+
+        # Build version_literal.h
+        # This provides the version as a string literal for use by the Windows
+        # installer and macOS install helper, which don't use Qt and don't have
+        # QString.
+        # Including this file will cause that file to be rebuilt for every
+        # commit; use this sparingly.
+        versionliteralh = CppHeader.new('version_literal')
+        versionliteralh.defineString('PIA_VERSION_LITERAL', version)
+        @probe.file('version_literal.h', versionliteralh.content)
+
         # The user agent includes:
         #   product/version
         #     (Product is the brand short name, cleaned to include only
         #     a-zA-Z0-9-_.  Version is the full semantic version.)
         #   (platformName; architecture; prerelease; debug)
         #     (prerelease and debug are included when applicable)
-        versionh.defineString('PIA_USER_AGENT',
+        userAgent =
             "#{@productShortName.tr("^a-zA-Z0-9-_", "")}/#{version} " +
             "(#{platformName}; #{Build::TargetArchitecture}" +
             "#{Build::VersionPrerelease == '' ? '' : '; prerelease'}" +
-            "#{Build::Variant == :release ? '' : '; debug'})")
+            "#{Build::Variant == :release ? '' : '; debug'})"
+        versioncpp = LineContent.new
+        versioncpp.line '#include "version.h"'
+        versioncpp.line '#include <QString>'
+        versioncpp.line ''
+        versioncpp.line 'namespace Version'
+        versioncpp.line '{'
+        versioncpp.line '    const QString &semanticVersion()'
+        versioncpp.line '    {'
+        versioncpp.line '        static const QString v{QStringLiteral("' + version + '")};'
+        versioncpp.line '        return v;'
+        versioncpp.line '    }'
+        versioncpp.line '    const QString &userAgent()'
+        versioncpp.line '    {'
+        versioncpp.line '        static const QString v{QStringLiteral("' + userAgent + '")};'
+        versioncpp.line '        return v;'
+        versioncpp.line '    }'
+        versioncpp.line '}'
+        @probe.file('version.cpp', versioncpp.content)
+
+        # winversion.h contains version numbers needed in Windows RC scripts.
+        # These can't be externalized due to limitations in rc.exe, and they
+        # change whenever the version number changes.
+        versionwinh = CppHeader.new('version_win')
         # Windows-style four-part version number used in VERSIONINFO.
         # This can't completely encode a semantic version, so we use the
         # fourth field to express alpha/beta/GA:
@@ -146,11 +204,9 @@ class PiaVersion
         winVer = Build::VersionBase.gsub('.', ',') + ',' + winVerLast
         # Write it both literally and as a string, the RC preprocessor
         # doesn't seem to support the stringification operator.
-        # Note that Qbs doesn't seem to create a dependency on version.h
-        # for the RC script, so changes in version require a full rebuild.
-        versionh.defineLiteral('PIA_WIN_VERSION', winVer)
-        versionh.defineString('PIA_WIN_VERSION_STR', winVer)
-        @probe.file('version.h', versionh.content)
+        versionwinh.defineLiteral('PIA_WIN_VERSION', winVer)
+        versionwinh.defineString('PIA_WIN_VERSION_STR', winVer)
+        @probe.file('version_win.h', versionwinh.content)
 
         # Build brand.h
         brandh = CppHeader.new('brand')

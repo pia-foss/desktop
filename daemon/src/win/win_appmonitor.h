@@ -22,7 +22,7 @@
 #ifndef WIN_APPMONITOR_H
 #define WIN_APPMONITOR_H
 
-#include "settings.h"
+#include "settings/splittunnel.h"
 #include "win_firewall.h"
 #include "win/win_com.h"
 #include <QWinEventNotifier>

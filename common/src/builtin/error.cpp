@@ -104,14 +104,11 @@ QDebug operator<<(QDebug d, const Error& e)
     return d.noquote() << e.errorString() << e.location();
 }
 
-#ifdef UNIT_TEST
-// In unit tests, report unhandled errors by logging them.
+// Report unhandled errors by logging them.
 void reportError(Error error)
 {
     qCritical() << error;
 }
-#endif
-
 
 #ifdef QT_DEBUG
 static QString formatOperation(const char* operation)

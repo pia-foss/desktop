@@ -26,6 +26,7 @@
 #include <QProcess>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QTimer>
 
 OpenVPNProcess::OpenVPNProcess(QObject *parent)
     : QObject(parent)
@@ -104,7 +105,13 @@ void OpenVPNProcess::shutdown()
 {
     if (_state < Exiting)
     {
-        // TODO: Set a timer to trigger a hard shutdown after a few seconds
+        QTimer::singleShot(3000, this, [this]()
+        {
+            if (_process && _process->state() == QProcess::Running) {
+                qWarning() << "Sending TERM to openvpn process.";
+                _process->terminate();
+            }
+        });
         sendManagementCommand(QLatin1String("signal SIGTERM"));
     }
 }

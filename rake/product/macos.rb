@@ -9,7 +9,7 @@ require_relative '../util/dsl.rb'
 module PiaMacOS
     extend BuildDSL
 
-    def self.defineTargets(version, stage)
+    def self.defineTargets(version, commonlib, stage)
         # Define a probe to identify the codesign certificate in use, and other
         # variables that affect codesigning.
         # The file content doesn't really matter, but this is a good way to hook
@@ -113,9 +113,7 @@ module PiaMacOS
 
         openvpnHelper = Executable.new("#{Build::Brand}-openvpn-helper")
             .use(version.export)
-            .define('BUILD_COMMON')
-            .source('common/src')
-            .source('common/src/builtin')
+            .use(commonlib.export)
             .sourceFile('extras/openvpn/mac_openvpn_helper.cpp')
             .useQt('Network')
             .install(stage, :bin)

@@ -17,8 +17,6 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("preconnectstatus.cpp")
-
 #include "preconnectstatus.h"
 #include "client.h"
 #include <QCoreApplication>

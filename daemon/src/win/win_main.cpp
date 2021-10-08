@@ -19,7 +19,7 @@
 #include "common.h"
 #line SOURCE_FILE("win/win_main.cpp")
 
-#if defined(PIA_CLIENT) || defined(UNIT_TEST)
+#if defined(UNIT_TEST)
 
 // Entry point shouldn't be included for these projects
 void dummyWinMain() {}

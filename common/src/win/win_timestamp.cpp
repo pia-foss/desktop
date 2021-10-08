@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("win_timestamp.cpp")
+#include "timestamp.h"
 
 #include <Windows.h>
 

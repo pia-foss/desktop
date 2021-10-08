@@ -528,7 +528,12 @@ Item {
     active: Daemon.account.loggedIn && !Daemon.state.hasAccountToken
     links: [{
       text: uiTr("Retry"),
-      clicked: function() { Daemon.retryLogin(); }
+      clicked: function() { Daemon.retryLogin(function (err) {
+        if (err) {
+          console.warn('Retry login failed: ', err);
+          showLoginPage();
+        }
+      }); }
     }]
   }
 
@@ -701,6 +706,8 @@ Item {
   signal showPage(string pageName)
   // Show regions page
   signal showRegions()
+  // Show Login page
+  signal showLoginPage()
 
   // The title of the first active error-level notification if there is one, or
   // "" if there are no active errors.

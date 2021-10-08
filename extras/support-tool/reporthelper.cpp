@@ -69,7 +69,7 @@ void ReportHelper::sendPayload(const QByteArray &payloadContent, const QString &
     //
     QHttpPart verPart;
     verPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"version\""));
-    verPart.setBody(PIA_VERSION);
+    verPart.setBody(Version::semanticVersion().toUtf8());
 
     QHttpPart commentPart;
     commentPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"comments\""));

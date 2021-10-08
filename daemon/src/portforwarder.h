@@ -29,7 +29,7 @@
 #include <array>
 #include "apiclient.h"
 #include "async.h"
-#include "settings.h"
+#include "settings/daemonstate.h"
 #include "portforwardrequest.h"
 
 // PortForwarder forwards a port through the VPN connection when the VPN is

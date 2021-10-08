@@ -28,6 +28,7 @@
 #include "linebuffer.h"
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QTimer>
 #include <unordered_set>
 
 // Owns a QLocalSocket created by the QLocalServer and feeds incoming data
@@ -139,6 +140,7 @@ private:
     // The network adapter used for the current connection
     std::shared_ptr<NetworkAdapter> _networkAdapter;
     ConnectionConfig _connectingConfig;
+    QTimer _connectingTimer;
 };
 
 #endif

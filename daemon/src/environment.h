@@ -23,7 +23,7 @@
 #include "util.h"
 #include "apibase.h"
 #include "openssl.h"
-#include "settings.h"
+#include "settings/daemonstate.h"
 #include <unordered_map>
 
 // Environment loads constant data defining the production environment, with

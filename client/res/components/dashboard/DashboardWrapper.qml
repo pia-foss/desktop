@@ -97,6 +97,9 @@ Item {
     function onShowRegions() {
       pageManager.setPage(pageManager.pageIndices.region)
     }
+    function onShowLoginPage() {
+      pageManager.setPage(pageManager.pageIndices.login)
+    }
   }
 
   Shortcut {

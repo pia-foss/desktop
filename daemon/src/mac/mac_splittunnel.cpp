@@ -577,6 +577,12 @@ void MacSplitTunnel::handleIp6(std::vector<unsigned char> buffer, int actualSize
     if(_params.blockAll && !_params.isConnected)
         defaultPorts.clear();
 
+    if(_flowTracker.track(*pPacket) == FlowTracker::RepeatedFlow)
+    {
+        qInfo() << "Observed repeated packet (> 10 times), dropping" << pPacket->toString();
+        return;
+    }
+
     _defaultRuleUpdater.update(IPv6, defaultPorts);
     _bypassRuleUpdater.update(IPv6, bypassPorts);
     _vpnOnlyRuleUpdater.update(IPv6, vpnOnlyPorts);
@@ -643,16 +649,9 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     if(destAddress.isMulticast() || destAddress.isBroadcast() || destAddress.toString() == _splitTunnelIp.ip4())
         return; // We drop a packet by just returning
 
-    const AddressPair newPacketAddress{pPacket->sourceAddress(), pPacket->sourcePort()};
-
-    if(_lastPacketAddress4 == newPacketAddress)
-        ++_lastPacketCount4;
-    else
-        _lastPacketCount4 = 0;
-
-    if(_lastPacketCount4 > 10)
+    if(_flowTracker.track(*pPacket) == FlowTracker::RepeatedFlow)
     {
-        qInfo() << "Received repeated packet (10 times), dropping" << pPacket->toString();
+        qInfo() << "Observed repeated packet (> 10 times), dropping" << pPacket->toString();
         return;
     }
 
@@ -666,8 +665,6 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
     _defaultRuleUpdater.update(IPv4, defaultPorts);
     _bypassRuleUpdater.update(IPv4, bypassPorts);
     _vpnOnlyRuleUpdater.update(IPv4, vpnOnlyPorts);
-
-    _lastPacketAddress4 = newPacketAddress;
 
     //qInfo() << "Re-injecting IPv4 packet:" << pPacket->toString();
 
@@ -707,11 +704,12 @@ void MacSplitTunnel::handleIp4(std::vector<unsigned char> buffer, int actualSize
 
 void MacSplitTunnel::readFromTunnel(int socket)
 {
-    const uint mtu = _pUtun->mtu();
-    std::vector<unsigned char> buffer(mtu);
-    buffer.resize(mtu);
+    // + 4 bytes for the address family
+    const uint mtuPlusHeader = _pUtun->mtu() + 4;
 
-    ssize_t actual = ::read(socket, buffer.data(), mtu);
+    std::vector<unsigned char> buffer(mtuPlusHeader);
+
+    ssize_t actual = ::read(socket, buffer.data(), mtuPlusHeader);
     buffer.resize(actual);
     if(actual == -1)
     {
