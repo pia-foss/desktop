@@ -49,11 +49,6 @@
         <translation>用户名</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="55"/>
-        <source>AccountPage --- Manage My Account</source>
-        <translation>管理我的账户</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="60"/>
         <source>AccountPage --- Log Out / Switch Account</source>
         <translation>注销 / 切换账户</translation>
@@ -84,21 +79,6 @@
         <translation>（于 %1 到期）</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="132"/>
-        <source>AccountPage --- Purchase Subscription</source>
-        <translation>购买订阅</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="133"/>
-        <source>AccountPage --- Manage Subscription</source>
-        <translation>管理订阅</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="133"/>
-        <source>AccountPage --- Renew Subscription</source>
-        <translation>继续订阅</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="191"/>
         <source>AccountPage --- REFER A FRIEND. GET 30 DAYS FREE.</source>
         <translation>推荐朋友。获得免费 30 天礼遇。</translation>
@@ -127,6 +107,26 @@
         <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="296"/>
         <source>AccountPage --- Log in to your account</source>
         <translation>登录到您的帐户</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="132"/>
+        <source>AccountPage --- Purchase Subscription</source>
+        <translation>购买订阅</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="133"/>
+        <source>AccountPage --- Manage Subscription</source>
+        <translation>管理订阅</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="133"/>
+        <source>AccountPage --- Renew Subscription</source>
+        <translation>继续订阅</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/account/AccountPage.qml" line="55"/>
+        <source>AccountPage --- Manage My Account</source>
+        <translation>管理我的账户</translation>
     </message>
 </context>
 <context>
@@ -200,16 +200,16 @@
 <context>
     <name>AutomationRuleRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/automation/AutomationRuleRow.qml" line="109"/>
-        <source>AutomationRuleRow --- ACTIVE</source>
-        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
-        <translation>活跃</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationTable.qml" line="37"/>
         <source>AutomationRuleRow --- Remove</source>
         <extracomment>Screen reader annotation for the remove button in the automation list table</extracomment>
         <translation>删除</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/automation/AutomationRuleRow.qml" line="109"/>
+        <source>AutomationRuleRow --- ACTIVE</source>
+        <extracomment>&quot;ACTIVE&quot; Indicates that you are connected to the network corresponding to this rule item</extracomment>
+        <translation>活跃</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/automation/AutomationTable.qml" line="154"/>
@@ -306,6 +306,12 @@
         <translation>选中标记项目符号</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
+        <source>ChangelogWindow --- Split tunnel feature</source>
+        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
+        <translation>分离通道功能</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="66"/>
         <source>ChangelogWindow --- Control which apps use our VPN!</source>
         <translation>控制哪些应用程序使用我们的 VPN！</translation>
@@ -317,10 +323,10 @@
         <translation>借助我们全面的分离通道功能，您可以控制哪些应用程序使用 VPN 以及何时使用。看看我们的分离通道 [[应用程序示例]]，看看能够实现什么功能。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="78"/>
-        <source>ChangelogWindow --- Split tunnel feature</source>
-        <extracomment>Screen reader annotation for the split tunnel image in the What&apos;s New view</extracomment>
-        <translation>分离通道功能</translation>
+        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
+        <source>ChangelogWindow --- Command-line interface feature</source>
+        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
+        <translation>命令行界面功能</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="83"/>
@@ -332,12 +338,6 @@
         <extracomment>CLI stands for command-line interface: https://en.wikipedia.org/wiki/Command-line_interface &quot;piactl&quot; is the name of the command used to control PIA from the CLI, this should not be translated.</extracomment>
 <source>ChangelogWindow --- The PIA desktop app comes with a CLI for added functionality. Invoke &quot;piactl&quot; and check it out today! You can do things like control PIA, integrate PIA hotkeys, and even automate PIA functionality with scripts, or make custom integrations.</source>
         <translation>PIA 桌面应用程序附带 CLI 以提供更多功能。不妨调用“ piactl”并立即体验！您可以执行下列操作：控制 PIA、集成 PIA 热键、使用脚本实现 PIA 功能自动化，或进行自定义集成等等。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/changelog/WhatsNewContent.qml" line="91"/>
-        <source>ChangelogWindow --- Command-line interface feature</source>
-        <extracomment>Screen reader annotation for the command-line interface image in the What&apos;s New view</extracomment>
-        <translation>命令行界面功能</translation>
     </message>
 </context>
 <context>
@@ -741,6 +741,89 @@
 <context>
     <name>ConnectionPage</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="29"/>
+        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
+<source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
+        <translation>可靠、稳定且安全的协议，经过 18 年以上的开源开发</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="32"/>
+        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
+        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
+        <translation>更新、更高效的协议，有提高性能的潜力。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="91"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="109"/>
+        <source>ConnectionPage --- Trademarks</source>
+        <translation>商标</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="99"/>
+        <source>ConnectionPage --- What do these settings mean?</source>
+        <translation>这些设置有什么含义？</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="117"/>
+        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
+        <translation>所有产品和公司名称均为其各自所有者的商标™ 或注册® 商标。使用产品和公司名称并不意味着与其所有者有任何隶属关系或经过其认可。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="119"/>
+        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
+        <translation>OpenVPN® 是 OpenVPN Technologies, Inc. 的商标。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="120"/>
+        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
+        <translation>WireGuard® 是 Jason A. Donenfeld 个人的商标。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="67"/>
+        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
+        <translation>Shadowsocks 代理设置需要 TCP。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="113"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
+        <source>ConnectionPage --- Local Port</source>
+        <translation>本地端口</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="125"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="35"/>
+        <source>ConnectionPage --- Auto</source>
+        <translation>自动</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="128"/>
+        <source>ConnectionPage --- Configuration Method</source>
+        <translation>配置方法</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="135"/>
+        <source>ConnectionPage --- DHCP</source>
+        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
+        <translation>DHCP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="139"/>
+        <source>ConnectionPage --- Static</source>
+        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
+        <translation>静态</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="144"/>
+        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
+        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
+        <translation>确定如何在 TAP 适配器上配置地址。如果您在连接时遇到问题，则另一种方法可能更可靠。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="87"/>
+        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
+        <translation>警告：您正在发送未经加密的流量， 它们很容易遭到窃听。</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="45"/>
         <source>ConnectionPage --- Proxy</source>
         <translation>代理</translation>
@@ -780,51 +863,6 @@
         <translation>密码（可选）</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="67"/>
-        <source>ConnectionPage --- The Shadowsocks proxy setting requires TCP.</source>
-        <translation>Shadowsocks 代理设置需要 TCP。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="87"/>
-        <source>ConnectionPage --- Warning: Your traffic is sent unencrypted and is vulnerable to eavesdropping.</source>
-        <translation>警告：您正在发送未经加密的流量， 它们很容易遭到窃听。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="113"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
-        <source>ConnectionPage --- Local Port</source>
-        <translation>本地端口</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="125"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="35"/>
-        <source>ConnectionPage --- Auto</source>
-        <translation>自动</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="128"/>
-        <source>ConnectionPage --- Configuration Method</source>
-        <translation>配置方法</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="135"/>
-        <source>ConnectionPage --- DHCP</source>
-        <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
-        <translation>DHCP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="139"/>
-        <source>ConnectionPage --- Static</source>
-        <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
-        <translation>静态</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="144"/>
-        <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
-        <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
-        <translation>确定如何在 TAP 适配器上配置地址。如果您在连接时遇到问题，则另一种方法可能更可靠。</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="157"/>
         <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="49"/>
         <source>ConnectionPage --- Use Small Packets</source>
@@ -852,44 +890,6 @@
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>配置代理时，无法使用备用设置。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="29"/>
-        <extracomment>Description for OpenVPN shown as tip describing available protocols.</extracomment>
-<source>ConnectionPage --- Reliable, stable and secure protocol with 18+ years of open source development.</source>
-        <translation>可靠、稳定且安全的协议，经过 18 年以上的开源开发</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="32"/>
-        <source>ConnectionPage --- Newer, more efficient protocol with the potential for increased performance.</source>
-        <extracomment>Description for WireGuard shown as tip describing available protocols.</extracomment>
-        <translation>更新、更高效的协议，有提高性能的潜力。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="91"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="109"/>
-        <source>ConnectionPage --- Trademarks</source>
-        <translation>商标</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="99"/>
-        <source>ConnectionPage --- What do these settings mean?</source>
-        <translation>这些设置有什么含义？</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="117"/>
-        <source>ConnectionPage --- All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</source>
-        <translation>所有产品和公司名称均为其各自所有者的商标™ 或注册® 商标。使用产品和公司名称并不意味着与其所有者有任何隶属关系或经过其认可。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="119"/>
-        <source>ConnectionPage --- OpenVPN® is a trademark of OpenVPN Technologies, Inc.</source>
-        <translation>OpenVPN® 是 OpenVPN Technologies, Inc. 的商标。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/ProtocolPage.qml" line="120"/>
-        <source>ConnectionPage --- WireGuard® is a trademark of Jason A. Donenfeld, an individual.</source>
-        <translation>WireGuard® 是 Jason A. Donenfeld 个人的商标。</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
@@ -990,15 +990,15 @@
 <context>
     <name>DedicatedIpAddRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
+        <source>DedicatedIpAddRow --- Dedicated IP Token</source>
+        <translation>专用 IP 令牌</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
         <source>DedicatedIpAddRow --- Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
         <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
         <translation>在下方粘贴令牌。如果您最近购买了专用 IP，可以访问 [[My Account]] 页面生成令牌。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
-        <source>DedicatedIpAddRow --- Dedicated IP Token</source>
-        <translation>专用 IP 令牌</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
@@ -1188,14 +1188,40 @@
         <translation>系统启动时开启</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="46"/>
+        <source>GeneralPage --- Connect on Launch</source>
+        <translation>开启时连接</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="40"/>
         <source>GeneralPage --- Show Desktop Notifications</source>
         <translation>显示桌面通知</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="46"/>
-        <source>GeneralPage --- Connect on Launch</source>
-        <translation>开启时连接</translation>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="69"/>
+        <source>GeneralPage --- Language</source>
+        <translation>语言</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="120"/>
+        <source>GeneralPage --- Theme</source>
+        <translation>主题</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="123"/>
+        <source>GeneralPage --- Dark</source>
+        <translation>黑暗</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="124"/>
+        <source>GeneralPage --- Light</source>
+        <translation>明亮</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="88"/>
+        <source>GeneralPage --- Tray Icon Style</source>
+        <extracomment>This setting allows the user to choose a style for the icon shown in the system tray / notification area. It should use the typical desktop terminology for the &quot;tray&quot;.</extracomment>
+        <translation>托盘图标样式</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="50"/>
@@ -1206,17 +1232,6 @@
         <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="57"/>
         <source>GeneralPage --- Show Geo-Located Regions</source>
         <translation>显示地理定位区域</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="69"/>
-        <source>GeneralPage --- Language</source>
-        <translation>语言</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="88"/>
-        <source>GeneralPage --- Tray Icon Style</source>
-        <extracomment>This setting allows the user to choose a style for the icon shown in the system tray / notification area. It should use the typical desktop terminology for the &quot;tray&quot;.</extracomment>
-        <translation>托盘图标样式</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="93"/>
@@ -1256,21 +1271,6 @@
 <source>GeneralPage -- icon-theme --- Classic</source>
         
         <translation>经典</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="120"/>
-        <source>GeneralPage --- Theme</source>
-        <translation>主题</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="123"/>
-        <source>GeneralPage --- Dark</source>
-        <translation>黑暗</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="124"/>
-        <source>GeneralPage --- Light</source>
-        <translation>明亮</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/general/GeneralPage.qml" line="130"/>
@@ -1395,17 +1395,6 @@
 <context>
     <name>HelpPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="43"/>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="95"/>
-        <source>HelpPage --- Version:</source>
-        <translation>版本：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="51"/>
-        <source>HelpPage --- v%1</source>
-        <translation>v%1</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="109"/>
         <source>HelpPage --- Client:</source>
         <translation>客户端：</translation>
@@ -1427,24 +1416,14 @@
         <translation>快速导览</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="162"/>
-        <source>HelpPage --- Enable Debug Logging</source>
-        <translation>启用调试日志记录</translation>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="250"/>
+        <source>HelpPage --- Receive Beta Updates</source>
+        <translation>接收公测版更新</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="163"/>
-        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
-        <translation>保存调试日志，以便提交给 技术支持团队帮助排查问题。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="188"/>
-        <source>HelpPage --- Submit Debug Logs</source>
-        <translation>提交调试日志</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="214"/>
-        <source>HelpPage --- Support Portal</source>
-        <translation>支持端口</translation>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="251"/>
+        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
+        <translation>加入我们的公测版计划，测试新功能并提供反馈。</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="222"/>
@@ -1462,14 +1441,30 @@
         <translation>加速图形可降低 CPU 使用率并启用图形效果，但可能导致某些图形卡或驱动程序出现问题。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="250"/>
-        <source>HelpPage --- Receive Beta Updates</source>
-        <translation>接收公测版更新</translation>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="162"/>
+        <source>HelpPage --- Enable Debug Logging</source>
+        <translation>启用调试日志记录</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="251"/>
-        <source>HelpPage --- Join our beta program to test new features and provide feedback.</source>
-        <translation>加入我们的公测版计划，测试新功能并提供反馈。</translation>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="43"/>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="95"/>
+        <source>HelpPage --- Version:</source>
+        <translation>版本：</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="163"/>
+        <source>HelpPage --- Save debug logs which can be submitted to technical support to help troubleshoot problems.</source>
+        <translation>保存调试日志，以便提交给 技术支持团队帮助排查问题。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="188"/>
+        <source>HelpPage --- Submit Debug Logs</source>
+        <translation>提交调试日志</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="214"/>
+        <source>HelpPage --- Support Portal</source>
+        <translation>支持端口</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="300"/>
@@ -1532,14 +1527,14 @@
         <translation>正在重新安装 WinTUN 适配器...</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="438"/>
-        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
-        <translation>正在重新安装分离通道筛选器…</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="439"/>
         <source>HelpPage --- Split Tunnel Filter</source>
         <translation>分离通道筛选器</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="438"/>
+        <source>HelpPage --- Reinstalling Split Tunnel Filter...</source>
+        <translation>正在重新安装分离通道筛选器…</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="480"/>
@@ -1550,6 +1545,11 @@
         <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="509"/>
         <source>HelpPage --- Uninstall Private Internet Access</source>
         <translation>卸载 Private Internet Access</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="51"/>
+        <source>HelpPage --- v%1</source>
+        <translation>v%1</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="34"/>
@@ -1630,7 +1630,7 @@
         <translation>获取您的专用 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="142"/>
+        <location filename="../../../client/res/components/changelog/HeroCard.qml" line="144"/>
         <source>HeroCard --- Dedicated IP feature</source>
         <translation>专用 IP 功能</translation>
     </message>
@@ -1914,11 +1914,6 @@
 <context>
     <name>NetworkPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="65"/>
-        <source>NetworkPage --- DNS</source>
-        <translation>DNS</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="74"/>
         <source>NetworkPage --- PIA DNS</source>
         <translation>PIA DNS</translation>
@@ -1934,48 +1929,6 @@
         <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="264"/>
         <source>NetworkPage --- Use Existing DNS</source>
         <translation>使用现有 DNS</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="75"/>
-        <source>NetworkPage --- Custom</source>
-        <translation>自定义</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="113"/>
-        <source>NetworkPage --- Custom DNS</source>
-        <translation>自定义 DNS</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="136"/>
-        <source>NetworkPage --- Primary DNS:</source>
-        <translation>主 DNS：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="154"/>
-        <source>NetworkPage --- Secondary DNS:</source>
-        <translation>次 DNS：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="175"/>
-        <source>NetworkPage --- Request Port Forwarding</source>
-        <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
-        <translation>请求端口转发</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="182"/>
-        <source>NetworkPage --- Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
-        <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
-        <translation>将 VPN IP 中的端口转发到您的计算机。将为您 选择该端口。不是所有地点都支持端口转发。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="190"/>
-        <source>NetworkPage --- Allow LAN Traffic</source>
-        <translation>允许 LAN 流量</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="191"/>
-        <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
-        <translation>始终允许本地网络上的设备之间的流量， 即使使用 VPN Killswitch 也不例外。</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="206"/>
@@ -2013,6 +1966,59 @@
         <translation>使用自定义 DNS</translation>
     </message>
     <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="175"/>
+        <source>NetworkPage --- Request Port Forwarding</source>
+        <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
+        <translation>请求端口转发</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="65"/>
+        <source>NetworkPage --- DNS</source>
+        <translation>DNS</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="75"/>
+        <source>NetworkPage --- Custom</source>
+        <translation>自定义</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="113"/>
+        <source>NetworkPage --- Custom DNS</source>
+        <translation>自定义 DNS</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="136"/>
+        <source>NetworkPage --- Primary DNS:</source>
+        <translation>主 DNS：</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="154"/>
+        <source>NetworkPage --- Secondary DNS:</source>
+        <translation>次 DNS：</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="182"/>
+        <source>NetworkPage --- Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
+        <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
+        <translation>将 VPN IP 中的端口转发到您的计算机。将为您 选择该端口。不是所有地点都支持端口转发。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="190"/>
+        <source>NetworkPage --- Allow LAN Traffic</source>
+        <translation>允许 LAN 流量</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="191"/>
+        <source>NetworkPage --- Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
+        <translation>始终允许本地网络上的设备之间的流量， 即使使用 VPN Killswitch 也不例外。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="119"/>
+        <extracomment>Description for the split tunnel setting.</extracomment>
+<source>NetworkPage --- Choose which applications use the VPN.</source>
+        <translation>选择哪些应用程序使用 VPN。</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="46"/>
         <source>NetworkPage --- Split Tunnel</source>
         <translation>分离通道</translation>
@@ -2031,12 +2037,6 @@
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="114"/>
         <source>NetworkPage --- The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
         <translation>未安装分离通道筛选器。请在帮助页面上重新安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="119"/>
-        <extracomment>Description for the split tunnel setting.</extracomment>
-<source>NetworkPage --- Choose which applications use the VPN.</source>
-        <translation>选择哪些应用程序使用 VPN。</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="120"/>
@@ -3114,6 +3114,26 @@
         <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
         <translation>WireGuard 需要安装 Windows 8 或更高版本。</translation>
     </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="55"/>
+        <source>SettingsMessages --- You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
+        <translation>打开“分离通道”功能时，您可能会在macOS Monterey上遇到互联网连接问题。如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="56"/>
+        <source>SettingsMessages --- Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
+        <translation>如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="57"/>
+        <source>SettingsMessages --- macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
+        <translation>macOS Monterey在某些系统上存在与“分离通道”有关的问题。如果您无法访问互联网，请禁用“分离通道”。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="58"/>
+        <source>SettingsMessages --- Disable Split Tunnel</source>
+        <translation>禁用分离通道</translation>
+    </message>
 </context>
 <context>
     <name>SettingsModule</name>
@@ -3180,32 +3200,6 @@
         <translation>协议</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Network</source>
-        
-        <translation>网络</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
-        <extracomment>setting-title</extracomment>
-<source>SettingsWindow -- setting-title --- Privacy</source>
-        
-        <translation>隐私</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
-        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
-        
-        <translation>专用 IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
-        <source>SettingsWindow -- setting-title --- Automation</source>
-        
-        <translation>自动化</translation>
-    </message>
-    <message>
         <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="71"/>
         <source>SettingsWindow -- setting-title --- Split Tunnel</source>
         
@@ -3223,6 +3217,32 @@
 <source>SettingsWindow -- setting-title --- Account</source>
         
         <translation>账户</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="68"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Privacy</source>
+        
+        <translation>隐私</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="67"/>
+        <extracomment>setting-title</extracomment>
+<source>SettingsWindow -- setting-title --- Network</source>
+        
+        <translation>网络</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="70"/>
+        <source>SettingsWindow -- setting-title --- Automation</source>
+        
+        <translation>自动化</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="69"/>
+        <source>SettingsWindow -- setting-title --- Dedicated IP</source>
+        
+        <translation>专用 IP</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/SettingsWindow.qml" line="74"/>
@@ -3343,6 +3363,12 @@
 <context>
     <name>SplitTunnelAddIpRow</name>
     <message>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
+        <source>SplitTunnelAddIpRow --- Add IP Address</source>
+        <translation>添加 IP 地址</translation>
+    </message>
+    <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="59"/>
         <source>SplitTunnelAddIpRow --- IP Address or Subnet</source>
         <translation>IP 地址或子网</translation>
@@ -3351,12 +3377,6 @@
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="66"/>
         <source>SplitTunnelAddIpRow --- You can enter an IPv4/IPv6 address, or a subnet in CIDR notation:</source>
         <translation>您可以输入 IPv4/IPv6 地址或采用 CIDR 表示法的子网：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
-        <source>SplitTunnelAddIpRow --- Add IP Address</source>
-        <translation>添加 IP 地址</translation>
     </message>
 </context>
 <context>

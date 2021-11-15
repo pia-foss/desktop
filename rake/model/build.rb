@@ -8,7 +8,7 @@ require 'json'
 # and creates a per-component build directory for this component.
 class Build
     # The major-minor-patch parts of this version
-    VersionMMP = [3, 1, 0]
+    VersionMMP = [3, 1, 1]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
@@ -25,7 +25,7 @@ class Build
                                            [:x86, :x86_64, :armhf, :arm64])
 
     # Load the essential brand info - the brand identifier is needed in many
-    # places on Mac to brand assets, property lists, etc.
+# places on Mac to brand assets, property lists, etc.
     # More complete parsing is done by PiaVersion, which generates version.h,
     # brand.h, etc.
     BrandInfo = JSON.parse(File.read(File.join('brands', Brand,

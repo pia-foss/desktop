@@ -225,6 +225,27 @@ Item {
       NativeHelpers.reinstallWfpCalloutStatus === "reboot"
   }
 
+  // Display the notification whenever split tunnel is enabled and the user is on macOS Monterey.
+  // Don't allow the notification to be dismissed.  Use "info" level (green)
+  // Use the following message: `Please disable the Split Tunnel feature if you're having trouble
+  // connecting to the internet.`
+  // Add a link labeled `Disable Split Tunnel` that turns off the split tunnel setting.
+  // (This should consequently hide the notification, since it only appears when ST is enabled.)
+
+  NotificationStatus {
+    id: splitTunnelMonterey
+    message: SettingsMessages.stMontereyNotification
+    severity: severities.info
+    links: [{
+      text: uiTr("Settings"),
+      clicked: function() { showPage("split-tunnel")}
+    }]
+    dismissible: false
+    active: Daemon.settings.splitTunnelEnabled &&
+            Qt.platform.os === "osx" &&
+            NativeHelpers.osMajorVersion === 12
+  }
+
   // Notification for the OpenVPN "authorization failure" error.
   // Although this OpenVPN error has a very specific meaning, for PIA this does
   // not mean that the user's credentials are incorrect.  For example, if the
@@ -629,6 +650,7 @@ Item {
     wintunMissing,
     splitTunnelUninstalled,
     splitTunnelReboot,
+    splitTunnelMonterey,
     authFailure,
     dnsConfigFailed,
     hnsdFailing,

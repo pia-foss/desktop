@@ -38,6 +38,7 @@
 #include <QElapsedTimer>
 #include <QCursor>
 #include <QLibrary>
+#include <QOperatingSystemVersion>
 
 #ifdef Q_OS_MACOS
 #include "mac/mac_install.h"
@@ -331,6 +332,11 @@ void NativeHelpers::setDockVisibility(bool enabled)
 #endif
 }
 
+int NativeHelpers::getMajorOSVersion() const
+{
+    auto current = QOperatingSystemVersion::current();
+    return current.majorVersion();
+}
 
 auto NativeHelpers::getPlatform() const -> Platform
 {

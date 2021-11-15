@@ -147,9 +147,10 @@ Page {
         // can also trigger a driver (re)install, so this indicates that we
         // should handle the result here.
         property bool installingDriver: false
+        property bool confirming: false
 
         onCurrentValueChanged: {
-          if(currentValue === daemonSetting.currentValue)
+          if(currentValue === daemonSetting.currentValue || confirming)
             return
 
           // Disabling is always allowed
@@ -157,7 +158,21 @@ Page {
             daemonSetting.currentValue = currentValue
             return
           }
+          if (Qt.platform.os === 'osx' && NativeHelpers.osMajorVersion === 12) {
+            confirming = true
+            currentValue = false
+            confirmDialog.show()
+          } else {
+            continueEnabling()
+          }
+        }
 
+        function cancelEnabling() {
+          confirming = false
+        }
+        function continueEnabling() {
+          currentValue = true
+          confirming = false
           // If we're already installing or a reboot is needed, we can't enable
           // (the control should be disabled in this case)
           if(!appExclusionCheckbox.canStartInstall) {
@@ -270,6 +285,31 @@ Page {
 
     SplitTunnelAddIpDialog {
       id: addIpDialog
+    }
+    OverlayDialog {
+      id: confirmDialog
+
+      buttons: [Dialog.Ok, Dialog.Cancel]
+      contentWidth: 300
+
+      DialogMessage {
+        width: parent.width
+        icon: 'info'
+        text: SettingsMessages.stMontereyConfirmation
+        color: Theme.settings.inputLabelColor
+      }
+
+      function show() {
+        visible = true
+        focus = true
+        open()
+      }
+      onAccepted: {
+        appExclusionSetting.continueEnabling();
+      }
+      onRejected: {
+        appExclusionSetting.cancelEnabling();
+      }
     }
   }
 

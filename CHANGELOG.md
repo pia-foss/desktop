@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.1.1
+
+* Added a notice about split tunnel issues on macOS Monterey
+
 ### v3.1.0
 
 * Added support for Wayland display server on Linux
