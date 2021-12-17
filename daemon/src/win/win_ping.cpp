@@ -61,7 +61,10 @@ namespace
     }
 }
 
-QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address, std::chrono::milliseconds timeout)
+QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address,
+                                        std::chrono::milliseconds timeout,
+                                        WORD payloadSize,
+                                        bool allowFragments)
 {
     WinIcmpRef &icmp{getIcmpRef()};
     if(!icmp)
@@ -71,24 +74,22 @@ QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address, std::chrono::millisecon
     }
 
     // Use the same payload as `ping`
-    enum : WORD
-    {
-        PayloadSize = 32,
-        // Per doc, reply buffer must be able to contain all these components:
-        // - payload
-        // - ICMP_ECHO_REPLY
-        // - 8 bytes for an ICMP error
-        // - IO_STATUS_BLOCK - 8 bytes, struct is actually defined in DDK it
-        //   seems
-        //
-        // The size of IO_STATUS_BLOCK is hard-coded due to the structure
-        // apparently being defined in the DDK.  IcmpSendEcho2() checks the
-        // size of the reply buffer, so absolute-worst-case we will fail to send
-        // pings.
-        ReplyBufSize = PayloadSize + sizeof(ICMP_ECHO_REPLY) + 8/*ICMP error*/ + 8/*IO_STATUS_BLOCK*/
-    };
+    // Per doc, reply buffer must be able to contain all these components:
+    // - payload
+    // - ICMP_ECHO_REPLY
+    // - 8 bytes for an ICMP error
+    // - IO_STATUS_BLOCK - 8 bytes, struct is actually defined in DDK it
+    //   seems
+    //
+    // The size of IO_STATUS_BLOCK is hard-coded due to the structure
+    // apparently being defined in the DDK.  IcmpSendEcho2() checks the
+    // size of the reply buffer, so absolute-worst-case we will fail to send
+    // pings.
     // Match default for 'ping' on Windows
-    quint8 payload[]{"abcdefghijklmnopqrstuvwabcdefghi"};
+    std::vector<std::uint8_t> payloadBuf;
+    payloadBuf.resize(payloadSize);
+    quint8* payload = payloadBuf.data();
+    WORD ReplyBufSize = payloadSize + sizeof(ICMP_ECHO_REPLY) + 8/*ICMP error*/ + 8/*IO_STATUS_BLOCK*/;
 
     // Create an event that the reply will signal
     WinHandle event{::CreateEventW(nullptr, false, false, nullptr)};
@@ -107,9 +108,17 @@ QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address, std::chrono::millisecon
 
     IPAddr pingAddr{};
     pingAddr = htonl(address);
+
+    IP_OPTION_INFORMATION ip_opts{};
+    ip_opts.Ttl = 128;
+    if (!allowFragments) {
+        ip_opts.Flags = IP_FLAG_DF | IP_OPT_ROUTER_ALERT;
+    }
+
     auto result = ::IcmpSendEcho2(icmp, pEcho->_event, nullptr, nullptr,
-                                  pingAddr, payload, PayloadSize,
-                                  nullptr, pEcho->_replyBuffer.data(),
+                                  pingAddr, payload, payloadSize,
+                                  allowFragments ? nullptr : &ip_opts,
+                                  pEcho->_replyBuffer.data(),
                                   static_cast<WORD>(pEcho->_replyBuffer.size()),
                                   msec(timeout));
 
@@ -223,6 +232,7 @@ void WinIcmpEcho::onEventActivated()
                 << "- possible messages:" << ipErrorString(err.code()) << "/"
                 << err.message();
         }
+        emit receivedError(err.code());
         return;
     }
 
@@ -250,5 +260,6 @@ void WinIcmpEcho::onEventActivated()
         qWarning() << "Received error from ICMP echo to"
             << QHostAddress{replyAddr}.toString() << "-"
             << pReplyData->Status << "-" << ipErrorString(pReplyData->Status);
+        emit receivedError(pReplyData->Status);
     }
 }

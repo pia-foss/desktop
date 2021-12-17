@@ -779,7 +779,9 @@ OriginalNetworkScan Daemon::originalNetwork() const
 {
     return {_state.originalGatewayIp(), _state.originalInterface(),
             _state.originalInterfaceIp(), _state.originalInterfaceNetPrefix(),
-            _state.originalInterfaceIp6(), _state.originalGatewayIp6()};
+            _state.originalMtu(),
+            _state.originalInterfaceIp6(), _state.originalGatewayIp6(),
+            _state.originalMtu6()};
 }
 
 bool Daemon::hasActiveClient() const
@@ -1499,8 +1501,9 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
             })
             ->except(this, [this, username, password](const Error& error) {
                 resetAccountInfo();
-                if (error.code() == Error::ApiUnauthorizedError)
+                if (error.code() == Error::ApiUnauthorizedError || error.code() == Error::ApiPaymentRequiredError)
                     throw error;
+
                 // Proceed with empty account info; the client can still connect
                 // if the naked username/password is valid for OpenVPN auth.
                 _account.username(username);
@@ -2464,6 +2467,8 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
         qInfo() << " - def6:" << network.defaultIpv6();
         qInfo() << " - gw4:" << network.gatewayIpv4();
         qInfo() << " - gw6:" << network.gatewayIpv6();
+        qInfo() << " - mtu4:" << network.mtu4();
+        qInfo() << " - mtu6:" << network.mtu6();
         qInfo() << " - ip4:" << network.addressesIpv4().size();
         int i=0;
         for(const auto &addr : network.addressesIpv4())
@@ -2487,6 +2492,7 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
                 defaultConnection.gatewayIp({});
 
             defaultConnection.interfaceName(network.networkInterface());
+            defaultConnection.mtu(network.mtu4());
 
             if(!network.addressesIpv4().empty())
             {
@@ -2505,6 +2511,7 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
         }
         if(network.defaultIpv6())
         {
+            defaultConnection.mtu6(network.mtu6());
             if(!network.addressesIpv6().empty())
             {
                 defaultConnection.ipAddress6(network.addressesIpv6().front().first.toString());
@@ -2527,9 +2534,11 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
     _state.originalGatewayIp(defaultConnection.gatewayIp());
     _state.originalInterface(defaultConnection.interfaceName());
     _state.originalInterfaceNetPrefix(defaultConnection.prefixLength());
+    _state.originalMtu(defaultConnection.mtu());
     _state.originalInterfaceIp(defaultConnection.ipAddress());
     _state.originalInterfaceIp6(defaultConnection.ipAddress6());
     _state.originalGatewayIp6(defaultConnection.gatewayIp6());
+    _state.originalMtu6(defaultConnection.mtu6());
 
     // Relevant only to macOS
     _state.macosPrimaryServiceKey(macosPrimaryServiceKey);

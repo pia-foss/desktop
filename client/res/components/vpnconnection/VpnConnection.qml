@@ -85,14 +85,7 @@ QtObject {
       }
       else {
         _addRecentLocation(locationId)
-        // If we are not already connected, connect to this location.
-        //
-        // If we were connected, the daemon started a reconnection due to
-        // specifying reconnectIfNeeded=true to applySettings().  Don't call
-        // connectVPN(), because this may clear an automation trigger that's
-        // currently active.
-        if(!Daemon.state.vpnEnabled)
-          Daemon.connectVPN()
+        Daemon.connectVPN()
       }
     })
   }

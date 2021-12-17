@@ -433,6 +433,8 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
         connections.back().gatewayIpv6(itf.second.gatewayIpv6);
         connections.back().addressesIpv4(std::move(itf.second.addressesIpv4));
         connections.back().addressesIpv6(std::move(itf.second.addressesIpv6));
+        connections.back().mtu4(itf.second.pItf4 ? itf.second.pItf4->NlMtu : 0);
+        connections.back().mtu6(itf.second.pItf6 ? itf.second.pItf6->NlMtu : 0);
 
         // Check if this is a Wi-Fi interface and apply that state
         auto itWifiState = wifiInterfaces.find(itf.first);

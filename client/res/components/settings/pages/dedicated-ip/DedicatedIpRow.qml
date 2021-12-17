@@ -44,7 +44,6 @@ DedicatedIpRowBase {
   //: "Remove" button label - used as the screen reader annotation for the "X"
   //: button next to a dedicated IP, and for the confirmation button on the
   //: prompt presented when removing a dedicated IP.
-  readonly property string removeButton: uiTr("Remove")
 
   // This row has all columns
   effectiveColumnFor: function(column){return column}
@@ -57,7 +56,7 @@ DedicatedIpRowBase {
         ipText.copyClicked()
         break
       case keyColumns.remove:
-        removeDipDialog.show()
+        parentTable.promptRemoveDip(regionName, regionIp, regionId)
         break
     }
   }
@@ -82,38 +81,14 @@ DedicatedIpRowBase {
     onActivated: ipText.copyClicked()
   }
   accRemoveCell: NativeAcc.TableCellButton {
-    name: removeButton
+    name: parentTable.removeButtonText
     item: removeImg
     onActivated: dedicatedIpRow.removeClicked()
   }
 
   function removeClicked() {
     focusCell(keyColumns.remove)
-    removeDipDialog.show()
-  }
-
-  OverlayDialog {
-    id: removeDipDialog
-
-    buttons: [{code: Dialog.Ok, text: removeButton}, Dialog.Cancel]
-    contentWidth: 300
-    title: uiTr("Remove Dedicated IP")
-
-    DialogMessage {
-      width: parent.width
-      icon: 'info'
-      //: Confirmation prompt to remove a dedicated IP.  %1 is the translated
-      //: region name, %2 is an IP address, such as 100.200.100.200.
-      text: uiTr("Remove %1 - %2?").arg(regionName).arg(regionIp)
-      color: Theme.settings.inputLabelColor
-    }
-
-    function show(name, ip, id) {
-      visible = true
-      focus = true
-      open()
-    }
-    onAccepted: Daemon.removeDedicatedIp(regionId)
+    parentTable.promptRemoveDip(regionName, regionIp, regionId)
   }
 
   // Highlight cue for the entire row, used for the region column

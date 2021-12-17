@@ -249,7 +249,8 @@ bool macExecuteInstaller()
     if (auth_res == MacAuthorizeResult::Success)
     {
         // Success - relaunch client from installation
-        QProcess::execute(Path::InstallationDir / "Contents/Resources/relaunch.sh", { QString::number(getpid()), originalAppPath });
+        QProcess::execute(Path::InstallationDir / "Contents/Resources/relaunch.sh",
+                          { QString::number(getpid()), originalAppPath});
         return true;
     }
 

@@ -29,17 +29,6 @@
 #include <netinet/ip.h>
 #include <fcntl.h>
 
-namespace
-{
-#if defined(Q_OS_MAC)
-    // On Mac, basic ICMP echoes are possible with the SOCK_DGRAM type, we don't
-    // need an unfettered raw socket.
-    const auto sockType = SOCK_DGRAM;
-#else
-    const auto sockType = SOCK_RAW;
-#endif
-}
-
 PosixPing::PosixPing()
     : _identifier{static_cast<quint16>(QRandomGenerator::global()->bounded(std::numeric_limits<quint16>::max()))},
       _nextSequence{0}
@@ -48,10 +37,16 @@ PosixPing::PosixPing()
     // still want to test the bulk of LatencyTracker, so mimic the pings just by
     // triggering phony measurements in unit tests.
 #ifndef UNIT_TEST
-    _icmpSocket = PosixFd{::socket(PF_INET, sockType, IPPROTO_ICMP)};
+    _icmpSocket = PosixFd{::socket(PF_INET, SOCK_RAW, IPPROTO_ICMP)};
     if(!_icmpSocket)
     {
         qWarning() << "Failed to open ICMP socket:" << errno;
+    }
+
+    int val = 1;
+    if (setsockopt(_icmpSocket.get(), IPPROTO_IP,
+                   IP_HDRINCL, &val, sizeof(val)) < 0) {
+      qWarning() << "Failed to set IP_HDRINCL flag on ICMP socket";
     }
 
     // apply NONBLOCK flag
@@ -76,8 +71,8 @@ quint16 PosixPing::calcChecksum(const quint8 *data, std::size_t len) const
         ++words;
     }
     // Handle trailing odd byte
-    if(len % 1)
-        accum += (data[len-1] << 8);
+    if(len % 2)
+        accum += data[len-1];
 
     // Fold in carry
     accum = (accum & 0xFFFF) + (accum >> 16);
@@ -87,7 +82,7 @@ quint16 PosixPing::calcChecksum(const quint8 *data, std::size_t len) const
     return ~static_cast<quint16>(accum);
 }
 
-bool PosixPing::sendEchoRequest(quint32 address)
+bool PosixPing::sendEchoRequest(quint32 address, int payloadSize, bool allowFragment)
 {
 #ifdef UNIT_TEST
     // Fake this in unit tests since we can't send real ICMP pings when not run
@@ -104,10 +99,31 @@ bool PosixPing::sendEchoRequest(quint32 address)
     if(!_icmpSocket)
         return false; // Can't do anything, failed to open raw socket - traced earlier
 
-    // Build an ICMP echo request packet.  (Don't include the IP header, the
-    // network stack adds that by default.)
-    alignas(IcmpEcho) std::array<quint8, sizeof(IcmpEcho)+PayloadSize> packet;
-    IcmpEcho *pEcho = reinterpret_cast<IcmpEcho*>(packet.data());
+    // Build an ICMP echo request packet.
+    int rawPacketSize = sizeof(IcmpEcho) + payloadSize + sizeof(struct ip);
+    int packetSize = sizeof(IcmpEcho) + payloadSize;
+    std::vector<std::uint8_t> rawPacket;
+    rawPacket.resize(rawPacketSize);
+    quint8* pRawPacket = rawPacket.data();
+    quint8* packet = pRawPacket + sizeof(struct ip);
+    IcmpEcho *pEcho = reinterpret_cast<IcmpEcho*>(packet);
+    struct ip *ip = reinterpret_cast<struct ip *>(pRawPacket);
+
+    ip->ip_src.s_addr = 0;
+    ip->ip_v = 4;
+    ip->ip_hl = sizeof *ip >> 2;
+    ip->ip_tos = 0;
+    ip->ip_len = rawPacketSize;
+    // The IPv4 ID is only used for tracking fragmented datagrams.  We disable
+    // fragmentation most of the time, but since we've already picked a random
+    // identifier anyway for the ICMP header, use that.
+    ip->ip_id = htons(_identifier);
+    ip->ip_off = htons(0);
+    ip->ip_ttl = 255;
+    ip->ip_p = 1;
+    ip->ip_sum = 0;
+    ip->ip_dst.s_addr = htonl(address);
+
     pEcho->type = 8;
     pEcho->code = 0;
     pEcho->checksum = 0;
@@ -117,7 +133,7 @@ bool PosixPing::sendEchoRequest(quint32 address)
     ++_nextSequence;
     // The default payload on Mac/Linux is 56 bytes from 0x00 - 0x37.  The first
     // few bytes are replaced with a timestamp.
-    for(quint8 i = 0; i < PayloadSize; ++i)
+    for(int i = 0; i < payloadSize; ++i)
     {
         packet[sizeof(IcmpEcho)+i] = i;
     }
@@ -139,14 +155,28 @@ bool PosixPing::sendEchoRequest(quint32 address)
 
     // Compute the checksum.  Add into a 32-bit accumulator, then fold the
     // carries in.
-    pEcho->checksum = calcChecksum(packet.data(), packet.size());
+    pEcho->checksum = calcChecksum(packet, packetSize);
+
+    if (!allowFragment) {
+#if defined(Q_OS_MAC)
+        ip->ip_off = IP_DF;
+#else
+        ip->ip_off = htons(IP_DF);
+        int val = IP_PMTUDISC_DO;
+        int err = setsockopt(_icmpSocket.get(), IPPROTO_IP, IP_MTU_DISCOVER, &val, sizeof(val));
+        if (err) {
+            qWarning() << "Failed to set DF flag on ICMP socket";
+            return false;
+        }
+#endif
+    }
 
     // Write the packet
     sockaddr_in to;
     to.sin_family = AF_INET;
     to.sin_port = 0;    // Not used for ICMP raw socket
     to.sin_addr.s_addr = htonl(address);
-    auto sent = ::sendto(_icmpSocket.get(), &packet, sizeof(packet), 0,
+    auto sent = ::sendto(_icmpSocket.get(), pRawPacket, rawPacketSize, 0,
                          reinterpret_cast<sockaddr*>(&to), sizeof(to));
     if(sent < 0)
     {
@@ -162,9 +192,9 @@ bool PosixPing::sendEchoRequest(quint32 address)
         }
         return false;
     }
-    else if(sent != sizeof(packet))
+    else if(sent != rawPacketSize)
     {
-        qWarning() << "Only sent" << sent << "/" << sizeof(packet)
+        qWarning() << "Only sent" << sent << "/" << rawPacketSize
             << "bytes in ping to" << QHostAddress{address}.toString();
         return false;
     }
@@ -238,7 +268,6 @@ void PosixPing::onReadyRead()
     {
         qWarning() << "Received corrupt ICMP packet from"
             << QHostAddress{ntohl(pIpHdr->src)}.toString();
-        return;
     }
 
     // Find the ICMP header

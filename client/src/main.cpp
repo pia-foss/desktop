@@ -202,6 +202,7 @@ int clientMain(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 
     bool quietLaunch{false};
+    bool forceClearCache{false};
     // CLI args are parsed before creating the app and initializing paths, but
     // changing launch-on-login must be done after.  Save the requested
     // operation and execute it later.
@@ -221,6 +222,8 @@ int clientMain(int argc, char *argv[])
     {
         if(argv[i] && ::strcmp(argv[i], "--quiet") == 0)
             quietLaunch = true;
+        else if(argv[i] && ::strcmp(argv[i], "--clear-cache") == 0)
+            forceClearCache = true;
         else if(argv[i] && ::strcmp(argv[i], "--safe-mode") == 0)
             gfxMode = GraphicsMode::PersistSafe;
 #ifdef Q_OS_LINUX
@@ -336,6 +339,10 @@ int clientMain(int argc, char *argv[])
     // graph backend, this causes Qt Quick to create the RHI interface, which
     // checks the environment then.
     QQuickWindow::setSceneGraphBackend(QSGRendererInterface::GraphicsApi::Direct3D11Rhi);
+#endif
+
+#ifdef _DEBUG
+    qputenv("QML_DISABLE_DISK_CACHE", "1");
 #endif
 
 #ifdef Q_OS_MACOS
@@ -461,7 +468,7 @@ int clientMain(int argc, char *argv[])
     // Client so it can set the permanent client setting (including writing the
     // settings out to disk).
     Client client{hasExistingClientSettings, initialSettings.toJsonObject(),
-                  gfxMode, quietLaunch};
+                  gfxMode, quietLaunch, forceClearCache};
     // If a URL was given, pass it over to Client - NativeHelpers will queue
     // this up until the QML login page is ready to handle it
     if(!resourceURL.isEmpty())

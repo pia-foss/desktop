@@ -158,7 +158,7 @@ Page {
             daemonSetting.currentValue = currentValue
             return
           }
-          if (Qt.platform.os === 'osx' && NativeHelpers.osMajorVersion === 12) {
+          if (Qt.platform.os === 'osx' && NativeHelpers.macosProductVersion.startsWith('12.')) {
             confirming = true
             currentValue = false
             confirmDialog.show()
@@ -171,7 +171,20 @@ Page {
           confirming = false
         }
         function continueEnabling() {
-          currentValue = true
+          // This is really touchy due to the "bidirectional" nature of
+          // Setting.currentValue - it's used both to indicate a selection made
+          // by the user and the value we want to display.  Since this triggers
+          // onCurrentValueChanged, which may then call continueEnabling again,
+          // we have to be very careful.
+          //
+          // If currentValue is already true (any case where no confirmation was
+          // necessary), we don't need to do anything.
+          //
+          // If currentValue had been set back to false to show a confirmation,
+          // we need to set it back to true here.  In that case, 'confirming'
+          // prevents infinite recursion.
+          if(!currentValue)
+            currentValue = true
           confirming = false
           // If we're already installing or a reboot is needed, we can't enable
           // (the control should be disabled in this case)
@@ -289,6 +302,7 @@ Page {
     OverlayDialog {
       id: confirmDialog
 
+      title: appExclusionCheckbox.label
       buttons: [Dialog.Ok, Dialog.Cancel]
       contentWidth: 300
 

@@ -156,10 +156,12 @@ public:
     OriginalNetworkScan() = default;    // Required by Q_DECLARE_METATYPE
     OriginalNetworkScan(const QString &gatewayIp, const QString &interfaceName,
                         const QString &ipAddress, unsigned prefixLength,
-                        const QString &ipAddress6, const QString &gatewayIp6)
+                        unsigned mtu,
+                        const QString &ipAddress6, const QString &gatewayIp6,
+                        unsigned mtu6)
         : _gatewayIp{gatewayIp}, _interfaceName{interfaceName},
-          _ipAddress{ipAddress}, _prefixLength{prefixLength},
-          _ipAddress6{ipAddress6}, _gatewayIp6{gatewayIp6}
+          _ipAddress{ipAddress}, _prefixLength{prefixLength}, _mtu{mtu},
+          _ipAddress6{ipAddress6}, _gatewayIp6{gatewayIp6}, _mtu6{mtu6}
     {
     }
 
@@ -169,8 +171,10 @@ public:
             interfaceName() == rhs.interfaceName() &&
             ipAddress() == rhs.ipAddress() &&
             prefixLength() == rhs.prefixLength() &&
+            mtu() == rhs.mtu() &&
             ipAddress6() == rhs.ipAddress6() &&
-            gatewayIp6() == rhs.gatewayIp6();
+            gatewayIp6() == rhs.gatewayIp6() &&
+            mtu6() == rhs.mtu6();
     }
 
     bool operator!=(const OriginalNetworkScan& rhs) const
@@ -180,7 +184,7 @@ public:
 
     // Check whether the OriginalNetworkScan has valid (non-empty) values for
     // all fields.
-    bool ipv4Valid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty();}
+    bool ipv4Valid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty() && _mtu != 0;}
 
     // Whether the host has IPv6 available (as a global IP)
     bool hasIpv6() const {return !ipAddress6().isEmpty();}
@@ -190,24 +194,33 @@ public:
     void interfaceName(const QString &value) {_interfaceName = value;}
     void ipAddress(const QString &value) {_ipAddress = value;}
     void prefixLength(unsigned value) {_prefixLength = value;}
+    void mtu(unsigned value) { _mtu = value; }
     void ipAddress6(const QString &value) {_ipAddress6 = value;}
     void gatewayIp6(const QString &value) {_gatewayIp6 = value;}
+    void mtu6(unsigned value) { _mtu6 = value; }
 
     const QString &gatewayIp() const {return _gatewayIp;}
     const QString &interfaceName() const {return _interfaceName;}
     const QString &ipAddress() const {return _ipAddress;}
     unsigned prefixLength() const {return _prefixLength;}
+    unsigned mtu() const { return _mtu; }
 
     // An IP address from the default IPv6 interface.  This may not be the same
     // interface as the default IPv4 interface reported above.
     const QString &ipAddress6() const {return _ipAddress6;}
     const QString &gatewayIp6() const {return _gatewayIp6;}
+    // MTU for the default IPv6 interface.  (MTUs are currently only provided
+    // on Windows.)  May differe from the IPv4 MTU even if the interfaces are
+    // the same, because Windows has separate IPv4 and IPv6 MTUs for interfaces.
+    unsigned mtu6() const { return _mtu6; }
 
 private:
     QString _gatewayIp, _interfaceName, _ipAddress;
     unsigned _prefixLength;
+    unsigned _mtu;
     QString _ipAddress6;
     QString _gatewayIp6;
+    unsigned _mtu6;
 };
 
 // Custom logging for OriginalNetworkScan instances
@@ -435,7 +448,7 @@ public:
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
 
     quint16 localPort() const {return _localPort;}
-    uint mtu() const {return _mtu;}
+    int mtu() const {return _mtu;}
 
     // Whether to try alternate transports.  Requires OpenVPN and no proxy.
     bool automaticTransport() const {return _automaticTransport;}
@@ -528,7 +541,7 @@ private:
     quint16 _openvpnRemotePort{};
     bool _wireguardUseKernel{false};
     quint16 _localPort{0};
-    uint _mtu{0};
+    int _mtu{-1};
     bool _automaticTransport{false};
 
     // DNS
@@ -736,11 +749,11 @@ private:
 };
 
 // The 127/8 loopback address used for local DNS.
-COMMON_EXPORT const QString resolverLocalAddress();
+const QString resolverLocalAddress();
 
 // The IP used for PIA DNS in the modern infrastructure - on-VPN, and with MACE.
-COMMON_EXPORT const QString piaModernDnsVpnMace();
+const QString piaModernDnsVpnMace();
 // The IP used for PIA DNS in the modern infrastructure - on-VPN (no MACE).
-COMMON_EXPORT const QString piaModernDnsVpn();
+const QString piaModernDnsVpn();
 
 #endif

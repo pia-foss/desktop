@@ -346,8 +346,12 @@ void LinuxNl::Worker::readCaches()
         // This retains the link, so we have to release it later
         NlUniquePtr<libnl::rtnl_link> pItfLink{libnl::rtnl_link_get(_pLinkCache->get(), itfAddrs.first)};
         QString itfName;
+        unsigned mtu{0};
         if(pItfLink)
+        {
             itfName = QString::fromUtf8(libnl::rtnl_link_get_name(pItfLink.get()));
+            mtu = libnl::rtnl_link_get_mtu(pItfLink.get());
+        }
 
         std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
         addressesIpv4.reserve(itfAddrs.second._addrs4.size());
@@ -367,6 +371,8 @@ void LinuxNl::Worker::readCaches()
                 addressesIpv6.push_back({addr6, libnl::nl_addr_get_prefixlen(pNlAddr6)});
         }
 
+        // Linux does not have separate IPv4 and IPv6 MTUs; it's just set once
+        // for the link.
         connections.push_back(NetworkConnection{itfName,
                                                 NetworkConnection::Medium::Unknown,
                                                 itfAddrs.first == lowestGateway4.ifindex,
@@ -374,7 +380,8 @@ void LinuxNl::Worker::readCaches()
                                                 readNlAddr4(itfAddrs.second._pIpv4Gateway),
                                                 readNlAddr6(itfAddrs.second._pIpv6Gateway),
                                                 std::move(addressesIpv4),
-                                                std::move(addressesIpv6)});
+                                                std::move(addressesIpv6),
+                                                mtu, mtu});
 
         // If the interface is known to nl80211, it's a Wi-Fi interface.
         // Otherwise, assume that it's wired.  This isn't precisely correct for

@@ -37,7 +37,8 @@ FocusScope {
     'rate': 2, // Rate limited
     'api': 3,  // Error reaching API, etc. (user's creds might be correct)
     'unknown': 4,
-    'email_sent': 5
+    'email_sent': 5,
+    'expired': 6  // The user's subscription has expired
   }
   property int shownError: errors.none
   property int emailError: errors.none
@@ -113,6 +114,13 @@ FocusScope {
           case NativeError.ApiRateLimitedError:
             shownError = errors.rate
             break
+          case NativeError.ApiPaymentRequiredError:
+            // Api error Payment Required (http status 402)
+            // is used to indicate an account subscription has expired
+            shownError = errors.expired
+            // Change the displayed page to the upgrade page
+            stateStack.showUpgradePage()
+            break
           default:
             shownError = errors.api
             break
@@ -123,305 +131,395 @@ FocusScope {
     }
   }
 
-  Rectangle {
+  // Contains both the normal 'login' page and the 'upgrade required' page (if the user's account expired)
+  StackLayout {
+    id: stateStack
+    readonly property int loginPageIndex: 0
+    readonly property int upgradePageIndex: 1
+    property int activeIndex: loginPageIndex
     anchors.fill: parent
-    color: "transparent"
-    clip: true
-    Item {
-      id: mapContainer
-      width: parent.width
-      height: loginContent.y
+    currentIndex: activeIndex
 
-      LocationMap {
-        id: mapImage
-        anchors.horizontalCenter: parent.horizontalCenter
-        // Size to 130px tall as long as the minimum margin is available (14 px)
-        height: Math.min(parent.height - 14, 130)
-        width: {
-          console.info("map size: " + 2*height + "x" + height)
-          return 2*height
-        }
-        // Distribute the margin mostly on the top - 36:10 top/bottom
-        y: (parent.height - height) * 36 / 46
-        mapOpacity: Theme.login.mapOpacity
-        markerInnerRadius: 3.5
-        markerOuterRadius: 6.5
-        location: Daemon.state.vpnLocations.nextLocation
-      }
+    // Default page
+    function showLoginPage() {
+      stateStack.activeIndex = loginPageIndex
     }
 
-    Item {
-      id: loginContent
-      anchors.bottom: linkContainer.top
-      anchors.bottomMargin: 20
-      anchors.left: parent.left
-      width: parent.width
-      height: usernameModeContent.height
+    // Shown when the user's subscription expires
+    function showUpgradePage() {
+      stateStack.activeIndex = upgradePageIndex
+    }
+
+    // The "login" page (everything contained in this Rectangle)
+    Rectangle {
+      anchors.fill: parent
+      color: "transparent"
+      clip: true
       Item {
-        id: usernameModeContent
+        id: mapContainer
         width: parent.width
-        height: lb.y + lb.height
-        visible: mode === modes.login
+        height: loginContent.y
 
-        Text {
-          color: Theme.login.errorTextColor
-          text: {
-            switch(shownError) {
-            case errors.auth:
-              return uiTr("Invalid login")
-            case errors.rate:
-              return uiTr("Too many attempts, try again in 1 hour")
-            case errors.api:
-              return uiTr("Can't reach the server")
-            default:
+        LocationMap {
+          id: mapImage
+          anchors.horizontalCenter: parent.horizontalCenter
+          // Size to 130px tall as long as the minimum margin is available (14 px)
+          height: Math.min(parent.height - 14, 130)
+          width: {
+            console.info("map size: " + 2*height + "x" + height)
+            return 2*height
+          }
+          // Distribute the margin mostly on the top - 36:10 top/bottom
+          y: (parent.height - height) * 36 / 46
+          mapOpacity: Theme.login.mapOpacity
+          markerInnerRadius: 3.5
+          markerOuterRadius: 6.5
+          location: Daemon.state.vpnLocations.nextLocation
+        }
+      }
+
+      Item {
+        id: loginContent
+        anchors.bottom: linkContainer.top
+        anchors.bottomMargin: 20
+        anchors.left: parent.left
+        width: parent.width
+        height: usernameModeContent.height
+        Item {
+          id: usernameModeContent
+          width: parent.width
+          height: lb.y + lb.height
+          visible: mode === modes.login
+
+          Text {
+            color: Theme.login.errorTextColor
+            text: {
+              switch(shownError) {
+              case errors.auth:
+                return uiTr("Invalid login")
+              case errors.rate:
+                return uiTr("Too many attempts, try again in 1 hour")
+              case errors.api:
+                return uiTr("Can't reach the server")
+              case errors.expired:
+                return uiTr("Your subscription has expired")
+              default:
+                return ""
+              }
+            }
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            font.pixelSize: Theme.login.errorTextPx
+            visible: shownError !== errors.none
+          }
+
+          FlexValidator {
+            id: loginValidator
+
+            // Recent usernames must all be alphanumeric but some historical ones are email addresses
+            // As a result of this, let's not validate the login input at all
+            // but instead use the validator for trimming whitespace from user input (fixInput() allows us to do this)
+            regExp: /.*/
+            function fixInput(input) { return input.trim() }
+          }
+
+          LoginText {
+            id: loginInput
+            errorState: shownError !== errors.none
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 260
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            placeholderText: uiTr("Username")
+            validator: loginValidator
+            onAccepted: login()
+            errorTipText: {
+              if(loginInput.text.startsWith('x')) {
+                //: Shown if the user attempts to login with the wrong account type.
+                //: 'p' refers to the letter prefix on the username; the p should be
+                //: kept in Latin script.  (Example user names are "p0123456",
+                //: "p5858587").
+                return uiTr("Use your normal username beginning with 'p'.")
+              }
               return ""
             }
           }
-          anchors.top: parent.top
-          anchors.horizontalCenter: parent.horizontalCenter
-          font.pixelSize: Theme.login.errorTextPx
-          visible: shownError !== errors.none
-        }
 
-        FlexValidator {
-          id: loginValidator
+          LoginText {
+            id: passwordInput
+            errorState: shownError !== errors.none
+            width: 260
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: loginInput.bottom
+            anchors.topMargin: 8
+            placeholderText: uiTr("Password")
+            onAccepted: login()
+            masked: true
+          }
 
-          // Recent usernames must all be alphanumeric but some historical ones are email addresses
-          // As a result of this, let's not validate the login input at all
-          // but instead use the validator for convenience as the fixInput() callback allows trimming of input as the user types
-          regExp: /.*/
-          function fixInput(input) { return input.trim() }
-        }
-
-        LoginText {
-          id: loginInput
-          errorState: shownError !== errors.none
-          anchors.horizontalCenter: parent.horizontalCenter
-          width: 260
-          anchors.top: parent.top
-          anchors.topMargin: 16
-          placeholderText: uiTr("Username")
-          validator: loginValidator
-          onAccepted: login()
-          errorTipText: {
-            if(loginInput.text.startsWith('x')) {
-              //: Shown if the user attempts to login with the wrong account type.
-              //: 'p' refers to the letter prefix on the username; the p should be
-              //: kept in Latin script.  (Example user names are "p0123456",
-              //: "p5858587").
-              return uiTr("Use your normal username beginning with 'p'.")
-            }
-            return ""
+          LoginButton {
+            id: lb
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: passwordInput.bottom
+            anchors.topMargin: 20
+            loginEnabled: hasValidInput
+            loginWorking: loginInProgress
+            onTriggered: login()
           }
         }
 
-        LoginText {
-          id: passwordInput
-          errorState: shownError !== errors.none
-          width: 260
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.top: loginInput.bottom
-          anchors.topMargin: 8
-          placeholderText: uiTr("Password")
-          onAccepted: login()
-          masked: true
+        //
+        // "Email Login" page
+        //
+        Item {
+          visible: mode === modes.email
+          anchors.fill: parent
+
+          Text {
+            color: {
+              switch(emailError) {
+              case errors.email_sent:
+                return Theme.login.inputTextColor
+              default:
+                return Theme.login.errorTextColor
+              }
+            }
+            text: {
+              switch(emailError) {
+              case errors.unknown:
+                return uiTr("Something went wrong. Please try again later.")
+              case errors.email_sent:
+                return uiTr("Please check your email.")
+              default:
+                return ""
+              }
+            }
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            font.pixelSize: Theme.login.errorTextPx
+            visible: emailError !== errors.none
+          }
+
+          LoginText {
+            id: emailInput
+            errorState: emailError !== errors.none && emailError !== errors.email_sent
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 260
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            placeholderText: uiTr("Email Address")
+            onAccepted: requestEmailLogin()
+            validator: RegExpValidator {
+              regExp: /^\S+@\S+\.\S+$/
+            }
+          }
+
+          LoginButton {
+            id: sendEmailButton
+            buttonText: uiTr("SEND EMAIL")
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            loginEnabled: emailInput.text.length > 0 && emailInput.acceptableInput
+            loginWorking: emailRequestInProgress
+            onTriggered: requestEmailLogin()
+          }
         }
 
-        LoginButton {
-          id: lb
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.top: passwordInput.bottom
-          anchors.topMargin: 20
-          loginEnabled: hasValidInput
-          loginWorking: loginInProgress
-          onTriggered: login()
+        // When logging in with a token
+        Item {
+          visible: mode === modes.token
+          anchors.fill: parent
+
+          Image {
+            id: spinnerImage
+            height: 40
+            width: 40
+            source: Theme.login.buttonSpinnerImage
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 40
+
+            RotationAnimator {
+              target: spinnerImage
+              running: spinnerImage.visible
+              from: 0;
+              to: 360;
+              duration: 1000
+              loops: Animation.Infinite
+            }
+
+            visible: tokenError === errors.none
+          }
+
+          Text {
+            color: {
+              if(tokenError !== errors.none)
+                return Theme.login.errorTextColor
+              else
+                return Theme.dashboard.textColor
+            }
+            anchors.top: spinnerImage.bottom
+            anchors.topMargin: 15
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: {
+              if(tokenError === errors.none) {
+                return uiTr("Please Wait...")
+              } else {
+                return uiTr("Something went wrong. Please try again later.")
+              }
+            }
+          }
         }
+
+
       }
 
-      //
-      // "Email Login" page
-      //
       Item {
-        visible: mode === modes.email
-        anchors.fill: parent
+        id: linkContainer
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 24
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
 
-        Text {
-          color: {
-            switch(emailError) {
-            case errors.email_sent:
-              return Theme.login.inputTextColor
-            default:
-              return Theme.login.errorTextColor
-            }
-          }
+        height: buyAccount.y + buyAccount.height
+
+        // Normally, put the last two links side-by-side:
+        //
+        // | Log in with Email                   |
+        // | Forgot Password         Buy Account |
+        // +-------------------------------------+
+        //
+        // For long translations, stack the last two links instead
+        //
+        // | Log in with Email translation       |
+        // | Forgot password translation         |
+        // | Buy Account translation             |
+        // +-------------------------------------+
+        //
+        // This layout also ensures that the "login mode" link always gets a full
+        // line; the translations for this line vary quite a bit and we don't want
+        // the layout to change when the login mode changes.
+        readonly property int minimumHorzGap: 4
+        readonly property int stackedGap: 4
+        readonly property bool stackLinks: {
+          return forgotPassword.implicitWidth + buyAccount.implicitWidth + minimumHorzGap > linkContainer.width
+        }
+
+        TextLink {
+          id: loginMode
+          x: 0
+          y: 0
+          visible: emailLoginFeatureEnabled
           text: {
-            switch(emailError) {
-            case errors.unknown:
-              return uiTr("Something went wrong. Please try again later.")
-            case errors.email_sent:
-              return uiTr("Please check your email.")
-            default:
-              return ""
-            }
+            if(mode === modes.login)
+              return uiTr("Log in with Email")
+            else if(mode === modes.email)
+              return uiTr("Log in with Username")
+            else if(mode === modes.token)
+              return uiTr("Log in with Username")
           }
-          anchors.top: parent.top
-          anchors.horizontalCenter: parent.horizontalCenter
-          font.pixelSize: Theme.login.errorTextPx
-          visible: emailError !== errors.none
-        }
-
-        LoginText {
-          id: emailInput
-          errorState: emailError !== errors.none && emailError !== errors.email_sent
-          anchors.horizontalCenter: parent.horizontalCenter
-          width: 260
-          anchors.top: parent.top
-          anchors.topMargin: 16
-          placeholderText: uiTr("Email Address")
-          onAccepted: requestEmailLogin()
-          validator: RegExpValidator {
-            regExp: /^\S+@\S+\.\S+$/
+          onClicked: {
+            if(mode === modes.login)
+              resetLoginPage(modes.email)
+            else if(mode === modes.email)
+              resetLoginPage(modes.login)
+            else if(mode === modes.token)
+              resetLoginPage(modes.login)
           }
         }
 
-        LoginButton {
-          id: sendEmailButton
-          buttonText: uiTr("SEND EMAIL")
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.bottom: parent.bottom
-          loginEnabled: emailInput.text.length > 0 && emailInput.acceptableInput
-          loginWorking: emailRequestInProgress
-          onTriggered: requestEmailLogin()
+        TextLink {
+          id: forgotPassword
+          x: 0
+          y: loginMode.visible ? (loginMode.y + loginMode.height + linkContainer.stackedGap) : 0
+          text: uiTr("Forgot Password")
+          link: BrandHelper.getBrandParam("forgotPasswordLink")
+        }
+
+        TextLink {
+          id: buyAccount
+          x: linkContainer.stackLinks ? 0 : parent.width - width
+          y: {
+            var y = forgotPassword.y
+            if(linkContainer.stackLinks)
+              y += forgotPassword.height + linkContainer.stackedGap
+            return y
+          }
+          text: uiTr("Buy Account")
+          link: BrandHelper.getBrandParam("buyAccountLink")
         }
       }
-
-      // When logging in with a token
-      Item {
-        visible: mode === modes.token
-        anchors.fill: parent
-
-        Image {
-          id: spinnerImage
-          height: 40
-          width: 40
-          source: Theme.login.buttonSpinnerImage
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.top: parent.top
-          anchors.topMargin: 40
-
-          RotationAnimator {
-            target: spinnerImage
-            running: spinnerImage.visible
-            from: 0;
-            to: 360;
-            duration: 1000
-            loops: Animation.Infinite
-          }
-
-          visible: tokenError === errors.none
-        }
-
-        Text {
-          color: {
-            if(tokenError !== errors.none)
-              return Theme.login.errorTextColor
-            else
-              return Theme.dashboard.textColor
-          }
-          anchors.top: spinnerImage.bottom
-          anchors.topMargin: 15
-          anchors.horizontalCenter: parent.horizontalCenter
-          text: {
-            if(tokenError === errors.none) {
-              return uiTr("Please Wait...")
-            } else {
-              return uiTr("Something went wrong. Please try again later.")
-            }
-          }
-        }
-      }
-
-
     }
 
-
+    // The "upgrade required" page - shown when the user's subscription has expired
     Item {
-      id: linkContainer
-      anchors.bottom: parent.bottom
-      anchors.bottomMargin: 24
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.leftMargin: 20
-      anchors.rightMargin: 20
+     id: upgradeRequired
+     anchors.left: parent.left
+     anchors.horizontalCenter: parent.horizontalCenter
+     width: parent.width * 0.75
 
-      height: buyAccount.y + buyAccount.height
-
-      // Normally, put the last two links side-by-side:
-      //
-      // | Log in with Email                   |
-      // | Forgot Password         Buy Account |
-      // +-------------------------------------+
-      //
-      // For long translations, stack the last two links instead
-      //
-      // | Log in with Email translation       |
-      // | Forgot password translation         |
-      // | Buy Account translation             |
-      // +-------------------------------------+
-      //
-      // This layout also ensures that the "login mode" link always gets a full
-      // line; the translations for this line vary quite a bit and we don't want
-      // the layout to change when the login mode changes.
-      readonly property int minimumHorzGap: 4
-      readonly property int stackedGap: 4
-      readonly property bool stackLinks: {
-        return forgotPassword.implicitWidth + buyAccount.implicitWidth + minimumHorzGap > linkContainer.width
+      Image {
+        id: upgradeRocket
+        source: Theme.login.upgradeRocketImage
+        height: 135
+        width: (height / sourceSize.height) * sourceSize.width
+        anchors.top: parent.top
+        anchors.topMargin: 15
+        anchors.horizontalCenter: parent.horizontalCenter
       }
 
-      TextLink {
-        id: loginMode
-        x: 0
-        y: 0
-        visible: emailLoginFeatureEnabled
-        text: {
-          if(mode === modes.login)
-            return uiTr("Log in with Email")
-          else if(mode === modes.email)
-            return uiTr("Log in with Username")
-          else if(mode === modes.token)
-            return uiTr("Log in with Username")
-        }
-        onClicked: {
-          if(mode === modes.login)
-            resetLoginPage(modes.email)
-          else if(mode === modes.email)
-            resetLoginPage(modes.login)
-          else if(mode === modes.token)
-            resetLoginPage(modes.login)
-        }
-      }
+     Text {
+       id: upgradeText
+       visible: true
+       color: Theme.dashboard.textColor
+       text: uiTr("Welcome Back!")
+       font.pointSize: 15
+       font.weight: Font.Bold
+       anchors.top: upgradeRocket.bottom
+       anchors.topMargin: 10
+       anchors.horizontalCenter: parent.horizontalCenter
+     }
 
-      TextLink {
-        id: forgotPassword
-        x: 0
-        y: loginMode.visible ? (loginMode.y + loginMode.height + linkContainer.stackedGap) : 0
-        text: uiTr("Forgot Password")
-        link: BrandHelper.getBrandParam("forgotPasswordLink")
-      }
+     Text {
+       id: upgradeMessageText
+       visible: true
+       color: Theme.dashboard.textColor
+       width: upgradeRequired.width * 0.90
+       text: uiTr("In order to use Private Internet Access, you'll need to renew your subscription.")
+       wrapMode: Text.WordWrap
+       horizontalAlignment: Text.AlignHCenter
+       anchors.horizontalCenter: parent.horizontalCenter
+       anchors.top: upgradeText.top
+       anchors.topMargin: 50
+     }
 
-      TextLink {
-        id: buyAccount
-        x: linkContainer.stackLinks ? 0 : parent.width - width
-        y: {
-          var y = forgotPassword.y
-          if(linkContainer.stackLinks)
-            y += forgotPassword.height + linkContainer.stackedGap
-          return y
-        }
-        text: uiTr("Buy Account")
-        link: BrandHelper.getBrandParam("buyAccountLink")
-      }
-    }
+     LoginButton {
+       id: upgradeButton
+       buttonText: uiTr("RENEW NOW")
+       anchors.horizontalCenter: parent.horizontalCenter
+       anchors.top: upgradeMessageText.bottom
+       anchors.topMargin: 35
+       loginEnabled: true
+       loginWorking: false
+       onTriggered: {
+         Qt.openUrlExternally(BrandHelper.getBrandParam("subscriptionLink"))
+       }
+     }
+
+     TextLink {
+       id: backToLoginLink
+       text: uiTr("Back to login")
+       anchors.top: upgradeButton.bottom
+       anchors.topMargin: 20
+       anchors.horizontalCenter: parent.horizontalCenter
+       underlined: true
+       onClicked: {
+         stateStack.showLoginPage()
+       }
+     }
+   }
   }
 
   function resetCreds() {

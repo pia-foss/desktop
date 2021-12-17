@@ -25,12 +25,10 @@
 const std::initializer_list<QString> &ClientSettings::iconThemeValues()
 {
     static const std::initializer_list<QString> values {
-#if defined(Q_OS_MACOS)
-        // Mac defaults to auto and has dark/light/colored/classic choices
+#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
         "auto", "light", "dark", "colored"
-#elif defined(Q_OS_WIN)
-        // Win just has light/colored/classic
-        "light", "colored"
+        // Windows and macOS default to auto (follow system theme) and have
+        // dark/light/colored/classic choices
 #elif defined(Q_OS_LINUX)
         // Linux has light/dark/colored/classic, but no 'auto'
         "light", "dark", "colored"
@@ -50,7 +48,7 @@ const std::initializer_list<QString> &ClientSettings::iconThemeValues()
 const QString &ClientSettings::iconThemeDefault()
 {
     static const QString defTheme =
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
         QStringLiteral("auto")
 #else
         QStringLiteral("light")

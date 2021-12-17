@@ -57,6 +57,7 @@ TextLink {
   enabled: !executing && !waitingForDisconnect
   readonly property bool executing: reinstallStatus === 'working'
   property bool waitingForDisconnect: false
+  property bool initialized: false
   function startReinstall() {
     if(!enabled)
       return
@@ -84,6 +85,8 @@ TextLink {
   property string lastReinstallStatus
 
   onReinstallStatusChanged: {
+    if (!initialized)
+      return
     if(reinstallLink.lastReinstallStatus === reinstallLink.reinstallStatus) {
       console.info('Ignore duplicate state ' + reinstallLink.lastReinstallStatus)
       return
@@ -104,7 +107,10 @@ TextLink {
     }
   }
 
-  Component.onCompleted: reinstallLink.lastReinstallStatus = reinstallLink.reinstallStatus
+  Component.onCompleted: {
+    reinstallLink.lastReinstallStatus = reinstallLink.reinstallStatus
+    initialized = true
+  }
 
   Connections {
     target: Daemon.state

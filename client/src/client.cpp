@@ -141,7 +141,8 @@ const QString ClientInterface::_pseudotranslationRtlLocale{QStringLiteral("ps")}
 
 ClientInterface::ClientInterface(bool hasExistingSettingsFile,
                                  const QJsonObject &initialSettings,
-                                 GraphicsMode gfxMode, bool quietLaunch)
+                                 GraphicsMode gfxMode, bool quietLaunch,
+                                 bool forceClearCache)
 {
     _settings.readJsonObject(initialSettings);
 
@@ -186,7 +187,7 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
     // cache.  We can do this here since we haven't started the QML engine yet.
     // Qt has been observed in some cases reusing old caches incorrectly after
     // an upgrade.
-    if(previousVersion != currentVersion)
+    if(previousVersion != currentVersion || forceClearCache)
     {
         Path cachePath{QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation)};
         cachePath = cachePath / QStringLiteral("qmlcache");
@@ -525,13 +526,13 @@ void ClientInterface::migrateFromDaemon(const DaemonSettings &daemonSettings)
 std::atomic<qintptr> Client::_currentDaemonSocket{-1};
 
 Client::Client(bool hasExistingSettingsFile, const QJsonObject &initialSettings,
-               GraphicsMode gfxMode, bool quietLaunch)
+               GraphicsMode gfxMode, bool quietLaunch, bool forceClearCache)
     : _daemon(new DaemonConnection(this))
     , _daemonInterface{_daemon}
     , _nativeHelpers{}
     , _preConnectStatus{*_daemon}
     , _clientInterface{hasExistingSettingsFile, initialSettings, gfxMode,
-                       quietLaunch}
+                       quietLaunch, forceClearCache}
     , _qmlContext{_engine}
     , _notifyActivateResult{}
     , _activated{false}

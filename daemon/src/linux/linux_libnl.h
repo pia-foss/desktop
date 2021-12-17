@@ -175,6 +175,7 @@ namespace libnl
     LIBNL_FUNC(rtnl_addr_get_ifindex);
     LIBNL_FUNC(rtnl_addr_get_local);
     LIBNL_FUNC(rtnl_link_get);
+    LIBNL_FUNC(rtnl_link_get_mtu);
     LIBNL_FUNC(rtnl_link_get_name);
     LIBNL_FUNC(rtnl_link_put);
     LIBNL_FUNC(rtnl_route_get_dst);

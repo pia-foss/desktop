@@ -26,6 +26,7 @@
 #include "exec.h"
 #include "openssl.h"
 #include "path.h"
+#include "pathmtu.h"
 #include <QTimer>
 #include <QRandomGenerator>
 #include <cstring>
@@ -45,6 +46,7 @@
 
 #if defined(Q_OS_UNIX)
     #include "posix/wireguardgobackend.h"
+    #include "posix/posix_mtu.h"
 #endif
 
 // embeddable-wg-library - C header
@@ -162,13 +164,11 @@ private:
     void createInterface(const WireguardKeypair &clientKeypair,
                          const AuthResult &authResult);
 
-    // Calculate a default MTU on Mac/Linux when no MTU was specified.  Uses
-    // the link's MTU minus 80 bytes for encapsulation.
-    QString findInterfaceForHost(const QString &host);
-    QString findDefaultInterface();
-    unsigned findInterfaceMtu(const QString &itf);
-    unsigned findHostMtu(const QString &host);
-    unsigned determinePosixMtu(const QHostAddress &host);
+    // Calculate the maximum MTU that we could have to the specified VPN server,
+    // according to the physical interface MTU and protocol overhead.  (We never
+    // apply a larger MTU than this; we might apply a smaller one if probes
+    // indicate that the MTU is smaller or if the user requested a smaller MTU.)
+    unsigned findMaxMtu(const QHostAddress &host);
 
     void finalizeInterface(const QString &deviceName,
                            const AuthResult &authResult);
@@ -259,6 +259,7 @@ private:
 
     // Used to execute 'ip' commands with appropriate logging categories
     static Executor _executor;
+    std::unique_ptr<MtuPinger> _mtuPinger;
 };
 
 Executor WireguardMethod::_executor{CURRENT_CATEGORY};
@@ -569,99 +570,20 @@ void WireguardMethod::createInterface(const WireguardKeypair &clientKeypair,
         });
 }
 
-QString WireguardMethod::findInterfaceForHost(const QString &host)
+unsigned WireguardMethod::findMaxMtu(const QHostAddress &host)
 {
-#if defined(Q_OS_MACOS)
-    auto hostItfMatch = _executor.cmdWithRegex(QStringLiteral("route"),
-        {QStringLiteral("-n"), QStringLiteral("get"), QStringLiteral("-inet"), host},
-        QRegularExpression{QStringLiteral("interface: ([^ ]+)$"), QRegularExpression::PatternOption::MultilineOption});
-    if(hostItfMatch.hasMatch())
-        return hostItfMatch.captured(1);
-#elif defined(Q_OS_LINUX)
-    auto hostItfMatch = _executor.cmdWithRegex(QStringLiteral("ip"),
-        {QStringLiteral("route"), QStringLiteral("get"), host},
-        QRegularExpression{QStringLiteral("dev ([^ ]+)")});
-    if(hostItfMatch.hasMatch())
-        return hostItfMatch.captured(1);
-#endif
-    return {};
-}
-
-QString WireguardMethod::findDefaultInterface()
-{
-#if defined(Q_OS_MACOS)
-    auto defItfMatch = _executor.cmdWithRegex(QStringLiteral("route"),
-        {QStringLiteral("-n"), QStringLiteral("get"), QStringLiteral("-inet"), QStringLiteral("default")},
-        QRegularExpression{QStringLiteral("interface: ([^ ]+)$"), QRegularExpression::PatternOption::MultilineOption});
-    if(defItfMatch.hasMatch())
-        return defItfMatch.captured(1);
-#elif defined(Q_OS_LINUX)
-    auto hostItfMatch = _executor.cmdWithRegex(QStringLiteral("ip"),
-        {QStringLiteral("route"), QStringLiteral("show"), QStringLiteral("default")},
-        QRegularExpression{QStringLiteral("dev ([^ ]+)")});
-    if(hostItfMatch.hasMatch())
-        return hostItfMatch.captured(1);
-#endif
-    return {};
-}
-
-unsigned WireguardMethod::findInterfaceMtu(const QString &itf)
-{
-    QString mtuStr;
-#if defined(Q_OS_MACOS)
-    auto itfMtuMatch = _executor.cmdWithRegex(QStringLiteral("ifconfig"),
-        {itf}, QRegularExpression{QStringLiteral("mtu ([0-9]+)")});
-    if(itfMtuMatch.hasMatch())
-        mtuStr = itfMtuMatch.captured(1);
-#elif defined(Q_OS_LINUX)
-    auto itfMtuMatch = _executor.cmdWithRegex(QStringLiteral("ip"),
-        {QStringLiteral("link"), QStringLiteral("show"), QStringLiteral("dev"),
-         itf}, QRegularExpression{QStringLiteral("mtu ([0-9]+)")});
-    if(itfMtuMatch.hasMatch())
-        mtuStr = itfMtuMatch.captured(1);
-#endif
-    return mtuStr.toUInt();
-}
-
-unsigned WireguardMethod::findHostMtu(const QString &host)
-{
-    const auto &hostItf = findInterfaceForHost(host);
-    if(!hostItf.isEmpty())
-    {
-        // Found an interface for the specified host.  Return its MTU, or 0 if
-        // the interface doesn't have an MTU specified.  (It doesn't seem
-        // sensible to check the default route since we know what interface will
-        // be used for this host; if they were different we'd just be applying
-        // the MTU from some other irrelevant interface.)
-        unsigned mtu = findInterfaceMtu(hostItf);
-        qInfo() << "Found MTU" << mtu << "from interface" << hostItf
-            << "to host" << host;
-        return mtu;
-    }
-
-    // We couldn't find an interface for that host, try to find the default
-    // interface.
-    const auto &defaultItf = findDefaultInterface();
-    if(!defaultItf.isEmpty())
-    {
-        unsigned mtu = findInterfaceMtu(defaultItf);
-        qInfo() << "Found MTU" << mtu << "from default interface" << defaultItf;
-        return mtu;
-    }
-
-    return 0;
-}
-
-unsigned WireguardMethod::determinePosixMtu(const QHostAddress &host)
-{
-    unsigned mtu = _connectionConfig.mtu();
-    if(mtu)
-        return mtu;
+    int mtu = 0;
 
     // Find an MTU if none was specified.
     // Find the MTU for the interface used to reach the remote host.
-    mtu = findHostMtu(host.toString());
-    // Default to 1500 if no MTU was found.
+#if defined(Q_OS_WIN)
+    mtu = originalNetwork().mtu();
+#else
+    mtu = PosixMtu::findHostMtu(host.toString());
+#endif
+    // Default to 1500 if no MTU was found.  Never assume the MTU to the
+    // Internet is larger than 1500, even if the physical interface claims to
+    // have a larger link MTU.
     if(!mtu || mtu > 1500)
         mtu = 1500;
     // Subtract 80 bytes for encapsulation.
@@ -679,6 +601,12 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     const auto &peerIpNet = authResult._peerIpNet;
     _dnsServers = _connectionConfig.getDnsServers();
 
+    // Determine the maximum tunnel MTU before setting up the tunnel interface.
+    // The method used to find the physical interface on Linux doesn't simulate
+    // the fwmark applied by WireGuard, so it would incorrectly detect the
+    // WireGuard interface once it is up.
+    int maxMtu = findMaxMtu(authResult._serverIp);
+
 // OS specific interface config (including DNS and routing)
 #if defined(Q_OS_LINUX)
     // Setup the interface
@@ -690,9 +618,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         throw Error{HERE, Error::Code::WireguardConfigDeviceFailed};
     }
 
-    // MTU (also brings up interface)
-    unsigned mtu = determinePosixMtu(authResult._serverIp);
-    if(_executor.bash(QStringLiteral("ip link set mtu %1 up dev %2").arg(mtu).arg(deviceName)))
+    // Bring up interface
+    if(_executor.bash(QStringLiteral("ip link set up dev %1").arg(deviceName)))
         throw Error{HERE, Error::Code::WireguardConfigDeviceFailed};
 
     // Routing
@@ -749,10 +676,6 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     _executor.bash(QStringLiteral("ifconfig %1 inet %2/%3 %2 alias").arg(deviceName, peerIpNet.first.toString(), QString::number(peerIpNet.second)));
     _executor.bash(QStringLiteral("ifconfig %1 up").arg(deviceName));
 
-    // MTU
-    unsigned mtu = determinePosixMtu(authResult._serverIp);
-    _executor.bash(QStringLiteral("ifconfig %1 mtu %2").arg(deviceName).arg(mtu));
-
     // Routing
     if(_connectionConfig.setDefaultRoute())
     {
@@ -790,46 +713,6 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     }
 #elif defined(Q_OS_WIN)
     auto pWinAdapter = std::static_pointer_cast<WinNetworkAdapter>(_pNetworkAdapter);
-
-    // MTU
-    //
-    // The WireGuard service supports setting the MTU, but it doesn't work; it
-    // always fails with "the parameter is incorrect".  Do it manually instead.
-    //
-    // If the MTU can't be set, we do not raise an error - proceed with the
-    // connection without setting the MTU.
-    //
-    // Retrying won't fix this error; if we throw an error we'd just constantly
-    // retry due to this failure.  We might add an in-client notification if it
-    // fails a lot.
-    unsigned mtu = _connectionConfig.mtu();
-    if(mtu)
-    {
-        MIB_IPINTERFACE_ROW tunItf{};
-        InitializeIpInterfaceEntry(&tunItf);
-        tunItf.Family = AF_INET;
-        tunItf.InterfaceLuid.Value = pWinAdapter->luid();
-        auto getResult = GetIpInterfaceEntry(&tunItf);
-        if(getResult != NO_ERROR)
-        {
-            qWarning() << "Unable to get interface state to set MTU to" << mtu
-                << "-" << WinErrTracer{getResult};
-        }
-        else
-        {
-            tunItf.NlMtu = mtu;
-            auto setResult = SetIpInterfaceEntry(&tunItf);
-            if(setResult != NO_ERROR)
-            {
-                qWarning() << "Unable to set interface MTU to" << mtu << "-"
-                    << WinErrTracer{setResult};
-            }
-            else
-            {
-                qInfo() << "Set interface MTU to" << mtu;
-            }
-        }
-    }
 
     // Routing
     WinRouteManager routeManager;
@@ -877,6 +760,11 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         }
     }
 #endif
+
+    qInfo() << "MTU config:" << _connectionConfig.mtu()
+        << " - calculated tunnel MTU to VPN host" << authResult._serverIp << ":"
+        << maxMtu;
+    _mtuPinger.reset(new MtuPinger{_pNetworkAdapter, maxMtu, _connectionConfig.mtu()});
 
     // Routes are up, if a network change occurs, update the routes
     _routesUp = true;

@@ -91,7 +91,7 @@ public:
     JsonField(uint, remotePortUDP, 0) // 0 == auto
     JsonField(uint, remotePortTCP, 0) // 0 == auto
     JsonField(uint, localPort, 0) // 0 == auto
-    JsonField(uint, mtu, 0) // 0 == unspecified
+    JsonField(int, mtu, -1) // 0 == unspecified, large; -1 == Path MTU detection
     JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM" })
     // On Windows, the method to use to configure the TAP adapter's IP addresses
     // and DNS servers.

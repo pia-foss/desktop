@@ -162,7 +162,7 @@ if [ ! "$GENERATE_ICO" = "" ]; then
     ico_sizes=(16 20 24 32 40 48 64 128)
     # Only do this for the themes actually needed, GIMP ICO compression is
     # tedious and time-consuming
-    ico_themes=(square-classic square-colored-no-outline square-colored-with-dark-outline square-light-no-outline square-light-with-dark-outline)
+    ico_themes=(square-classic square-colored-no-outline square-colored-with-dark-outline square-light-no-outline square-light-with-dark-outline square-dark-no-outline)
     # ico_themes=(square-colored-no-outline)
 
     for theme in "${ico_themes[@]}"; do
@@ -248,6 +248,7 @@ if [ ! "$GENERATE_ICO" = "" ]; then
     cp "$ICO_TMP_DIR"/square-colored-no-outline-*.ico "$ICO_OUTPUT_DIR"
     cp "$ICO_TMP_DIR"/square-colored-with-dark-outline-*.ico "$ICO_OUTPUT_DIR"
     cp "$ICO_TMP_DIR"/square-light-no-outline-*.ico "$ICO_OUTPUT_DIR"
+    cp "$ICO_TMP_DIR"/square-dark-no-outline-*.ico "$ICO_OUTPUT_DIR"
     cp "$ICO_TMP_DIR"/square-light-with-dark-outline-*.ico "$ICO_OUTPUT_DIR"
     echo "Generated ICOs in $ICO_OUTPUT_DIR"
 fi

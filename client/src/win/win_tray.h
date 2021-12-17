@@ -26,12 +26,14 @@
 #include "win_objects.h"
 #include "win_scaler.h"
 #include "win/win_messagewnd.h"
+#include "win/win_util.h"
 #include "brand.h"
 
 #include <QAbstractNativeEventFilter>
 #include <QTimer>
 #include <QScopedPointer>
 #include <QHash>
+#include <QWinEventNotifier>
 
 std::unique_ptr<NativeTray> createNativeTrayWin(NativeTray::IconState initialIcon, const QString &initialIconSet);
 
@@ -150,9 +152,11 @@ public:
     TrayIconLoader(IconResource::Size size, const QString &initialIconSet);
     const IconResource &getStateIcon(NativeTray::IconState state) const;
     void setIconSet(const QString &iconSet);
+    void setOSThemeSetting(const QString &theme);
 
 private:
     QString _iconSet;
+    QString _osThemeSetting;
     IconResource::Size _size;
 
 #if BRAND_HAS_CLASSIC_TRAY
@@ -161,6 +165,7 @@ private:
     // 'Light' and 'Colored' use either outlined or non-outlined icons based on
     // the Windows version
     IconTheme _theme_light;
+    IconTheme _theme_dark;
     IconTheme _theme_colored;
 };
 
@@ -188,10 +193,14 @@ public:
     virtual void setMenuItems(const NativeMenuItem::List& items) override;
     virtual void getIconBound(QRect &iconBound, qreal &screenScale) override;
 
+    void updateIconWithSysTheme();
 private:
     void onLeftClicked();
     void onShowMenu(const QPoint &pos);
     const IconResource &getStateIcon(IconState icon, const QString &iconSet);
+    void onThemeRegChanged(HANDLE hEvent);
+    void startWatchThemeReg();
+    void activateIconSet(const QString &iconSet);
 
 private:
     TrayIconLoader _trayIcons;
@@ -199,6 +208,11 @@ private:
     ShellTrayIcon _icon;
     WinPopupMenu _menu;
     MonitorScale _monitorScale;
+    QWinEventNotifier _eventNotifier;
+    IconState _iconState;
+    WinHandle _themeChangeEvent;
+    WinHKey _themeKey;
+    DWORD _themeValue;
 };
 
 #endif

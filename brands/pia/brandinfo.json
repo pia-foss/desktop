@@ -17,6 +17,7 @@
     "automationHelpLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/understanding-the-desktop-network-automation-feature",
     "referFriendLink":"https://www.privateinternetaccess.com/refer-a-friend",
     "getDedicatedIpLink":"https://www.privateinternetaccess.com/pages/client-control-panel/dedicated-ip",
+    "subscriptionLink":"https://www.privateinternetaccess.com/pages/client-control-panel#subscription-overview",
     "windowsProductGuid": "{33023371-7761-4F81-BBB1-0E0D0D175ACF}",
     "windowsServiceName": "PrivateInternetAccessService",
     "windowsWireguardServiceName": "PrivateInternetAccessWireguard",
@@ -34,4 +35,5 @@
     "wintunManufacturer": "Private Internet Access, Inc.",
     "wintunDescription": "WinTUN driver package for Private Internet Access"
 }
+
 

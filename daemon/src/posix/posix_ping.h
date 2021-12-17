@@ -57,7 +57,7 @@ private:
 public:
     // Send an ICMP echo request.  If a reply is received, it will be signaled
     // with receivedReply().
-    bool sendEchoRequest(quint32 address);
+    bool sendEchoRequest(quint32 address, int payloadSize = 32, bool allowFragment = true);
 
 private:
     void onReadyRead();

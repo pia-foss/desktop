@@ -44,13 +44,14 @@ NetworkConnection::NetworkConnection(const QString &networkInterface,
                                      const Ipv4Address &gatewayIpv4,
                                      const Ipv6Address &gatewayIpv6,
                                      std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
-                                     std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6)
+                                     std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6,
+                                     unsigned mtu4, unsigned mtu6)
     : _networkInterface{networkInterface}, _medium{medium},
       _wifiAssociated{false}, _wifiEncrypted{false}, _wifiSsid{},
       _defaultIpv4{defaultIpv4}, _defaultIpv6{defaultIpv6},
       _gatewayIpv4{gatewayIpv4}, _gatewayIpv6{gatewayIpv6},
       _addressesIpv4{std::move(addressesIpv4)},
-      _addressesIpv6{std::move(addressesIpv6)}
+      _addressesIpv6{std::move(addressesIpv6)}, _mtu4{mtu4}, _mtu6{mtu6}
 {
     // Sort the local IP addresses so we can check for equality by just
     // comparing the vectors

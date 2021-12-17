@@ -22,6 +22,7 @@
 #ifndef OPENVPNMETHOD_H
 #define OPENVPNMETHOD_H
 
+#include "exec.h"
 #include "vpnmethod.h"
 #include "openvpn.h"
 #include "vpn.h"
@@ -30,6 +31,8 @@
 #include <QLocalSocket>
 #include <QTimer>
 #include <unordered_set>
+
+class MtuPinger;
 
 // Owns a QLocalSocket created by the QLocalServer and feeds incoming data
 // into a LineBuffer; used by HelperIpcServer
@@ -131,6 +134,12 @@ private:
     void openvpnManagementLine(const QString& line);
     void openvpnExited(int exitCode);
 
+    // Calculate the maximum MTU that we could have to the specified VPN server,
+    // according to the physical interface MTU and protocol overhead.  (We never
+    // apply a larger MTU than this; we might apply a smaller one if probes
+    // indicate that the MTU is smaller or if the user requested a smaller MTU.)
+    unsigned findMaxMtu(const QHostAddress &host);
+
 private:
     OpenVPNProcess *_openvpn;
 #if defined(Q_OS_WIN)
@@ -140,7 +149,10 @@ private:
     // The network adapter used for the current connection
     std::shared_ptr<NetworkAdapter> _networkAdapter;
     ConnectionConfig _connectingConfig;
+    Server _vpnServer;
     QTimer _connectingTimer;
+    static Executor _executor;
+    std::unique_ptr<MtuPinger> _mtuPinger;
 };
 
 #endif

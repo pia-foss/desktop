@@ -455,7 +455,7 @@ void MacSplitTunnel::updateNetwork(const FirewallParams &params, QString tunnelD
         Exec::bash(QStringLiteral("route add -net 0.0.0.0 -interface %1 -ifscope %1").arg(tunnelDeviceName));
     }
 
-    if(params._connectionSettings && params._connectionSettings->mtu())
+    if(params._connectionSettings && params._connectionSettings->mtu() > 0)
     {
         auto mtu = params._connectionSettings->mtu();
         if (_pUtun->mtu() != mtu)

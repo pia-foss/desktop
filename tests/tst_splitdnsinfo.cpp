@@ -22,15 +22,16 @@
 #include "daemon/src/posix/posix_firewall_iptables.h"
 #include "linux/linux_cgroup.h"
 
-namespace 
+namespace
 {
     const QString dnsServer1{"1.1.1.1"};
     const QString dnsServer2{"8.8.8.8"};
     const QString localDnsServer{"127.0.0.53"};
     const QString sourceIp1{"192.168.1.2"};
-    const QString sourceIp2{"192.168.1.3"};  
-    const QString localSourceIp{"127.0.0.1"};  
-    OriginalNetworkScan netScan{"192.168.1.1", "eth0", "192.168.1.43", 24, "2001:db8::123", "2001::1"};
+    const QString sourceIp2{"192.168.1.3"};
+    const QString localSourceIp{"127.0.0.1"};
+    OriginalNetworkScan netScan{"192.168.1.1", "eth0", "192.168.1.43", 24, 1500,
+                                "2001:db8::123", "2001::1", 1500};
 }
 
 class tst_splitdnsinfo : public QObject
@@ -41,14 +42,14 @@ private slots:
 
     void testValidity()
     {
-        // Empty    
+        // Empty
         QVERIFY(SplitDNSInfo{}.isValid() == false);
         // Missing a field
         SplitDNSInfo info1{dnsServer1, CGroup::bypassId, ""};
         QVERIFY(info1.isValid() == false);
         // All fields present
         SplitDNSInfo info2{dnsServer1, CGroup::bypassId, sourceIp1};
-        QVERIFY(info2.isValid() == true);        
+        QVERIFY(info2.isValid() == true);
     }
 
     void testEquality()
@@ -57,11 +58,11 @@ private slots:
         SplitDNSInfo info2{dnsServer2, CGroup::bypassId, sourceIp1};
         SplitDNSInfo info3{dnsServer1, CGroup::bypassId, sourceIp1};
 
-        QVERIFY(info1 != info2);     
-        QVERIFY(info1 == info3);   
+        QVERIFY(info1 != info2);
+        QVERIFY(info1 == info3);
     }
 
-    void testInfoForRemoteDnsWithBypass() 
+    void testInfoForRemoteDnsWithBypass()
     {
         FirewallParams params{};
         params.netScan = netScan;
@@ -69,15 +70,15 @@ private slots:
         DaemonState state;
         state.existingDNSServers({QHostAddress{dnsServer1}.toIPv4Address()});
 
-        // Bypass apps 
+        // Bypass apps
         auto info1 = SplitDNSInfo::infoFor(params, state, SplitDNSInfo::SplitDNSType::Bypass);
 
         QVERIFY(info1.dnsServer() == dnsServer1);
         QVERIFY(info1.cGroupId() == CGroup::bypassId);
         QVERIFY(info1.sourceIp() == netScan.ipAddress());
-    }    
+    }
 
-    void testInfoForLocalDnsWithBypass() 
+    void testInfoForLocalDnsWithBypass()
     {
         FirewallParams params{};
         params.netScan = netScan;
@@ -90,11 +91,11 @@ private slots:
         QVERIFY(info1.dnsServer() == localDnsServer);
         QVERIFY(info1.cGroupId() == CGroup::bypassId);
         // Use of a localhost DNS (127/8) forces a localhost ip
-        // We need a localhost source to send to a localhost dest (localDnsServer1) 
+        // We need a localhost source to send to a localhost dest (localDnsServer1)
         QVERIFY(info1.sourceIp() == "127.0.0.1");
-    }    
+    }
 
-    void testInfoForRemoteDnsWithVpnOnly() 
+    void testInfoForRemoteDnsWithVpnOnly()
     {
         DaemonSettings settings{};
         auto customDNS = QStringList{dnsServer1, dnsServer2};
@@ -105,16 +106,16 @@ private slots:
 
         FirewallParams params{};
         DaemonAccount account{};
-        params._connectionSettings.emplace(settings, state, account);   
+        params._connectionSettings.emplace(settings, state, account);
 
         auto info1 = SplitDNSInfo::infoFor(params, state, SplitDNSInfo::SplitDNSType::VpnOnly);
 
         QVERIFY(info1.dnsServer() == dnsServer1);
         QVERIFY(info1.cGroupId() == CGroup::vpnOnlyId);
         QVERIFY(info1.sourceIp() == state.tunnelDeviceLocalAddress());
-    }    
+    }
 
-    void testInfoForLocalDnsWithVpnOnly() 
+    void testInfoForLocalDnsWithVpnOnly()
     {
         DaemonSettings settings{};
         settings.overrideDNS(QStringLiteral("local"));
@@ -124,7 +125,7 @@ private slots:
 
         FirewallParams params{};
         DaemonAccount account{};
-        params._connectionSettings.emplace(settings, state, account);   
+        params._connectionSettings.emplace(settings, state, account);
 
         auto info1 = SplitDNSInfo::infoFor(params, state, SplitDNSInfo::SplitDNSType::VpnOnly);
 
@@ -133,7 +134,7 @@ private slots:
         QVERIFY(info1.cGroupId() == CGroup::vpnOnlyId);
         // local source ip as the dns is local (127/8)
         QVERIFY(info1.sourceIp() == localSourceIp);
-    }    
+    }
 };
 
 QTEST_GUILESS_MAIN(tst_splitdnsinfo)

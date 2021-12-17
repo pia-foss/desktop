@@ -227,6 +227,13 @@ namespace Exec
     {
         return defaultExecutor().cmdWithOutput(program, args);
     }
+
+    QRegularExpressionMatch cmdWithRegex(const QString &program,
+                                         const QStringList &args,
+                                         const QRegularExpression &regex)
+    {
+        return defaultExecutor().cmdWithRegex(program, args, regex);
+    }
 #endif
 
     int cmd(const QString &program, const QStringList &args, bool ignoreErrors)

@@ -21,6 +21,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import "."
 import "../"
+import "../../"
 import "../../inputs"
 import "../../stores"
 import "../../../client"
@@ -63,14 +64,23 @@ Item {
         ]
       }
 
-      CheckboxInput {
-        label: uiTranslate("ConnectionPage", "Use Small Packets")
-        onValue: 1250
-        offValue: 0
-        setting: DaemonSetting { name: "mtu" }
-        desc: uiTranslate("ConnectionPage", "Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.")
+      DropdownInput {
+        label: SettingsMessages.mtuSetting
+        setting: DaemonSetting {
+          name: "mtu"
+        }
+        model: [{
+            "name": SettingsMessages.mtuSettingAuto,
+            "value": -1
+          }, {
+            "name": SettingsMessages.mtuSettingLargePackets,
+            "value": 0
+          }, {
+            "name": SettingsMessages.mtuSettingSmallPackets,
+            "value": 1250
+          }]
+        info: SettingsMessages.mtuSettingDescription
       }
-
 
       CheckboxInput {
         id: wgUseKernel

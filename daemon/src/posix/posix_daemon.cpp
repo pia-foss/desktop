@@ -747,7 +747,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
         auto startTcpDump = [&](QProcess &tcpdumpProcess, const QString &interfaceName, const QString &outputFileName)
         {
             tcpdumpProcess.setProgram("tcpdump");
-            tcpdumpProcess.setArguments({filterExpression, "-vvvUi", interfaceName, "-w", outputFileName});
+            tcpdumpProcess.setArguments({filterExpression, "-k", "--immediate-mode", "-vvvUi", interfaceName, "-w", outputFileName});
             tcpdumpProcess.start();
         };
         // Physical interface

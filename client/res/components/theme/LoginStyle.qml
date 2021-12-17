@@ -23,6 +23,7 @@ QtObject {
     readonly property string buttonSpinnerImage: Theme.imagePathCommon + "/dashboard/login/login-button-spinner.png"
     readonly property string buttonWorkingImage: Theme.imagePathCommon + "/dashboard/login/login-button-press.png"
     readonly property string buttonHoverImage: Theme.imagePathCommon + "/dashboard/login/login-button-hover.png"
+    readonly property string upgradeRocketImage: Theme.imagePathCommon + "/dashboard/login/upgrade-rocket.png"
     readonly property color buttonDisabledTextColor: Theme.dark ? "#323642" : "#ffffff"
     readonly property color buttonEnabledTextColor: "#ffffff"
     readonly property int buttonTextPx: 14

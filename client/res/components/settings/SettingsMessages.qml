@@ -68,8 +68,18 @@ QtObject {
   readonly property string dataAuthenticationSetting: uiTranslate("ConnectionPage", "Data Authentication")
   readonly property string handshakeSetting: uiTranslate("ConnectionPage", "Handshake")
   readonly property string defaultRemotePort: uiTranslate("ConnectionPage", "Default")
+
+  readonly property string mtuSetting: uiTr("MTU")
+  readonly property string mtuSettingAuto: uiTranslate("mtu_setting", "Auto")
+  readonly property string mtuSettingLargePackets: uiTranslate("mtu_setting", "Large Packets")
+  readonly property string mtuSettingSmallPackets: uiTranslate("mtu_setting", "Small Packets")
+  readonly property string mtuSettingDescription: [
+      uiTr("Determines the maximum packet size allowed through the tunnel."),
+      uiTr("Auto: Detect automatically, best for most connections"),
+      uiTr("Large Packets: Most efficient if the connection is reliable"),
+      uiTr("Small Packets: Less efficient but best on unreliable connections")
+    ].join("\n\u2022\xA0\xA0")
   
-  // These are here for now so we can order translations.
   readonly property string stMontereyConfirmation: uiTr("You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you're having trouble connecting to the internet.")
   readonly property string stMontereyNotification: uiTr("Please disable the Split Tunnel feature if you're having trouble connecting to the internet.")
   readonly property string stMontereyPushNotification: uiTr("macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can't reach the internet, disable Split Tunnel.")

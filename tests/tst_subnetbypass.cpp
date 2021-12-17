@@ -106,7 +106,8 @@ private:
 
 namespace
 {
-    OriginalNetworkScan validNetScan{"192.168.1.1", "eth0", "192.168.1.43", 24, "2001:db8::123", "2001::1"};
+    OriginalNetworkScan validNetScan{"192.168.1.1", "eth0", "192.168.1.43", 24, 1500,
+                                     "2001:db8::123", "2001::1", 1500};
 }
 
 FirewallParams validFirewallParams()

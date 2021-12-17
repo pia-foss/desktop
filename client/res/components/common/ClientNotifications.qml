@@ -243,7 +243,7 @@ Item {
     dismissible: false
     active: Daemon.settings.splitTunnelEnabled &&
             Qt.platform.os === "osx" &&
-            NativeHelpers.osMajorVersion === 12
+            NativeHelpers.macosProductVersion.startsWith('12.')
   }
 
   // Notification for the OpenVPN "authorization failure" error.
@@ -404,8 +404,12 @@ Item {
   NotificationStatus {
     id: connectionTrouble
     title: uiTr("CONNECTING...")
-    message: uiTr("Can't reach the VPN server.  Please check your connection.")
+    message: uiTr("We couldn't establish the connection to the VPN server. Please get in touch with our support department.")
     severity: severities.warning
+    links: [{
+      text: uiTranslate("RatingRequestNotificationStatus", "Contact Support"),
+      clicked: function() { Qt.openUrlExternally("https://www.privateinternetaccess.com/helpdesk/new-ticket") }
+    }]
     active: Daemon.state.usingSlowInterval &&
             Daemon.state.connectionLost === 0 &&
             Daemon.state.proxyUnreachable === 0

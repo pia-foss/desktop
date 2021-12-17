@@ -160,7 +160,7 @@ public:
     // failure mode that settings could work but wouldn't be reloaded).
     ClientInterface(bool hasExistingSettingsFile,
                     const QJsonObject &initialSettings, GraphicsMode gfxMode,
-                    bool quietLaunch);
+                    bool quietLaunch, bool forceClearCache);
     ~ClientInterface();
 
     Q_PROPERTY(ClientSettings* settings READ get_settings FINAL CONSTANT)
@@ -232,7 +232,7 @@ public:
 
 public:
     Client(bool hasExistingSettingsFile, const QJsonObject &initialSettings,
-           GraphicsMode gfxMode, bool quietLaunch);
+           GraphicsMode gfxMode, bool quietLaunch, bool forceClearCache);
     ~Client();
 
     DaemonConnection* daemon() { return _daemon; }

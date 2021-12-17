@@ -36,6 +36,8 @@ TableBase {
   //: Screen reader label for the list of Dedicated IPs.
   label: uiTr("Dedicated IPs")
 
+  readonly property string removeButtonText: uiTranslate("DedicatedIpRow", "Remove")
+
   color: "transparent"
   border.color: "transparent"
   hideTableFocusCue: true
@@ -137,5 +139,41 @@ TableBase {
     }
 
     return table
+  }
+
+  function promptRemoveDip(regionName, regionIp, regionId) {
+    removeDipDialog.regionName = regionName
+    removeDipDialog.regionIp = regionIp
+    removeDipDialog.regionId = regionId
+
+    removeDipDialog.show()
+  }
+
+  OverlayDialog {
+    id: removeDipDialog
+
+    property string regionName
+    property string regionIp
+    property string regionId
+
+    buttons: [{code: Dialog.Ok, text: removeButtonText}, Dialog.Cancel]
+    contentWidth: 300
+    title: uiTranslate("DedicatedIpRow", "Remove Dedicated IP")
+
+    DialogMessage {
+      width: parent.width
+      icon: 'info'
+      //: Confirmation prompt to remove a dedicated IP.  %1 is the translated
+      //: region name, %2 is an IP address, such as 100.200.100.200.
+      text: uiTranslate("DedicatedIpRow", "Remove %1 - %2?").arg(removeDipDialog.regionName).arg(removeDipDialog.regionIp)
+      color: Theme.settings.inputLabelColor
+    }
+
+    function show(name, ip, id) {
+      visible = true
+      focus = true
+      open()
+    }
+    onAccepted: Daemon.removeDedicatedIp(removeDipDialog.regionId)
   }
 }

@@ -70,7 +70,7 @@ public:
     // We do not translate the product name.
     Q_PROPERTY(QString productName READ getProductName FINAL CONSTANT)
 
-    Q_PROPERTY(int osMajorVersion READ getMajorOSVersion FINAL CONSTANT)
+    Q_PROPERTY(QString macosProductVersion READ getMacosProductVersion FINAL CONSTANT)
 
     // Whether the client is currently logging to a file.  This exposes the flag
     // from Logger, which works with or without a daemon connection.
@@ -240,7 +240,7 @@ signals:
 private:
     Platform getPlatform() const;
     QString getProductName() const;
-    int getMajorOSVersion() const;
+    QString getMacosProductVersion() const;
     bool getIncludeFeatureHandshake() const;
     bool getLogToFile();
     bool getSplitTunnelSupported() const;

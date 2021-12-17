@@ -123,13 +123,18 @@ namespace Exec
     int COMMON_EXPORT cmd(const QString &program, const QStringList &args,
                           bool ignoreErrors = false);
 
-    // Execute a process with arguments and return the stdout (or empty string on error)
-    QString COMMON_EXPORT cmdWithOutput(const QString &program, const QStringList &args);
-
-
     int COMMON_EXPORT cmdWithEnv(const QString &program, const QStringList &args,
                                  const QProcessEnvironment &env,
                                  bool ignoreErrors = false);
+
+#if defined(Q_OS_UNIX)
+    // Execute a process with arguments and return the stdout (or empty string on error)
+    QString COMMON_EXPORT cmdWithOutput(const QString &program, const QStringList &args);
+
+    QRegularExpressionMatch COMMON_EXPORT cmdWithRegex(const QString &program,
+                                                       const QStringList &args,
+                                                       const QRegularExpression &regex);
+#endif
 }
 
 #endif

@@ -22,8 +22,19 @@
 #include "openvpnmethod.h"
 #include "daemon.h"
 #include "path.h"
+#include "pathmtu.h"
 #include "ipaddress.h"
 #include <QStandardPaths>
+
+#if defined(Q_OS_WIN)
+    #include "win/win_daemon.h"
+    #include "win/win_interfacemonitor.h"
+    #include "win/win_util.h"
+#endif
+
+#if defined(Q_OS_UNIX)
+    #include "posix/posix_mtu.h"
+#endif
 
 HelperIpcConnection::HelperIpcConnection(QLocalSocket *pConnection)
     : _pConnection{pConnection}
@@ -107,6 +118,8 @@ bool HelperIpcServer::listen()
     return true;
 }
 
+Executor OpenVPNMethod::_executor{CURRENT_CATEGORY};
+
 OpenVPNMethod::OpenVPNMethod(QObject *pParent, const OriginalNetworkScan &netScan)
     : VPNMethod{pParent, netScan}, _openvpn{}
 {
@@ -126,6 +139,7 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
                         quint16 shadowsocksProxyPort)
 {
     _connectingConfig = connectingConfig;
+    _vpnServer = vpnServer;
 
 #if defined(Q_OS_WIN)
     if(!_helperIpcServer.listen())
@@ -585,17 +599,6 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         out << "ncp-disable" << endl;
     }
 
-    if (_connectingConfig.mtu() > 0)
-    {
-        // TODO: For UDP it's also possible to use "fragment" to enable
-        // internal datagram fragmentation, allowing us to deal with whatever
-        // is sent into the tunnel. Unfortunately, this is a setting that
-        // needs to be matched on the server side; maybe in the future we can
-        // amend pia-signal-settings with it?
-
-        out << "mssfix " << _connectingConfig.mtu() << endl;
-    }
-
     if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
     {
         // If the host resolve step failed, _socksRouteAddress is not set, fail.
@@ -737,6 +740,32 @@ void OpenVPNMethod::openvpnStderrLine(const QString& line)
     checkForMagicStrings(line);
 }
 
+unsigned OpenVPNMethod::findMaxMtu(const QHostAddress &host)
+{
+    int mtu = 0;
+
+    // Find an MTU if none was specified.
+    // Find the MTU for the interface used to reach the remote host.
+#if defined(Q_OS_WIN)
+    mtu = originalNetwork().mtu();
+#else
+    mtu = PosixMtu::findHostMtu(host.toString());
+#endif
+    // Default to 1500 if no MTU was found.  Never assume the MTU to the
+    // Internet is larger than 1500, even if the physical interface claims to
+    // have a larger link MTU.
+    if(!mtu || mtu > 1500)
+        mtu = 1500;
+    // Subtract overhead for encapsulation (OpenVPN with AES GCM; overhead
+    // varies by transport due to additional framing needed in TCP)
+    if(_connectingConfig.openvpnProtocol() == ConnectionConfig::Protocol::TCP)
+        mtu -= 74;
+    else
+        mtu -= 52;
+
+    return mtu;
+}
+
 void OpenVPNMethod::checkForMagicStrings(const QString& line)
 {
     QRegExp tunDeviceNameRegex{R"(Using device:([^ ]+) local_address:([^ ]+) remote_address:([^ ]+))"};
@@ -744,6 +773,13 @@ void OpenVPNMethod::checkForMagicStrings(const QString& line)
     {
         if(!_networkAdapter)
             _networkAdapter.reset(new NetworkAdapter{tunDeviceNameRegex.cap(1)});
+
+        int maxMtu = findMaxMtu(Ipv4Address{_vpnServer.ip()});
+        qInfo() << "MTU config:" << _connectingConfig.mtu()
+            << " - calculated tunnel MTU to VPN host" << _vpnServer.ip() << ":"
+            << maxMtu;
+
+        _mtuPinger.reset(new MtuPinger(_networkAdapter, maxMtu, _connectingConfig.mtu()));
 
         emitTunnelConfiguration(tunDeviceNameRegex.cap(1), tunDeviceNameRegex.cap(2),
                                 tunDeviceNameRegex.cap(3));

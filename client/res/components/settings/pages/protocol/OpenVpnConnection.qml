@@ -142,6 +142,26 @@ Item {
       validator: RegExpValidator { regExp: /(?:[0-9]{,5})?/ }
       placeholderText: uiTranslate("ConnectionPage", "Auto")
     }
+
+    // Row 4
+    DropdownInput {
+      label: SettingsMessages.mtuSetting
+      setting: DaemonSetting {
+        name: "mtu"
+      }
+      model: [{
+          "name": SettingsMessages.mtuSettingAuto,
+          "value": -1
+        }, {
+          "name": SettingsMessages.mtuSettingLargePackets,
+          "value": 0
+        }, {
+          "name": SettingsMessages.mtuSettingSmallPackets,
+          "value": 1250
+        }]
+      info: SettingsMessages.mtuSettingDescription
+    }
+
     DropdownInput {
       label: uiTranslate("ConnectionPage", "Configuration Method")
       visible: Qt.platform.os === 'windows'
@@ -163,25 +183,19 @@ Item {
     }
 
 
-
+    // Spacer between drop downs and check boxes.  With columnSpan: 2, this also
+    // forces the next check box to start a new line (the items in the prior
+    // row vary since Configuration Method only applies on Windows)
     Item {
       Layout.columnSpan: 2
       Layout.preferredHeight: 5
     }
 
-    // Row 4
-    CheckboxInput {
-      Layout.alignment: Qt.AlignTop
-      label: uiTranslate("ConnectionPage", "Use Small Packets")
-      onValue: 1250
-      offValue: 0
-      setting: DaemonSetting { name: "mtu" }
-      desc: uiTranslate("ConnectionPage", "Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.")
-    }
-
+    // Row 5
     CheckboxInput {
       uncheckWhenDisabled: true
       Layout.alignment: Qt.AlignTop
+      Layout.columnSpan: 2
       label: uiTranslate("ConnectionPage", "Try Alternate Settings")
       setting: DaemonSetting { name: "automaticTransport" }
       readonly property bool hasProxy: Daemon.settings.proxyEnabled

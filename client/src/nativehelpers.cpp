@@ -332,10 +332,13 @@ void NativeHelpers::setDockVisibility(bool enabled)
 #endif
 }
 
-int NativeHelpers::getMajorOSVersion() const
+QString NativeHelpers::getMacosProductVersion() const
 {
-    auto current = QOperatingSystemVersion::current();
-    return current.majorVersion();
+#if defined(Q_OS_MACOS)
+    return Exec::cmdWithOutput(QStringLiteral("sw_vers"), {QStringLiteral("-productVersion")});
+#else
+    return QString();
+#endif
 }
 
 auto NativeHelpers::getPlatform() const -> Platform
@@ -635,6 +638,10 @@ QString NativeHelpers::iconPreviewResource(const QString &theme)
     if(theme == QStringLiteral("classic"))
         return QStringLiteral("qrc:/img/tray/wide-classic-connected.png");
 #elif defined(Q_OS_WIN)
+    if(theme == QStringLiteral("auto"))
+        return QStringLiteral("qrc:/img/tray/sample-square-auto.png");
+    if(theme == QStringLiteral("dark"))
+        return QStringLiteral("qrc:/img/tray/square-dark-no-outline-connected.png");
     if(theme == QStringLiteral("light"))
     {
         if(TrayIconLoader::useOutlineIcons())

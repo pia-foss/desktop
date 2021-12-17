@@ -1,5 +1,18 @@
 # Changelog
 
+### v3.2.0
+
+* Added "Auto" MTU setting to measure actual MTU after connecting
+* Added automatic tray icon theme on Windows
+* Improved handling of expired accounts
+* Fixed connecting to favorite regions after a connection was refused by the server
+* Fix issue causing multiple dialogs on driver install on Windows
+* Fix issue where deleting a Dedicated IP breaks tooltips
+
+### v3.1.2
+
+* Fixed a crash on Windows when enabling split tunnel
+
 ### v3.1.1
 
 * Added a notice about split tunnel issues on macOS Monterey

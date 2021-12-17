@@ -83,8 +83,8 @@ void NetworkTaskWithRetry::executeNextAttempt()
                 // Check for errors
                 if (error)
                 {
-                    // Auth errors can't be retried.
-                    if (error.code() == Error::ApiUnauthorizedError)
+                    // Auth and "payment required" (expired account) errors can't be retried.
+                    if (error.code() == Error::ApiUnauthorizedError || error.code() == Error::ApiPaymentRequiredError)
                     {
                         reject(error);
                         return;
@@ -157,7 +157,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     {
         qDebug() << "requesting:" << requestResource;
     }
-    
+
     // Permit same-origin redirects.  Qt does not follow redirects by default,
     // which has resulted in some near-misses in the past when load balancers,
     // meta proxies, etc. have been reconfigured.
@@ -166,7 +166,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // cross-origin redirects.  Do this with a user handler since Qt normally
     // distinguishes `https://host/` and `https://host:443/`; treat these as the
     // same.
-    request.setAttribute(QNetworkRequest::Attribute::RedirectPolicyAttribute, 
+    request.setAttribute(QNetworkRequest::Attribute::RedirectPolicyAttribute,
                          QNetworkRequest::RedirectPolicy::UserVerifiedRedirectPolicy);
 
     // Seems like QNetworkAccessManager could provide this, but the closest
@@ -200,7 +200,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
     // Abort the request if it doesn't complete within a certain interval
     Q_ASSERT(_pRetryStrategy);  // Class invariant
     QTimer::singleShot(msec(_pRetryStrategy->beginAttempt(_resource)), reply.get(), &QNetworkReply::abort);
-    
+
     // Handle redirects by permitting same-origin HTTPS redirects only
     connect(reply.get(), &QNetworkReply::redirected, this,
         [this, reply, requestUri](const QUrl &url)
@@ -279,6 +279,15 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
             networkTask->reject(Error(HERE, Error::ApiRateLimitedError));
             return;
         }
+
+        if (reply->attribute(QNetworkRequest::Attribute::HttpStatusCodeAttribute).toInt() == 402)
+        {
+            // 402 is used by our client API to indicate an account subscription has expired
+            qWarning() << "Could not request" << resource << "due to payment required";
+            networkTask->reject(Error(HERE, Error::ApiPaymentRequiredError));
+            return;
+        }
+
 
         if (replyError != QNetworkReply::NetworkError::NoError)
         {

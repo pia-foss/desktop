@@ -47,7 +47,7 @@ if [ -n "$PID" ] && [[ $PID =~ ^[0-9]+$ ]] ; then
         # on the first few attempts.
         for i in $(seq 1 10); do
           echo "attempt $i to open $appDir"
-          if open "$appDir"; then
+          if open "$appDir" --args "--clear-cache" ; then
             break
           fi
           sleep 0.2
@@ -61,7 +61,7 @@ if [ -n "$PID" ] && [[ $PID =~ ^[0-9]+$ ]] ; then
     ) & disown
 else
     # Just launch directly
-    open "$appDir"
+    open "$appDir" --args "--clear-cache"
     if [ -n "$ORIGAPP" ]; then
         rm -rf "$ORIGAPP" || true
     fi

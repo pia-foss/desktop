@@ -26,8 +26,8 @@ class UTun
 {
 public:
     int fd() const {return _sock.get();}
-    uint setMtu(uint mtu);
-    uint mtu() const;
+    int setMtu(int mtu);
+    int mtu() const;
     const QString& name() const {return _name;}
     static nullable_t<UTun> create();
 private:

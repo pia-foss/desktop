@@ -39,15 +39,55 @@ private slots:
 
     void testEquality()
     {
-        OriginalNetworkScan scan1{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6, gatewayIp6};
-        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6, gatewayIp6};
+        OriginalNetworkScan scan1{gatewayIp, interfaceName, ipAddress, prefixLen,
+                                  1500, ipAddress6, gatewayIp6, 1500};
+        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, prefixLen,
+                                  1500, ipAddress6, gatewayIp6, 1500};
         QVERIFY(scan1 == scan2);
+
+        OriginalNetworkScan scan3{};
+        scan3 = scan1;
+        QVERIFY(scan1 == scan3);
     }
 
     void testInequality()
     {
-        OriginalNetworkScan scan1{gatewayIp, "eth1", ipAddress, prefixLen, ipAddress6, gatewayIp6};
-        OriginalNetworkScan scan2{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6, gatewayIp6};
+        OriginalNetworkScan scan1{gatewayIp, "eth1", ipAddress, prefixLen, 1500,
+                                ipAddress6, gatewayIp6, 1500};
+        OriginalNetworkScan scan2{};
+
+        // Tweak each field in turn; verify each field participates in equality
+        // comparison
+        scan2 = scan1;
+        scan2.gatewayIp(QStringLiteral("10.0.0.1"));
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.interfaceName(QStringLiteral("eth2"));
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.ipAddress(QStringLiteral("172.16.0.2"));
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.prefixLength(16);
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.mtu(1300);
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.ipAddress6(QStringLiteral("2601::2"));
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.gatewayIp6(QStringLiteral("fe80::1"));
+        QVERIFY(scan1 != scan2);
+
+        scan2 = scan1;
+        scan2.mtu6(1300);
         QVERIFY(scan1 != scan2);
     }
 
@@ -56,11 +96,14 @@ private slots:
         OriginalNetworkScan emptyScan{};
         QVERIFY(emptyScan.ipv4Valid() == false);
 
-        OriginalNetworkScan completeScan{gatewayIp, interfaceName, ipAddress, prefixLen, ipAddress6, gatewayIp6};
+        OriginalNetworkScan completeScan{gatewayIp, interfaceName, ipAddress,
+                                         prefixLen, 1300, ipAddress6,
+                                         gatewayIp6, 1300};
         QVERIFY(completeScan.ipv4Valid() == true);
 
         // An empty ipAddress6 does not impact Ipv4 validity
-        OriginalNetworkScan withoutIPv6{gatewayIp, interfaceName, ipAddress, prefixLen, "", ""};
+        OriginalNetworkScan withoutIPv6{gatewayIp, interfaceName, ipAddress,
+                                        1300, prefixLen, "", "", 0};
         QVERIFY(withoutIPv6.ipv4Valid() == true);
     }
 };

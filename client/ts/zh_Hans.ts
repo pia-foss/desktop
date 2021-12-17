@@ -2,6 +2,545 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>ClientNotifications</name>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="389"/>
+        <source>ClientNotifications --- We couldn&apos;t establish the connection to the VPN server. Please get in touch with our support department.</source>
+        <translation>无法建立与 VPN 服务器的连接。请与我们的支持部门取得联系。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
+        <source>ClientNotifications -- header-title --- ERROR</source>
+        
+        <extracomment>Header bar title used for all &quot;error&quot; statuses - serious installation problems, etc. This means that there is currently an error condition active now.</extracomment>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="51"/>
+        <source>ClientNotifications --- UPDATE FAILED</source>
+        <translation>更新失败</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
+        <source>ClientNotifications --- Download of version %1 failed.</source>
+        <translation>下载 %1 版失败。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
+        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
+        <translation>此操作系统版本不再受支持。请升级以获取最新的 PIA 更新。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
+        <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
+        <translation>未安装 VPN 隧道的 TAP 适配器。您可以从“设置”重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="145"/>
+        <source>ClientNotifications --- Restart to complete installation.</source>
+        <translation>重新启动以完成安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="146"/>
+        <source>ClientNotifications --- The system must be restarted before you can connect.</source>
+        <translation>必须重新启动系统才能连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="164"/>
+        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
+        <translation>未安装 VPN 隧道的 WinTUN 适配器。您可以从“设置”重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="177"/>
+        <source>ClientNotifications --- The split tunnel filter is not installed.</source>
+        <translation>未安装分离通道筛选器。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="178"/>
+        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
+        <translation>App 排除功能需要安装分离通道筛选器。请从设置中重新安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="189"/>
+        <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
+        <source>ClientNotifications --- Reinstall</source>
+        <translation>重新安装</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="203"/>
+        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
+        <translation>App 排除功能需要安装分离通道筛选器。请重新启动以完成安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="239"/>
+        <source>ClientNotifications --- Connection refused.</source>
+        <translation>连接被拒绝。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="245"/>
+        <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
+        <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
+        <translation>服务器已拒绝连接。请检查您的用户名和密码，并确认您的账户未过期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="254"/>
+        <source>ClientNotifications --- Could not configure DNS.</source>
+        <translation>无法配置 DNS。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="255"/>
+        <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
+        <translation>启用调试日志记录并检查守护程序日志以获取具体详情。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="258"/>
+        <source>ClientNotifications --- Daemon Log</source>
+        <translation>守护程序日志</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="222"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="260"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="307"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="377"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="459"/>
+        <source>ClientNotifications --- Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="268"/>
+        <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
+        <translation>无法运行 /usr/bin/xdg-open。请从以下位置打开守护程序日志文件：</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="285"/>
+        <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
+        <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
+        <translation>无法连接到 Handshake。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="289"/>
+        <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
+        <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
+        <translation>无法通过 Handshake 设置名称解析。您可以继续等待，或尝试其他的名称服务器设置。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="303"/>
+        <source>ClientNotifications --- There may be a problem with the connection.</source>
+        <translation>连接可能有问题。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="304"/>
+        <source>ClientNotifications --- Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
+        <translation>已连接到 VPN，但无法访问互联网。请检查网络和连接设置。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="329"/>
+        <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
+        <translation>不建议以管理员身份运行 PIA。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="330"/>
+        <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
+        <translation>以管理员身份运行 PIA 可能会使“系统启动时打开”功能无法使用，并可能导致其他问题。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="342"/>
+        <source>ClientNotifications --- KILLSWITCH ENABLED</source>
+        <translation>KILLSWITCH 已启用</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="343"/>
+        <source>ClientNotifications --- Killswitch is enabled.</source>
+        <translation>Killswitch 已启用。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="344"/>
+        <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
+        <translation>互联网连接已被阻止，因为已在“设置”中启用了 Killswitch 功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="347"/>
+        <source>ClientNotifications --- Change</source>
+        <translation>更改</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="360"/>
+        <source>ClientNotifications --- RECONNECTING...</source>
+        <translation>正在重新连接...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="361"/>
+        <source>ClientNotifications --- The connection to the VPN server was lost.</source>
+        <translation>与 VPN 服务器的连接已丢失。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="370"/>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="388"/>
+        <source>ClientNotifications --- CONNECTING...</source>
+        <translation>正在连接...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+        <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
+        <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
+        <translation>无法连接到代理。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="374"/>
+        <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
+        <translation>无法访问代理。请检查您的代理设置，并确认代理是否可用。</translation>
+    </message>
+    <message>
+    <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
+        <translation>无法接入 VPN 服务器。请检查您的连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="402"/>
+        <source>ClientNotifications --- RECONNECT NEEDED</source>
+        <translation>需要重新连接</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="403"/>
+        <source>ClientNotifications --- Reconnect to apply settings.</source>
+        <translation>重新连接以使设置生效。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="404"/>
+        <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
+        <translation>只有在您下次连接时，一些设置更改才会生效。点击以立即重新连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="413"/>
+        <source>ClientNotifications --- Connected with OpenVPN.</source>
+        <translation>已与 OpenVPN 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="416"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
+        <translation>首次登录需要与 OpenVPN 连接。重新连接可使用 WireGuard。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="418"/>
+        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
+        <translation>首次登录需要与 OpenVPN 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="437"/>
+        <source>ClientNotifications --- Connected using %1 port %2.</source>
+        <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
+        <translation>已使用 %1 端口 %2 连接。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
+        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
+        <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
+        <translation>已启用“尝试其他设置”。无法在默认 %1 端口上访问服务器，因此使用了 %2 端口 %3。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="454"/>
+        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
+        <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
+        <translation>已启用“尝试其他设置”。无法在 %1 端口 %2 上访问服务器，因此使用了 %3 端口 %4。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="468"/>
+        <source>ClientNotifications --- Subscription expires in %1 days.</source>
+        <translation>订阅将在 %1 天内到期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+        <source>ClientNotifications --- Renew</source>
+        <translation>续订</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="485"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
+        <translation>您的专用 IP 将在 %1 天后过期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="491"/>
+        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
+        <translation>您的专用 IP 将在 1 天后过期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="496"/>
+        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
+        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
+        <translation>您的专用 IP 将在今天过期。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="501"/>
+        <source>ClientNotifications --- Get a new one</source>
+        <translation>获取新 IP</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="513"/>
+        <source>ClientNotifications --- Your dedicated IP was updated.</source>
+        <translation>您的专用 IP 已更新。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="529"/>
+        <source>ClientNotifications --- Unable to reach login server.</source>
+        <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
+        <translation>无法访问登录服务器。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="533"/>
+        <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
+        <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
+        <translation>您的账户详细信息不可用，但您仍可以连接至 VPN。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="537"/>
+        <source>ClientNotifications --- Retry</source>
+        <translation>重试</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="550"/>
+        <source>ClientNotifications --- Private Internet Access was updated.</source>
+        <translation>Private Internet Access 已等新。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="553"/>
+        <source>ClientNotifications --- See what&apos;s new</source>
+        <translation>查看新特征</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="570"/>
+        <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
+        <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
+        <translation>应用程序意外退出。您的 VPN 连接已保留。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
+        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
+        <translation>未安装虚拟网络适配器。</translation>
+    </message>
+</context>
+<context>
+    <name>LoginPage</name>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="187"/>
+        <source>LoginPage --- Your subscription has expired</source>
+        <translation>您的订阅已到期</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="459"/>
+        <source>LoginPage --- Welcome Back!</source>
+        <translation>欢迎回来！</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="472"/>
+        <source>LoginPage --- In order to use Private Internet Access, you&apos;ll need to renew your subscription.</source>
+        <translation>您需要续订才能使用 Private Internet Access。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="482"/>
+        <source>LoginPage --- RENEW NOW</source>
+        <translation>立即续订</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="495"/>
+        <source>LoginPage --- Back to login</source>
+        <translation>返回登录</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="181"/>
+        <source>LoginPage --- Invalid login</source>
+        <translation>登录无效</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="183"/>
+        <source>LoginPage --- Too many attempts, try again in 1 hour</source>
+        <translation>尝试次数过多，1 小时后方可再次尝试</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="185"/>
+        <source>LoginPage --- Can&apos;t reach the server</source>
+        <translation>无法接入服务器</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="215"/>
+        <source>LoginPage --- Username</source>
+        <translation>用户名</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="224"/>
+        <source>LoginPage --- Use your normal username beginning with &apos;p&apos;.</source>
+        <extracomment>Shown if the user attempts to login with the wrong account type. &apos;p&apos; refers to the letter prefix on the username; the p should be kept in Latin script. (Example user names are &quot;p0123456&quot;, &quot;p5858587&quot;).</extracomment>
+        <translation>使用以 p 开头的普通用户名。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="237"/>
+        <source>LoginPage --- Password</source>
+        <translation>密码</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="272"/>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="350"/>
+        <source>LoginPage --- Something went wrong. Please try again later.</source>
+        <translation>出现问题。请稍后再试。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="274"/>
+        <source>LoginPage --- Please check your email.</source>
+        <translation>请查看您的电子邮件。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="292"/>
+        <source>LoginPage --- Email Address</source>
+        <translation>电子邮件地址</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="301"/>
+        <source>LoginPage --- SEND EMAIL</source>
+        <translation>发送电子邮件</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="348"/>
+        <source>LoginPage --- Please Wait...</source>
+        <translation>请稍候...</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="399"/>
+        <source>LoginPage --- Log in with Email</source>
+        <translation>使用电子邮件登录</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="401"/>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
+        <source>LoginPage --- Log in with Username</source>
+        <translation>使用用户名登录</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="419"/>
+        <source>LoginPage --- Forgot Password</source>
+        <translation>忘记密码</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="432"/>
+        <source>LoginPage --- Buy Account</source>
+        <translation>购买账户</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMessages</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="53"/>
+        <source>SettingsMessages --- MTU</source>
+        <translation>MTU</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="58"/>
+        <source>SettingsMessages --- Determines the maximum packet size allowed through the tunnel.</source>
+        <translation>决定允许通过隧道的数据包大小上限。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="59"/>
+        <source>SettingsMessages --- Auto: Detect automatically, best for most connections</source>
+        <translation>自动：自动检测，适合大多数连接</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="60"/>
+        <source>SettingsMessages --- Large Packets: Most efficient if the connection is reliable</source>
+        <translation>大数据包：如果连接可靠，则效率最高</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="61"/>
+        <source>SettingsMessages --- Small Packets: Less efficient but best on unreliable connections</source>
+        <translation>小数据包：效率较低，但在不可靠的连接上效果最好</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
+        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
+        <translation>请重启计算机以完成分离通道筛选器的安装。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
+        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
+        <translation>无法安装分离通道筛选器。请尝试重启计算机，如果此问题仍然存在，请联系客服人员。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
+        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
+        <translation>此功能需要安装 Windows 7 Service Pack 1 或更高版本。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
+        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
+        <translation>此功能需要安装 iptables 1.6.1 或更高版本。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
+        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
+        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
+        <translation>此功能需要安装 libnl-3、libnl-route-3 和 libnl-genl-3。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
+        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
+        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+        <translation>此功能要求在 %1 有可用的 net_cls。</translation>
+    </message>
+    <message>
+    <source>SettingsMessages --- This feature requires kernel process events.</source>
+        <translation>此功能需要有内核进程事件。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="41"/>
+        <source>SettingsMessages --- This feature requires OpenVPN.</source>
+        <translation>此功能需要安装 OpenVPN。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
+        <translation>WireGuard 需要安装 Windows 8 或更高版本。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="64"/>
+        <source>SettingsMessages --- You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
+        <translation>打开“分离通道”功能时，您可能会在macOS Monterey上遇到互联网连接问题。如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="65"/>
+        <source>SettingsMessages --- Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
+        <translation>如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="66"/>
+        <source>SettingsMessages --- macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
+        <translation>macOS Monterey在某些系统上存在与“分离通道”有关的问题。如果您无法访问互联网，请禁用“分离通道”。</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="67"/>
+        <source>SettingsMessages --- Disable Split Tunnel</source>
+        <translation>禁用分离通道</translation>
+    </message>
+</context>
+<context>
+    <name>mtu_setting</name>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="54"/>
+        <source>mtu_setting --- Auto</source>
+        <translation>自动</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="55"/>
+        <source>mtu_setting --- Large Packets</source>
+        <translation>大数据包</translation>
+    </message>
+    <message>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="56"/>
+        <source>mtu_setting --- Small Packets</source>
+        <translation>小数据包</translation>
+    </message>
+</context>
+<context>
     <name>AccountModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/AccountModule.qml" line="17"/>
@@ -350,322 +889,6 @@
     </message>
 </context>
 <context>
-    <name>ClientNotifications</name>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="35"/>
-        <source>ClientNotifications -- header-title --- ERROR</source>
-        
-        <extracomment>Header bar title used for all &quot;error&quot; statuses - serious installation problems, etc. This means that there is currently an error condition active now.</extracomment>
-        <translation>错误</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="51"/>
-        <source>ClientNotifications --- UPDATE FAILED</source>
-        <translation>更新失败</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="52"/>
-        <source>ClientNotifications --- Download of version %1 failed.</source>
-        <translation>下载 %1 版失败。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="63"/>
-        <source>ClientNotifications --- This operating system version is no longer supported.  Please upgrade to receive the latest PIA updates.</source>
-        <translation>此操作系统版本不再受支持。请升级以获取最新的 PIA 更新。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="133"/>
-        <source>ClientNotifications --- The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
-        <extracomment>&quot;TAP&quot; is the type of virtual network adapter used on Windows and is not generally localized.</extracomment>
-        <translation>未安装 VPN 隧道的 TAP 适配器。您可以从“设置”重新安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="145"/>
-        <source>ClientNotifications --- Restart to complete installation.</source>
-        <translation>重新启动以完成安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="146"/>
-        <source>ClientNotifications --- The system must be restarted before you can connect.</source>
-        <translation>必须重新启动系统才能连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="164"/>
-        <source>ClientNotifications --- The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
-        <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
-        <translation>未安装 VPN 隧道的 WinTUN 适配器。您可以从“设置”重新安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="177"/>
-        <source>ClientNotifications --- The split tunnel filter is not installed.</source>
-        <translation>未安装分离通道筛选器。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="178"/>
-        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
-        <translation>App 排除功能需要安装分离通道筛选器。请从设置中重新安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="189"/>
-        <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
-        <source>ClientNotifications --- Reinstall</source>
-        <translation>重新安装</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="203"/>
-        <source>ClientNotifications --- The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
-        <translation>App 排除功能需要安装分离通道筛选器。请重新启动以完成安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="218"/>
-        <source>ClientNotifications --- Connection refused.</source>
-        <translation>连接被拒绝。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="224"/>
-        <source>ClientNotifications --- The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
-        <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
-        <translation>服务器已拒绝连接。请检查您的用户名和密码，并确认您的账户未过期。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="233"/>
-        <source>ClientNotifications --- Could not configure DNS.</source>
-        <translation>无法配置 DNS。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="234"/>
-        <source>ClientNotifications --- Enable debug logging and check the daemon log for specific details.</source>
-        <translation>启用调试日志记录并检查守护程序日志以获取具体详情。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="237"/>
-        <source>ClientNotifications --- Daemon Log</source>
-        <translation>守护程序日志</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="239"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="271"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="286"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="356"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="434"/>
-        <source>ClientNotifications --- Settings</source>
-        <translation>设置</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="247"/>
-        <source>ClientNotifications --- Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
-        <translation>无法运行 /usr/bin/xdg-open。请从以下位置打开守护程序日志文件：</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="264"/>
-        <source>ClientNotifications --- Can&apos;t connect to Handshake.</source>
-        <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
-        <translation>无法连接到 Handshake。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="268"/>
-        <source>ClientNotifications --- Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
-        <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
-        <translation>无法通过 Handshake 设置名称解析。您可以继续等待，或尝试其他的名称服务器设置。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="282"/>
-        <source>ClientNotifications --- There may be a problem with the connection.</source>
-        <translation>连接可能有问题。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="283"/>
-        <source>ClientNotifications --- Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
-        <translation>已连接到 VPN，但无法访问互联网。请检查网络和连接设置。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="308"/>
-        <source>ClientNotifications --- Running PIA as administrator is not recommended.</source>
-        <translation>不建议以管理员身份运行 PIA。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="309"/>
-        <source>ClientNotifications --- Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
-        <translation>以管理员身份运行 PIA 可能会使“系统启动时打开”功能无法使用，并可能导致其他问题。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="321"/>
-        <source>ClientNotifications --- KILLSWITCH ENABLED</source>
-        <translation>KILLSWITCH 已启用</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="322"/>
-        <source>ClientNotifications --- Killswitch is enabled.</source>
-        <translation>Killswitch 已启用。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
-        <source>ClientNotifications --- Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
-        <translation>互联网连接已被阻止，因为已在“设置”中启用了 Killswitch 功能。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="326"/>
-        <source>ClientNotifications --- Change</source>
-        <translation>更改</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="339"/>
-        <source>ClientNotifications --- RECONNECTING...</source>
-        <translation>正在重新连接...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="340"/>
-        <source>ClientNotifications --- The connection to the VPN server was lost.</source>
-        <translation>与 VPN 服务器的连接已丢失。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="349"/>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="367"/>
-        <source>ClientNotifications --- CONNECTING...</source>
-        <translation>正在连接...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="352"/>
-        <source>ClientNotifications --- Can&apos;t connect to the proxy.</source>
-        <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
-        <translation>无法连接到代理。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="353"/>
-        <source>ClientNotifications --- The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
-        <translation>无法访问代理。请检查您的代理设置，并确认代理是否可用。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="368"/>
-        <source>ClientNotifications --- Can&apos;t reach the VPN server.  Please check your connection.</source>
-        <translation>无法接入 VPN 服务器。请检查您的连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="377"/>
-        <source>ClientNotifications --- RECONNECT NEEDED</source>
-        <translation>需要重新连接</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="378"/>
-        <source>ClientNotifications --- Reconnect to apply settings.</source>
-        <translation>重新连接以使设置生效。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="379"/>
-        <source>ClientNotifications --- Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
-        <translation>只有在您下次连接时，一些设置更改才会生效。点击以立即重新连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="388"/>
-        <source>ClientNotifications --- Connected with OpenVPN.</source>
-        <translation>已与 OpenVPN 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="391"/>
-        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
-        <translation>首次登录需要与 OpenVPN 连接。重新连接可使用 WireGuard。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="393"/>
-        <source>ClientNotifications --- Connected with OpenVPN to log in for the first time.</source>
-        <translation>首次登录需要与 OpenVPN 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="412"/>
-        <source>ClientNotifications --- Connected using %1 port %2.</source>
-        <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
-        <translation>已使用 %1 端口 %2 连接。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="421"/>
-        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
-        <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
-        <translation>已启用“尝试其他设置”。无法在默认 %1 端口上访问服务器，因此使用了 %2 端口 %3。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="429"/>
-        <source>ClientNotifications --- Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
-        <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
-        <translation>已启用“尝试其他设置”。无法在 %1 端口 %2 上访问服务器，因此使用了 %3 端口 %4。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="443"/>
-        <source>ClientNotifications --- Subscription expires in %1 days.</source>
-        <translation>订阅将在 %1 天内到期。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
-        <source>ClientNotifications --- Renew</source>
-        <translation>续订</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="460"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in %1 days.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
-        <translation>您的专用 IP 将在 %1 天后过期。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
-        <source>ClientNotifications --- Your dedicated IP will expire in 1 day.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
-        <translation>您的专用 IP 将在 1 天后过期。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
-        <source>ClientNotifications --- Your dedicated IP will expire today.</source>
-        <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
-        <translation>您的专用 IP 将在今天过期。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="476"/>
-        <source>ClientNotifications --- Get a new one</source>
-        <translation>获取新 IP</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="488"/>
-        <source>ClientNotifications --- Your dedicated IP was updated.</source>
-        <translation>您的专用 IP 已更新。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="504"/>
-        <source>ClientNotifications --- Unable to reach login server.</source>
-        <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
-        <translation>无法访问登录服务器。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="508"/>
-        <source>ClientNotifications --- Your account details are unavailable, but you may still be able to connect to the VPN.</source>
-        <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
-        <translation>您的账户详细信息不可用，但您仍可以连接至 VPN。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="512"/>
-        <source>ClientNotifications --- Retry</source>
-        <translation>重试</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="525"/>
-        <source>ClientNotifications --- Private Internet Access was updated.</source>
-        <translation>Private Internet Access 已等新。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="528"/>
-        <source>ClientNotifications --- See what&apos;s new</source>
-        <translation>查看新特征</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/ClientNotifications.qml" line="545"/>
-        <source>ClientNotifications --- The application quit unexpectedly. Your VPN connection was preserved.</source>
-        <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
-        <translation>应用程序意外退出。您的 VPN 连接已保留。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="8"/>
-        <source>ClientNotifications --- The virtual network adapter is not installed.</source>
-        <translation>未安装虚拟网络适配器。</translation>
-    </message>
-</context>
-<context>
     <name>ConnectButton</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/ConnectButton.qml" line="93"/>
@@ -785,35 +1008,35 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="113"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="24"/>
         <source>ConnectionPage --- Local Port</source>
         <translation>本地端口</translation>
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="125"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="35"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="36"/>
         <source>ConnectionPage --- Auto</source>
         <translation>自动</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="128"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="148"/>
         <source>ConnectionPage --- Configuration Method</source>
         <translation>配置方法</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="135"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="155"/>
         <source>ConnectionPage --- DHCP</source>
         <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
         <translation>DHCP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="139"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="159"/>
         <source>ConnectionPage --- Static</source>
         <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
         <translation>静态</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="144"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="164"/>
         <source>ConnectionPage --- Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
         <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
         <translation>确定如何在 TAP 适配器上配置地址。如果您在连接时遇到问题，则另一种方法可能更可靠。</translation>
@@ -848,7 +1071,7 @@
     </message>
     <message>
         <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="282"/>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
         <source>ConnectionPage --- Default</source>
         <translation>默认</translation>
     </message>
@@ -863,56 +1086,52 @@
         <translation>密码（可选）</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="157"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="49"/>
-        <source>ConnectionPage --- Use Small Packets</source>
+    <source>ConnectionPage --- Use Small Packets</source>
         <translation>使用小型数据包</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="161"/>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="53"/>
-        <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
+    <source>ConnectionPage --- Set a smaller MTU for the VPN connection. This can result in lower transfer speeds but improved reliability on poor connections.</source>
         <translation>为 VPN 连接设置更小的 MTU。这可能会导致 传输速度下降，但在连接不良时可以提高稳定性。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="167"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="181"/>
         <source>ConnectionPage --- Try Alternate Settings</source>
         <translation>尝试其他设置</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="175"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="189"/>
         <source>ConnectionPage --- If the connection type and remote port above do not work, try other settings automatically.</source>
         <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
         <translation>如果上面的连接类型和远程端口无效，则自动尝试其他设置。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="181"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="195"/>
         <source>ConnectionPage --- Alternate settings can&apos;t be used when a proxy is configured.</source>
         <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
         <translation>配置代理时，无法使用备用设置。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="46"/>
         <source>ConnectionPage --- Transport</source>
         <translation>传输</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
         <source>ConnectionPage --- Remote Port</source>
         <translation>远程端口</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
         <source>ConnectionPage --- Data Encryption</source>
         <translation>数据加密</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
         <source>ConnectionPage --- Data Authentication</source>
         <translation>数据验证</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
         <source>ConnectionPage --- Handshake</source>
         <translation>握手</translation>
     </message>
@@ -1041,13 +1260,13 @@
         <translation>专用 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="75"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="77"/>
         <source>DedicatedIpList --- Region</source>
         <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays region names.</extracomment>
         <translation>地区</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="89"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="91"/>
         <source>DedicatedIpList --- Remove</source>
         <extracomment>Screen reader annotation for the column in the Dedicated IP list that removes a dedicated IP.</extracomment>
         <translation>删除</translation>
@@ -1083,18 +1302,17 @@
 <context>
     <name>DedicatedIpRow</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpRow.qml" line="29"/>
-        <source>DedicatedIpRow --- Remove</source>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="21"/>
         <extracomment>&quot;Remove&quot; button label - used as the screen reader annotation for the &quot;X&quot; button next to a dedicated IP, and for the confirmation button on the prompt presented when removing a dedicated IP.</extracomment>
+<source>DedicatedIpRow --- Remove</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpRow.qml" line="82"/>
-        <source>DedicatedIpRow --- Remove Dedicated IP</source>
+    <source>DedicatedIpRow --- Remove Dedicated IP</source>
         <translation>删除专用 IP</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpRow.qml" line="89"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="150"/>
         <source>DedicatedIpRow --- Remove %1 - %2?</source>
         <extracomment>Confirmation prompt to remove a dedicated IP. %1 is the translated region name, %2 is an IP address, such as 100.200.100.200.</extracomment>
         <translation>删除 %1 - %2？</translation>
@@ -1103,7 +1321,7 @@
 <context>
     <name>DedicatedIpRowBase</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="82"/>
+        <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpList.qml" line="84"/>
         <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpRowBase.qml" line="23"/>
         <source>DedicatedIpRowBase --- IP Address</source>
         <extracomment>Screen reader annotation for the column in the Dedicated IP list that displays the IP address for that dedicated IP.</extracomment>
@@ -1557,27 +1775,27 @@
         <translation>等待断开连接</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="47"/>
         <source>HelpPage --- The network adapter cannot be reinstalled while connected. Disconnect and reinstall now?</source>
         <translation>在连接状态下无法重新安装网络适配器。立即断开连接并重新安装？</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="46"/>
+        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="47"/>
         <source>HelpPage --- Disconnect needed</source>
         <translation>需要断开连接</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="78"/>
+        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="81"/>
         <source>HelpPage --- The network adapter has been successfully reinstalled.</source>
         <translation>网络适配器已经成功重新安装。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="81"/>
+        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="84"/>
         <source>HelpPage --- The network adapter has been successfully reinstalled. You may need to reboot your system.</source>
         <translation>网络适配器已经成功重新安装。您可能需要重启您的系统。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="84"/>
+        <location filename="../../../client/res/components/settings/pages/help/ReinstallLink.qml" line="87"/>
         <source>HelpPage --- There was an error while attempting to reinstall the network adapter.</source>
         <translation>尝试重新安装网络适配器时遇到了问题。</translation>
     </message>
@@ -1678,87 +1896,6 @@
         <location filename="../../../client/res/components/dashboard/login/LoginButton.qml" line="12"/>
         <source>LoginButton --- LOG IN</source>
         <translation>登录</translation>
-    </message>
-</context>
-<context>
-    <name>LoginPage</name>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="153"/>
-        <source>LoginPage --- Invalid login</source>
-        <translation>登录无效</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="155"/>
-        <source>LoginPage --- Too many attempts, try again in 1 hour</source>
-        <translation>尝试次数过多，1 小时后方可再次尝试</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="157"/>
-        <source>LoginPage --- Can&apos;t reach the server</source>
-        <translation>无法接入服务器</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="185"/>
-        <source>LoginPage --- Username</source>
-        <translation>用户名</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="194"/>
-        <source>LoginPage --- Use your normal username beginning with &apos;p&apos;.</source>
-        <extracomment>Shown if the user attempts to login with the wrong account type. &apos;p&apos; refers to the letter prefix on the username; the p should be kept in Latin script. (Example user names are &quot;p0123456&quot;, &quot;p5858587&quot;).</extracomment>
-        <translation>使用以 p 开头的普通用户名。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="207"/>
-        <source>LoginPage --- Password</source>
-        <translation>密码</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="242"/>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="320"/>
-        <source>LoginPage --- Something went wrong. Please try again later.</source>
-        <translation>出现问题。请稍后再试。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="244"/>
-        <source>LoginPage --- Please check your email.</source>
-        <translation>请查看您的电子邮件。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="262"/>
-        <source>LoginPage --- Email Address</source>
-        <translation>电子邮件地址</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="271"/>
-        <source>LoginPage --- SEND EMAIL</source>
-        <translation>发送电子邮件</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="318"/>
-        <source>LoginPage --- Please Wait...</source>
-        <translation>请稍候...</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="370"/>
-        <source>LoginPage --- Log in with Email</source>
-        <translation>使用电子邮件登录</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="372"/>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="374"/>
-        <source>LoginPage --- Log in with Username</source>
-        <translation>使用用户名登录</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="390"/>
-        <source>LoginPage --- Forgot Password</source>
-        <translation>忘记密码</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
-        <source>LoginPage --- Buy Account</source>
-        <translation>购买账户</translation>
     </message>
 </context>
 <context>
@@ -2044,13 +2181,13 @@
         <translation>了解更多</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="177"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="182"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="205"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="210"/>
         <source>NetworkPage --- App Exclusions</source>
         <translation>App 排除</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="246"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="274"/>
         <source>NetworkPage --- Apps may need to be restarted for changes to be applied.</source>
         <translation>可能需要重新启动 App 才能使更改生效。</translation>
     </message>
@@ -3066,76 +3203,6 @@
     </message>
 </context>
 <context>
-    <name>SettingsMessages</name>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="15"/>
-        <source>SettingsMessages --- Restart your computer to finish installing the split tunnel filter.</source>
-        <translation>请重启计算机以完成分离通道筛选器的安装。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="17"/>
-        <source>SettingsMessages --- The split tunnel filter could not be installed.  Try restarting your computer, or contact support if this problem persists.</source>
-        <translation>无法安装分离通道筛选器。请尝试重启计算机，如果此问题仍然存在，请联系客服人员。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="20"/>
-        <source>SettingsMessages --- This feature requires Windows 7 Service Pack 1 or later.</source>
-        <translation>此功能需要安装 Windows 7 Service Pack 1 或更高版本。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="21"/>
-        <source>SettingsMessages --- This feature requires iptables 1.6.1 or later.</source>
-        <translation>此功能需要安装 iptables 1.6.1 或更高版本。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="24"/>
-        <source>SettingsMessages --- This feature requires libnl-3, libnl-route-3, and libnl-genl-3.</source>
-        <extracomment>Message for Linux indicating that specific system libraries are needed to support the split tunnel feature.</extracomment>
-        <translation>此功能需要安装 libnl-3、libnl-route-3 和 libnl-genl-3。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
-        <source>SettingsMessages --- This feature requires net_cls to be available at %1.</source>
-        <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
-        <translation>此功能要求在 %1 有可用的 net_cls。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="29"/>
-        <source>SettingsMessages --- This feature requires kernel process events.</source>
-        <translation>此功能需要有内核进程事件。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
-        <source>SettingsMessages --- This feature requires OpenVPN.</source>
-        <translation>此功能需要安装 OpenVPN。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
-        <source>SettingsMessages --- WireGuard requires Windows 8 or later.</source>
-        <translation>WireGuard 需要安装 Windows 8 或更高版本。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="55"/>
-        <source>SettingsMessages --- You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-        <translation>打开“分离通道”功能时，您可能会在macOS Monterey上遇到互联网连接问题。如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="56"/>
-        <source>SettingsMessages --- Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-        <translation>如果您在连接互联网时遇到困难，请禁用“分离通道”功能。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="57"/>
-        <source>SettingsMessages --- macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
-        <translation>macOS Monterey在某些系统上存在与“分离通道”有关的问题。如果您无法访问互联网，请禁用“分离通道”。</translation>
-    </message>
-    <message>
-        <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="58"/>
-        <source>SettingsMessages --- Disable Split Tunnel</source>
-        <translation>禁用分离通道</translation>
-    </message>
-</context>
-<context>
     <name>SettingsModule</name>
     <message>
         <location filename="../../../client/res/components/dashboard/connect/modules/settings/SettingsModule.qml" line="17"/>
@@ -3355,7 +3422,7 @@
     <name>SplitTunnelAddAppRow</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="156"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="214"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="242"/>
         <source>SplitTunnelAddAppRow --- Add Application</source>
         <translation>添加应用程序</translation>
     </message>
@@ -3364,7 +3431,7 @@
     <name>SplitTunnelAddIpRow</name>
     <message>
         <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="223"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="251"/>
         <source>SplitTunnelAddIpRow --- Add IP Address</source>
         <translation>添加 IP 地址</translation>
     </message>
@@ -3477,7 +3544,7 @@
 <context>
     <name>SplitTunnelPage</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="208"/>
+        <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="236"/>
         <source>SplitTunnelPage --- Your Split Tunnel Rules</source>
         <translation>您的分离通道规则</translation>
     </message>
@@ -3985,44 +4052,44 @@
 <context>
     <name>WireguardConnection</name>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="39"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="40"/>
         <source>WireguardConnection --- Connection Timeout</source>
         <translation>连接超时</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="42"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="43"/>
         <source>WireguardConnection --- 30 seconds</source>
         <translation>30 秒</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="43"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="44"/>
         <source>WireguardConnection --- 1 minute</source>
         <translation>1 分钟</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="44"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="45"/>
         <source>WireguardConnection --- 2 minutes</source>
         <translation>2 分钟</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="65"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="75"/>
         <source>WireguardConnection --- Use Kernel Module</source>
         <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
         <translation>使用内核模块</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="79"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="89"/>
         <source>WireguardConnection --- Install the WireGuard kernel module for the best performance.</source>
         <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
         <translation>安装 WireGuard 内核模块以获得最佳性能。</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="86"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="96"/>
         <source>WireguardConnection --- Install</source>
         <translation>安装</translation>
     </message>
     <message>
-        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="119"/>
+        <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="129"/>
         <extracomment>This message is shown on Linux distributions when the WireGuard kernel module can&apos;t be installed automatically. &quot;Distribution&quot; refers to a Linux distribution: https://en.wikipedia.org/wiki/Linux_distribution</extracomment>
 <source>WireguardConnection --- For distribution-specific installation instructions, visit:</source>
         <translation>如需了解针对发行版的安装说明，请访问：</translation>

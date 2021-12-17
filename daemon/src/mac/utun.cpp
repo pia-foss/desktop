@@ -74,7 +74,7 @@ UTun::UTun(int unitNumber)
     _name = QStringLiteral("utun%1").arg(_unitNumber - 1);
 }
 
-uint UTun::mtu() const
+int UTun::mtu() const
 {
     ifreq ifr{};
     ::strlcpy(ifr.ifr_name, qPrintable(name()), sizeof(ifr.ifr_name));
@@ -86,7 +86,7 @@ uint UTun::mtu() const
     return 0;
 }
 
-uint UTun::setMtu(uint mtu)
+int UTun::setMtu(int mtu)
 {
     ifreq ifr{};
     ifr.ifr_mtu = mtu;

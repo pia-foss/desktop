@@ -101,6 +101,7 @@ public:
         ApiBadResponseError,
         ApiUnauthorizedError,
         ApiInterfaceError,  // Need to use a specific interface for the API request, but the interface isn't ready
+        ApiPaymentRequiredError,
 
         VersionUnparseableError = 1300,
 

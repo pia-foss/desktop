@@ -19,6 +19,7 @@
 #include "common.h"
 #line SOURCE_FILE("win/win_tray.cpp")
 
+#include "trayiconmanager.h"
 #include "win_tray.h"
 #include "win_resources.h"
 #include "win/win_util.h"
@@ -28,6 +29,7 @@
 #include <QGuiApplication>
 #include <QTimer>
 #include <QRectF>
+#include <QString>
 #include <QTimer>
 #include <windowsx.h>   // GET_X_LPARAM() and GET_Y_LPARAM()
 #include <string.h> // For wcsncpy_s(), used to fill NOTIFYICONDATAW buffers
@@ -278,6 +280,14 @@ TrayIconLoader::TrayIconLoader(IconResource::Size size, const QString &initialIc
                    iconForWinVer(IDI_LIGHT_DOWN,          IDI_LIGHT_OUTLINE_DOWN),
                    iconForWinVer(IDI_LIGHT_SNOOZED,       IDI_LIGHT_OUTLINE_SNOOZED),
                    },
+      _theme_dark{size,
+                   IDI_DARK_ALERT,
+                   IDI_DARK_CONNECTED,
+                   IDI_DARK_CONNECTING,
+                   IDI_DARK_DISCONNECTING,
+                   IDI_DARK_DOWN,
+                   IDI_DARK_SNOOZED
+                   },
       _theme_colored{size,
                      iconForWinVer(IDI_COLORED_ALERT,         IDI_COLORED_OUTLINE_ALERT),
                      iconForWinVer(IDI_COLORED_CONNECTED,     IDI_COLORED_OUTLINE_CONNECTED),
@@ -297,10 +307,25 @@ void TrayIconLoader::setIconSet(const QString &iconSet) {
     }
 }
 
+void TrayIconLoader::setOSThemeSetting(const QString &theme) {
+    if(theme != _osThemeSetting)
+    {
+        _osThemeSetting = theme;
+    }
+}
+
 const IconResource &TrayIconLoader::getStateIcon(NativeTray::IconState state) const
 {
+    if(_iconSet == QStringLiteral("auto")) {
+        if (_osThemeSetting == QStringLiteral("light"))
+            return _theme_dark.getIconForState(state);
+        else
+            return _theme_light.getIconForState(state);
+    }
     if(_iconSet == QStringLiteral("colored"))
         return _theme_colored.getIconForState(state);
+    else if(_iconSet == QStringLiteral("dark"))
+        return _theme_dark.getIconForState(state);
 #if BRAND_HAS_CLASSIC_TRAY
     else if(_iconSet == QStringLiteral("classic"))
         return _theme_classic.getIconForState(state);
@@ -312,17 +337,81 @@ const IconResource &TrayIconLoader::getStateIcon(NativeTray::IconState state) co
 NativeTrayWin::NativeTrayWin(IconState initialIcon, const QString &initialIconSet)
     : _trayIcons{IconResource::Size::Small, initialIconSet},
       _notificationIcons{IconResource::Size::Large, initialIconSet},
-      _icon{_trayIcons.getStateIcon(initialIcon).getHandle()}
+      _icon{_trayIcons.getStateIcon(initialIcon).getHandle()},
+      _iconState{initialIcon},
+      _themeChangeEvent{},
+      _themeKey{},
+      _themeValue{(DWORD)-1}
 {
     connect(&_icon, &ShellTrayIcon::leftClicked, this, &NativeTrayWin::onLeftClicked);
     connect(&_icon, &ShellTrayIcon::showMenu, this, &NativeTrayWin::onShowMenu);
+    connect(&_eventNotifier, &QWinEventNotifier::activated, this, &NativeTrayWin::onThemeRegChanged);
+
+    startWatchThemeReg();
+    updateIconWithSysTheme();
+}
+
+void NativeTrayWin::startWatchThemeReg()
+{
+    QString path("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, reinterpret_cast<const wchar_t*>(path.utf16()),
+                0, KEY_READ | KEY_NOTIFY, _themeKey.receive()) == ERROR_SUCCESS) {
+        const DWORD filter = REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_ATTRIBUTES |
+                             REG_NOTIFY_CHANGE_LAST_SET | REG_NOTIFY_CHANGE_SECURITY;
+        _themeChangeEvent = WinHandle(CreateEvent(NULL, true, false, NULL));
+        if (RegNotifyChangeKeyValue(_themeKey, true, filter, _themeChangeEvent, true) != ERROR_SUCCESS) {
+            _themeChangeEvent = {};
+            return;
+        }
+        _eventNotifier.setHandle(_themeChangeEvent);
+        _eventNotifier.setEnabled(true);
+    }
+}
+
+void NativeTrayWin::onThemeRegChanged(HANDLE hEvent)
+{
+    updateIconWithSysTheme();
+    _themeChangeEvent = {};
+    _themeKey = {};
+    startWatchThemeReg();
+}
+
+void NativeTrayWin::updateIconWithSysTheme()
+{
+    DWORD type = REG_DWORD;
+    DWORD size = sizeof(DWORD);
+    DWORD value = 0;
+    _trayIcons.setOSThemeSetting("dark");
+    _notificationIcons.setOSThemeSetting("dark");
+    if (!_themeKey)
+        return;
+    LONG result = RegQueryValueEx(_themeKey, L"AppsUseLightTheme", nullptr, &type,
+                                            reinterpret_cast<LPBYTE>(&value), &size);
+    if (result != ERROR_SUCCESS)
+        return;
+    _themeValue = value;
+    qInfo() << "AppsUseLightTheme value: " << value;
+    if (value) {
+       _trayIcons.setOSThemeSetting("light");
+       _notificationIcons.setOSThemeSetting("light");
+    } else {
+       _trayIcons.setOSThemeSetting("dark");
+       _notificationIcons.setOSThemeSetting("dark");
+    }
+    _icon.setIcon(_trayIcons.getStateIcon(_iconState).getHandle());
 }
 
 void NativeTrayWin::setIconState(IconState icon, const QString &iconSet)
 {
+    _iconState = icon;
     _trayIcons.setIconSet(iconSet);
     _notificationIcons.setIconSet(iconSet);
     _icon.setIcon(_trayIcons.getStateIcon(icon).getHandle());
+}
+
+void NativeTrayWin::activateIconSet(const QString &iconSet)
+{
+    setIconState(_iconState, iconSet);
 }
 
 void NativeTrayWin::showNotification(IconState icon, const QString &title,

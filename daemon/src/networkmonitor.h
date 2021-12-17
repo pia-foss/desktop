@@ -55,7 +55,7 @@ public:
 
 public:
     NetworkConnection() : NetworkConnection{{}, Medium::Unknown, false, false,
-                                            {}, {}, {}, {}} {}
+                                            {}, {}, {}, {}, 0, 0} {}
     // Create NetworkConnection.  Any of the fields could be empty (though it is
     // unusual for the interface to be empty).
     NetworkConnection(const QString &networkInterface,
@@ -64,7 +64,8 @@ public:
                       const Ipv4Address &gatewayIpv4,
                       const Ipv6Address &gatewayIpv6,
                       std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
-                      std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6);
+                      std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6,
+                      unsigned mtu4, unsigned mtu6);
 
 public:
     bool operator==(const NetworkConnection &other) const
@@ -81,7 +82,9 @@ public:
                gatewayIpv4() == other.gatewayIpv4() &&
                gatewayIpv6() == other.gatewayIpv6() &&
                addressesIpv4() == other.addressesIpv4() &&
-               addressesIpv6() == other.addressesIpv6();
+               addressesIpv6() == other.addressesIpv6() &&
+               mtu4() == other.mtu4() &&
+               mtu6() == other.mtu6();
     }
     bool operator!=(const NetworkConnection &other) const {return !(*this == other);}
     // NetworkConnections can be sorted in order to compare sets of network
@@ -189,6 +192,14 @@ public:
     const std::vector<std::pair<Ipv6Address, unsigned>> &addressesIpv6() const {return _addressesIpv6;}
     void addressesIpv6(std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6) {_addressesIpv6 = std::move(addressesIpv6);}
 
+    // MTU of this network connection.  Separate IPv4 and IPv6 MTUs are provided,
+    // because Windows maintains separate IPv4 and IPv6 MTUs.  (On other OSes,
+    // mtu4 and mtu6 are always the same for a given connection.)
+    unsigned mtu4() const { return _mtu4; }
+    void mtu4(unsigned mtu4) { _mtu4 = mtu4; }
+    unsigned mtu6() const { return _mtu6; }
+    void mtu6(unsigned mtu6) { _mtu6 = mtu6; }
+
 private:
     QString _networkInterface;
     Medium _medium;
@@ -200,6 +211,7 @@ private:
     std::vector<std::pair<Ipv4Address, unsigned>> _addressesIpv4;
     std::vector<std::pair<Ipv6Address, unsigned>> _addressesIpv6;
     QString _macosPrimaryServiceKey;
+    unsigned _mtu4, _mtu6;
 };
 
 // NetworkMonitor monitors the current network connections and identifies the

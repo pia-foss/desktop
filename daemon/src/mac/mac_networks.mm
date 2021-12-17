@@ -109,8 +109,13 @@ public:
     // Check all WiFi interfaces and build a map of interface names to
     // CWInterface objects, which we'll use to find SSIDs and encryption modes.
     std::unordered_map<QString, WifiConfig> readWifiConfig();
-    // Read interface media types from System Configuration
-    std::unordered_map<QString, NetworkConnection::Medium> readNetworkMedia();
+    // Read interface media types, MTUs, etc. from System Configuration
+    struct ScNetworkItfInfo
+    {
+        NetworkConnection::Medium medium;
+        unsigned mtu;
+    };
+    std::unordered_map<QString, ScNetworkItfInfo> readScNetworkInterfaces();
 
     // Read all active network connections and forward the information to
     // PosixNetworks.
@@ -218,11 +223,12 @@ auto MacNetworks::readWifiConfig() -> std::unordered_map<QString, WifiConfig>
     return wifiConfigs;
 }
 
-std::unordered_map<QString, NetworkConnection::Medium> MacNetworks::readNetworkMedia()
+auto MacNetworks::readScNetworkInterfaces()
+    -> std::unordered_map<QString, ScNetworkItfInfo>
 {
     MacArray interfaces{::SCNetworkInterfaceCopyAll()};
 
-    std::unordered_map<QString, NetworkConnection::Medium> media;
+    std::unordered_map<QString, ScNetworkItfInfo> itfs;
 
     for(const auto &interface : interfaces.view<SCNetworkInterfaceRef>())
     {
@@ -244,16 +250,19 @@ std::unordered_map<QString, NetworkConnection::Medium> MacNetworks::readNetworkM
         // would ever have the default route and is still at least a consistent
         // behavior.)
         auto mediumName = QString::fromCFString(::SCNetworkInterfaceGetInterfaceType(interface.get()));
-        NetworkConnection::Medium medium{NetworkConnection::Medium::Unknown};
+        ScNetworkItfInfo itf{NetworkConnection::Medium::Unknown, 0};
         if(mediumName == QStringLiteral("Ethernet"))
-            medium = NetworkConnection::Medium::Wired;
+            itf.medium = NetworkConnection::Medium::Wired;
         else if(mediumName == QStringLiteral("IEEE80211"))
-            medium = NetworkConnection::Medium::WiFi;
-        media.emplace(QString::fromCFString(::SCNetworkInterfaceGetBSDName(interface.get())),
-                      medium);
+            itf.medium = NetworkConnection::Medium::WiFi;
+        int mtuCur{}, mtuMin{}, mtuMax{};
+        if(::SCNetworkInterfaceCopyMTU(interface.get(), &mtuCur, &mtuMin, &mtuMax) && mtuCur > 0)
+            itf.mtu = static_cast<unsigned>(mtuCur);
+        itfs.emplace(QString::fromCFString(::SCNetworkInterfaceGetBSDName(interface.get())),
+                      std::move(itf));
     }
 
-    return media;
+    return itfs;
 }
 
 QString MacNetworks::getGlobalRouterIp(const QString &ipVersion)
@@ -289,7 +298,7 @@ QString MacNetworks::getDefaultServiceKeyName(const MacString &globalKey,
 
 void MacNetworks::readConnections()
 {
-    auto media = readNetworkMedia();
+    auto scNetItfInfo = readScNetworkInterfaces();
     auto wifiConfigs = readWifiConfig();
 
     // Get the default IPv4 and IPv6 services
@@ -439,7 +448,7 @@ void MacNetworks::readConnections()
                                     ipConfig._defIpv6, ipv4RouterAddr,
                                     ipv6RouterAddr,
                                     std::move(addressesIpv4),
-                                    std::move(addressesIpv6));
+                                    std::move(addressesIpv6), 0, 0);
         auto &connection = connectionInfo.back();
 
         auto itWifiConfig = wifiConfigs.find(ipConfigEntry.first);
@@ -486,12 +495,17 @@ void MacNetworks::readConnections()
             }
         }
 
-        auto itMedium = media.find(ipConfigEntry.first);
-        if(itMedium != media.end())
-            connectionInfo.back().medium(itMedium->second);
+        auto itInfo = scNetItfInfo.find(ipConfigEntry.first);
+        if(itInfo != scNetItfInfo.end())
+        {
+            connection.medium(itInfo->second.medium);
+            // macOS does not have separate IPv4/IPv6 MTUs
+            connection.mtu4(itInfo->second.mtu);
+            connection.mtu6(itInfo->second.mtu);
+        }
 
         // Expose the primary service key
-        connectionInfo.back().macosPrimaryServiceKey(defIpv4SvcKey);
+        connection.macosPrimaryServiceKey(defIpv4SvcKey);
     }
 
     updateNetworks(std::move(connectionInfo));

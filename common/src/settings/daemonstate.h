@@ -431,15 +431,15 @@ public:
     // The original interface IP and network prefix before we activated the VPN
     JsonField(QString, originalInterfaceIp, {})
     JsonField(unsigned, originalInterfaceNetPrefix, {})
+    JsonField(unsigned, originalMtu, 0)
 
     // The original gateway interface before we activated the VPN
     JsonField(QString, originalInterface, {})
 
-    // The original IPv6 interface IP before we activated the VPN
+    // The original IPv6 interface IP, gateway, and MTU before we activated the VPN
     JsonField(QString, originalInterfaceIp6, {})
-
-    // The original IPv6 gateway IP before we activated the VPN
     JsonField(QString, originalGatewayIp6, {})
+    JsonField(unsigned, originalMtu6, 0)
 
     // The key for the primary service on macOS
     JsonField(QString, macosPrimaryServiceKey, {})

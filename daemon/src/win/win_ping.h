@@ -48,7 +48,10 @@ public:
     // is required (this is also why the object is self-owning).
     //
     // If the request can't be sent, returns nullptr.
-    static QPointer<WinIcmpEcho> send(quint32 address, std::chrono::milliseconds timeout);
+    static QPointer<WinIcmpEcho> send(quint32 address,
+                                      std::chrono::milliseconds timeout,
+                                      WORD payloadSize = 32,
+                                      bool allowFragments = true);
 
 private:
     WinIcmpEcho(WinHandle event, std::size_t replyBufSize);
@@ -61,6 +64,7 @@ private:
 signals:
     // Emitted when the reply is received.
     void receivedReply(quint32 address);
+    void receivedError(int errCode);
 
 private:
     // Event signaled when the reply is received

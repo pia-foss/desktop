@@ -16,21 +16,16 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "launch.h"
-#include "safemode_inl.h"
-#include "util.h"
+#pragma once
+#include "common.h"
 
-void LaunchClientTask::execute()
+namespace PosixMtu
 {
-    if(getBootMode() == BootMode::Normal)
-    {
-        // Launch the client non-elevated
-        launchProgramAsDesktopUser(g_clientPath, {L"--clear-cache"});
-    }
-    else
-    {
-        // Can't start the service in safe mode, so just indicate that the
-        // user needs to restart.
-        messageBox(IDS_MB_RESTARTTOUSE, IDS_MB_CAP_INSTALLCOMPLETE, 0, MB_ICONINFORMATION, IDOK);
-    }
+
+// Get the MTU for the interface that would be used to reach a specific host
+// (tries to find the interface that would be used to reach the host, or falls
+// back to the default interface, then finds the MTU for whichever interface
+// was selected).
+unsigned findHostMtu(const QString &host);
+
 }
