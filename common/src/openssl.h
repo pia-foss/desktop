@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -44,9 +44,13 @@ public:
 
 public:
     // Verify that an HTTPS certificate is valid for the peer name given, and
-    // was issued by this CA.
+    // was issued by this CA. The allowExpired parameter permits an expired
+    // certificate while still validating that it was issued by the correct
+    // CA, and that it should only be used for unit tests so that the unit
+    // test certificates don't have to be rotated
     bool verifyHttpsCertificate(const QList<QSslCertificate> &certChain,
-                                const QString &peerName);
+                                const QString &peerName,
+                                bool allowExpired = false);
 
 private:
     std::unique_ptr<data> _pData;

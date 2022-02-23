@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Private Internet Access, Inc.
+# Copyright (c) 2022 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -40,3 +40,7 @@ trap popd EXIT
 export RUBYOPT=-Eutf-8
 rake clean VARIANT="$MODE" BRAND="$BRAND"
 rake all -j8 VARIANT="$MODE" BRAND="$BRAND"
+
+if [ -n "$CI_MERGE_REQUEST_ID" ]; then
+  rake tsdiff
+fi

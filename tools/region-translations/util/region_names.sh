@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2021 Private Internet Access, Inc.
+# Copyright (c) 2022 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -56,8 +56,8 @@ function get_translation() {
 
 function check_missing_name() {
   name="$1"
-  # Swedish is checked arbitrarily, we translate everything at once anyway
-  translation="$(get_translation "$name" sv)"
+  # French is checked arbitrarily, we translate everything at once anyway
+  translation="$(get_translation "$name" fr)"
   if [ "$translation" = '""' ]; then
     echo "missing: $name" >&2
   fi

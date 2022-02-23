@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -361,10 +361,6 @@ QString NativeHelpers::getProductName() const
     return QStringLiteral(PIA_PRODUCT_NAME);
 }
 
-bool NativeHelpers::getIncludeFeatureHandshake() const
-{
-    return INCLUDE_FEATURE_HANDSHAKE;
-}
 
 bool NativeHelpers::getLogToFile()
 {

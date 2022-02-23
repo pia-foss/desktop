@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# Vagrant file to enable running thaibreak and translation import scripts
+# on non-Linux systems
+
+
+# Instructions:
+# 
+# $ vagrant up
+# $ vagrant ssh
+# $ cd /home/vagrant
+# $ wget -c https://privateinternetaccess-storage.s3.amazonaws.com/pub/pia_desktop/qt/2021-01-23/qt-5.15.2-pia-linux-x86_64.run
+# $ chmod +x qt-5.15.2-pia-linux-x86_64.run && ./qt-5.15.2-pia-linux-x86_64.run
+# $ install Qt to /home/vagrant/Qt/
+# $ cd /pia
+# $ rake tools
+# $ ./out/pia_debug_x86_64/tools/bin/import_translations.sh /host_tmp/pia-desktop-translations.zip
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/focal64"
+
+  config.vm.box_check_update = false
+
+  # Include the 
+  config.vm.synced_folder("../", "/pia")
+  config.vm.synced_folder("/tmp", "/host_tmp") if Dir.exist?("/tmp")
+
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y build-essential rake ruby clang mesa-common-dev libnl-3-dev libnl-route-3-dev git libnl-genl-3-dev libthai-dev
+  SHELL
+end

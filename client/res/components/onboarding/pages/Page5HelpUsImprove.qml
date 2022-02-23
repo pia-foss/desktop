@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -23,6 +23,7 @@ import "../../theme"
 import "../../common"
 import "../../core"
 import "../../daemon"
+import PIA.NativeHelpers 1.0
 
 Item {
   id: page5
@@ -90,7 +91,7 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter
     text: uiTr("ACCEPT")
     onClicked: {
-      Daemon.applySettings({"sendServiceQualityEvents":true})
+      Daemon.applySettings({"serviceQualityAcceptanceVersion": NativeHelpers.getClientVersion()})
       closeAndShowDashboard()
     }
   }
@@ -100,10 +101,10 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter
     text: uiTr("NO THANKS")
     onClicked: {
-      // Setting this to "false" has no effect the first time the quick tour
-      // is run since it defaults to false anyway, but if the user revisits the
-      // quick tour and clicks this, it makes sense to disable the setting.
-      Daemon.applySettings({"sendServiceQualityEvents":false})
+      // Setting this to "" has no effect the first time the quick tour
+      // is run since it defaults to false-ish (empty string) anyway,
+      // but if the user revisits the quick tour and clicks this, it makes sense to disable the setting.
+      Daemon.applySettings({"serviceQualityAcceptanceVersion": ""})
       closeAndShowDashboard()
     }
   }

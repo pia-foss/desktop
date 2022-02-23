@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2021 Private Internet Access, Inc.
+# Copyright (c) 2022 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -25,7 +25,7 @@ function show_help() {
     echo "  $0 <.../PIA Desktop.zip>"
     echo "  $0 --help"
     echo ""
-    echo "Imports the translation ZIP export from OneSky."
+    echo "Imports the translation ZIP export from Translation Platforms."
     echo "(Extracts the ZIP, renames the ts files, and runs thaibreak)"
     echo ""
     echo "unzip is required for this script."
@@ -72,23 +72,25 @@ TRZIP="$(realpath "$1")"
 cd "$REPO/client/ts/"
 unzip -o "$TRZIP"
 # Rename all files
-mv Language.ar.ts ar.ts
-mv Language.da.ts da.ts
-mv Language.de.ts de.ts
-mv Language.es-MX.ts es_MX.ts
-mv Language.fr.ts fr.ts
-mv Language.it.ts it.ts
-mv Language.ja.ts ja.ts
-mv Language.ko.ts ko.ts
-mv Language.nb.ts nb.ts
-mv Language.nl.ts nl.ts
-mv Language.pl.ts pl.ts
-mv Language.pt-BR.ts pt_BR.ts
-mv Language.ru.ts ru.ts
-mv Language.sv-SE.ts sv.ts
-mv Language.th.ts th.ts
-mv Language.tr.ts tr.ts
-mv Language.zh-CN.ts zh_Hans.ts
-mv Language.zh-TW.ts zh_Hant.ts
+mv ar/ar.ts ar.ts
+mv da/da.ts da.ts
+mv de/de.ts de.ts
+mv es-MX/es_MX.ts es_MX.ts
+mv fr/fr.ts fr.ts
+mv it/it.ts it.ts
+mv ja/ja.ts ja.ts
+mv ko/ko.ts ko.ts
+mv nl/nl.ts nl.ts
+mv nb/nb.ts nb.ts
+mv pl/pl.ts pl.ts
+mv pt-BR/pt_BR.ts pt_BR.ts
+mv ru/ru.ts ru.ts
+mv th/th.ts th.ts
+mv tr/tr.ts tr.ts
+mv zh-CN/zh_Hans.ts zh_Hans.ts
+mv zh-TW/zh_Hant.ts zh_Hant.ts
+
+# Empty directories are left behind for each of the languages. Delete them.
+rm -Rf -- */
 
 "$TOOLSBIN/thai_ts.sh" th.ts

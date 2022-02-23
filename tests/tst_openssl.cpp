@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -167,11 +167,11 @@ private slots:
 
         QList<QSslCertificate> certChain;
         certChain.push_back(QSslCertificate{usCaliforniaCert});
-        QVERIFY(pCA->verifyHttpsCertificate(certChain, usCaliforniaSerial));
+        QVERIFY(pCA->verifyHttpsCertificate(certChain, usCaliforniaSerial, true));
 
         // The certificate should be rejected for any other name
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Cert hostname validation failed with result 0 for "de778d49fe291354c7fef5032e9b61ac")");
-        QVERIFY(!pCA->verifyHttpsCertificate(certChain, hackedCertSerial));
+        QVERIFY(!pCA->verifyHttpsCertificate(certChain, hackedCertSerial, true));
     }
 
     // Verify that a hacked cert is rejected - its signature is not valid.
@@ -186,7 +186,7 @@ private slots:
         certChain.push_back(QSslCertificate{hackedCert});
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Cert validation failed with result 0 for "de778d49fe291354c7fef5032e9b61ac")");
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Validation error 7 at depth 0 - "certificate signature failure")");
-        QVERIFY(!pCA->verifyHttpsCertificate(certChain, hackedCertSerial));
+        QVERIFY(!pCA->verifyHttpsCertificate(certChain, hackedCertSerial, true));
     }
 
     // Verify that a valid cert from another root is not accepted when
@@ -205,16 +205,16 @@ private slots:
         // The cert is not accepted by the PIA root
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Cert validation failed with result 0 for "us-california.privateinternetaccess.com")");
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Validation error 20 at depth 1 - "unable to get local issuer certificate")");
-        QVERIFY(!pPiaCA->verifyHttpsCertificate(certChain, testchainName));
+        QVERIFY(!pPiaCA->verifyHttpsCertificate(certChain, testchainName, true));
         // The cert chain is accepted by the correct root
-        QVERIFY(otherCA.verifyHttpsCertificate(certChain, testchainName));
+        QVERIFY(otherCA.verifyHttpsCertificate(certChain, testchainName, true));
 
         // Including the root itself in the cert chain doesn't affect the result
         certChain.push_back(QSslCertificate{testchainRootCert});
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Cert validation failed with result 0 for "us-california.privateinternetaccess.com")");
         QTest::ignoreMessage(QtMsgType::QtWarningMsg, R"(Validation error 19 at depth 2 - "self signed certificate in certificate chain")");
-        QVERIFY(!pPiaCA->verifyHttpsCertificate(certChain, testchainName));
-        QVERIFY(otherCA.verifyHttpsCertificate(certChain, testchainName));
+        QVERIFY(!pPiaCA->verifyHttpsCertificate(certChain, testchainName, true));
+        QVERIFY(otherCA.verifyHttpsCertificate(certChain, testchainName, true));
     }
 };
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -40,16 +40,16 @@ private slots:
     }
 
     // Handshake DNS
-    void testGenDnsServersHandshake()
+    void testGenDnsServersHdns()
     {
         DaemonSettings settings;
         DaemonState state;
         DaemonAccount account;
 
-        settings.overrideDNS(QStringLiteral("handshake"));
+        settings.overrideDNS(QStringLiteral("hdns"));
         ConnectionConfig config{settings, state, account};
-        QVERIFY(config.getDnsServers() == QStringList{resolverLocalAddress()});
-        QVERIFY(config.dnsType() == ConnectionConfig::DnsType::Handshake);
+        QVERIFY(config.getDnsServers() == QStringList{hDnsAddress()});
+        QVERIFY(config.dnsType() == ConnectionConfig::DnsType::HDns);
     }
 
     // Local DNS

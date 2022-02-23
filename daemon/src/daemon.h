@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -321,6 +321,8 @@ public:
     // Get the _state.original* fields as an OriginalNetworkScan
     OriginalNetworkScan originalNetwork() const;
 
+    void forcePublicIpRefresh();
+
 protected:
     virtual void applyFirewallRules(const FirewallParams& params) {}
 
@@ -503,6 +505,8 @@ private:
     void shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc);
     void modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc);
     void modernRegionsMetaLoaded(const QJsonDocument &modernRegionsJsonDoc);
+    void publicIpLoaded(const QJsonDocument &publicIpDoc);
+    void updatePublicIpRefresher (VPNConnection::State state);
     void onNetworksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
@@ -601,7 +605,7 @@ protected:
     LatencyTracker _modernLatencyTracker;
     PortForwarder _portForwarder;
     JsonRefresher _modernRegionRefresher, _modernRegionMetaRefresher,
-                  _shadowsocksRefresher;
+                  _shadowsocksRefresher, _publicIpRefresher;
     SocksServerThread _socksServer;
     UpdateDownloader _updateDownloader;
     SnoozeTimer _snoozeTimer;

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -306,9 +306,6 @@ WinDaemon::WinDaemon(QObject* parent)
     , MessageWnd(WindowType::Invisible)
     , _firewall(new FirewallEngine(this))
     , _unboundAppId{nullptr, Path::UnboundExecutable}
-#if INCLUDE_FEATURE_HANDSHAKE
-    , _hnsdAppId{nullptr, Path::HnsdExecutable}
-#endif
     , _lastSplitParams{}
     , _wfpCalloutMonitor{L"PiaWfpCallout"}
     , _subnetBypass{std::make_unique<WinRouteManager>()}
@@ -869,9 +866,6 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
     // (1) First we block everything coming from the resolver processes
     logFilter("allowResolver (block everything)", _filters.blockResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
     updateBooleanInvalidateFilter(blockResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 14));
-#if INCLUDE_FEATURE_HANDSHAKE
-    updateBooleanInvalidateFilter(blockResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 14));
-#endif
 
     // (2) Next we poke a hole in this block but only allow data that goes across the tunnel
     logFilter("allowResolver (tunnel traffic)", _filters.permitResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
@@ -879,17 +873,6 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
         Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
         Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53}
     ));
-#if INCLUDE_FEATURE_HANDSHAKE
-    updateBooleanInvalidateFilter(permitResolvers[1], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::HnsdExecutable, 15,
-        Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
-
-        // OR'ing of conditions is done automatically when you have 2 or more consecutive conditions of the same fieldId.
-        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53},
-
-        // 13038 is the Handshake control port
-        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 13038}
-    ));
-#endif
 
     // Always permit loopback traffic, including IPv6.
     logFilter("allowLoopback", _filters.permitLocalhost, params.allowLoopback);
@@ -911,9 +894,6 @@ void WinDaemon::applyFirewallRules(const FirewallParams& params)
             // Put hnsd in the VPN since we did not use the VPN as the default
             // route
             newVpnOnlyApps.insert(&_unboundAppId);
-#if INCLUDE_FEATURE_HANDSHAKE
-            newVpnOnlyApps.insert(&_hnsdAppId);
-#endif
         }
 
         splitTunnelPhysIp = params.netScan.ipAddress();

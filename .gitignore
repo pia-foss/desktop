@@ -18,9 +18,15 @@ releases
 *.swp
 # IntelliJ IDEA
 .idea/*
+cmake-build-debug/*
 # Visual Studio
 /.vs/
 *.sln
 *.vcxproj
 *.vcxproj.filters
 /Debug/
+.vscode/
+
+# Vagrant box for running Linux-only scripts
+tools/.vagrant
+

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -68,9 +68,9 @@ namespace
 {
     //Initially, we try to load the regions every 15 seconds, until they've been
     //loaded
-    const std::chrono::seconds regionsInitialLoadInterval{15};
+    const std::chrono::seconds regionsInitialLoadInterval{15}, publicIpLoadInterval{5};
     //After they're initially loaded, we refresh every 10 minutes
-    const std::chrono::minutes regionsRefreshInterval{10};
+    const std::chrono::minutes regionsRefreshInterval{10}, publicIpRefreshInterval{10};
     const std::chrono::hours modernRegionsMetaRefreshInterval{48};
 
     // Dedicated IPs are refreshed with the same interval as the regions list
@@ -87,6 +87,9 @@ namespace
     const QString shadowsocksRegionsResource{QStringLiteral("shadow_socks")};
     const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v6")};
     const QString modernRegionMetaResource{QStringLiteral("vpninfo/regions/v2")};
+    
+    // Resource paths for IP Address
+    const QString ipLookupResource{QStringLiteral("api/client/status")};
 
     // Old default debug logging setting, 1.0 (and earlier) until 1.2-beta.2
     const QStringList debugLogging10{QStringLiteral("*.debug=true"),
@@ -194,14 +197,14 @@ void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
         case ConnectionConfig::DnsType::Pia:
             info.dnsType(QStringLiteral("pia"));
             break;
-        case ConnectionConfig::DnsType::Handshake:
-            info.dnsType(QStringLiteral("handshake"));
-            break;
         case ConnectionConfig::DnsType::Local:
             info.dnsType(QStringLiteral("local"));
             break;
         case ConnectionConfig::DnsType::Existing:
             info.dnsType(QStringLiteral("existing"));
+            break;
+        case ConnectionConfig::DnsType::HDns:
+            info.dnsType(QStringLiteral("hdns"));
             break;
         case ConnectionConfig::DnsType::Custom:
             info.dnsType(QStringLiteral("custom"));
@@ -369,6 +372,9 @@ Daemon::Daemon(QObject* parent)
     , _shadowsocksRefresher{QStringLiteral("Shadowsocks regions"),
                             shadowsocksRegionsResource,
                             regionsInitialLoadInterval, regionsRefreshInterval}
+    , _publicIpRefresher{QStringLiteral("Public IP Address"),
+                            ipLookupResource,
+                            publicIpLoadInterval, publicIpRefreshInterval}
     , _snoozeTimer(this)
     , _pendingSerializations(0)
 {
@@ -622,6 +628,8 @@ Daemon::Daemon(QObject* parent)
             [this](){Daemon::setOverrideActive(QStringLiteral("shadowsocks list"));});
     connect(&_shadowsocksRefresher, &JsonRefresher::overrideFailed, this,
             [this](){Daemon::setOverrideFailed(QStringLiteral("shadowsocks list"));});
+    connect(&_publicIpRefresher, &JsonRefresher::contentLoaded, this,
+            &Daemon::publicIpLoaded);
 
     connect(this, &Daemon::daemonActivated, this, [this]() {
         // Reset override states since we are (re)activating
@@ -648,6 +656,7 @@ Daemon::Daemon(QObject* parent)
                                               Path::ModernShadowsocksBundle,
                                               _environment.getRegionsListPublicKey(),
                                               QJsonDocument{_data.cachedModernShadowsocksList()});
+        updatePublicIpRefresher(_connection->state());
         _updateDownloader.run(true, _environment.getUpdateApi());
 
         _memTraceTimer.start();
@@ -674,6 +683,8 @@ Daemon::Daemon(QObject* parent)
         _checkForAppMessagesTimer.stop();
         queueNotification(&Daemon::RPC_disconnectVPN);
         queueNotification(&Daemon::reapplyFirewallRules);
+        updatePublicIpRefresher(_connection->state());
+        _state.externalIp({});
     });
     connect(&_settings, &DaemonSettings::killswitchChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::allowLANChanged, this, &Daemon::queueApplyFirewallRules);
@@ -686,6 +697,7 @@ Daemon::Daemon(QObject* parent)
     // 'method' causes a firewall rule application because it can toggle split tunnel
     connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
+    connect(_connection, &VPNConnection::stateChanged, this, &Daemon::updatePublicIpRefresher);
     connect(&_settings, &DaemonSettings::updateChannelChanged, this,
             [this]()
             {
@@ -757,15 +769,19 @@ Daemon::Daemon(QObject* parent)
     auto daemonCrashDir = Path::DaemonDataDir / QStringLiteral("crashes");
     daemonCrashDir.cleanDirFiles(5);
 
-    _pServiceQuality.emplace(_apiClient, _environment, _account, _data,
-                             _settings.sendServiceQualityEvents() &&
-                             _data.hasFlag(QStringLiteral("service_quality_events")));
+    auto ver = SemVersion::tryParse(_settings.serviceQualityAcceptanceVersion());
+    bool enableQualityEventsFlag = _data.hasFlag(QStringLiteral("service_quality_events"))
+            && !_settings.serviceQualityAcceptanceVersion().isEmpty();
+
+    _pServiceQuality.emplace(_apiClient, _environment, _account, _data, enableQualityEventsFlag, ver);
     auto updateEventsEnabled = [this]()
     {
-        _pServiceQuality->enable(_settings.sendServiceQualityEvents() &&
-                                 _data.hasFlag(QStringLiteral("service_quality_events")));
+        auto ver = SemVersion::tryParse(_settings.serviceQualityAcceptanceVersion());
+        bool enableQualityEvents = _data.hasFlag(QStringLiteral("service_quality_events"))
+                && !_settings.serviceQualityAcceptanceVersion().isEmpty();
+        _pServiceQuality->enable(enableQualityEvents, ver);
     };
-    connect(&_settings, &DaemonSettings::sendServiceQualityEventsChanged, this,
+    connect(&_settings, &DaemonSettings::serviceQualityAcceptanceVersionChanged, this,
             updateEventsEnabled);
     connect(&_data, &DaemonData::flagsChanged, this, updateEventsEnabled);
 }
@@ -2137,7 +2153,6 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
     // connection is initiated by an RPC.
     if(state == VPNConnection::State::Disconnected)
     {
-        _state.externalIp({});
         _state.tunnelDeviceName({});
         _state.tunnelDeviceLocalAddress({});
         _state.tunnelDeviceRemoteAddress({});
@@ -2441,6 +2456,27 @@ void Daemon::modernRegionsMetaLoaded(const QJsonDocument &modernRegionsMetaJsonD
 
     _data.modernRegionMeta(modernRegionsMetaObj);
     _modernRegionMetaRefresher.loadSucceeded();
+}
+
+void Daemon::publicIpLoaded(const QJsonDocument &publicIpDoc) {
+    qDebug () << "Loaded public IP";
+    if(publicIpDoc[QStringLiteral("connected")].isBool()  // Check to see if there is a "connected" key
+      && !publicIpDoc[QStringLiteral("connected")].toBool(true)) { // and that it is indeed "false"
+        _state.externalIp(publicIpDoc["ip"].toString());
+        _publicIpRefresher.loadSucceeded();
+    }
+}
+
+void Daemon::updatePublicIpRefresher (VPNConnection::State state) {
+    if(state == VPNConnection::State::Disconnected || state == VPNConnection::State::Connecting && isActive()) {
+         _publicIpRefresher.start(environment().getIpAddrApi());
+    } else {
+         _publicIpRefresher.stop();
+    }
+}
+
+void Daemon::forcePublicIpRefresh () {
+     _publicIpRefresher.refresh();
 }
 
 void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
@@ -2994,8 +3030,7 @@ void Daemon::reapplyFirewallRules()
     params.allowPIA = (params.blockAll || params.blockIPv6 || params.blockDNS);
     params.allowLoopback = params.allowPIA || params.enableSplitTunnel;
     params.allowResolver = params.blockDNS && params._connectionSettings &&
-                           (params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Handshake ||
-                            params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Local);
+                            params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Local;
 
     qInfo() << "Reapplying firewall rules;"
             << "state:" << qEnumToString(_connection->state())
@@ -3221,20 +3256,6 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     if(previous < SemVersion{1, 6, 0})
         restrictAccountJson();
 
-    // Handshake was removed in 2.2.0.
-#if !INCLUDE_FEATURE_HANDSHAKE
-    DaemonSettings::DNSSetting handshakeValue;
-    handshakeValue = QStringLiteral("handshake");
-    if(previous < SemVersion{2, 2, 0} && _settings.overrideDNS() == handshakeValue)
-    {
-        // Migrate to the "Local Resolver" setting.  Since Handshake's testnet
-        // never actually had any useful domains in it, this is essentially what
-        // the Handshake setting used to do - it would virtually always fall
-        // back to the ICANN DNS root.
-        qInfo() << "Migrating DNS setting to local resolver from Handshake";
-        _settings.overrideDNS(QStringLiteral("local"));
-    }
-#endif
 
     // Some alpha builds prior to 2.2.0 were released with other values for
     // this setting.
@@ -3286,6 +3307,15 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
         //  empty, revert proxy type to "shadowsocks" just to avoid
         //  the situation where the connection fails silently. PP-1062
         _settings.proxyType(QStringLiteral("shadowsocks"));
+    }
+    if(previous < SemVersion{3, 3, 0}) {
+        const auto &oldServiceQualityFlag = _settings.get("sendServiceQualityEvents").toBool();
+
+        if(oldServiceQualityFlag) {
+            _settings.serviceQualityAcceptanceVersion ("3.2.0+06857");
+        } else {
+            _settings.serviceQualityAcceptanceVersion ("");
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -162,9 +162,10 @@ namespace
 
 ServiceQuality::ServiceQuality(ApiClient &apiClient, Environment &environment,
                                DaemonAccount &account, DaemonData &data,
-                               bool enabled)
+                               bool enabled,
+                               nullable_t<SemVersion> version)
     : _apiClient{apiClient}, _environment{environment}, _account{account},
-      _data{data}, _enabled{enabled}, _sendingBatchSize{0}
+      _data{data}, _enabled{enabled}, _sendingBatchSize{0}, _consentVersion{version}
 {
     // Names used for tracing in startExpireTimer()
     _rotateIdTimer.setObjectName(QStringLiteral("aggregation ID rotate timer"));
@@ -471,6 +472,11 @@ bool ServiceQuality::storeEvent(EventType type, VpnProtocol protocol,
             break;
         case EventType::ConnectionEstablished:
             newEvent.event_name(QStringLiteral("VPN_CONNECTION_ESTABLISHED"));
+
+            // If the user provides consent for service quality metrics after v3.3.0
+            // include the time to connect metric, otherwise do not include it.
+            if (_consentVersion && *_consentVersion >= SemVersion(3, 3))
+                newEvent.event_properties().time_to_connect((float)_connTimer.elapsed() / 1000);
             break;
         case EventType::ConnectionCanceled:
             newEvent.event_name(QStringLiteral("VPN_CONNECTION_CANCELED"));
@@ -521,8 +527,9 @@ bool ServiceQuality::storeEvent(EventType type, VpnProtocol protocol,
     return true;
 }
 
-void ServiceQuality::enable(bool enabled)
+void ServiceQuality::enable(bool enabled, nullable_t<SemVersion> version)
 {
+    _consentVersion = version;
     if(enabled == _enabled)
     {
         qInfo() << "Service quality events already"
@@ -570,6 +577,7 @@ void ServiceQuality::vpnEnabled(VpnProtocol protocol, ConnectionSource source)
     // a few cases when events aren't being stored.)
     if(storeEvent(EventType::ConnectionAttempt, protocol, source))
         _pLastAttempt.emplace(protocol, source);
+    _connTimer.restart();
 }
 
 void ServiceQuality::vpnDisabled(ConnectionSource source)

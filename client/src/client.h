@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -170,6 +170,7 @@ public:
 
 private:
     void writeSettings();
+    void migrateClientSettings();
     // Add a language that uses a script supported by the embedded Roboto font
     // (so it's always available)
     void addKnownLanguage(QVector<ClientLanguage> &languages,

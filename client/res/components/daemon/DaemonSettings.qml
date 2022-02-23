@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -53,7 +53,7 @@ QtObject {
   readonly property string updateChannel: NativeDaemon.settings.updateChannel
   readonly property string betaUpdateChannel: NativeDaemon.settings.betaUpdateChannel
   readonly property bool offerBetaUpdates: NativeDaemon.settings.offerBetaUpdates
-  readonly property bool sendServiceQualityEvents: NativeDaemon.settings.sendServiceQualityEvents
+  readonly property string serviceQualityAcceptanceVersion: NativeDaemon.settings.serviceQualityAcceptanceVersion
   readonly property bool splitTunnelEnabled: NativeDaemon.settings.splitTunnelEnabled
   readonly property bool splitTunnelDNS: NativeDaemon.settings.splitTunnelDNS
   readonly property var splitTunnelRules: NativeDaemon.settings.splitTunnelRules

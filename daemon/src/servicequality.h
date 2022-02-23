@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -24,6 +24,7 @@
 #include "settings/daemondata.h"
 #include "apiclient.h"
 #include "environment.h"
+#include "semversion.h"
 
 // ServiceQuality keeps track of service quality information that's sent back to
 // help us improve our service.  This only occurs when the user has opted in to
@@ -69,7 +70,7 @@ public:
     // apiClient, environment, and account are all needed to make the API
     // request to send a batch of events.
     ServiceQuality(ApiClient &apiClient, Environment &environment,
-                   DaemonAccount &account, DaemonData &data, bool enabled);
+                   DaemonAccount &account, DaemonData &data, bool enabled, nullable_t<SemVersion> ver);
 
 private:
     static sysTimeMs nowMs()
@@ -161,7 +162,7 @@ private:
 
 public:
     // Enable or disable service quality events
-    void enable(bool enabled);
+    void enable(bool enabled, nullable_t<SemVersion> version);
 
     // Send any queued events now (used by a dev tool to send events early)
     void sendEventsNow();
@@ -242,6 +243,9 @@ private:
     // Timer used to send an early batch if we don't generate any events for a
     // while
     QTimer _earlySendTimer;
+    // Timer used to get time for connection establishment
+    // while
+    QElapsedTimer _connTimer;
     // The interval we're currently using for the early batch time.  Changed
     // whenever we send an early batch to ensure that it can't be used to
     // correlate requests.
@@ -262,6 +266,7 @@ private:
     // - to keep track of whether a request is in flight (avoid creating two
     //   simultaneous requests)
     std::size_t _sendingBatchSize;
+    nullable_t<SemVersion> _consentVersion;
 };
 
 #endif

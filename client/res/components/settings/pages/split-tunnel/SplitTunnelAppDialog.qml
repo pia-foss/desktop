@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -48,6 +48,8 @@ OverlayDialog {
       addApplicationDialog.open();
       SplitTunnelManager.scanApplications();
     } else {
+      if (Qt.platform.os === 'osx')
+        browseAppDialog.folder = 'file:///Applications'
       browseAppDialog.open();
     }
   }

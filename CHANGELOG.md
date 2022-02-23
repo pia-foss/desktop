@@ -1,5 +1,12 @@
 # Changelog
 
+### v3.3.0
+
+* Support Handshake domain name resolution (Using HDNS nameservers)
+* Public IP is displayed even when not connected
+* "Time to Connect" stats can be sent to PIA on an opt-in basis to help improve our service
+* Fixed default folder when browsing for applications in Split Tunnel application selection
+
 ### v3.2.0
 
 * Added "Auto" MTU setting to measure actual MTU after connecting

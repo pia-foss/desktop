@@ -1,10 +1,9 @@
 require_relative '../executable.rb'
 require_relative '../model/build.rb'
-require_relative '../util/onesky.rb'
 
 # Define translation targets:
 # - the client's translation resource file
-# - the exported en_US translation file for OneSky
+# - the exported en_US translation file for Translation Platforms
 def defineTranslationTargets(stage, artifacts)
     tsBuild = Build.new('translations')
 
@@ -39,11 +38,10 @@ def defineTranslationTargets(stage, artifacts)
     # Only include pseudotranslations in debug builds
     translations.exclude('client/ts/ro.ts', 'client/ts/ps.ts') unless Build::debug?
 
-    # Import the .ts files - undo the OneSky export
     translations.each do |ts|
         file tsBuild.artifact(File.basename(ts)) => [ts, tsBuild.componentDir] do |t|
             puts "import: #{ts}"
-            importedContent = PiaOneSky.tsImport(File.read(ts, encoding: "UTF-8"))
+            importedContent = File.read(ts, encoding: "UTF-8")
             File.write(t.name, importedContent)
         end
     end
@@ -116,21 +114,21 @@ def defineTranslationTargets(stage, artifacts)
     stage.install(rccFile, :res)
 
     exportBuild = Build.new('translations_export')
-    exportFile = exportBuild.artifact('en_US.onesky.ts')
+    sourceFile = exportBuild.artifact('pia_desktop.ts')
     updatedEnUs = tsBuild.artifact('en_US.ts')
-    file exportFile => [updatedEnUs, exportBuild.componentDir] do |t|
-        puts "export: #{updatedEnUs}"
-        exportedContent = PiaOneSky.tsExport(File.read(updatedEnUs, encoding: "UTF-8"))
-        File.write(t.name, exportedContent)
+
+    file sourceFile => [updatedEnUs, exportBuild.componentDir] do |t|
+        puts "export: #{t.name}"
+        FileUtils.copy_file(updatedEnUs, t.name)
     end
 
-    # Preserve this artifact for use with OneSky
-    artifacts.install(exportFile, '')
+    artifacts.install(sourceFile, '')
 
     # This is an export artifact - it doesn't go in the staging directory and
     # isn't an installer, it's just exported from CI so we can ship it off for
     # translations
-    task :export => exportFile do |t|
+    desc "Build translation export artifact (for submission to translators)"
+    task :export => [sourceFile] do |t|
         puts "exported translation artifacts"
     end
 end

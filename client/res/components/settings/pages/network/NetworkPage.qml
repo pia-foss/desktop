@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -30,45 +30,11 @@ import "../../../daemon"
 import "../../../theme"
 
 Page {
-  Setting {
-    id: customDNSSetting
-    readonly property DaemonSetting daemonSetting: DaemonSetting {
-      name: "overrideDNS"
-      onCurrentValueChanged: customDNSSetting.currentValue = currentValue
-    }
-    property var knownCustomServers: null
-    sourceValue: daemonSetting.sourceValue
+  //: "Handshake" is a brand name, not translated.
+  readonly property string hdnsName: uiTr("Handshake DNS")
 
-    function isStringValue(value, str) {
-      return typeof value === 'string' && value === str
-    }
-
-    function isThirdPartyDNS(value) {
-      return !isStringValue(value, "pia") && !isStringValue(value, "handshake")
-          && !isStringValue(value, "local")
-    }
-
-    onSourceValueChanged: {
-      if (Array.isArray(sourceValue) && sourceValue.length > 0) {
-        knownCustomServers = sourceValue
-      }
-    }
-    onCurrentValueChanged: {
-      if (currentValue === "custom") {
-        customDNSDialog.setServers(
-              Array.isArray(
-                daemonSetting.currentValue) ? daemonSetting.currentValue : [])
-      } else if (daemonSetting.currentValue !== currentValue) {
-        // When changing from a non-third-party value (pia/handshake) to a
-        // third-party value ("existing" since custom was already handled),
-        // show the "use existing DNS" prompt.
-        if (!isThirdPartyDNS(sourceValue) && isThirdPartyDNS(currentValue)) {
-          customDNSDialog.setExisting()
-        } else {
-          daemonSetting.currentValue = currentValue
-        }
-      }
-    }
+  function isStringValue(value, str) {
+    return typeof value === 'string' && value === str
   }
 
   GridLayout {
@@ -77,50 +43,86 @@ Page {
     columnSpacing: Theme.settings.controlGridDefaultColSpacing
     rowSpacing: Theme.settings.controlGridDefaultRowSpacing
 
-    PrivacyInput {
-      id: dnsSelector
-      Layout.columnSpan: 2
-      label: uiTr("DNS")
-      info: ""
-      itemHeight: 35
-      // The Russian translations are really long but they _barely_ fit if we
-      // squish the margins a little.  That's a little bit off from the radii
-      // used in the control, so keep the proper margins for other languages.
-      textMargin: Client.settings.language === "ru" ? 10 : 20
+    DropdownInput {
+            id: dnsDropdown
+            //: Label for the setting that controls which DNS servers are used to look up
+            //: domain names and translate them to IP addresses when browsing the internet.
+            //: This setting is also present in OS network settings, so this string should
+            //: preferably match whatever localized term the OS uses.
+            label: uiTr("DNS")
+            setting: Setting {
+              id: customDNSSetting
+              readonly property DaemonSetting daemonSetting: DaemonSetting { name: "overrideDNS"; onCurrentValueChanged: customDNSSetting.currentValue = currentValue }
+              property var knownCustomServers: null
+              sourceValue: daemonSetting.sourceValue
 
-      itemList: {
-        var items = [uiTr("PIA DNS"), uiTr("Built-in Resolver"), uiTr(
-                       "Use Existing DNS"), uiTr("Custom")]
-        return items
-      }
-      property string previous: "pia"
-      activeItem: {
-        if (Array.isArray(Daemon.settings.overrideDNS)) {
-          return 3
-        }
 
-        switch (Daemon.settings.overrideDNS) {
-        case 'pia':
-          return 0
-        case 'local':
-          return 1
-        case '':
-          return 2
-        }
-      }
 
-      onUpdated: function (index) {
-        var key = ['pia', 'local', '', 'custom'][index]
-        if (key === 'custom') {
-          if (customDNSSetting.knownCustomServers) {
-            customDNSSetting.currentValue = customDNSSetting.knownCustomServers
-          } else {
-            customDNSSetting.currentValue = "custom"
-          }
-        } else {
-          customDNSSetting.currentValue = key
-        }
-      }
+              function isThirdPartyDNS(value) {
+                return !isStringValue(value, "pia") && !isStringValue(value, "local")
+              }
+
+              onSourceValueChanged: {
+                if (Array.isArray(sourceValue) && sourceValue.length > 0) {
+                  knownCustomServers = sourceValue;
+                }
+              }
+              onCurrentValueChanged: {
+                if (currentValue === "custom") {
+                  customDNSDialog.setServers(Array.isArray(daemonSetting.currentValue) ? daemonSetting.currentValue : []);
+                } else if (daemonSetting.currentValue !== currentValue) {
+                  // When changing from a non-third-party value (pia/handshake) to a
+                  // third-party value ("existing" since custom was already handled),
+                  // show the "use existing DNS" prompt.
+                  if (!isThirdPartyDNS(sourceValue) && isThirdPartyDNS(currentValue)) {
+                    customDNSDialog.setExisting();
+                  } else {
+                    daemonSetting.currentValue = currentValue;
+                  }
+                }
+              }
+            }
+            warning: {
+              if(setting.isThirdPartyDNS(setting.sourceValue) && !isStringValue(setting.sourceValue, "hdns"))
+                return uiTr("Warning: Using a third party DNS could compromise your privacy.")
+              return ""
+            }
+            info: {
+              if(setting.sourceValue === "hdns") {
+                //: "Handshake" is a brand name and should not be translated.
+                return uiTr("Handshake is a decentralized naming protocol.  For more information, visit handshake.org.")
+              }
+              return ""
+            }
+            model: {
+              var items = [
+                    { name: uiTr("PIA DNS"), value: "pia" },
+                    //: Indicates that we will run a built-in DNS resolver locally
+                    //: on the user's computer.
+                    { name: uiTr("Built-in Resolver"), value: "local" },
+                    { name: hdnsName, value: "hdns" },
+                    { name: uiTr("Use Existing DNS"), value: "" }
+                  ];
+
+
+              if (Array.isArray(setting.currentValue) && setting.currentValue.length > 0) {
+                items.push({ name: uiTr("Custom") + " [" +
+                                   setting.currentValue.join(" / ")
+                                   + "]", value: setting.currentValue });
+              } else if (setting.knownCustomServers) {
+                items.push({ name: uiTr("Custom") + " [" +
+                                   setting.knownCustomServers.join(" / ")
+                                   + "]", value: setting.knownCustomServers });
+              } else {
+                items.push({ name: uiTr("Custom"), value: "custom" });
+              }
+
+              return items;
+            }
+    }
+
+    Item {
+      Layout.fillWidth: true
     }
 
     EditHeading {
@@ -279,8 +281,13 @@ Page {
       open()
     }
     function setExisting() {
-      title = customDNSSetting.currentValue ? uiTr("Use Custom DNS") : uiTr(
-                                                "Use Existing DNS")
+      if(isStringValue(customDNSSetting.currentValue, "hdns")) {
+        title = uiTr("Handshake DNS")
+      } else {
+        title = customDNSSetting.currentValue ? uiTr("Use Custom DNS") : uiTr(
+              "Use Existing DNS")
+      }
+
       customPrimaryDNS.visible = false
       customSecondaryDNS.visible = false
       open()
@@ -301,11 +308,11 @@ Page {
         customDNSSetting.daemonSetting.currentValue = customDNSSetting.currentValue
       }
 
-      editHeading.focusButton();
+      dnsDropdown.forceActiveFocus(Qt.MouseFocusReason)
     }
     onRejected: {
       customDNSSetting.currentValue = customDNSSetting.sourceValue
-      editHeading.focusButton();
+      dnsDropdown.forceActiveFocus(Qt.MouseFocusReason)
     }
   }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -21,6 +21,7 @@ import QtQuick.Layouts 1.12
 import "../../../core"
 import "../../../common"
 import "../../../theme"
+import "../../../client"
 import PIA.NativeHelpers 1.0
 import PIA.NativeAcc 1.0 as NativeAcc
 
@@ -35,6 +36,10 @@ TableRowBase {
     event: 0,
     expand: 1
   })
+
+  // On some languages, the "Version" and "Time to Connect" strings are too close together.
+  // Add some extra padding between the two columns for those languages with this flag.
+  readonly property bool tightenMargins: Client.settings.language === "ru" || Client.settings.language === "it"
 
   readonly property int keyColumnCount: 2
 
@@ -120,6 +125,11 @@ TableRowBase {
   readonly property var accVersionCell: NativeAcc.TableCellText {
     name: versionValue.text
     item: versionValue
+  }
+
+  readonly property var accConnTimeCell: NativeAcc.TableCellText {
+    name: connTimeValue.text
+    item: connTimeValue
   }
 
   readonly property var accUserAgentCell: NativeAcc.TableCellText {
@@ -251,7 +261,7 @@ TableRowBase {
     readonly property int labelWidth: {
       let maxLabelWidth = 0
       let labels = [platformLabel, prereleaseLabel, protocolLabel, sourceLabel,
-        versionLabel, userAgentLabel, aggregationIdLabel, eventIdLabel,
+        versionLabel, userAgentLabel, aggregationIdLabel, eventIdLabel, connTimeLabel,
         productIdLabel]
       for(let i=0; i<labels.length; ++i) {
         if(labels[i])
@@ -304,12 +314,30 @@ TableRowBase {
         color: Theme.settings.inputListItemSecondaryTextColor
         font.pixelSize: 12
       }
+
+      Text {
+        id: versionLabel
+        Layout.preferredWidth: details.labelWidth
+        text: uiTr("Version:")
+        color: Theme.settings.inputListItemSecondaryTextColor
+        font.pixelSize: 12
+      }
+
+      Text {
+        id: versionValue
+        Layout.fillWidth: true
+        text: event.event_properties.version
+        color: Theme.settings.inputListItemSecondaryTextColor
+        font.pixelSize: 12
+      }
+
     }
 
     GridLayout {
       id: rightGrid
       anchors.top: details.top
       anchors.right: details.right
+      anchors.rightMargin: tightenMargins ? -20 : 0
       width: details.width/2 - details.margin/2
 
       columns: 2
@@ -345,6 +373,33 @@ TableRowBase {
         color: Theme.settings.inputListItemSecondaryTextColor
         font.pixelSize: 12
       }
+
+      Text {
+        id: connTimeLabel
+        Layout.preferredWidth: details.labelWidth
+        //: Label for "Time to connect" column - the time for the connection
+        //: to be established.
+        text: uiTr("Time to connect:")
+        color: Theme.settings.inputListItemSecondaryTextColor
+        font.pixelSize: 12
+        visible: typeof event.event_properties.time_to_connect !== 'undefined' &&
+                    event.event_properties.time_to_connect > 0
+      }
+
+
+      Text {
+        id: connTimeValue
+        Layout.fillWidth: true
+        //: The "%1" is replaced by the number of seconds it takes for the
+        //: connection to be established.
+        //: Example: "3.2 seconds".
+        text: uiTr("%1 seconds").arg(event.event_properties.time_to_connect && event.event_properties.time_to_connect.toFixed(2))
+        color: Theme.settings.inputListItemSecondaryTextColor
+        font.pixelSize: 12
+        visible: typeof event.event_properties.time_to_connect !== 'undefined' &&
+                    event.event_properties.time_to_connect > 0
+      }
+
     }
 
     GridLayout {
@@ -355,22 +410,6 @@ TableRowBase {
       anchors.right: details.right
 
       columns: 2
-
-      Text {
-        id: versionLabel
-        Layout.preferredWidth: details.labelWidth
-        text: uiTr("Version:")
-        color: Theme.settings.inputListItemSecondaryTextColor
-        font.pixelSize: 12
-      }
-
-      Text {
-        id: versionValue
-        Layout.fillWidth: true
-        text: event.event_properties.version
-        color: Theme.settings.inputListItemSecondaryTextColor
-        font.pixelSize: 12
-      }
 
       Text {
         id: userAgentLabel

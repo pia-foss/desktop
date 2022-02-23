@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -186,6 +186,14 @@ TableBase {
     item: qualityEventsList
   }
 
+  property NativeAcc.TableColumn connTimeColumn: NativeAcc.TableColumn {
+    //: Screen reader annotation for the "Time to connect" column - the time for the connection
+    //: to be established.
+    //: The value for this is in the form of "3.2 seconds" or something similar
+    name: uiTr("Time to connect")
+    item: qualityEventsList
+  }
+
   property NativeAcc.TableColumn userAgentColumn: NativeAcc.TableColumn {
     //: Screen reader annotation for the "user agent" column of the Connection
     //: Events list, which indicates the User Agent string for that client
@@ -235,6 +243,7 @@ TableBase {
     { property: "accProtocolCell", column: protocolColumn },
     { property: "accSourceCell", column: sourceColumn },
     { property: "accVersionCell", column: versionColumn },
+    { property: "accConnTimeCell", column: connTimeColumn },
     { property: "accUserAgentCell", column: userAgentColumn },
     { property: "accAggregationIdCell", column: aggregationIdColumn },
     { property: "accEventIdCell", column: eventIdColumn },

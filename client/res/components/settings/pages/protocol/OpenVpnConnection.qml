@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -127,6 +127,7 @@ Item {
       model: portSelection(Daemon.state.openvpnTcpPortChoices)
     }
     TextboxInput {
+      visible: !Daemon.data.flags.includes("remove_local_port_setting")
       textBoxVerticalPadding: 4
       label: uiTranslate("ConnectionPage", "Local Port")
       setting: Setting {

@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2021 Private Internet Access, Inc.
+# Copyright (c) 2022 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -36,7 +36,6 @@ cd ${scriptsDir}
 ./winstaller_localize.js pl      LANG_POLISH              SUBLANG_POLISH_POLAND        ANSI_CHARSET
 ./winstaller_localize.js pt_BR   LANG_PORTUGUESE          SUBLANG_PORTUGUESE_BRAZILIAN ANSI_CHARSET
 ./winstaller_localize.js ru      LANG_RUSSIAN             SUBLANG_RUSSIAN_RUSSIA       RUSSIAN_CHARSET
-./winstaller_localize.js sv      LANG_SWEDISH             SUBLANG_SWEDISH              ANSI_CHARSET
 ./winstaller_localize.js th      LANG_THAI                SUBLANG_THAI_THAILAND        THAI_CHARSET
 ./winstaller_localize.js tr      LANG_TURKISH             SUBLANG_TURKISH_TURKEY       ANSI_CHARSET
 ./winstaller_localize.js ja      LANG_JAPANESE            SUBLANG_JAPANESE_JAPAN       SHIFTJIS_CHARSET

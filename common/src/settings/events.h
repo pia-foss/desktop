@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -41,6 +41,7 @@ public:
         prerelease(other.prerelease());
         vpn_protocol(other.vpn_protocol());
         connection_source(other.connection_source());
+        time_to_connect(other.time_to_connect());
         return *this;
     }
     bool operator==(const EventProperties &other) const
@@ -50,6 +51,7 @@ public:
             version() == other.version() &&
             prerelease() == other.prerelease() &&
             vpn_protocol() == other.vpn_protocol() &&
+            time_to_connect() == other.time_to_connect() &&
             connection_source() == other.connection_source();
     }
     bool operator!=(const EventProperties &other) const {return !(*this == other);}
@@ -69,6 +71,7 @@ public:
     // - "Automatic" - The connection was initiated automatically (e.g. by
     //   ending Snooze or an automation rule.)
     JsonField(QString, connection_source, {}, {"Manual", "Automatic"})
+    JsonField(Optional<float>, time_to_connect, nullptr)
 };
 
 // If the user has opted in to providing service quality information back to us

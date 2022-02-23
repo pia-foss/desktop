@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -596,8 +596,8 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
     const auto &dnsSetting = settings.overrideDNS();
     if(dnsSetting == QStringLiteral("pia"))
         _dnsType = DnsType::Pia;
-    else if(dnsSetting == QStringLiteral("handshake"))
-        _dnsType = DnsType::Handshake;
+    else if(dnsSetting == QStringLiteral("hdns"))
+        _dnsType = DnsType::HDns;
     else if(dnsSetting == QStringLiteral("local"))
         _dnsType = DnsType::Local;
     // Otherwise, check if it's a QStringList of server addresses
@@ -610,7 +610,10 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         _setDefaultDns = false;
     }
 
-    _localPort = static_cast<quint16>(settings.localPort());
+    if (!g_daemon || !g_data.hasFlag(QStringLiteral("remove_local_port_setting")))
+        _localPort = static_cast<quint16>(settings.localPort());
+    else
+        _localPort = 0;
     _mtu = settings.mtu();
 
     _requestMace = settings.enableMACE();
@@ -823,7 +826,8 @@ QStringList ConnectionConfig::getDnsServers() const
         default:
         case DnsType::Pia:
             return {requestMace() ? piaModernDnsVpnMace() : piaModernDnsVpn()};
-        case DnsType::Handshake:
+        case DnsType::HDns:
+            return hDnsAddress();
         case DnsType::Local:
             return {resolverLocalAddress()};
         case DnsType::Existing:
@@ -924,6 +928,17 @@ void VPNConnection::scheduleDnsCacheFlush()
 #endif
     });
 }
+
+ExternalIpTask::ExternalIpTask() {
+    connect(&g_state, &DaemonState::externalIpChanged, this, &ExternalIpTask::checkExternalIp);
+    checkExternalIp();
+}
+
+void ExternalIpTask::checkExternalIp() {
+    if(!g_state.externalIp().isEmpty())
+        resolve();
+}
+
 
 bool VPNConnection::needsReconnect()
 {
@@ -1121,6 +1136,7 @@ void VPNConnection::doConnect()
         Q_ASSERT(_connectingConfig.vpnLocation());
 
         _connectionStep = ConnectionStep::FetchingIP;
+
         // Do we need to fetch the non-VPN IP address?  Do this for the first
         // connection attempt (which resets if the network connection changes).
         // However, we can't do it at all if we're reconnecting, because the
@@ -1137,20 +1153,19 @@ void VPNConnection::doConnect()
             // changes it might otherwise take ~2 minutes for stale connections
             // to die.
             ApiNetwork::instance()->getAccessManager().clearConnectionCache();
-            // We're not retrying this request if it fails - we don't want to hold
-            // up the connection attempt; this information isn't critical.
-            g_daemon->apiClient().getIp(*g_daemon->environment().getIpAddrApi(), QStringLiteral("api/client/status"))
-                    ->notify(this, [this](const Error& error, const QJsonDocument& json) {
-                        if (!error)
-                        {
-                            QString ip = json[QStringLiteral("ip")].toString();
-                            if (!ip.isEmpty())
-                            {
-                                g_state.externalIp(ip);
-                            }
-                        }
-                        doConnect();
-                    }, Qt::QueuedConnection); // Deliver results asynchronously so we never recurse
+
+            // Usually the external IP refresher has already found an IP by this
+            // point.  If it hasn't, give it a chance to find it before we
+            // connect, this often applies when "connect on launch" is enabled
+            // in the client.
+            _pExternalIpTask.abandon();
+            g_daemon->forcePublicIpRefresh();
+            _pExternalIpTask = Async<ExternalIpTask>::create()
+                .timeout(std::chrono::seconds(5))
+                ->next(this, [this](const Error &)
+                {
+                    doConnect();
+                }, Qt::QueuedConnection); // Deliver results asynchronously so we never recurse
             return;
         }
     }
@@ -1382,27 +1397,7 @@ void VPNConnection::vpnMethodStateChanged()
             _connectingConfig = {};
             _connectingServer = {};
 
-            // If DNS is set to Handshake, start it now, since we've connected
-            if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Handshake)
-            {
-                auto hnsdArgs = hnsdFixedArgs;
-                // Tell hnsd to use the VPN interface for outgoing DNS queries.
-                //
-                // This matters when defaultRoute is off - split tunnel has
-                // issues with UDP that are being addressed separately, so for
-                // now hnsd is patched to handle this.  (We still need to treat
-                // hnsd as a VPN-only app to handle its TCP connections to
-                // Handshake nodes.)
-                //
-                // Also provide 127.0.0.1 as an outgoing interface since the
-                // authoritative root server (part of hnsd itself) is on
-                // localhost - this relies on patches applied to libunbound to
-                // use loopback interfaces for loopback queries only.
-                hnsdArgs.push_back(QStringLiteral("--outgoing-dns-if"));
-                hnsdArgs.push_back(QStringLiteral("127.0.0.1,") + g_state.tunnelDeviceLocalAddress());
-                _resolverRunner.enable(ResolverRunner::Resolver::Handshake, hnsdArgs);
-            }
-            else if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Local)
+            if(_connectedConfig.dnsType() == ConnectionConfig::DnsType::Local)
             {
                 // Write the config file
                 {
@@ -1797,5 +1792,10 @@ const QString piaModernDnsVpnMace()
 const QString piaModernDnsVpn()
 {
     static QString value{QStringLiteral("10.0.0.243")};
+    return value;
+}
+const QStringList hDnsAddress()
+{
+    static QStringList value{QStringLiteral("103.196.38.38"), QStringLiteral("103.196.38.39")};
     return value;
 }

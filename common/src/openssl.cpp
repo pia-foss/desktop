@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -59,10 +59,13 @@ struct stack_st;
 struct stack_st_X509;
 typedef int (*pem_password_cb)(char* buf, int size, int rwflag, void* u);
 typedef int (*OPENSSL_sk_compfunc)(const void *, const void *);
+typedef int (*X509_STORE_CTX_verify_cb)(int, X509_STORE_CTX *);
 
 enum
 {
     EVP_PKEY_X25519 = 1034, // NID_X25519
+    X509_V_ERR_CERT_HAS_EXPIRED = 10,
+    X509_V_OK = 0,
 };
 
 static void (*CRYPTO_free)(void*) = nullptr;
@@ -100,6 +103,9 @@ static int (*X509_STORE_CTX_init)(X509_STORE_CTX*, X509_STORE*, X509*, stack_st_
 static int (*X509_STORE_CTX_get_error)(X509_STORE_CTX*) = nullptr;
 static int (*X509_STORE_CTX_get_error_depth)(X509_STORE_CTX*) = nullptr;
 
+static void (*X509_STORE_CTX_set_verify_cb)(X509_STORE_CTX *ctx,
+                                   X509_STORE_CTX_verify_cb verify_cb) = nullptr;
+
 static int (*X509_verify_cert)(X509_STORE_CTX*) = nullptr;
 static const char * (*X509_verify_cert_error_string)(long) = nullptr;
 
@@ -119,6 +125,15 @@ static void (*OPENSSL_sk_free)(stack_st*) = nullptr;
 
 static unsigned long (*OpenSSL_version_num)() = nullptr;
 static const char *(*OpenSSL_version)(int) = nullptr;
+
+static int permitExpiredCallback(int preverify, X509_STORE_CTX* ctx)
+{
+    int error = X509_STORE_CTX_get_error(ctx);
+    if (error == X509_V_OK || error == X509_V_ERR_CERT_HAS_EXPIRED)
+        return 1;
+
+    return preverify;
+}
 
 static bool checkOpenSSL()
 {
@@ -183,6 +198,7 @@ static bool checkOpenSSL()
     RESOLVE_OPENSSL_FUNCTION(X509_STORE_CTX_init);
     RESOLVE_OPENSSL_FUNCTION(X509_STORE_CTX_get_error);
     RESOLVE_OPENSSL_FUNCTION(X509_STORE_CTX_get_error_depth);
+    RESOLVE_OPENSSL_FUNCTION(X509_STORE_CTX_set_verify_cb);
 
     RESOLVE_OPENSSL_FUNCTION(X509_verify_cert);
     RESOLVE_OPENSSL_FUNCTION(X509_verify_cert_error_string);
@@ -363,7 +379,8 @@ PrivateCA::~PrivateCA()
 }
 
 bool PrivateCA::verifyHttpsCertificate(const QList<QSslCertificate> &certificateChain,
-                                       const QString &peerName)
+                                       const QString &peerName,
+                                       bool allowExpired)
 {
     Q_ASSERT(_pData);   // Class invariant
     // If we were not able to load the cert store, fail.  This includes failure
@@ -428,6 +445,9 @@ bool PrivateCA::verifyHttpsCertificate(const QList<QSslCertificate> &certificate
         qWarning() << "Can't initialize validation context for" << peerName;
         return false;
     }
+
+    if (allowExpired)
+        X509_STORE_CTX_set_verify_cb(pContext.get(), permitExpiredCallback);
 
     int verifyResult = X509_verify_cert(pContext.get());
     // OpenSSL returns 1 for success, 0 for failure, or "in exceptional

@@ -6,6 +6,7 @@ require_relative './rake/product/version.rb'
 require_relative './rake/product/translations.rb'
 require_relative './rake/product/breakpad.rb'
 require_relative './rake/product/unittest.rb'
+require_relative './rake/crowdin.rb'
 require 'net/http'
 require 'openssl'
 

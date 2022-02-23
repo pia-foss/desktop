@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -71,8 +71,8 @@ bool DaemonSettings::validateDNSSetting(const DaemonSettings::DNSSetting& settin
 {
     static const QStringList validDNSSettings {
         "pia",
-        "handshake",
         "local",
+        "hdns"
     };
     static const QRegularExpression validIP(QStringLiteral("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$"));
     QString value;

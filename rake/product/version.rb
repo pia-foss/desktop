@@ -108,7 +108,6 @@ class PiaVersion
         migration = ENV['RUBY_MIGRATION']
         migration = '' if migration == nil
         producth.defineRawString('RUBY_MIGRATION', migration)
-        producth.defineLiteral('INCLUDE_FEATURE_HANDSHAKE', '0')
 
         qml_reload_entry = ENV["QML_RELOAD_ENTRY"]
         producth.defineString("QML_RELOAD_ENTRY", qml_reload_entry) if qml_reload_entry != nil

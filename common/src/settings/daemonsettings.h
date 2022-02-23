@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -146,8 +146,12 @@ public:
     JsonField(QString, betaUpdateChannel,defaultReleaseChannelBeta)
     // Whether the user wants beta updates.
     JsonField(bool, offerBetaUpdates, false)
-    // Whether to store and send service quality information.
-    JsonField(bool, sendServiceQualityEvents, false)
+
+    // Store the version where the user last opted in for service quality
+    // events. Storing the version instead of a boolean field enables
+    // the option to conditionally include or remove metrics depending on
+    // the version.
+    JsonField(QString, serviceQualityAcceptanceVersion, "")
 
     // Whether split tunnel is enabled
     JsonField(bool, splitTunnelEnabled, false)

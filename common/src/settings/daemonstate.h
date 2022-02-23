@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -93,7 +93,7 @@ public:
     JsonField(bool, methodForcedByAuth, false)
 
     // DNS type used for this connection
-    JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "handshake", "local", "existing", "custom"})
+    JsonField(QString, dnsType, QStringLiteral("pia"), {"pia", "local", "hdns", "existing", "custom"})
 
     // OpenVPN cryptographic settings - only meaningful when method is OpenVPN
     JsonField(QString, openvpnCipher, {})

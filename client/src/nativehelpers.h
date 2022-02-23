@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -75,9 +75,6 @@ public:
     // Whether the client is currently logging to a file.  This exposes the flag
     // from Logger, which works with or without a daemon connection.
     Q_PROPERTY(bool logToFile READ getLogToFile NOTIFY logToFileChanged)
-
-    // Temporary Handshake feature toggle
-    Q_PROPERTY(bool includeFeatureHandshake READ getIncludeFeatureHandshake FINAL CONSTANT)
 
     // Do native initialization on the popup-style dashboard window.
     // On OS X, sets the dashboard window to appear on all workspaces.
@@ -241,7 +238,6 @@ private:
     Platform getPlatform() const;
     QString getProductName() const;
     QString getMacosProductVersion() const;
-    bool getIncludeFeatureHandshake() const;
     bool getLogToFile();
     bool getSplitTunnelSupported() const;
     void onFocusWindowChanged(QWindow *pFocusWindow);

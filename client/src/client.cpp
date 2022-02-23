@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -139,6 +139,7 @@ bool ClientTranslator::load(const QLocale &locale)
 const QString ClientInterface::_pseudotranslationLocale{QStringLiteral("ro")};
 const QString ClientInterface::_pseudotranslationRtlLocale{QStringLiteral("ps")};
 
+
 ClientInterface::ClientInterface(bool hasExistingSettingsFile,
                                  const QJsonObject &initialSettings,
                                  GraphicsMode gfxMode, bool quietLaunch,
@@ -149,6 +150,7 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
     _state.firstRunFlag(!hasExistingSettingsFile);
     _state.quietLaunch(quietLaunch);
 
+    migrateClientSettings();
     loadLanguages();
 
     // If the language hasn't been set yet, default to the system language.
@@ -289,6 +291,13 @@ void ClientInterface::addCheckedLanguage(QVector<ClientLanguage> &languages,
     languages.push_back(newLang);
 }
 
+void ClientInterface::migrateClientSettings () {
+    // Swedish language support was removed in v3.3
+    if(_settings.language() == QStringLiteral("sv")) {
+        _settings.language(QStringLiteral("en-US"));
+    }
+}
+
 void ClientInterface::loadLanguages()
 {
     // Probe for the languages that are actually available and populate
@@ -314,7 +323,6 @@ void ClientInterface::loadLanguages()
     addKnownLanguage(languages, QStringLiteral("pt-BR"), QStringLiteral(u"Português (Brasil)"));
     addKnownLanguage(languages, QStringLiteral("ru"), QStringLiteral(u"Русский"));
     addKnownLanguage(languages, QStringLiteral("es-MX"), QStringLiteral(u"Español (México)"));
-    addKnownLanguage(languages, QStringLiteral("sv"), QStringLiteral("Svenska"));
     addCheckedLanguage(languages, QStringLiteral("th"), QStringLiteral(u"ไทย"), QStringLiteral("Thai"), QFontDatabase::WritingSystem::Thai);
     addKnownLanguage(languages, QStringLiteral("tr"), QStringLiteral(u"Türkçe"));
     addCheckedLanguage(languages, QStringLiteral("ar"), QStringLiteral(u"العربية"), QStringLiteral("Arabic"), QFontDatabase::WritingSystem::Arabic, true);

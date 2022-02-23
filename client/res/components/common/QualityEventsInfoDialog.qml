@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -46,13 +46,14 @@ OverlayDialog {
       t += "* " + uiTr("Connection Canceled") + "\n"
       t += "* " + uiTr("Connection Established") + "\n"
 
-      t += uiTr("For all of these events, we will collect the following information:") + "\n"
+      t += uiTr("For relevant events, we will collect the following information:") + "\n"
 
       t += "* " + uiTr("Platform") + "\n"
       t += "* " + uiTr("App version") + "\n"
       t += "* " + uiTr("App type (pre-release or not)") + "\n"
       t += "* " + uiTr("Protocol used") + "\n"
       t += "* " + uiTr("Connection source (manual or using automation)") + "\n"
+      t += "* " + uiTr("Time to establish connection") + "\n"
 
       t += uiTr("All events will contain a unique ID, which is randomly generated. This ID is not associated with your user account. This unique ID is re-generated daily for privacy purposes.") + "\n"
 

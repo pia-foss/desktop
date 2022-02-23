@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -252,11 +252,7 @@ protected:
         // resolver filters (for Unbound)
         enum : std::size_t
         {
-#if INCLUDE_FEATURE_HANDSHAKE
-            ResolverFilterCount = 2,
-#else
             ResolverFilterCount = 1,
-#endif
         };
         WfpFilterObject permitPIA[6];
         WfpFilterObject permitAdapter[2];
@@ -303,9 +299,6 @@ protected:
 
     // App IDs for resolvers, needed when we add a special "split" rule.
     AppIdKey _unboundAppId;
-#if INCLUDE_FEATURE_HANDSHAKE
-    AppIdKey _hnsdAppId;
-#endif
 
     // Inputs to reapplySplitTunnelFirewall() - the last set of inputs used is
     // stored so we know when to recreate the firewall rules.

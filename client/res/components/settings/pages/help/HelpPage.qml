@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -319,8 +319,21 @@ Page {
       info: uiTr(
               "Help ensure our service's performance by sharing connection stats with us.")
       infoShowBelow: false
-      setting: DaemonSetting {
-        name: 'sendServiceQualityEvents'
+      setting: Setting {
+        sourceValue: Daemon.settings.serviceQualityAcceptanceVersion != ""
+        onCurrentValueChanged: {
+          if (currentValue !== sourceValue) {
+            if (!currentValue) {
+              Daemon.applySettings({
+                                     "serviceQualityAcceptanceVersion": ""
+                                   })
+            } else {
+              Daemon.applySettings({
+                                     "serviceQualityAcceptanceVersion": NativeHelpers.getClientVersion()
+                                   })
+            }
+          }
+        }
       }
       visible: Daemon.data.flags.includes("service_quality_events")
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Private Internet Access, Inc.
+// Copyright (c) 2022 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -28,6 +28,7 @@
 #include "processrunner.h"
 #include "vpnstate.h"
 #include "elapsedtime.h"
+#include "async.h"
 
 #include <QDateTime>
 #include <QDeadlineTimer>
@@ -360,9 +361,9 @@ public:
     enum class DnsType
     {
         Pia,
-        Handshake,
         Local,
         Existing,
+        HDns,
         Custom
     };
     Q_ENUM(DnsType);
@@ -564,6 +565,17 @@ private:
     bool _requestPortForward{false};
 };
 
+class ExternalIpTask: public Task<void>
+{
+    Q_OBJECT
+
+public:
+    ExternalIpTask();
+
+private:
+    void checkExternalIp();
+};
+
 class VPNConnection : public QObject
 {
     Q_OBJECT
@@ -746,6 +758,8 @@ private:
     nullable_t<ContinuousElapsedTime> _lastBytecountTime;
     // Cached value if we already determined we need a reconnect to apply settings
     bool _needsReconnect;
+
+    Async<ExternalIpTask> _pExternalIpTask;
 };
 
 // The 127/8 loopback address used for local DNS.
@@ -755,5 +769,7 @@ const QString resolverLocalAddress();
 const QString piaModernDnsVpnMace();
 // The IP used for PIA DNS in the modern infrastructure - on-VPN (no MACE).
 const QString piaModernDnsVpn();
+// The IP addresses used for hdns.io
+const QStringList hDnsAddress();
 
 #endif
