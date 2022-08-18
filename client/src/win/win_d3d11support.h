@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_d3d11support.h")
 
 #ifndef WIN_D3D11SUPPORT_H

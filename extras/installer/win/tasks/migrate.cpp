@@ -20,7 +20,7 @@
 #include "function.h"
 #include "process.h"
 #include "uninstall.h"
-#include "util.h"
+#include "../util.h"
 #include "brand.h"
 #include <shlobj.h>
 

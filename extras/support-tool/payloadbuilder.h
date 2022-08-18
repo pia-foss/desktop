@@ -19,11 +19,11 @@
 #ifndef PAYLOADBUILDER_H
 #define PAYLOADBUILDER_H
 
+#include <common/src/builtin/logging.h>
 #include <QObject>
 #include <QByteArray>
 #include <QDir>
 #include <QTemporaryDir>
-#include <QDebug>
 #include <QScopedPointer>
 
 // The entire payload is in a single folder. The current CrashLab implementation

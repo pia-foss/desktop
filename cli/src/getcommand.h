@@ -16,15 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("getcommand.h")
 
 #ifndef GETCOMMAND_H
 #define GETCOMMAND_H
 
 #include "clicommand.h"
-#include "settings/locations.h"
-#include "settings/daemonstate.h"
+#include <clientlib/src/model/daemonstate.h>
 
 // "Type" keywords used by get, set, and monitor
 namespace GetSetType
@@ -39,7 +38,7 @@ namespace GetSetValue
     const QString &getBooleanText(bool value);
     bool parseBooleanParam(const QString &param);
     extern const QString locationAuto;
-    QString getRegionCliName(const QSharedPointer<Location> &pLocation);
+    QString getRegionCliName(const QJsonObject &location);
     QString matchSpecifiedLocation(const DaemonState &state, const QString &location);
 }
 

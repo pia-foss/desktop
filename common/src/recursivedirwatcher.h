@@ -24,7 +24,7 @@
 
 #include <QFileSystemWatcher>
 #include <QTimer>
-#include "path.h"
+#include "builtin/path.h"
 
 // RecursiveWatcher watches a path to a file or directory that may or may not
 // exist yet.  It watches all parent directories to detect when the target path

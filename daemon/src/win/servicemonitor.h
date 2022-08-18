@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("servicemonitor.h")
 
 #ifndef SERVICEMONITOR_H
 #define SERVICEMONITOR_H
 
-#include <windows.h>
+#include <kapps_core/src/winapi.h>
 #include "../../../extras/installer/win/service_inl.h"
-#include "settings/daemonstate.h"
+#include "../model/state.h"
 #include <QObject>
 
 // SERVICE_NOTIFY_2W that also cleans up its pszServiceNames when destroyed.
@@ -52,7 +52,7 @@ private:
 // lastState() to load the initial state.  ServiceMonitor will then emit
 // serviceStateChanged() if the state changes.
 //
-// ServiceMonitor reports the state as a DaemonState::NetExtensionState value.
+// ServiceMonitor reports the state as a StateModel::NetExtensionState value.
 // If it reports the 'Error' state, it may not be able to report any further
 // state changes.
 class ServiceMonitor : public QObject
@@ -61,7 +61,7 @@ class ServiceMonitor : public QObject
     CLASS_LOGGING_CATEGORY("win.servicemonitor");
 
 public:
-    using NetExtensionState = DaemonState::NetExtensionState;
+    using NetExtensionState = StateModel::NetExtensionState;
 
 private:
     static ServiceMonitor *thisFromCallback(void *pNotify);

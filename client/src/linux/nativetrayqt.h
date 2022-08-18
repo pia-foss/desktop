@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("nativetrayqt.h")
 
 #ifndef NATIVETRAYQT_H
 #define NATIVETRAYQT_H
 
-#include "nativetray.h"
+#include "../nativetray.h"
 
 #include <QHash>
 #include <QIcon>

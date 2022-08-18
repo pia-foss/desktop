@@ -31,8 +31,6 @@ load_servers
 
 IFS=$'\n'
 
-first=1
-
 function print_translation_source() {
   key="$1"
   # A few strings already have en-US translations that differ from the regions list name.
@@ -41,29 +39,26 @@ function print_translation_source() {
   if [ "$en" == '""' ]; then
     en="$key"
   fi
-  # Print the prior line's comma and line ending if this isn't the first line
-  if [ -z "$first" ]; then
-    echo ","
-  else
-    first=
-  fi
-  echo -n "  $key: $en"
+  echo "  $key: $en,"
 }
 
-mkdir -p out/onesky
+mkdir -p out/export
 (
   echo "{"
 
-  for r in $(get_region_names); do
-    print_translation_source "$r"
-  done
+  (
+    for r in $(get_region_names); do
+      print_translation_source "$r"
+    done
 
-  for r in $(get_country_names); do
-    print_translation_source "$r"
-  done
+    for r in $(get_country_names); do
+      print_translation_source "$r"
+    done
+  ) | sort | sed '$s/,$//'
 
-  echo ""	# Last line's line ending (no comma)
   echo "}"
-) >out/onesky/regions.json
+) >out/export/en-US.json
 
-echo "Generated out/onesky/regions.json"
+mv out/export/en-US.json translations/en-US.json
+
+echo "Generated translations/en-US.json"

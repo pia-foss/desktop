@@ -16,10 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_ping.cpp")
 
 #include "win_ping.h"
+#include <kapps_core/src/win/win_error.h>
+#include <kapps_core/src/winapi.h>
 #include <QHostAddress>
 #include <iphlpapi.h>
 #include <IcmpAPI.h>
@@ -46,7 +48,7 @@ namespace
             // does.
             if(!*this)
             {
-                WinErrTracer err{::GetLastError()};
+                kapps::core::WinErrTracer err{::GetLastError()};
                 qWarning() << "Failed to open ICMP:" << err;
             }
         }
@@ -95,7 +97,7 @@ QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address,
     WinHandle event{::CreateEventW(nullptr, false, false, nullptr)};
     if(!event)
     {
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         qWarning() << "Unable to ping" << QHostAddress{address}.toString()
             << "- failed to create event:" << err;
         return {};
@@ -132,7 +134,7 @@ QPointer<WinIcmpEcho> WinIcmpEcho::send(quint32 address,
     }
 
     // Failure - trace the error, let unique_ptr destroy the WinIcmpEcho
-    WinErrTracer err{::GetLastError()};
+    kapps::core::WinErrTracer err{::GetLastError()};
     qWarning() << "Unable to ping" << QHostAddress{address}.toString()
         << "- result" << result << "- error" << err;
     return {};
@@ -169,7 +171,7 @@ bool WinIcmpEcho::shouldTraceIcmpError(DWORD status) const
     }
 }
 
-QString WinIcmpEcho::ipErrorString(DWORD status) const
+std::wstring WinIcmpEcho::ipErrorString(DWORD status) const
 {
     enum
     {
@@ -180,7 +182,7 @@ QString WinIcmpEcho::ipErrorString(DWORD status) const
     if(::GetIpErrorString(status, buffer, &actualLen) == NO_ERROR)
     {
         // Success, use this string.
-        return QString::fromWCharArray(buffer, actualLen);
+        return {buffer, actualLen};
     }
 
     // If GetIpErrorString() fails, doc says we should fall back to
@@ -190,7 +192,7 @@ QString WinIcmpEcho::ipErrorString(DWORD status) const
     //
     // Grab it anyway though just to err on the side of getting _something_,
     // this is just for tracing.
-    return WinErrTracer{status}.message();
+    return kapps::core::WinErrTracer{status}.message();
 }
 
 void WinIcmpEcho::onEventActivated()
@@ -211,7 +213,7 @@ void WinIcmpEcho::onEventActivated()
     {
         // This is unusual - this isn't what happens for a timeout, we get a
         // response with a timeout status in that case.
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         // Doc is unclear here - documentation seems to indicate that we should
         // observe IP_REQ_TIMED_OUT, etc., from the ICMP_ECHO_REPLY::Status
         // field, but that's not what happens in practice.

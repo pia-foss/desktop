@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguardservicebackend.h")
 
 #ifndef WIREGUARDSERVICEBACKEND_H
 #define WIREGUARDSERVICEBACKEND_H
 
-#include "wireguardbackend.h"
-#include "wireguarduapi.h"
-#include "async.h"
+#include "../wireguardbackend.h"
+#include "../wireguarduapi.h"
+#include <common/src/async.h>
 #include <QLocalSocket>
 
 // WireguardServiceBackend is a Wireguard userspace implementation using the

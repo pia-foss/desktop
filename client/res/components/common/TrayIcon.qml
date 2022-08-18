@@ -30,7 +30,7 @@ import "../helpers"
 // ready.  Once we connect to the daemon, this is managed by TrayManager.
 TrayIconManager {
   property var currentStateIcon: {
-    if(connState.snoozeModeEnabled && connState.snoozeDisconnected) {
+    if(connState.snoozeState === connState.snoozeDisconnected) {
       return TrayIconManager.Snoozed
     }
 
@@ -75,7 +75,7 @@ TrayIconManager {
 
     switch (connState.connectionState) {
     case connState.stateConnected:
-      return base + ": " + uiTr("Connected to %1").arg(Daemon.getLocationName(Daemon.state.connectedConfig.vpnLocation))
+      return base + ": " + uiTr("Connected to %1").arg(Client.getDetailedLocationName(Daemon.state.connectedConfig.vpnLocation))
     case connState.stateConnecting:
       if (Daemon.state.connectionState.indexOf('Reconnect') >= 0)
         return base + ": " + uiTr("Reconnecting...")

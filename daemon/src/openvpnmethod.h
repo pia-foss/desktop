@@ -16,23 +16,25 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("openvpnmethod.h")
 
 #ifndef OPENVPNMETHOD_H
 #define OPENVPNMETHOD_H
 
-#include "exec.h"
+#include <common/src/exec.h>
 #include "vpnmethod.h"
 #include "openvpn.h"
 #include "vpn.h"
-#include "linebuffer.h"
+#include <common/src/linebuffer.h>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QTimer>
 #include <unordered_set>
+#include <kapps_core/src/ipaddress.h>
 
 class MtuPinger;
+
 
 // Owns a QLocalSocket created by the QLocalServer and feeds incoming data
 // into a LineBuffer; used by HelperIpcServer
@@ -138,7 +140,7 @@ private:
     // according to the physical interface MTU and protocol overhead.  (We never
     // apply a larger MTU than this; we might apply a smaller one if probes
     // indicate that the MTU is smaller or if the user requested a smaller MTU.)
-    unsigned findMaxMtu(const QHostAddress &host);
+    unsigned findMaxMtu(const kapps::core::Ipv4Address &host);
 
 private:
     OpenVPNProcess *_openvpn;
@@ -149,7 +151,8 @@ private:
     // The network adapter used for the current connection
     std::shared_ptr<NetworkAdapter> _networkAdapter;
     ConnectionConfig _connectingConfig;
-    Server _vpnServer;
+    // VPN host we're connecting to - used to find the link MTU to this host
+    kapps::core::Ipv4Address _vpnHost;
     QTimer _connectingTimer;
     static Executor _executor;
     std::unique_ptr<MtuPinger> _mtuPinger;

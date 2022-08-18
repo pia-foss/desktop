@@ -16,12 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("exec.h")
-
 #ifndef EXEC_H
 #define EXEC_H
 
+#include "common.h"
 #include <QProcessEnvironment>
 #include <QRegularExpression>
 
@@ -42,11 +40,11 @@ public:
     // Create with the trace category.  Stdout/stderr will trace with categories
     // "<category>.stdout", "<category>.stderr".
     // The category must be valid for the life of PosixExec.
-    explicit Executor(const QLoggingCategory &category);
+    explicit Executor(const kapps::core::LogCategory &category);
 
 private:
-    QByteArray buildSubcategoryName(const QLoggingCategory &category,
-                                    const QLatin1String &suffix);
+    std::string buildSubcategoryName(const kapps::core::LogCategory &category,
+                                     const kapps::core::StringSlice &suffix);
 
 private:
     // Implementation of bash()/cmd() - executes program with args, prints the
@@ -54,7 +52,7 @@ private:
     // traceFunc is called to trace the command if tracing occurs; tracing is
     // different for bash() vs. cmd().
     int cmdImpl(const QString &program, const QStringList &args,
-                void(*traceFunc)(QDebug &, const QString&, const QStringList&),
+                void(*traceFunc)(std::ostream &, const QString&, const QStringList&),
                 const QProcessEnvironment &env, QString *pOut,
                 bool ignoreErrors);
 
@@ -100,9 +98,9 @@ public:
 #endif
 
 private:
-    const QLoggingCategory &_category;
-    QByteArray _stdoutCatName, _stderrCatName;
-    QLoggingCategory _stdoutCategory, _stderrCategory;
+    const kapps::core::LogCategory &_category;
+    std::string _stdoutCatName, _stderrCatName;
+    kapps::core::LogCategory _stdoutCategory, _stderrCategory;
 };
 
 namespace Exec

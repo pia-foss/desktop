@@ -20,6 +20,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import "../../daemon"
+import "../../client"
 import "../../common"
 import "../../core"
 import "../../theme"
@@ -80,7 +81,8 @@ RegionRowConstants {
   FlagImage {
     x: 24
     anchors.verticalCenter: parent.verticalCenter
-    countryCode: regionAuto.serviceLocations.bestLocation ? regionAuto.serviceLocations.bestLocation.country : ''
+    countryCode: regionAuto.serviceLocations.bestLocation ?
+      Daemon.state.getRegionCountryCode(regionAuto.serviceLocations.bestLocation.id) : ''
   }
 
   RegionRowLabels {
@@ -109,7 +111,7 @@ RegionRowConstants {
     id: currentAutoRegionText
     x: 56
     y: 34
-    text: Daemon.getLocationName(regionAuto.serviceLocations.bestLocation)
+    text: Client.getRegionAutoName(regionAuto.serviceLocations.bestLocation && regionAuto.serviceLocations.bestLocation.id)
     font.pixelSize: Theme.regions.sublabelTextPx
     color: Theme.regions.autoRegionSublabelColor
   }

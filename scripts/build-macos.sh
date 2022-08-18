@@ -38,9 +38,9 @@ trap popd EXIT
 
 # Build
 export RUBYOPT=-Eutf-8
-rake clean VARIANT="$MODE" BRAND="$BRAND"
-rake all -j8 VARIANT="$MODE" BRAND="$BRAND"
+rake clean VARIANT="$MODE" BRAND="$BRAND" ARCHITECTURE=universal
+rake all VARIANT="$MODE" BRAND="$BRAND" ARCHITECTURE=universal
 
 if [ -n "$CI_MERGE_REQUEST_ID" ]; then
-  rake tsdiff
+    rake tsdiff
 fi

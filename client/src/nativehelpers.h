@@ -16,13 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("nativehelpers.h")
 
 #ifndef NATIVEHELPERS_H
 #define NATIVEHELPERS_H
 #pragma once
 
+#include <kapps_core/src/winapi.h>
 #include <QWindow>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>
@@ -194,12 +195,6 @@ public:
     void requestDashboardReopen();
 
     Q_INVOKABLE void checkAppDeactivate();
-
-    // Get the best location for a country - provides
-    // NearestLocations::getBestMatchingLocation() to QML with an appropriate
-    // predicate.  The DaemonState is used to get the location data.
-    Q_INVOKABLE QString getBestLocationForCountry(QObject *pDaemonStateObj,
-                                                  const QString &countryCode);
 
     static void applyStartOnLoginSetting(bool enabled);
     static bool getStartOnLoginSetting();

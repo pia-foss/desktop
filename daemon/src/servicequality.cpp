@@ -17,6 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "servicequality.h"
+#include <kapps_core/src/uuid.h>
 #include <chrono>
 #include <array>
 #include <QRandomGenerator>
@@ -79,85 +80,13 @@ namespace
     // timers until they elapse.
     std::chrono::seconds _timerTolerance{2};
 
-    // Version 4 (random) UUID.  Note that QUuid::createUuid() isn't
-    // guaranteed to be this type on Windows.
-    class Uuidv4
+    QString genUuidV4Str()
     {
-    public:
-        // Create a random Uuidv4 value
-        Uuidv4()
-        {
-            // Generate 128 random bits.
-            QRandomGenerator::global()->fillRange(_val.data(), _val.size());
-            // Set version to 4 (random)
-            _val[0] &= 0xFFFFFFFFFFFF0FFF;
-            _val[0] |= 0x0000000000004000;
-            // Set variant to "Variant 1"
-            _val[1] &= 0x0FFFFFFFFFFFFFFF;
-            _val[1] |= 0x8000000000000000;
-        }
-
-    private:
-        // Take the lowest 4 bits from 'value', render them as a hex char, and
-        // shift 'value' right 4 bits.
-        char renderHexChar(quint64 &value) const
-        {
-            static const char hexChars[]{"0123456789abcdef"};
-            quint64 nextBits = value & 0xF;
-            value >>= 4;
-            return hexChars[nextBits];
-        }
-
-    public:
-        // Render the UUID as a string
-        QString toString() const
-        {
-            char result[36];
-            quint64 part{_val[1]};
-            result[35] = renderHexChar(part);
-            result[34] = renderHexChar(part);
-            result[33] = renderHexChar(part);
-            result[32] = renderHexChar(part);
-            result[31] = renderHexChar(part);
-            result[30] = renderHexChar(part);
-            result[29] = renderHexChar(part);
-            result[28] = renderHexChar(part);
-            result[27] = renderHexChar(part);
-            result[26] = renderHexChar(part);
-            result[25] = renderHexChar(part);
-            result[24] = renderHexChar(part);
-            result[23] = '-';
-            result[22] = renderHexChar(part);
-            result[21] = renderHexChar(part);
-            result[20] = renderHexChar(part);
-            result[19] = renderHexChar(part);
-            result[18] = '-';
-            part = _val[0];
-            result[17] = renderHexChar(part);
-            result[16] = renderHexChar(part);
-            result[15] = renderHexChar(part);
-            result[14] = renderHexChar(part);
-            result[13] = '-';
-            result[12] = renderHexChar(part);
-            result[11] = renderHexChar(part);
-            result[10] = renderHexChar(part);
-            result[ 9] = renderHexChar(part);
-            result[ 8] = '-';
-            result[ 7] = renderHexChar(part);
-            result[ 6] = renderHexChar(part);
-            result[ 5] = renderHexChar(part);
-            result[ 4] = renderHexChar(part);
-            result[ 3] = renderHexChar(part);
-            result[ 2] = renderHexChar(part);
-            result[ 1] = renderHexChar(part);
-            result[ 0] = renderHexChar(part);
-            return QString::fromLatin1(result, 36);
-        }
-
-    private:
-        // 128-bit UUID value (native endian)
-        std::array<quint64, 2> _val;
-    };
+        std::array<std::uint64_t, 2> data{};
+        QRandomGenerator::global()->fillRange(data.data(), data.size());
+        const auto &uuid = kapps::core::Uuid::buildV4(data[0], data[1]);
+        return QString::fromStdString(uuid.toString());
+    }
 }
 
 ServiceQuality::ServiceQuality(ApiClient &apiClient, Environment &environment,
@@ -237,7 +166,7 @@ void ServiceQuality::startExpireTimer(QTimer &timer, const sysTimeMs &timestamp,
 
 void ServiceQuality::generateId(const sysTimeMs &now)
 {
-    _data.qualityAggId(Uuidv4{}.toString());
+    _data.qualityAggId(genUuidV4Str());
     // Set the new rotate time.  This will reset our timer since we detect when
     // this changes in DaemonData.
     _data.qualityAggIdRotateTime(msec((now + _rotateIdTime).time_since_epoch()));
@@ -464,7 +393,7 @@ bool ServiceQuality::storeEvent(EventType type, VpnProtocol protocol,
 
     ServiceQualityEvent newEvent;
     newEvent.aggregated_id(_data.qualityAggId());
-    newEvent.event_unique_id(Uuidv4{}.toString());
+    newEvent.event_unique_id(genUuidV4Str());
     switch(type)
     {
         case EventType::ConnectionAttempt:

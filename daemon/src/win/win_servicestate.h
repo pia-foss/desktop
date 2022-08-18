@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win_servicestate.h")
 
 #ifndef WIN_SERVICESTATE_H
 #define WIN_SERVICESTATE_H
 
-#include <windows.h>
+#include <kapps_core/src/winapi.h>
 #include "servicemonitor.h" // WinServiceNotify
-#include "async.h"
+#include <common/src/async.h>
 
 // WinServiceState keeps track of the running state of an installed service on
 // Windows.  (This is different from ServiceMonitor, which keeps track of

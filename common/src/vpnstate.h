@@ -67,6 +67,22 @@ public:
     };
     Q_ENUM(State)
 
+    // Special values for the value of DaemonState::forwardedPort.  Note that
+    // these names are part of the CLI interface for "get portforward" and
+    // shouldn't be changed.
+    enum PortForwardState : int
+    {
+        // PF not enabled, or not connected to VPN
+        Inactive = 0,
+        // Enabled, connected, and supported - requesting port
+        Attempting = -1,
+        // Port forward failed
+        Failed = -2,
+        // PF enabled, but not available for the connected region
+        Unavailable = -3,
+    };
+    Q_ENUM(PortForwardState)
+
     enum Limits
     {
         // Maximum connection attempts until "slow connect" mode triggers

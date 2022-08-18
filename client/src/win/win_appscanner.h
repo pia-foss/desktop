@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win_appscanner.h")
 
 #ifndef WIN_APPSCANNER_H
@@ -24,7 +24,7 @@
 
 #include "../appscanner.h"
 #include "../../extras/winrtsupport/src/winrtsupport.h"
-#include "../thread.h"
+#include <common/src/thread.h>
 
 class WinAppScanner : public AppScanner
 {

@@ -22,7 +22,7 @@
 #include "networktaskwithretry.h"
 #include "apinetwork.h"
 #include "openssl.h"
-#include "util.h"
+#include <common/src/builtin/util.h>
 #include <QTimer>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -84,7 +84,9 @@ void NetworkTaskWithRetry::executeNextAttempt()
                 if (error)
                 {
                     // Auth and "payment required" (expired account) errors can't be retried.
-                    if (error.code() == Error::ApiUnauthorizedError || error.code() == Error::ApiPaymentRequiredError)
+                    if (error.code() == Error::ApiUnauthorizedError ||
+                        error.code() == Error::ApiPaymentRequiredError ||
+                        error.code() == Error::ApiRateLimitedError)
                     {
                         reject(error);
                         return;
@@ -203,7 +205,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
 
     // Handle redirects by permitting same-origin HTTPS redirects only
     connect(reply.get(), &QNetworkReply::redirected, this,
-        [this, reply, requestUri](const QUrl &url)
+        [reply, requestUri](const QUrl &url)
         {
             // Resolve the redirect URL if it's relative.  Typical relative
             // paths as URLs won't affect the scheme/host/port and will be
@@ -254,7 +256,7 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
 
         auto replyError = reply->error();
         qInfo() << "Request for" << resource << "-" << statusCode.toInt()
-            << statusMsg.toByteArray() << "- error code:" << replyError;
+            << statusMsg.toByteArray().data() << "- error code:" << replyError;
 
         // Check specifically for an auth error, which indicates that the creds are
         // not valid.
@@ -270,13 +272,36 @@ Async<QByteArray> NetworkTaskWithRetry::sendRequest()
         // a specific error if all retries fail.
         if (reply->attribute(QNetworkRequest::Attribute::HttpStatusCodeAttribute).toInt() == 429)
         {
-            qWarning() << "Could not request" << resource << "due to rate limiting";
+            QByteArray header = reply->rawHeader("Retry-After");
+            // Default retry delay is 59 seconds
+            int retryDelay = 59;
+            if(!header.isEmpty())
+            {
+                bool ok{false};
+                int val = header.toInt(&ok);
+                if(ok)
+                {
+                    retryDelay = val;
+                }
+                else
+                {
+                    qWarning() << "Invalid Retry-After value, got: " << QString{header};
+                }
+            }
+            else
+            {
+                qWarning() << "Retry-After header not found in 429 response";
+            }
+
+            qWarning() << "Could not request" << resource << "due to rate limiting; "
+                       << "Retry after " << retryDelay << " seconds.";
             // A rate limiting error is worse than a network error - set the worst
             // retriable error, but keep trying in case another API endpoint gives us
             // 200 or 401.
             // (Otherwise, leave the worst error alone, it might already be set to a
             // rate limiting error by a prior attempt.)
-            networkTask->reject(Error(HERE, Error::ApiRateLimitedError));
+            networkTask->reject(Error(HERE, Error::ApiRateLimitedError,
+                                  QDateTime::currentDateTime().addSecs(retryDelay)));
             return;
         }
 

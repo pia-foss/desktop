@@ -20,7 +20,7 @@
 #line SOURCE_FILE("apinetwork.cpp")
 
 #include "apinetwork.h"
-#include <testshim.h>
+#include "testshim.h"
 #include <algorithm>
 #include <QNetworkProxyFactory>
 #include <atomic>

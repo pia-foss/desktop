@@ -19,8 +19,8 @@
 #ifndef SETTINGS_DAEMONACCOUNT_H
 #define SETTINGS_DAEMONACCOUNT_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include "dedicatedip.h"
 #include <unordered_set>
 

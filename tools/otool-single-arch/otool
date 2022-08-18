@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+# See rake/product/macos.rb - macdeployEnv() - add an architecture param to the
+# otool invocation.
+# 'xcrun otool' conveniently finds the real otool, since this script is the
+# first 'otool' in PATH.
+xcrun otool -arch "$OTOOL_SINGLE_ARCH" "$@"

@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("portforwarder.h")
 
 #ifndef PORTFORWARDER_H
@@ -28,8 +28,9 @@
 #include <QScopedPointer>
 #include <array>
 #include "apiclient.h"
-#include "async.h"
-#include "settings/daemonstate.h"
+#include <common/src/async.h>
+#include <common/src/vpnstate.h>
+#include "model/state.h"
 #include "portforwardrequest.h"
 
 // PortForwarder forwards a port through the VPN connection when the VPN is
@@ -54,7 +55,7 @@ public:
         ConnectedUnsupported
     };
 
-    using PortForwardState = DaemonState::PortForwardState;
+    using PortForwardState = VpnState::PortForwardState;
 
 public:
     // Create PortForwarder with the DaemonAccount, which is used to load/store
@@ -65,7 +66,7 @@ public:
     //
     // Port forwarding is initially disabled when PortForwarder is created.
     PortForwarder(ApiClient &apiClient, DaemonAccount &account,
-                  DaemonState &state, Environment &environment);
+                  StateModel &state, Environment &environment);
 
 public:
     // Update the current VPN connection state.
@@ -98,7 +99,7 @@ private:
     ApiClient &_apiClient;
     // Components of Daemon needed by the PF request implementations
     DaemonAccount &_account;
-    DaemonState &_state;
+    StateModel &_state;
     Environment &_environment;
     // Whether the VPN is connected
     State _connectionState;

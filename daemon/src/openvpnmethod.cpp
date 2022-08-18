@@ -16,20 +16,20 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("openvpnmethod.cpp")
 
 #include "openvpnmethod.h"
 #include "daemon.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "pathmtu.h"
-#include "ipaddress.h"
+#include <kapps_core/src/ipaddress.h>
 #include <QStandardPaths>
 
 #if defined(Q_OS_WIN)
     #include "win/win_daemon.h"
     #include "win/win_interfacemonitor.h"
-    #include "win/win_util.h"
+    #include <common/src/win/win_util.h>
 #endif
 
 #if defined(Q_OS_UNIX)
@@ -139,7 +139,7 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
                         quint16 shadowsocksProxyPort)
 {
     _connectingConfig = connectingConfig;
-    _vpnServer = vpnServer;
+    _vpnHost = vpnServer.impl().address();
 
 #if defined(Q_OS_WIN)
     if(!_helperIpcServer.listen())
@@ -518,7 +518,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // the only fix for that is to actually read the entire routing table.
         // Users can work around this by manually creating this route to the
         // SOCKS proxy.
-        Ipv4Address remoteHostIpv4{remoteHost.toIPv4Address()};
+        kapps::core::Ipv4Address remoteHostIpv4{remoteHost.toIPv4Address()};
         if(remoteHostIpv4.isLoopback() || remoteHostIpv4.isPrivateUse())
         {
             qInfo() << "Not creating route for local proxy" << remoteHost;
@@ -558,7 +558,7 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         // Route DNS servers into the VPN (DNS is always sent through the VPN)
         for(const auto &dnsServer : _connectingConfig.getDnsServers())
         {
-            if(!Ipv4Address{dnsServer}.isLocalDNS())
+            if(!kapps::core::Ipv4Address{dnsServer.toStdString()}.isLocalDNS())
                 out << "route " << dnsServer << " 255.255.255.255 vpn_gateway 0" << endl;
         }
     }
@@ -581,7 +581,9 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
     // We support both NCP cipher negotiation and pia-signal-settings right now
     // as we transition from pia-signal-settings to unpatched vanilla OpenVPN.
     // Use whatever method was indicated for this server.
-    if(vpnServer.openvpnNcpSupport())
+    bool supportsNcp = (transport.protocol() == QStringLiteral("tcp")) ?
+        vpnServer.openVpnTcpNcp() : vpnServer.openVpnUdpNcp();
+    if(supportsNcp)
     {
         // NCP mode.  Permit only the configured cipher.
         out << "ncp-ciphers " << sanitize(_connectingConfig.openvpnCipher()) << endl;
@@ -693,7 +695,7 @@ void OpenVPNMethod::openvpnStateChanged()
 void OpenVPNMethod::openvpnStdoutLine(const QString& line)
 {
     FUNCTION_LOGGING_CATEGORY("openvpn.stdout");
-    qDebug().noquote() << line;
+    qDebug() << line;
 
     checkStdoutErrors(line);
 }
@@ -735,12 +737,12 @@ void OpenVPNMethod::checkStdoutErrors(const QString &line)
 void OpenVPNMethod::openvpnStderrLine(const QString& line)
 {
     FUNCTION_LOGGING_CATEGORY("openvpn.stderr");
-    qDebug().noquote() << line;
+    qDebug() << line;
 
     checkForMagicStrings(line);
 }
 
-unsigned OpenVPNMethod::findMaxMtu(const QHostAddress &host)
+unsigned OpenVPNMethod::findMaxMtu(const kapps::core::Ipv4Address &host)
 {
     int mtu = 0;
 
@@ -749,7 +751,7 @@ unsigned OpenVPNMethod::findMaxMtu(const QHostAddress &host)
 #if defined(Q_OS_WIN)
     mtu = originalNetwork().mtu();
 #else
-    mtu = PosixMtu::findHostMtu(host.toString());
+    mtu = PosixMtu::findHostMtu(qs::toQString(host.toString()));
 #endif
     // Default to 1500 if no MTU was found.  Never assume the MTU to the
     // Internet is larger than 1500, even if the physical interface claims to
@@ -774,9 +776,9 @@ void OpenVPNMethod::checkForMagicStrings(const QString& line)
         if(!_networkAdapter)
             _networkAdapter.reset(new NetworkAdapter{tunDeviceNameRegex.cap(1)});
 
-        int maxMtu = findMaxMtu(Ipv4Address{_vpnServer.ip()});
+        int maxMtu = findMaxMtu(_vpnHost);
         qInfo() << "MTU config:" << _connectingConfig.mtu()
-            << " - calculated tunnel MTU to VPN host" << _vpnServer.ip() << ":"
+            << " - calculated tunnel MTU to VPN host" << _vpnHost << ":"
             << maxMtu;
 
         _mtuPinger.reset(new MtuPinger(_networkAdapter, maxMtu, _connectingConfig.mtu()));
@@ -815,7 +817,7 @@ bool OpenVPNMethod::respondToMgmtAuth(const QString &line, const QString &user,
 void OpenVPNMethod::openvpnManagementLine(const QString& line)
 {
     FUNCTION_LOGGING_CATEGORY("openvpn.mgmt");
-    qDebug().noquote() << line;
+    qDebug() << line;
 
     if (!line.isEmpty() && line[0] == '>')
     {

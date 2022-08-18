@@ -85,7 +85,7 @@ MovableModule {
 
     visible: Daemon.account.expirationTime > 0 && (Daemon.account.expired || (Daemon.account.recurring && Daemon.account.daysRemaining < 100))
     label: expirationLabel.text
-    text: new Date(Daemon.account.expirationTime).toLocaleDateString(Qt.locale(Client.state.activeLanguage.locale), Locale.ShortFormat)
+    text: new Date(Daemon.account.expirationTime).toLocaleDateString(Qt.locale(), Locale.ShortFormat)
     color: Daemon.account.expired ? Theme.dashboard.notificationErrorLinkColor : Theme.dashboard.moduleSecondaryTextColor
     font.pixelSize: Theme.dashboard.moduleValueTextPx
     x: 200

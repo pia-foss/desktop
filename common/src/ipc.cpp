@@ -20,7 +20,7 @@
 #line SOURCE_FILE("ipc.cpp")
 
 #include "ipc.h"
-#include "path.h"
+#include "builtin/path.h"
 
 #include <QtEndian>
 #include <QByteArray>
@@ -180,7 +180,7 @@ bool LocalSocketIPCServer::listen()
 #endif
     if (!_server->listen(PIA_LOCAL_SOCKET_NAME))
     {
-        qCritical().noquote() << _server->errorString();
+        qCritical() << _server->errorString();
         return false;
     }
     return true;

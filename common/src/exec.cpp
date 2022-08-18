@@ -25,40 +25,38 @@
 namespace
 {
     // Tracer for cmd() and friends
-    const auto traceCmd = [](QDebug &dbg, const QString &program, const QStringList &args)
+    const auto traceCmd = [](std::ostream &os, const QString &program, const QStringList &args)
     {
-        dbg << program;
+        os << program;
         for(const auto &arg : args)
-            dbg << ' ' << arg;
+            os << ' ' << arg;
     };
 
 #ifdef Q_OS_UNIX
     // Tracer for bash() and friends
-    const auto traceShellCmd = [](QDebug &dbg, const QString&, const QStringList &args)
+    const auto traceShellCmd = [](std::ostream &os, const QString&, const QStringList &args)
     {
-        // Just trace "$ <command>".
-        // Turn off quoting, don't need to bother saving state (this is tightly
-        // coupled to cmdImpl)
-        dbg.noquote();
-        dbg << "$ " << args[1];
+        // Just trace "$ <command>".  Don't quote the command again.
+        // (program is "bash" and args[0] is "-c", don't need to see those)
+        os << "$ " << qUtf8Printable(args[1]);
     };
 #endif
 }
 
-Executor::Executor(const QLoggingCategory &category)
+Executor::Executor(const kapps::core::LogCategory &category)
     : _category{category},
-      _stdoutCatName{buildSubcategoryName(category, QLatin1String{".stdout"})},
-      _stderrCatName{buildSubcategoryName(category, QLatin1String{".stderr"})},
-      _stdoutCategory{_stdoutCatName.data()},
-      _stderrCategory{_stderrCatName.data()}
+      _stdoutCatName{buildSubcategoryName(category, ".stdout")},
+      _stderrCatName{buildSubcategoryName(category, ".stderr")},
+      _stdoutCategory{*category.module(), _stdoutCatName},
+      _stderrCategory{*category.module(), _stderrCatName}
 {
 }
 
-QByteArray Executor::buildSubcategoryName(const QLoggingCategory &category,
-                                          const QLatin1String &suffix)
+std::string Executor::buildSubcategoryName(const kapps::core::LogCategory &category,
+                                           const kapps::core::StringSlice &suffix)
 {
-    QByteArray subcatName;
-    QLatin1String catName{category.categoryName()};
+    std::string subcatName;
+    const auto &catName{category.name()};
     subcatName.reserve(catName.size() + suffix.size());
     subcatName.append(catName.data(), catName.size());
     subcatName.append(suffix.data(), suffix.size());
@@ -68,27 +66,26 @@ QByteArray Executor::buildSubcategoryName(const QLoggingCategory &category,
 // bash - $ command
 // cmd - program args
 
-// This seems a bit excessive, but the only way to write into a QDebug from
-// qCWarning() and friends is with some sort of postfix expression, due to the
-// way the macros work.  This is an object we can insert that just calls the
-// functor with appropriate arguments when traced.
+// This used to be necessary when tracing was based on QDebug since we had to
+// use a postfix expression to call the trace functor.  It could be reworked
+// for the kapps::core logger.
 struct CmdTrace
 {
-    using FuncT = void(*)(QDebug&, const QString&, const QStringList&);
+    using FuncT = void(*)(std::ostream&, const QString&, const QStringList&);
     const QString &program;
     const QStringList &args;
     FuncT pFunc;
 };
 
-QDebug &operator<<(QDebug &dbg, const CmdTrace &trace)
+std::ostream &operator<<(std::ostream &os, const CmdTrace &trace)
 {
     Q_ASSERT(trace.pFunc);    // Ensured by caller
-    trace.pFunc(dbg, trace.program, trace.args);
-    return dbg;
+    trace.pFunc(os, trace.program, trace.args);
+    return os;
 }
 
 int Executor::cmdImpl(const QString &program, const QStringList &args,
-                      void(*traceFunc)(QDebug &, const QString&, const QStringList&),
+                      void(*traceFunc)(std::ostream &, const QString&, const QStringList&),
                       const QProcessEnvironment &env, QString *pOut,
                       bool ignoreErrors)
 {
@@ -115,18 +112,19 @@ int Executor::cmdImpl(const QString &program, const QStringList &args,
 #endif
         *pOut = QString::fromUtf8(out);
     }
+
     if ((exitCode != 0 || !err.isEmpty()) && !ignoreErrors)
     {
-        qCWarning(_category).nospace() << "(" << exitCode << ") "
-            << CmdTrace{program, args, traceFunc};
+        KAPPS_CORE_WARNING_CATEGORY(_category).nospace() << '(' << exitCode
+            << ')' << CmdTrace{program, args, traceFunc};
     }
     if (!out.isEmpty())
     {
-        qCInfo(_stdoutCategory).noquote() << out;
+        KAPPS_CORE_INFO_CATEGORY(_stdoutCategory) << out.data();
     }
     if (!err.isEmpty())
     {
-        qCWarning(_stderrCategory).noquote() << err;
+        KAPPS_CORE_WARNING_CATEGORY(_stderrCategory) << err.data();
     }
     return exitCode;
 }
@@ -191,9 +189,9 @@ QRegularExpressionMatch Executor::cmdWithRegex(const QString &program,
     auto match = regex.match(output);
     if(!match.hasMatch())
     {
-        qCWarning(_category).noquote() << "No match in output from"
+        KAPPS_CORE_WARNING_CATEGORY(_category) << "No match in output from"
             << CmdTrace{program, args, traceCmd};
-        qCWarning(_category).noquote() << output;
+        KAPPS_CORE_WARNING_CATEGORY(_category) << qUtf8Printable(output);
     }
     return match;
 }
@@ -203,7 +201,7 @@ namespace Exec
 {
     Executor &defaultExecutor()
     {
-        static QLoggingCategory _defaultCategory{"process"};
+        static kapps::core::LogCategory _defaultCategory{__FILE__, "process"};
         static Executor _defaultExecutor{_defaultCategory};
         return _defaultExecutor;
     }

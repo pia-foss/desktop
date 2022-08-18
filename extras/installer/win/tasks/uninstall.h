@@ -20,7 +20,7 @@
 #define TASKS_UNINSTALL_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 #include "file.h"
 #include "list.h"
 

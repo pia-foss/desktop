@@ -9,7 +9,7 @@ require_relative '../util/dsl.rb'
 module PiaMacOS
     extend BuildDSL
 
-    def self.defineTargets(version, commonlib, stage)
+    def self.defineTargets(version, stage, kappsModules, commonlib, clientlib)
         # Define a probe to identify the codesign certificate in use, and other
         # variables that affect codesigning.
         # The file content doesn't really matter, but this is a good way to hook
@@ -112,8 +112,7 @@ module PiaMacOS
             .install(stage, :bin)
 
         openvpnHelper = Executable.new("#{Build::Brand}-openvpn-helper")
-            .use(version.export)
-            .use(commonlib.export)
+            .use(clientlib.export)
             .sourceFile('extras/openvpn/mac_openvpn_helper.cpp')
             .useQt('Network')
             .install(stage, :bin)
@@ -122,27 +121,28 @@ module PiaMacOS
         bundleGenerated = Build.new('bundle-generated')
         infoPlist = bundleGenerated.artifact('Info.plist')
 
-        infoPlistContent = MacInfoPlist.defaultPlist(version.productName,
-                                                     version.productName,
-                                                     Build::ProductIdentifier)
-        infoPlistContent['CFBundleIconFile'] = 'app.icns'
-        infoPlistContent['CFBundleURLTypes'] = [
-            {
-                'CFBundleTypeRole': 'Viewer',
-                'CFBundleURLName': "#{Build::ProductIdentifier}.uri",
-                'CFBundleURLSchemes': ["#{Build::Brand}vpn"],
-                'CFBundleURLIconFile': 'app.icns'
-            }
-        ]
-        infoPlistContent['LSUIElement'] = true
-        infoPlistContent['NSSupportsAutomaticGraphicsSwitching'] = true
-        infoPlistContent['SMPrivilegedExecutables'] = {
-            "#{Build::ProductIdentifier}.installhelper":
-                "identifier #{Build::ProductIdentifier}.installhelper " +
-                "and certificate leaf[subject.CN] = \"#{ENV['PIA_CODESIGN_CERT']}\" " +
-                "and info [#{Build::ProductIdentifier}.version] = \"#{version.version}\""
-        }
-        infoPlistContent["#{Build::ProductIdentifier}.version"] = version.version
+        infoPlistContent = MacInfoPlist.new(version.productName,
+                                            version.productName,
+                                            Build::ProductIdentifier)
+            .macosApp
+            .set('CFBundleIconFile', 'app.icns')
+            .set('CFBundleURLTypes', [
+                    {
+                        'CFBundleTypeRole': 'Viewer',
+                        'CFBundleURLName': "#{Build::ProductIdentifier}.uri",
+                        'CFBundleURLSchemes': ["#{Build::Brand}vpn"],
+                        'CFBundleURLIconFile': 'app.icns'
+                    }
+                ])
+            .set('LSUIElement', true)
+            .set('NSSupportsAutomaticGraphicsSwitching', true)
+            .set('SMPrivilegedExecutables', {
+                    "#{Build::ProductIdentifier}.installhelper":
+                        "identifier #{Build::ProductIdentifier}.installhelper " +
+                        "and certificate leaf[subject.CN] = \"#{ENV['PIA_CODESIGN_CERT']}\" " +
+                        "and info [#{Build::ProductIdentifier}.version] = \"#{version.version}\""
+                })
+            .set("#{Build::ProductIdentifier}.version", version.version)
 
         # The Info.plist has dependencies on version.txt and brand.txt so it
         # will be recreated if the version/brand info changes.  The dependency
@@ -154,15 +154,15 @@ module PiaMacOS
                            version.artifact('version.txt'),
                            version.artifact('brand.txt'),
                            codesignProbeArtifact] do |t|
-            File.write(infoPlist, MacInfoPlist.renderPlistXml(infoPlistContent))
+            File.write(infoPlist, infoPlistContent.renderPlistXml)
         end
         stage.install(infoPlist, 'Contents/')
 
         # Generate a PkgInfo, it just contains 'APPL????'
         pkgInfo = bundleGenerated.artifact('PkgInfo')
         file pkgInfo => bundleGenerated.componentDir do |t|
-            File.write(pkgInfo, infoPlistContent['CFBundlePackageType'] +
-                                infoPlistContent['CFBundleSignature'])
+            File.write(pkgInfo, infoPlistContent.get('CFBundlePackageType') +
+                                infoPlistContent.get('CFBundleSignature'))
         end
         stage.install(pkgInfo, 'Contents/')
 
@@ -171,16 +171,17 @@ module PiaMacOS
         stBundleGenerated = Build.new('support-tool-bundle-generated')
         stInfoPlist = stBundleGenerated.artifact('Info.plist')
 
-        stInfoPlistContent = MacInfoPlist.defaultPlist("#{version.productShortName} Support Tool",
-                                                       "#{Build::Brand}-support-tool",
-                                                       "#{Build::ProductIdentifier}.support-tool")
-        stInfoPlistContent['CFBundleIconFile'] = 'app.icns'
-        stInfoPlistContent['LSUIElement'] = false
-        stInfoPlistContent['NSSupportsAutomaticGraphicsSwitching'] = true
+        stInfoPlistContent = MacInfoPlist.new("#{version.productShortName} Support Tool",
+                                              "#{Build::Brand}-support-tool",
+                                              "#{Build::ProductIdentifier}.support-tool")
+            .macosApp
+            .set('CFBundleIconFile', 'app.icns')
+            .set('LSUIElement', false)
+            .set('NSSupportsAutomaticGraphicsSwitching', true)
         file stInfoPlist => [stBundleGenerated.componentDir,
                              version.artifact('version.txt'),
                              version.artifact('brand.txt')] do |t|
-            File.write(stInfoPlist, MacInfoPlist.renderPlistXml(stInfoPlistContent))
+            File.write(stInfoPlist, stInfoPlistContent.renderPlistXml)
         end
         stBundleContents = "Contents/Resources/#{Build::Brand}-support-tool.app/Contents/"
         stage.install(stInfoPlist, stBundleContents)
@@ -195,6 +196,76 @@ module PiaMacOS
         stage.install(stSymlink, File.join(stBundleContents, 'MacOS/'))
 
         # TODO - Integtest Info.plist and PkgInfo
+    end
+
+    # Run two processes with arguments - redirect both stdout and stderr from
+    # the first into the stdin of the second.
+    #
+    # (Avoids having to use the "shell" form of system() when argument quoting
+    # is nontrivial)
+    def self.systemPipeline(firstArgs, secondArgs)
+        firstPid = nil
+        secondPid = nil
+        IO.pipe do |readPipe, writePipe|
+            firstPid = spawn(*firstArgs, {out: writePipe.fileno, err: writePipe.fileno})
+            secondPid = spawn(*secondArgs, in: readPipe.fileno)
+        end
+        statuses = []
+        Process.wait(firstPid)
+        statuses.push([firstArgs, $?])
+        Process.wait(secondPid)
+        statuses.push([secondArgs, $?])
+
+        statuses.each do |s|
+            if ! s[1].success?
+                raise "Invocation of #{s[0].join(' ')} failed: #{s[1]}"
+            end
+        end
+    end
+
+    def self.macdeployEnv
+        # macdeployqt very nearly works as-is on a universal build of Qt.
+        # install_name_tool correctly applies the desired change to every arch,
+        # and otool -L dumps dependencies for all arches, etc., so it does
+        # deploy correctly.
+        #
+        # It has slight issues when parsing otool -L when it reaches the second
+        # arch header, which it assumes are more dependency lines.
+        #
+        # The architecture header is correctly ignored because it doesn't
+        # parse as a dependency line.  It produces a noisy error, but
+        # macdeployqt does the right thing.
+        #
+        # The second install name line though _does_ match the format of a
+        # dependency line.  This too nearly works, treating every library as
+        # a dependency of itself (which is correctly ignored), _except_ for
+        # some plugins whose install names are unadorned file names, like
+        # libqmlfolderlistmodelplugin.dylib and several others (inspect them
+        # with otool -L and compare with the results for the QtCore framework
+        # module, etc.
+        #
+        # In that specific case, macdeployqt thinks the library should be found
+        # in the library search path and tries to find
+        # /usr/lib/libqmlfolderlistmodelplugin.dylib, which (hopefully) does
+        # not exist.
+        #
+        # Even then, it still ignores the file when it can't be found and still
+        # produces a working deployment.  However, for robustness, make
+        # macdeployqt use a shim around otool that only inspects one
+        # architecture.  The changes are made with install_name_tool, which
+        # still correctly applies to all architectures.
+        #
+        # This assumes that the dependencies are the same for all architectures.
+        # We need to do this whenever the Qt build used is universal, even if
+        # we're not building a universal target.
+        return {} if Executable::Qt.targetQtArch != :universal
+        analyzeArch = (Build::TargetArchitecture == :universal) ?
+            Build::PlatformUniversalArchitectures[:macos][0] :
+            Build::TargetArchitecture
+        return {
+            "PATH" => "./tools/otool-single-arch:#{ENV["PATH"]}",
+            "OTOOL_SINGLE_ARCH" => analyzeArch.to_s
+        }
     end
 
     def self.macdeploy(bundleDir, qmlDirs)
@@ -213,7 +284,54 @@ module PiaMacOS
         macdeployArgs += qmlDirs.map { |d| "-qmldir=#{d}" }
         macdeployArgs << '-no-strip'
 
-        sh *macdeployArgs
+        # FileUtils::sh doesn't accept environment variables
+        puts macdeployArgs.join(" ")
+        system(macdeployEnv, *macdeployArgs)
+        if !$?.success?
+            raise "macdeployqt failed with result #{$?.to_s}"
+        end
+
+        # Qt 5.15.2 doesn't actually support cross-arch builds, and macdeployqt
+        # has some issues with them.  It's close enough that we can fix it up,
+        # but we do not ship these builds.  The build we ship uses universal
+        # macdeployqt to deploy universal Qt libs, which is close enough to a
+        # native build that it works.
+        if(Executable::Qt.targetQtRoot != Executable::Qt.hostQtRoot)
+            puts "WARNING: Cross-architecture (non-universal) builds are not supported on macOS"
+            # The only issue seems to be that macdeployqt deploys the wrong
+            # plugins - it deploys host arch plugins, not target arch.  Replace
+            # them with the correct plugins.
+            FileList[File.join(bundleDir, 'Contents/PlugIns/*')].each do |groupDir|
+                FileList[File.join(groupDir, '*.dylib')].each do |pluginFile|
+                    # Get the last two components - 'group/plugin.dylib'
+                    group = File.basename(groupDir)
+                    plugin = File.basename(pluginFile)
+                    pluginRelPath = File.join(group, plugin)
+                    deployedPlugin = File.join(bundleDir, 'Contents/PlugIns', pluginRelPath)
+
+                    # The correct plugin is usually in <Qt>/plugins/<groups>/<plugin>.dylib.
+                    # QML plugins though can be in any number of components under <Qt>/qml.
+                    # The names of QML plugins must be unique enough to find the
+                    # file - after all, macdeployqt dumps them all in the same
+                    # directory.
+                    if(group == "quick")
+                        # This will also match a .dSYM somewhere, but the actual
+                        # dylib always sorts first
+                        correctPlugin = FileList[File.join(Executable::Qt.targetQtRoot, 'qml/**', plugin)].first
+                    else
+                        correctPlugin = File.join(Executable::Qt.targetQtRoot, 'plugins', pluginRelPath)
+                    end
+
+                    # Replace the deployed (wrong-arch) plugin with the correct one
+                    puts "fix deployed plugin: #{pluginRelPath} -> #{correctPlugin}"
+                    FileUtils.cp(correctPlugin, deployedPlugin)
+                    # Note that macdeployqt also changes load entries with
+                    # install_name_tool to use @rpath instead of @loader_path.
+                    # This is _not_ done here; the @loader_path relative path is
+                    # also correct in PIA's app bundle.
+                end
+            end
+        end
     end
 
     def self.defineIntegtestArtifact(version, integtestStage, artifacts)

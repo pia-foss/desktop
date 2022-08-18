@@ -16,17 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("updatedownloader.h")
 
 #ifndef UPDATEDOWNLOADER_H
 #define UPDATEDOWNLOADER_H
 
-#include "semversion.h"
-#include "async.h"
-#include "json.h"
+#include <common/src/semversion.h>
+#include <common/src/async.h>
+#include <common/src/json.h>
 #include "apiclient.h"
-#include "jsonrefresher.h"
+#include <common/src/jsonrefresher.h>
 #include <QObject>
 #include <QJsonDocument>
 #include <QNetworkAccessManager>
@@ -86,9 +86,9 @@ private:
     QString _uri, _version, _osRequired;
 };
 
-inline QDebug &operator<<(QDebug &dbg, const Update &update)
+inline std::ostream &operator<<(std::ostream &os, const Update &update)
 {
-    return dbg << update.uri() << update.version();
+    return os << update.uri() << ' ' << update.version();
 }
 
 // UpdateChannel keeps track of the current build available on a given channel

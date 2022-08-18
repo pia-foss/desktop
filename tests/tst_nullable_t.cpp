@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
 //OwnedInt is just a test object for verifying move semantics in nullable_t.

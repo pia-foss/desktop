@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "posix_mtu.h"
-#include "exec.h"
+#include <common/src/exec.h>
 
 namespace PosixMtu
 {

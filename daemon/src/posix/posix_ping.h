@@ -19,8 +19,8 @@
 #ifndef POSIX_PING_H
 #define POSIX_PING_H
 
-#include "common.h"
-#include "posix_objects.h"
+#include <common/src/common.h>
+#include <kapps_core/src/posix/posix_objects.h>
 #include <QSocketNotifier>
 
 // Open an ICMP socket and send pings on Mac/Linux.
@@ -66,7 +66,7 @@ signals:
     void receivedReply(quint32 address);
 
 private:
-    PosixFd _icmpSocket;
+    kapps::core::PosixFd _icmpSocket;
     // Have to delay construction of this notifier until we have set up the
     // ICMP socket.
     nullable_t<QSocketNotifier> _pReadNotifier;

@@ -20,7 +20,7 @@
 #define TASKS_TAP_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 // Base task for TAP installation/uninstallation.
 class TapDriverTask : public Task

@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win_dnscachecontrol.h")
 
 #ifndef WIN_DNSCACHECONTROL_H
 #define WIN_DNSCACHECONTROL_H
 
 #include "win_servicestate.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <QTimer>
 
 // WinDnsCacheControl disables or restores the DnsCache service, which is

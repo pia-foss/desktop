@@ -24,7 +24,6 @@ import "../../../theme"
 import "../../../common"
 import "../../../core"
 import "../../../settings/stores"
-import "../../../vpnconnection"
 import "../../../client"
 import "../.."
 
@@ -35,14 +34,6 @@ Item {
   property string location
   readonly property bool hovered: connectMouseArea.containsMouse
   readonly property string locationName: Client.getFavoriteLocalizedName(location)
-
-  function isOffline(loc) {
-    // Convert a possible auto/<countryCode>
-    // to a real location name (i.e 'best' for that country)
-    var realLocationName = Client.realLocation(loc)
-    var l = Daemon.state.availableLocations[realLocationName]
-    return !l || l.offline;
-  }
 
   width: 43
   height: 40
@@ -84,8 +75,8 @@ Item {
   FlagImage {
     id: flag
     anchors.centerIn: parent
-    countryCode: Client.countryFromLocation(location)
-    offline: isOffline(location)
+    countryCode: Client.countryForFavorite(location)
+    offline: Client.isFavoriteOffline(location)
 
     opacity: {
       // Stay 100% opaque when connected or connecting to this location.
@@ -110,7 +101,7 @@ Item {
 
   readonly property bool isDedicatedIp: {
     var loc = Daemon.state.availableLocations[location]
-    return !!(loc && loc.dedicatedIpExpire > 0)
+    return !!(loc && loc.dedicatedIp)
   }
 
   // This is the silhouette of the DIP badge rendered in the background color of
@@ -189,8 +180,8 @@ Item {
     focusCueForceRound: true
 
     onClicked: {
-      if(!isOffline(location)) {
-        VpnConnection.connectLocation(Client.realLocation(location))
+      if(!Client.isFavoriteOffline(location)) {
+        Client.connectFavorite(location)
       }
     }
   }

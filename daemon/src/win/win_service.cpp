@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_service.cpp")
 
 #include "win_service.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "win.h"
 #include "brand.h"
 #include "../../../extras/installer/win/service_inl.h"
@@ -39,9 +39,12 @@ static bool reportStatus(DWORD state, DWORD exitCode = NO_ERROR, DWORD waitHint 
 static void serviceMain(int argc, wchar_t** argv)
 {
     if (HRESULT error = ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))
-        qFatal("CoInitializeEx failed with error 0x%08x.", error);
+    {
+        qFatal() << "CoInitializeEx failed with error 0x"
+            << QString::number(error, 16) << ".";
+    }
     if (!(g_statusHandle = ::RegisterServiceCtrlHandlerExW(PIA_SERVICE, serviceCtrlHandler, nullptr)))
-        qFatal("Unable to register service control handler");
+        qFatal() << "Unable to register service control handler";
     reportStatus(SERVICE_START_PENDING);
 
     DWORD exitCode = 1;

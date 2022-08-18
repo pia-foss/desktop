@@ -61,9 +61,10 @@ QtObject {
   readonly property bool wireguardUseKernel: NativeDaemon.settings.wireguardUseKernel
   readonly property int wireguardPingTimeout: NativeDaemon.settings.wireguardPingTimeout
   readonly property bool persistDaemon: NativeDaemon.settings.persistDaemon
-  readonly property string macStubDnsMethod: NativeDaemon.settings.macStubDnsMethod
   readonly property int sessionCount: NativeDaemon.settings.sessionCount
+  readonly property int successfulSessionCount: NativeDaemon.settings.successfulSessionCount
   readonly property bool ratingEnabled: NativeDaemon.settings.ratingEnabled
+  readonly property bool surveyRequestEnabled: NativeDaemon.settings.surveyRequestEnabled
   readonly property int lastDismissedAppMessageId: NativeDaemon.settings.lastDismissedAppMessageId
   readonly property bool showAppMessages: NativeDaemon.settings.showAppMessages
   readonly property var manualServer: NativeDaemon.settings.manualServer

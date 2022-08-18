@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("mac_objects.h")
 
 #ifndef MAC_OBJECTS_H
@@ -233,11 +233,13 @@ public:
 
 public:
     QString toQString() const {return QString::fromCFString(get());}
+    // TODO: don't go through QString
+    std::string toStdString() const {return toQString().toStdString();}
 };
 
-inline QDebug &operator<<(QDebug &dbg, const MacString &str)
+inline std::ostream &operator<<(std::ostream &os, const MacString &str)
 {
-    return dbg << str.toQString();
+    return os << str.toQString();
 }
 
 // Specializations of macCfTypeId().

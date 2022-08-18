@@ -17,8 +17,8 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "launch.h"
-#include "safemode_inl.h"
-#include "util.h"
+#include "../safemode_inl.h"
+#include "../util.h"
 
 void LaunchClientTask::execute()
 {

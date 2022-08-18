@@ -110,7 +110,7 @@ Item {
     anchors.right: parent.right
     height: countryHeight
 
-    label: hasSubRegions ? Daemon.getCountryName(regionCountry) : Daemon.getLocationName(region)
+    label: hasSubRegions ? Client.getCountryName(regionCountry) : Client.getRegionAutoName(region.id)
     labelTextPx: Theme.regions.labelTextPx
     showLatency: !hasSubRegions && !region.offline
     latency: {
@@ -142,10 +142,10 @@ Item {
     offline: region ? region.offline : regionChildren.every(e => e.subregion.offline)
     geoLocation: {
       if(region)
-        return region.geoOnly
+        return region.geoLocated
       // For a group, show the geo indicator if all subregions are geo locations
       for(var i=0; i<regionChildren.length; ++i) {
-        if(!regionChildren[i].subregion.geoOnly)
+        if(!regionChildren[i].subregion.geoLocated)
           return false
       }
       return true // All regions are geo
@@ -229,7 +229,7 @@ Item {
 
         Layout.fillWidth: true
         height: regionHeight
-        label: Daemon.getLocationName(subregion)
+        label: Client.getRegionNestedName(subregion.id)
         labelTextPx: Theme.regions.sublabelTextPx
         showLatency: !subregion.offline
         latency: Util.isFiniteNumber(subregion.latency) ? subregion.latency : -1
@@ -240,7 +240,7 @@ Item {
         canFavorite: regionDelegate.canFavorite
         favoriteRegionId: subregionKey
         lacksPortForwarding: regionDelegate.portForwardEnabled && !subregion.portForward
-        geoLocation: subregion.geoOnly
+        geoLocation: subregion.geoLocated
         pfWarningTipText: singleRegionPfWarning
         offline: subregion.offline
         highlightColumn: {

@@ -16,14 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("latencytracker.h")
-
-#ifndef LATENCYTRACKER_H
-#define LATENCYTRACKER_H
-
-#include "thread.h"
-#include "settings/locations.h"
+#pragma once
+#include <common/src/common.h>
+#include <common/src/thread.h>
+#include <common/src/settings/locations.h>
 #include "vpn.h"
 #include <QObject>
 #include <QElapsedTimer>
@@ -99,7 +95,7 @@ class LatencyTracker : public QObject
 private:
     struct LocationData
     {
-        QSharedPointer<Location> pLocation;
+        QSharedPointer<const Location> pLocation;
         LatencyHistory latency;
         //Locations can sit in _locations without having been attempted if
         //measurements are not enabled.
@@ -133,7 +129,7 @@ private:
     void measureNewLocations();
 
     //Begin a new measurement for a group of locations
-    void beginMeasurement(const std::vector<QSharedPointer<Location>> &locations);
+    void beginMeasurement(const std::vector<QSharedPointer<const Location>> &locations);
 
 public:
     //Daemon passes the current set of locations to this method.
@@ -222,7 +218,7 @@ public:
 
 public:
     //Create LatencyBatch with the locations that will be checked.
-    LatencyBatch(const std::vector<QSharedPointer<Location>> &locations,
+    LatencyBatch(const std::vector<QSharedPointer<const Location>> &locations,
                  QObject *pParent);
 
 signals:
@@ -277,5 +273,3 @@ private:
 //If the given address does not have any other equivalent addresses (it's an
 //IPv6 address), this returns a vector containing just the original address.
 QVector<QHostAddress> getEquivalentAddresses(const QHostAddress &srcAddr);
-
-#endif // LATENCYTRACKER_H

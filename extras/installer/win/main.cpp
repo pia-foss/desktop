@@ -102,6 +102,7 @@ skipped in silent or passive mode.
 #include "resource.h"
 
 #include "util.h"
+#include "util_inl.h"
 #include "tasks/payload.h"
 #include "tasks.h"
 #include "installer.h"
@@ -206,28 +207,6 @@ static std::wstring getExecutablePath()
 {
     std::wstring path(MAX_PATH, 0);
     path.resize(GetModuleFileName((HMODULE)g_instance, &path[0], path.size()));
-    return path;
-}
-
-// Determine the system temp directory (e.g. C:\Windows\Temp)
-static std::wstring getSystemTempPath()
-{
-    std::wstring path;
-    const wchar_t* env;
-    if (CreateEnvironmentBlock((LPVOID*)&env, NULL, FALSE))
-    {
-        for (const wchar_t* p = env; *p; p += wcslen(p) + 1)
-        {
-            if (!wcsnicmp(p, L"TEMP=", 5))
-            {
-                path.assign(p + 5);
-                while (!path.empty() && path.back() == '\\')
-                    path.pop_back();
-                break;
-            }
-        }
-        DestroyEnvironmentBlock((LPVOID)env);
-    }
     return path;
 }
 

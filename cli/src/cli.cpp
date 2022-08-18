@@ -16,16 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("cli.cpp")
 
-#include "clientlib.h"
-#include "output.h"
-#include "path.h"
-#include "util.h"
+#include <clientlib/src/clientlib.h>
+#include <common/src/output.h>
+#include <common/src/builtin/path.h>
+#include <common/src/builtin/util.h>
 #include "version.h"
 #include "makecommand.h"
 #include <QCommandLineParser>
+
+KAPPS_CORE_LOG_MODULE(cli, "src/cli.cpp")
 
 int cliMain(int argc, char *argv[])
 {
@@ -88,7 +90,7 @@ int cliMain(int argc, char *argv[])
 
     if(parser.isSet("version"))
     {
-        outln() << Version::semanticVersion();
+        outln() << QString::fromStdString(Version::semanticVersion());
         return CliExitCode::Success;
     }
 

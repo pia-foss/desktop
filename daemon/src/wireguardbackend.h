@@ -16,17 +16,20 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguardbackend.h")
 
 #ifndef WIREGUARD_BACKEND_H
 #define WIREGUARD_BACKEND_H
 
 #include <QHostAddress>
-#include "async.h"
+#include <common/src/async.h>
 #include "vpn.h"
 #include <deque>
 
+// wireguard.h will include Windows headers on Windows; include winapi.h first
+// to exclude things we don't want like the min()/max() macros
+#include <kapps_core/src/winapi.h>
 // embeddable-wg-library - C header
 extern "C"
 {

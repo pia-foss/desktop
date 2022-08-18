@@ -16,10 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
-#include "async.h"
+#include <common/src/async.h>
 
 class tst_tasks : public QObject
 {
@@ -27,7 +27,7 @@ class tst_tasks : public QObject
 
     static int add(int x) { return x + 1; }
     int memberAdd(int x) { return add(x); }
-    static int handle(const Error& error) { qWarning().noquote() << qEnumToString(error.code()); return 0; }
+    static int handle(const Error& error) { qWarning() << qEnumToString(error.code()); return 0; }
     int memberHandle(const Error& error) { return handle(error); }
     static QString printable(const Error& error, int x) { return error ? QStringLiteral("error") : QString::number(x); }
     QString memberPrintable(const Error& error, int x) { return printable(error, x); }

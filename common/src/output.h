@@ -16,13 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("output.h")
-
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-#include "util.h"
+#include "common.h"
+#include "builtin/util.h"
 #include <QTextStream>
 
 // Indent output produced by OutputLine().

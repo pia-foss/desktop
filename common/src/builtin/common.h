@@ -91,17 +91,9 @@
 # define Q_REQUIRED_RESULT __attribute__((__warn_unused_result__))
 #endif
 
-// Visibility annotations for declarations in common and builtin
-// The default is to assume common and builtin are being statically linked - do
-// not annotate anything.
-//
-// DYNAMIC_COMMON indicates that common and builtin are dynamically linked,
-// which causes visible declarations to be annotated.  On GCC/clang, this just
-// annotates them with "public" visibility.  On MSVC, they are exported if
-// BUILD_COMMON is defined and imported otherwise.
-//
-// Annotate declarations that can be exported with COMMON_EXPORT.
-#ifdef DYNAMIC_COMMON
+#ifdef STATIC_COMMON
+    #define COMMON_EXPORT   // Statically linking, no annotation
+#else
     #ifdef _WIN32
         #ifdef BUILD_COMMON
             #define COMMON_EXPORT __declspec(dllexport)
@@ -111,8 +103,6 @@
     #else
         #define COMMON_EXPORT __attribute__((visibility("default")))
     #endif
-#else
-    #define COMMON_EXPORT   // Statically linking, no annotation
 #endif
 
 // In rare cases, a template specialization may need to be both manually
@@ -133,7 +123,7 @@
 // uses CRTP.  MSVC implicitly applies dllexport when deriving a dllexport type
 // from a template instantiation, so we just have to remove dllexport from the
 // extern declaration.
-#if defined(DYNAMIC_COMMON) && defined(_WIN32) && defined(BUILD_COMMON)
+#if !defined(STATIC_COMMON) && defined(_WIN32) && defined(BUILD_COMMON)
     // No annotation on the declaration of the specialiation - would conflict with extern
     #define COMMON_EXPORT_TMPL_SPEC_DECL
 #else
@@ -145,62 +135,6 @@
 // documents without runtime impact which exceptions a function may throw.
 //
 #define throws(...) noexcept(false)
-
-
-#ifdef Q_OS_WIN
-
-#define _WINSOCKAPI_
-
-#define NOMINMAX           // Macros min(a,b) and max(a,b)
-
-#ifndef PIA_CLIENT
-
-// Reduce the amount of extra stuff defined by Windows.h
-#define WIN32_LEAN_AND_MEAN
-
-#define NOGDICAPMASKS      // CC_*, LC_*, PC_*, CP_*, TC_*, RC_
-#define NOVIRTUALKEYCODES  // VK_*
-//#define NOWINMESSAGES      // WM_*, EM_*, LB_*, CB_*
-#define NOWINSTYLES        // WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
-#define NOSYSMETRICS       // SM_*
-#define NOMENUS            // MF_*
-//#define NOICONS            // IDI_*
-#define NOKEYSTATES        // MK_*
-#define NOSYSCOMMANDS      // SC_*
-#define NORASTEROPS        // Binary and Tertiary raster ops
-#define NOSHOWWINDOW       // SW_*
-#define OEMRESOURCE        // OEM Resource values
-#define NOATOM             // Atom Manager routines
-#define NOCLIPBOARD        // Clipboard routines
-#define NOCOLOR            // Screen colors
-//#define NOCTLMGR           // Control and Dialog routines      // Needed by setupapi.h
-#define NODRAWTEXT         // DrawText() and DT_*
-#define NOGDI              // All GDI defines and routines
-//#define NOKERNEL           // All KERNEL defines and routines
-//#define NOUSER             // All USER defines and routines
-//#define NONLS              // All NLS defines and routines
-#define NOMB               // MB_* and MessageBox()
-#define NOMEMMGR           // GMEM_*, LMEM_*, GHND, LHND, associated routines
-#define NOMETAFILE         // typedef METAFILEPICT
-//#define NOMSG              // typedef MSG and associated routines
-#define NOOPENFILE         // OpenFile(), OemToAnsi, AnsiToOem, and OF_*
-#define NOSCROLL           // SB_* and scrolling routines
-//#define NOSERVICE          // All Service Controller routines, SERVICE_ equates, etc.
-#define NOSOUND            // Sound driver routines
-#define NOTEXTMETRIC       // typedef TEXTMETRIC and associated routines
-#define NOWH               // SetWindowsHook and WH_*
-//#define NOWINOFFSETS       // GWL_*, GCL_*, associated routines
-#define NOCOMM             // COMM driver routines
-#define NOKANJI            // Kanji support stuff.
-#define NOHELP             // Help engine interface.
-#define NOPROFILER         // Profiler interface.
-#define NODEFERWINDOWPOS   // DeferWindowPos routines
-#define NOMCX              // Modem Configuration Extensions
-
-#endif
-
-#endif
-
 
 // HEADER_FILE() and SOURCE_FILE() macros were historically used to trim down
 // file paths manually in release builds (to reduce logging verbosity).  These

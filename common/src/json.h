@@ -16,12 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("json.h")
-
-#ifndef JSON_H
-#define JSON_H
 #pragma once
+#include "common.h"
+#include <kapps_core/src/corejson.h>
 
 #include <cmath>
 #include <exception>
@@ -34,6 +31,7 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QJsonDocument>
 #include <QJsonValue>
 #include <QLinkedList>
 #include <QList>
@@ -65,7 +63,24 @@ QT_WARNING_DISABLE_CLANG("-Wunused-lambda-capture")
 // integer even though it can't actually be represented.  This should be
 // addressed, but right now the mass of warnings is hiding other more important
 // issues.
+#if __clang_major__ >= 11
 QT_WARNING_DISABLE_CLANG("-Wimplicit-const-int-float-conversion")
+#endif
+
+// Tracing a QJsonObject or QJsonDocument renders JSON.
+inline std::ostream &operator<<(std::ostream &os, const QJsonDocument &doc)
+{
+    return os << doc.toJson(QJsonDocument::JsonFormat::Compact).data();
+}
+inline std::ostream &operator<<(std::ostream &os, const QJsonObject &obj)
+{
+    return os << QJsonDocument{obj};
+}
+inline std::ostream &operator<<(std::ostream &os, const QJsonArray &arr)
+{
+    return os << QJsonDocument{arr};
+}
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QJsonValue &val);
 
 // Forward declaration
 class COMMON_EXPORT NativeJsonObject;
@@ -174,7 +189,7 @@ template<typename T> bool json_cast(const QJsonValue& from, QSharedPointer<T>& t
     }
     else
     {
-        auto result = QSharedPointer<T>::create();
+        auto result = QSharedPointer<std::remove_cv_t<T>>::create();
         if (!json_cast(from, *result))
             return false;
         to = std::move(result);
@@ -292,11 +307,11 @@ COMMON_EXPORT bool json_cast(const NativeJsonObject& from, QJsonValue& to);
 // (Important for parsing JSON data from APIs, indicates which field was invalid
 // if an error occurs.)
 template<typename To, typename From> static inline To json_cast(const From& from,
-                                                                const CodeLocation &loc = {})
+                                                                const CodeLocation &loc)
 {
     To to;
     if (!json_cast(from, to))
-        throw Error{loc ? loc : HERE, Error::Code::JsonCastError};
+        throw Error{loc, Error::Code::JsonCastError};
     return to;
 }
 
@@ -304,7 +319,6 @@ template<typename To, typename From> static inline To json_cast(const From& from
 // Get a printable version of any QJsonValue.
 //
 COMMON_EXPORT QString jsonValueString(const QJsonValue& value);
-
 
 // Base class for a QJsonObject-like class with fields accessible natively
 // as well as via Qt properties. All properties must be convertible to/from
@@ -459,17 +473,63 @@ private:
 // parameter so the choices() template is only instantiated if choices_name() is
 // actually called.  This ensures a compile-time error if choices_name() is
 // called for a property that shouldn't have it (although not a very good one).)
-#define JsonField(type, name, defaultValue, ...) \
+#define JsonField_detail_property(type, name, defaultValue, ...) \
     public: const type& name() const { return _##name; } \
     public: void name(const type& value) { clearError(); if (_##name != value) { if (validate(value,##__VA_ARGS__)) { _##name = value; emitPropertyChange({[this](){emit name##Changed();}, QStringLiteral(#name)}); } else { _error = JsonFieldError(HERE, QStringLiteral(#name), QStringLiteral(#type)); } } } \
     signals: Q_SIGNAL void name##Changed(); \
-    public: QJsonValue get_##name() const { QJsonValue value; if (!json_cast(name(), value)) { qCritical() << "Unable to convert field " #name " to JSON"; } return value; } \
-    public: void set_##name(const QJsonValue& value) { clearError(); type actual; if (!json_cast(value, actual)) { _error = JsonFieldError(HERE, QStringLiteral(#name), QStringLiteral(#type), jsonValueString(value)); } else name(actual); } \
     public: static type default_##name() { return defaultValue; } \
     public: void reset_##name() { type value = default_##name(); if (_##name != value) { _##name = std::move(value); emitPropertyChange({[this](){emit name##Changed();}, QStringLiteral(#name)}); } } \
     private: type _##name = default_##name(); \
     public: static auto choices_##name(decltype(choices(static_cast<type*>(nullptr),##__VA_ARGS__)) c = choices(static_cast<type*>(nullptr),##__VA_ARGS__)) {return c;} \
     Q_PROPERTY(QJsonValue name READ get_##name WRITE set_##name NOTIFY name##Changed RESET reset_##name FINAL)
+
+#define JsonField_detail_setDecl(name) \
+    public: void set_##name(const QJsonValue &value);
+
+#define JsonField_detail_setImpl(name, qual) \
+    void qual set_##name(const QJsonValue& value) \
+    { \
+        clearError(); \
+        decltype(_##name) actual; \
+        if (!json_cast(value, actual)) \
+        { \
+            _error = JsonFieldError{HERE, \
+                QStringLiteral(#name), \
+                qs::toQString(kapps::core::typeName<decltype(_##name)>()), \
+                jsonValueString(value)}; \
+        } \
+        else \
+            name(actual); \
+    }
+
+#define JsonField_detail_getDecl(name) \
+    public: QJsonValue get_##name() const;
+
+#define JsonField_detail_getImpl(name, qual) \
+    QJsonValue qual get_##name() const \
+    { \
+        QJsonValue value; \
+        if (!json_cast(name(), value)) \
+        { \
+            qCritical() << "Unable to convert field " #name " to JSON"; \
+        } \
+        return value; \
+    }
+
+// Declare and implement a NativeJsonObject property inline
+#define JsonField(type, name, defaultValue, ...) \
+    public: JsonField_detail_setImpl(name, ) \
+    public: JsonField_detail_getImpl(name, ) \
+    JsonField_detail_property(type, name, defaultValue,##__VA_ARGS__)
+
+// Declare a NativeJsonObject property and implement it out-of-line
+#define JsonFieldDecl(type, name, defaultValue, ...) \
+    JsonField_detail_setDecl(name) \
+    JsonField_detail_getDecl(name) \
+    JsonField_detail_property(type, name, defaultValue,##__VA_ARGS__)
+#define JsonFieldImpl(scope, name) \
+    JsonField_detail_setImpl(name, scope::) \
+    JsonField_detail_getImpl(name, scope::)
 
 // For object-valued fields, JsonObjectField() provides a mutable name()
 // accessor, so the object's properties can be manipulated with
@@ -651,4 +711,215 @@ COMMON_EXPORT bool readProperties(NativeJsonObject &object, const Path &settings
 COMMON_EXPORT void writeProperties(const QJsonObject &object, const Path &settingsDir,
                                    const char *filename);
 
-#endif // JSON_H
+// Bridge between Qt and kapps::core JSON support:
+// - Provide conversions between Qt types and nlohmann::json
+// - Provide conversions between kapps::core::Json{Writable,Readable} and
+//   QJsonValue
+//
+// The goal is to eventually move the daemon entirely to nlohmann::json.  The
+// client will probably continue to use Qt's JSON library (as it integrates with
+// QML), but since it is intended to move to a dynamic model instead of the
+// static models in DaemonState/etc., it shouldn't need any bridging.
+
+// Get a QJsonObject from an nlohman::json that is expected to have an object
+// value.  This is relatively complex because:
+// - Qt can only parse object- or array-valued JSON, not other types as
+//   permitted by RFC8259.
+// - Qt's error handling is, as usual, really cumbersome.  Qt doesn't use
+//   exceptions, so we have to manually check for lots of error conditions and
+//   extract relevant information for tracing.
+//
+// If the conversion is not possible for any reason (including if the
+// nlohmann::json is not an object value), this throws.
+//
+// There is no helper for the reverse (QJsonObject to nlohmann::json), because
+// it's trivial - just QJsonDocument{o}.toJson() followed by
+// nlohmann::json::parse(), which throws good exceptions for errors.
+COMMON_EXPORT QJsonObject adaptJsonTextToQJsonObject(kapps::core::StringSlice jsonText);
+template<class JsonT>
+QJsonObject adaptNljToQt(const JsonT &j)
+{
+    if(!j.is_object())
+    {
+        KAPPS_CORE_WARNING() << "Can't read JSON of type" << j.type()
+            << "- expected object";
+        throw std::runtime_error{"object JSON value expected"};
+    }
+
+    auto jsonText = j.dump();
+    return adaptJsonTextToQJsonObject(jsonText);
+}
+
+// Convert QSharedPointer<T> to/from JSON.  nullptr is represented as a JSON null.
+template<class T, class JsonT>
+void to_json(JsonT &j, const QSharedPointer<T> &p)
+{
+    if(!p)
+    {
+        // Parentheses initializion is required here, {value_t::null} may be
+        // interpreted as "array of null" due to the initializer_list constructor
+        // taking precedence
+        j = JsonT(JsonT::value_t::null);
+    }
+    else
+        j = *p;
+}
+template<class T, class JsonT>
+void from_json(const JsonT &j, QSharedPointer<T> &p)
+{
+    if(j.is_null())
+        p.clear();
+    else
+    {
+        auto pValue = QSharedPointer<T>::create();
+        from_json(j, *pValue);
+        p = std::move(pValue);
+    }
+}
+
+// Convert between QString and nlohmann::json
+template<class JsonT>
+void to_json(JsonT &j, const QString &s)
+{
+    // Creates a std::string containing the content of s in UTF-8, which is then
+    // moved into the json value
+    j = s.toStdString();
+}
+template<class JsonT>
+void from_json(const JsonT &j, QString &s)
+{
+    // This throws as intended if the value is not a string
+    auto valueStr = j.template get<kapps::core::StringSlice>();
+    s = QString::fromUtf8(valueStr.data(), valueStr.size());
+}
+
+// Convert between NativeJsonObject and nlohmann::json
+template<class JsonT>
+void to_json(JsonT &j, const NativeJsonObject &o)
+{
+    QByteArray jsonText = QJsonDocument{o.toJsonObject()}.toJson();
+    j = JsonT::parse(jsonText);
+}
+
+template<class JsonT>
+void from_json(const JsonT &j, NativeJsonObject &o)
+{
+    QJsonObject qtJson = adaptNljToQt(j);
+    // Normally we try to avoid mutating the result object if any part of the
+    // conversion fails, but that's not possible here - we don't know the
+    // concrete type of the NativeJsonObject, and it's not assignable to
+    // avoid slicing.
+    if(!o.readJsonObject(qtJson))
+    {
+        // There really should be an error if assign() failed
+        if(o.error())
+        {
+            KAPPS_CORE_WARNING() << "Can't read value from JSON data:"
+                << o.error();
+            throw *o.error();
+        }
+        KAPPS_CORE_WARNING() << "Can't read value from JSON data: unknown error";
+        throw std::runtime_error{"unknown error from NativeJsonObject"};
+    }
+}
+
+// Convert QJsonValue to kapps::core::JsonReadable.  This has to serialize the
+// JSON to transport between Qt and nlohmann::json.
+//
+// Qt can only serialize JSON for an object or array value (not any JSON
+// value, as is now allowed by RFC8259).  This implementation assumes that T
+// wants an object value, and it rejects other types.  (We could still relax
+// this by putting 'from' into an object for serialization, but no existing
+// types need this.)
+template<class T, class JsonT = nlohmann::json>
+bool json_cast(const QJsonValue &from, kapps::core::JsonReadable<T> &to)
+{
+    try
+    {
+        if(!from.isObject())
+        {
+            KAPPS_CORE_WARNING() << "Can't read" << kapps::core::typeName<T>()
+                << "value from JSON of type" << from.type()
+                << "- expected object";
+            return false;
+        }
+
+        QJsonDocument doc{from.toObject()};
+        QByteArray docJson = doc.toJson();
+        auto nljDoc = JsonT::parse(docJson.begin(), docJson.end());
+        from_json(nljDoc, to);
+        return true;
+    }
+    catch(const std::exception &ex)
+    {
+        // We have to eat the exception, this variation of json_cast is not
+        // supposed to throw
+        KAPPS_CORE_WARNING() << "Can't read" << kapps::core::typeName<T>()
+            << "value from JSON:" << ex.what();
+    }
+    return false;
+}
+
+// kapps::core::JsonReadable<T> values can't be read from JSON, but currently
+// NativeJsonObject requires both conversions to exist.  This conversion always
+// fails.
+template<class T>
+bool json_cast(const kapps::core::JsonReadable<T> &, QJsonValue&)
+{
+    KAPPS_CORE_ERROR() << "Can't convert readable type"
+        << kapps::core::typeName<T>() << "to JSON";
+    return false;
+}
+
+// Convert kapps::core::JsonWritable to a QJsonValue.  Like the conversion from
+// kapps::core::JsonReadable, this has to serialize the JSON to transport
+// between the libraries.
+//
+// Again, since Qt can only deserialize object- or array-valued JSON documents,
+// this assumes that T wants an object value.
+template<class T, class JsonT = nlohmann::json>
+bool json_cast(const kapps::core::JsonWritable<T> &from, QJsonValue& to)
+{
+    try
+    {
+        JsonT nljDoc;
+        to_json(nljDoc, from);
+        to = adaptNljToQt(nljDoc);
+        return true;
+    }
+    catch(const std::exception &ex)
+    {
+        // We have to eat the exception, this variation of json_cast is not
+        // supposed to throw
+        KAPPS_CORE_WARNING() << "Can't render JSON from"
+            << kapps::core::typeName<T>() << "value:" << ex.what();
+    }
+    return false;
+}
+
+// kapps::core::JsonWritable<T> values can't be read from JSON, but currently
+// NativeJsonObject requires both conversions to exist.  This conversion always
+// fails.
+template<class T>
+bool json_cast(const QJsonValue &, kapps::core::JsonWritable<T> &)
+{
+    KAPPS_CORE_ERROR() << "Can't convert writable type"
+        << kapps::core::typeName<T>() << "from JSON";
+    return false;
+}
+
+// kapps::core::JsonConvertible<T> is both writable and readable, use the
+// correct operation for each (resolves ambiguity since we had to define bogus
+// operations above for JsonWritable/JsonReadable)
+template<class T>
+bool json_cast(const QJsonValue &from, kapps::core::JsonConvertible<T> &to)
+{
+    kapps::core::JsonReadable<T> &toReadable{to};
+    return json_cast(from, toReadable);
+}
+template<class T>
+bool json_cast(const kapps::core::JsonConvertible<T> &from, QJsonValue& to)
+{
+    const kapps::core::JsonWritable<T> &fromWritable{from};
+    return json_cast(fromWritable, to);
+}

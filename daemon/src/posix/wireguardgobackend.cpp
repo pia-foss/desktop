@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("wireguardgobackend.cpp")
 
 #include "wireguardgobackend.h"
-#include "path.h"
-#include "async.h"
-#include "exec.h"
+#include <common/src/builtin/path.h>
+#include <common/src/async.h>
+#include <common/src/exec.h>
 #include "brand.h"
 #include <unistd.h>
 #include <memory>
@@ -455,7 +455,7 @@ WireguardGoBackend::WireguardGoBackend()
 #endif
 
     connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
-        [](const QByteArray &line){qInfo() << "wireguard-go:" << line;});
+        [](const QByteArray &line){qInfo() << "wireguard-go:" << line.data();});
 #ifdef Q_OS_MACOS
     connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
         [=](const QByteArray &line) mutable {

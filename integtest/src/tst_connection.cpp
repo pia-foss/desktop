@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("tst_connection.cpp")
 
 #include "integtestcase.h"
 #include "cliharness.h"
-#include "settings/daemonsettings.h"
+#include <common/src/settings/daemonsettings.h>
 #include "tunnelcheckstatus.h"
 
 // Connection tests

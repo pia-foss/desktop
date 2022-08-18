@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 #include <QSignalSpy>
 
-#include "ipc.h"
+#include <common/src/ipc.h>
 
 #include <functional>
 

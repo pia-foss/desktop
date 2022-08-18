@@ -1,5 +1,21 @@
 # Changelog
 
+### v3.4.0
+
+* Builds for macOS are now universal for x86_64 and arm64
+* Improved robustness in firewall backends
+* Improved reliability of split tunnel rules for Opera and other applications with "launcher" executables on Windows
+* Install logs are now included in debug reports when available
+* Login and dedicated IP pages indicate when to retry when rate-limited by API
+* Fixed opening combo boxes when another combo box was open, the second combo box no longer closes immediately
+* Fixed permissions on piavpn.service to eliminate warning from systemd on some Linux distributions
+* Fixed a rare GUI crash that could occur on the Split Tunnel or Automation pages if a setting change occurred while a combo box was open
+* Detect absense of iptables on some Linux systems and install if possible.
+
+### v3.3.1
+
+* Request product feedback by linking to our survey
+
 ### v3.3.0
 
 * Support Handshake domain name resolution (Using HDNS nameservers)

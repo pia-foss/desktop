@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("mac/mac_window.h")
 #include <QPixmap>
 
 #ifndef MAC_WINDOW_H
 #define MAC_WINDOW_H
 
-#include "windowmaxsize.h"
+#include "../windowmaxsize.h"
 
 // Put a window on all workspaces on OS X (enables
 // NSWindowCollectionBehaviorCanJoinAllSpaces)

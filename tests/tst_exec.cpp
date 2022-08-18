@@ -16,10 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
-#include "exec.h"
+#include <common/src/exec.h>
 
 class tst_exec : public QObject
 {
@@ -51,7 +51,7 @@ private slots:
     void testCmdWithErrorMessages()
     {
         // the -2 code is defined in waitForExitCode() see util.cpp
-        QTest::ignoreMessage(QtWarningMsg, "(-2) \"c0mmandDoesNotExist\"");
+        QTest::ignoreMessage(QtWarningMsg, "(-2)\"c0mmandDoesNotExist\"");
         Exec::cmd(QStringLiteral("c0mmandDoesNotExist"), {}, false);
     }
 

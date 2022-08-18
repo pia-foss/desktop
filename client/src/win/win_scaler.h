@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_scaler.h")
 
 #ifndef WIN_SCALER_H
@@ -24,10 +24,10 @@
 
 #include "win_objects.h"
 #include "win_subclasswnd.h"
-#include "nativewindowscaler.h"
-#include "windowmaxsize.h"
-#include "win/win_messagewnd.h"
-#include "win/win_util.h"
+#include "../nativewindowscaler.h"
+#include "../windowmaxsize.h"
+#include <common/src/win/win_messagewnd.h>
+#include <common/src/win/win_util.h>
 
 // MonitorScale queries for the scale factor to use when rendering to a given
 // monitor.

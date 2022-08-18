@@ -412,18 +412,9 @@ bool RemoteCallInterface::processResponse(const QJsonObject &response)
     {
         if (error.isObject())
         {
-            auto errorObject = error.toObject();
-            auto code = static_cast<Error::Code>(static_cast<int>(errorObject[QLatin1String("code")].toDouble()));
-            auto message = errorObject[QLatin1String("message")].toString("Unknown error");
-            auto data = errorObject[QLatin1String("data")].toArray();
-            QStringList params;
-            params.reserve(data.size());
-            for (auto v : data)
-            {
-                params.push_back(v.toString());
-            }
-            qWarning() << "Request" << id << "received error:" << message;
-            task->reject(Error(HERE, code, params));
+            auto errorObject = Error{error.toObject()};
+            qWarning() << "Request" << id << "received error:" << errorObject;
+            task->reject(std::move(errorObject));
         }
         else
         {

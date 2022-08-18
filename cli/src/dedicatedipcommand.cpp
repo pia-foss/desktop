@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "dedicatedipcommand.h"
-#include "output.h"
+#include <common/src/output.h>
 #include "cliclient.h"
 #include "authcommand.h"  // Shared functionality to load creds file
 #include "brand.h"

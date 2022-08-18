@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("window.h")
 
 #ifndef NATIVEACC_WINDOW_H
@@ -25,6 +25,7 @@
 #include "accessibleitem.h"
 #include "accutil.h"
 #include "interfaces.h"
+#include <kapps_core/src/winapi.h>
 #include <QAccessibleObject>
 #include <QQuickWindow>
 #include <QPointer>

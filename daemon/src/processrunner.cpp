@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("processrunner.cpp")
 
 #include "processrunner.h"
@@ -88,11 +88,15 @@ void UidGidProcess::setupChildProcess()
         struct group* gr = getgrnam(qPrintable(_desiredGroup));
         if(!gr)
         {
-            qWarning("Failed to set group to %s (%d: %s)", qPrintable(_desiredGroup), errno, qPrintable(qt_error_string(errno)));
+            qWarning().nospace() << "Failed to set group to "
+                << _desiredGroup << " (" << errno << ": "
+                << qt_error_string(errno) << ")";
         }
         else if(setegid(gr->gr_gid) == -1 && setgid(gr->gr_gid) == -1)
         {
-            qWarning("Failed to set group id to %d (%d: %s)", gr->gr_gid, errno, qPrintable(qt_error_string(errno)));
+            qWarning().nospace() << "Failed to set group id to "
+                << gr->gr_gid << " (" << errno << ": "
+                << qt_error_string(errno) << ")";
         }
     }
 
@@ -101,11 +105,13 @@ void UidGidProcess::setupChildProcess()
         struct passwd* pw = getpwnam(qPrintable(_desiredUser));
         if(!pw)
         {
-            qWarning("Failed to set user to %s (%d: %s)", qPrintable(_desiredUser), errno, qPrintable(qt_error_string(errno)));
+            qWarning().nospace() << "Failed to set user to " << _desiredUser
+                << " (" << errno << ": " << qt_error_string(errno) << ")";
         }
         else if(seteuid(pw->pw_uid) == -1 && setuid(pw->pw_uid) == -1)
         {
-            qWarning("Failed to set user id to %d (%d: %s)", pw->pw_uid, errno, qPrintable(qt_error_string(errno)));
+            qWarning().nospace() << "Failed to set user id to " << pw->pw_uid
+                << " (" << errno << ": " << qt_error_string(errno) << ")";
         }
     }
 #endif
@@ -132,7 +138,7 @@ ProcessRunner::ProcessRunner(RestartStrategy::Params restartParams)
     connect(&_stderrBuf, &LineBuffer::lineComplete, this,
         [this](const QByteArray &line)
         {
-            qWarning() << objectName() << "- stderr:" << line;
+            qWarning() << objectName() << "- stderr:" << line.data();
         });
 }
 
@@ -201,7 +207,7 @@ void ProcessRunner::handleProcessEnded()
     QByteArray partialStderrLine = _stderrBuf.reset();
     if(!partialStderrLine.isEmpty())
     {
-        qWarning() << objectName() << "- stderr:" << partialStderrLine;
+        qWarning() << objectName() << "- stderr:" << partialStderrLine.data();
         partialStderrLine.clear();
     }
 

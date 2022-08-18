@@ -18,6 +18,8 @@ class Component
         @includeDirs = []
         @libPaths = []
         @libs = []
+        # Further components used as dependencies
+        @dependencies = []
         # Frameworks - Mac-specific, analogous to libs for this purpose
         @frameworkPaths = []
         @frameworks = []
@@ -48,6 +50,15 @@ class Component
         self
     end
 
+    # Specify a dependent component.  Any module referencing this component also
+    # references the dependencies automatically.  For example, this is used when
+    # this component's headers include headers from another dependency
+    # component, like kapps_net referencing kapps_core.
+    def dependency(component)
+        @dependencies.push(component)
+        self
+    end
+
     # Define an exported framework path (Mac-specific)
     def frameworkPath(dir)
         @frameworkPaths.push(File.absolute_path(dir))
@@ -75,6 +86,9 @@ class Component
     end
     def libs()
         @libs
+    end
+    def dependencies()
+        @dependencies
     end
     def frameworkPaths()
         @frameworkPaths

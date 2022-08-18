@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("cliharness.cpp")
 
 #include "cliharness.h"
 #include "integtestcase.h"
 #include "brand.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include <QProcess>
 #include <QTest>
 #include <QJsonDocument>
@@ -75,7 +75,7 @@ namespace CliHarness
             else
             {
                 // It should always end with a line break
-                qWarning() << "output for" << args << "didn't end in line break:" << output;
+                qWarning() << "output for" << args << "didn't end in line break:" << output.data();
             }
 
             return QString::fromLocal8Bit(output);
@@ -150,14 +150,14 @@ CliMonitor::CliMonitor(const QString &type)
 {
     connect(&_piactlStdout, &LineBuffer::lineComplete, this, [this](const QByteArray &line)
     {
-        qInfo() << "monitor updated with value" << line;
         _value = QString::fromLocal8Bit(line);
+        qInfo() << "monitor updated with value" << _value;
         emit valueChanged(_value);
     });
 
     connect(&_piactlStderr, &LineBuffer::lineComplete, this, [](const QByteArray &line)
     {
-        qInfo() << "monitor stderr:" << line;
+        qInfo() << "monitor stderr:" << line.data();
     });
 
     connect(&_piactl, &QProcess::readyReadStandardOutput, this, [this]()

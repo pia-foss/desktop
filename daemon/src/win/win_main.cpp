@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_main.cpp")
 
 #if defined(UNIT_TEST)
@@ -28,8 +28,9 @@ void dummyWinMain() {}
 
 #include "win_console.h"
 #include "win_service.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "win.h"
+#include <common/src/dtop.h>
 
 #include <QTextStream>
 
@@ -39,13 +40,22 @@ int main(int argc, char** argv)
 {
     setUtf8LocaleCodec();
     Logger::initialize(true);
+    initKApps();
 
     FUNCTION_LOGGING_CATEGORY("win.main");
 
     if (HRESULT error = ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))
-        qFatal("CoInitializeEx failed with error 0x%08x.", error);
-    if (HRESULT error = ::CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL))
-        qFatal("CoInitializeSecurity failed with error 0x%08x.", error);
+    {
+        qFatal() << "CoInitializeEx failed with error 0x"
+            << QString::number(error, 16) << ".";
+    }
+    if (HRESULT error = ::CoInitializeSecurity(NULL, -1, NULL, NULL,
+        RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE,
+        NULL))
+    {
+        qFatal() << "CoInitializeSecurity failed with error 0x"
+            << QString::number(error, 16) << ".";
+    }
 
     switch (WinService::tryRun())
     {

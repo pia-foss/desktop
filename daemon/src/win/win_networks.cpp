@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include "win_networks.h"
 #include "win_nativewifi.h"
 #include "win_servicestate.h"
 #include "win.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <QMetaObject>
 #include <iphlpapi.h>
 
@@ -268,10 +268,10 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
         // needed when examining gateway routes.  Either could be nullptr
         const MIB_IPINTERFACE_ROW *pItf4;
         const MIB_IPINTERFACE_ROW *pItf6;
-        Ipv4Address gatewayIpv4;
-        Ipv6Address gatewayIpv6;
-        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
-        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
+        kapps::core::Ipv4Address gatewayIpv4;
+        kapps::core::Ipv6Address gatewayIpv6;
+        std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4;
+        std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6;
     };
     std::unordered_map<WinLuid, InterfaceInfo> interfacesByLuid;
     interfacesByLuid.reserve(pItfTable.get()->NumEntries);
@@ -304,12 +304,12 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
 
         if(addr.Address.si_family == AF_INET)
         {
-            pItf->addressesIpv4.push_back({Ipv4Address{ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)},
+            pItf->addressesIpv4.push_back({kapps::core::Ipv4Address{ntohl(addr.Address.Ipv4.sin_addr.S_un.S_addr)},
                                            addr.OnLinkPrefixLength});
         }
         else if(addr.Address.si_family == AF_INET6)
         {
-            pItf->addressesIpv6.push_back({Ipv6Address{addr.Address.Ipv6.sin6_addr.u.Byte},
+            pItf->addressesIpv6.push_back({kapps::core::Ipv6Address{addr.Address.Ipv6.sin6_addr.u.Byte},
                                            addr.OnLinkPrefixLength});
             // Ignore link-local
             if(pItf->addressesIpv6.back().first.isLinkLocal())
@@ -376,7 +376,7 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
         unsigned long *pBestMetric;
         if(route.DestinationPrefix.Prefix.si_family == AF_INET)
         {
-            if(pItf->gatewayIpv4 != Ipv4Address{})
+            if(pItf->gatewayIpv4 != kapps::core::Ipv4Address{})
             {
                 qInfo() << "Ignoring gateway route via"
                     << parseWinSockaddr(route.NextHop).toString() << "on interface"
@@ -385,13 +385,13 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
                     << "for this interface";
                 continue;
             }
-            pItf->gatewayIpv4 = Ipv4Address{ntohl(route.NextHop.Ipv4.sin_addr.S_un.S_addr)};
+            pItf->gatewayIpv4 = kapps::core::Ipv4Address{ntohl(route.NextHop.Ipv4.sin_addr.S_un.S_addr)};
             pBestGateway = &bestGatewayIpv4;
             pBestMetric = &bestMetricIpv4;
         }
         else
         {
-            if(pItf->gatewayIpv6 != Ipv6Address{})
+            if(pItf->gatewayIpv6 != kapps::core::Ipv6Address{})
             {
                 qInfo() << "Ignoring gateway route via"
                     << parseWinSockaddr(route.NextHop).toString() << "on interface"
@@ -400,7 +400,7 @@ std::vector<NetworkConnection> WinNetworks::readRoutes()
                     << "for this interface";
                 continue;
             }
-            pItf->gatewayIpv6 = Ipv6Address{route.NextHop.Ipv6.sin6_addr.u.Byte};
+            pItf->gatewayIpv6 = kapps::core::Ipv6Address{route.NextHop.Ipv6.sin6_addr.u.Byte};
             pBestGateway = &bestGatewayIpv6;
             pBestMetric = &bestMetricIpv6;
         }

@@ -16,11 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("clientlib.h")
 #ifndef CLIENTLIB_H
 
-#ifdef DYNAMIC_CLIENTLIB
+#ifdef STATIC_CLIENTLIB
+    #define CLIENTLIB_EXPORT
+#else
     #ifdef _WIN32
         #ifdef BUILD_CLIENTLIB
             #define CLIENTLIB_EXPORT __declspec(dllexport)
@@ -30,8 +32,6 @@
     #else
         #define CLIENTLIB_EXPORT __attribute__((visibility("default")))
     #endif
-#else
-    #define CLIENTLIB_EXPORT
 #endif
 
 // Initialize logging and run the client.

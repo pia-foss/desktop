@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("apiclient.cpp")
 
 #include "apiclient.h"
-#include "testshim.h"
-#include "networktaskwithretry.h"
+#include <common/src/testshim.h>
+#include <common/src/networktaskwithretry.h>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QPointer>
@@ -46,7 +46,9 @@ namespace
         auto json = QJsonDocument::fromJson(body, &parseError);
         if (parseError.error != QJsonParseError::NoError || json.isNull())
         {
-            qError() << "Couldn't parse API response due to error" << parseError.error << "at position" << parseError.offset << "in document:" << body;
+            qError() << "Couldn't parse API response due to error"
+                << parseError.error << "at position" << parseError.offset
+                << "in document:" << body.data();
             throw Error(HERE, Error::ApiBadResponseError);
         }
         return json;

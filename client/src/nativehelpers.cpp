@@ -16,19 +16,19 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("nativehelpers.cpp")
 
 #include "nativehelpers.h"
 #include "balancetext.h"
 #include "clientsettings.h"
 #include "client.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "version.h"
 #include "brand.h"
 #include "product.h"
-#include "exec.h"
-#include "locations.h"
+#include <common/src/exec.h>
+#include <common/src/locations.h>
 
 #include <QProcess>
 #include <QStringList>
@@ -254,7 +254,7 @@ void NativeHelpers::releaseWindowResources(QQuickWindow *pWindow)
 
 QString NativeHelpers::getClientVersion()
 {
-    return Version::semanticVersion();
+    return QString::fromStdString(Version::semanticVersion());
 }
 
 bool NativeHelpers::getStartOnLogin()
@@ -686,23 +686,6 @@ void NativeHelpers::checkAppDeactivate()
 #ifdef Q_OS_MAC
     macCheckAppDeactivate();
 #endif
-}
-
-QString NativeHelpers::getBestLocationForCountry(QObject *pDaemonStateObj,
-                                                 const QString &countryCode)
-{
-    const DaemonState *pDaemonState = dynamic_cast<const DaemonState*>(pDaemonStateObj);
-    if(!pDaemonState)
-        return {};
-    NearestLocations nearest{pDaemonState->availableLocations()};
-    const auto &countryLower = countryCode.toLower();
-    const auto &pBestInCountry = nearest.getBestMatchingLocation([&countryLower](const Location &loc)
-    {
-        return loc.country().toLower() == countryLower;
-    });
-    if(pBestInCountry)
-        return pBestInCountry->id();
-    return {};
 }
 
 void NativeHelpers::applyStartOnLoginSetting(bool enabled)

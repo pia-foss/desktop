@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac/mac_loginitem.cpp")
 
 #include "mac_loginitem.h"
 #include "brand.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include <QFile>
 #include <QTextStream>
 

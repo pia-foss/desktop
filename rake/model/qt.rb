@@ -37,19 +37,11 @@ class Qt
     PiaQtBuildBias =  500000
 
     def initialize()
-        # On Mac and Linux, both host and target architecture Qt builds must be
-        # present.  (They're the same if not cross-compiling.)
-        #
-        # On Windows, we have to use windeployqt from the target architecture,
-        # or it would deploy the wrong libraries.  We don't yet support cross
-        # compiling on Windows as a result, but x86 builds are still made on x64
-        # hosts since x64 Windows can execute x86 tools.
-        hostArch = (Util.hostPlatform == :windows) ? Build::TargetArchitecture : Util.hostArchitecture
         # Locate Qt.  QTROOT can be set to the path to a Qt version to force
         # the use of that build (if we can't find Qt automatically, or to force
         # a particular version)
         qtVersion = ENV['QTROOT']
-        if(qtVersion != nil)
+        if qtVersion
             if(!File.directory?(qtVersion))
                 raise "QTROOT in environment does not exist: #{qtVersion}"
             end
@@ -64,21 +56,24 @@ class Qt
 
             qtVersion = FileList[*searchPatterns].max_by do |p|
                 # Both host and target Qt roots must be present
-                hostQtRoot = getQtRoot(p, hostArch)
-                targetQtRoot = getQtRoot(p, Build::TargetArchitecture)
+                qtRoots = getQtRoots(p)
                 version = getQtPathVersion(p)
-                if(hostQtRoot != nil && targetQtRoot != nil && version != nil)
+                if qtRoots && version
                     # Prefer PIA Qt builds if available per above
-                    piaBias = File.exist?(File.join(hostQtRoot, 'share/pia-qt-build')) ? PiaQtBuildBias : 0
+                    piaBias = File.exist?(File.join(qtRoots[:host][:path], 'share/pia-qt-build')) ? PiaQtBuildBias : 0
                     getQtVersionScore(version[0], version[1]) + piaBias
                 else
                     0
                 end
             end
             if(qtVersion == nil || !File.directory?(qtVersion))
+                # The first build root is used to show a sample of how to set
+                # QTROOT.  If there somehow weren't any, use a default so we
+                # still generate a reasonable error.
+                sampleRoot = (searchRoots.length > 0 ? searchRoots[0] : "...")
                 raise "Unable to find Qt installation in #{searchPatterns}\n" +
                     "Install Qt and/or set QTROOT to the preferred Qt build, such as:\n" +
-                    "QTROOT=#{File.join(searchRoots[0], "Qt/5.#{PreferredQtMinorVersion}.#{PreferredQtPatchVersion}")}"
+                    "QTROOT=#{File.join(sampleRoot, "Qt/5.#{PreferredQtMinorVersion}.#{PreferredQtPatchVersion}")}"
             end
         end
 
@@ -105,23 +100,22 @@ class Qt
         # Both host and target Qt builds are needed (build tools are used from
         # the host installation, libraries are used from the target).  These are
         # the same when not cross-compiling.
-        @hostQtRoot = getQtRoot(qtVersion, hostArch)
-        @targetQtRoot = getQtRoot(qtVersion, Build::TargetArchitecture)
-        puts "Host: #{hostArch} - #{@hostQtRoot}"
-        puts "Target: #{Build::TargetArchitecture} - #{@targetQtRoot}"
+        qtRoots = (qtVersion && File.directory?(qtVersion)) ? getQtRoots(qtVersion) : nil
+        if qtRoots == nil
+            raise "Unable to find any Qt build for host \"#{Util.hostArchitecture}\" and target \"#{Build::TargetArchitecture}\" in version #{qtVersion}"
+        end
+        @hostQtRoot = qtRoots[:host][:path]
+        @hostQtArch = qtRoots[:host][:arch]
+        @targetQtRoot = qtRoots[:target][:path]
+        @targetQtArch = qtRoots[:target][:arch]
+        puts "Host: #{@hostQtArch} - #{@hostQtRoot}"
+        puts "Target: #{@targetQtArch} - #{@targetQtRoot}"
 
         # Use a probe to detect if the Qt directory changes
         @qtProbe = Probe.new('qt')
         @qtProbe.file('qtversion.txt', "5.#{@actualVersion[0]}.#{@actualVersion[1]}\n")
         @qtProbe.file('qtroot.txt', "#{@hostQtRoot}\n#{@targetQtRoot}\n")
         qtProbeArtifact = @qtProbe.artifact('qtroot.txt')
-
-        if(@hostQtRoot == nil)
-            raise "Unable to find any \"#{hostArch}\" Qt build in #{qtVersion}"
-        end
-        if(@targetQtRoot == nil)
-            raise "Unable to find any \"#{Build::TargetArchitecture}\" Qt build in #{qtVersion}"
-        end
 
         mkspec = ''
         mkspec = 'win32-msvc' if Build.windows? # For either 32 or 64 bit
@@ -151,6 +145,56 @@ class Qt
 
     private
 
+    # Get "host" and "target" Qt build paths (which may be the same).  The
+    # "host" build will be used for tools - moc, rcc, deploy tools, etc.  We
+    # compile and link against the "target" build.
+    #
+    # If successful, returns a hash with the following:
+    # * :host - Host Qt root (can be executed)
+    #   * :path - Path to host Qt root
+    #   * :arch - Architecture selected for the host (possibilities are
+    #     the same as for Build::TargetArchitecture - :universal is possible on
+    #     macOS)
+    # * :target - Target Qt root (compile/link against this)
+    #   * :path - Path to target Qt root
+    #   * :arch - Architecture selected for the target (same possibilites as
+    #     for host - :universal is possible on macOS)
+    #
+    # Returns nil if the Qt build given does not provide suitable builds for
+    # both host and target.
+    #
+    # The "host" Qt build isn't always the native host architecture due to
+    # quirks of Qt deployment, but it is always a build that can be executed
+    # on the host.
+    def getQtRoots(qtVersionPath)
+        # * Windows always uses the target arch for tools.  We only support
+        #   x86_64 hosts and either x86_64/x86 targets, so the target arch can
+        #   always be executed.  windeployqt does not work across architectures,
+        #   it deploys the wrong libraries.
+        # * macOS prefers a "universal" build because it works for any target
+        #   (host, cross, or universal), but the host arch can be used if
+        #   universal is not available.  For a host build, this is fine, both
+        #   host and target are the same.  For a cross build, the build does
+        #   work, but product/macos.rb will generate a warning as we must
+        #   attempt to work around cross quirks in macdeployqt.
+        # * Linux uses the host arch, cross builds work fine.  (Linux deployment
+        #   is provided by product/linux.rb, Qt does not provide a deployment
+        #   tool.)
+        hostArches = Build::selectDesktop([Build::TargetArchitecture],
+            [:universal, Util.hostArchitecture], [Util.hostArchitecture])
+        # Similarly, target prefers universal for macos, but can use the target
+        # arch for a non-universal build.  Windows and Linux just use the target
+        # arch.
+        targetArches = Build::selectDesktop([Build::TargetArchitecture],
+            [:universal, Build::TargetArchitecture], [Build::TargetArchitecture])
+
+        builds = {
+            host: getFirstQtArchRoot(qtVersionPath, hostArches),
+            target: getFirstQtArchRoot(qtVersionPath, targetArches)
+        }
+        return builds if (builds[:host] && builds[:target])
+        nil
+    end
     def getQtToolchainPatterns(arch)
         # Some Qt releases on Windows have builds for more than one version of
         # MSVC.  Select the latest one.
@@ -159,24 +203,33 @@ class Qt
         qtToolchains = ['msvc????'] if Build.windows?
         qtToolchains = ['clang'] if Build.macos?
         qtToolchains = ['clang', 'gcc'] if Build.linux?
-        suffix = ''
+
+        suffix = '' # :x86 has no suffix
         if(arch == :x86_64)
             suffix = '_64'
         elsif(arch != :x86)
-            # Qt doesn't provide armhf or arm64 builds.  The PIA Qt builds
-            # include the entire architecture name here.
-            suffix = '_' + Build::TargetArchitecture.to_s
+            # Qt doesn't provide armhf, arm64, or universal builds.  The PIA Qt
+            # builds include the entire architecture name here.
+            suffix = '_' + arch.to_s
         end
         qtToolchains.map { |t| t + suffix }
     end
 
-    def getQtRoot(qtVersion, arch)
+    def getQtArchRoot(qtVersion, arch)
         qtToolchainPtns = getQtToolchainPatterns(arch)
         qtRoots = FileList[*Util.joinPaths([[qtVersion], qtToolchainPtns])]
         # Explicitly filter for existing paths - if the pattern has wildcards
         # we only get existing directories, but if the patterns are just
         # alternates with no wildcards, we can get directories that don't exist
         qtRoots.find_all { |r| File.exist?(r) }.max
+    end
+
+    def getFirstQtArchRoot(qtVersion, arches)
+        arches.each do |a|
+            root = getQtArchRoot(qtVersion, a)
+            return {path: root, arch: a} if root
+        end
+        nil
     end
 
     def getQtVersionScore(minor, patch)
@@ -279,7 +332,13 @@ class Qt
     def targetQtRoot
         @targetQtRoot
     end
+    def targetQtArch
+        @targetQtArch
+    end
     def hostQtRoot
         @hostQtRoot
+    end
+    def hostQtArch
+        @hostQtArch
     end
 end

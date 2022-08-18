@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "tap.h"
-#include "tap_inl.h"
+#include "../tap_inl.h"
 
 bool TapDriverTask::_rollbackNeedsUninstall = false;
 bool TapDriverTask::_rollbackNeedsReinstall = false;

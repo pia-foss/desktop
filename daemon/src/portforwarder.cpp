@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("portforwarder.cpp")
 
 #include "portforwarder.h"
-#include "testshim.h"
+#include <common/src/testshim.h>
 #include <QJsonDocument>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -33,7 +33,7 @@ namespace
 }
 
 PortForwarder::PortForwarder(ApiClient &apiClient, DaemonAccount &account,
-                             DaemonState &state, Environment &environment)
+                             StateModel &state, Environment &environment)
     : _apiClient{apiClient},
       _account{account},
       _state{state},
@@ -117,7 +117,7 @@ void PortForwarder::enablePortForwarding(bool enabled)
 void PortForwarder::requestPort()
 {
     // Use the appropriate implementation for the current infrastructure.
-    // DaemonState::connectedConfig will be set at this point since we are
+    // StateModel::connectedConfig will be set at this point since we are
     // currently connected - Daemon updates the state if we lose the connection.
     // If, somehow, we were to try to do a PF request while not connected, this
     // would just default to the modern implementation.

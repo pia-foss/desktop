@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("linux_shutdown.cpp")
 
 #include "linux_shutdown.h"
-#include "client.h"
-#include "ipc.h"
-#include "jsonrpc.h"
-#include "path.h"
-#include "util.h"
+#include "../client.h"
+#include <common/src/ipc.h>
+#include <common/src/jsonrpc.h>
+#include <common/src/builtin/path.h>
+#include <common/src/builtin/util.h>
 #include <unistd.h>
 
 namespace

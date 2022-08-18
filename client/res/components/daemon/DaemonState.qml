@@ -41,6 +41,7 @@ QtObject {
   readonly property var nextConfig: NativeDaemon.state.nextConfig
   readonly property var connectedServer: NativeDaemon.state.connectedServer
   readonly property var availableLocations: NativeDaemon.state.availableLocations
+  readonly property var regionsMetadata: NativeDaemon.state.regionsMetadata
   readonly property var groupedLocations: NativeDaemon.state.groupedLocations
   readonly property var dedicatedIpLocations: NativeDaemon.state.dedicatedIpLocations
   readonly property var openvpnUdpPortChoices: NativeDaemon.state.openvpnUdpPortChoices
@@ -76,6 +77,7 @@ QtObject {
   readonly property string originalInterface: NativeDaemon.state.originalInterface
   readonly property double snoozeEndTime: NativeDaemon.state.snoozeEndTime
   readonly property var splitTunnelSupportErrors: NativeDaemon.state.splitTunnelSupportErrors
+  readonly property var vpnSupportErrors: NativeDaemon.state.vpnSupportErrors
   readonly property string tunnelDeviceName: NativeDaemon.state.tunnelDeviceName
   readonly property string tunnelDeviceLocalAddress: NativeDaemon.state.tunnelDeviceLocalAddress
   readonly property string tunnelDeviceRemoteAddress: NativeDaemon.state.tunnelDeviceRemoteAddress
@@ -94,29 +96,48 @@ QtObject {
     'unavailable': -3
   }
 
-  // Location geographic coordinates - from region metadata
-  readonly property var locationCoords: Daemon.data.modernRegionMeta.gps || {}
-
-  // The regions list just gives us country codes, not names.  Map the codes to
-  // names here using region metadata.
-  readonly property var countryNames: Daemon.data.modernRegionMeta['country_groups'] || {}
-
-  function translateName (name) {
-    // Add a dependency on uiTr() so this retranslates at the right time
-    let trDep = uiTr
-
-    let translations = Daemon.data.modernRegionMeta['translations'] || {};
-
-    if(translations.hasOwnProperty(name)) {
-      if(translations[name].hasOwnProperty(Client.settings.language)) {
-        return translations[name][Client.settings.language];
-      }
+  // We need to know how many regions are in a country frequently to determine
+  // how to display a region in that country (as a single-region country or
+  // nested region within a country).  The daemon provides this information as
+  // groupedLocations, but those locations are ordered, so an O(N) lookup would
+  // be required, and this happens a _lot_.  Cache the locations per country in
+  // a map.
+  readonly property var locationsByCountry: {
+    let locs = {}
+    let groups = groupedLocations
+    for(let i=0; i<groups.length; ++i) {
+      let group = groups[i]
+      locs[group.code] = group.locations
     }
-
-    return name;
+    return locs
   }
 
-  function getBestLocationForCountry(countryCode) {
-    return NativeHelpers.getBestLocationForCountry(NativeDaemon.state, countryCode)
+  function getLocationsInCountry(countryCode) {
+    return locationsByCountry[countryCode] || []
+  }
+  function getLocationCountInCountry(countryCode) {
+    return getLocationsInCountry(countryCode).length
+  }
+  function shouldNestCountry(countryCode) {
+    return getLocationCountInCountry(countryCode) > 1
+  }
+
+  function getRegionDisplay(regionId) {
+    return regionsMetadata.regionDisplays && regionsMetadata.regionDisplays[regionId]
+  }
+
+  // Get a region's country code - used to show flags
+  function getRegionCountryCode(regionId) {
+    let regionDisplay = getRegionDisplay(regionId)
+    return (regionDisplay && regionDisplay.country) || ""
+  }
+
+  function getCountryDisplay(countryCode) {
+    return regionsMetadata.countryDisplays &&
+      regionsMetadata.countryDisplays[countryCode]
+  }
+
+  function getRegionCountryDisplay(regionId) {
+    return getCountryDisplay(getRegionCountryCode(regionId))
   }
 }

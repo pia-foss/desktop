@@ -19,8 +19,8 @@
 #ifndef SETTINGS_CONNECTION_H
 #define SETTINGS_CONNECTION_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include "locations.h"
 
 // Bandwidth measurements for one measurement interval, in bytes

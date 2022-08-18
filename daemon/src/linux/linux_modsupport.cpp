@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("linux_modsupport.cpp")
 
 #include "linux_modsupport.h"
-#include "exec.h"
+#include <common/src/exec.h>
 #include <QFile>
 #include <QTimer>
 #include <sys/utsname.h>

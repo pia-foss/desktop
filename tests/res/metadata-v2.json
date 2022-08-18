@@ -1,0 +1,1582 @@
+{
+  "translations": {
+    "Finland": {
+      "ar": "فنلندا",
+      "da": "Finland",
+      "de": "Finnland",
+      "en-US": "Finland",
+      "es-MX": "Finlandia",
+      "fr": "Finlande",
+      "it": "Finlandia",
+      "ja": "フィンランド",
+      "ko": "핀란드",
+      "nb": "Finland",
+      "nl": "Finland",
+      "pl": "Finlandia",
+      "pt-BR": "Finlândia",
+      "ru": "Финляндия",
+      "sv": "Finland",
+      "th": "ฟินแลนด์",
+      "tr": "Finlandiya",
+      "zh-Hans": "芬兰",
+      "zh-Hant": "芬蘭"
+    },
+    "Germany": {
+      "ar": "ألمانيا",
+      "da": "Tyskland",
+      "de": "Deutschland",
+      "en-US": "Germany",
+      "es-MX": "Alemania",
+      "fr": "Allemagne",
+      "it": "Germania",
+      "ja": "ドイツ",
+      "ko": "독일",
+      "nb": "Tyskland",
+      "nl": "Duitsland",
+      "pl": "Niemcy",
+      "pt-BR": "Alemanha",
+      "ru": "Германия",
+      "sv": "Tyskland",
+      "th": "เยอรมัน",
+      "tr": "Almanya",
+      "zh-Hans": "德国",
+      "zh-Hant": "德國"
+    },
+    "Italy": {
+      "ar": "إيطاليا",
+      "da": "Italien",
+      "de": "Italien",
+      "en-US": "Italy",
+      "es-MX": "Italia",
+      "fr": "Italie",
+      "it": "Italia",
+      "ja": "イタリア",
+      "ko": "이탈리아",
+      "nb": "Italia",
+      "nl": "Italië",
+      "pl": "Włochy",
+      "pt-BR": "Itália",
+      "ru": "Италия",
+      "sv": "Italien",
+      "th": "อิตาลี",
+      "tr": "İtalya",
+      "zh-Hans": "意大利",
+      "zh-Hant": "意大利"
+    },
+    "Sweden": {
+      "ar": "السويد",
+      "da": "Sverige",
+      "de": "Schweden",
+      "en-US": "Sweden",
+      "es-MX": "Suecia",
+      "fr": "Suède",
+      "it": "Svezia",
+      "ja": "スウェーデン",
+      "ko": "스웨덴",
+      "nb": "Sverige",
+      "nl": "Zweden",
+      "pl": "Szwecja",
+      "pt-BR": "Suécia",
+      "ru": "Швеция",
+      "sv": "Sverige",
+      "th": "สวีเดน",
+      "tr": "İsveç",
+      "zh-Hans": "瑞典",
+      "zh-Hant": "瑞典"
+    },
+    "United Kingdom": {
+      "ar": "المملكة المتحدة",
+      "da": "Storbritannien",
+      "de": "Vereinigtes Königreich",
+      "en-US": "United Kingdom",
+      "es-MX": "Reino Unido",
+      "fr": "Royaume-Uni",
+      "it": "Regno Unito",
+      "ja": "イギリス",
+      "ko": "영국",
+      "nb": "Storbritanna",
+      "nl": "Verenigd Koninkrijk",
+      "pl": "Wielka Brytania",
+      "pt-BR": "Reino Unido",
+      "ru": "Великобритания",
+      "sv": "Storbritannien",
+      "th": "สหราชอาณาจักร",
+      "tr": "Birleşik Krallık",
+      "zh-Hans": "英国",
+      "zh-Hant": "英國"
+    },
+    "Canada": {
+      "ar": "كندا",
+      "da": "Canada",
+      "de": "Kanada",
+      "en-US": "Canada",
+      "es-MX": "Canadá",
+      "fr": "Canada",
+      "it": "Canada",
+      "ja": "カナダ",
+      "ko": "캐나다",
+      "nb": "Canada",
+      "nl": "Canada",
+      "pl": "Kanada",
+      "pt-BR": "Canadá",
+      "ru": "Канада",
+      "sv": "Kanada",
+      "th": "แคนาดา",
+      "tr": "Kanada",
+      "zh-Hans": "加拿大",
+      "zh-Hant": "加拿大"
+    },
+    "United States": {
+      "ar": "الولايات المتحدة",
+      "da": "USA",
+      "de": "USA",
+      "en-US": "United States",
+      "es-MX": "Estados Unidos",
+      "fr": "États-Unis",
+      "it": "Stati Uniti",
+      "ja": "アメリカ",
+      "ko": "미국",
+      "nb": "USA",
+      "nl": "Verenigde Staten",
+      "pl": "Stany Zjednoczone",
+      "pt-BR": "Estados Unidos",
+      "ru": "Соединенные Штаты",
+      "sv": "USA",
+      "th": "สหรัฐอเมริกา",
+      "tr": "Birleşik Devletler",
+      "zh-Hans": "美国",
+      "zh-Hant": "美國"
+    },
+    "Israel": {
+      "ar": "إسرائيل",
+      "da": "Israel",
+      "de": "Israel",
+      "en-US": "Israel",
+      "es-MX": "Israel",
+      "fr": "Israël",
+      "it": "Israele",
+      "ja": "イスラエル",
+      "ko": "이스라엘",
+      "nb": "Israel",
+      "nl": "Israël",
+      "pl": "Izrael",
+      "pt-BR": "Israel",
+      "ru": "Израиль",
+      "sv": "Israel",
+      "th": "อิสราเอล",
+      "tr": "İsrail",
+      "zh-Hans": "以色列",
+      "zh-Hant": "以色列"
+    },
+    "Japan": {
+      "ar": "اليابان",
+      "da": "Japan",
+      "de": "Japan",
+      "en-US": "Japan",
+      "es-MX": "Japón",
+      "fr": "Japon",
+      "it": "Giappone",
+      "ja": "日本",
+      "ko": "일본",
+      "nb": "Japan",
+      "nl": "Japan",
+      "pl": "Japonia",
+      "pt-BR": "Japão",
+      "ru": "Япония",
+      "sv": "Japan",
+      "th": "ญี่ปุ่น",
+      "tr": "Japonya",
+      "zh-Hans": "日本",
+      "zh-Hant": "日本"
+    },
+    "Australia": {
+      "ar": "أستراليا",
+      "da": "Australien",
+      "de": "Australien",
+      "en-US": "Australia",
+      "es-MX": "Australia",
+      "fr": "Australie",
+      "it": "Australia",
+      "ja": "オーストラリア",
+      "ko": "호주",
+      "nb": "Australia",
+      "nl": "Australië",
+      "pl": "Australia",
+      "pt-BR": "Austrália",
+      "ru": "Австралия",
+      "sv": "Australien",
+      "th": "ออสเตรเลีย",
+      "tr": "Avustralya",
+      "zh-Hans": "澳大利亚",
+      "zh-Hant": "澳洲"
+    },
+    "Abu Dhabi": {},
+    "Abuja": {},
+    "Algiers": {},
+    "Amsterdam": {},
+    "Andorra": {
+      "ar": "أندورا",
+      "da": "Andorra",
+      "de": "Andorra",
+      "en-US": "Andorra",
+      "es-MX": "Andorra",
+      "fr": "Andorre",
+      "it": "Andorra",
+      "ja": "アンドラ",
+      "ko": "안도라",
+      "nb": "Andorra",
+      "nl": "Andorra",
+      "pl": "Andora",
+      "pt-BR": "Andorra",
+      "ru": "Андорра",
+      "sv": "Andorra",
+      "th": "อันดอร์รา",
+      "tr": "Andorra",
+      "zh-Hans": "安道尔",
+      "zh-Hant": "安道爾"
+    },
+    "Astana": {},
+    "Athens": {},
+    "US Atlanta": {
+      "ar": "الولايات المتحدة، أتلانتا",
+      "da": "USA Atlanta",
+      "de": "USA Atlanta",
+      "en-US": "US Atlanta",
+      "es-MX": "EE. UU. Atlanta",
+      "fr": "US Atlanta",
+      "it": "US Atlanta",
+      "ja": "米国 アトランタ",
+      "ko": "미국 애틀랜타",
+      "nb": "US Atlanta",
+      "nl": "VS Atlanta",
+      "pl": "USA Atlanta",
+      "pt-BR": "US Atlanta",
+      "ru": "США - Атланта",
+      "sv": "US Atlanta",
+      "th": "สหรัฐอเมริกา แอตแลนตา",
+      "tr": "ABD Atlanta",
+      "zh-Hans": "美国亚特兰大",
+      "zh-Hant": "美國亞特蘭大"
+    },
+    "Beijing": {},
+    "Belgrade": {},
+    "DE Berlin": {
+      "ar": "ألمانيا، برلين",
+      "da": "DE Berlin",
+      "de": "Deutschland Berlin",
+      "en-US": "DE Berlin",
+      "es-MX": "DE Berlín",
+      "fr": "DE Berlin",
+      "it": "DE Berlino",
+      "ja": "ドイツ ベルリン",
+      "ko": "독일 베를린",
+      "nb": "DE Berlin",
+      "nl": "DE Berlijn",
+      "pl": "DE Berlin",
+      "pt-BR": "DE Berlim",
+      "ru": "Германия - Берлин",
+      "sv": "DE Berlin",
+      "th": "เยอรมัน เบอร์ลิน",
+      "tr": "DE Berlin",
+      "zh-Hans": "德国柏林",
+      "zh-Hant": "德國柏林"
+    },
+    "Bratislava": {},
+    "Brussels": {},
+    "Bucharest": {},
+    "Budapest": {},
+    "Buenos Aires": {},
+    "Cairo": {},
+    "US California": {
+      "ar": "الولايات المتحدة، كاليفورنيا",
+      "da": "USA Californien",
+      "de": "USA Kalifornien",
+      "en-US": "US California",
+      "es-MX": "EE. UU. California",
+      "fr": "US Californie",
+      "it": "US California",
+      "ja": "米国 カリフォルニア",
+      "ko": "미국 캘리포니아",
+      "nb": "US California",
+      "nl": "VS Californië",
+      "pl": "USA Kalifornia",
+      "pt-BR": "US Califórnia",
+      "ru": "США - Калифорния",
+      "sv": "US Kalifornien",
+      "th": "สหรัฐอเมริกา แคลิฟอร์เนีย",
+      "tr": "ABD Kaliforniya",
+      "zh-Hans": "美国加利佛尼亚",
+      "zh-Hant": "美國加州"
+    },
+    "Caracas": {},
+    "US Chicago": {
+      "ar": "الولايات المتحدة، شيكاغو",
+      "da": "USA Chicago",
+      "de": "USA Chicago",
+      "en-US": "US Chicago",
+      "es-MX": "EE. UU. Chicago",
+      "fr": "US Chicago",
+      "it": "US Chicago",
+      "ja": "米国 シカゴ",
+      "ko": "미국 시카고",
+      "nb": "US Chicago",
+      "nl": "VS Chicago",
+      "pl": "USA Chicago",
+      "pt-BR": "US Chicago",
+      "ru": "США - Чикаго",
+      "sv": "US Chicago",
+      "th": "สหรัฐอเมริกา ชิคาโก",
+      "tr": "ABD Şikago",
+      "zh-Hans": "美国芝加哥",
+      "zh-Hant": "美國芝加哥"
+    },
+    "Chisinau": {},
+    "Colombo": {},
+    "Copenhagen": {},
+    "US Denver": {
+      "ar": "الولايات المتحدة، دنفر",
+      "da": "USA Denver",
+      "de": "USA Denver",
+      "en-US": "US Denver",
+      "es-MX": "EE. UU. Denver",
+      "fr": "US Denver",
+      "it": "US Denver",
+      "ja": "米国 デンバー",
+      "ko": "미국 덴버",
+      "nb": "US Denver",
+      "nl": "VS Denver",
+      "pl": "USA Denver",
+      "pt-BR": "US Denver",
+      "ru": "США - Денвер",
+      "sv": "US Denver",
+      "th": "สหรัฐอเมริกา เดนเวอร์",
+      "tr": "ABD Denver",
+      "zh-Hans": "美国丹佛",
+      "zh-Hant": "美國丹佛"
+    },
+    "Dhaka": {},
+    "Doha": {},
+    "Douglas": {},
+    "Dublin": {},
+    "US East2": {},
+    "FI Finland": {
+      "ar": "فنلندا",
+      "da": "Finland",
+      "de": "Finnland",
+      "en-US": "Finland",
+      "es-MX": "Finlandia",
+      "fr": "Finlande",
+      "it": "Finlandia",
+      "ja": "フィンランド",
+      "ko": "핀란드",
+      "nb": "Finland",
+      "nl": "Finland",
+      "pl": "Finlandia",
+      "pt-BR": "Finlândia",
+      "ru": "Финляндия",
+      "sv": "Finland",
+      "th": "ฟินแลนด์",
+      "tr": "Finlandiya",
+      "zh-Hans": "芬兰",
+      "zh-Hant": "芬蘭"
+    },
+    "US Florida": {
+      "ar": "الولايات المتحدة، فلوريدا",
+      "da": "USA Florida",
+      "de": "USA Florida",
+      "en-US": "US Florida",
+      "es-MX": "EE. UU. Florida",
+      "fr": "US Floride",
+      "it": "US Florida",
+      "ja": "米国 フロリダ",
+      "ko": "미국 플로리다",
+      "nb": "US Florida",
+      "nl": "VS Florida",
+      "pl": "USA Floryda",
+      "pt-BR": "US Flórida",
+      "ru": "США - Флорида",
+      "sv": "US Florida",
+      "th": "สหรัฐอเมริกา ฟลอริดา",
+      "tr": "ABD Florida",
+      "zh-Hans": "美国佛罗里达",
+      "zh-Hant": "美國佛羅里達州"
+    },
+    "DE Frankfurt": {
+      "ar": "ألمانيا، فرانكفورت",
+      "da": "DE Frankfurt",
+      "de": "Deutschland Frankfurt",
+      "en-US": "DE Frankfurt",
+      "es-MX": "DE Frankfurt",
+      "fr": "DE Francfort",
+      "it": "DE Francoforte",
+      "ja": "ドイツ フランクフルト",
+      "ko": "독일 프랑크푸르트",
+      "nb": "DE Frankfurt",
+      "nl": "DE Frankfurt",
+      "pl": "DE Frankfurt",
+      "pt-BR": "DE Frankfurt",
+      "ru": "Германия - Франкфурт",
+      "sv": "DE Frankfurt",
+      "th": "เยอรมัน แฟรงค์เฟิร์ต",
+      "tr": "DE Frankfurt",
+      "zh-Hans": "德国法兰克福",
+      "zh-Hant": "德國法蘭克福"
+    },
+    "Hanoi": {},
+    "FI Helsinki": {},
+    "Hong Kong": {
+      "ar": "هونغ كونغ",
+      "da": "Hong Kong",
+      "de": "Hongkong",
+      "en-US": "Hong Kong",
+      "es-MX": "Hong Kong",
+      "fr": "Hong Kong",
+      "it": "Hong Kong",
+      "ja": "香港",
+      "ko": "홍콩",
+      "nb": "Hongkong",
+      "nl": "Hongkong",
+      "pl": "Hongkong",
+      "pt-BR": "Hong Kong",
+      "ru": "Гонконг",
+      "sv": "Hong Kong",
+      "th": "ฮ่องกง",
+      "tr": "Hong Kong",
+      "zh-Hans": "中国香港",
+      "zh-Hant": "香港"
+    },
+    "US Houston": {
+      "ar": "الولايات المتحدة، هيوستن",
+      "da": "USA Houston",
+      "de": "USA Houston",
+      "en-US": "US Houston",
+      "es-MX": "EE. UU. Houston",
+      "fr": "US Houston",
+      "it": "US Houston",
+      "ja": "米国 ヒューストン",
+      "ko": "미국 휴스턴",
+      "nb": "US Houston",
+      "nl": "VS Houston",
+      "pl": "USA Houston",
+      "pt-BR": "US Houston",
+      "ru": "США - Хьюстон",
+      "sv": "US Houston",
+      "th": "สหรัฐอเมริกา ฮูสตัน",
+      "tr": "ABD Houston",
+      "zh-Hans": "美国休斯顿",
+      "zh-Hant": "美國休士頓"
+    },
+    "Ireland": {
+      "ar": "إيرلندا",
+      "da": "Irland",
+      "de": "Irland",
+      "en-US": "Ireland",
+      "es-MX": "Irlanda",
+      "fr": "Irlande",
+      "it": "Irlanda",
+      "ja": "アイルランド",
+      "ko": "아일랜드",
+      "nb": "Irland",
+      "nl": "Ierland",
+      "pl": "Irlandia",
+      "pt-BR": "Irlanda",
+      "ru": "Ирландия",
+      "sv": "Irland",
+      "th": "ไอร์แลนด์",
+      "tr": "İrlanda",
+      "zh-Hans": "冰岛",
+      "zh-Hant": "愛爾蘭"
+    },
+    "IL Israel": {
+      "ar": "إسرائيل",
+      "da": "Israel",
+      "de": "Israel",
+      "en-US": "Israel",
+      "es-MX": "Israel",
+      "fr": "Israël",
+      "it": "Israele",
+      "ja": "イスラエル",
+      "ko": "이스라엘",
+      "nb": "Israel",
+      "nl": "Israël",
+      "pl": "Izrael",
+      "pt-BR": "Israel",
+      "ru": "Израиль",
+      "sv": "Israel",
+      "th": "อิสราเอล",
+      "tr": "İsrail",
+      "zh-Hans": "以色列",
+      "zh-Hant": "以色列"
+    },
+    "Istanbul": {},
+    "IL Jerusalem": {},
+    "Johannesburg": {},
+    "Kiev": {},
+    "US Las Vegas": {
+      "ar": "الولايات المتحدة، لاس فيغاس",
+      "da": "USA Las Vegas",
+      "de": "USA Las Vegas",
+      "en-US": "US Las Vegas",
+      "es-MX": "EE. UU. Las Vegas",
+      "fr": "US Las Vegas",
+      "it": "US Las Vegas",
+      "ja": "米国 ラスベガス",
+      "ko": "미국 라스베가스",
+      "nb": "US Las Vegas",
+      "nl": "VS Las Vegas",
+      "pl": "USA Las Vegas",
+      "pt-BR": "US Las Vegas",
+      "ru": "США - Лас-Вегас",
+      "sv": "US Las Vegas",
+      "th": "สหรัฐอเมริกา ลาส เวกัส",
+      "tr": "ABD Las Vegas",
+      "zh-Hans": "美国拉斯维加斯",
+      "zh-Hant": "美國拉斯維加斯"
+    },
+    "Lisbon": {},
+    "UK London": {
+      "ar": "المملكة المتحدة، لندن",
+      "da": "UK London",
+      "de": "GB London",
+      "en-US": "UK London",
+      "es-MX": "Reino Unido Londres",
+      "fr": "UK Londres",
+      "it": "UK Londra",
+      "ja": "英国 ロンドン",
+      "ko": "영국 런던",
+      "nb": "UK London",
+      "nl": "GB Londen",
+      "pl": "WB Londyn",
+      "pt-BR": "UK Londres",
+      "ru": "Великобритания - Лондон",
+      "sv": "UK London",
+      "th": "สหราชอาณาจักร ลอนดอน",
+      "tr": "Birleşik Krallık Londra",
+      "zh-Hans": "英国伦敦",
+      "zh-Hant": "英國倫敦"
+    },
+    "Luxembourg": {
+      "ar": "لوكسمبورغ",
+      "da": "Luxembourg",
+      "de": "Luxemburg",
+      "en-US": "Luxembourg",
+      "es-MX": "Luxemburgo",
+      "fr": "Luxembourg",
+      "it": "Lussemburgo",
+      "ja": "ルクセンブルク",
+      "ko": "룩셈부르크",
+      "nb": "Luxembourg",
+      "nl": "Luxemburg",
+      "pl": "Luksemburg",
+      "pt-BR": "Luxemburgo",
+      "ru": "Люксембург",
+      "sv": "Luxemburg",
+      "th": "ลักเซมเบิร์ก",
+      "tr": "Lüksemburg",
+      "zh-Hans": "卢森堡",
+      "zh-Hant": "盧森堡"
+    },
+    "Macau": {
+      "ar": "ماكاو",
+      "da": "Macau",
+      "de": "Macau",
+      "en-US": "Macau",
+      "es-MX": "Macao",
+      "fr": "Macao",
+      "it": "Macau",
+      "ja": "マカオ",
+      "ko": "마카오",
+      "nb": "Macao",
+      "nl": "Macau",
+      "pl": "Makau",
+      "pt-BR": "Macau",
+      "ru": "Макао",
+      "sv": "Macau",
+      "th": "มาเก๊า",
+      "tr": "Makao",
+      "zh-Hans": "澳门地区",
+      "zh-Hant": "澳門"
+    },
+    "Madrid": {},
+    "UK Manchester": {
+      "ar": "المملكة المتحدة، مانشستر",
+      "da": "UK Manchester",
+      "de": "GB Manchester",
+      "en-US": "UK Manchester",
+      "es-MX": "Reino Unido Manchester",
+      "fr": "UK Manchester",
+      "it": "UK Manchester",
+      "ja": "英国 マンチェスター",
+      "ko": "영국 맨체스터",
+      "nb": "UK Manchester",
+      "nl": "GB Manchester",
+      "pl": "WB Manchester",
+      "pt-BR": "UK Manchester",
+      "ru": "Великобритания - Манчестер",
+      "sv": "UK Manchester",
+      "th": "สหราชอาณาจักร แมนเชสเตอร์",
+      "tr": "Birleşik Krallık Manchester",
+      "zh-Hans": "英国曼彻斯特",
+      "zh-Hant": "英國曼徹斯特"
+    },
+    "Manila": {},
+    "AU Melbourne": {
+      "ar": "أستراليا، ملبورن",
+      "da": "AU Melbourne",
+      "de": "Australien Melbourne",
+      "en-US": "AU Melbourne",
+      "es-MX": "AU Melbourne",
+      "fr": "AU Melbourne",
+      "it": "AU Melbourne",
+      "ja": "オーストラリア メルボルン",
+      "ko": "호주 멜버른",
+      "nb": "AU Melbourne",
+      "nl": "AU Melbourne",
+      "pl": "AU Melbourne",
+      "pt-BR": "AU Melbourne",
+      "ru": "Австралия - Мельбурн",
+      "sv": "AU Melbourne",
+      "th": "ออสเตรเลีย เมลเบิร์น",
+      "tr": "AU Melbourne",
+      "zh-Hans": "澳大利亚墨尔本",
+      "zh-Hant": "澳洲悉尼"
+    },
+    "Mexico": {
+      "ar": "المكسيك",
+      "da": "Mexico",
+      "de": "Mexiko",
+      "en-US": "Mexico",
+      "es-MX": "México",
+      "fr": "Mexique",
+      "it": "Messico",
+      "ja": "メキシコ",
+      "ko": "멕시코",
+      "nb": "Mexico",
+      "nl": "Mexico",
+      "pl": "Meksyk",
+      "pt-BR": "México",
+      "ru": "Мексика",
+      "sv": "Mexiko",
+      "th": "เม็กซิโก",
+      "tr": "Meksika",
+      "zh-Hans": "墨西哥",
+      "zh-Hant": "墨西哥"
+    },
+    "IT Milano": {},
+    "Monaco": {
+      "ar": "موناكو",
+      "da": "Monaco",
+      "de": "Monaco",
+      "en-US": "Monaco",
+      "es-MX": "Mónaco",
+      "fr": "Monaco",
+      "it": "Monaco",
+      "ja": "モナコ",
+      "ko": "모나코",
+      "nb": "Monaco",
+      "nl": "Monaco",
+      "pl": "Monako",
+      "pt-BR": "Mônaco",
+      "ru": "Монако",
+      "sv": "Monaco",
+      "th": "โมนาโก",
+      "tr": "Monako",
+      "zh-Hans": "摩纳哥",
+      "zh-Hant": "摩納哥"
+    },
+    "CA Montreal": {
+      "ar": "كندا، مونتريال",
+      "da": "CA Montreal",
+      "de": "Kanada Montreal",
+      "en-US": "CA Montreal",
+      "es-MX": "CA Montreal",
+      "fr": "CA Montréal",
+      "it": "CA Montreal",
+      "ja": "カナダ モントリオール",
+      "ko": "캐나다 몬트리올",
+      "nb": "CA Montreal",
+      "nl": "CA Montreal",
+      "pl": "CA Montreal",
+      "pt-BR": "CA Montreal",
+      "ru": "Канада - Монреаль",
+      "sv": "CA Montreal",
+      "th": "แคนาดา มอนทรีออล",
+      "tr": "CA Montreal",
+      "zh-Hans": "加拿大蒙特利尔",
+      "zh-Hant": "加拿大滿地可"
+    },
+    "Mumbai": {},
+    "Nassau": {},
+    "US East": {
+      "ar": "الولايات المتحدة، الشرق",
+      "da": "USA Øst",
+      "de": "USA Osten",
+      "en-US": "US East",
+      "es-MX": "EE. UU. Este",
+      "fr": "US Est",
+      "it": "US East",
+      "ja": "米国 東部",
+      "ko": "미국 동부",
+      "nb": "US Den amerikanske østkysten",
+      "nl": "VS Oosten",
+      "pl": "USA Stany Wschodnie",
+      "pt-BR": "US Leste",
+      "ru": "США - Восток",
+      "sv": "US Öst",
+      "th": "สหรัฐอเมริกา ฝั่งตะวันออก",
+      "tr": "ABD Doğu",
+      "zh-Hans": "美国东部",
+      "zh-Hant": "美國東岸"
+    },
+    "US New York": {
+      "ar": "الولايات المتحدة، نيويورك",
+      "da": "USA New York City",
+      "de": "USA New York",
+      "en-US": "US New York City",
+      "es-MX": "EE. UU. Nueva York",
+      "fr": "US New York",
+      "it": "US New York City",
+      "ja": "米国 ニューヨーク市",
+      "ko": "미국 뉴욕 시",
+      "nb": "US New York City",
+      "nl": "VS New York City",
+      "pl": "USA Nowy Jork",
+      "pt-BR": "US New York City",
+      "ru": "США - Нью-Йорк",
+      "sv": "US New York City",
+      "th": "สหรัฐอเมริกา นิวยอร์กซิตี้",
+      "tr": "ABD New York City",
+      "zh-Hans": "美国纽约市",
+      "zh-Hant": "美國紐約市"
+    },
+    "New Zealand": {
+      "ar": "نيوزيلندا",
+      "da": "New Zealand",
+      "de": "Neuseeland",
+      "en-US": "New Zealand",
+      "es-MX": "Nueva Zelanda",
+      "fr": "Nouvelle-Zélande",
+      "it": "Nuova Zelanda",
+      "ja": "ニュージーランド",
+      "ko": "뉴질랜드",
+      "nb": "New Zealand",
+      "nl": "Nieuw-Zeeland",
+      "pl": "Nowa Zelandia",
+      "pt-BR": "Nova Zelândia",
+      "ru": "Новая Зеландия",
+      "sv": "Nya Zeeland",
+      "th": "นิวซีแลนด์",
+      "tr": "Yeni Zelanda",
+      "zh-Hans": "新西兰",
+      "zh-Hant": "紐西蘭"
+    },
+    "Nicosia": {},
+    "Nuuk": {},
+    "Oslo": {},
+    "Panama City": {},
+    "Paris": {},
+    "AU Perth": {
+      "ar": "أستراليا، برث",
+      "da": "AU Perth",
+      "de": "Australien Perth",
+      "en-US": "AU Perth",
+      "es-MX": "AU Perth",
+      "fr": "AU Perth",
+      "it": "AU Perth",
+      "ja": "オーストラリア、パース",
+      "ko": "호주 퍼스",
+      "nb": "AU Perth",
+      "nl": "AU Perth",
+      "pl": "AU Perth",
+      "pt-BR": "AU Perth",
+      "ru": "Австралия - Перт",
+      "sv": "AU Perth",
+      "th": "ออสเตรเลีย เพิร์ธ",
+      "tr": "AU Perth",
+      "zh-Hans": "澳大利亚珀斯",
+      "zh-Hant": "澳洲伯斯"
+    },
+    "Phnom Penh": {},
+    "Podgorica": {},
+    "Prague": {},
+    "Rabat": {},
+    "Reykjavik": {},
+    "Riga": {},
+    "Riyadh": {},
+    "Sao Paulo": {},
+    "Sarajevo": {},
+    "US Seattle": {
+      "ar": "الولايات المتحدة، سياتل",
+      "da": "USA Seattle",
+      "de": "USA Seattle",
+      "en-US": "US Seattle",
+      "es-MX": "EE. UU. Seattle",
+      "fr": "US Seattle",
+      "it": "US Seattle",
+      "ja": "米国 シアトル",
+      "ko": "미국 시애틀",
+      "nb": "US Seattle",
+      "nl": "VS Seattle",
+      "pl": "USA Seattle",
+      "pt-BR": "US Seattle",
+      "ru": "США - Сиэтл",
+      "sv": "US Seattle",
+      "th": "สหรัฐอเมริกา ซีแอตเทิล",
+      "tr": "ABD Seattle",
+      "zh-Hans": "美国西雅图",
+      "zh-Hant": "美國西雅圖"
+    },
+    "US Silicon Valley": {
+      "ar": "الولايات المتحدة، سيليكون فالي",
+      "da": "USA Silicon Valley",
+      "de": "USA Silicon Valley",
+      "en-US": "US Silicon Valley",
+      "es-MX": "EE. UU. Silicon Valley",
+      "fr": "US Silicon Valley",
+      "it": "US Silicon Valley",
+      "ja": "米国 シリコンバレー",
+      "ko": "미국 실리콘 밸리",
+      "nb": "US Silicon Valley",
+      "nl": "VS Silicon Valley",
+      "pl": "USA Dolina Krzemowa",
+      "pt-BR": "US Vale do Silício",
+      "ru": "США - Кремниевая долина",
+      "sv": "US Silicon Valley",
+      "th": "สหรัฐอเมริกา ซิลิคอนแวลลีย์",
+      "tr": "ABD Silikon Vadisi",
+      "zh-Hans": "美国硅谷",
+      "zh-Hant": "美國矽谷"
+    },
+    "Singapore": {
+      "ar": "سنغافورة",
+      "da": "Singapore",
+      "de": "Singapur",
+      "en-US": "Singapore",
+      "es-MX": "Singapur",
+      "fr": "Singapour",
+      "it": "Singapore",
+      "ja": "シンガポール",
+      "ko": "싱가포르",
+      "nb": "Singapore",
+      "nl": "Singapore",
+      "pl": "Singapur",
+      "pt-BR": "Cingapura",
+      "ru": "Сингапур",
+      "sv": "Singapore",
+      "th": "สิงคโปร์",
+      "tr": "Singapur",
+      "zh-Hans": "新加坡",
+      "zh-Hant": "新加坡"
+    },
+    "Sofia": {},
+    "Spain": {
+      "ar": "إسبانيا",
+      "da": "Spanien",
+      "de": "Spanien",
+      "en-US": "Spain",
+      "es-MX": "España",
+      "fr": "Espagne",
+      "it": "Spagna",
+      "ja": "スペイン",
+      "ko": "스페인",
+      "nb": "Spania",
+      "nl": "Spanje",
+      "pl": "Hiszpania",
+      "pt-BR": "Espanha",
+      "ru": "Испания",
+      "sv": "Spanien",
+      "th": "สเปน",
+      "tr": "İspanya",
+      "zh-Hans": "西班牙",
+      "zh-Hant": "西班牙"
+    },
+    "SE Stockholm": {},
+    "SE Sweden": {
+      "ar": "السويد",
+      "da": "Sverige",
+      "de": "Schweden",
+      "en-US": "Sweden",
+      "es-MX": "Suecia",
+      "fr": "Suède",
+      "it": "Svezia",
+      "ja": "スウェーデン",
+      "ko": "스웨덴",
+      "nb": "Sverige",
+      "nl": "Zweden",
+      "pl": "Szwecja",
+      "pt-BR": "Suécia",
+      "ru": "Швеция",
+      "sv": "Sverige",
+      "th": "สวีเดน",
+      "tr": "İsveç",
+      "zh-Hans": "瑞典",
+      "zh-Hant": "瑞典"
+    },
+    "AU Sydney": {
+      "ar": "أستراليا، سيدني",
+      "da": "AU Sydney",
+      "de": "Australien Sydney",
+      "en-US": "AU Sydney",
+      "es-MX": "AU Sídney",
+      "fr": "AU Sydney",
+      "it": "AU Sydney",
+      "ja": "オーストラリア シドニー",
+      "ko": "호주 시드니",
+      "nb": "AU Sydney",
+      "nl": "AU Sydney",
+      "pl": "AU Sydney",
+      "pt-BR": "AU Sydney",
+      "ru": "Австралия - Сидней",
+      "sv": "AU Sydney",
+      "th": "ออสเตรเลีย ซิดนีย์",
+      "tr": "AU Sidney",
+      "zh-Hans": "澳大利亚悉尼",
+      "zh-Hant": "澳洲悉尼"
+    },
+    "Taipei": {},
+    "Tallinn": {},
+    "Tbilisi": {},
+    "Tehran": {},
+    "US Texas": {
+      "ar": "الولايات المتحدة، تكساس",
+      "da": "USA Texas",
+      "de": "USA Texas",
+      "en-US": "US Texas",
+      "es-MX": "EE. UU. Texas",
+      "fr": "US Texas",
+      "it": "US Texas",
+      "ja": "米国 テキサス",
+      "ko": "미국 텍사스",
+      "nb": "US Texas",
+      "nl": "VS Texas",
+      "pl": "USA Teksas",
+      "pt-BR": "US Texas",
+      "ru": "США - Техас",
+      "sv": "US Texas",
+      "th": "สหรัฐอเมริกา เท็กซัส",
+      "tr": "ABD Teksas",
+      "zh-Hans": "美国德克萨斯",
+      "zh-Hant": "美國德州"
+    },
+    "Tirana": {},
+    "JP Tokyo": {},
+    "CA Toronto": {
+      "ar": "كندا، تورونتو",
+      "da": "CA Toronto",
+      "de": "Kanada Toronto",
+      "en-US": "CA Toronto",
+      "es-MX": "CA Toronto",
+      "fr": "CA Toronto",
+      "it": "CA Toronto",
+      "ja": "カナダ トロント",
+      "ko": "캐나다 토론토",
+      "nb": "CA Toronto",
+      "nl": "CA Toronto",
+      "pl": "CA Toronto",
+      "pt-BR": "CA Toronto",
+      "ru": "Канада - Торонто",
+      "sv": "CA Toronto",
+      "th": "แคนาดา โทรอนโต",
+      "tr": "CA Toronto",
+      "zh-Hans": "加拿大多伦多",
+      "zh-Hant": "加拿大多倫多"
+    },
+    "UAE": {
+      "ar": "الإمارات العربية المتحدة",
+      "da": "UAE",
+      "de": "VAE",
+      "en-US": "UAE",
+      "es-MX": "EAU",
+      "fr": "ÉAU",
+      "it": "EAU",
+      "ja": "アラブ首長国連邦",
+      "ko": "아랍에미리트",
+      "nb": "UAE",
+      "nl": "VAE",
+      "pl": "ZEA",
+      "pt-BR": "EAU",
+      "ru": "ОАЭ",
+      "sv": "Förenade arabemiraten",
+      "th": "สหรัฐอาหรับเอมิเรตส์",
+      "tr": "BAE",
+      "zh-Hans": "阿联酋",
+      "zh-Hant": "阿聯酋"
+    },
+    "UK Southampton": {
+      "ar": "المملكة المتحدة، ساوثامبتون",
+      "da": "UK Southampton",
+      "de": "GB Southampton",
+      "en-US": "UK Southampton",
+      "es-MX": "Reino Unido Southampton",
+      "fr": "UK Southampton",
+      "it": "UK Southampton",
+      "ja": "英国 サウザンプトン",
+      "ko": "영국 사우샘프턴",
+      "nb": "UK Southampton",
+      "nl": "GB Southampton",
+      "pl": "WB Southampton",
+      "pt-BR": "UK Southampton",
+      "ru": "Великобритания - Саутгемптон",
+      "sv": "UK Southampton",
+      "th": "สหราชอาณาจักร เซาแทมป์ตัน",
+      "tr": "Birleşik Krallık Southampton",
+      "zh-Hans": "英国南安普敦",
+      "zh-Hant": "英國南安普敦"
+    },
+    "Ulaanbaatar": {},
+    "Vaduz": {},
+    "Valletta": {},
+    "CA Vancouver": {
+      "ar": "كندا، فانكوفر",
+      "da": "CA Vancouver",
+      "de": "Kanada Vancouver",
+      "en-US": "CA Vancouver",
+      "es-MX": "CA Vancouver",
+      "fr": "CA Vancouver",
+      "it": "CA Vancouver",
+      "ja": "カナダ バンクーバー",
+      "ko": "캐나다 밴쿠버",
+      "nb": "CA Vancouver",
+      "nl": "CA Vancouver",
+      "pl": "CA Vancouver",
+      "pt-BR": "CA Vancouver",
+      "ru": "Канада - Ванкувер",
+      "sv": "CA Vancouver",
+      "th": "แคนาดา แวนคูเวอร์",
+      "tr": "CA Vancouver",
+      "zh-Hans": "加拿大温哥华",
+      "zh-Hant": "加拿大溫哥華"
+    },
+    "Vienna": {},
+    "Vilnius": {},
+    "Warsaw": {},
+    "US Washington DC": {
+      "ar": "الولايات المتحدة، واشنطن العاصمة",
+      "da": "USA Washington DC",
+      "de": "USA Washington DC",
+      "en-US": "US Washington DC",
+      "es-MX": "EE. UU. Washington DC",
+      "fr": "US Washington DC",
+      "it": "US Washington DC",
+      "ja": "米国 ワシントンDC",
+      "ko": "미국 워싱턴 시",
+      "nb": "US Washington DC",
+      "nl": "VS Washington DC",
+      "pl": "USA Waszyngton, DC",
+      "pt-BR": "US Washington DC",
+      "ru": "США - Вашингтон",
+      "sv": "US Washington DC",
+      "th": "สหรัฐอเมริกา วอชิงตัน ดี.ซี.",
+      "tr": "ABD Washington DC",
+      "zh-Hans": "美国华盛顿特区",
+      "zh-Hant": "美國華盛頓哥倫比亞特區"
+    },
+    "US West": {
+      "ar": "الولايات المتحدة، الغرب",
+      "da": "USA Vest",
+      "de": "USA Westen",
+      "en-US": "US West",
+      "es-MX": "EE. UU. Oeste",
+      "fr": "US Ouest",
+      "it": "US West",
+      "ja": "米国 西部",
+      "ko": "미국 서부",
+      "nb": "US Den amerikanske vestkysten",
+      "nl": "VS Westen",
+      "pl": "USA Stany Zachodnie",
+      "pt-BR": "US Oeste",
+      "ru": "США - Запад",
+      "sv": "US Väst",
+      "th": "สหรัฐอเมริกา ฝั่งตะวันตก",
+      "tr": "ABD Batı",
+      "zh-Hans": "美国西部",
+      "zh-Hant": "美國西岸"
+    },
+    "Yerevan": {},
+    "Zurich": {},
+    "CA Ontario": {
+      "ar": "كندا أونتاريو",
+      "da": "CA Ontario",
+      "de": "Kanada Ontario",
+      "en-US": "CA Ontario",
+      "es-MX": "CA Ontario",
+      "fr": "CA Ontario",
+      "it": "CA Ontario",
+      "ja": "カナダ オンタリオ",
+      "ko": "캐나다 온타리오",
+      "nb": "CA Ontario",
+      "nl": "CA Ontario",
+      "pl": "Kanada Ontario",
+      "pt-BR": "CA Ontário",
+      "ru": "Канада - Онтарио",
+      "sv": "CA Ontario",
+      "th": "ออนตาริโอ แคลิฟอร์เนีย",
+      "tr": "CA Ontario",
+      "zh-Hans": "加拿大安大略省",
+      "zh-Hant": "安大略省"
+    },
+    "Skopje": {},
+    "UK Streaming Optimized": {
+      "ar": "المملكة المتحدة لندن-تدفق",
+      "da": "UK London-Streaming",
+      "de": "GB London-Streaming",
+      "en-US": "UK London-Streaming",
+      "es-MX": "Reino Unido Londres-Streaming",
+      "fr": "UK Londres-Streaming",
+      "it": "UK Londra-Streaming",
+      "ja": "英国 ロンドン-ストリーミング",
+      "ko": "영국 런던-스트리밍",
+      "nb": "UK London-Streaming",
+      "nl": "GB Londen-Streaming",
+      "pl": "WB Londyn-Streaming",
+      "pt-BR": "UK Londres-Streaming",
+      "ru": "Великобритания - Лондон - Потоковое",
+      "sv": "UK London-Streaming",
+      "th": "สหราชอาณาจักร ลอนดอน-สตรีมมิ่ง",
+      "tr": "Birleşik Krallık Londra-Streaming",
+      "zh-Hans": "英国伦敦-流媒体",
+      "zh-Hant": "英國倫敦-流媒體"
+    },
+    "JP Streaming Optimized": {},
+    "US Boston": {},
+    "Zagreb": {},
+    "IT Streaming Optimized": {},
+    "US Streaming Optimized": {},
+    "FI Streaming Optimized": {},
+    "SE Streaming Optimized": {}
+  },
+  "country_groups": {
+    "fi": "Finland",
+    "de": "Germany",
+    "it": "Italy",
+    "se": "Sweden",
+    "gb": "United Kingdom",
+    "ca": "Canada",
+    "us": "United States",
+    "il": "Israel",
+    "jp": "Japan",
+    "au": "Australia"
+  },
+  "gps": {
+    "ae": [
+      "24.474796",
+      "54.370576"
+    ],
+    "nigeria": [
+      "9.064331",
+      "7.489297"
+    ],
+    "dz": [
+      "36.775348",
+      "3.060066"
+    ],
+    "nl_amsterdam": [
+      "52.371009",
+      "4.900112"
+    ],
+    "ad": [
+      "42.506939",
+      "1.521247"
+    ],
+    "kazakhstan": [
+      "51.166908",
+      "71.420651"
+    ],
+    "gr": [
+      "37.984149",
+      "23.727984"
+    ],
+    "us_atlanta": [
+      "33.748547",
+      "-84.391502"
+    ],
+    "china": [
+      "39.90647",
+      "116.391195"
+    ],
+    "rs": [
+      "44.817879",
+      "20.456809"
+    ],
+    "de_berlin": [
+      "52.517037",
+      "13.38886"
+    ],
+    "sk": [
+      "48.065466",
+      "17.113207"
+    ],
+    "belgium": [
+      "50.844041",
+      "4.367202"
+    ],
+    "ro": [
+      "44.436139",
+      "26.102744"
+    ],
+    "hungary": [
+      "47.498382",
+      "19.040471"
+    ],
+    "ar": [
+      "-34.612869",
+      "-58.445979"
+    ],
+    "egypt": [
+      "30.048819",
+      "31.243666"
+    ],
+    "us_california": [
+      "34.0522",
+      "-118.2437"
+    ],
+    "venezuela": [
+      "10.501823",
+      "-66.912105"
+    ],
+    "us_chicago": [
+      "41.883229",
+      "-87.632398"
+    ],
+    "md": [
+      "47.012274",
+      "28.860594"
+    ],
+    "srilanka": [
+      "6.934287",
+      "79.85327"
+    ],
+    "denmark": [
+      "55.686724",
+      "12.570069"
+    ],
+    "us_denver": [
+      "39.738453",
+      "-104.984853"
+    ],
+    "bangladesh": [
+      "23.728216",
+      "90.409879"
+    ],
+    "qatar": [
+      "25.252149",
+      "51.536865"
+    ],
+    "man": [
+      "54.251186",
+      "-4.463196"
+    ],
+    "ireland": [
+      "53.349307",
+      "-6.261175"
+    ],
+    "us_florida": [
+      "25.775084",
+      "-80.194702"
+    ],
+    "de-frankfurt": [
+      "50.110653",
+      "8.682093"
+    ],
+    "vietnam": [
+      "21.02921",
+      "105.85247"
+    ],
+    "fi": [
+      "60.166628",
+      "24.943508"
+    ],
+    "hk": [
+      "22.264412",
+      "114.167061"
+    ],
+    "us_houston": [
+      "29.760803",
+      "-95.369506"
+    ],
+    "israel": [
+      "31.796816",
+      "35.213782"
+    ],
+    "tr": [
+      "41.017058",
+      "28.985568"
+    ],
+    "za": [
+      "-26.205",
+      "28.049722"
+    ],
+    "ua": [
+      "50.449988",
+      "30.523494"
+    ],
+    "us_las_vegas": [
+      "36.169202",
+      "-115.140597"
+    ],
+    "pt": [
+      "38.713057",
+      "-9.138006"
+    ],
+    "uk": [
+      "51.507276",
+      "-0.12766"
+    ],
+    "lu": [
+      "49.611277",
+      "6.129799"
+    ],
+    "macau": [
+      "22.1899448",
+      "113.5380454"
+    ],
+    "spain": [
+      "40.416705",
+      "-3.703583"
+    ],
+    "uk_manchester": [
+      "53.479147",
+      "-2.244745"
+    ],
+    "philippines": [
+      "14.590607",
+      "120.979901"
+    ],
+    "aus_melbourne": [
+      "-37.814255",
+      "144.963146"
+    ],
+    "mexico": [
+      "19.43253",
+      "-99.13321"
+    ],
+    "italy": [
+      "45.466797",
+      "9.190498"
+    ],
+    "monaco": [
+      "43.731142",
+      "7.419758"
+    ],
+    "ca": [
+      "45.509062",
+      "-73.553363"
+    ],
+    "in": [
+      "18.95238",
+      "72.832711"
+    ],
+    "bahamas": [
+      "25.078346",
+      "-77.338333"
+    ],
+    "us-newjersey": [
+      "40.0757384",
+      "-74.4041622"
+    ],
+    "us_new_york_city": [
+      "40.713054",
+      "-74.007228"
+    ],
+    "nz": [
+      "-36.853467",
+      "174.765551"
+    ],
+    "cyprus": [
+      "35.156968",
+      "33.354492"
+    ],
+    "greenland": [
+      "69.6354163",
+      "-42.1736914"
+    ],
+    "no": [
+      "59.913269",
+      "10.739111"
+    ],
+    "panama": [
+      "8.970743",
+      "-79.534454"
+    ],
+    "france": [
+      "48.856506",
+      "2.352133"
+    ],
+    "aus_perth": [
+      "-31.952712",
+      "115.86048"
+    ],
+    "cambodia": [
+      "11.563196",
+      "104.932875"
+    ],
+    "montenegro": [
+      "42.433593",
+      "19.260063"
+    ],
+    "czech": [
+      "50.08744",
+      "14.421256"
+    ],
+    "morocco": [
+      "34.02236",
+      "-6.839036"
+    ],
+    "is": [
+      "64.150002",
+      "-21.9499"
+    ],
+    "lv": [
+      "56.949398",
+      "24.105185"
+    ],
+    "saudiarabia": [
+      "24.63203",
+      "46.714907"
+    ],
+    "br": [
+      "-14.235",
+      "-51.9253"
+    ],
+    "ba": [
+      "43.851498",
+      "18.388613"
+    ],
+    "us_seattle": [
+      "47.603229",
+      "-122.33028"
+    ],
+    "us_silicon_valley": [
+      "37.387474",
+      "-122.1545229"
+    ],
+    "sg": [
+      "1.290453",
+      "103.852038"
+    ],
+    "sofia": [
+      "42.6977082",
+      "23.3218675"
+    ],
+    "sweden": [
+      "59.330761",
+      "18.06131"
+    ],
+    "aus": [
+      "-33.854816",
+      "151.216454"
+    ],
+    "taiwan": [
+      "25.037638",
+      "121.564459"
+    ],
+    "ee": [
+      "59.437216",
+      "24.745369"
+    ],
+    "georgia": [
+      "41.681118",
+      "44.802246"
+    ],
+    "us_south_west": [
+      "30.264979",
+      "-97.746598"
+    ],
+    "al": [
+      "41.331144",
+      "19.826398"
+    ],
+    "japan": [
+      "35.680071",
+      "139.768522"
+    ],
+    "ca_toronto": [
+      "43.651893",
+      "-79.381713"
+    ],
+    "uk_southampton": [
+      "50.902535",
+      "-1.404189"
+    ],
+    "mongolia": [
+      "47.92123",
+      "106.918556"
+    ],
+    "liechtenstein": [
+      "47.139286",
+      "9.522796"
+    ],
+    "malta": [
+      "35.898755",
+      "14.513489"
+    ],
+    "ca_vancouver": [
+      "49.263566",
+      "-123.138572"
+    ],
+    "austria": [
+      "48.192309",
+      "16.371364"
+    ],
+    "lt": [
+      "54.684314",
+      "25.285398"
+    ],
+    "poland": [
+      "52.231924",
+      "21.006727"
+    ],
+    "us_washington_dc": [
+      "38.892062",
+      "-77.019912"
+    ],
+    "us3": [
+      "33.448204",
+      "-112.072585"
+    ],
+    "yerevan": [
+      "40.168905",
+      "44.513168"
+    ],
+    "swiss": [
+      "47.368559",
+      "8.540443"
+    ],
+    "ca_ontario": [
+      "43.65107",
+      "-79.347015"
+    ],
+    "mk": [
+      "41.6137143",
+      "21.743258"
+    ],
+    "uk_2": [
+      "51.507276",
+      "-0.12766"
+    ],
+    "japan_2": [
+      "35.680071",
+      "139.768522"
+    ],
+    "zagreb": [
+      "45.815399",
+      "15.966568"
+    ],
+    "italy_2": [
+      "45.466797",
+      "9.190498"
+    ],
+    "us-streaming": [
+      "40.0757384",
+      "-74.4041622"
+    ],
+    "fi_2": [
+      "60.166628",
+      "24.943508"
+    ],
+    "sweden_2": [
+      "59.330761",
+      "18.06131"
+    ]
+  }
+}

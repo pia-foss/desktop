@@ -37,29 +37,35 @@ class MockPingServers : public QObject
     Q_OBJECT
 
 public:
-    MockPingServers()
+    // Create MockPingServers with the region name prefix and first 3 bytes of
+    // the IPv4 address (the last byte is filled with an index)
+    MockPingServers(kapps::core::StringSlice prefix,
+        std::uint8_t ip0, std::uint8_t ip1, std::uint8_t ip2)
     {
+        auto pServiceGroup = std::make_shared<kapps::regions::ServiceGroup>(
+            std::vector<std::uint16_t>{}, false,
+            std::vector<std::uint16_t>{}, false,
+            std::vector<std::uint16_t>{1337}, false,
+            std::vector<std::uint16_t>{}, std::string{}, std::string{},
+            std::vector<std::uint16_t>{});
         // Create some mock servers to listen for pings from LatencyTracker
         _mockServerList.reserve(MockPingServerCount);
         while(_mockPingLocations.size() < MockPingServerCount)
         {
-            QSharedPointer<Location> pLocation{new Location{}};
-
-            // Fill in the mock ServerLocation - most of these fields do not
+            // Fill in the mock Location - most of these fields do not
             // matter, just add any VPN server with the loopback address so it
             // will be selected for ICMP latency measurements.
-            auto serverId = QStringLiteral("mock-server-%1").arg(_mockServerList.size());
-            pLocation->id(serverId);
-            pLocation->name(serverId);
-            pLocation->country(QStringLiteral("US"));
-            pLocation->portForward(false);
-            Server mockServer;
-            mockServer.ip(QStringLiteral("127.0.0.%1").arg(_mockServerList.size()+1));
-            mockServer.commonName("n/a");
-            mockServer.wireguardPorts({1337});  // Indicates this has the WireGuard service
-            pLocation->servers({std::move(mockServer)});
+            kapps::core::Ipv4Address ip{ip0, ip1, ip2, static_cast<std::uint8_t>(_mockServerList.size()+1)};
+            auto pServer = std::make_shared<kapps::regions::Server>(ip, "n/a",
+                std::string{}, pServiceGroup);
+            auto regionId = qs::format("%-%", prefix, _mockServerList.size());
+            auto pRegion = std::make_shared<kapps::regions::Region>(regionId,
+                true, false, false, kapps::core::Ipv4Address{},
+                std::vector<std::shared_ptr<const kapps::regions::Server>>{pServer});
 
-            _mockServerList[pLocation->id()] = pLocation;
+            auto pLocation = QSharedPointer<Location>::create(
+                std::move(pRegion), nullable_t<double>{});
+            _mockServerList[regionId] = pLocation;
             _mockPingLocations.push_back(pLocation);
         }
     }
@@ -71,7 +77,7 @@ public:
 
     // Get a vector of locations from the mock servers.  (Used to pass the mock
     // servers to LatencyBatch.)
-    const std::vector<QSharedPointer<Location>> &mockPingLocations() const {return _mockPingLocations;}
+    const std::vector<QSharedPointer<const Location>> &mockPingLocations() const {return _mockPingLocations;}
 
     // Get a set of all mock location IDs - used by unit tests to keep track
     // of the measurements that have been emitted
@@ -88,7 +94,7 @@ public:
 
 private:
     LocationsById _mockServerList;
-    std::vector<QSharedPointer<Location>> _mockPingLocations;
+    std::vector<QSharedPointer<const Location>> _mockPingLocations;
 };
 
 // LatencyBatch and LatencyTracker batch their measurements, but the batching is
@@ -177,7 +183,7 @@ private slots:
         {
             auto initialLocations = _mockServers.mockServerList();
             // Remove a server so we can add it later
-            initialLocations.erase(QStringLiteral("mock-server-0"));
+            initialLocations.erase("mock-server-0");
 
             // Wait for all of the measurements to be emitted
             QSignalSpy initialLatencySpy{&splitter, &MeasurementSplitter::newMeasurement};
@@ -190,7 +196,7 @@ private slots:
         // removed above (which should trigger an immediate measurement), and
         // delete a different location (which should not trigger anything).
         auto updatedLocations = _mockServers.mockServerList();
-        updatedLocations.erase(QStringLiteral("mock-server-1"));
+        updatedLocations.erase("mock-server-1");
         tracker.updateLocations(updatedLocations);
 
         // We get exactly one measurement
@@ -247,7 +253,7 @@ private slots:
 
         auto initialLocations = _mockServers.mockServerList();
         // Delete a location
-        initialLocations.erase(QStringLiteral("mock-server-0"));
+        initialLocations.erase("mock-server-0");
         tracker.updateLocations(initialLocations);
 
         // Expect 3 measurements
@@ -289,22 +295,30 @@ private slots:
     // the measurement timeout.)
     void invalidCleanup()
     {
-        //Bogus locations - no latency servers, unparseable addresses
-        QSharedPointer<Location> pBogusAddr{new Location{}};
-        pBogusAddr->id(QStringLiteral("mock-bogus-addr"));
-        pBogusAddr->name(QStringLiteral("mock-bogus-addr"));
-        pBogusAddr->country(QStringLiteral("US"));
-        pBogusAddr->portForward(false);
-        Server mockServer;
-        mockServer.ip(QStringLiteral("bogus_address"));
-        mockServer.commonName("n/a");
-        mockServer.wireguardPorts({1337});
-        pBogusAddr->servers({std::move(mockServer)});
-        QSharedPointer<Location> pNoServers{new Location{}};
-        pBogusAddr->id(QStringLiteral("mock-no-servers"));
-        pBogusAddr->name(QStringLiteral("mock-no-servers"));
-        pBogusAddr->country(QStringLiteral("US"));
-        pBogusAddr->portForward(false);
+        // Location whose server has a bogus IP address - should be ignored
+        auto pServiceGroup = std::make_shared<kapps::regions::ServiceGroup>(
+            std::vector<std::uint16_t>{}, false,
+            std::vector<std::uint16_t>{}, false,
+            std::vector<std::uint16_t>{1337}, false,
+            std::vector<std::uint16_t>{}, std::string{}, std::string{},
+            std::vector<std::uint16_t>{});
+
+        auto pBogusServer = std::make_shared<kapps::regions::Server>(
+            kapps::core::Ipv4Address{}, "n/a", std::string{}, pServiceGroup);
+        auto pBogusRegion = std::make_shared<kapps::regions::Region>("mock-bogus-addr",
+            true, false, false, kapps::core::Ipv4Address{},
+            std::vector<std::shared_ptr<const kapps::regions::Server>>{pBogusServer});
+
+        auto pBogusAddr = QSharedPointer<Location>::create(
+            std::move(pBogusRegion), nullable_t<double>{});
+
+        // Location with no servers at all (offline)
+        auto pOfflineRegion = std::make_shared<kapps::regions::Region>("mock-bogus-offline",
+            true, false, false, kapps::core::Ipv4Address{},
+            std::vector<std::shared_ptr<const kapps::regions::Server>>{pBogusServer});
+
+        auto pNoServers = QSharedPointer<Location>::create(
+            std::move(pOfflineRegion), nullable_t<double>{});
 
         auto pBatch{new LatencyBatch{{pBogusAddr, pNoServers}, this}};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
@@ -320,24 +334,9 @@ private slots:
     void unresponsiveCleanup()
     {
         // Prevent responses from being received by using bogus servers with
-        // valid but unreachable IP addresses.
-        std::vector<QSharedPointer<Location>> mockPingLocations;
-        for(int i=0; i<MockPingServerCount; ++i)
-        {
-            QSharedPointer<Location> pBogusAddr{new Location{}};
-            pBogusAddr->id(QStringLiteral("mock-bogus-addr-%1").arg(i));
-            pBogusAddr->name(QStringLiteral("mock-bogus-addr-%1").arg(i));
-            pBogusAddr->country(QStringLiteral("US"));
-            pBogusAddr->portForward(false);
-            Server mockServer;
-            // IP in documentation range
-            mockServer.ip(QStringLiteral("192.0.2.%1").arg(i));
-            mockServer.commonName("n/a");
-            mockServer.wireguardPorts({1337});
-            pBogusAddr->servers({std::move(mockServer)});
-            mockPingLocations.push_back(std::move(pBogusAddr));
-        }
-        auto pBatch{new LatencyBatch{mockPingLocations, this}};
+        // valid but unreachable IP addresses (documentation range)
+        MockPingServers servers{"mock-bogus-addr", 192, 0, 2};
+        auto pBatch{new LatencyBatch{servers.mockPingLocations(), this}};
         QSignalSpy measurementSpy{pBatch, &LatencyBatch::newMeasurements};
         QSignalSpy destroySpy{pBatch, &QObject::destroyed};
 
@@ -379,7 +378,7 @@ private slots:
     }
 
 private:
-    MockPingServers _mockServers;
+    MockPingServers _mockServers{"mock-server", 127, 0, 0};
 };
 
 QTEST_GUILESS_MAIN(tst_latencytracker)

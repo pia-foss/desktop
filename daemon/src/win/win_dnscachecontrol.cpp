@@ -16,13 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_dnscachecontrol.cpp")
 
 #include "win_dnscachecontrol.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "brand.h"
-#include "daemon.h"
+#include "../daemon.h"
+#include <kapps_core/src/win/win_error.h>
 #include <Shlwapi.h>
 #include <Psapi.h>
 #include <VersionHelpers.h>
@@ -103,7 +104,7 @@ WinDnsCacheControl::WinDnsCacheControl()
     if(!_dnscacheRegKey)
     {
         qWarning() << "Can't open Dnscache registry key -"
-            << WinErrTracer{static_cast<DWORD>(openStatus)};
+            << kapps::core::WinErrTracer{static_cast<DWORD>(openStatus)};
     }
 
     connect(&_serviceState, &WinServiceState::stateChanged, this,
@@ -133,7 +134,7 @@ std::pair<std::wstring, DWORD> WinDnsCacheControl::getDnscacheRegKeys()
     if(getStatus != ERROR_SUCCESS)
     {
         qWarning() << "Can't stub Dnscache; unable to get existing image path:"
-            << WinErrTracer{static_cast<DWORD>(getStatus)};
+            << kapps::core::WinErrTracer{static_cast<DWORD>(getStatus)};
         return {};
     }
 
@@ -153,7 +154,7 @@ std::pair<std::wstring, DWORD> WinDnsCacheControl::getDnscacheRegKeys()
     if(getStatus != ERROR_SUCCESS || typeSize != sizeof(type))
     {
         qWarning() << "Can't stub Dnscache; unable to get existing type:"
-            << WinErrTracer{static_cast<DWORD>(getStatus)};
+            << kapps::core::WinErrTracer{static_cast<DWORD>(getStatus)};
         return {};
     }
 
@@ -171,7 +172,7 @@ bool WinDnsCacheControl::setDnscacheRegExpandSz(const std::wstring &valueName,
     if(setStatus != ERROR_SUCCESS)
     {
         qWarning() << "Can't set Dnscache" << valueName << "to" << value << "-"
-            << WinErrTracer{static_cast<DWORD>(setStatus)};
+            << kapps::core::WinErrTracer{static_cast<DWORD>(setStatus)};
         return false;
     }
     return true;
@@ -191,7 +192,7 @@ bool WinDnsCacheControl::setDnscacheRegKeys(const std::wstring &imagePath, DWORD
     {
         qWarning() << "Can't set Dnscache type to" << type
             << "after setting path to" << imagePath << "-"
-            << WinErrTracer{static_cast<DWORD>(setStatus)};
+            << kapps::core::WinErrTracer{static_cast<DWORD>(setStatus)};
 
         // Revert the image path, nothing we can do if this fails
         // If no rollback was given, then this was reverting to the original
@@ -218,7 +219,7 @@ std::wstring WinDnsCacheControl::getDnscacheRunningBasename(DWORD pid,
                                               FALSE, pid)};
     if(!dnscacheProcess)
     {
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         qInfo() << "Can't determine state of Dnscache; unable to open process"
             << pid << "-" << err;
         return {};
@@ -234,7 +235,7 @@ std::wstring WinDnsCacheControl::getDnscacheRunningBasename(DWORD pid,
                                                procImage.size());
     if(nameLen == 0)
     {
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         qInfo() << "Can't determine state of Dnscache; can't get name of process"
             << pid << "-" << err;
         return {};
@@ -408,7 +409,7 @@ bool WinDnsCacheControl::killServiceIfNetworkService(ServiceHandle &scm,
                                      SERVICE_QUERY_CONFIG)};
     if(!svc)
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to open service" << svcName << "-" << error;
         return false;
     }
@@ -418,7 +419,7 @@ bool WinDnsCacheControl::killServiceIfNetworkService(ServiceHandle &scm,
     if(!::QueryServiceConfigW(svc, pSvcConfig,
                               configBuffer.size(), &bufSizeNeeded))
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to get config of service" << svcName << "-" << error;
         return false;
     }
@@ -442,7 +443,7 @@ bool WinDnsCacheControl::killServiceIfNetworkService(ServiceHandle &scm,
                                        FALSE, pid)};
     if(!svcProcess)
     {
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         qInfo() << "Can't open process" << pid << "-" << err;
         return false;
     }
@@ -451,7 +452,7 @@ bool WinDnsCacheControl::killServiceIfNetworkService(ServiceHandle &scm,
         << pid << "to allow Dnscache to restart";
     if(!::TerminateProcess(svcProcess.get(), static_cast<UINT>(-1)))
     {
-        WinErrTracer err{::GetLastError()};
+        kapps::core::WinErrTracer err{::GetLastError()};
         qInfo() << "Can't open process" << pid << "-" << err;
         return false;
     }
@@ -467,7 +468,7 @@ bool WinDnsCacheControl::killNetworkService()
     ServiceHandle scm{::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE)};
     if(!scm)
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to open SCM to find NetworkService svchost -"
             << error;
         return false;
@@ -489,7 +490,7 @@ bool WinDnsCacheControl::killNetworkService()
                                                 statusBuffer.size(),
                                                 &bytesNeeded, &servicesReturned,
                                                 &resumeHandle, nullptr);
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         if(enumResult)
         {
             moreData = false;

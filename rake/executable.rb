@@ -2,10 +2,11 @@ require_relative 'toolchain/msvc.rb' if Build.windows?
 require_relative 'toolchain/clang.rb' unless Build.windows?
 require_relative 'model/build.rb'
 require_relative 'model/component.rb'
-require_relative 'model/qt.rb'
+require_relative 'model/qt.rb' if Build.desktop?
 require_relative 'util/util.rb'
 require_relative 'util/dsl.rb'
 require_relative 'macinfoplist.rb'
+require_relative 'executablebuilder.rb'
 require 'rake/loaders/makefile'
 
 # Build an executable image from any number of source directories.  The result
@@ -39,8 +40,14 @@ require 'rake/loaders/makefile'
 #
 # See export() and use() for more details.
 class Executable
-    # Find Qt
-    Qt = Qt.new
+    # Determine the architectures we're building for - one for a specific
+    # arch, multiple for a universal build on XNU targets
+    Architectures = Build::TargetArchitecture == :universal ?
+        Build::PlatformUniversalArchitectures[Build::Platform] :
+        [Build::TargetArchitecture]
+
+    # Find Qt when targeting Desktop platforms only
+    Qt = Build.desktop? ? Qt.new : nil
 
     # Select and initialize a toolchain.
     #
@@ -63,7 +70,8 @@ class Executable
     # :coverage -> true, false
     #  - Enable code coverage measurement - intended for unit tests.  Clang
     #    only, ignored for clang <6.0.  Default is false.
-    Tc = Build.windows? ? MsvcToolchain.new(Qt) : ClangToolchain.new(Qt)
+    Tc = Build.windows? ? MsvcToolchain.new(Build::TargetArchitecture, Qt) :
+        ClangToolchain.new(Architectures, Qt)
 
     # Determine the source subdirectories to use to pick up platform-specific
     # source.  Include '' for non-platform-specific source.
@@ -92,7 +100,7 @@ class Executable
     #   :static - The module will be a static library ('.lib'/'.a')
     def initialize(name, type = :executable)
         @name = name
-    
+
         # Hack for Windows - limit component directory name to 30 chars.
         # The PIA installer executable name can be pretty long for feature
         # branches when there's also a prerelease tag, etc.  This itself is
@@ -111,7 +119,7 @@ class Executable
             buildName.chomp!('.') while buildName.end_with?('.')
         end
         @build = Build.new(buildName)
-        
+
         @macros = []
         @includeDirs = []
         @libPaths = []
@@ -123,15 +131,14 @@ class Executable
             type: type,
             runtime: :dynamic,
             interface: :console,
-            coverage: false
+            coverage: false,
+            forceLinkSymbols: [],
+            autoInfoPlist: true
         }
 
         # Whether we have referenced QtCore yet; it's added the first time we
         # reference a Qt module
         @hasQtCore = false
-
-        # Suppress the default Info.plist for Mac console executables
-        @noDefaultInfoPlist = false
 
         # All the resources collected for the QRC task.  Nil if no resources
         # have been defined yet, this indicates that we need to create the QRC
@@ -144,21 +151,114 @@ class Executable
         #   files: <array of file paths>
         # }
         @qrcResources = nil
-        # Where the QRC XML file will be generated (if resources are given)
-        @qrcXml = @build.artifact("qrc_#{name}.qrc")
 
-        # Link task - collects inputs from dependencies
+        # This is the final target the Executable produces
         moduleFile = name + Tc.targetExt(type)
         @moduleTarget = @build.artifact(moduleFile)
-        # Multifile - allows object compilation to occur in parallel
-        multifile @moduleTarget => [@build.componentDir] do |t|
-            objs = t.prerequisites.select { |pr| Tc.isObjectFile?(pr) }
-            plistObj = generateDefaultInfoPlist
-            if(plistObj != nil)
-                objs << plistObj
-            end
-            Tc.link(t.name, objs, @libPaths, @libs, @frameworkPaths,
+
+        # The task structuring here is a bit complex due to a limitation in
+        # Rake.  Whenever the dependencies of a parallel task (multitask or our
+        # "multifile") converge, more than one thread can try to invoke the
+        # same dependency, and threads after the first will just block.
+        #
+        # exe(uni.) ---> exe(x86_64) ---> lib(uni.) ---> [...]
+        #            '-> exe(arm64) --'
+        #
+        # If exe(uni.) is a parallel task, this will waste one thread during the
+        # build of "lib" due to both threads trying to execute lib(uni.) at the
+        # same time (the second just blocks).
+        #
+        # Convergence can happen a lot in Executable due to the large number of
+        # shared libraries that we now have.  To work around this, restructure
+        # the tasks, so that the flow from exe(uni.) through to lib(uni.) is
+        # _not_ parallel:
+        #
+        # exe(uni.) ---> .deps ---> lib(uni.) ---> [...]
+        #            '
+        #            '-> .arches ---> exe(x86_64)
+        #                         '-> exe(arm64)
+        #
+        # exe(uni.) and .deps are serial tasks, but .arches is parallel.
+        # This preserves most of the properties we want:
+        #  * we don't waste a thread while building "lib"
+        #  * the arch executables can still be built in parallel
+        #  * the arch executables' objects can still be compiled in parallel
+        #  * the deps are always built before arch executables (due to the
+        #    non-parallel task for exe(uni.) building in a known order)
+        #
+        # We lose some parallelism when multiple dependencies could be built in
+        # parallel (.deps is serial).  In many cases, the deps are actually
+        # independent, but we don't know here whether they could converge
+        # Still, we get most of the benefit just by compiling objects in
+        # parallel within an executable.
+        #
+        # Though not represented here, we do still put a dependency from
+        # exe(x86_64) and exe(arm64) on .deps since they do require it.  This
+        # has almost no effect since .deps would be built already by the serial
+        # exe(uni.) task, but `rake -m` can force all tasks to be parallel, so
+        # we must declare the proper dependency too.  (-m would waste a lot of
+        # threads due to convergence, but at least it would work.)
+
+        # The dummy tasks still need files so Rake knows when to re-run them
+        # using the dummy file's mtime.  (Non-file tasks always run, we don't
+        # want that.)
+        @dependencyTarget = @build.artifact(".deps")
+        # This task depends on nothing right now; dependencies added with .use()
+        # will be attached here.
+        file @dependencyTarget => @build.componentDir do |t|
+            FileUtils.touch(t.name)
+        end
+
+        @builders = nil
+        if(Architectures.length == 1)
+            # Create a single builder, with no architecture subdirectory in the
+            # build directory, producing the final target
+            @builders = [ExecutableBuilder.new(name, Tc, Architectures[0],
+                @moduleTarget, @macros, @includeDirs, @libPaths, @libs,
+                @frameworkPaths, @frameworks, @linkArgs, @options)]
+            # Although @moduleTarget is a multitask, this doesn't cause a
+            # convergence problem as the dependencies are grouped into a serial
+            # task.  The other dependencies of @moduleTarget are individual
+            # object compilations that will not converge.
+            task @moduleTarget => [@build.componentDir, @dependencyTarget]
+        else
+            # Create a builder for each architecture
+            @builders = Architectures.map do |a|
+                # Create a build subdirectory for this arch
+                archBuild = @build.artifact(a.to_s)
+                directory archBuild => [@build.componentDir]
+                # The arch target is in the subdirectory
+                archTarget = @build.artifact(File.join(a.to_s, moduleFile))
+                # Create the builder for this arch
+                builder = ExecutableBuilder.new(name, Tc, a, archTarget,
+                    @macros, @includeDirs, @libPaths, @libs, @frameworkPaths,
                     @frameworks, @linkArgs, @options)
+                # The builder's output depends on the builder's output dir
+                task archTarget => [archBuild, @dependencyTarget]
+                builder
+            end
+            # Create a 'lipo' task to combine each of the architecture builds.
+            builderTargets = @builders.map { |b| b.target }
+            archesTarget = @build.artifact(".arches")
+            multifile archesTarget => builderTargets do |t|
+                FileUtils.touch(t.name)
+            end
+            file @moduleTarget => [@dependencyTarget, archesTarget] do |t|
+                FileUtils.rm(@moduleTarget) if File.exist?(@moduleTarget)
+                sh 'lipo', '-create', *builderTargets, '-output', @moduleTarget
+                # Combine the dSYM bundles too
+                if(type != :static)
+                    FileUtils.rm_rf(@moduleTarget + ".dSYM")
+                    FileUtils.mkdir_p(@moduleTarget + ".dSYM/Contents/Resources/DWARF")
+                    FileUtils.cp(@builders[0].target + ".dSYM/Contents/Info.plist",
+                                 @moduleTarget + ".dSYM/Contents/")
+                    builderSyms = builderTargets.map do |t|
+                        t + ".dSYM/Contents/Resources/DWARF/" + File.basename(t)
+                    end
+                    sh 'lipo', '-create', *builderSyms, '-output',
+                        @moduleTarget + ".dSYM/Contents/Resources/DWARF/" + File.basename(@moduleTarget)
+                end
+            end
         end
 
         # Create symlinks to the target if needed
@@ -182,20 +282,23 @@ class Executable
 
     # Does an input file need moc?
     def needsMoc?(filePath)
+        # Nothing needs moc when not using Qt
+        if(Qt == nil)
+            return false
+        end
         # Ignore Windows resource scripts, they're in UTF-16 and don't need to
         # be moc'd
         if(File.extname(filePath) == '.rc')
             return false
         end
         # Qbs uses a proper C++ lexer to look for Q_OBJECT tokens.  This just
-        # does a regex search, which could be fooled by Q_OBJECT occurring in
+        # does a text search, which could be fooled by Q_OBJECT occurring in
         # a string literal or comment, but at worst we'd just run moc
         # unnecessarily on those files, and having Q_OBJECT in a string or
         # comment is unusual.
         #
         # Qbs also has some additional logic for Q_PLUGIN_METADATA, but we're
         # not using that.
-        mocPattern = /\bQ_(OBJECT|GADGET|NAMESPACE)\b/
         File.open(filePath) do |srcFile|
             srcFile.each_line.any? do |line|
                 line.include?('Q_OBJECT') || line.include?('Q_GADGET') || line.include?('Q_NAMESPACE')
@@ -203,33 +306,17 @@ class Executable
         end
     end
 
-    # Generate a default Info.plist if applicable to this executable.  The plist
-    # is generated and compiled, the .o file path is returned (or nil if no
-    # default plist is needed)
-    def generateDefaultInfoPlist()
-        # Only needed for Mac console apps that don't have an explicit
-        # Info.plist input
-        return nil if !Build.macos? ||
-            @options[:type] != :executable ||
-            @options[:interface] != :console ||
-            @noDefaultInfoPlist
-
-        infoPlistFile = @build.artifact('Info.plist')
-        File.write(infoPlistFile, MacInfoPlist.renderDefaultPlist(@name, @name, Build::ProductIdentifier))
-
-        plistSContent = ".section __TEXT,__info_plist\n" +
-            ".incbin \"#{File.absolute_path(infoPlistFile)}\"\n"
-        plistSFile = @build.artifact('Info.plist.s')
-        File.write(plistSFile, plistSContent)
-
-        plistObjPath = @build.artifact(File.basename(plistSFile) + Tc.objectExt(plistSFile))
-        Tc.compile(plistSFile, plistObjPath, nil, @macros, @includeDirs,
-                   @frameworkPaths, @options)
-        plistObjPath
+    # Get the absolute path to an artifact to be built by a specific builder.
+    # Includes the builder's architecture only if more than one arch is being
+    # built.
+    def archArtifact(path, builder)
+        return @build.artifact(path) if @builders.length == 1
+        @build.artifact(File.join(builder.architecture.to_s, path))
     end
 
     # Compile a source file to an object file, and include that object in the
-    # executable.
+    # executable.  'objPath' is an object file path relative to the per-arch
+    # build directory.
     #
     # Normally, sourceFile() picks an object path using the source path.
     # resource() also uses this directly; the source file is generated so
@@ -240,71 +327,17 @@ class Executable
     # dependencies, so Rake knows to rebuild an object even if only header files
     # changed.
     def compileSource(sourcePath, objPath)
-        # Build intermediate directory
-        # Ex: .../pia-clientlib + src/win
-        objBuildDir = File.dirname(objPath)
-        directory objBuildDir
-
-        # .mf extension is required so import() knows to use the Makefile parser
-        depFile = objPath.ext(".dep.mf")
-
-        file objPath => [sourcePath, objBuildDir] do |t|
-            puts "compile #{@name}: #{sourcePath}"
-
-            # If the file needs moc, run it.  However, we can't compile the moc
-            # source separately, since we can't include the class definitions
-            # ahead of the moc source - the source file has to #include the moc
-            # source at the end of the file.
-            #
-            # We don't need an explicit task for this, it's just part of
-            # transforming this source file to an object file.
-            fileIncludeDirs = @includeDirs
-            if needsMoc?(sourcePath)
-                mocSrcPath = @build.artifact(sourcePath.ext(".moc"))
-                Tc.moc(sourcePath, mocSrcPath, @macros, @includeDirs,
-                       @frameworkPaths)
-                # Add this directory to the include paths so the source file can
-                # include the moc source
-                fileIncludeDirs = fileIncludeDirs + [File.dirname(mocSrcPath)]
-            end
-
-            Tc.compile(sourcePath, objPath, depFile, @macros, fileIncludeDirs,
-                       @frameworkPaths, @options)
+        # Check if the file needs moc.  This happens at probe time, so any
+        # generated files may not exist yet.  We don't need moc on generated
+        # files anyway.
+        mocSrcPath = (File.exist?(sourcePath) && needsMoc?(sourcePath)) ?
+            sourcePath.ext(".moc") : nil
+        @builders.each do |b|
+            archObjPath = archArtifact(objPath, b)
+            archMocSrcPath = (mocSrcPath == nil) ? nil : archArtifact(mocSrcPath, b)
+            b.compileSource(sourcePath, archObjPath, archMocSrcPath)
         end
 
-        # If a dep file exists from a prior run, import it so we can create
-        # dependencies on the header files that were used last time.
-        if(File.exist?(depFile))
-            # Rake is able to import Makefile dependencies, but in this case
-            # it's relatively common that a dependency no longer exists (such as
-            # when switching branches where a header no longer exists).  Load
-            # this manually and ignore any files that don't exist.
-            deps = File.read(depFile)
-            # This parser is simpler than the built-in makefile loader since it
-            # is only used with generated makedep files.
-            target = nil
-            deps.each_line do |l|
-                if(target == nil)
-                    target, tail = l.split(':', 2)
-                    # tail ignored; it theoretically could contain deps but the
-                    # generated makedep files are never written that way - it's
-                    # always just ' \'
-                else
-                    # Remove leading/trailing spaces, final newline, and any trailing '\'
-                    l.gsub!(/^[ \t]+/, '')
-                    l.gsub!(/[ \t]+(|\\)$/, '')
-                    l = Util.deleteSuffix(l, "\n")
-                    # Unescape embedded spaces
-                    l.gsub!('\\ ', ' ')
-                    if(File.exist?(l))
-                        task objPath => l
-                    end
-                end
-            end
-        end
-
-        # Include object in executable
-        task @moduleTarget => objPath
         self
     end
 
@@ -348,7 +381,7 @@ class Executable
     # Suppress the default Info.plist on Mac for console executables.  Use if
     # the executable links in its own customized Info.plist.
     def noDefaultInfoPlist
-        @noDefaultInfoPlist = true
+        @options[:autoInfoPlist] = false
         self
     end
 
@@ -356,6 +389,18 @@ class Executable
     # toolchain
     def coverage(enable)
         @options[:coverage] = enable
+        self
+    end
+
+    # Force the linker to think a particular symbols is unreferenced, so the
+    # object defining that symbol will be linked in from a static library even
+    # if it is otherwise unreferenced.
+    #
+    # This is needed for the unit test static lib to ensure that some static
+    # initializers run correctly.  The symbol must be a C-linkage function (the
+    # name is mangled on Win x86 assuming that it is a __cdecl function).
+    def forceLinkSymbol(symbol)
+        @options[:forceLinkSymbols].push(symbol)
         self
     end
 
@@ -409,7 +454,7 @@ class Executable
 
     # Add platform-specific linker arguments
     def linkArgs(args)
-        @linkArgs += args
+        @linkArgs.push(*args)
         self
     end
 
@@ -435,16 +480,33 @@ class Executable
     #
     # See export() for details on the parts of an Executable that are exported to
     # other components, and for the required keys on module definitions.
-    def use(component)
+    def use(component, visibility = nil)
         @macros.concat(component.macros)
         @includeDirs.concat(component.includeDirs)
         @libPaths.concat(component.libPaths)
         @libs.concat(component.libs)
+        if(visibility == :export)
+            @exportComponent.dependency(component)
+        end
         @frameworkPaths.concat(component.frameworkPaths)
         @frameworks.concat(component.frameworks)
 
         if(component.task != nil)
-            task @moduleTarget => component.task
+            task @dependencyTarget => component.task
+        end
+
+        # Recurse into the component's dependencies.  This must be last, because
+        # the order of static libraries in @libs is important.  (If a static lib
+        # references another static lib, the "dependent" lib must be first, so
+        # that the unknown symbols can then be resolved with the "dependency"
+        # lib.  This can happen with unit tests, as all-tests-lib.a depends on
+        # other static libraries, although code coverage may hide this problem
+        # as it causes --whole-archive to be enabled when possible.)
+        component.dependencies.each do |dep|
+            # Do not export the dependencies even if exporting this component as
+            # a dependency.  If we export this component, its dependencies are
+            # picked up transitively when used.
+            use(dep, nil)
         end
         self
     end
@@ -453,13 +515,25 @@ class Executable
     # "Core" is referenced automatically when the first Qt module is referenced.
     # Don't pass "Core" explicitly since it handles essential Qt definitions.
     # To only use "Core" without using any other Qt modules, use '.useQt(nil)'.
-    def useQt(moduleName)
+    def useQt(moduleName, visibility = nil)
+        # Can't use Qt modules on platforms where we do not use Qt
+        if(Qt == nil)
+            raise "Qt#{moduleName} not available - PIA does not use Qt on #{Build::Platform}"
+        end
         if(!@hasQtCore)
-            use(Qt.core)
+            # In principle, we should probably only export Qt.core if at least
+            # one other Qt component is exported, or if the executable
+            # explicitly said to export core with '.useQt(nil, :export)'.
+            #
+            # In practice, all of our Qt-based modules need to export Qt.core,
+            # and there's virtually no harm exporting it even if not needed.
+            # So there's not much point actually adding that logic; just export
+            # it.
+            use(Qt.core, :export)
             @hasQtCore = true
         end
         if(moduleName != nil)
-            use(Qt.component(moduleName))
+            use(Qt.component(moduleName), visibility)
         end
         self
     end
@@ -507,12 +581,17 @@ class Executable
     # 'excludePatterns' can be used to ignore files that would otherwise match
     # 'patterns'.  A few patterns are always excluded (ResourceExcludePatterns)
     def resource(root, patterns, excludePatterns = [])
+        # Cannot add Qt-style resources when not using Qt
+        if(Qt == nil)
+            raise "Cannot add Qt-style resources from #{root} when not using Qt"
+        end
         # If we don't have a QRC source task yet, create one
+        qrcXml = @build.artifact("qrc_#{@name}.qrc")
         qrcSourcePath = @build.artifact("qrc_#{@name}.cpp")
         if(@qrcResources == nil)
             @qrcResources = []
             # Generate a QRC resource script (as XML)
-            file @qrcXml => [@build.componentDir] do |t|
+            file qrcXml => [@build.componentDir] do |t|
                 File.open(t.name, "w") do |f|
                     f.write("<!DOCTYPE RCC><RCC version=\"1.0\"><qresource>\n")
                     @qrcResources.each do |group|
@@ -525,12 +604,12 @@ class Executable
                 end
             end
             # Use rcc to generate a source file
-            file qrcSourcePath => [@qrcXml] do |t|
+            file qrcSourcePath => [qrcXml] do |t|
                 puts "rcc #{@name}"
-                Tc.rcc(@qrcXml, t.name, @name)
+                Tc.rcc(qrcXml, t.name, @name)
             end
             # Include it in the build
-            qrcObj = @build.artifact(File.basename(qrcSourcePath) + Tc.objectExt(qrcSourcePath))
+            qrcObj = File.basename(qrcSourcePath) + Tc.objectExt(qrcSourcePath)
             compileSource(qrcSourcePath, qrcObj)
         end
 
@@ -541,7 +620,7 @@ class Executable
             .select {|f| !File.directory?(f)}
         @qrcResources << {root: root, files: resources}
         # qrcXml depends on all of these files
-        task @qrcXml => resources
+        task qrcXml => resources
 
         self
     end
@@ -552,8 +631,7 @@ class Executable
     # specific files are used for deps like Breakpad when the whole directory is
     # not needed.
     def sourceFile(sourcePath)
-        # Ex: .../pia-clientlib + src/win/win_com.cpp.obj
-        objPath = @build.artifact(sourcePath + Tc.objectExt(sourcePath))
+        objPath = sourcePath + Tc.objectExt(sourcePath)
         compileSource(sourcePath, objPath)
     end
 
@@ -563,25 +641,12 @@ class Executable
     # Most of the time, use .source(path) to specify a whole directory instead.
     def headerFile(headerPath)
         if needsMoc?(headerPath)
-            mocSrcPath = @build.artifact("#{headerPath}.moc.cpp")
-            # Build intermediate directory - includes subdirectory path of
-            # source file
-            objBuildDir = @build.artifact(File.dirname(headerPath))
-            directory objBuildDir
-
-            # Generate source with moc
-            file mocSrcPath => [headerPath, objBuildDir] do |t|
-                puts "moc #{@name}: #{headerPath}"
-                Tc.moc(headerPath, mocSrcPath, @macros, @includeDirs,
-                       @frameworkPaths)
+            mocSrcPath = headerPath.ext(".moc.cpp")
+            @builders.each do |b|
+                archMocSrcPath = archArtifact(mocSrcPath, b)
+                archMocObjPath = archMocSrcPath + Tc.objectExt(mocSrcPath)
+                b.mocHeader(headerPath, archMocSrcPath, archMocObjPath)
             end
-
-            # Compile the moc src and link it into the program
-            mocObjPath = mocSrcPath + Tc.objectExt(mocSrcPath)
-            compileSource(mocSrcPath, mocObjPath)
-
-            # Include object in executable
-            task @moduleTarget => mocObjPath
         end
         self
     end
@@ -597,17 +662,26 @@ class Executable
     # Include the source files from this directory, relative to the project
     # root.
     #
-    # By default, source directories are exported as include directories to
-    # other modules that use this one.  Pass nil for visibility to prevent
-    # this.
-    #
     # - Platform-specific subdirectories (win, mac, linux, posix), are included
     #   automatically
     # - moc rules are generated for headers in this directory, the resulting
     #   files are compiled and linked into the module
-    # - The source directory is also added as an include directory
-    def source(path, includeVisibility = :export)
-        include(path, includeVisibility)
+    #
+    # Occasionally, a module may export its source directory as an include
+    # directory.  This usually happens for third-party modules, where we
+    # expect to be able to `#include <7z.h>`, etc. in source.  Pass :export
+    # for includeVisibility to export an include path.
+    def source(path, includeVisibility = nil)
+        # If this path is an exported include directory, it's also an internal
+        # include directory, because `#include <...>` needs to work on those
+        # files within this project too.
+        #
+        # Otherwise, it is neither.  Source files can always `#include "..."` to
+        # get files from their current directory, and if the component includes
+        # multiple source directories, we don't want them implicitly including
+        # each other's files (instead consider `#include "../file.h"` or
+        # `#include <module/src/file.h>`.
+        include(path, :export) if includeVisibility == :export
 
         # For headers with moc macros, generate moc and compile rules
         headerPatterns = Util.joinPaths([[path], SourceSubdirs, ["*.h"]])

@@ -106,6 +106,7 @@ function startClient() {
 function configureSystemd() {
     # install the service
     sudo cp "$root/installfiles/piavpn.service" "$systemdServiceLocation"
+    sudo chmod 644 "$systemdServiceLocation"
 
     echoPass "Created $serviceName service"
 
@@ -184,6 +185,12 @@ function hasDependencies() {
     if ! ldconfig -p | grep -q libnl-route-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnl-genl-3.so.200; then return 1; fi
     if ! ldconfig -p | grep -q libnsl.so.1; then return 1; fi
+    # The iptables binary is usually located in the /usr/sbin directory.
+    # Another way of checking, more in line with the ones above, could be:
+    # if ! ls /usr/sbin | grep -q iptables; then return 1; fi
+    # The chosen method could be more resistant if in some distros the
+    # binary is in another directory
+    if ! iptables --version >/dev/null 2>&1; then return 1; fi
 
     return 0
 }
@@ -194,6 +201,7 @@ function promptManualDependencies() {
     echo " - libnl-3-200"
     echo " - libnl-route-3-200, libnl-genl-3-200 (may be included in libnl-3-200)"
     echo " - libnsl (libnsl.so.1)"
+    echo " - iptables"
     requestConfirmation "Continue with installation?"
 }
 
@@ -202,19 +210,39 @@ function installDependencies() {
     # package manager, etc.
     if hasDependencies; then return 0; fi
 
+    # Here we are installing the "iptables" package in every distribution
+    # This, depending on the distribution, can be the legacy one or the 
+    # nftables backend one.
+    # 
+    # Debian:   "iptables" uses nf_tables backend
+    # Fedora:   "iptables" is the legacy package installed by default
+    #           "iptables-nft" is nf_tables backend one
+    # Manjaro:  "iptables" is the legacy package installed by default
+    #           "iptables-nft" is nf_tables backend one
+    #           they can't both be installed at the same time, installing one will remove the other
+    # OpenSUSE: "iptables" is the legacy package installed by default
+    #           "iptables-backend-nft" is nf_tables backend one
+    #
+    # All these packages are valid, if the user already installed a different one
+    # then the one we install here, there should be no problems.
+    #
+    # All the distributions also have a "nftables" package
+    # This is another package that does not depend on iptables in any way, or viceversa.
+    # Both can be installed at the same on a system without any conflicts.
+
     if hash yum 2>/dev/null; then
         # libnsl is no longer part of of the glibc package on Fedora
-        sudo yum -y install libxkbcommon-x11 libnl3 libnsl
+        sudo yum -y install libxkbcommon-x11 libnl3 libnsl iptables
     elif hash pacman 2>/dev/null; then
-        sudo pacman -S --noconfirm libxkbcommon-x11 libnl
+        sudo pacman -S --noconfirm libxkbcommon-x11 libnl iptables
     elif hash zypper 2>/dev/null; then
-        sudo zypper install libxkbcommon-x11-0
+        sudo zypper install libxkbcommon-x11-0 iptables
     # Check for apt-get last.  Apparently some RPM-based distributions (such as
     # openSUSE) have an RPM port of apt in addition to their preferred package
     # manager.  This check uses Debian package names though that aren't
     # necessarily the same on other distributions.
     elif hash apt-get 2>/dev/null; then
-        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200"
+        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200 iptables"
         sudo apt-get install --yes $APT_PKGS
     else
         promptManualDependencies

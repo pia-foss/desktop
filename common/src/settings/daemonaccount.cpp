@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "daemonaccount.h"
 
 const std::unordered_set<QString> &DaemonAccount::sensitiveProperties()

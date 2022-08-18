@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("apiclient.h")
 
 #ifndef APICLIENT_H
 #define APICLIENT_H
 
-#include "async.h"
-#include "apibase.h"
-#include "apiretry.h"
+#include <common/src/async.h>
+#include <common/src/apibase.h>
+#include <common/src/apiretry.h>
 #include "environment.h"
 #include <QJsonDocument>
 #include <QNetworkReply>

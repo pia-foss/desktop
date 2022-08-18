@@ -20,7 +20,7 @@
 #define TASKS_SERVICE_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 // Base task for service management.
 class ServiceTask : public Task

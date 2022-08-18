@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("mac_screens.h")
 
 #ifndef MAC_SCREENS_H
 #define MAC_SCREENS_H
 
-#include "platformscreens.h"
+#include "../platformscreens.h"
 
 std::unique_ptr<PlatformScreens> createMacScreens();
 

@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguardkernelbackend.h")
 
 #ifndef WIREGUARDKERNELBACKEND_H
 #define WIREGUARDKERNELBACKEND_H
 
-#include "wireguardbackend.h"
-#include "vpn.h"
+#include "../wireguardbackend.h"
+#include "../vpn.h"
 
 // WireguardKernelBackend is a backend Wireguard implementation using the Linux
 // kernel module.  It uses embeddable-wg-library to configure the interface

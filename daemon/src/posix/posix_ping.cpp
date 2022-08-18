@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("posix_ping.cpp")
 
 #include "posix_ping.h"
@@ -37,7 +37,7 @@ PosixPing::PosixPing()
     // still want to test the bulk of LatencyTracker, so mimic the pings just by
     // triggering phony measurements in unit tests.
 #ifndef UNIT_TEST
-    _icmpSocket = PosixFd{::socket(PF_INET, SOCK_RAW, IPPROTO_ICMP)};
+    _icmpSocket = kapps::core::PosixFd{::socket(PF_INET, SOCK_RAW, IPPROTO_ICMP)};
     if(!_icmpSocket)
     {
         qWarning() << "Failed to open ICMP socket:" << errno;

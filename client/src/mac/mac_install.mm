@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac/mac_install.mm")
 
 #import "mac_install.h"
 
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "brand.h"
 #include "product.h"
 
@@ -93,7 +93,7 @@ namespace xpc
         }
 
         qInfo() << "Sending request" << traceEnum(action) << "with path"
-            << appPathUtf8;
+            << appPathUtf8.data();
         xpc_object_t reply = xpc_connection_send_message_with_reply_sync(xpcConn, request);
         auto result = static_cast<MacInstall::Result>(xpc_dictionary_get_int64(reply, MacInstall::xpcKeyResult));
         qInfo() << "Result for" << traceEnum(action) << "-" << traceEnum(result);

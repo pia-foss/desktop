@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/updatedownloader.h"
-#include "testshim.h"
+#include <common/src/testshim.h>
 #include "version.h"
 #include "brand.h"
 #include "src/mocknetwork.h"
@@ -50,7 +50,7 @@ const Update olderGa{QStringLiteral("https://unit.test/v080"), QStringLiteral("0
 // The same release.
 // (The version here could actually have pre-release tags depending on the
 // version being built.)
-const Update sameGa{QStringLiteral("https://unit.test/vCurrent"), Version::semanticVersion(), {}};
+const Update sameGa{QStringLiteral("https://unit.test/vCurrent"), QString::fromStdString(Version::semanticVersion()), {}};
 
 // The newer/older betas are relative to the "newer" GA release.
 const Update newerBeta{QStringLiteral("https://unit.test/v101b"), QStringLiteral("101.0.0-beta.3"), {}};
@@ -161,7 +161,7 @@ private slots:
     void validateVersion()
     {
         // This throws if the version number is not sane, which fails the test.
-        TestData::buildVersion = SemVersion{Version::semanticVersion()};
+        TestData::buildVersion = SemVersion{QString::fromStdString(Version::semanticVersion())};
         TestData::buildIsBeta = TestData::buildVersion.isPrereleaseType(u"beta");
     }
 

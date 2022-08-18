@@ -16,11 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_servicestate.cpp")
 
 #include "win_servicestate.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
+#include <kapps_core/src/win/win_error.h>
 #include <QElapsedTimer>
 
 namespace
@@ -187,7 +188,7 @@ void WinServiceState::startNotifications()
     _scm.reset(::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE));
     if(!_scm)
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to open SCM to monitor service" << _serviceName
             << "-" << error;
         return;
@@ -198,7 +199,7 @@ void WinServiceState::startNotifications()
     _service.reset(::OpenServiceW(_scm, _serviceName.c_str(), accessRights));
     if(!_service)
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to open service" << _serviceName
             << "to monitor state:" << error;
         _scm.close();
@@ -265,7 +266,7 @@ bool WinServiceState::requestNotifications()
             return false;
         default:
         {
-            WinErrTracer error{serviceNotifyResult};
+            kapps::core::WinErrTracer error{serviceNotifyResult};
             qWarning() << "Unable to monitor service" << _serviceName << "-"
                 << error;
             // We could concievably try to reinitialize in the presence of some
@@ -301,7 +302,7 @@ void WinServiceState::serviceChanged(const WinServiceNotify &notify)
         {
             qWarning() << "Service" << _serviceName
                 << "reported error"
-                << WinErrTracer{notify.dwNotificationStatus} << "in state"
+                << kapps::core::WinErrTracer{notify.dwNotificationStatus} << "in state"
                 << traceEnum(_lastState);
         }
         updateState(State::Deleted, 0);
@@ -398,7 +399,7 @@ Async<void> WinServiceState::startService()
 
     if(!::StartServiceW(_service, 0, nullptr))
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Can't start service" << _serviceName
             << "-" << error;
         // This error is known to occur in some cases when attempting to restart
@@ -435,7 +436,7 @@ Async<void> WinServiceState::stopService()
     SERVICE_STATUS status;  // Ignored but required by ControlService()
     if(!::ControlService(_service, SERVICE_CONTROL_STOP, &status))
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Can't stop service" << _serviceName
             << "-" << error;
         return Async<void>::reject({HERE, Error::Code::TaskRejected});

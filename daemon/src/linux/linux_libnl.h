@@ -19,7 +19,7 @@
 #ifndef LINUX_LIBNL_H
 #define LINUX_LIBNL_H
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QLibrary>
 #include <linux/genetlink.h>
 #include <netlink/genl/genl.h>

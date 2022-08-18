@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("clicommand.cpp")
 
 #include "clicommand.h"
 #include "brand.h"
-#include "output.h"
+#include <common/src/output.h>
 #include "cliclient.h"
-#include "util.h"
+#include <common/src/builtin/util.h>
 #include <QElapsedTimer>
 #include <unordered_map>
 
@@ -73,10 +73,16 @@ CliTimeout::CliTimeout(QCoreApplication &app)
     QTimer::singleShot(msec(_timeout), Qt::TimerType::PreciseTimer, this, [this]()
     {
         std::chrono::nanoseconds nsecElapsed{_elapsed.nsecsElapsed()};
-        const auto &traceElapsed = traceMsec(std::chrono::duration_cast<std::chrono::milliseconds>(nsecElapsed));
-        qWarning() << "Timed out after" << traceElapsed << "- had specified"
+
+        // Output from piactl still uses QTextStream, but traceMsec (like most
+        // tracers) has been updated to use std::ostream.  Render the duration
+        // to a string to display it.
+        std::stringstream elapsedStream;
+        elapsedStream << traceMsec(std::chrono::duration_cast<std::chrono::milliseconds>(nsecElapsed));
+        std::string elapsedText{std::move(elapsedStream).str()};
+        qWarning() << "Timed out after" << elapsedText << "- had specified"
             << traceMsec(_timeout);
-        errln() << "Timed out after" << traceElapsed;
+        errln() << "Timed out after" << QString::fromStdString(elapsedText);
         _app.exit(CliExitCode::Timeout);
     });
 }

@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("processrunner.h")
 
 #ifndef PROCESSRUNNER_H
 #define PROCESSRUNNER_H
 
-#include "linebuffer.h"
+#include <common/src/linebuffer.h>
 #include <QProcess>
 #include <QTimer>
 #include <QDeadlineTimer>

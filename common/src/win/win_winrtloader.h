@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #line HEADER_FILE("win_winrtloader.h")
 
 #ifndef WIN_WINRTLOADER_H
 #define WIN_WINRTLOADER_H
 
 #include "../../extras/winrtsupport/src/winrtsupport.h"
-#include "thread.h"
+#include "../thread.h"
 #include "win_util.h"
 
 // UWP apps are identified in split tunnel rules with a "file path" of the form

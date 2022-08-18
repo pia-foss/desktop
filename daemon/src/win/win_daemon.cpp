@@ -16,20 +16,21 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_daemon.cpp")
 
 #include "win_daemon.h"
 #include "wfp_filters.h"
 #include "win_appmanifest.h"
-#include "win/win_winrtloader.h"
+#include <common/src/win/win_winrtloader.h>
 #include "win_interfacemonitor.h"
-#include "path.h"
-#include "networkmonitor.h"
+#include <common/src/builtin/path.h>
+#include "../networkmonitor.h"
 #include "win.h"
 #include "brand.h"
 #include "../../../extras/installer/win/tap_inl.h"
 #include "../../../extras/installer/win/tun_inl.h"
+#include "../../../extras/installer/win/util_inl.h" // getSystemTempPath()
 #include <QDir>
 
 #include <Msi.h>
@@ -42,16 +43,27 @@
 #include <TlHelp32.h>
 #include <Psapi.h>
 
-// The 'bind' callout GUID is the GUID used in 1.7 and earlier; the WFP callout
-// only handled the bind layer in those releases.
-GUID PIA_WFP_CALLOUT_BIND_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
-GUID PIA_WFP_CALLOUT_CONNECT_V4 = { 0xb80ca14a, 0xa807, 0x4ef2, { 0x87, 0x2d, 0x4b, 0x1a, 0x51, 0x82, 0x54, 0x2 } };
-GUID PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4 = { 0x18ebe4a1, 0xa7b4, 0x4b76, { 0x9f, 0x39, 0x28, 0x57, 0x1e, 0xaa, 0x6b, 0x6 } };
-GUID PIA_WFP_CALLOUT_CONNECT_AUTH_V4 = { 0xf6e93b65, 0x5cd0, 0x4b0d, { 0xa9, 0x4c, 0x13, 0xba, 0xfd, 0x92, 0xf4, 0x1c } };
-GUID PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4 = { 0x6a564cd3, 0xd14e, 0x43dc, { 0x98, 0xde, 0xa4, 0x18, 0x14, 0x4d, 0x5d, 0xd2 } };
-GUID PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4 = { 0xb06c0a5f, 0x2b58, 0x6753, { 0x85, 0x29, 0xad, 0x8f, 0x1c, 0x51, 0x5f, 0xf5 } };
 namespace
 {
+    // Name and description for WFP filter rules
+    wchar_t wfpFilterName[] = L"" PIA_PRODUCT_NAME " Firewall";
+    wchar_t wfpFilterDescription[] = L"Implements privacy filtering features of " PIA_PRODUCT_NAME ".";
+    wchar_t wfpProviderCtxName[] = L"" BRAND_SHORT_NAME " WFP Provider Context";
+    wchar_t wfpProviderCtxDescription[] = L"" BRAND_SHORT_NAME " WFP Provider Context";
+    wchar_t wfpCalloutName[] = L"" BRAND_SHORT_NAME " WFP Callout";
+    wchar_t wfpCalloutDescription[] = L"" BRAND_SHORT_NAME " WFP Callout";
+
+    // GUIDs of the callouts defined by the PIA WFP callout driver.  These must
+    // match the callouts in the driver.  If you build a rebranded driver,
+    // change the GUIDs in the driver and update these to match.  Otherwise,
+    // keep the GUIDs for the PIA-branded driver.
+    GUID PIA_WFP_CALLOUT_BIND_V4 = {0xb16b0a6e, 0x2b2a, 0x41a3, { 0x8b, 0x39, 0xbd, 0x3f, 0xfc, 0x85, 0x5f, 0xf8 } };
+    GUID PIA_WFP_CALLOUT_CONNECT_V4 = { 0xb80ca14a, 0xa807, 0x4ef2, { 0x87, 0x2d, 0x4b, 0x1a, 0x51, 0x82, 0x54, 0x2 } };
+    GUID PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4 = { 0x18ebe4a1, 0xa7b4, 0x4b76, { 0x9f, 0x39, 0x28, 0x57, 0x1e, 0xaa, 0x6b, 0x6 } };
+    GUID PIA_WFP_CALLOUT_CONNECT_AUTH_V4 = { 0xf6e93b65, 0x5cd0, 0x4b0d, { 0xa9, 0x4c, 0x13, 0xba, 0xfd, 0x92, 0xf4, 0x1c } };
+    GUID PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4 = { 0x6a564cd3, 0xd14e, 0x43dc, { 0x98, 0xde, 0xa4, 0x18, 0x14, 0x4d, 0x5d, 0xd2 } };
+    GUID PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4 = { 0xb06c0a5f, 0x2b58, 0x6753, { 0x85, 0x29, 0xad, 0x8f, 0x1c, 0x51, 0x5f, 0xf5 } };
+
     // The shipped version of the WinTUN driver
     const WinDriverVersion shippedWintunVersion{1, 0, 0, 0};
 
@@ -247,82 +259,54 @@ std::chrono::microseconds WinUnbiasedDeadline::remaining() const
     return std::chrono::microseconds{(_expireTime - now) / 10};
 }
 
-void WinRouteManager::createRouteEntry(MIB_IPFORWARD_ROW2 &route, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
-{
-    InitializeIpForwardEntry(&route);
-    NET_LUID luid{};
-
-    luid.Value = static_cast<ULONG64>(interfaceName.toULongLong());
-    route.InterfaceLuid = luid;
-
-    const auto subnetPair = QHostAddress::parseSubnet(subnet);
-    const QHostAddress &subnetIp = subnetPair.first;
-    const int subnetPrefixLength = subnetPair.second;
-
-    // Destination subnet
-    route.DestinationPrefix.Prefix.si_family = AF_INET;
-    route.DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(subnetIp.toIPv4Address());
-    route.DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
-    route.DestinationPrefix.PrefixLength = subnetPrefixLength;
-
-    // Router address (next hop)
-    route.NextHop.Ipv4.sin_addr.s_addr = htonl(QHostAddress{gatewayIp}.toIPv4Address());
-    route.NextHop.Ipv4.sin_family = AF_INET;
-
-    route.Metric = metric;
-}
-
-void WinRouteManager::addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
-{
-    MIB_IPFORWARD_ROW2 route{};
-    createRouteEntry(route, subnet, gatewayIp, interfaceName, metric);
-
-    qInfo() << "Adding route for" << subnet << "via" << interfaceName
-        << "with metric:" << metric;
-    // Add the routing entry
-    auto routeResult = CreateIpForwardEntry2(&route);
-    if(routeResult != NO_ERROR)
-    {
-        qWarning() << "Could not create route for" << subnet << "-"
-            << WinErrTracer{routeResult};
-    }
-}
-
-void WinRouteManager::removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
-{
-    MIB_IPFORWARD_ROW2 route{};
-    createRouteEntry(route, subnet, gatewayIp, interfaceName, 0);
-    qInfo() << "Removing route for" << subnet << "via" << interfaceName;
-
-    // Delete the routing entry
-    if(DeleteIpForwardEntry2(&route) != NO_ERROR)
-    {
-        qWarning() << "Could not delete route for" << subnet;
-    }
-}
-
 WinDaemon::WinDaemon(QObject* parent)
-    : Daemon{parent}
-    , MessageWnd(WindowType::Invisible)
-    , _firewall(new FirewallEngine(this))
-    , _unboundAppId{nullptr, Path::UnboundExecutable}
-    , _lastSplitParams{}
-    , _wfpCalloutMonitor{L"PiaWfpCallout"}
-    , _subnetBypass{std::make_unique<WinRouteManager>()}
+    : Daemon{parent},
+      MessageWnd{WindowType::Invisible},
+      _wfpCalloutMonitor{L"PiaWfpCallout"}
 {
-    _filters = FirewallFilters{};
-    _filterAdapterLuid = 0;
+    kapps::net::FirewallConfig config{};
+    config.daemonDataDir = Path::DaemonDataDir;
+    config.resourceDir = Path::ResourceDir;
+    config.executableDir = Path::ExecutableDir;
+    config.productExecutables = std::vector<std::wstring>
+        {
+            Path::ClientExecutable,
+            Path::DaemonExecutable,
+            Path::OpenVPNExecutable,
+            Path::SupportToolExecutable,
+            Path::SsLocalExecutable,
+            Path::WireguardServiceExecutable
+        };
+    config.resolverExecutables = std::vector<std::wstring>
+        {
+            Path::UnboundExecutable
+        };
+    config.brandInfo.pWfpFilterName = wfpFilterName;
+    config.brandInfo.pWfpFilterDescription = wfpFilterDescription;
+    config.brandInfo.pWfpProviderCtxName = wfpProviderCtxName;
+    config.brandInfo.pWfpProviderCtxDescription = wfpProviderCtxDescription;
+    config.brandInfo.pWfpCalloutName = wfpCalloutName;
+    config.brandInfo.pWfpCalloutDescription = wfpCalloutDescription;
 
-    if (!_firewall->open() || !_firewall->installProvider())
+    config.brandInfo.wfpBrandProvider = BRAND_WINDOWS_WFP_PROVIDER;
+    config.brandInfo.wfpBrandSublayer = BRAND_WINDOWS_WFP_SUBLAYER;
+
+    config.brandInfo.wfpCalloutBindV4 = PIA_WFP_CALLOUT_BIND_V4;
+    config.brandInfo.wfpCalloutConnectV4 = PIA_WFP_CALLOUT_CONNECT_V4;
+    config.brandInfo.wfpCalloutFlowEstablishedV4 = PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4;
+    config.brandInfo.wfpCalloutConnectAuthV4 = PIA_WFP_CALLOUT_CONNECT_AUTH_V4;
+    config.brandInfo.wfpCalloutIppacketInboundV4 = PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4;
+    config.brandInfo.wfpCalloutIppacketOutboundV4 = PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4;
+
+    config.brandInfo.enableDnscache = [this](bool enable)
     {
-        qCritical() << "Unable to initialize WFP firewall";
-        delete _firewall;
-        _firewall = nullptr;
-    }
-    else
-    {
-        _firewall->removeAll();
-    }
+        if(enable)
+            _dnsCacheControl.restoreDnsCache();
+        else
+            _dnsCacheControl.disableDnsCache();
+    };
+
+    _pFirewall.emplace(config);
 
     // Qt for some reason passes Unix CA directories to OpenSSL by default on
     // Windows.  This results in the daemon attempting to load CA certificates
@@ -367,7 +351,7 @@ WinDaemon::WinDaemon(QObject* parent)
             this, &WinDaemon::queueApplyFirewallRules);
 
     connect(&_wfpCalloutMonitor, &ServiceMonitor::serviceStateChanged, this,
-            [this](DaemonState::NetExtensionState extState)
+            [this](StateModel::NetExtensionState extState)
             {
                 state().netExtensionState(qEnumToString(extState));
             });
@@ -383,12 +367,18 @@ WinDaemon::WinDaemon(QObject* parent)
 
     connect(this, &Daemon::aboutToConnect, this, &WinDaemon::onAboutToConnect);
 
-    connect(&_appMonitor, &WinAppMonitor::appIdsChanged, this,
-            &WinDaemon::queueApplyFirewallRules);
+    // _appMonitor.appIdsChanged() can be invoked on several different threads.
+    // queueApplyFirewallRules() isn't thread safe, dispatch back to the main
+    // thread.
+    _appMonitor.appIdsChanged = [this]()
+    {
+        QMetaObject::invokeMethod(this, &Daemon::queueApplyFirewallRules,
+                                  Qt::QueuedConnection);
+    };
 
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this,
-            [this](){_appMonitor.setSplitTunnelRules(_settings.splitTunnelRules());});
-    _appMonitor.setSplitTunnelRules(_settings.splitTunnelRules());
+            &WinDaemon::updateSplitTunnelRules);
+    updateSplitTunnelRules();
 
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, [this]()
     {
@@ -411,82 +401,6 @@ WinDaemon::WinDaemon(QObject* parent)
 
 WinDaemon::~WinDaemon()
 {
-#define deactivateFilter(filterVariable, removeCondition) \
-    do { \
-        /* Remove existing rule if necessary */ \
-        if ((removeCondition) && filterVariable != zeroGuid) \
-        { \
-            if (!_firewall->remove(filterVariable)) { \
-                qWarning() << "Failed to remove WFP filter" << #filterVariable; \
-            } \
-            filterVariable = {zeroGuid}; \
-        } \
-    } \
-    while(false)
-#define activateFilter(filterVariable, addCondition, ...) \
-    do { \
-        /* Add new rule if necessary */ \
-        if ((addCondition) && filterVariable == zeroGuid) \
-        { \
-            if ((filterVariable = _firewall->add(__VA_ARGS__)) == zeroGuid) { \
-                reportError(Error(HERE, Error::FirewallRuleFailed, { QStringLiteral(#filterVariable) })); \
-            } \
-        } \
-    } \
-    while(false)
-#define updateFilter(filterVariable, removeCondition, addCondition, ...) \
-    do { \
-        deactivateFilter(_filters.filterVariable, removeCondition); \
-        activateFilter(_filters.filterVariable, addCondition, __VA_ARGS__); \
-    } while(false)
-#define updateBooleanFilter(filterVariable, enableCondition, ...) \
-    do { \
-        const bool enable = (enableCondition); \
-        updateFilter(filterVariable, !enable, enable, __VA_ARGS__); \
-    } while(false)
-#define updateBooleanInvalidateFilter(filterVariable, enableCondition, invalidateCondition, ...) \
-    do { \
-        const bool enable = (enableCondition); \
-        const bool disable = !enable || (invalidateCondition); \
-        updateFilter(filterVariable, disable, enable, __VA_ARGS__); \
-    } while(false)
-#define filterActive(filterVariable) (_filters.filterVariable != zeroGuid)
-
-    if (_firewall)
-    {
-        qInfo() << "Cleaning up WFP objects";
-
-        if (_filters.ipInbound != zeroGuid)
-        {
-            qInfo() << "deactivate IpInbound object";
-            deactivateFilter(_filters.ipInbound, true);
-        }
-
-        if (_filters.splitCalloutIpInbound != zeroGuid)
-        {
-            qInfo() << "deactivate IpInbound callout object";
-            deactivateFilter(_filters.splitCalloutIpInbound, true);
-        }
-
-        if (_filters.ipOutbound != zeroGuid)
-        {
-            qInfo() << "deactivate IpOutbound object";
-            deactivateFilter(_filters.ipOutbound, true);
-        }
-
-        if (_filters.splitCalloutIpOutbound != zeroGuid)
-        {
-            qInfo() << "deactivate IpOutbound callout object";
-            deactivateFilter(_filters.splitCalloutIpOutbound, true);
-        }
-
-        _firewall->removeAll();
-        _firewall->uninstallProvider();
-        _firewall->checkLeakedObjects();
-    }
-    else
-        qInfo() << "Firewall was not initialized, nothing to clean up";
-
     qInfo() << "WinDaemon shutdown complete";
 }
 
@@ -494,7 +408,7 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getNetworkAdapter()
 {
     // For robustness, when making a connection, we always re-query for the
     // network adapter, in case the change notifications aren't 100% reliable.
-    // Also update the DaemonState accordingly to keep everything in sync.
+    // Also update the StateModel accordingly to keep everything in sync.
     auto adapters = WinInterfaceMonitor::getDescNetworkAdapters(L"Private Internet Access Network Adapter");
     if (adapters.size() == 0)
     {
@@ -519,7 +433,7 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getNetworkAdapter()
 void WinDaemon::checkNetworkAdapter()
 {
     // To check the network adapter state, just call getNetworkAdapter() and let
-    // it update DaemonState.  Ignore the result and any exception for a missing
+    // it update StateModel.  Ignore the result and any exception for a missing
     // adapter.
     try
     {
@@ -542,7 +456,7 @@ void WinDaemon::onAboutToConnect()
     // updated rules to apply, but this is much better than restarting the
     // service or having to make a change to the rules just to force this
     // update.
-    _appMonitor.setSplitTunnelRules(_settings.splitTunnelRules());
+    updateSplitTunnelRules();
 
     // If the WFP callout driver is installed but not loaded yet, load it now.
     // The driver is loaded this way for resiliency:
@@ -561,7 +475,7 @@ void WinDaemon::onAboutToConnect()
     // Skip this quickly if the driver isn't installed to avoid holding up
     // connections (don't open SCM or the service an additional time).
     // TODO - Also check master toggle for split tunnel
-    if(_wfpCalloutMonitor.lastState() == DaemonState::NetExtensionState::NotInstalled)
+    if(_wfpCalloutMonitor.lastState() == StateModel::NetExtensionState::NotInstalled)
     {
         qInfo() << "Callout driver hasn't been installed, nothing to start.";
         return;
@@ -590,103 +504,6 @@ void WinDaemon::onAboutToConnect()
             qWarning() << "Callout driver couldn't be started:" << startResult;
             break;
     }
-}
-
-std::vector<quint32> WinDaemon::findExistingDNS(const std::vector<quint32> &piaDNSServers)
-{
-    std::vector<quint32> newDNSServers;
-
-    // What we'd really like to do here is get the DNS servers for the primary
-    // network interface.  Unfortunately, there is no API to do that, and even
-    // parsing `netsh interface ip show dnsservers` won't work since that relies
-    // on the DNSCache service (which PIA must stop to implement split tunnel
-    // DNS).
-    //
-    // The best we can do is to get all DNS servers, which may include PIA's,
-    // but the preexisting servers will still be there.  Then filter out PIA's
-    // servers.
-    //
-    // If no DNS servers remain, then assume that the existing DNS servers were
-    // the same as PIA's - use PIA's DNS servers for bypass apps too.
-    //
-    // There are a few ways that this can be incorrect if there were no existing
-    // DNS servers, or the existing DNS servers were a subset of PIA's, etc.
-    // Given the assumption that alternate DNS servers configured on the same
-    // adapter are equivalent, it will behave reasonably, generally just adding
-    // or removing some equivalent DNS servers.
-    //
-    // The only way this can really significantly fail is if the user has
-    // multiple physical adapters, with different DNS servers configured on
-    // each, and where the primary adapter's DNS servers are the same as PIA's.
-    // In this case, we would incorrectly treat the secondary adapter's servers
-    // as the preexisting DNS, and likely use them on the primary adapter.
-
-    std::aligned_storage_t<1024, alignof(IP4_ARRAY)> dnsAddrBuf;
-    DWORD dnsBufLen = sizeof(dnsAddrBuf);
-    DNS_STATUS status = DnsQueryConfig(DnsConfigDnsServerList, 0,
-                                       NULL, NULL, &dnsAddrBuf, &dnsBufLen);
-    if(status == 0) // Success
-    {
-        const IP4_ARRAY &dnsServers = *reinterpret_cast<const IP4_ARRAY*>(&dnsAddrBuf);
-        newDNSServers.reserve(dnsServers.AddrCount);
-        qInfo() << "Got" << dnsServers.AddrCount
-            << "existing DNS servers";
-        for(DWORD i=0; i<dnsServers.AddrCount; ++i)
-        {
-            quint32 dnsServerAddr{ntohl(dnsServers.AddrArray[i])};
-            // Check if this was one of ours.  We only apply up to 2 DNS
-            // servers, so a linear search through the vector is fine.
-            bool setByPia = std::find(piaDNSServers.begin(), piaDNSServers.end(),
-                                      dnsServerAddr) != piaDNSServers.end();
-            qInfo() << " -" << i << "-" << Ipv4Address{dnsServerAddr}
-                << (setByPia ? "(ours)" : "");
-            if(!setByPia)
-                newDNSServers.push_back(dnsServerAddr);
-        }
-
-        // If no DNS servers remain, then the preexisting DNS servers were
-        // likely the same as PIA's - assume they were.
-        if(newDNSServers.empty())
-        {
-            qInfo() << "All DNS servers appear to be ours, assuming preexisting servers were the same";
-            newDNSServers = piaDNSServers;
-        }
-    }
-    else
-    {
-        qWarning() << "Could not get existing DNS servers - error" << status;
-    }
-
-    return newDNSServers;
-}
-
-static void logFilter(const char* filterName, int currentState, bool enableCondition, bool invalidateCondition = false)
-{
-    if (enableCondition ? currentState != 1 || invalidateCondition : currentState != 0)
-        qInfo("%s: %s -> %s", filterName, currentState == 1 ? "ON" : currentState == 0 ? "OFF" : "MIXED", enableCondition ? "ON" : "OFF");
-    else
-        qInfo("%s: %s", filterName, enableCondition ? "ON" : "OFF");
-}
-
-static void logFilter(const char* filterName, const GUID& filterVariable, bool enableCondition, bool invalidateCondition = false)
-{
-    logFilter(filterName, filterVariable == zeroGuid ? 0 : 1, enableCondition, invalidateCondition);
-}
-
-template<class FilterObjType, size_t N>
-static void logFilter(const char* filterName, const FilterObjType (&filterVariables)[N], bool enableCondition, bool invalidateCondition = false)
-{
-    int state = filterVariables[0] == zeroGuid ? 0 : 1;
-    for (size_t i = 1; i < N; i++)
-    {
-        int s = filterVariables[i] == zeroGuid ? 0 : 1;
-        if (s != state)
-        {
-            state = 2;
-            break;
-        }
-    }
-    logFilter(filterName, state, enableCondition, invalidateCondition);
 }
 
 LRESULT WinDaemon::proc(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -733,679 +550,12 @@ LRESULT WinDaemon::proc(UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 }
 
-void WinDaemon::applyFirewallRules(const FirewallParams& params)
+void WinDaemon::applyFirewallRules(kapps::net::FirewallParams params)
 {
-    if (!_firewall)
-        return;
-
-    QStringList effectiveDnsServers;
-    if(params._connectionSettings)
-        effectiveDnsServers = params._connectionSettings->getDnsServers();
-
-    auto networkAdapter = std::static_pointer_cast<WinNetworkAdapter>(params.adapter);
-
-    FirewallTransaction tx(_firewall);
-
-
-#define deactivateFilter(filterVariable, removeCondition) \
-    do { \
-        /* Remove existing rule if necessary */ \
-        if ((removeCondition) && filterVariable != zeroGuid) \
-        { \
-            if (!_firewall->remove(filterVariable)) { \
-                qWarning() << "Failed to remove WFP filter" << #filterVariable; \
-            } \
-            filterVariable = {zeroGuid}; \
-        } \
-    } \
-    while(false)
-#define activateFilter(filterVariable, addCondition, ...) \
-    do { \
-        /* Add new rule if necessary */ \
-        if ((addCondition) && filterVariable == zeroGuid) \
-        { \
-            if ((filterVariable = _firewall->add(__VA_ARGS__)) == zeroGuid) { \
-                reportError(Error(HERE, Error::FirewallRuleFailed, { QStringLiteral(#filterVariable) })); \
-            } \
-        } \
-    } \
-    while(false)
-#define updateFilter(filterVariable, removeCondition, addCondition, ...) \
-    do { \
-        deactivateFilter(_filters.filterVariable, removeCondition); \
-        activateFilter(_filters.filterVariable, addCondition, __VA_ARGS__); \
-    } while(false)
-#define updateBooleanFilter(filterVariable, enableCondition, ...) \
-    do { \
-        const bool enable = (enableCondition); \
-        updateFilter(filterVariable, !enable, enable, __VA_ARGS__); \
-    } while(false)
-#define updateBooleanInvalidateFilter(filterVariable, enableCondition, invalidateCondition, ...) \
-    do { \
-        const bool enable = (enableCondition); \
-        const bool disable = !enable || (invalidateCondition); \
-        updateFilter(filterVariable, disable, enable, __VA_ARGS__); \
-    } while(false)
-#define filterActive(filterVariable) (_filters.filterVariable != zeroGuid)
-
-    // Firewall rules, listed in order of ascending priority (as if the last
-    // matching rule applies, but note that it is the priority argument that
-    // actually determines precedence).
-
-    // As a bit of an exception to the normal firewall rule logic, the WFP
-    // rules handle the blockIPv6 rule by changing the priority of the IPv6
-    // part of the killswitch rule instead of having a dedicated IPv6 block.
-
-    // Block all other traffic when killswitch is enabled. If blockIPv6 is
-    // true, block IPv6 regardless of killswitch state.
-    logFilter("blockAll(IPv4)", _filters.blockAll[0], params.blockAll);
-    updateBooleanFilter(blockAll[0], params.blockAll,                     EverythingFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(0));
-    logFilter("blockAll(IPv6)", _filters.blockAll[1], params.blockAll || params.blockIPv6);
-    updateBooleanFilter(blockAll[1], params.blockAll || params.blockIPv6, EverythingFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(params.blockIPv6 ? 4 : 0));
-
-    // Exempt traffic going over the VPN adapter.  This is the TAP adapter for
-    // OpenVPN, or the WinTUN adapter for Wireguard.
-    UINT64 luid = networkAdapter ? networkAdapter->luid() : 0;
-    logFilter("allowVPN", _filters.permitAdapter, luid && params.allowVPN, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(permitAdapter[0], luid && params.allowVPN, luid != _filterAdapterLuid, InterfaceFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(luid, 2));
-    updateBooleanInvalidateFilter(permitAdapter[1], luid && params.allowVPN, luid != _filterAdapterLuid, InterfaceFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(luid, 2));
-    _filterAdapterLuid = luid;
-    // Note: This is where the IPv6 block rule is ordered if blockIPv6 is true.
-
-    // Exempt DHCP traffic.
-    logFilter("allowDHCP", _filters.permitDHCP, params.allowDHCP);
-    updateBooleanFilter(permitDHCP[0], params.allowDHCP, DHCPFilter<FWP_ACTION_PERMIT, FWP_IP_VERSION_V4>(6));
-    updateBooleanFilter(permitDHCP[1], params.allowDHCP, DHCPFilter<FWP_ACTION_PERMIT, FWP_IP_VERSION_V6>(6));
-
-    // Permit LAN traffic depending on settings
-    logFilter("allowLAN", _filters.permitLAN, params.allowLAN);
-    updateBooleanFilter(permitLAN[0], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("192.168.0.0/16"), 8));
-    updateBooleanFilter(permitLAN[1], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("172.16.0.0/12"), 8));
-    updateBooleanFilter(permitLAN[2], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("10.0.0.0/8"), 8));
-    updateBooleanFilter(permitLAN[3], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("224.0.0.0/4"), 8));
-    updateBooleanFilter(permitLAN[4], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("169.254.0.0/16"), 8));
-    updateBooleanFilter(permitLAN[5], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(QStringLiteral("255.255.255.255/32"), 8));
-    updateBooleanFilter(permitLAN[6], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("fc00::/7"), 8));
-    updateBooleanFilter(permitLAN[7], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("fe80::/10"), 8));
-    updateBooleanFilter(permitLAN[8], params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(QStringLiteral("ff00::/8"), 8));
-    // Permit the IPv6 global Network Prefix - this allows on-link IPv6 hosts to communicate using their global IPs
-    // which is more common in practice than link-local
-    updateBooleanFilter(permitLAN[9], params.netScan.hasIpv6() && params.allowLAN, IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(
-            // First 64 bits of a global IPv6 IP is the Network Prefix.
-            QStringLiteral("%1/64").arg(params.netScan.ipAddress6()), 8));
-
-    // Poke holes in firewall for the bypass subnets for Ipv4 and Ipv6
-    updateAllBypassSubnetFilters(params);
-
-    // Add rules to block non-PIA DNS servers if connected and DNS leak protection is enabled
-    logFilter("blockDNS", _filters.blockDNS, params.blockDNS);
-    updateBooleanFilter(blockDNS[0], params.blockDNS, DNSFilter<FWP_ACTION_BLOCK, FWP_IP_VERSION_V4>(10));
-    updateBooleanFilter(blockDNS[1], params.blockDNS, DNSFilter<FWP_ACTION_BLOCK, FWP_IP_VERSION_V6>(10));
-
-    QString dnsServers[2] { effectiveDnsServers.value(0), effectiveDnsServers.value(1) }; // default-constructed if missing
-    logFilter("allowDNS(1)", _filters.permitDNS[0], params.blockDNS && !dnsServers[0].isEmpty(), _dnsServers[0] != dnsServers[0]);
-    updateBooleanInvalidateFilter(permitDNS[0], params.blockDNS && !dnsServers[0].isEmpty(), _dnsServers[0] != dnsServers[0], IPAddressFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(dnsServers[0], 14));
-    _dnsServers[0] = dnsServers[0];
-    logFilter("allowDNS(2)", _filters.permitDNS[1], params.blockDNS && !dnsServers[1].isEmpty(), _dnsServers[1] != dnsServers[1]);
-    updateBooleanInvalidateFilter(permitDNS[1], params.blockDNS && !dnsServers[1].isEmpty(), _dnsServers[1] != dnsServers[1], IPAddressFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(dnsServers[1], 14));
-    _dnsServers[1] = dnsServers[1];
-
-    // Always permit traffic from known applications.
-    logFilter("allowPIA", _filters.permitPIA, params.allowPIA);
-    updateBooleanFilter(permitPIA[0], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::ClientExecutable, 15));
-    updateBooleanFilter(permitPIA[1], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::DaemonExecutable, 15));
-    updateBooleanFilter(permitPIA[2], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::OpenVPNExecutable, 15));
-    updateBooleanFilter(permitPIA[3], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::SupportToolExecutable, 15));
-    updateBooleanFilter(permitPIA[4], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::SsLocalExecutable, 15));
-    // Although the Wireguard service creates its own 'permit' rules, they're in
-    // a different sublayer, we need to permit it through our sublayer too.  See
-    // wireguardservicebackend.cpp
-    updateBooleanFilter(permitPIA[5], params.allowPIA, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::WireguardServiceExecutable, 15));
-
-    // Local resolver related filters
-    // (1) First we block everything coming from the resolver processes
-    logFilter("allowResolver (block everything)", _filters.blockResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(blockResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 14));
-
-    // (2) Next we poke a hole in this block but only allow data that goes across the tunnel
-    logFilter("allowResolver (tunnel traffic)", _filters.permitResolvers, luid && params.allowResolver, luid != _filterAdapterLuid);
-    updateBooleanInvalidateFilter(permitResolvers[0], luid && params.allowResolver, luid != _filterAdapterLuid, ApplicationFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(Path::UnboundExecutable, 15,
-        Condition<FWP_UINT64>{FWPM_CONDITION_IP_LOCAL_INTERFACE, FWP_MATCH_EQUAL, &luid},
-        Condition<FWP_UINT16>{FWPM_CONDITION_IP_REMOTE_PORT, FWP_MATCH_EQUAL, 53}
-    ));
-
-    // Always permit loopback traffic, including IPv6.
-    logFilter("allowLoopback", _filters.permitLocalhost, params.allowLoopback);
-    updateBooleanFilter(permitLocalhost[0], params.allowLoopback, LocalhostFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(15));
-    updateBooleanFilter(permitLocalhost[1], params.allowLoopback, LocalhostFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(15));
-
-    // Get the current set of excluded app IDs.  If they've changed we recreate
-    // all app rules, but if they stay the same we don't recreate them.
-    std::set<const AppIdKey*, PtrValueLess> newExcludedApps, newVpnOnlyApps;
-    QString splitTunnelPhysIp{""};
-    unsigned splitTunnelPhysNetPrefix{0};
-    if(params.enableSplitTunnel)
-    {
-        newExcludedApps = _appMonitor.getExcludedAppIds();
-        newVpnOnlyApps = _appMonitor.getVpnOnlyAppIds();
-
-        if(params.bypassDefaultApps)
-        {
-            // Put hnsd in the VPN since we did not use the VPN as the default
-            // route
-            newVpnOnlyApps.insert(&_unboundAppId);
-        }
-
-        splitTunnelPhysIp = params.netScan.ipAddress();
-        splitTunnelPhysNetPrefix = params.netScan.prefixLength();
-    }
-
-    qInfo() << "Number of excluded apps" << newExcludedApps.size();
-    qInfo() << "Number of vpnOnly apps" << newVpnOnlyApps.size();
-
-    SplitTunnelFirewallParams newSplitParams{};
-    newSplitParams._physicalIp = splitTunnelPhysIp;
-    newSplitParams._physicalNetPrefix = splitTunnelPhysNetPrefix;
-    newSplitParams._tunnelIp = _state.tunnelDeviceLocalAddress();
-    newSplitParams._isConnected = params.isConnected;
-    newSplitParams._hasConnected = params.hasConnected;
-    newSplitParams._vpnDefaultRoute = !params.bypassDefaultApps;
-    newSplitParams._blockDNS = params.blockDNS;
-    newSplitParams._forceVpnOnlyDns = newSplitParams._forceBypassDns = false;
-    if(params._connectionSettings)
-    {
-        newSplitParams._forceVpnOnlyDns = params._connectionSettings->forceVpnOnlyDns();
-        newSplitParams._forceBypassDns = params._connectionSettings->forceBypassDns();
-    }
-    newSplitParams._effectiveDnsServers.reserve(effectiveDnsServers.size());
-    for(const auto &effectiveDnsServer : effectiveDnsServers)
-    {
-        Ipv4Address serverIp{effectiveDnsServer};
-        if(serverIp != Ipv4Address{})
-            newSplitParams._effectiveDnsServers.push_back(serverIp.address());
-    }
-    newSplitParams._existingDnsServers = findExistingDNS(newSplitParams._effectiveDnsServers);
-
-    reapplySplitTunnelFirewall(newSplitParams, newExcludedApps, newVpnOnlyApps);
-
-    // Update subnet bypass routes
-    _subnetBypass.updateRoutes(params);
-
-    tx.commit();
-}
-
-void WinDaemon::updateAllBypassSubnetFilters(const FirewallParams &params)
-{
-    if(params.enableSplitTunnel)
-    {
-        if(params.bypassIpv4Subnets != _bypassIpv4Subnets)
-            updateBypassSubnetFilters(params.bypassIpv4Subnets, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
-
-        if(params.bypassIpv6Subnets != _bypassIpv6Subnets)
-            updateBypassSubnetFilters(params.bypassIpv6Subnets, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
-    }
-    else
-    {
-        if(!_bypassIpv4Subnets.isEmpty())
-            updateBypassSubnetFilters({}, _bypassIpv4Subnets, _subnetBypassFilters4, FWP_IP_VERSION_V4);
-
-        if(!_bypassIpv6Subnets.isEmpty())
-            updateBypassSubnetFilters({}, _bypassIpv6Subnets, _subnetBypassFilters6, FWP_IP_VERSION_V6);
-    }
-}
-
-void WinDaemon::updateBypassSubnetFilters(const QSet<QString> &subnets, QSet<QString> &oldSubnets, std::vector<WfpFilterObject> &subnetBypassFilters, FWP_IP_VERSION ipVersion)
-{
-    for (auto &filter : subnetBypassFilters)
-        deactivateFilter(filter, true);
-
-    // If we have any IPv6 subnets we need to also whitelist IPv6 link-local and broadcast ranges
-    // required by IPv6 Neighbor Discovery
-    auto adjustedSubnets = subnets;
-    if(ipVersion == FWP_IP_VERSION_V6 && !subnets.isEmpty())
-    {
-        adjustedSubnets << QStringLiteral("fe80::/10");
-        adjustedSubnets << QStringLiteral("ff00::/8");
-    }
-
-    subnetBypassFilters.resize(adjustedSubnets.size());
-
-    int index{0};
-    for(auto it = adjustedSubnets.begin(); it != adjustedSubnets.end(); ++it, ++index)
-    {
-        if(ipVersion == FWP_IP_VERSION_V6)
-        {
-            qInfo() << "Creating Subnet ipv6 rule" << *it;
-            activateFilter(subnetBypassFilters[index], true,
-                IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(*it, 10));
-        }
-        else
-        {
-            qInfo() << "Creating Subnet ipv4 rule" << *it;
-            activateFilter(subnetBypassFilters[index], true,
-                IPSubnetFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>(*it, 10));
-        }
-    }
-
-    // Update the bypass subnets
-    oldSubnets = subnets;
-}
-
-void WinDaemon::removeSplitTunnelAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
-                                            const QString &traceType)
-{
-    for(auto &oldApp : apps)
-    {
-        qInfo() << "remove" << traceType << "app filters:"
-            << QStringView{reinterpret_cast<const wchar_t*>(oldApp.first.data()),
-                           static_cast<qsizetype>(oldApp.first.size() / sizeof(wchar_t))};
-        deactivateFilter(oldApp.second.splitAppBind, true);
-        deactivateFilter(oldApp.second.splitAppConnect, true);
-        deactivateFilter(oldApp.second.appPermitAnyDns, true);
-        deactivateFilter(oldApp.second.splitAppFlowEstablished, true);
-        deactivateFilter(oldApp.second.permitApp, true);
-        deactivateFilter(oldApp.second.blockAppIpv4, true);
-        deactivateFilter(oldApp.second.blockAppIpv6, true);
-    }
-    apps.clear();
-}
-
-void WinDaemon::createBypassAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
-                                       const WfpProviderContextObject &context,
-                                       const AppIdKey &appId, bool rewriteDns)
-{
-    qInfo() << "add bypass app filters:" << appId;
-    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
-    if(empResult.second)
-    {
-        auto &appFilters = empResult.first->second;
-        activateFilter(appFilters.permitApp, true, AppIdFilter<FWP_IP_VERSION_V4>{appId, 15});
-        activateFilter(appFilters.splitAppBind, true,
-                        SplitFilter<FWP_IP_VERSION_V4>{appId,
-                            PIA_WFP_CALLOUT_BIND_V4,
-                            FWPM_LAYER_ALE_BIND_REDIRECT_V4,
-                            context,
-                            FWP_ACTION_CALLOUT_TERMINATING,
-                            15});
-        activateFilter(appFilters.splitAppConnect, true,
-                        SplitFilter<FWP_IP_VERSION_V4>{appId,
-                            PIA_WFP_CALLOUT_CONNECT_V4,
-                            FWPM_LAYER_ALE_CONNECT_REDIRECT_V4,
-                            context,
-                            FWP_ACTION_CALLOUT_TERMINATING,
-                            15});
-        if(rewriteDns)
-        {
-            // Permit sending to any IPv4 DNS address, then rewrite to the
-            // intended address
-            activateFilter(appFilters.appPermitAnyDns, true,
-                            AppDNSFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>{
-                                appId, 15});
-            activateFilter(appFilters.splitAppFlowEstablished, true,
-                            SplitFilter<FWP_IP_VERSION_V4>{appId,
-                                PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4,
-                                FWPM_LAYER_ALE_FLOW_ESTABLISHED_V4,
-                                context,
-                                FWP_ACTION_CALLOUT_INSPECTION,
-                                15});
-        }
-    }
-}
-
-void WinDaemon::createOnlyVPNAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
-                                        const WfpProviderContextObject &context,
-                                        const AppIdKey &appId, bool rewriteDns)
-{
-    qInfo() << "add only-VPN app filters:" << appId;
-    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
-    if(empResult.second)
-    {
-        auto &appFilters = empResult.first->second;
-        // While connected, the normal IPv6 firewall rule should still take care
-        // of this, but keep this per-app rule around for robustness.
-        activateFilter(appFilters.blockAppIpv6, true,
-                       AppIdFilter<FWP_IP_VERSION_V6, FWP_ACTION_BLOCK>{appId, 14});
-        activateFilter(appFilters.splitAppBind, true,
-                        SplitFilter<FWP_IP_VERSION_V4>{appId,
-                            PIA_WFP_CALLOUT_BIND_V4,
-                            FWPM_LAYER_ALE_BIND_REDIRECT_V4,
-                            context,
-                            FWP_ACTION_CALLOUT_TERMINATING,
-                            15});
-        activateFilter(appFilters.splitAppConnect, true,
-                        SplitFilter<FWP_IP_VERSION_V4>{appId,
-                            PIA_WFP_CALLOUT_CONNECT_V4,
-                            FWPM_LAYER_ALE_CONNECT_REDIRECT_V4,
-                            context,
-                            FWP_ACTION_CALLOUT_TERMINATING,
-                            15});
-        if(rewriteDns)
-        {
-            // Permit sending to any IPv4 DNS address, then rewrite to the
-            // intended address
-            activateFilter(appFilters.appPermitAnyDns, true,
-                            AppDNSFilter<FWP_ACTION_PERMIT, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V4>{
-                                appId, 15});
-            activateFilter(appFilters.splitAppFlowEstablished, true,
-                            SplitFilter<FWP_IP_VERSION_V4>{appId,
-                                PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4,
-                                FWPM_LAYER_ALE_FLOW_ESTABLISHED_V4,
-                                context,
-                                FWP_ACTION_CALLOUT_INSPECTION,
-                                15});
-        }
-    }
-}
-
-void WinDaemon::createBlockAppFilters(std::map<QByteArray, SplitAppFilters> &apps,
-                                      const AppIdKey &appId)
-{
-    qInfo() << "add block app filters:" << appId;
-    auto empResult = apps.emplace(appId.copyData(), SplitAppFilters{});
-    if(empResult.second)
-    {
-        auto &appFilters = empResult.first->second;
-        // Block IPv4, because we can't bind this app to the tunnel (the VPN is
-        // not connected).
-        activateFilter(appFilters.blockAppIpv4, true,
-                       AppIdFilter<FWP_IP_VERSION_V4, FWP_ACTION_BLOCK>{appId, 14});
-        // Block IPv6, because the normal IPv6 firewall rule is not active when
-        // disconnected (unless the killswitch is set to Always).
-        activateFilter(appFilters.blockAppIpv6, true,
-                       AppIdFilter<FWP_IP_VERSION_V6, FWP_ACTION_BLOCK>{appId, 14});
-    }
-}
-
-void WinDaemon::reapplySplitTunnelFirewall(const SplitTunnelFirewallParams &params,
-                                           const std::set<const AppIdKey*, PtrValueLess> &newExcludedApps,
-                                           const std::set<const AppIdKey*, PtrValueLess> &newVpnOnlyApps)
-{
-    bool sameExcludedApps = areAppsUnchanged(newExcludedApps, excludedApps);
-    bool sameVpnOnlyApps = areAppsUnchanged(newVpnOnlyApps, vpnOnlyApps);
-
-    // If anything changes, we have to delete all filters and recreate
-    // everything.  WFP has been known to throw spurious errors if we try to
-    // reuse callout or context objects, so we delete everything in order to
-    // tear those down and recreate them.
-    if(sameExcludedApps && sameVpnOnlyApps && _lastSplitParams == params)
-    {
-        qInfo() << "Split tunnel rules have not changed - excluded:"
-            << excludedApps.size() << "- VPN-only:" << vpnOnlyApps.size()
-            << _lastSplitParams;
-        return;
-    }
-
-    if(_filters.ipInbound != zeroGuid)
-    {
-        qInfo() << "deactivate IpInbound object";
-        deactivateFilter(_filters.ipInbound, true);
-    }
-
-    if(_filters.splitCalloutIpInbound != zeroGuid)
-    {
-       qInfo() << "deactivate IpInbound callout object";
-        deactivateFilter(_filters.splitCalloutIpInbound, true);
-    }
-
-    if (_filters.ipOutbound != zeroGuid)
-    {
-        qInfo() << "deactivate IpOutbound object";
-        deactivateFilter(_filters.ipOutbound, true);
-    }
-
-    if (_filters.splitCalloutIpOutbound != zeroGuid)
-    {
-        qInfo() << "deactivate IpOutbound callout object";
-        deactivateFilter(_filters.splitCalloutIpOutbound, true);
-    }
-
-    if (_filters.permitInjectedDns != zeroGuid)
-    {
-        qInfo() << "deactivate permitInjectedDns filter";
-        deactivateFilter(_filters.permitInjectedDns, true);
-    }
-
-    if (_filters.splitCalloutConnectAuth != zeroGuid)
-    {
-        qInfo() << "deactivate ConnectAuth callout object";
-        deactivateFilter(_filters.splitCalloutConnectAuth, true);
-    }
-
-    // Remove all app filters
-    removeSplitTunnelAppFilters(excludedApps, QStringLiteral("excluded"));
-    removeSplitTunnelAppFilters(vpnOnlyApps, QStringLiteral("VPN-only"));
-
-    // Delete the old callout and provider context.  WFP does not seem to like
-    // reusing the provider context (attempting to reuse it generates an error
-    // saying that it does not exist, despite the fact that deleting it
-    // succeeds), so out of paranoia we never reuse either object.
-    if(_filters.splitCalloutBind != zeroGuid)
-    {
-        qInfo() << "deactivate bind callout object";
-        deactivateFilter(_filters.splitCalloutBind, true);
-    }
-    if(_filters.splitCalloutConnect != zeroGuid)
-    {
-        qInfo() << "deactivate connect callout object";
-        deactivateFilter(_filters.splitCalloutConnect, true);
-    }
-    if(_filters.splitCalloutFlowEstablished != zeroGuid)
-    {
-        qInfo() << "deactivate flow established callout object";
-        deactivateFilter(_filters.splitCalloutFlowEstablished, true);
-    }
-    if(_filters.providerContextKey != zeroGuid)
-    {
-        qInfo() << "deactivate exclusion provider context object";
-        deactivateFilter(_filters.providerContextKey, true);
-    }
-    if(_filters.vpnOnlyProviderContextKey != zeroGuid)
-    {
-        qInfo() << "deactivate VPN-only provider context object";
-        deactivateFilter(_filters.vpnOnlyProviderContextKey, true);
-    }
-
-    // Keep track of the state we used to apply these rules, so we know when to
-    // recreate them
-    _lastSplitParams = params;
-    qInfo() << "Creating split tunnel rules with state" << _lastSplitParams;
-
-    // We can only create exclude rules when the appropriate bind IP address is known
-    bool createExcludedRules = !_lastSplitParams._physicalIp.isEmpty() && !newExcludedApps.empty();
-    // VPN-only rules are applied even if the last tunnel IP is not known
-    // though; we still apply the block rule ("per-app killswitch") until the IP
-    // is known.
-    bool createVpnOnlyRules = !newVpnOnlyApps.empty();
-    // We create bind rules for VPN-only apps when connected and the IP is
-    // known; otherwise we just create a block rule (which does not require the
-    // callout/context objects).
-    bool createVpnOnlyBindRules = _lastSplitParams._hasConnected && !_lastSplitParams._tunnelIp.isEmpty();
-
-    // See Driver.c in desktop-wfp-callout
-    struct ContextData
-    {
-        UINT32 bindIp;
-        UINT32 rewriteDnsServer;
-        UINT32 dnsSourceIp;
-    };
-
-    ContextData bypassContext{}, vpnOnlyContext{};
-
-    bypassContext.bindIp = QHostAddress{_lastSplitParams._physicalIp}.toIPv4Address();
-    vpnOnlyContext.bindIp = QHostAddress{_lastSplitParams._tunnelIp}.toIPv4Address();
-
-    // Create the new callout and context objects if any callout rules are
-    // needed.
-    //
-    // These aren't needed if split tunnel is completely inactive, or if we are
-    // just blocking VPN-only apps (per-app block rules don't require any
-    // callouts).
-    if(createExcludedRules || (createVpnOnlyRules && createVpnOnlyBindRules))
-    {
-        if(_lastSplitParams._forceVpnOnlyDns)
-        {
-            // The VPN does _not_ have the default route.  Rewrite VPN-only apps
-            // to use PIA's configured DNS.
-            vpnOnlyContext.rewriteDnsServer = _lastSplitParams._effectiveDnsServers[0];
-            // If the DNS address is on loopback, use the loopback interface.
-            // Otherwise, use the tunnel device.
-            //
-            // We could consider using the physical interface if the user
-            // entered custom DNS that is on-link for that interface, but
-            // currently we always route all DNS through the tunnel (even
-            // without split tunnel; the VPN methods always route DNS servers
-            // into the tunnel).
-            Ipv4Address rewriteDnsServerAddr{vpnOnlyContext.rewriteDnsServer};
-            if(rewriteDnsServerAddr.isLoopback())
-                vpnOnlyContext.dnsSourceIp = 0x7F000001;    // 127.0.0.1
-            // Check if it's on-link for the physical interface (we've already
-            // parsed the physical interface address in the bypass context)
-            else if(rewriteDnsServerAddr.inSubnet(bypassContext.bindIp, _lastSplitParams._physicalNetPrefix))
-                vpnOnlyContext.dnsSourceIp = bypassContext.bindIp;
-            else
-                vpnOnlyContext.dnsSourceIp = vpnOnlyContext.bindIp;
-            qInfo() << "Rewrite DNS for VPN-only apps to"
-                << Ipv4Address{vpnOnlyContext.rewriteDnsServer} << "on interface"
-                << Ipv4Address{vpnOnlyContext.dnsSourceIp};
-        }
-
-        if(_lastSplitParams._forceBypassDns)
-        {
-            // The VPN has the default route - rewrite DNS for 'bypass' apps.
-            // We expect them to send to the PIA-configured DNS; rewrite back to
-            // the original DNS.  Do this even if PIA's DNS is the same as the
-            // existing DNS, because this still ensures that DNS from bypass
-            // apps is sent via the physical interface.
-            //
-            // We should know the existing DNS servers at this point, but it's
-            // possible that there weren't any.  If not, then we'll have to use
-            // tunnel DNS for bypass apps (skip this rule).
-            if(!_lastSplitParams._existingDnsServers.empty())
-            {
-                bypassContext.rewriteDnsServer = _lastSplitParams._existingDnsServers[0];
-                // Use the loopback interface for a DNS server on loopback, or
-                // the physical interface otherwise.  No need to check whether
-                // the address is on-link since we're already using the physical
-                // interface anyway.
-                if(Ipv4Address{bypassContext.rewriteDnsServer}.isLoopback())
-                    bypassContext.dnsSourceIp = 0x7F000001;
-                else
-                    bypassContext.dnsSourceIp = bypassContext.bindIp;
-                qInfo() << "Rewrite DNS for bypass apps to"
-                    << Ipv4Address{bypassContext.rewriteDnsServer}
-                    << "on interface" << Ipv4Address{bypassContext.dnsSourceIp};
-            }
-            else
-            {
-                qInfo() << "Existing DNS servers not configured or not know, bypass apps will use tunnel DNS.";
-            }
-        }
-
-        if(bypassContext.bindIp)
-        {
-            ProviderContext splitProviderContext{&bypassContext, sizeof(bypassContext)};
-            qInfo() << "activate bypass provider context object";
-            activateFilter(_filters.providerContextKey, true, splitProviderContext);
-        }
-        else
-            qInfo() << "Not activating bypass provider context object, IP not known";
-
-        if(vpnOnlyContext.bindIp)
-        {
-            ProviderContext vpnProviderContext{&vpnOnlyContext, sizeof(vpnOnlyContext)};
-            qInfo() << "activate VPN-only provider context object";
-            activateFilter(_filters.vpnOnlyProviderContextKey, true, vpnProviderContext);
-        }
-        else
-            qInfo() << "Not activating VPN-only provider context object, IP not known";
-
-        qInfo() << "activate callout objects";
-        activateFilter(_filters.splitCalloutBind, true, Callout{FWPM_LAYER_ALE_BIND_REDIRECT_V4, PIA_WFP_CALLOUT_BIND_V4});
-        activateFilter(_filters.splitCalloutConnect, true, Callout{FWPM_LAYER_ALE_CONNECT_REDIRECT_V4, PIA_WFP_CALLOUT_CONNECT_V4});
-        activateFilter(_filters.splitCalloutFlowEstablished, true, Callout{FWPM_LAYER_ALE_FLOW_ESTABLISHED_V4, PIA_WFP_CALLOUT_FLOW_ESTABLISHED_V4});
-        activateFilter(_filters.splitCalloutConnectAuth, true, Callout{FWPM_LAYER_ALE_AUTH_CONNECT_V4, PIA_WFP_CALLOUT_CONNECT_AUTH_V4});
-        activateFilter(_filters.splitCalloutIpInbound, true, Callout{FWPM_LAYER_INBOUND_IPPACKET_V4, PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4});
-        activateFilter(_filters.splitCalloutIpOutbound, true, Callout{FWPM_LAYER_OUTBOUND_IPPACKET_V4, PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4});
-    }
-    else
-    {
-        qInfo() << "Not creating callout objects; not needed: exclude:"
-            << createExcludedRules << "- VPN-only:" << createVpnOnlyRules
-            << "- VPN-only bind:" << createVpnOnlyBindRules;
-    }
-
-    // If we are rewriting DNS for any app rule, activate these filters and
-    // stop the DNSCache service if it's running
-    if(bypassContext.rewriteDnsServer || vpnOnlyContext.rewriteDnsServer)
-    {
-        // If DNS leak protection is active, we need to explicitly permit
-        // injected DNS, since the existing DNS servers would be blocked
-        // normally.
-        if(params._blockDNS)
-        {
-            activateFilter(_filters.permitInjectedDns, true,
-                            CalloutDNSFilter<FWP_IP_VERSION_V4>{
-                                PIA_WFP_CALLOUT_CONNECT_AUTH_V4,
-                                FWPM_LAYER_ALE_AUTH_CONNECT_V4, 11});
-        }
-        // DNS rewriting occurs in the IPPACKET layers.  Outbound packets have
-        // to be injected at the IP layer (not at the transport layer) because
-        // we have to rewrite the source to the physical interface.  That means
-        // inbound also has to be handled at the IPPACKET layer because WFP is
-        // not aware of the rewritten UDP flows and would otherwise discard
-        // these packets.
-        activateFilter(_filters.ipInbound, true, IpInboundFilter{PIA_WFP_CALLOUT_IPPACKET_INBOUND_V4, zeroGuid, 10});
-        activateFilter(_filters.ipOutbound, true, IpOutboundFilter{PIA_WFP_CALLOUT_IPPACKET_OUTBOUND_V4, zeroGuid, 10});
-    }
-
-    if(_lastSplitParams._isConnected && (bypassContext.rewriteDnsServer || vpnOnlyContext.rewriteDnsServer))
-    {
-        // When connected with split tunnel DNS active, disable Dnscache.  We
-        // can't have a system-wide DNS cache since DNS responses may vary by
-        // app.  This causes apps to do their own DNS requests, which we can
-        // handle on a per-app basis in the callout driver.
-        //
-        // We have to wait until we're connected to do this (and restore it when
-        // not connected) because Dnscache must be up to apply DNS servers
-        // statically - which we do when connecting with WireGuard or the
-        // OpenVPN static method.
-        _dnsCacheControl.disableDnsCache();
-    }
-    else
-    {
-        // Restore Dnscache.  We need Dnscache to be up in order to connect with
-        // WireGuard or the OpenVPN static (non-DHCP) method.
-        _dnsCacheControl.restoreDnsCache();
-    }
-
-    if(createExcludedRules)
-    {
-        qInfo() << "Creating exclude rules for" << newExcludedApps.size() << "apps";
-        for(auto &pAppId : newExcludedApps)
-        {
-            createBypassAppFilters(excludedApps, _filters.providerContextKey,
-                                   *pAppId,
-                                   bypassContext.rewriteDnsServer && *pAppId != _unboundAppId);
-        }
-    }
-
-    if(createVpnOnlyRules)
-    {
-        qInfo() << "Creating VPN-only rules for" << newExcludedApps.size() << "apps";
-        for(auto &pAppId : newVpnOnlyApps)
-        {
-            if(createVpnOnlyBindRules)
-            {
-                createOnlyVPNAppFilters(vpnOnlyApps, _filters.vpnOnlyProviderContextKey,
-                                        *pAppId,
-                                        vpnOnlyContext.rewriteDnsServer && *pAppId != _unboundAppId);
-            }
-            else
-            {
-                createBlockAppFilters(vpnOnlyApps, *pAppId);
-            }
-        }
-    }
+    Q_ASSERT(_pFirewall);   // Class invariant
+    params.excludeApps = _appMonitor.getExcludedAppIds();
+    params.vpnOnlyApps = _appMonitor.getVpnOnlyAppIds();
+    _pFirewall->applyRules(params);
 }
 
 QJsonValue WinDaemon::RPC_inspectUwpApps(const QJsonArray &familyIds)
@@ -1490,7 +640,7 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     {
         Q_ASSERT(pAppId);   // Guarantee of WinAppMonitor::getAppIds()
 
-        const auto &appId = pAppId->printableString();
+        const auto &appId = qs::toQString(pAppId->printableString());
         auto title = QStringLiteral("WFP events (bypass %1 - %2)").arg(i).arg(appId);
         auto cmdParams = QStringLiteral("wfp show netevents appid = \"%1\" file = -").arg(appId);
         file.writeCommand(title, "netsh", cmdParams);
@@ -1502,7 +652,7 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     {
         Q_ASSERT(pAppId);   // Guarantee of WinAppMonitor::getAppIds()
 
-        const auto &appId = pAppId->printableString();
+        const auto &appId = qs::toQString(pAppId->printableString());
         auto title = QStringLiteral("WFP events (VPN-only %1 - %2)").arg(i).arg(appId);
         auto cmdParams = QStringLiteral("wfp show netevents appid = \"%1\" file = -").arg(appId);
         file.writeCommand(title, "netsh", cmdParams);
@@ -1525,6 +675,16 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("Resolve-DnsName (-Server piadns www.pia.com)", "powershell.exe", QStringLiteral("/C Resolve-DnsName www.privateinternetaccess.com -Server %1").arg(piaModernDnsVpn()));
     file.writeCommand("ping (ping www.pia.com)", "ping", QStringLiteral("www.privateinternetaccess.com /w 1000 /n 1"));
     file.writeCommand("ping (ping piadns)", "ping", QStringLiteral("%1 /w 1000 /n 1").arg(piaModernDnsVpn()));
+
+    auto installLog = getSystemTempPath();
+    // It's possible that getSystemTempPath() could fail if TEMP was not set in
+    // system variables for some reason.  Leave installLog empty rather than
+    // trying to read '/pia-install.log'
+    if(!installLog.empty())
+        installLog += L"\\" BRAND_CODE "-install.log";
+
+    file.writeCommand("Installer log", "cmd.exe",
+        QString::fromStdWString(LR"(/C "type ")" + installLog + LR"("")"));
 }
 
 void WinDaemon::checkWintunInstallation()
@@ -1536,19 +696,96 @@ void WinDaemon::checkWintunInstallation()
     _state.wintunMissing(installedProducts.empty());
 }
 
-class TraceMemSize : public DebugTraceable<TraceMemSize>
+void WinDaemon::updateSplitTunnelRules()
+{
+    // Try to load the link reader; this can fail.
+    nullable_t<kapps::core::WinLinkReader> linkReader;
+    try
+    {
+        linkReader.emplace();
+    }
+    catch(const std::exception &ex)
+    {
+        qWarning() << "Unable to resolve shell links -" << ex.what();
+        // Eat error and continue
+    }
+
+    // Extract actual executable paths from all the split tunnel rules - resolve
+    // UWP apps, links, etc.  Use an AppExecutables for each so we can
+    // accumulate all calls to inspectUwpAppManifest() as well as normal apps.
+    // We don't care about usesWwa here, that is handled when rules are created.
+    AppExecutables excludedExes;
+    AppExecutables vpnOnlyExes;
+    // Guess that there will usually not be more executables than total rules
+    excludedExes.executables.reserve(_settings.splitTunnelRules().size());
+    vpnOnlyExes.executables.reserve(_settings.splitTunnelRules().size());
+
+    for(const auto &rule : _settings.splitTunnelRules())
+    {
+        AppExecutables *pExes{};
+        if(rule.mode() == QStringLiteral("exclude"))
+            pExes = &excludedExes;
+        else if(rule.mode() == QStringLiteral("include"))
+            pExes = &vpnOnlyExes;
+        else
+            continue;   // Ignore any future rule types
+
+        Q_ASSERT(pExes);    // Postcondition of above
+
+        // UWP apps can have more than one target
+        if(rule.path().startsWith(uwpPathPrefix))
+        {
+            auto installDirs = getWinRtLoader().adminGetInstallDirs(rule.path().mid(uwpPathPrefix.size()));
+            // Inspect all of the install directories.  It's too late for us to
+            // do anything if this fails, just grab all the executables we can
+            // find.
+            for(const auto &dir : installDirs)
+                inspectUwpAppManifest(dir, *pExes);
+        }
+        else
+        {
+            // If the client gave us a link target, use that.
+            if(!rule.linkTarget().isEmpty())
+                pExes->executables.insert(rule.linkTarget().toStdWString());
+            // Otherwise, if the rule path is a link, still try to resolve it.
+            // This may not work if we are not in the correct user session
+            // though.
+            else if(rule.path().endsWith(QStringLiteral(".lnk"), Qt::CaseSensitivity::CaseInsensitive))
+            {
+                auto pathWStr = rule.path().toStdWString();
+                std::wstring linkTarget;
+                if(linkReader && linkReader->loadLink(pathWStr))
+                    linkTarget = linkReader->getLinkTarget(pathWStr);
+                if(linkTarget.empty())
+                    qWarning() << "Can't find link target for" << pathWStr;
+                else
+                {
+                    qInfo() << "Resolved app link" << pathWStr << "->"
+                        << linkTarget;
+                    pExes->executables.insert(linkTarget);
+                }
+            }
+            else
+                pExes->executables.insert(rule.path().toStdWString());
+        }
+    }
+
+    _appMonitor.setSplitTunnelRules(excludedExes.executables, vpnOnlyExes.executables);
+}
+
+class TraceMemSize : public kapps::core::OStreamInsertable<TraceMemSize>
 {
 public:
     TraceMemSize(std::size_t mem) : _mem{mem} {}
 
 public:
-    void trace(QDebug &dbg) const
+    void trace(std::ostream &os) const
     {
-        const std::array<QStringView, 3> units
+        const std::array<const char *, 3> units
         {{
-            {L"B"},
-            {L"KiB"},
-            {L"MiB"}
+            "B",
+            "KiB",
+            "MiB"
         }};
 
         int unitIdx{0};
@@ -1559,8 +796,7 @@ public:
             memInUnits /= 1024;
         }
 
-        QDebugStateSaver save{dbg};
-        dbg.noquote() << memInUnits << units[unitIdx];
+        os << memInUnits << ' ' << units[unitIdx];
     }
 
 private:

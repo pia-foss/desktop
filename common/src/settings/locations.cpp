@@ -16,15 +16,16 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "locations.h"
 #include <QRandomGenerator>
+#include <kapps_core/src/corejson.h>
+#include <nlohmann/json.hpp>
 
-bool Server::hasNonLatencyService() const
+Server::Server(std::shared_ptr<const kapps::regions::Server> pImpl)
+    : _pImpl{std::move(pImpl)}
 {
-    return !openvpnTcpPorts().empty() || !openvpnUdpPorts().empty() ||
-        !wireguardPorts().empty() || !shadowsocksPorts().empty() ||
-        !metaPorts().empty();
+    Q_ASSERT(_pImpl);   // Ensured by caller
 }
 
 bool Server::hasService(Service service) const
@@ -44,51 +45,25 @@ bool Server::hasPort(Service service, quint16 port) const
     return std::find(ports.begin(), ports.end(), port) != ports.end();
 }
 
-const std::vector<quint16> &Server::servicePorts(Service service) const
+kapps::regions::Ports Server::servicePorts(Service service) const
 {
     switch(service)
     {
         default:
         {
             Q_ASSERT(false);
-            static const std::vector<quint16> dummy{};
-            return dummy;
+            return {};
         }
         case Service::OpenVpnTcp:
-            return openvpnTcpPorts();
+            return openVpnTcpPorts();
         case Service::OpenVpnUdp:
-            return openvpnUdpPorts();
+            return openVpnUdpPorts();
         case Service::WireGuard:
-            return wireguardPorts();
+            return wireGuardPorts();
         case Service::Shadowsocks:
             return shadowsocksPorts();
         case Service::Meta:
             return metaPorts();
-    }
-}
-
-void Server::servicePorts(Service service, std::vector<quint16> ports)
-{
-    switch(service)
-    {
-        default:
-            Q_ASSERT(false);
-            return;
-        case Service::OpenVpnTcp:
-            openvpnTcpPorts(std::move(ports));
-            return;
-        case Service::OpenVpnUdp:
-            openvpnUdpPorts(std::move(ports));
-            return;
-        case Service::WireGuard:
-            wireguardPorts(std::move(ports));
-            return;
-        case Service::Shadowsocks:
-            shadowsocksPorts(std::move(ports));
-            return;
-        case Service::Meta:
-            metaPorts(std::move(ports));
-            return;
     }
 }
 
@@ -110,6 +85,31 @@ quint16 Server::randomServicePort(Service service) const
     return ports[idx];
 }
 
+Location::Location(std::shared_ptr<const kapps::regions::Region> pImpl,
+                   nullable_t<double> latency)
+    : _pImpl{std::move(pImpl)}, _latency{std::move(latency)}
+{
+    Q_ASSERT(_pImpl);   // Ensured by caller
+    // Wrap the kapps::regions::Server objects with our Server wrapper; the idea
+    // is to eventually eliminate this in the daemon and use the kapps::regions
+    // types directly
+    _servers.reserve(_pImpl->servers().size());
+    for(const auto &pServer : _pImpl->servers())
+    {
+        Q_ASSERT(pServer);  // Guaranteed by kapps::regions::Region
+        _servers.emplace_back(pServer->shared_from_this());
+    }
+}
+
+QString Location::dedicatedIp() const
+{
+    // The null address is represented as an empty string; indicates this is not
+    // a DIP region
+    if(_pImpl->dipAddress() == kapps::core::Ipv4Address{})
+        return {};
+    return qs::toQString(_pImpl->dipAddress().toString());
+}
+
 template<class PredicateFuncT>
 std::size_t Location::countServersFor(const PredicateFuncT &predicate) const
 {
@@ -120,16 +120,6 @@ std::size_t Location::countServersFor(const PredicateFuncT &predicate) const
             ++matches;
     }
     return matches;
-}
-
-std::size_t Location::countServersForService(Service service) const
-{
-    return countServersFor([service](const Server &server){return server.hasService(service);});
-}
-
-std::size_t Location::countServersForPort(Service service, quint16 port) const
-{
-    return countServersFor([service, port](const Server &server){return server.hasPort(service, port);});
 }
 
 template<class PredicateFuncT>
@@ -220,16 +210,6 @@ const Server *Location::randomServerForPort(Service service, quint16 port) const
     return randomServerFor([service, port](const Server &server){return server.hasPort(service, port);});
 }
 
-const Server *Location::serverWithIndexForService(std::size_t index, Service service) const
-{
-    return serverWithIndexFor(index, [service](const Server &server){return server.hasService(service);});
-}
-
-const Server *Location::serverWithIndexForPort(std::size_t index, Service service, quint16 port) const
-{
-    return serverWithIndexFor(index, [service, port](const Server &server){return server.hasPort(service, port);});
-}
-
 const Server *Location::randomServer(Service service, quint16 tryPort) const
 {
     const Server *pSelected{nullptr};
@@ -242,6 +222,22 @@ const Server *Location::randomServer(Service service, quint16 tryPort) const
     if(!pSelected)
         pSelected = randomServerForService(service);
     return pSelected;
+}
+
+DescendingPortSet Location::allPortsForService(Service service) const
+{
+    DescendingPortSet ports;
+    allPortsForService(service, ports);
+    return ports;
+}
+
+void Location::allPortsForService(Service service, DescendingPortSet &ports) const
+{
+    for(const auto &server : servers())
+    {
+        const auto &serverPorts{server.servicePorts(service)};
+        ports.insert(serverPorts.begin(), serverPorts.end());
+    }
 }
 
 const Server *Location::serverWithIndex(std::size_t index, Service service, quint16 tryPort) const
@@ -261,31 +257,31 @@ const Server *Location::serverWithIndex(std::size_t index, Service service, quin
     return pSelected;
 }
 
-std::vector<Server> Location::allServersForService(Service service) const
+const Server *Location::serverWithIndexForPort(std::size_t index, Service service, quint16 port) const
 {
-    std::vector<Server> serversForService;
-    serversForService.reserve(countServersForService(service));
-    for(const auto &server : servers())
-    {
-        if(server.hasService(service))
-            serversForService.push_back(server);
-    }
-
-    return serversForService;
+    return serverWithIndexFor(index, [service, port](const Server &server){return server.hasPort(service, port);});
 }
 
-DescendingPortSet Location::allPortsForService(Service service) const
+const Server *Location::serverWithIndexForService(std::size_t index, Service service) const
 {
-    DescendingPortSet ports;
-    allPortsForService(service, ports);
-    return ports;
+    return serverWithIndexFor(index, [service](const Server &server){return server.hasService(service);});
 }
 
-void Location::allPortsForService(Service service, DescendingPortSet &ports) const
+std::size_t Location::countServersForService(Service service) const
 {
-    for(const auto &server : servers())
-    {
-        const auto &serverPorts{server.servicePorts(service)};
-        ports.insert(serverPorts.begin(), serverPorts.end());
-    }
+    return countServersFor([service](const Server &server){return server.hasService(service);});
+}
+
+std::size_t Location::countServersForPort(Service service, quint16 port) const
+{
+    return countServersFor([service, port](const Server &server){return server.hasPort(service, port);});
+}
+
+ServiceLocations::ServiceLocations(QSharedPointer<const Location> pChosenLocation,
+                                   QSharedPointer<const Location> pBestLocation,
+                                   QSharedPointer<const Location> pNextLocation)
+    : _pChosenLocation{std::move(pChosenLocation)},
+      _pBestLocation{std::move(pBestLocation)},
+      _pNextLocation{std::move(pNextLocation)}
+{
 }

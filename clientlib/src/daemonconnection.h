@@ -16,16 +16,19 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("daemonconnection.h")
 
 #ifndef DAEMONCONNECTION_H
 #define DAEMONCONNECTION_H
 
 #include "clientlib.h"
-#include "ipc.h"
-#include "jsonrpc.h"
-#include "settings.h"
+#include <common/src/ipc.h>
+#include <common/src/jsonrpc.h>
+#include <common/src/settings/daemonaccount.h>
+#include <common/src/settings/daemondata.h>
+#include "model/daemonstate.h"
+#include <common/src/settings/daemonsettings.h>
 #include <QObject>
 #include <QTimer>
 

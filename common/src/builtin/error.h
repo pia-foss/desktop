@@ -28,11 +28,10 @@
 #include <QCoreApplication>
 #include <QJsonObject>
 #include <QStringList>
+#include <QDateTime>
 
 #include <exception>
 
-
-class QDebug;
 typedef CodeLocation ErrorLocation;
 
 /**
@@ -135,6 +134,7 @@ public:
 
         // Connectivity errors for multiple VPN methods
         VPNConfigInvalid = 1800,
+        VPNSupportError,
 
         LocalSocketNotFound = 1900, // The local socket definitely doesn't exist at all.
         LocalSocketCannotConnect,   // The local socket might exist, but we couldn't connect.
@@ -156,13 +156,15 @@ public:
 
 public:
     Error()
-        : _location(nullptr, 0, *QLoggingCategory::defaultCategory()), _code(Success), _systemCode(0) {}
+        : _location(), _code(Success), _systemCode(0) {}
     Error(ErrorLocation location, Code code, QStringList params)
         : _location(std::move(location)), _code(code), _systemCode(0), _params(std::move(params)) {}
     template<typename... Args>
     Error(ErrorLocation location, Code code, Args&&... args)
         : _location(std::move(location)), _code(code), _systemCode(0), _params{ std::forward<Args>(args)... } {}
     Error(const QJsonObject& errorObject);
+    Error(ErrorLocation location, Code code, QDateTime retryAfterTime)
+        : _location(std::move(location)), _code(code), _systemCode(0), _retryAfterTime(std::move(retryAfterTime)) {}
 
     Q_INVOKABLE Code code() const { return _code; }
     SystemCode systemCode() const { return _systemCode; }
@@ -170,8 +172,10 @@ public:
     QString errorDescription() const;
     QJsonObject toJsonObject() const;
     const CodeLocation& location() const { return _location; }
-    Q_INVOKABLE QString file() const { return {_location.file}; }
-    Q_INVOKABLE int line() const { return _location.line; }
+    // Used by Daemon.qml to trace RPC errors
+    Q_INVOKABLE QString file() const { return qs::toQString(_location.file()); }
+    Q_INVOKABLE int line() const { return _location.line(); }
+    Q_INVOKABLE qint64 retryAfterTime() const { return _retryAfterTime.toMSecsSinceEpoch(); }
 
     operator bool() const { return _code != Success; }
     bool operator!() const { return _code == Success; }
@@ -180,46 +184,17 @@ protected:
     Error(ErrorLocation &&location, Code code, SystemCode systemCode, QStringList params)
         : _location(location), _code(code), _systemCode(systemCode), _params(std::move(params)) {}
 
-public:
-    template<typename... Args> void Q_NORETURN fatal(const char* msg, Args&&... args) const { QMessageLogger(_location.file, _location.line, nullptr, _location.category->categoryName()).fatal(msg, std::forward<Args>(args)...); }
-
-    #define IMPLEMENT_SEVERITY(severity) \
-    template<typename... Args> void severity(const char* msg, Args&&... args) const { QMessageLogger(_location.file, _location.line, nullptr, _location.category->categoryName()).severity(*_location.category, msg, std::forward<Args>(args)...); } \
-    QDebug severity() const { return QMessageLogger(_location.file, _location.line, nullptr, _location.category->categoryName()).severity(*_location.category); }
-    #define IMPLEMENT_SEVERITY_NOOP(severity) \
-    template<typename... Args> void severity(const char* msg, Args&.. args) const {} \
-    QNoDebug severity() const { return QNoDebug(); }
-
-    IMPLEMENT_SEVERITY(critical)
-    #if defined(QT_NO_WARNING_OUTPUT)
-    IMPLEMENT_SEVERITY_NOOP(warning)
-    #else
-    IMPLEMENT_SEVERITY(warning)
-    #endif
-    #if defined(QT_NO_INFO_OUTPUT)
-    IMPLEMENT_SEVERITY_NOOP(info)
-    #else
-    IMPLEMENT_SEVERITY(info)
-    #endif
-    #if defined(QT_NO_DEBUG_OUTPUT)
-    IMPLEMENT_SEVERITY_NOOP(debug)
-    #else
-    IMPLEMENT_SEVERITY(debug)
-    #endif
-
-    #undef IMPLEMENT_SEVERITY
-    #undef IMPLEMENT_SEVERITY_NOOP
-
 protected:
     ErrorLocation _location;
     Code _code;
     SystemCode _systemCode;
     QStringList _params;
     QByteArray _storedFile;
+    QDateTime _retryAfterTime;
 };
 Q_DECLARE_METATYPE(Error)
 
-QDebug COMMON_EXPORT operator<<(QDebug d, const Error& e);
+COMMON_EXPORT std::ostream & operator<<(std::ostream &os, const Error& e);
 
 #define IMPLEMENT_ERROR_SUBCLASS_WITH_BASE(name, base, code) \
     class COMMON_EXPORT name : public base { \
@@ -400,23 +375,5 @@ namespace std
     template<>
     struct hash<Error::Code> : public hash<int> {};
 }
-
-// Trace an errno value - writes numeric value and name from qt_error_string()
-class COMMON_EXPORT ErrnoTracer : public DebugTraceable<ErrnoTracer>
-{
-public:
-    ErrnoTracer(int code) : _code{code} {}
-    ErrnoTracer() : ErrnoTracer{errno} {}
-
-public:
-    void trace(QDebug &dbg) const
-    {
-        dbg << QStringLiteral("(code: %1) %2").arg(_code)
-            .arg(qPrintable(qt_error_string(errno)));
-    }
-
-private:
-    int _code;
-};
 
 #endif // BUILTIN_ERROR_H

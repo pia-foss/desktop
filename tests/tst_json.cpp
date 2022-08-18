@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 #include <QSignalSpy>
 
-#include "json.h"
+#include <common/src/json.h>
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -68,36 +68,36 @@ private slots:
         const QJsonArray arrayValue = { 1, 2, 3 };
         const QJsonObject objectValue = { { "test", "test" } };
 
-        QCOMPARE(json_cast<bool>(QJsonValue(boolValue)), boolValue);
-        QCOMPARE(json_cast<int>(QJsonValue(intValue)), intValue);
-        QCOMPARE(json_cast<double>(QJsonValue(doubleValue)), doubleValue);
-        QCOMPARE(json_cast<double>(QJsonValue(intValue)), (double)intValue);
-        QCOMPARE(json_cast<int>(QJsonValue((double)intValue)), intValue);
-        QCOMPARE(json_cast<QString>(QJsonValue(stringValue)), stringValue);
-        QCOMPARE(json_cast<QJsonArray>(QJsonValue(arrayValue)), arrayValue);
-        QCOMPARE(json_cast<QJsonObject>(QJsonValue(objectValue)), objectValue);
+        QCOMPARE(json_cast<bool>(QJsonValue(boolValue), HERE), boolValue);
+        QCOMPARE(json_cast<int>(QJsonValue(intValue), HERE), intValue);
+        QCOMPARE(json_cast<double>(QJsonValue(doubleValue), HERE), doubleValue);
+        QCOMPARE(json_cast<double>(QJsonValue(intValue), HERE), (double)intValue);
+        QCOMPARE(json_cast<int>(QJsonValue((double)intValue), HERE), intValue);
+        QCOMPARE(json_cast<QString>(QJsonValue(stringValue), HERE), stringValue);
+        QCOMPARE(json_cast<QJsonArray>(QJsonValue(arrayValue), HERE), arrayValue);
+        QCOMPARE(json_cast<QJsonObject>(QJsonValue(objectValue), HERE), objectValue);
 
-        QCOMPARE(json_cast<QJsonValue>(boolValue), QJsonValue(boolValue));
-        QCOMPARE(json_cast<QJsonValue>(intValue), QJsonValue(intValue));
-        QCOMPARE(json_cast<QJsonValue>(doubleValue), QJsonValue(doubleValue));
-        QCOMPARE(json_cast<QJsonValue>(stringValue), QJsonValue(stringValue));
-        QCOMPARE(json_cast<QJsonValue>(arrayValue), QJsonValue(arrayValue));
-        QCOMPARE(json_cast<QJsonValue>(objectValue), QJsonValue(objectValue));
+        QCOMPARE(json_cast<QJsonValue>(boolValue, HERE), QJsonValue(boolValue));
+        QCOMPARE(json_cast<QJsonValue>(intValue, HERE), QJsonValue(intValue));
+        QCOMPARE(json_cast<QJsonValue>(doubleValue, HERE), QJsonValue(doubleValue));
+        QCOMPARE(json_cast<QJsonValue>(stringValue, HERE), QJsonValue(stringValue));
+        QCOMPARE(json_cast<QJsonValue>(arrayValue, HERE), QJsonValue(arrayValue));
+        QCOMPARE(json_cast<QJsonValue>(objectValue, HERE), QJsonValue(objectValue));
 
-        QVERIFY_EXCEPTION_THROWN(json_cast<bool>(QJsonValue(intValue)), Error);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonObject>(QJsonValue(arrayValue)), Error);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonArray>(QJsonValue(objectValue)), Error);
-        QVERIFY_EXCEPTION_THROWN(json_cast<int>(QJsonValue(1.5)), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<bool>(QJsonValue(intValue), HERE), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonObject>(QJsonValue(arrayValue), HERE), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QJsonArray>(QJsonValue(objectValue), HERE), Error);
+        QVERIFY_EXCEPTION_THROWN(json_cast<int>(QJsonValue(1.5), HERE), Error);
     }
     void castCollections()
     {
         const QList<int> listValue { 1, 2, 3 };
-        QCOMPARE(json_cast<QList<int>>(QJsonArray { 1, 2, 3 }), listValue);
-        QVERIFY_EXCEPTION_THROWN(json_cast<QList<int>>(QJsonArray { 1, 2, "test" }), Error);
+        QCOMPARE(json_cast<QList<int>>(QJsonArray { 1, 2, 3 }, HERE), listValue);
+        QVERIFY_EXCEPTION_THROWN(json_cast<QList<int>>(QJsonArray { 1, 2, "test" }, HERE), Error);
 
         const std::unordered_map<QString, QString> hashValue { { "test", "test" } };
-        QCOMPARE((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", "test" } })), hashValue);
-        QVERIFY_EXCEPTION_THROWN((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", 1 } })), Error);
+        QCOMPARE((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", "test" } }, HERE)), hashValue);
+        QVERIFY_EXCEPTION_THROWN((json_cast<std::unordered_map<QString, QString>>(QJsonObject { { "test", 1 } }, HERE)), Error);
     }
     void castCustomStructures()
     {
@@ -105,7 +105,7 @@ private slots:
         auto settings = json_cast<TestSettingsList>(QJsonArray {
                                                         QJsonObject { { "intField", 4 }, { "stringField", "test" } },
                                                         QJsonObject { { "boolField", true }, { "unknown", "test" } }
-                                                    });
+                                                    }, HERE);
         QCOMPARE(settings.size(), 2);
         QCOMPARE(settings[0]->intField(), 4);
         QCOMPARE(settings[0]->stringField(), "test");

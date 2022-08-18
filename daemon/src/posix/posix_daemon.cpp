@@ -16,29 +16,26 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("posix/posix_daemon.cpp")
 
 #include "posix_daemon.h"
 
 #include "posix.h"
-#include "posix_firewall_pf.h"
-#include "posix_firewall_iptables.h"
-#include "path.h"
-#include "ipaddress.h"
-#include "exec.h"
+#include <common/src/builtin/path.h>
+#include <kapps_core/src/ipaddress.h>
+#include <common/src/exec.h>
 #include "brand.h"
-#include "locations.h"
+#include <common/src/locations.h>
 
 #if defined(Q_OS_MACOS)
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include "mac/mac_splittunnel.h"
-#elif defined(Q_OS_LINUX)
-#include "linux/proc_tracker.h"
-#include "linux/linux_routing.h"
-#include "linux/linux_fwmark.h"
-#include "linux/linux_cgroup.h"
+#endif
+
+#if defined(Q_OS_LINUX)
+#include <kapps_net/src/linux/linux_cn_proc.h>
+#include <kapps_net/src/linux/linux_cgroup.h>
 #endif
 
 #include <QFileSystemWatcher>
@@ -53,6 +50,8 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 
+#include <kapps_net/src/firewall.h>
+
 #include <QDir>
 
 #define VPN_GROUP BRAND_CODE "vpn"
@@ -64,12 +63,14 @@ void setUidAndGid()
     if (uid != 0)
     {
         struct passwd* pw = getpwuid(uid);
-        qFatal("Running as user %s (%d); must be root.", pw && pw->pw_name ? pw->pw_name : "<unknown>", uid);
+        qFatal().nospace() << "Running as user "
+            << (pw && pw->pw_name ? pw->pw_name : "<unknown>") << " (" << uid
+            << "); must be root.";
     }
     struct group* gr = getgrnam(VPN_GROUP);
     if (!gr)
     {
-        qFatal("Group '" VPN_GROUP "' does not exist.");
+        qFatal() << "Group '" VPN_GROUP "' does not exist.";
         return;
     }
 
@@ -78,80 +79,54 @@ void setUidAndGid()
     // from using $ORIGIN in their RPATH.
     if (setegid(gr->gr_gid) == -1 || setgid(gr->gr_gid) == -1)
     {
-        qFatal("Failed to set group id to %d (%d: %s)", gr->gr_gid, errno, qPrintable(qt_error_string(errno)));
+        qFatal().nospace() << "Failed to set group id to "
+            << gr->gr_gid << " (" << errno << ": " << qt_error_string(errno)
+            << ")";
     }
     // Set the setgid bit on the support tool binary
     [](const char* path, gid_t gid) {
         if (chown(path, 0, gid) || chmod(path, 02755))
         {
-            qWarning("Failed to exclude support tool from killswitch (%d: %s)", errno, qPrintable(qt_error_string(errno)));
+            qWarning().nospace() << "Failed to exclude support tool from killswitch ("
+                << errno << ": " << qt_error_string(errno) << ")";
         }
     } (qUtf8Printable(Path::SupportToolExecutable), gr->gr_gid);
 }
 
-// Only used by MacOs - Linux uses routing policies and packet tagging instead
-class PosixRouteManager : public RouteManager
-{
-public:
-    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
-    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
-    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override;
-    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override;
-};
-
-void PosixRouteManager::addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
-{
-#if defined(Q_OS_MACOS)
-    qInfo() << "Adding ipv4 bypass route for" << subnet;
-    Exec::cmd("route", {"add", "-net", subnet, gatewayIp});
-#endif
-}
-
-void PosixRouteManager::removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
-{
-#if defined(Q_OS_MACOS)
-    qInfo() << "Removing ipv4 bypass route for" << subnet;
-    Exec::cmd("route", {"delete", "-net", subnet, gatewayIp});
-#endif
-}
-
-// sudo route -q -n delete -inet6 2a03:b0c0:2:d0::26:c001 fe80::325a:3aff:fe6d:a1e0
-void PosixRouteManager::addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric) const
-{
-#if defined(Q_OS_MACOS)
-    qInfo() << "Adding ipv6 bypass route for" << subnet;
-    Exec::cmd("route", {"add", "-inet6", subnet, QStringLiteral("%1%%2").arg(gatewayIp, interfaceName)});
-#endif
-}
-
-void PosixRouteManager::removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const
-{
-#if defined(Q_OS_MACOS)
-    qInfo() << "Removing ipv6 bypass route for" << subnet;
-    Exec::cmd("route", {"delete", "-inet6", subnet, QStringLiteral("%1%%2").arg(gatewayIp, interfaceName)});
-#endif
-}
-
 PosixDaemon::PosixDaemon()
-    : Daemon{}, _enableSplitTunnel{false},
-      _subnetBypass{std::make_unique<PosixRouteManager>()}
 #if defined(Q_OS_LINUX)
-    , _resolvconfWatcher{QStringLiteral("/etc/resolv.conf")}
+    : _resolvconfWatcher{QStringLiteral("/etc/resolv.conf")}
 #endif
 {
+    kapps::net::FirewallConfig config{};
+    config.daemonDataDir = Path::DaemonDataDir;
+    config.resourceDir = Path::ResourceDir;
+    config.executableDir = Path::ExecutableDir;
+    config.installationDir = Path::InstallationDir;
+    config.brandInfo.code = BRAND_CODE;
+    config.brandInfo.identifier = BRAND_IDENTIFIER;
+
+#if defined(Q_OS_LINUX)
+    config.brandInfo.cgroupBase = BRAND_LINUX_CGROUP_BASE;
+    config.brandInfo.fwmarkBase = BRAND_LINUX_FWMARK_BASE;
+    config.bypassFile = Path::VpnExclusionsFile;
+    config.vpnOnlyFile = Path::VpnOnlyFile;
+    config.defaultFile = Path::ParentVpnExclusionsFile;
+#elif defined(Q_OS_MACOS)
+    config.unboundDnsStubConfigFile = Path::UnboundDnsStubConfigFile;
+    config.unboundExecutableFile = Path::UnboundExecutable;
+#endif
+
+    KAPPS_CORE_INFO() << "Configuring firewall";
+    _pFirewall.emplace(config);
+
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
 
-#ifdef Q_OS_MACOS
-    PFFirewall::install();
-
-    prepareSplitTunnel<MacSplitTunnel>();
-#endif
-
     // There's no installation required for split tunnel on Mac or Linux (!)
-    _state.netExtensionState(qEnumToString(DaemonState::NetExtensionState::Installed));
+    _state.netExtensionState(qEnumToString(StateModel::NetExtensionState::Installed));
 
 #ifdef Q_OS_LINUX
-    IpTablesFirewall::install();
+    //IpTablesFirewall::install();
 
     // Check for the WireGuard kernel module
     connect(&_linuxModSupport, &LinuxModSupport::modulesUpdated, this,
@@ -162,7 +137,7 @@ PosixDaemon::PosixDaemon()
 
     checkLinuxModules();
 
-    prepareSplitTunnel<ProcTracker>();
+    //prepareSplitTunnel<ProcTracker>();
 #endif
 
     checkFeatureSupport();
@@ -193,27 +168,11 @@ PosixDaemon::PosixDaemon()
             else
                 _macDnsMonitor.disableMonitor();
         });
-
-    PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());
-
-    connect(&_settings, &DaemonSettings::macStubDnsMethodChanged, this,
-            [this](){PFFirewall::setMacDnsStubMethod(_settings.macStubDnsMethod());});
 #endif
 }
 
 PosixDaemon::~PosixDaemon()
 {
-#ifdef Q_OS_MACOS
-    PFFirewall::uninstall();
-#endif
-
-#ifdef Q_OS_LINUX
-    IpTablesFirewall::uninstall();
-#endif
-
-    // Ensure bound routes are cleaned up and split tunnel is shutdown
-    updateBoundRoute({});
-    toggleSplitTunnel({});
 }
 
 std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
@@ -223,12 +182,19 @@ std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
 
 void PosixDaemon::onAboutToConnect()
 {
-    aboutToConnectToVpn();
+#if defined(Q_OS_MACOS)
+    // Firewall::aboutToConnectToVpn() only exists on macOS; it's used to cycle
+    // the split tunnel device before connecting when split tunnel is active
+    if(_pFirewall)
+        _pFirewall->aboutToConnectToVpn();
+#endif
 }
 
 void PosixDaemon::handleSignal(int sig) Q_DECL_NOEXCEPT
 {
-    qInfo("Received signal %d", sig);
+    qInfo() << "Received signal" << sig;
+    qInfo() << "Deleting firewall rules";
+    _pFirewall.clear();
     switch (sig)
     {
     case SIGINT:
@@ -265,7 +231,7 @@ void PosixDaemon::updateExistingDNS()
         if(0 == Exec::bash(QStringLiteral("which resolvectl"), true))
         {
             qInfo() << "Saving existingDNS for systemd using resolvectl";
-            QString output = Exec::bashWithOutput(QStringLiteral("resolvectl dns | grep %1 | cut -d ':' -f 2-").arg(netScan.interfaceName()));
+            QString output = Exec::bashWithOutput(QStringLiteral("resolvectl dns | grep %1 | cut -d ':' -f 2-").arg(QString::fromStdString(netScan.interfaceName())));
             rawDnsList = output.split(' ');
         }
         else
@@ -274,7 +240,7 @@ void PosixDaemon::updateExistingDNS()
             QString output = Exec::bashWithOutput(QStringLiteral("systemd-resolve --status"));
             auto outputLines = output.split('\n');
             // Find the section for this interface
-            QString interfaceSectRegex = QStringLiteral(R"(^Link \d+ \()") + netScan.interfaceName() + R"(\)$)";
+            QString interfaceSectRegex = QStringLiteral(R"(^Link \d+ \()") + QString::fromStdString(netScan.interfaceName()) + R"(\)$)";
             int lineIdx = outputLines.indexOf(QRegularExpression{interfaceSectRegex});
             if(lineIdx < 0)
                 lineIdx = outputLines.size();
@@ -386,266 +352,39 @@ void PosixDaemon::updateExistingDNS()
 }
 #endif
 
-#if defined(Q_OS_LINUX)
-// Update the 100.vpnTunOnly rule with the current tunnel device name and local
-// address.  If it's updated and the anchor should be enabled, returns true.
-// Otherwise, returns false - the anchor should be disabled.
-static bool updateVpnTunOnlyAnchor(bool hasConnected, QString tunnelDeviceName, QString tunnelDeviceLocalAddress)
+void PosixDaemon::applyFirewallRules(kapps::net::FirewallParams params)
 {
-    if(hasConnected)
-    {
-        if(tunnelDeviceName.isEmpty() || tunnelDeviceLocalAddress.isEmpty())
-        {
-            qWarning() << "Not enabling 100.vpnTunOnly rule, do not have tunnel device config:"
-                << tunnelDeviceName << "-" << tunnelDeviceLocalAddress;
-            return false;
-        }
+    // On POSIX, use the rule paths directly in excludeApps/vpnOnlyApps.
+    // macOS rules apply to bundle folders.   Linux rules apply to exact
+    // executables, and child processes are addressed by inheriting their
+    // parent's cgroup.
+    params.excludeApps.reserve(_settings.splitTunnelRules().size());
+    params.vpnOnlyApps.reserve(_settings.splitTunnelRules().size());
 
-        qInfo() << "Enabling 100.vpnTunOnly rule for tun device"
-            << tunnelDeviceName << "-" << tunnelDeviceLocalAddress;
-        IpTablesFirewall::replaceAnchor(
-            IpTablesFirewall::IPv4,
-            QStringLiteral("100.vpnTunOnly"),
-            {
-                QStringLiteral("! -i %1 -d %2 -m addrtype ! --src-type LOCAL -j DROP")
-                .arg(tunnelDeviceName, tunnelDeviceLocalAddress),
-            },
-            IpTablesFirewall::kRawTable
-        );
-        return true;
+    for(const auto &rule : _settings.splitTunnelRules())
+    {
+        qInfo() << "split tunnel rule:" << rule.path() << rule.mode();
+        // Ignore anything with a rule type we don't recognize
+        if(rule.mode() == QStringLiteral("exclude"))
+            params.excludeApps.push_back(rule.path().toStdString());
+        else if(rule.mode() == QStringLiteral("include"))
+            params.vpnOnlyApps.push_back(rule.path().toStdString());
     }
 
-    return false;
-}
-
-static void updateForwardedRoutes(const FirewallParams &params, const QString &tunnelDeviceName, bool shouldBypassVpn)
-{
-    const auto &netScan = params.netScan;
-
-    // If routed traffic is configured to bypass, create the default gateway
-    // route in this table all the time, which ensures that it isn't briefly
-    // routed into the VPN while the connection is coming up.
-    if(shouldBypassVpn)
-        Exec::bash(QStringLiteral("ip route replace default via %1 dev %2 table %3").arg(netScan.gatewayIp(), netScan.interfaceName(), Routing::forwardedTable));
-    // Otherwise, create the VPN route for this traffic once connected.  This
-    // doesn't need to be active while disconnected - the "use VPN" mode of
-    // routed traffic intentionally permits traffic when disconnected, setting
-    // KS=Always blocks it correctly with the blackhole route if desired.
-    else if(params.hasConnected)
-        Exec::bash(QStringLiteral("ip route replace default dev %1 table %2").arg(tunnelDeviceName, Routing::forwardedTable));
-    // Routed = Use VPN, and not connected
-    else
-        Exec::bash(QStringLiteral("ip route delete default table %2").arg(Routing::forwardedTable));
-
-    // Add blackhole fall-back route to block all forwarded traffic if killswitch is on (and disconnected)
-    if(params.leakProtectionEnabled)
-        Exec::bash(QStringLiteral("ip route replace blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
-    else
-        Exec::bash(QStringLiteral("ip route delete blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
-
-    // Blackhole IPv6 for forwarded connections too, for IPv6 leak protection and killswitch
-    if(params.blockIPv6)
-        Exec::bash(QStringLiteral("ip -6 route replace blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
-    else
-        Exec::bash(QStringLiteral("ip -6 route delete blackhole default metric 32000 table %1").arg(Routing::forwardedTable));
-}
-#endif
-
-#if defined(Q_OS_MACOS)
-// Figure out which subnets we need to bypass for the allowSubnets rule on MacOs
-static QStringList subnetsToBypass(const FirewallParams &params)
-{
-    if(params.bypassIpv6Subnets.isEmpty())
-        // No IPv6 subnets, so just return IPv4
-        return QStringList{params.bypassIpv4Subnets.toList()};
-    else
-        // If we have any IPv6 subnets then Whitelist link-local/broadcast IPv6 ranges too.
-        // These are required by IPv6 Neighbor Discovery
-        return QStringList{"fe80::/10", "ff00::/8"}
-               + (params.bypassIpv4Subnets + params.bypassIpv6Subnets).toList();
-}
-
-static QStringList natPhysRules(const OriginalNetworkScan &netScan, const QString &macVersionStr)
-{
-    // Mojave (10.14) kernel panics when we enable nat for ipv6
-    const QString noNat6{QStringLiteral("10.14")};
-    static const auto noNat6Version = QVersionNumber::fromString(noNat6);
-    const auto macVersion = QVersionNumber::fromString(macVersionStr);
-    const QString itfName = netScan.interfaceName();
-
-    QString inetLanIps{"{ 10.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32 }"};
-    QString inet6LanIps{"{ fc00::/7, fe80::/10, ff00::/8 }"};
-    QStringList ruleList{QStringLiteral("no nat on %1 inet6 from any to %2").arg(itfName).arg(inet6LanIps),
-                         QStringLiteral("no nat on %1 inet from any to %2").arg(itfName).arg(inetLanIps),
-                         QStringLiteral("nat on %1 inet -> (%1)").arg(itfName)};
-
-    if(macVersion > noNat6Version)
-        ruleList << QStringLiteral("nat on %1 inet6 -> (%1)").arg(itfName);
-    else
-        qInfo() << QStringLiteral("Not creating inet6 nat rule for %1 - macOS version %2 <= %3").arg(itfName, macVersionStr, noNat6);
-
-    return ruleList;
-}
-#endif
-
-void PosixDaemon::applyFirewallRules(const FirewallParams& params)
-{
-    const auto &netScan{params.netScan};
-#if defined(Q_OS_MACOS)
-    // double-check + ensure our firewall is installed and enabled. This is necessary as
-    // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-    if(!PFFirewall::isInstalled()) PFFirewall::install();
-
-    PFFirewall::ensureRootAnchorPriority();
-
-    PFFirewall::setTranslationEnabled(QStringLiteral("000.natVPN"), params.hasConnected, { {"interface", _state.tunnelDeviceName()} });
-    PFFirewall::setFilterWithRules(QStringLiteral("001.natPhys"), params.enableSplitTunnel, natPhysRules(netScan, QSysInfo::productVersion()));
-    PFFirewall::setFilterEnabled(QStringLiteral("000.allowLoopback"), params.allowLoopback);
-    PFFirewall::setFilterEnabled(QStringLiteral("100.blockAll"), params.blockAll);
-    PFFirewall::setFilterEnabled(QStringLiteral("200.allowVPN"), params.allowVPN, { {"interface", _state.tunnelDeviceName()} });
-    PFFirewall::setFilterEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
-
-    PFFirewall::setFilterEnabled(QStringLiteral("290.allowDHCP"), params.allowDHCP);
-    PFFirewall::setFilterEnabled(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
-    PFFirewall::setAnchorTable(QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN, QStringLiteral("ipv6prefix"), {
-        // First 64 bits is the IPv6 Network Prefix
-        QStringLiteral("%1/64").arg(netScan.ipAddress6())});
-    PFFirewall::setFilterEnabled(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
-    PFFirewall::setAnchorTable(QStringLiteral("305.allowSubnets"), params.enableSplitTunnel, QStringLiteral("subnets"), subnetsToBypass(params));
-    PFFirewall::setFilterEnabled(QStringLiteral("490.allowLAN"), params.allowLAN);
-
-    // On Mac, there are two DNS leak protection modes depending on whether we
-    // are connected.
-    //
-    // These modes are needed to handle quirks in mDNSResponder.  It has been
-    // observed sending DNS packets on the physical interface even when the
-    // DNS server is properly routed via the VPN.  When resuming from sleep, it
-    // also may prevent traffic from being sent over the physical interface
-    // until it has received DNS responses over that interface (which we don't
-    // want to allow to prevent leaks).
-    //
-    // - When connected, 310.blockDNS blocks access to UDP/TCP 53 on servers
-    //   other than the configured DNS servers, and UDP/TCP 53 to the configured
-    //   servers is forced onto the tunnel, even if the sender had bound to the
-    //   physical interface.
-    // - In any other state, 000.stubDNS redirects all UDP/TCP 53 to a local
-    //   resolver that just returns NXDOMAIN for all queries.  This should
-    //   satisfy mDNSResponder without creating leaks.
-    bool macBlockDNS{false}, macStubDNS{false};
-    QStringList localDnsServers, tunnelDnsServers;
-
-    // In addition to the normal case (connected) some versions of macOS
-    // set the PrimaryService Key to empty when switching networks.
-    // In this case we want to use stubDNS to work-around this behavior.
-    if(_state.connectionState() == QStringLiteral("Connected") &&
-       !_state.macosPrimaryServiceKey().isEmpty())
+    // When bypassing by default, force Handshake and Unbound into the VPN with
+    // an "include" rule.  (Just routing the Handshake seeds into the VPN is not
+    // sufficient; hnsd uses a local recursive DNS resolver that will query
+    // authoritative DNS servers, and we want that to go through the VPN.)
+    if(params.bypassDefaultApps)
     {
-        macBlockDNS = params.blockDNS;
-        QStringList effectiveDnsServers;
-        if(params._connectionSettings)
-            effectiveDnsServers = params._connectionSettings->getDnsServers();
-        for(const auto &address : effectiveDnsServers)
-        {
-            Ipv4Address parsed{address};
-            if(!parsed.isLocalDNS())
-                tunnelDnsServers.push_back(address);
-            else
-                localDnsServers.push_back(address);
-        }
-    }
-    else
-    {
-        macStubDNS = params.blockDNS;
+        params.vpnOnlyApps.push_back(Path::HnsdExecutable);
+        params.vpnOnlyApps.push_back(Path::UnboundExecutable);
     }
 
-    PFFirewall::setTranslationEnabled(QStringLiteral("000.stubDNS"), macStubDNS);
-    if(PFFirewall::setDnsStubEnabled(macStubDNS))
-    {
-        // Schedule a DNS cache flush since the DNS stub was disabled; important
-        // if the user disables the VPN while in this state.
-        _connection->scheduleDnsCacheFlush();
-    }
-    PFFirewall::setFilterEnabled(QStringLiteral("400.allowPIA"), params.allowPIA);
-    PFFirewall::setFilterEnabled(QStringLiteral("500.blockDNS"), macBlockDNS, { {"interface", _state.tunnelDeviceName()} });
-    PFFirewall::setAnchorTable(QStringLiteral("500.blockDNS"), macBlockDNS, QStringLiteral("localdns"), localDnsServers);
-    PFFirewall::setAnchorTable(QStringLiteral("500.blockDNS"), macBlockDNS, QStringLiteral("tunneldns"), tunnelDnsServers);
-    PFFirewall::setFilterEnabled(QStringLiteral("510.stubDNS"), macStubDNS);
-    PFFirewall::setFilterEnabled(QStringLiteral("520.allowHnsd"), params.allowResolver, { { "interface", _state.tunnelDeviceName() } });
-
-#elif defined(Q_OS_LINUX)
-
-   // double-check + ensure our firewall is installed and enabled
-    if(!IpTablesFirewall::isInstalled()) IpTablesFirewall::install();
-
-    // Note: rule precedence is handled inside IpTablesFirewall
-    IpTablesFirewall::ensureRootAnchorPriority();
-
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("000.allowLoopback"), params.allowLoopback);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("200.allowVPN"), params.allowVPN);
-    // Allow bypass apps to override KS only when disconnected -
-    // if we were to allow this rule when connected as well (which just allows a bypass app to do what it wants)
-    // then it'll override our split tunnel DNS leak protection rules (possibly
-    // allowing DNS on all interfaces) which is not what we want.
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("230.allowBypassApps"), params.blockAll && !params.isConnected);
-
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("250.blockIPv6"), params.blockIPv6);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("290.allowDHCP"), params.allowDHCP);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv6, QStringLiteral("299.allowIPv6Prefix"), netScan.hasIpv6() && params.allowLAN);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("300.allowLAN"), params.allowLAN);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("305.allowSubnets"), params.enableSplitTunnel);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("310.blockDNS"), params.blockDNS);
-
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("320.allowDNS"), params.hasConnected);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("100.protectLoopback"), true);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("80.splitDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.snatDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("80.fwdSplitDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4, QStringLiteral("90.fwdSnatDNS"), params.hasConnected && params.enableSplitTunnel, IpTablesFirewall::kNatTable);
-
-    // block VpnOnly packets when the VPN is not connected
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("340.blockVpnOnly"), !_state.vpnEnabled());
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.allowHnsd"), params.allowResolver && !params.bypassDefaultApps);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("350.cgAllowHnsd"), params.allowResolver && params.bypassDefaultApps);
-
-    // Allow PIA Wireguard packets when PIA is allowed.  These come from the
-    // kernel when using the kernel module method, so they aren't covered by the
-    // allowPIA rule, which is based on GID.
-    // This isn't needed for OpenVPN or userspace WG, but it doesn't do any
-    // harm.
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("390.allowWg"), params.allowPIA);
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("400.allowPIA"), params.allowPIA);
-
-    // Mark forwarded packets in all cases (so we can block when KS is on)
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::Both, QStringLiteral("100.tagFwd"), true, IpTablesFirewall::kMangleTable);
-
-    // Update and apply our rules to ensure VPN packets are only accepted on the
-    // tun interface, mitigates CVE-2019-14899: https://seclists.org/oss-sec/2019/q4/122
-    bool enableVpnTunOnly = updateVpnTunOnlyAnchor(params.hasConnected,
-                                                   _state.tunnelDeviceName(),
-                                                   _state.tunnelDeviceLocalAddress());
-    IpTablesFirewall::setAnchorEnabled(IpTablesFirewall::IPv4,
-                                       QStringLiteral("100.vpnTunOnly"),
-                                       enableVpnTunOnly,
-                                       IpTablesFirewall::kRawTable);
-
-    // Update dynamic rules that depend on info such as the adapter name and/or DNS servers
-    _firewall.updateRules(params);
-
-    // Update routes for forwarded packets (i.e docker)
-    updateForwardedRoutes(params, _state.tunnelDeviceName(),
-        params.enableSplitTunnel && !_settings.routedPacketsOnVPN());
-
-#endif
-
-#ifdef Q_OS_MACOS
-    // Subnet bypass routing for MacOs
-    // Linux doesn't make use of this, it uses packet tagging and routing policies instead.
-    _subnetBypass.updateRoutes(params);
-#endif
-
-    updateBoundRoute(params);
-    toggleSplitTunnel(params);
+    if(_pFirewall)
+        _pFirewall->applyRules(params);
+    else
+        qInfo() << "Firewall has already been shut down, not applying firewall rules";
 }
 
 #ifdef Q_OS_MAC
@@ -693,7 +432,7 @@ void scutilDNSDiagnostics(DiagnosticsFile &file)
 // which is all we are interested in, so it doesn't matter if
 // the request fails, so long as the 3-way handshake completes.
 // These diagnostics are useful for debugging split tunnel issues on MacOS.
-auto tcpdumpMetaEndpoint(const DaemonState &state)
+auto tcpdumpMetaEndpoint(const StateModel &state)
 {
     struct MetaInfo
     {
@@ -702,7 +441,7 @@ auto tcpdumpMetaEndpoint(const DaemonState &state)
     };
 
     NearestLocations nearest(state.availableLocations());
-    QSharedPointer<Location> pMetaRegion = nearest.getBestMatchingLocation([](const Location &loc)
+    QSharedPointer<const Location> pMetaRegion = nearest.getBestMatchingLocation([](const Location &loc)
     {
         return loc.hasService(Service::Meta);
     });
@@ -811,6 +550,8 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("System information", "system_profiler",
         QStringList{QStringLiteral("SPHardwareDataType"), QStringLiteral("SPDisplaysDataType"),
             QStringLiteral("SPMemoryDataType"), QStringLiteral("SPStorageDataType")});
+    file.writeCommand("Install log", "cat",
+        {QStringLiteral("/Library/Application Support/" BRAND_IDENTIFIER "/install.log")});
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeText("Overview", diagnosticsOverview());
@@ -880,127 +621,21 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("ip route show table " BRAND_CODE "vpnOnlyrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnOnlyrt"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnFwdrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnFwdrt"});
     file.writeCommand("WireGuard Kernel Logs", "bash", QStringList{"-c", "dmesg | grep -i wireguard | tail -n 200"});
-    // Info about the wireguard kernel module (whether it is loaded and/or available)
+    // Info about the wireguard kernel module (whether it is bed and/or available)
     file.writeCommand("ls -ld /sys/modules/wireguard", "ls", {"-ld", "/sys/modules/wireguard"});
     file.writeCommand("modprobe --show-depends wireguard", "modprobe", {"--show-depends", "wireguard"});
     // Info about libnl libraries
     file.writeCommand("ldconfig -p | grep libnl", "bash", QStringList{"-c", "ldconfig -p | grep libnl"});
+    // There's no Install log section on Linux.  The Linux install script does
+    // not log to a file.  It does very little compared to the Win/Mac
+    // installers, and the few things it does can be easily inspected.
 #endif
-}
-
-void PosixDaemon::updateBoundRoute(const FirewallParams &params)
-{
-#if defined(Q_OS_MAC)
-    auto createBoundRoute = [](const QString &ipAddress, const QString &interfaceName)
-    {
-        // Checked by caller (OriginalNetworkScan::ipv4Valid() below)
-        Q_ASSERT(!ipAddress.isEmpty());
-        Q_ASSERT(!interfaceName.isEmpty());
-
-        Exec::bash(QStringLiteral("route add -net 0.0.0.0 %1 -ifscope %2").arg(ipAddress, interfaceName));
-    };
-    auto removeBoundRoute = [](const QString &ipAddress, const QString &interfaceName)
-    {
-        // Checked by caller (OriginalNetworkScan::ipv4Valid() below)
-        Q_ASSERT(!ipAddress.isEmpty());
-        Q_ASSERT(!interfaceName.isEmpty());
-
-        Exec::bash(QStringLiteral("route delete 0.0.0.0 -interface %1 -ifscope %1").arg(interfaceName));
-    };
-
-    // We may need a bound route for the physical interface:
-    // - When we have connected (even if currently reconnecting) - we need this
-    //   for DNS leak protection.  Apps can try to send DNS packets out the
-    //   physical interface toward the configured DNS servers, but PIA forces it
-    //   it into the tunnel anyway.  (mDNSResponder does this in 10.15.4+.)
-    // - Split tunnel (even if disconnected) - needed to allow bypass apps to
-    //   bind to the physical interface, and needed for OpenVPN itself to bind
-    //   to the physical interface to bypass split tunnel.
-    if(params.enableSplitTunnel || params.hasConnected)
-    {
-        // Remove the previous bound route if it's present and different
-        if(_boundRouteNetScan.ipv4Valid() &&
-           (_boundRouteNetScan.gatewayIp() != params.netScan.gatewayIp() ||
-            _boundRouteNetScan.interfaceName() != params.netScan.interfaceName()))
-        {
-            qInfo() << "Network has changed from"
-                << _boundRouteNetScan.interfaceName() << "/"
-                << _boundRouteNetScan.gatewayIp() << "to"
-                << params.netScan.interfaceName() << "/"
-                << params.netScan.gatewayIp() << "- create new bound route";
-            removeBoundRoute(_boundRouteNetScan.gatewayIp(),
-                                    _boundRouteNetScan.interfaceName());
-        }
-
-        // Add the new bound route.  Do this even if it doesn't seem to have
-        // changed, because the route can be lost if the user switches to a new
-        // network on the same interface with the same gateway (common with
-        // 2.4GHz <-> 5GHz network switching)
-        if(params.netScan.ipv4Valid())
-        {
-            // Trace this only when it appears to be new
-            if(!_boundRouteNetScan.ipv4Valid())
-            {
-                qInfo() << "Creating bound route for new network"
-                    << params.netScan.interfaceName() << "/"
-                    << params.netScan.gatewayIp();
-            }
-            createBoundRoute(params.netScan.gatewayIp(), params.netScan.interfaceName());
-        }
-
-        _boundRouteNetScan = params.netScan;
-    }
-    else
-    {
-        // Remove the bound route if it's there
-        if(_boundRouteNetScan.ipv4Valid())
-        {
-            removeBoundRoute(_boundRouteNetScan.gatewayIp(),
-                                    _boundRouteNetScan.interfaceName());
-        }
-        _boundRouteNetScan = {};
-    }
-#endif
-}
-
-void PosixDaemon::toggleSplitTunnel(const FirewallParams &params)
-{
-    qInfo() << "Tunnel device is:" << _state.tunnelDeviceName();
-    QVector<QString> excludedApps = params.excludeApps;
-
-    qInfo() <<  "Updated split tunnel - enabled:" << params.enableSplitTunnel
-        << "-" << params.netScan;
-
-    // Activate split tunnel if it's supposed to be active and currently isn't
-    if(params.enableSplitTunnel && !_enableSplitTunnel)
-    {
-        qInfo() << "Starting Split Tunnel";
-
-        startSplitTunnel(params, _state.tunnelDeviceName(),
-                         _state.tunnelDeviceLocalAddress());
-    }
-    // Deactivate if it's supposed to be inactive but is currently active
-    else if(!params.enableSplitTunnel && _enableSplitTunnel)
-    {
-        qInfo() << "Shutting down Split Tunnel";
-        shutdownSplitTunnel();
-    }
-    // Otherwise, the current active state is correct, but if we are currently
-    // active, update the configuration
-    else if(params.enableSplitTunnel)
-    {
-        // Inform of Network changes
-        // Note we do not check first for _splitTunnelNetScan != params.netScan as
-        // it's possible a user connected to a new network with the same gateway and interface and IP (i.e switching from 5g to 2.4g)
-        updateSplitTunnel(params, _state.tunnelDeviceName(),
-                          _state.tunnelDeviceLocalAddress());
-    }
-
-    _enableSplitTunnel = params.enableSplitTunnel;
 }
 
 void PosixDaemon::checkFeatureSupport()
 {
+    // Probably needs to be refactored since wrong errors can end up in 
+    // the splitTunnelSupportErrors JsonProperty.
     std::vector<QString> errors;
 
 #ifdef Q_OS_LINUX
@@ -1008,6 +643,25 @@ void PosixDaemon::checkFeatureSupport()
     QProcess iptablesVersion;
     iptablesVersion.start(QStringLiteral("iptables"), QStringList{QStringLiteral("--version")});
     iptablesVersion.waitForFinished();
+
+    bool iptablesDetected = false;
+    // To correctly evaluate the exitCode the process must have a NormalExit exitStatus
+    // otherwise we assume there was a problem with it.
+    if(iptablesVersion.exitStatus() == QProcess::NormalExit)
+    {
+        // Every non zero exitCode value (1-255) means the command "iptables --version"
+        // returned an error.
+        if(iptablesVersion.exitCode() == 0)
+        {
+            iptablesDetected = true;
+        }
+    }
+    // Adding the error to the vpnSupportErrors JsonProperty
+    if(!iptablesDetected)
+        _state.vpnSupportErrors({QStringLiteral("iptables_missing")});
+
+    qInfo() << "vpnSupportErrors: " << _state.vpnSupportErrors();
+
     auto output = iptablesVersion.readAllStandardOutput();
     auto outputNewline = output.indexOf('\n');
     // First line only
@@ -1019,8 +673,11 @@ void PosixDaemon::checkFeatureSupport()
     auto major = match.captured(1).toInt();
     auto minor = match.captured(3).toInt();
     auto patch = match.captured(5).toInt();
-    qInfo().nospace() << "iptables version " << output << " -> " << major << "."
-        << minor << "." << patch;
+    // output.data() is "iptables vX.X.X (nf_tables)" when iptables is installed
+    // otherwise it is empty when no iptables package is installed.
+    qInfo().nospace() << "iptables version command output " << output.data() 
+    << " -> " << major << "." << minor << "." << patch;
+
     // SemVersion implements a suitable operator<(), we don't use it to parse
     // the version because we're not sure that iptables will always return three
     // parts in its version number though.
@@ -1040,12 +697,13 @@ void PosixDaemon::checkFeatureSupport()
 
     // This cgroup must be mounted in this location for this feature.
     QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
+
     if(!cgroupFile.exists())
     {
         // Try to create the net_cls VFS (if we have no other errors)
         if(errors.empty())
         {
-            if(!CGroup::createNetCls())
+            if(!kapps::net::CGroup::createNetCls(Path::ParentVpnExclusionsFile.parent()))
                 errors.push_back(QStringLiteral("cgroups_invalid"));
         }
         else
@@ -1066,9 +724,9 @@ void PosixDaemon::checkFeatureSupport()
     errors.push_back(QStringLiteral("cn_proc_invalid"));
     qInfo() << "Checking proc event support by connecting to Netlink connector";
     _pCnProcTest.emplace();
-    connect(_pCnProcTest.ptr(), &CnProc::connected, this, [this]()
+    _pCnProcTest->connected = [this]()
     {
-        qInfo() << "Proc event recieved, kernel supports proc events";
+        qInfo() << "Proc event received, kernel supports proc events";
         auto errors = _state.splitTunnelSupportErrors();
         auto itNewEnd = std::remove(errors.begin(), errors.end(),
                                     QStringLiteral("cn_proc_invalid"));
@@ -1076,7 +734,8 @@ void PosixDaemon::checkFeatureSupport()
         _state.splitTunnelSupportErrors(errors);
         // Don't need the netlink connection any more
         _pCnProcTest.clear();
-    });
+    };
+
 #endif
 
     if(!errors.empty())

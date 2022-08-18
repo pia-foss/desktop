@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("portforwardrequest.cpp")
 
 #include "portforwardrequest.h"
@@ -68,7 +68,7 @@ namespace
 
 PortForwardRequestModern::PortForwardRequestModern(ApiClient &apiClient,
                                                    DaemonAccount &account,
-                                                   DaemonState &state,
+                                                   StateModel &state,
                                                    const Environment &environment)
     : _apiClient{apiClient}, _account{account},
       _pfApiBase{QStringLiteral("https://") + state.tunnelDeviceRemoteAddress() + QStringLiteral(":19999"),
@@ -192,7 +192,7 @@ auto PortForwardRequestModern::handleGetSigResult(const QJsonDocument &result)
     if(resultStatus != QStringLiteral("OK"))
     {
         qWarning() << "Server rejected PF request, status:" << resultStatus;
-        qWarning().noquote() << "Server response:" << result.toJson();
+        qWarning() << "Server response:" << result;
         throw Error{HERE, Error::Code::ApiBadResponseError};
     }
 
@@ -200,7 +200,7 @@ auto PortForwardRequestModern::handleGetSigResult(const QJsonDocument &result)
                   result[QStringLiteral("signature")].toString()};
     if(token._payload.isEmpty() || token._signature.isEmpty())
     {
-        qWarning().noquote() << "Server returned invalid PF response:" << result.toJson();
+        qWarning() << "Server returned invalid PF response:" << result;
         throw Error{HERE, Error::Code::ApiBadResponseError};
     }
 
@@ -244,7 +244,7 @@ void PortForwardRequestModern::bindWithToken(const PfToken &token, bool initial)
             if(resultStatus != QStringLiteral("OK"))
             {
                 qWarning() << "Server rejected PF bind, status:" << resultStatus;
-                qWarning().noquote() << "Server response:" << bindResult.toJson();
+                qWarning() << "Server response:" << bindResult;
                 retryNewToken();
                 return;
             }

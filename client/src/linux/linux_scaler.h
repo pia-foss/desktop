@@ -16,16 +16,16 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("linux_scaler.h")
 
 #ifndef LINUX_SCALER_H
 #define LINUX_SCALER_H
 
 #include <QObject>
-#include "windowmaxsize.h"
-#include "nativewindowscaler.h"
-#include "staticsignal.h"
+#include "../windowmaxsize.h"
+#include "../nativewindowscaler.h"
+#include <common/src/staticsignal.h>
 #include <QProcessEnvironment>
 
 class LinuxWindowScaler : public NativeWindowScaler

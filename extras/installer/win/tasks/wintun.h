@@ -19,8 +19,8 @@
 #ifndef TASKS_WINTUN_H
 #define TASKS_WINTUN_H
 
-#include "tasks.h"
-#include "tap_inl.h"
+#include "../tasks.h"
+#include "../tap_inl.h"
 
 // These tasks install and uninstall the WinTUN driver package.
 //

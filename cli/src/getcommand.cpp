@@ -16,15 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("getcommand.cpp")
 
 #include "getcommand.h"
-#include "output.h"
+#include <common/src/output.h>
 #include "cliclient.h"
-#include "settings/daemonstate.h"
-#include "settings/daemonsettings.h"
-#include "vpnstate.h"
+#include <clientlib/src/model/daemonstate.h>
+#include <common/src/settings/daemonsettings.h>
+#include <common/src/vpnstate.h>
 #include <map>
 
 namespace GetSetType
@@ -67,36 +67,64 @@ namespace GetSetValue
         throw Error{HERE, Error::Code::CliInvalidArgs};
     }
     const QString locationAuto{QStringLiteral("auto")};
-    // Get the CLI name used to represent a region.  nullptr is interpreted as
-    // "auto".
-    QString getRegionCliName(const QSharedPointer<Location> &pLocation)
+    // Get the CLI name used to represent a region.
+    QString getRegionCliName(const QJsonObject &location, const DaemonState &state)
     {
-        if(!pLocation)
-            return locationAuto;
-
-        QString name;
-        if(pLocation->isDedicatedIp())
+        const auto &regionsMetadata = state.regionsMetadata();
+        QString id = location["id"].toString();
+        // Find the region display and country display
+        QJsonObject regionDisplay = regionsMetadata["regionDisplays"][id].toObject();
+        QString countryCode = regionDisplay["country"].toString();
+        QJsonObject countryDisplay = regionsMetadata["countryDisplays"][countryCode].toObject();
+        // Find the country group to know if this would be shown as a "nested"
+        // location in the client.  It's shown this way if there is more than
+        // one location in the country.
+        bool nestedRegion{false};
+        for(const auto &group : state.groupedLocations())
         {
-            name = QStringLiteral("dedicated-") + pLocation->name() +
-                QStringLiteral("-") + pLocation->dedicatedIp();
+            if(group["code"] == countryCode)
+            {
+                nestedRegion = group["locations"].toArray().size() > 1;
+                break;
+            }
+        }
+
+        QString regionName;
+        if(nestedRegion)
+        {
+            // Nested regions display "XX city"
+            regionName = countryDisplay["prefix"].toObject()["en-US"].toString();
+            regionName += regionDisplay["name"].toObject()["en-US"].toString();
         }
         else
-            name = pLocation->name();
-        // Avoid an empty name, just in case
-        if(name.isEmpty())
-            name = pLocation->id();
-
-        name = name.toLower();
-        // Replace any whitespace characters with '-'
-        for(int i=0; i<name.length(); ++i)
         {
-            if(name[i].isSpace())
-                name.replace(i, 1, '-');
+            // Single regions display the country name
+            regionName = countryDisplay["name"].toObject()["en-US"].toString();
+        }
+        // Avoid an empty name, just in case
+        if(regionName.isEmpty())
+            regionName = id;
+
+        QString cliName;
+        QString dedicatedIp = location["dedicatedIp"].toString();
+        if(!dedicatedIp.isEmpty())
+        {
+            cliName = QStringLiteral("dedicated-") + regionName +
+                QStringLiteral("-") + dedicatedIp;
+        }
+        else
+            cliName = regionName;
+
+        cliName = cliName.toLower();
+        // Replace any whitespace characters with '-'
+        for(int i=0; i<cliName.length(); ++i)
+        {
+            if(cliName[i].isSpace())
+                cliName.replace(i, 1, '-');
         }
 
-        qInfo() << "Location" << pLocation->id() << "/" << pLocation->name()
-            << "->" << name;
-        return name;
+        qInfo() << "Location" << id << "/" << regionName << "->" << cliName;
+        return cliName;
     }
 
     // Match the location specified on the command line to the daemon's location
@@ -113,8 +141,8 @@ namespace GetSetValue
         // throw it away.
         for(const auto &knownLocation : state.availableLocations())
         {
-            if(knownLocation.second && location == GetSetValue::getRegionCliName(knownLocation.second))
-                return knownLocation.second->id();
+            if(location == GetSetValue::getRegionCliName(knownLocation.toObject(), state))
+                return knownLocation["id"].toString();
         }
 
         qWarning() << "No match found for specified location:" << location;
@@ -159,7 +187,7 @@ namespace
             qEnumValues<VpnState::State>()}},
         {GetSetType::debugLogging, {QStringLiteral("State of debug logging setting"), {}}},
         {GetSetType::portForward, {QStringLiteral("Forwarded port number if available, or the status of the request to forward a port"),
-            qEnumValues<DaemonState::PortForwardState>(QStringLiteral("[forwarded port]"))}},
+            qEnumValues<VpnState::PortForwardState>(QStringLiteral("[forwarded port]"))}},
         {GetSetType::requestPortForward, {QStringLiteral("Whether a forwarded port will be requested on the next connection attempt"), {}}},
         {GetSetType::protocol, {QStringLiteral("VPN connection protocol"), DaemonSettings::choices_method()}},
         {GetSetType::vpnIp, {QStringLiteral("Current VPN IP address"), {}}},
@@ -204,7 +232,7 @@ namespace
     class ValuePrinter : public QObject
     {
     public:
-        static QString renderLocation(const QSharedPointer<Location> &pLocation);
+        static QString renderLocation(const QJsonObject &location, const DaemonState &state);
         static QString renderValue(CliClient &client, const QString &type);
 
     public:
@@ -257,10 +285,10 @@ namespace
     }
 
     // Render a line representing a location, for either "get location" or
-    // "get locations".  nullptr is interpreted as "auto".
-    QString ValuePrinter::renderLocation(const QSharedPointer<Location> &pLocation)
+    // "get locations".
+    QString ValuePrinter::renderLocation(const QJsonObject &location, const DaemonState &state)
     {
-        return GetSetValue::getRegionCliName(pLocation);
+        return GetSetValue::getRegionCliName(location, state);
     }
 
     QString ValuePrinter::renderValue(CliClient &client, const QString &type)
@@ -281,7 +309,7 @@ namespace
         {
             int forwardedPort = client.connection().state.forwardedPort();
             // For special values, write the state name
-            const auto &metaEnum = QMetaEnum::fromType<DaemonState::PortForwardState>();
+            const auto &metaEnum = QMetaEnum::fromType<VpnState::PortForwardState>();
             const char *name = metaEnum.valueToKey(forwardedPort);
             if(name)
                 return name;
@@ -301,7 +329,10 @@ namespace
             // Print the chosen location from DaemonState; this includes the
             // name and results in invalid choices being treated as 'auto'
             // (which is what the daemon does)
-            return renderLocation(client.connection().state.vpnLocations().chosenLocation());
+            auto currentLocation = client.connection().state["vpnLocations"]["chosenLocation"];
+            if(currentLocation.isObject())
+                return renderLocation(currentLocation.toObject(), client.connection().state);
+            return GetSetValue::locationAuto;
         }
         else if(type == GetSetType::vpnIp)
         {
@@ -462,22 +493,20 @@ int GetCommand::exec(const QStringList &params, QCoreApplication &app)
             // Print locations in the default order they're listed in the
             // client - DIP locations by latency, then normal locations by
             // country and latency
-            outln() << ValuePrinter::renderLocation({});  // Auto
+            outln() << GetSetValue::locationAuto;
 
-            const auto &dedicatedIpLocations = client.connection().state.dedicatedIpLocations();
-            for(const auto &pDip : dedicatedIpLocations)
+            const auto &dedicatedIpLocations = client.connection().state["dedicatedIpLocations"].toArray();
+            for(const auto &dip : dedicatedIpLocations)
             {
-                if(pDip)
-                    outln() << ValuePrinter::renderLocation(pDip);
+                outln() << ValuePrinter::renderLocation(dip.toObject(), client.connection().state);
             }
 
-            const auto &groupedLocations = client.connection().state.groupedLocations();
+            const auto &groupedLocations = client.connection().state["groupedLocations"].toArray();
             for(const auto &country : groupedLocations)
             {
-                for(const auto &pLocation : country.locations())
+                for(const auto &location : country["locations"].toArray())
                 {
-                    if(pLocation)
-                        outln() << ValuePrinter::renderLocation(pLocation);
+                    outln() << ValuePrinter::renderLocation(location.toObject(), client.connection().state);
                 }
             }
         }

@@ -8,10 +8,11 @@ class Install
 
     # Known platform-specific directories that can be passed to install() as a
     # targetPath
+    # TODO - Check mobile
     PlatformDirs = {
-        bin: Build.selectPlatform('/', 'Contents/MacOS/', 'bin/'),
-        lib: Build.selectPlatform('/', 'Contents/MacOS/', 'lib/'),
-        res: Build.selectPlatform('/', 'Contents/Resources/', 'share/')
+        bin: Build.selectPlatform('/', 'Contents/MacOS/', 'bin/', 'bin/', 'Contents/iOS/'),
+        lib: Build.selectPlatform('/', 'Contents/Frameworks/', 'lib/', 'lib/', 'Contents/iOS/'),
+        res: Build.selectPlatform('/', 'Contents/Resources/', 'share/', 'share/', 'Contents/Resources/')
     }
 
     # Create Install with the name of the staging directory.
@@ -23,7 +24,7 @@ class Install
         # Create a final task to clean up any extra files that might have been
         # left from a prior build.  Tasks that work on the installation
         # directory after it is staged can depend on this one.
-        multitask @targetTask => @build.componentDir do |t|
+        task @targetTask => @build.componentDir do |t|
             puts "install: #{@name}"
             extras = FileList[@build.artifact('**/*')]
             extras.exclude(*t.prerequisites)
@@ -48,9 +49,6 @@ class Install
     #  install(target, '/specific/dir/alt-name')
     #  install(target, '/specific/dir', 'alt-name') # equivalent
     #  install(target, '/specific/dir/', 'alt-name') # equivalent
-    #
-    #  # Install multiple artifacts to the same directory
-    #  install([first, second, third], :res)
     #
     # - sourcePath is a path to an artifact
     # - targetPath can be:

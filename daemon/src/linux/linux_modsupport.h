@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("linux_modsupport.h")
 
 #ifndef LINUX_MODSUPPORT_H
 #define LINUX_MODSUPPORT_H
 
 #include <QFileSystemWatcher>
-#include "path.h"
+#include <common/src/builtin/path.h>
 
 // LinuxModSupport detects whether the kernel has support for modules that can
 // be used by PIA (currently just 'wireguard').  It watches modules.dep to

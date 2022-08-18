@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("metaserviceapibase.cpp")
 
 #include "metaserviceapibase.h"
-#include "locations.h"
+#include <common/src/locations.h>
 
-MetaServiceApiBase::MetaServiceApiBase(const DaemonState &state,
+MetaServiceApiBase::MetaServiceApiBase(const StateModel &state,
                                        QString dynamicBasePath,
                                        std::shared_ptr<PrivateCA> pDynamicBaseCA,
                                        std::vector<QString> fixedBaseUris)
@@ -39,7 +39,7 @@ MetaServiceApiBase::MetaServiceApiBase(const DaemonState &state,
 
 ApiBaseSequence MetaServiceApiBase::beginAttempt()
 {
-    QSharedPointer<Location> pFirstBaseRegion{}, pSecondBaseRegion{};
+    QSharedPointer<const Location> pFirstBaseRegion{}, pSecondBaseRegion{};
 
     std::vector<BaseUri> bases;
     bases.reserve(_fixedBaseUris.size() + 2);
@@ -107,7 +107,7 @@ ApiBaseSequence MetaServiceApiBase::beginAttempt()
 
     // Select a server in the region for the Meta service, and a port on that
     // server.
-    auto appendDynamicBase = [&](const QSharedPointer<Location> &pRegion)
+    auto appendDynamicBase = [&](const QSharedPointer<const Location> &pRegion)
     {
         const Server *pBaseServer{};
         if(pRegion)

@@ -20,7 +20,7 @@
 #line SOURCE_FILE("openssl.cpp")
 
 #include "openssl.h"
-#include "path.h"
+#include "builtin/path.h"
 
 #include <QDir>
 #include <QLibrary>

@@ -16,24 +16,23 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line SOURCE_FILE("daemon.cpp")
-
+#include <common/src/common.h>
 #include "daemon.h"
 
 #include "vpn.h"
 #include "vpnmethod.h"
-#include "ipc.h"
-#include "jsonrpc.h"
-#include "locations.h"
-#include "path.h"
+#include <common/src/ipc.h>
+#include <common/src/jsonrpc.h>
+#include <common/src/locations.h>
+#include <common/src/builtin/path.h>
 #include "version.h"
 #include "brand.h"
-#include "util.h"
-#include "apinetwork.h"
+#include <common/src/builtin/util.h>
+#include <common/src/apinetwork.h>
 #if defined(Q_OS_WIN)
 #include "win/wfp_filters.h"
 #include "win/win_networks.h"
+#include "win/win_interfacemonitor.h"
 #elif defined(Q_OS_MAC)
 #include "mac/mac_networks.h"
 #elif defined(Q_OS_LINUX)
@@ -54,15 +53,18 @@
 #include <QStringView>
 
 #if defined(Q_OS_WIN)
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
+#include <kapps_core/src/win/win_error.h>
 #include <VersionHelpers.h>
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <AclAPI.h>
 #include <AccCtrl.h>
 #include <TlHelp32.h>
 #include <Psapi.h>
 #pragma comment(lib, "advapi32.lib")
 #endif
+
+KAPPS_CORE_LOG_MODULE(daemon, "src/daemon.cpp")
 
 namespace
 {
@@ -87,7 +89,7 @@ namespace
     const QString shadowsocksRegionsResource{QStringLiteral("shadow_socks")};
     const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v6")};
     const QString modernRegionMetaResource{QStringLiteral("vpninfo/regions/v2")};
-    
+
     // Resource paths for IP Address
     const QString ipLookupResource{QStringLiteral("api/client/status")};
 
@@ -175,181 +177,75 @@ void restrictAccountJson()
     qInfo() << "Successfully applied permissions to account.json";
 }
 
-// Populate a ConnectionInfo in DaemonState from VPNConnection's ConnectionConfig
-void populateConnection(ConnectionInfo &info, const ConnectionConfig &config)
+// Populate a ConnectionInfo in StateModel from VPNConnection's ConnectionConfig
+ConnectionInfo populateConnection(const ConnectionConfig &config)
 {
-    info.vpnLocation(config.vpnLocation());
-    info.vpnLocationAuto(config.vpnLocationAuto());
+    QString method;
     switch(config.method())
     {
         default:
         case ConnectionConfig::Method::OpenVPN:
-            info.method(QStringLiteral("openvpn"));
+            method = QStringLiteral("openvpn");
             break;
         case ConnectionConfig::Method::Wireguard:
-            info.method(QStringLiteral("wireguard"));
+            method = QStringLiteral("wireguard");
             break;
     }
-    info.methodForcedByAuth(config.methodForcedByAuth());
+
+    QString dnsType;
     switch(config.dnsType())
     {
         default:
         case ConnectionConfig::DnsType::Pia:
-            info.dnsType(QStringLiteral("pia"));
+            dnsType = QStringLiteral("pia");
             break;
         case ConnectionConfig::DnsType::Local:
-            info.dnsType(QStringLiteral("local"));
+            dnsType = QStringLiteral("local");
             break;
         case ConnectionConfig::DnsType::Existing:
-            info.dnsType(QStringLiteral("existing"));
+            dnsType = QStringLiteral("existing");
             break;
         case ConnectionConfig::DnsType::HDns:
-            info.dnsType(QStringLiteral("hdns"));
+            dnsType = QStringLiteral("hdns");
             break;
         case ConnectionConfig::DnsType::Custom:
-            info.dnsType(QStringLiteral("custom"));
+            dnsType = QStringLiteral("custom");
             break;
     }
-    info.openvpnCipher(config.openvpnCipher());
-    info.otherAppsUseVpn(config.otherAppsUseVpn());
+
+    QString proxy, proxyCustom;
+    QSharedPointer<const Location> pProxyShadowsocks;
+    bool proxyShadowsocksLocationAuto{false};
     switch(config.proxyType())
     {
         default:
         case ConnectionConfig::ProxyType::None:
-            info.proxy(QStringLiteral("none"));
-            info.proxyCustom({});
-            info.proxyShadowsocks({});
-            info.proxyShadowsocksLocationAuto(false);
+            proxy = QStringLiteral("none");
             break;
         case ConnectionConfig::ProxyType::Custom:
         {
-            info.proxy(QStringLiteral("custom"));
-            QString host = config.customProxy().host();
+            proxy = QStringLiteral("custom");
+            proxyCustom = config.customProxy().host();
             if(config.customProxy().port())
             {
-                host += ':';
-                host += QString::number(config.customProxy().port());
+                proxyCustom += ':';
+                proxyCustom += QString::number(config.customProxy().port());
             }
-            info.proxyCustom(host);
-            info.proxyShadowsocks({});
-            info.proxyShadowsocksLocationAuto(false);
             break;
         }
         case ConnectionConfig::ProxyType::Shadowsocks:
-            info.proxy(QStringLiteral("shadowsocks"));
-            info.proxyCustom({});
-            info.proxyShadowsocks(config.shadowsocksLocation());
-            info.proxyShadowsocksLocationAuto(config.shadowsocksLocationAuto());
+            proxy = QStringLiteral("shadowsocks");
+            pProxyShadowsocks = config.shadowsocksLocation();
+            proxyShadowsocksLocationAuto = config.shadowsocksLocationAuto();
             break;
     }
-    info.portForward(config.requestPortForward());
+
+    return {config.vpnLocation(), config.vpnLocationAuto(), std::move(method),
+        config.methodForcedByAuth(), std::move(dnsType), config.openvpnCipher(),
+        config.otherAppsUseVpn(), std::move(proxy), std::move(proxyCustom),
+        std::move(pProxyShadowsocks), std::move(proxyShadowsocksLocationAuto),
+        config.requestPortForward()};
 };
-
-void SubnetBypass::clearAllRoutes4()
-{
-    for(const auto &subnet : _lastIpv4Subnets)
-        _routeManager->removeRoute4(subnet, _lastNetScan.gatewayIp(), _lastNetScan.interfaceName());
-
-    _lastIpv4Subnets.clear();
-}
-
-void SubnetBypass::clearAllRoutes6()
-{
-    for(const auto &subnet : _lastIpv6Subnets)
-        _routeManager->removeRoute6(subnet, _lastNetScan.gatewayIp6(), _lastNetScan.interfaceName());
-
-    _lastIpv6Subnets.clear();
-}
-
-void SubnetBypass::addAndRemoveSubnets4(const FirewallParams &params)
-{
-    auto subnetsToRemove{_lastIpv4Subnets - params.bypassIpv4Subnets};
-    auto subnetsToAdd{params.bypassIpv4Subnets - _lastIpv4Subnets};
-
-    // Remove routes for old subnets
-    for(const auto &subnet : subnetsToRemove)
-        _routeManager->removeRoute4(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
-
-    // Add routes for new subnets
-    for(auto subnet : subnetsToAdd)
-        _routeManager->addRoute4(subnet, params.netScan.gatewayIp(), params.netScan.interfaceName());
-}
-
-void SubnetBypass::addAndRemoveSubnets6(const FirewallParams &params)
-{
-    auto subnetsToRemove{_lastIpv6Subnets - params.bypassIpv6Subnets};
-    auto subnetsToAdd{params.bypassIpv6Subnets - _lastIpv6Subnets};
-
-    // Remove routes for old subnets
-    for(const auto &subnet : subnetsToRemove)
-        _routeManager->removeRoute6(subnet, params.netScan.gatewayIp6(), params.netScan.interfaceName());
-
-    // Add routes for new subnets
-    for(auto subnet : subnetsToAdd)
-        _routeManager->addRoute6(subnet, params.netScan.gatewayIp6(), params.netScan.interfaceName());
-}
-
-QString SubnetBypass::stateChangeString(bool oldValue, bool newValue)
-{
-    if(oldValue != newValue)
-        return QStringLiteral("%1 -> %2").arg(boolToString(oldValue), boolToString(newValue));
-    else
-        return boolToString(oldValue);
-}
-
-void SubnetBypass::updateRoutes(const FirewallParams &params)
-{
-    // We only need to create routes if:
-    // - split tunnel is enabled
-    // - we've connected since enabling the VPN
-    // - bypassing isn't already the default behavior
-    // - the netScan is valid
-    bool shouldBeEnabled = params.enableSplitTunnel &&
-// We want bypass routes to continue to exist on macos even when disconnected - this is so
-// they override the split tunnel routes.
-// Also bypassDefaultApps doesn't prevent the split tunnel routes existing on macos, so we ignore that too.
-#ifndef Q_OS_MACOS
-                           params.hasConnected &&
-                           !params.bypassDefaultApps &&
-#endif
-                           params.netScan.ipv4Valid();
-
-    qInfo() << "SubnetBypass:" << stateChangeString(_isEnabled, shouldBeEnabled);
-
-    // If subnet bypass is not enabled but was enabled previously, disable the subnet bypass
-    if(!shouldBeEnabled && _isEnabled)
-    {
-        qInfo() << "Clearing all subnet bypass routes";
-        clearAllRoutes4();
-        clearAllRoutes6();
-        _isEnabled = false;
-        _lastNetScan = {};
-    }
-    // Otherwise, enable it
-    else if(shouldBeEnabled)
-    {
-        // Wipe out all routes if the network changes. They'll get recreated
-        // later if necessary
-        if(params.netScan != _lastNetScan)
-        {
-            qInfo() << "Network info changed from"
-                << _lastNetScan << "to" << params.netScan << "Clearing routes";
-            clearAllRoutes4();
-            clearAllRoutes6();
-        }
-
-        if(params.bypassIpv4Subnets != _lastIpv4Subnets)
-            addAndRemoveSubnets4(params);
-
-        if(params.bypassIpv6Subnets != _lastIpv6Subnets)
-            addAndRemoveSubnets6(params);
-
-        _isEnabled = true;
-        _lastIpv4Subnets = params.bypassIpv4Subnets;
-        _lastIpv6Subnets = params.bypassIpv6Subnets;
-        _lastNetScan = params.netScan;
-    }
-}
 
 Daemon::Daemon(QObject* parent)
     : QObject(parent)
@@ -456,10 +352,21 @@ Daemon::Daemon(QObject* parent)
     connectPropertyChanges(_data, &Daemon::_dataChanges);
     connectPropertyChanges(_account, &Daemon::_accountChanges);
     connectPropertyChanges(_settings, &Daemon::_settingsChanges);
-    connectPropertyChanges(_state, &Daemon::_stateChanges);
+    _state.propertyChanged = [this](kapps::core::StringSlice name)
+    {
+        if(_stateChanges.insert(name.to_string()).second)
+            queueNotification(&Daemon::notifyChanges);
+        // Update nextConfig unless it was nextConfig itself that changed.
+        // (Even if it was nextConfig, updating would be a no-op since
+        // nextConfig does not depend on itself, but ignore it for robustness)
+        if(name != "nextConfig")
+            updateNextConfig();
+    };
 
-    // DaemonState::nextConfig depends on DaemonSettings, DaemonState, and DaemonAccount
-    connect(&_state, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
+    // StateModel::nextConfig depends on StateModel (above), DaemonSettings, and
+    // DaemonAccount.  Updating it for any possible property change is a bit
+    // aggressive, but ConnectionConfig does inspect a lot of properties, and a
+    // no-op change is ignored by StateModel.
     connect(&_settings, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
     connect(&_account, &NativeJsonObject::propertyChanged, this, &Daemon::updateNextConfig);
 
@@ -533,6 +440,7 @@ Daemon::Daemon(QObject* parent)
     #define RPC_METHOD(name, ...) LocalMethod(QStringLiteral(#name), this, &Daemon::RPC_##name)
     _methodRegistry->add(RPC_METHOD(applySettings).defaultArguments(false));
     _methodRegistry->add(RPC_METHOD(resetSettings));
+    _methodRegistry->add(RPC_METHOD(getCountryBestRegion));
     _methodRegistry->add(RPC_METHOD(addDedicatedIp));
     _methodRegistry->add(RPC_METHOD(removeDedicatedIp));
     _methodRegistry->add(RPC_METHOD(dismissDedicatedIpChange));
@@ -693,7 +601,7 @@ Daemon::Daemon(QObject* parent)
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::routedPacketsOnVPNChanged, this, &Daemon::queueApplyFirewallRules);
-    connect(&_state, &DaemonState::existingDNSServersChanged, this, &Daemon::queueApplyFirewallRules);
+    _state.existingDNSServers.changed = [this]{queueApplyFirewallRules();};
     // 'method' causes a firewall rule application because it can toggle split tunnel
     connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
@@ -793,10 +701,10 @@ Daemon::~Daemon()
 
 OriginalNetworkScan Daemon::originalNetwork() const
 {
-    return {_state.originalGatewayIp(), _state.originalInterface(),
-            _state.originalInterfaceIp(), _state.originalInterfaceNetPrefix(),
-            _state.originalMtu(),
-            _state.originalInterfaceIp6(), _state.originalGatewayIp6(),
+    return {_state.originalGatewayIp().toStdString(), _state.originalInterface().toStdString(),
+            _state.originalInterfaceIp().toStdString(), _state.originalInterfaceNetPrefix(),
+             _state.originalMtu(),
+            _state.originalInterfaceIp6().toStdString(), _state.originalGatewayIp6().toStdString(),
             _state.originalMtu6()};
 }
 
@@ -838,7 +746,7 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
         // Apply the masked object to logSettings
         logSettings["proxyCustom"] = logSettingsProxyCustom;
     }
-    qDebug().noquote() << "Applying settings:" << QJsonDocument(logSettings).toJson(QJsonDocument::Compact);
+    qDebug() << "Applying settings:" << logSettings;
 
     // Prevent applying unknown settings.  Although Daemon does attempt to
     // preserve unknown settings for compatibility after a downgrade/upgrade,
@@ -978,6 +886,24 @@ void Daemon::RPC_resetSettings()
         defaultsJson.remove(excludedSetting);
 
     RPC_applySettings(defaultsJson, false);
+}
+
+QString Daemon::RPC_getCountryBestRegion(const QString &country)
+{
+    NearestLocations nearest{_state.availableLocations()};
+    const auto &countryLower = country.toLower();
+    const auto &pBestInCountry = nearest.getBestMatchingLocation(
+        [&](const Location &loc)
+        {
+            auto pRegionDisplay = _state.regionsMetadata().getRegionDisplay(loc.id().toStdString());
+            return pRegionDisplay && qs::toQString(pRegionDisplay->country()).toLower() == countryLower;
+        });
+
+    if(pBestInCountry)
+        return pBestInCountry->id();
+
+    qWarning() << "Could not select region for country" << country;
+    throw Error{HERE, Error::Code::JsonRPCInvalidRequest};
 }
 
 Async<void> Daemon::RPC_addDedicatedIp(const QString &token)
@@ -1286,7 +1212,18 @@ QJsonValue Daemon::RPC_writeDiagnostics()
         file.writeText(title, QJsonDocument(object).toJson(QJsonDocument::Indented));
     };
 
-    writePrettyJson("DaemonState", _state.toJsonObject(), { "availableLocations", "groupedLocations", "externalIp", "externalVpnIp", "forwardedPort" });
+    try
+    {
+        writePrettyJson("DaemonState",
+            adaptNljToQt(_state.getJsonObject()),
+            { "availableLocations", "regionsMetadata", "groupedLocations",
+              "externalIp", "externalVpnIp", "forwardedPort" });
+    }
+    catch(const std::exception &ex)
+    {
+        KAPPS_CORE_WARNING() << "Unable to write DaemonState:"
+            << ex.what();
+    }
     // The custom proxy setting is removed because it may contain the proxy
     // credentials.
     writePrettyJson("DaemonSettings", _settings.toJsonObject(), { "proxyCustom" });
@@ -1517,7 +1454,9 @@ Async<void> Daemon::RPC_login(const QString& username, const QString& password)
             })
             ->except(this, [this, username, password](const Error& error) {
                 resetAccountInfo();
-                if (error.code() == Error::ApiUnauthorizedError || error.code() == Error::ApiPaymentRequiredError)
+                if (error.code() == Error::ApiUnauthorizedError ||
+                    error.code() == Error::ApiPaymentRequiredError ||
+                    error.code() == Error::ApiRateLimitedError)
                     throw error;
 
                 // Proceed with empty account info; the client can still connect
@@ -1591,7 +1530,7 @@ void Daemon::RPC_logout()
             } else {
                 QString status = json[QLatin1String("status")].toString();
                 if (status != QStringLiteral("success"))
-                    qWarning () << "API Token expire: Bad result: " << json.toJson();
+                    qWarning () << "API Token expire: Bad result: " << json;
                 else
                     qDebug () << "API Token expire: success";
             }
@@ -1620,7 +1559,7 @@ Async<void> Daemon::RPC_submitRating(int rating)
                           { QStringLiteral("rating"), rating},
                           { QStringLiteral("application"), QStringLiteral("desktop")},
                           { QStringLiteral("platform"), UpdateChannel::platformName},
-                          { QStringLiteral("version"), Version::semanticVersion()}
+                          { QStringLiteral("version"), QString::fromStdString(Version::semanticVersion())}
                   })), ApiClient::tokenAuth(_account.token()))
             ->then(this, [this](const QJsonDocument& json) {
         Q_UNUSED(json);
@@ -1746,7 +1685,16 @@ void Daemon::clientConnected(IPCConnection* connection)
         accountJsonObj.remove(sensitiveProp);
     all.insert(QStringLiteral("account"), std::move(accountJsonObj));
     all.insert(QStringLiteral("settings"), _settings.toJsonObject());
-    all.insert(QStringLiteral("state"), _state.toJsonObject());
+    QJsonObject stateJson;
+    try
+    {
+        stateJson = adaptNljToQt(_state.getJsonObject());
+    }
+    catch(const std::exception &ex)
+    {
+        KAPPS_CORE_WARNING() << "Unable to serialize state:" << ex.what();
+    }
+    all.insert(QStringLiteral("state"), stateJson);
     client->post(QStringLiteral("data"), all);
 }
 
@@ -1759,6 +1707,35 @@ QJsonObject getProperties(const NativeJsonObject& object, const QSet<QString>& p
         result.insert(property, value.isUndefined() ? QJsonValue::Null : value);
     }
     return result;
+}
+
+QJsonObject getProperties(const JsonState<clientjson::json> &object,
+    const std::unordered_set<std::string> &properties)
+{
+    try
+    {
+        clientjson::json result{};
+        for(const auto &name : properties)
+        {
+            // Individual properties can fail without failing everything
+            try
+            {
+                result.emplace(name, object.getProperty(name));
+            }
+            catch(const std::exception &ex)
+            {
+                KAPPS_CORE_WARNING() << "Unable to serialize property" << name
+                    << "-" << ex.what();
+            }
+        }
+        return adaptNljToQt(result);
+    }
+    catch(const std::exception &ex)
+    {
+        KAPPS_CORE_WARNING() << "Unable to serialize properties" << properties
+            << "-" << ex.what();
+    }
+    return {};
 }
 
 void Daemon::notifyChanges()
@@ -1946,8 +1923,8 @@ private:
 Async<void> Daemon::loadVpnIp()
 {
     // Test the connection to determine:
-    // - the VPN IP (DaemonState::externalVpnIp)
-    // - whether there might be a connection problem (DaemonState::connectionProblem)
+    // - the VPN IP (StateModel::externalVpnIp)
+    // - whether there might be a connection problem (StateModel::connectionProblem)
     //
     // Connection problems include incorrect routing (routing via physical
     // interface instead of VPN interface), or lack of Internet connectivity
@@ -2015,6 +1992,7 @@ Async<void> Daemon::loadVpnIp()
 }
 
 void Daemon::vpnStateChanged(VPNConnection::State state,
+                             VPNConnection::State oldState,
                              const ConnectionConfig &connectingConfig,
                              const ConnectionConfig &connectedConfig,
                              const nullable_t<Server> &connectedServer,
@@ -2035,8 +2013,8 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
 
     _connectingConfig = connectingConfig;
     _connectedConfig = connectedConfig;
-    populateConnection(_state.connectingConfig(), connectingConfig);
-    populateConnection(_state.connectedConfig(), connectedConfig);
+    _state.connectingConfig(populateConnection(connectingConfig));
+    _state.connectedConfig(populateConnection(connectedConfig));
     _state.connectedServer(connectedServer);
 
     queueNotification(&Daemon::reapplyFirewallRules);
@@ -2108,6 +2086,14 @@ void Daemon::vpnStateChanged(VPNConnection::State state,
             refreshAccountInfo();
 
         refreshDedicatedIps();
+
+        // When a new connection is established (not a reconnection), count a
+        // successful session.  New connections are indicated by prior state
+        // Connecting, reconnections would have prior state Reconnecting.
+        if(_settings.surveyRequestEnabled() && oldState == VpnState::Connecting)
+        {
+            _settings.successfulSessionCount(_settings.successfulSessionCount() + 1);
+        }
     }
     else
     {
@@ -2231,27 +2217,19 @@ void Daemon::newLatencyMeasurements(const LatencyTracker::Latencies &measurement
 {
     SCOPE_LOGGING_CATEGORY("daemon.latency");
 
-    bool locationsAffected = false;
     LatencyMap newLatencies;
     newLatencies = _data.modernLatencies();
 
     for(const auto &measurement : measurements)
     {
         newLatencies[measurement.first] = static_cast<double>(msec(measurement.second));
-        if(_state.availableLocations().find(measurement.first) != _state.availableLocations().end())
-        {
-            locationsAffected = true;
-        }
     }
 
     _data.modernLatencies(newLatencies);
 
-    if(locationsAffected)
-    {
-        // Rebuild the locations, including the grouped locations and location
-        // choices, since the latencies changed
-        rebuildActiveLocations();
-    }
+    // Rebuild the locations, including the grouped locations and location
+    // choices, since the latencies changed
+    rebuildActiveLocations();
 }
 
 void Daemon::portForwardUpdated(int port)
@@ -2260,10 +2238,9 @@ void Daemon::portForwardUpdated(int port)
     _state.forwardedPort(port);
 }
 
-void Daemon::applyBuiltLocations(const LocationsById &newLocations)
+void Daemon::applyBuiltLocations(LocationsById newLocations,
+                                 kapps::regions::Metadata metadata)
 {
-    const LocationsById *locationsToApply = &newLocations;
-
     // The LatencyTrackers still ping all locations, so we have latency
     // measurements if the locations are re-enabled, but remove them from
     // availableLocations and groupedLocations so all parts of the program will
@@ -2278,35 +2255,21 @@ void Daemon::applyBuiltLocations(const LocationsById &newLocations)
         nonGeoLocations.reserve(newLocations.size());
         for(const auto &locEntry : newLocations)
         {
-            if(locEntry.second && !locEntry.second->geoOnly())
+            if(locEntry.second && !locEntry.second->geoLocated())
                 nonGeoLocations[locEntry.first] = locEntry.second;
         }
-        locationsToApply = &nonGeoLocations;
+        _state.availableLocations(std::move(nonGeoLocations));
     }
-
-    if(!_state.availableLocations().empty())
-    {
-        // Check if any new locations were added.  We're not actually triggering
-        // a metadata refresh from this right now, but we're testing this and
-        // may add that in the future.
-        for(const auto &loc: *locationsToApply)
-        {
-            if(loc.second && !loc.second->isDedicatedIp() &&
-                _state.availableLocations().count(loc.first) == 0)
-            {
-                qWarning() << "Detected a new region " << loc.first;
-                qWarning() << "Region metadata needs to be refreshed";
-                break;
-            }
-        }
-    }
-
-    _state.availableLocations(*locationsToApply);
+    else
+        _state.availableLocations(std::move(newLocations));
+    _state.regionsMetadata(std::move(metadata));
 
     // Update the grouped locations from the new stored locations
     std::vector<CountryLocations> groupedLocations;
-    std::vector<QSharedPointer<Location>> dedicatedIpLocations;
-    buildGroupedLocations(_state.availableLocations(), groupedLocations,
+    std::vector<QSharedPointer<const Location>> dedicatedIpLocations;
+    buildGroupedLocations(_state.availableLocations(),
+                          _state.regionsMetadata(),
+                          groupedLocations,
                           dedicatedIpLocations);
     _state.groupedLocations(std::move(groupedLocations));
     _state.dedicatedIpLocations(std::move(dedicatedIpLocations));
@@ -2382,31 +2345,47 @@ void Daemon::applyBuiltLocations(const LocationsById &newLocations)
 }
 
 bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
-                                    const QJsonArray &shadowsocksObj)
+                                    const QJsonArray &shadowsocksObj,
+                                    const QJsonObject &metadataObj)
 {
-    LocationsById newLocations = buildModernLocations(_data.modernLatencies(),
-                                                      regionsObj,
-                                                      shadowsocksObj,
-                                                      _account.dedicatedIps(),
-                                                      _settings.manualServer());
+    try
+    {
+        auto newLocations = buildModernLocations(_data.modernLatencies(),
+                                                 regionsObj,
+                                                 shadowsocksObj,
+                                                 metadataObj,
+                                                 _account.dedicatedIps(),
+                                                 _settings.manualServer());
 
-    // Like the legacy list, if no regions are found, treat this as an error
-    // and keep the data we have (which might still be usable).
-    if(newLocations.empty())
-        return false;
+        // Like the legacy list, if no regions are found, treat this as an error
+        // and keep the data we have (which might still be usable).
+        if(newLocations.first.empty() ||
+            newLocations.second.countryDisplays().empty() ||
+            newLocations.second.regionDisplays().empty())
+        {
+            return false;
+        }
 
-    // Apply the modern locations to the modern latency tracker
-    _modernLatencyTracker.updateLocations(newLocations);
+        // Apply the modern locations to the modern latency tracker
+        _modernLatencyTracker.updateLocations(newLocations.first);
 
-    applyBuiltLocations(newLocations);
+        applyBuiltLocations(std::move(newLocations.first),
+                            std::move(newLocations.second));
 
-    return true;
+        return true;
+    }
+    catch(const std::exception &ex)
+    {
+        qWarning() << "Unable to build locations:" << ex.what();
+    }
+    return false;
 }
 
 void Daemon::rebuildActiveLocations()
 {
     rebuildModernLocations(_data.cachedModernRegionsList(),
-                            _data.cachedModernShadowsocksList());
+                           _data.cachedModernShadowsocksList(),
+                           _data.modernRegionMeta());
 }
 
 void Daemon::shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJsonDoc)
@@ -2415,10 +2394,10 @@ void Daemon::shadowsocksRegionsLoaded(const QJsonDocument &shadowsocksRegionsJso
 
     // It's unlikely that the Shadowsocks regions list could totally hose us,
     // but the same resiliency is here for robustness.
-    if(!rebuildModernLocations(_data.cachedModernRegionsList(), shadowsocksRegionsObj))
+    if(!rebuildModernLocations(_data.cachedModernRegionsList(), shadowsocksRegionsObj, _data.modernRegionMeta()))
     {
         qWarning() << "Shadowsocks location data could not be loaded.  Received"
-            << shadowsocksRegionsJsonDoc.toJson();
+            << shadowsocksRegionsJsonDoc;
         // Don't update cachedModernShadowsocksList, keep the last content
         // (which might still be usable, the new content is no good).
         // Don't treat this as a successful load (don't notify JsonRefresher)
@@ -2437,10 +2416,10 @@ void Daemon::modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc)
     // would totally hose the client and more likely indicates a problem in the
     // servers list - keep whatever content we had before even though it's
     // older.
-    if(!rebuildModernLocations(modernRegionsObj, _data.cachedModernShadowsocksList()))
+    if(!rebuildModernLocations(modernRegionsObj, _data.cachedModernShadowsocksList(), _data.modernRegionMeta()))
     {
         qWarning() << "Modern location data could not be loaded.  Received"
-            << modernRegionsJsonDoc.toJson();
+            << modernRegionsJsonDoc;
         // Don't update the cache - keep the existing data, which might still be
         // usable.  Don't treat this as a successful load.
         return;
@@ -2453,6 +2432,20 @@ void Daemon::modernRegionsLoaded(const QJsonDocument &modernRegionsJsonDoc)
 void Daemon::modernRegionsMetaLoaded(const QJsonDocument &modernRegionsMetaJsonDoc)
 {
     const auto &modernRegionsMetaObj = modernRegionsMetaJsonDoc.object();
+
+    // Currently, since some metadata are still incorporated into the Locations
+    // models, it's possible (but unlikely) that the metadata could hose the
+    // regions list.  Once the client has fully moved metadata references to the
+    // new metadata objects, we should be able to stop putting metadata into the
+    // Location objects and remove this.
+    if(!rebuildModernLocations(_data.cachedModernRegionsList(), _data.cachedModernShadowsocksList(), modernRegionsMetaObj))
+    {
+        qWarning() << "Modern region metadata could not be loaded.  Received"
+            << modernRegionsMetaJsonDoc;
+        // Don't update the cache - keep the existing data, which might still be
+        // usable.  Don't treat this as a successful load.
+        return;
+    }
 
     _data.modernRegionMeta(modernRegionsMetaObj);
     _modernRegionMetaRefresher.loadSucceeded();
@@ -2522,12 +2515,12 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
 
         if(network.defaultIpv4())
         {
-            if(network.gatewayIpv4() != Ipv4Address{})
+            if(network.gatewayIpv4() != kapps::core::Ipv4Address{})
                 defaultConnection.gatewayIp(network.gatewayIpv4().toString());
             else
                 defaultConnection.gatewayIp({});
 
-            defaultConnection.interfaceName(network.networkInterface());
+            defaultConnection.interfaceName(network.networkInterface().toStdString());
             defaultConnection.mtu(network.mtu4());
 
             if(!network.addressesIpv4().empty())
@@ -2567,13 +2560,13 @@ void Daemon::onNetworksChanged(const std::vector<NetworkConnection> &networks)
         ++netIdx;
     }
 
-    _state.originalGatewayIp(defaultConnection.gatewayIp());
-    _state.originalInterface(defaultConnection.interfaceName());
+    _state.originalGatewayIp(QString::fromStdString(defaultConnection.gatewayIp()));
+    _state.originalInterface(QString::fromStdString(defaultConnection.interfaceName()));
     _state.originalInterfaceNetPrefix(defaultConnection.prefixLength());
     _state.originalMtu(defaultConnection.mtu());
-    _state.originalInterfaceIp(defaultConnection.ipAddress());
-    _state.originalInterfaceIp6(defaultConnection.ipAddress6());
-    _state.originalGatewayIp6(defaultConnection.gatewayIp6());
+    _state.originalInterfaceIp(QString::fromStdString(defaultConnection.ipAddress()));
+    _state.originalInterfaceIp6(QString::fromStdString(defaultConnection.ipAddress6()));
+    _state.originalGatewayIp6(QString::fromStdString(defaultConnection.gatewayIp6()));
     _state.originalMtu6(defaultConnection.mtu6());
 
     // Relevant only to macOS
@@ -2835,8 +2828,8 @@ AppMessage Daemon::parseAppMessage(const QJsonObject &messageJson) const
     }
     catch(const Error &err)
     {
-        qWarning().noquote() << "Invalid Json for App Message -" << err << "-"
-                             << QJsonDocument(messageJson).toJson();
+        qWarning() << "Invalid Json for App Message -" << err << "-"
+            << messageJson;
     }
 
     return {};
@@ -2844,7 +2837,7 @@ AppMessage Daemon::parseAppMessage(const QJsonObject &messageJson) const
 
 void Daemon::checkForAppMessages()
 {
-    const auto version = SemVersion{Version::semanticVersion()};
+    const auto version = SemVersion{QString::fromStdString(Version::semanticVersion())};
     // Strip off pre-release tag leaving only major.minor.patch
     const auto versionString = QStringLiteral("%1.%2.%3").arg(version.major()).arg(version.minor()).arg(version.patch());
     const QString queryParams = QStringLiteral("version=%1&client=%2").arg(versionString).arg(UpdateChannel::platformName);
@@ -2883,7 +2876,7 @@ Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QStrin
                 QJsonValue value;
                 // Define a helper to assign (and optionally transform) a value from
                 // the source data if present there, otherwise a default value.
-                #define assignOrDefault(field, dataName, ...) do { if (!(value = json[QLatin1String(dataName)]).isUndefined()) { __VA_ARGS__ } else { value = json_cast<QJsonValue>(DaemonAccount::default_##field()); } result.insert(QStringLiteral(#field), value); } while(false)
+                #define assignOrDefault(field, dataName, ...) do { if (!(value = json[QLatin1String(dataName)]).isUndefined()) { __VA_ARGS__ } else { value = json_cast<QJsonValue>(DaemonAccount::default_##field(), HERE); } result.insert(QStringLiteral(#field), value); } while(false)
                 assignOrDefault(plan, "plan");
                 assignOrDefault(active, "active");
                 assignOrDefault(canceled, "canceled");
@@ -2917,15 +2910,21 @@ void Daemon::resetAccountInfo()
 
 void Daemon::reapplyFirewallRules()
 {
-    FirewallParams params {};
+    kapps::net::FirewallParams params {};
 
     // Are we connected right now?
     params.isConnected = _state.connectionState() == QStringLiteral("Connected");
 
     // If we are currently attempting to connect, use those settings to update
     // the firewall.
-    if(_state.connectingConfig().vpnLocation())
-        params._connectionSettings = _connectingConfig;
+
+    nullable_t<ConnectionConfig> connectionSettings;
+    if(_connectingConfig.vpnLocation())
+        connectionSettings = _connectingConfig;
+
+    // Used by macOS to access network information for the default interface
+    params.macosPrimaryServiceKey = _state.macosPrimaryServiceKey().toStdString();
+
     // If the VPN is enabled, have we connected since it was enabled?
     // Note that it is possible for vpnEnabled() to be true while in the
     // "Disconnected" state - this happens when a fatal error causes the app to
@@ -2937,8 +2936,8 @@ void Daemon::reapplyFirewallRules()
         params.hasConnected = true;
         // If we aren't currently attempting another connection, use the current
         // connection to update the firewall
-        if(!params._connectionSettings && params.isConnected)
-            params._connectionSettings = _connectedConfig;
+        if(!connectionSettings && params.isConnected)
+            connectionSettings = _connectedConfig;
     }
 
     // If the daemon is not active (no client is connected) or the user is not
@@ -2954,8 +2953,22 @@ void Daemon::reapplyFirewallRules()
 
     if(VPNMethod *pMethod = _connection->vpnMethod())
     {
-        params.adapter = pMethod->getNetworkAdapter();
+#if defined(Q_OS_UNIX)
+        // Use tunnel interface name on Linux/MacOS, i.e "tun2"
+        params.tunnelDeviceName = _state.tunnelDeviceName().toStdString();
+#elif defined(Q_OS_WIN)
+        // Use luid (stored as a string) on Windows
+        const auto &pAdapter = pMethod->getNetworkAdapter();
+        if(pAdapter)
+        {
+            auto &winAdapter = std::static_pointer_cast<WinNetworkAdapter>(pAdapter);
+            params.tunnelDeviceName = QString::number(winAdapter->luid()).toStdString();
+        }
+#endif
     }
+
+    params.tunnelDeviceLocalAddress = _state.tunnelDeviceLocalAddress().toStdString();
+    params.tunnelDeviceRemoteAddress = _state.tunnelDeviceRemoteAddress().toStdString();
 
     params.enableSplitTunnel = _settings.splitTunnelEnabled();
 
@@ -2964,18 +2977,8 @@ void Daemon::reapplyFirewallRules()
     // - such as the split tunnel code
     params.netScan = originalNetwork();
 
-    params.excludeApps.reserve(_settings.splitTunnelRules().size());
-    params.vpnOnlyApps.reserve(_settings.splitTunnelRules().size());
-
-    for(const auto &rule : _settings.splitTunnelRules())
-    {
-        qInfo() << "split tunnel rule:" << rule.path() << rule.mode();
-        // Ignore anything with a rule type we don't recognize
-        if(rule.mode() == QStringLiteral("exclude"))
-            params.excludeApps.push_back(rule.path());
-        else if(rule.mode() == QStringLiteral("include"))
-            params.vpnOnlyApps.push_back(rule.path());
-    }
+    // vpnOnlyApps and excludedApps are set up by applyFirewallRules(), this
+    // differs between Windows and POSIX
 
     for(const auto &subnetRule : _settings.bypassSubnets())
     {
@@ -2983,13 +2986,13 @@ void Daemon::reapplyFirewallRules()
         if(subnetRule.mode() != QStringLiteral("exclude"))
             continue;
 
-        QString normalizedSubnet = subnetRule.normalizedSubnet();
+        auto normalizedSubnet = subnetRule.normalizedSubnet();
         auto protocol = subnetRule.protocol();
 
         if(protocol == QAbstractSocket::IPv4Protocol)
-            params.bypassIpv4Subnets << normalizedSubnet;
+            params.bypassIpv4Subnets.insert(normalizedSubnet.toStdString());
         else if(protocol == QAbstractSocket::IPv6Protocol)
-            params.bypassIpv6Subnets << normalizedSubnet;
+            params.bypassIpv6Subnets.insert(normalizedSubnet.toStdString());
         else
             // Invalid subnet results in QAbsractSocket::UnknownNetworkLayerProtocol
             qWarning() << "Invalid bypass subnet:" << subnetRule.subnet() << "Skipping";
@@ -3000,21 +3003,19 @@ void Daemon::reapplyFirewallRules()
     // effective value for params.bypassDefaultApps doesn't change.  If it does,
     // we'll still update split tunnel, but this change will require a
     // reconnect.
-    if(params._connectionSettings)
+    if(connectionSettings)
     {
-        params.bypassDefaultApps = !params._connectionSettings->otherAppsUseVpn();
-        params.setDefaultRoute = params._connectionSettings->setDefaultRoute();
+        params.bypassDefaultApps = !connectionSettings->otherAppsUseVpn();
+        params.setDefaultRoute = connectionSettings->setDefaultRoute();
+        params.splitTunnelDnsEnabled = _settings.splitTunnelDNS();
+        params.mtu = connectionSettings->mtu();
+
+        // Convert dns from QStringList to std::vector<std::string>
+        params.effectiveDnsServers = qs::stdVecFromStringList(connectionSettings->getDnsServers());
     }
 
-    // When bypassing by default, force Handshake and Unbound into the VPN with
-    // an "include" rule.  (Just routing the Handshake seeds into the VPN is not
-    // sufficient; hnsd uses a local recursive DNS resolver that will query
-    // authoritative DNS servers, and we want that to go through the VPN.)
-    if(params.bypassDefaultApps)
-    {
-        params.vpnOnlyApps.push_back(Path::HnsdExecutable);
-        params.vpnOnlyApps.push_back(Path::UnboundExecutable);
-    }
+    // Set existing DNS servers
+    params.existingDNSServers = _state.existingDNSServers();
 
     // We can't block everything when the default behavior is to bypass.
     params.blockAll = params.leakProtectionEnabled && !params.bypassDefaultApps;
@@ -3025,12 +3026,16 @@ void Daemon::reapplyFirewallRules()
     // - the current connection configuration overrides the default DNS
     // - the VPN connection is enabled, and
     // - we've connected at least once since the VPN was enabled
-    params.blockDNS = params._connectionSettings && params._connectionSettings->setDefaultDns() && vpnActive && params.hasConnected;
+    params.blockDNS = connectionSettings && connectionSettings->setDefaultDns() && vpnActive && params.hasConnected;
 
     params.allowPIA = (params.blockAll || params.blockIPv6 || params.blockDNS);
     params.allowLoopback = params.allowPIA || params.enableSplitTunnel;
-    params.allowResolver = params.blockDNS && params._connectionSettings &&
-                            params._connectionSettings->dnsType() == ConnectionConfig::DnsType::Local;
+    params.allowResolver = params.blockDNS && connectionSettings &&
+        connectionSettings->dnsType() == ConnectionConfig::DnsType::Local;
+
+    // Linux only
+    // Should routed packets go over VPN or bypass ?
+    params.routedPacketsOnVPN = _settings.routedPacketsOnVPN();
 
     qInfo() << "Reapplying firewall rules;"
             << "state:" << qEnumToString(_connection->state())
@@ -3040,12 +3045,12 @@ void Daemon::reapplyFirewallRules()
             << "vpnEnabled:" << _state.vpnEnabled()
             << "blockIPv6:" << _settings.blockIPv6()
             << "allowLAN:" << _settings.allowLAN()
-            << "dnsType:" << (params._connectionSettings ? qEnumToString(params._connectionSettings->dnsType()) : QLatin1String("N/A"))
-            << "dnsServers:" << (params._connectionSettings ? params._connectionSettings->getDnsServers() : QStringList{});
+            << "dnsType:" << (connectionSettings ? qEnumToString(connectionSettings->dnsType()) : QLatin1String("N/A"))
+            << "dnsServers:" << (connectionSettings ? connectionSettings->getDnsServers() : QStringList{});
 
-    applyFirewallRules(params);
-
-    _state.killswitchEnabled(params.leakProtectionEnabled);
+    bool killswitchEnabled = params.leakProtectionEnabled;
+    applyFirewallRules(std::move(params));
+    _state.killswitchEnabled(killswitchEnabled);
 }
 
 void Daemon::updatePortForwarder()
@@ -3075,7 +3080,7 @@ void Daemon::setOverrideActive(const QString &resourceName)
 {
     FUNCTION_LOGGING_CATEGORY("daemon.override");
     qInfo() << "Override is active:" << resourceName;
-    QStringList overrides = _state.overridesActive();
+    std::deque<QString> overrides = _state.overridesActive();
     overrides.push_back(resourceName);
     _state.overridesActive(overrides);
 }
@@ -3084,24 +3089,15 @@ void Daemon::setOverrideFailed(const QString &resourceName)
 {
     FUNCTION_LOGGING_CATEGORY("daemon.override");
     qWarning() << "Override could not be loaded:" << resourceName;
-    QStringList overrides = _state.overridesFailed();
+    std::deque<QString> overrides = _state.overridesFailed();
     overrides.push_back(resourceName);
     _state.overridesFailed(overrides);
 }
 
-void Daemon::updateNextConfig(const QString &changedPropertyName)
+void Daemon::updateNextConfig()
 {
-    // Ignore changes in nextConfig itself.  Should theoretically have no effect
-    // anyway since _state.nextConfig() below won't actually cause a change
-    // (nextConfig doesn't depend on itself), but explicitly ignore for
-    // robustness.
-    if(changedPropertyName == QStringLiteral("nextConfig"))
-        return;
-
     ConnectionConfig connection{_settings, _state, _account};
-    ConnectionInfo info{};
-    populateConnection(info, connection);
-    _state.nextConfig(info);
+    _state.nextConfig(populateConnection(connection));
 }
 
 static QString decryptOldPassword(const QString& bytes)
@@ -3142,9 +3138,9 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     SemVersion previous = [](const QString& p) -> SemVersion {
         auto result = SemVersion::tryParse(p);
         return result != nullptr ? std::move(*result) : SemVersion(1, 0, 0);
-    }(existingSettingsFile ? _settings.lastUsedVersion() : Version::semanticVersion());
+    }(existingSettingsFile ? _settings.lastUsedVersion() : QString::fromStdString(Version::semanticVersion()));
     // Always write the current version for any future settings upgrades.
-    _settings.lastUsedVersion(Version::semanticVersion());
+    _settings.lastUsedVersion(QString::fromStdString(Version::semanticVersion()));
 
     // If the user has manually installed a beta release, typically by opting
     // into the beta via the web site, enable beta updates.  This occurs when
@@ -3154,7 +3150,7 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     // We don't do any other change though (such as switching back) - users that
     // have opted into beta may receive GA releases when there isn't an active
     // beta, and they should continue to receive betas.
-    auto daemonVersion = SemVersion::tryParse(Version::semanticVersion());
+    auto daemonVersion = SemVersion::tryParse(QString::fromStdString(Version::semanticVersion()));
     if (daemonVersion && daemonVersion->isPrereleaseType(u"beta") &&
         !_settings.offerBetaUpdates() &&
         (!previous.isPrereleaseType(u"beta") || !existingSettingsFile))
@@ -3256,12 +3252,6 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
     if(previous < SemVersion{1, 6, 0})
         restrictAccountJson();
 
-
-    // Some alpha builds prior to 2.2.0 were released with other values for
-    // this setting.
-    if(previous < SemVersion{2, 2, 0})
-        _settings.macStubDnsMethod(QStringLiteral("NX"));
-
     // Default debug logging was changed in a prerelease of 2.3.1 released
     // after 2.3.0 (now includes RHI tracing for Direct3D on Windows).
     if(previous <= SemVersion{2, 3, 0})
@@ -3324,65 +3314,60 @@ void Daemon::calculateLocationPreferences()
     // Pick the best location
     NearestLocations nearest{_state.availableLocations()};
 
-    _state.vpnLocations().bestLocation(nearest.getNearestSafeVpnLocation(_settings.portForward()));
+    QSharedPointer<const Location> pVpnBest{nearest.getNearestSafeVpnLocation(_settings.portForward())};
 
     // Find the user's chosen location (nullptr if it's 'auto' or doesn't exist)
     const auto &locationId = _settings.location();
-    _state.vpnLocations().chosenLocation({});
+    QSharedPointer<const Location> pVpnChosen;
     if(locationId != QLatin1String("auto"))
     {
-        auto itChosenLocation = _state.availableLocations().find(locationId);
+        auto itChosenLocation = _state.availableLocations().find(locationId.toStdString());
         if(itChosenLocation != _state.availableLocations().end()
            && !itChosenLocation->second->offline())
-            _state.vpnLocations().chosenLocation(itChosenLocation->second);
+            pVpnChosen = itChosenLocation->second;
     }
 
     // Find the user's chosen SS location similarly, also ensure that it has
     // Shadowsocks
     const auto &ssLocId = _settings.proxyShadowsocksLocation();
-    QSharedPointer<Location> pSsLoc;
+    QSharedPointer<const Location> pSsChosen;
     if(ssLocId != QLatin1String("auto"))
     {
-        auto itSsLocation = _state.availableLocations().find(ssLocId);
+        auto itSsLocation = _state.availableLocations().find(ssLocId.toStdString());
         if(itSsLocation != _state.availableLocations().end()
             && !itSsLocation->second->offline())
-            pSsLoc = itSsLocation->second;
+            pSsChosen = itSsLocation->second;
     }
-    if(pSsLoc && !pSsLoc->hasService(Service::Shadowsocks))
-        pSsLoc = {};    // Selected location does not have Shadowsocks
-    _state.shadowsocksLocations().chosenLocation(pSsLoc);
+    if(pSsChosen && !pSsChosen->hasService(Service::Shadowsocks))
+        pSsChosen = {};    // Selected location does not have Shadowsocks
 
     // Determine the next location we would use
-    if(_state.vpnLocations().chosenLocation())
-        _state.vpnLocations().nextLocation(_state.vpnLocations().chosenLocation());
-    else
-        _state.vpnLocations().nextLocation(_state.vpnLocations().bestLocation());
+    QSharedPointer<const Location> pVpnNext{pVpnChosen ? pVpnChosen : pVpnBest};
 
     // The best Shadowsocks location depends on the next VPN location
-    auto pNextLocation = _state.vpnLocations().nextLocation();
-    if(!pNextLocation)
+    QSharedPointer<const Location> pSsBest, pSsNext;
+    // pVpnNext can be nullptr if no locations are known, we can't pick any
+    // Shadowsocks locations in that case.
+    if(pVpnNext)
     {
-        // No locations are known, can't do anything else.
-        _state.shadowsocksLocations().bestLocation({});
-        _state.shadowsocksLocations().chosenLocation({});
-        return;
+        // If the next location has SS, use that, that will add the least latency
+        if(pVpnNext->hasService(Service::Shadowsocks))
+            pSsBest = pVpnNext;
+        else
+        {
+            // If no SS locations are known, this is set to nullptr
+            pSsBest = nearest.getBestMatchingLocation(
+                [](auto loc){ return loc.hasService(Service::Shadowsocks); });
+        }
+
+        // Determine the next SS location
+        pSsNext = pSsChosen ? pSsChosen : pSsBest;
     }
 
-    // If the next location has SS, use that, that will add the least latency
-    if(pNextLocation->hasService(Service::Shadowsocks))
-        _state.shadowsocksLocations().bestLocation(pNextLocation);
-    else
-    {
-        // If no SS locations are known, this is set to nullptr
-        _state.shadowsocksLocations().bestLocation(nearest.getBestMatchingLocation(
-            [](auto loc){ return loc.hasService(Service::Shadowsocks); }));
-    }
-
-    // Determine the next SS location
-    if(_state.shadowsocksLocations().chosenLocation())
-        _state.shadowsocksLocations().nextLocation(_state.shadowsocksLocations().chosenLocation());
-    else
-        _state.shadowsocksLocations().nextLocation(_state.shadowsocksLocations().bestLocation());
+    _state.vpnLocations({std::move(pVpnChosen), std::move(pVpnBest),
+                         std::move(pVpnNext)});
+    _state.shadowsocksLocations({std::move(pSsChosen), std::move(pSsBest),
+                                 std::move(pSsNext)});
 }
 
 void Daemon::onUpdateRefreshed(const Update &availableUpdate,
@@ -3457,9 +3442,9 @@ void Daemon::logCommand(const QString &cmd, const QStringList &args)
     {
         qInfo() << "status:" << proc.exitStatus() << "- code:" << proc.exitCode();
         qInfo() << "stdout:";
-        qInfo().noquote() << proc.readAllStandardOutput();
+        qInfo() << proc.readAllStandardOutput().data();
         qInfo() << "stderr:";
-        qInfo().noquote() << proc.readAllStandardError();
+        qInfo() << proc.readAllStandardError().data();
     }
     else
     {
@@ -3595,13 +3580,20 @@ Error Daemon::connectVPN(ServiceQuality::ConnectionSource source)
     if(!_account.loggedIn())
         return {HERE, Error::Code::DaemonRPCNotLoggedIn};
 
+    // Check if any VPN errors are present, if so prevent the connection
+    // and return an error.
+    const auto &vpnErrors = _state.vpnSupportErrors();
+    qInfo() << "vpnSupportErrors: " << vpnErrors;
+    if(!vpnErrors.empty())
+        return {HERE, Error::Code::VPNSupportError};
+
     // Note that for the rest of this logic, it is possible that the VPN is
     // already enabled (_state.vpnEnabled() is already true).  We still want to
     // apply most of the remaining logic, and in particular
     // VpnConnection::connectVPN() will start a reconnect if one is needed to
     // apply settings.
 
-    // Stop any snooze that's active, since soemthing wants to connect the VPN.
+    // Stop any snooze that's active, since something wants to connect the VPN.
     // If this _is_ due to snooze, it updates the snooze state again after we
     // start reconnecting.
     _snoozeTimer.forceStopSnooze();
@@ -3609,7 +3601,6 @@ Error Daemon::connectVPN(ServiceQuality::ConnectionSource source)
     emit aboutToConnect();
 
     _state.vpnEnabled(true);
-
 
     // VpnConnection::connectVPN() returns false if the VPN was already
     // enabled and no reconnect was needed.  In that case, do not log an
@@ -3790,7 +3781,7 @@ void Daemon::traceMemory() {
     DWORD dwError = ::GetLastError();
     if(dwError != ERROR_SUCCESS && dwError != ERROR_NO_MORE_FILES)
     {
-        qWarning() << "Unable to enumerate processes:" << WinErrTracer{dwError};
+        qWarning() << "Unable to enumerate processes:" << kapps::core::WinErrTracer{dwError};
     }
 #endif
 }

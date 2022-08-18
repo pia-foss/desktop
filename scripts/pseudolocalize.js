@@ -181,9 +181,9 @@ function pseudolocalizeToLang(langId) {
   // - translation
   // If the string has a 'comment' tag, detect the comment name, a few strings
   // have to be special-cased
-  tsSrc = tsSrc.replace(/( *<comment>([^<]*)<\/comment>\n|)( *<extracomment>[^<]*<\/extracomment>\n|)( *)<translation>([^<]*)<\/translation>/g,
-    function(match, commentline, commentval, extracommentline, indent, src) {
-      return commentline + extracommentline + indent + '<translation>' + pseudolocalize(src, commentval) + '</translation>'
+  tsSrc = tsSrc.replace(/(<source>([^<]*)<\/source>\n)( *<comment>([^<]*)<\/comment>\n|)( *<extracomment>[^<]*<\/extracomment>\n|)( *)<translation[^>]*>[^<]*<\/translation>/g,
+    function(match, srcline, src, commentline, commentval, extracommentline, indent) {
+      return srcline + commentline + extracommentline + indent + '<translation>' + pseudolocalize(src, commentval) + '</translation>'
     })
 
   fs.writeFileSync(outTsPath, tsSrc)

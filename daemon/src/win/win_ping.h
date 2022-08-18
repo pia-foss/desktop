@@ -16,17 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win_ping.h")
 
 #ifndef WIN_PING_H
 #define WIN_PING_H
 
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <QPointer>
 #include <QWinEventNotifier>
 #include <vector>
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
 
 // Send an ICMP echo and receive the response with WinIcmpEcho::send().  This
 // uses IcmpSendEcho2().
@@ -58,7 +58,7 @@ private:
 
 private:
     bool shouldTraceIcmpError(DWORD status) const;
-    QString ipErrorString(DWORD status) const;
+    std::wstring ipErrorString(DWORD status) const;
     void onEventActivated();
 
 signals:

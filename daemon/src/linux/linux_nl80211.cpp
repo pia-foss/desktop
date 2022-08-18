@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include "linux_nl80211.h"
 #include "linux_libnl.h"
 #include <array>
@@ -74,8 +74,8 @@ namespace
 LinuxNl80211Cache::LinuxNl80211Cache(int nl80211Protocol, int configGroup,
                                      int mlmeGroup)
     : LinuxNlNtfSock{NETLINK_GENERIC}, _nl80211Protocol{nl80211Protocol},
-      _configGroup{configGroup}, _mlmeGroup{mlmeGroup}, _interfaces{},
-      _ready{false}, _pendingDump{PendingDumpRequest::None},
+      _configGroup{configGroup}, _mlmeGroup{mlmeGroup}, _ready{false},
+      _interfaces{}, _pendingDump{PendingDumpRequest::None},
       _dumpProgress{DumpProgress::Inactive}, _receivingInterfaces{},
       _receivingScanInterface{}
 {

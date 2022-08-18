@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("portforwardrequest.h")
 
 #ifndef PORTFORWARDREQUEST_H
 #define PORTFORWARDREQUEST_H
 
-#include "settings/daemonaccount.h"
-#include "settings/daemonstate.h"
+#include <common/src/settings/daemonaccount.h>
+#include "model/state.h"
 #include "apiclient.h"
 
 // PortForwardRequest is the interface to the port forwarding implementation.
@@ -87,7 +87,7 @@ private:
 
 public:
     PortForwardRequestModern(ApiClient &apiClient, DaemonAccount &account,
-                             DaemonState &state, const Environment &environment);
+                             StateModel &state, const Environment &environment);
 
 private:
     // Parse the PF payload from DaemonAccount into a JSON document.

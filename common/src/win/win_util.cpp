@@ -16,11 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #line SOURCE_FILE("win_util.cpp")
 
 #include "win_util.h"
-#include <Windows.h>
+#include <kapps_core/src/logger.h>
+#include <kapps_core/src/winapi.h>
 
 #pragma comment(lib, "User32.lib")
 // RegCloseKey() used by WinHKey
@@ -32,18 +33,6 @@ const wchar_t *qstringWBuf(const QString &value)
     // a wchar_t array.  The string returned by utf16() is null-terminated.
     static_assert(sizeof(ushort) == sizeof(wchar_t), "QString-LPCWSTR conversion assumes wchar_t==ushort");
     return reinterpret_cast<const wchar_t*>(value.utf16());
-}
-
-std::wstring expandEnvString(const wchar_t *pEnvStr)
-{
-    std::wstring expanded;
-    expanded.resize(MAX_PATH);
-    auto len = ::ExpandEnvironmentStringsW(pEnvStr, expanded.data(),
-                                           expanded.size());
-    if(len < 0 || len > expanded.size())
-        return {};
-    expanded.resize(len-1); // len includes the terminating null char
-    return expanded;
 }
 
 ProcAddress::ProcAddress(const QString &module, const QByteArray &entrypoint)
@@ -60,30 +49,17 @@ ProcAddress::~ProcAddress()
         ::FreeLibrary(_moduleHandle);
 }
 
-QString WinErrTracer::message() const
-{
-    LPWSTR errMsg{nullptr};
-
-    auto len = ::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                                nullptr, code(), 0,
-                                reinterpret_cast<LPWSTR>(&errMsg), 0, nullptr);
-    QString msg = QString::fromWCharArray(errMsg, len);
-    ::LocalFree(errMsg);
-
-    return msg;
-}
-
 void broadcastMessage(const LPCWSTR &message)
 {
     UINT msg = ::RegisterWindowMessageW(message);
     if(!msg)
     {
-        qWarning() << "Unable to register desired message for broadcast - error"
+        KAPPS_CORE_WARNING() << "Unable to register desired message for broadcast - error"
             << ::GetLastError();
     }
     else
     {
-        qDebug () << "Broadcasting message " << QString::fromWCharArray(message);
+        KAPPS_CORE_DEBUG() << "Broadcasting message " << QString::fromWCharArray(message);
         PostMessage(HWND_BROADCAST, msg, 0, 0);
     }
 }

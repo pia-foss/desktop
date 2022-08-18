@@ -17,11 +17,11 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "brandhelper.h"
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("client.cpp")
 
 #include "client.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "trayiconmanager.h"
 #include "nativehelpers.h"
 #include "circlemousearea.h"
@@ -34,14 +34,14 @@
 #include "clipboard.h"
 #include "flexvalidator.h"
 #include "path_interface.h"
-#include "semversion.h"
+#include <common/src/semversion.h>
 #include "version.h"
 #include "brand.h"
 #include "product.h"
 #include "nativeacc/nativeacc.h"
 #include "splittunnelmanager.h"
-#include "appsingleton.h"
-#include "apiretry.h"
+#include <common/src/appsingleton.h>
+#include <common/src/apiretry.h>
 
 #if defined(Q_OS_MACOS)
 #include "mac/mac_loginitem.h"
@@ -49,13 +49,13 @@
 #include "mac/mac_window.h"
 #elif defined(Q_OS_WIN)
 #include "win/win_language.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #elif defined(Q_OS_LINUX)
 #include "linux/linux_language.h"
 #endif
 
 #ifdef Q_OS_UNIX
-#include "posix/unixsignalhandler.h"
+#include <common/src/posix/unixsignalhandler.h>
 #endif
 
 #include <QGuiApplication>
@@ -70,6 +70,8 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QStandardPaths>
+
+KAPPS_CORE_LOG_MODULE(client, "src/client.cpp")
 
 QmlCallResult::QmlCallResult(Async<QJsonValue> asyncResult)
     : _asyncResult{std::move(asyncResult)}
@@ -168,8 +170,8 @@ ClientInterface::ClientInterface(bool hasExistingSettingsFile,
 
     // Read the last used version, and set the current version as the last used version
     QString lastUsedVersion = _settings.lastUsedVersion();
-    _settings.lastUsedVersion(Version::semanticVersion());
-    SemVersion currentVersion{Version::semanticVersion()};
+    _settings.lastUsedVersion(QString::fromStdString(Version::semanticVersion()));
+    SemVersion currentVersion{QString::fromStdString(Version::semanticVersion())};
 
     SemVersion previousVersion = [&]() -> SemVersion {
         auto actual = SemVersion::tryParse(lastUsedVersion);
@@ -447,7 +449,7 @@ void ClientInterface::setTranslation(const QString &locale)
 
 bool ClientInterface::applySettings(const QJsonObject &settings)
 {
-    qDebug().noquote() << "Applying settings:" << QJsonDocument(settings).toJson(QJsonDocument::Compact);
+    qDebug() << "Applying settings:" << settings;
 
     bool success = _settings.assign(settings);
 
@@ -526,7 +528,7 @@ void ClientInterface::migrateFromDaemon(const DaemonSettings &daemonSettings)
         _settings.secondaryModules(daemonSettings.secondaryModules());
         _settings.migrateDaemonSettings(false);
 
-        qDebug().noquote() << "Settings after migration:" << QJsonDocument(_settings.toJsonObject()).toJson(QJsonDocument::Compact);
+        qDebug() << "Settings after migration:" << _settings.toJsonObject();
         writeSettings();
     }
 }
@@ -649,6 +651,15 @@ Client::Client(bool hasExistingSettingsFile, const QJsonObject &initialSettings,
     // necessary
     connect(&_clientInterface, &ClientInterface::retranslate, this,
             &Client::retranslate);
+
+    // Provide DaemonState::regionsMetadata to ClientState, which handles
+    // localization of region/country names using kapps::regions
+    connect(&_daemon->state, &DaemonState::regionsMetadataChanged, this,
+        [this]
+        {
+            _clientInterface.get_state()->setRegionsMetadata(_daemon->state.regionsMetadata());
+        });
+    _clientInterface.get_state()->setRegionsMetadata(_daemon->state.regionsMetadata());
 }
 
 Client::~Client()

@@ -98,9 +98,9 @@ MovableModule {
     anchors.verticalCenter: regionValue.verticalCenter
     visible: {
       if(Daemon.state.vpnLocations.chosenLocation)
-        return Daemon.state.vpnLocations.chosenLocation.geoOnly
+        return Daemon.state.vpnLocations.chosenLocation.geoLocated
       else if(regionModule.autoLocation)
-        return regionModule.autoLocation.geoOnly
+        return regionModule.autoLocation.geoLocated
       return false
     }
   }
@@ -124,7 +124,7 @@ MovableModule {
     y: 60
     visible: {
       if(regionModule.chosenLocation)
-        return regionModule.chosenLocation.dedicatedIpExpire > 0
+        return !!regionModule.chosenLocation.dedicatedIp
       return false
     }
     dedicatedIp: {

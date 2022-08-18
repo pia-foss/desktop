@@ -21,6 +21,7 @@ import QtQuick 2.0
 import PIA.NativeClient 1.0
 import PIA.NativeHelpers 1.0
 import "../daemon"
+import "../vpnconnection"
 import "../../javascript/util.js" as Util
 
 QtObject {
@@ -55,10 +56,60 @@ QtObject {
     if(!loc)
       return favoriteSortGroups.invalid
 
-    if(loc.dedicatedIpExpire > 0)
+    if(loc.dedicatedIp)
       return favoriteSortGroups.dedicatedIps
 
     return favoriteSortGroups.regions // Normal region
+  }
+
+  // Get the localized name of a country by country code.
+  function getCountryName(countryCode) {
+    // Depend on uiTr and Daemon.state.regionsMetadata so this will reevaluate
+    // if they change; the native implementation can't add that dependency
+    let trDep = uiTr
+    let metaDep = Daemon.state.regionsMetadata
+    return NativeClient.state.getTranslatedCountryName(countryCode)
+  }
+  // Get the localized prefix for a region in a country by country code.
+  function getCountryPrefix(countryCode) {
+    let trDep = uiTr
+    let metaDep = Daemon.state.regionsMetadata
+    return NativeClient.state.getTranslatedCountryPrefix(countryCode)
+  }
+  // Get a region's country name - this is suitable for displaying a region
+  // that's alone in a country; it's not nested under a country group.
+  function getRegionCountryName(regionId) {
+    let countryCode = Daemon.state.getRegionCountryCode(regionId)
+    return getCountryName(countryCode)
+  }
+  // Get a region's city name.  This is typically not used by itself in PIA,
+  // we combine it with the country prefix - see getRegionNestedName().
+  function getRegionCityName(regionId) {
+    let trDep = uiTr
+    let metaDep = Daemon.state.regionsMetadata
+    return NativeClient.state.getTranslatedRegionName(regionId)
+  }
+  // Get a name for a region displayed nested under a country group.  This
+  // combines the country's prefix with the region's name.
+  function getRegionNestedName(regionId) {
+    let countryCode = Daemon.state.getRegionCountryCode(regionId)
+    return getCountryPrefix(countryCode) + getRegionCityName(regionId)
+  }
+  // Select either the country name or nested name for a region, depending on
+  // whether there are any other regions in this country.
+  //
+  // In some cases the caller may have already decided whether to create a
+  // single entry or a group, but it may still be desirable to call this if
+  // the regions might have been filtered.  Filtering might cause a nested
+  // region to become the only "filtered" region in its country, and this
+  // shouldn't change the region's apparent name.
+  function getRegionAutoName(regionId) {
+    console.assert(typeof regionId === 'string', "Expected a string as regionId, got " + typeof regionId)
+    let countryCode = Daemon.state.getRegionCountryCode(regionId)
+    if(!Daemon.state.shouldNestCountry(countryCode))
+      return getCountryName(countryCode)  // Single-region country
+    // Otherwise it's a multiple-region country, build the nested name
+    return getCountryPrefix(countryCode) + getRegionCityName(regionId)
   }
 
   // Favorite locations sorted by alphabetically by display name
@@ -85,15 +136,15 @@ QtObject {
       var firstName, secondName
       // Details to compare if the names are identical - currently only used for
       // DIPs, this is the IP address
-      var firstDetail, secondDetail
+      var firstDetail = "", secondDetail = ""
 
       if(firstGroup === favoriteSortGroups.countryGroups) {
-        firstName = Daemon.getCountryName(countryFromAutoCountryLocation(first))
-        secondName = Daemon.getCountryName(countryFromAutoCountryLocation(second))
+        firstName = getCountryName(countryFromAutoCountryLocation(first))
+        secondName = getCountryName(countryFromAutoCountryLocation(second))
       }
       else {
-        firstName = Daemon.getLocationName(firstLoc)
-        secondName = Daemon.getLocationName(secondLoc)
+        firstName = getRegionAutoName(firstLoc.id)
+        secondName = getRegionAutoName(secondLoc.id)
 
         if(firstGroup === favoriteSortGroups.dedicatedIps) {
           firstDetail = firstLoc.dedicatedIp
@@ -112,22 +163,8 @@ QtObject {
   // an auto country is valid if it has >= 2 regions in it. If it only has 1 region then
   // we can just connect to that region directly and do not need to find the 'best' region in that country.
   function isValidAutoCountry(locationId) {
-    return locationId.startsWith("auto/") && countryCount(countryFromAutoCountryLocation(locationId)) >= 2
-  }
-
-  // Return the number of regions for a given country
-  function countryCount(country) {
-    var countries = Daemon.state.groupedLocations
-    for(var i=0; i<countries.length; ++i) {
-      if(countries[i].locations.length <= 0)
-        continue
-
-      if(countries[i].locations[0].country.toUpperCase() === country.toUpperCase()) {
-        return countries[i].locations.length
-      }
-    }
-
-    return 0
+    return locationId.startsWith("auto/") &&
+      Daemon.state.shouldNestCountry(countryFromAutoCountryLocation(locationId))
   }
 
   function applySettings(settings) {
@@ -142,41 +179,72 @@ QtObject {
     return NativeClient.localeUpperCase(text)
   }
 
-  function countryFromLocation(location) {
-    // connect by country
-    if(location.startsWith("auto/")) {
-      return countryFromAutoCountryLocation(location)
-    }
+  ///////////////
+  // Favorites //
+  ///////////////
+  // Favorite regions can be:
+  // - an ordinary region (favorite ID is just the region ID)
+  // - a country group (favorite ID is "auto/<country>", such as "auto/DE" or
+  //   "auto/US")
+  //
+  // Connecting to a "country group" favorite just connects to the current
+  // "best" region for that country.  We cannot currently actually select a
+  // "country group" as the current location, so it will not update if the best
+  // region in that country changes.
+  //
+  // These utilities provide operations that work on either kind of favorite,
+  // using the favorite name.
 
-    var locationData = Daemon.state.availableLocations[location]
-    if(locationData && locationData.country)
-      return locationData.country
-    // Didn't find this location.
-    return ""
+  // These operations on country groups are generally only used here to build
+  // the general operations
+  function isCountryGroupFavorite(location) {
+    return location.startsWith("auto/")
   }
-
-  // convert an auto/COUNTRY to a real location (finding the best region for that country)
-  function realLocation(location) {
-    if(location.startsWith("auto/")) {
-      var country = countryFromAutoCountryLocation(location)
-      return Daemon.state.getBestLocationForCountry(country)
-    }
-    else {
-      return location
-    }
-  }
-
-  // strip the "auto/" prefix from an Auto Country location
-  // an auto country location represents the region with the lowest ping in a given country, e.g auto/us
   function countryFromAutoCountryLocation(location) {
     return location.substring(5, location.length).toUpperCase()
   }
 
+  // Get the country code for a favorite; used to show flags.
+  function countryForFavorite(location) {
+    // connect by country
+    if(isCountryGroupFavorite(location)) {
+      return countryFromAutoCountryLocation(location)
+    }
+
+    let countryCode = Daemon.state.getRegionCountryCode(location)
+    return countryCode || ""
+  }
+
+  function connectFavorite(location) {
+    if(isCountryGroupFavorite(location)) {
+      VpnConnection.connectCountryBest(countryFromAutoCountryLocation(location))
+    }
+    else {
+      VpnConnection.connectLocation(location)
+    }
+  }
+
+  // Check if a favorite is offline
+  function isFavoriteOffline(location) {
+    if(isCountryGroupFavorite(location)) {
+      let country = countryFromAutoCountryLocation(location)
+      // A country group is online if at least one region in the country is
+      // online.  Although the daemon applies some preferences to try to select
+      // auto-safe or non-geo regions first, these only affect preference order.
+      let countryRegions = Daemon.state.getLocationsInCountry(country)
+      return !countryRegions.find(region => !region.offline)
+    }
+
+    // Otherwise, just check the offline flag for this location
+    let l = Daemon.state.availableLocations[location]
+    return !l || l.offline;
+  }
+
   function getFavoriteLocalizedName(locId) {
-    if(locId.startsWith("auto/")) {
+    if(isCountryGroupFavorite(locId)) {
       //: Text that indicates the best (lowest ping) region is being used for a given country.
       //: The %1 placeholder contains the name of the country, e.g "UNITED STATES - BEST"
-      return uiTr("%1 - Best").arg(Daemon.getCountryName(countryFromAutoCountryLocation(locId)))
+      return uiTr("%1 - Best").arg(getCountryName(countryFromAutoCountryLocation(locId)))
     }
 
     var loc = Daemon.state.availableLocations[locId]
@@ -199,9 +267,9 @@ QtObject {
   // possible (like in the regions list, etc.)
   function getDetailedLocationName(loc) {
     if(loc.dedicatedIp)
-      return Daemon.getLocationName(loc) + " - " + loc.dedicatedIp
+      return getRegionAutoName(loc.id) + " - " + loc.dedicatedIp
 
-    return Daemon.getLocationName(loc)
+    return getRegionAutoName(loc.id)
   }
 
   // Start the log uploader.  If the daemon connection is up, asks the daemon to

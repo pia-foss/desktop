@@ -16,17 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_appscanner.cpp")
 
 #include "win_appscanner.h"
 #include "win_objects.h"
-#include "win/win_linkreader.h"
-#include "win/win_util.h"
-#include "win/win_winrtloader.h"
-#include "path.h"
+#include <kapps_core/src/win/win_linkreader.h>
+#include <common/src/win/win_util.h>
+#include <common/src/win/win_winrtloader.h>
+#include <common/src/builtin/path.h>
 #include "brand.h"
-#include "client.h"
+#include "../client.h"
 #include <QtWin>
 #include <QDirIterator>
 #include <QMutex>
@@ -39,6 +39,7 @@
 
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Ole32.lib")
 
 namespace
 {
@@ -86,7 +87,7 @@ namespace
                 throw Error{HERE, Error::Code::Unknown};
             }
 
-            std::wstring nameResPath{expandEnvString(nameResUnexpPath.data())};
+            std::wstring nameResPath{kapps::core::expandEnvString(nameResUnexpPath.data())};
             if(nameResPath.empty())
             {
                 qInfo() << "Couldn't expand path" << filePath;
@@ -210,7 +211,7 @@ namespace
         QJsonArray buildAppsArray() const;
 
     private:
-        WinLinkReader _reader;
+        kapps::core::WinLinkReader _reader;
         // Canonicalized app installation directory (used to exclude PIA itself)
         std::wstring _piaBasePath;
         // Map of found apps by the target name.  Keys are the _canonicalize_
@@ -258,10 +259,11 @@ namespace
 
     void LinkScanner::readLink(const QString &baseFolderPath, const QFileInfo &link)
     {
-        if(!_reader.loadLink(link.filePath()))
+        const auto &linkFilePath{link.filePath().toStdWString()};
+        if(!_reader.loadLink(linkFilePath))
             return;
 
-        std::wstring targetPath = _reader.getLinkTarget(link.filePath());
+        std::wstring targetPath = _reader.getLinkTarget(linkFilePath);
         if(targetPath.empty())
             return;
 
@@ -282,7 +284,7 @@ namespace
 
         // Get the argument length - if it fails that's fine, just use the
         // default max value
-        std::size_t argsLength = _reader.getArgsLength(link.filePath());
+        std::size_t argsLength = _reader.getArgsLength(linkFilePath);
 
         // Do we already have an app for this target?
         auto itExistingApp = _apps.find(canonicalTarget);
@@ -477,15 +479,16 @@ namespace
     QPixmap WinAppIconProvider::loadLinkPixmap(const QString &id,
                                                const QSize &requestedSize)
     {
-        WinLinkReader linkReader;
+        kapps::core::WinLinkReader linkReader;
+        const auto &linkFilePath{id.toStdWString()};
 
-        if(!linkReader.loadLink(id))
+        if(!linkReader.loadLink(linkFilePath))
             return {};
 
-        auto location = linkReader.getLinkIconLocation(id);
+        auto location = linkReader.getLinkIconLocation(linkFilePath);
         // If no icon location was given, fall back to the link target
         if(location.first.empty())
-            location = {linkReader.getLinkTarget(id), 0};
+            location = {linkReader.getLinkTarget(linkFilePath), 0};
 
         // Is it an ICO file or a DLL/EXE?
         // (QStringView has a case-insensitive endsWith)
@@ -617,6 +620,16 @@ void WinAppScanner::scanOnThread(WinAppScanner *pScanner)
         }, Qt::ConnectionType::QueuedConnection);
 }
 
+// A WinComInit wrapped in a QObject so it can be parented to another QObject
+// on _workerThread
+class WinComInitQObject : public QObject
+{
+public:
+    using QObject::QObject;
+private:
+    WinComInit _comInit;
+};
+
 WinAppScanner::WinAppScanner()
 {
     // Initialize COM on the worker thread.
@@ -624,7 +637,7 @@ WinAppScanner::WinAppScanner()
     {
         // COM initializer is parented to the worker thread's object owner so
         // it's destroyed before the thread terminates.
-        new WinComInit{&_workerThread.objectOwner()};
+        new WinComInitQObject{&_workerThread.objectOwner()};
         getWinRtSupport().initWinRt();
     });
 }

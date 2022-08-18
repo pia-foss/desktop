@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("daemonconnection.cpp")
 
 #include "daemonconnection.h"
@@ -45,16 +45,13 @@ DaemonConnection::DaemonConnection(QObject* parent)
     {
         for(const auto &dipLoc : state.dedicatedIpLocations())
         {
-            if(!dipLoc)
-                continue;
-            Logger::addRedaction(dipLoc->dedicatedIp(), QStringLiteral("DIP IP %1").arg(dipLoc->id()));
-            // There should in principle be exactly one CN; it's present on the
-            // VPN server(s) in this location.
-            for(const auto &dipServer : dipLoc->servers())
-            {
-                if(dipServer.hasVpnService())
-                    Logger::addRedaction(dipServer.commonName(), QStringLiteral("DIP CN %1").arg(dipLoc->id()));
-            }
+            const auto &dipIp = dipLoc["dedicatedIp"].toString();
+            const auto &dipId = dipLoc["id"].toString();
+            const auto &dipCn = dipLoc["dedicatedIpCn"].toString();
+            if(!dipIp.isEmpty())
+                Logger::addRedaction(dipIp, QStringLiteral("DIP IP %1").arg(dipId));
+            if(!dipCn.isEmpty())
+                Logger::addRedaction(dipCn, QStringLiteral("DIP CN %1").arg(dipId));
         }
     });
 }
@@ -126,7 +123,7 @@ void DaemonConnection::RPC_data(const QJsonObject &data)
 
 void DaemonConnection::RPC_error(const QJsonObject& errorObject)
 {
-    qInfo() << "Received error:" << QJsonDocument{errorObject}.toJson();
+    qInfo() << "Received error:" << errorObject;
     Error e(errorObject);
     emit error(e);
 }

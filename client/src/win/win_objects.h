@@ -16,18 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_objects.h")
 
 #ifndef WIN_OBJECTS_H
 #define WIN_OBJECTS_H
 
-#include "nativetray.h"
+#include "../nativetray.h"
 
 #include <QHash>
 #include <QSharedPointer>
 #include <variant>
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
 
 template<typename Handle> using SharedHandle = QSharedPointer<std::remove_pointer_t<Handle>>;
 

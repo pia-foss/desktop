@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_appmanifest.cpp")
 
 #include "win_appmanifest.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QRegExp>

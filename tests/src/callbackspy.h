@@ -19,7 +19,7 @@
 #ifndef CALLBACKSPY_H
 #define CALLBACKSPY_H
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
 // Adapt a callback to a QObject signal so it can be spied in unit tests; used
@@ -97,7 +97,8 @@ public:
             return false;   // Traced by checkSuccess()
         if(!_spy[0][1].canConvert<ResultT>())
         {
-            qWarning() << "Received value was not the required type:" << _spy[0][1];
+            qWarning() << "Received value was not the required type:"
+                << _spy[0][1].typeName();
             return false;
         }
         return true;
@@ -114,7 +115,7 @@ public:
         if(!predicate(std::move(result)))
         {
             qWarning() << "Received value did not satisfy predicate:"
-                << _spy[0][1];
+                << _spy[0][1].typeName();
             return false;
         }
         return true;

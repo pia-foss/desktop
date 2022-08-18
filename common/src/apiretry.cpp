@@ -45,13 +45,13 @@ namespace
     const std::chrono::seconds timedTimeoutAccuracy{1};
 }
 
-void ApiResource::trace(QDebug &dbg) const
+void ApiResource::trace(std::ostream &os) const
 {
     // If this resource doesn't contain a query string, just trace it as-is
     if(!contains('?'))
     {
         const QString &thisStr{*this};
-        dbg << thisStr;
+        os << thisStr;
         return;
     }
 
@@ -59,7 +59,7 @@ void ApiResource::trace(QDebug &dbg) const
     // very crude but is good enough for the URIs used by PIA.
     QString redacted{*this};
     redacted.replace(QRegularExpression{"=[^&]*"}, QStringLiteral("=..."));
-    dbg << redacted;
+    os << redacted;
 }
 
 // Counted retry strategy.  Just retries immediately up to a maximum number of

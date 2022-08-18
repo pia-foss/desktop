@@ -1,14 +1,32 @@
-require_relative './rake/util/buildenv.rb' # Before all others, this injects env vars from .buildenv
-require_relative './rake/model/build.rb'
-require_relative './rake/executable.rb'
-require_relative './rake/install.rb'
-require_relative './rake/product/version.rb'
-require_relative './rake/product/translations.rb'
-require_relative './rake/product/breakpad.rb'
-require_relative './rake/product/unittest.rb'
-require_relative './rake/crowdin.rb'
 require 'net/http'
 require 'openssl'
+require 'open3'
+
+# Don't mess with bundler on CI servers - we currently only need
+# bundler when developing locally to install extra gems for
+# testing (rspec) and debugging (pry)
+if ENV['GITLAB_CI'].nil?
+    begin
+        print "Installing gems (if needed)..."
+        # Run bundler to install the gems in our Gemfile
+        # We use this style of execution (which captures stdout/stderr rather than "sh" to prevent noise)
+        # This style returns output as a string (which we just discard)
+        Open3.capture3("bundle install")
+        puts "done!"
+    rescue
+        puts "Bundler not installed - install bundler with: sudo gem install bundler -v 2.3.17"
+        exit 1
+    end
+
+    require 'rubygems'
+    require 'bundler/setup'
+
+    # Auto-require all the gems in our gemfile
+    Bundler.require(:default)
+end
+
+# Bring in our build system classes
+require_relative 'rake/buildsystem'
 
 # Fail if LFS wasn't set up.  Otherwise, builds can actually succeed but fail
 # with confusing problems at runtime.
@@ -21,345 +39,183 @@ end
 
 version = PiaVersion.new
 
-# Stage - install target to prepare the installed application bundle.  The
-# installer is then built from this directory.
-stage = Install.new(Build.macos? ? "stage/#{version.productName}.app" : 'stage')
-
-# Artifacts - These are the final outputs preserved from CI builds
+# Artifacts - These are the final outputs preserved from CI builds.
+# _Everything_ we keep from CI builds is included here.  (This does not include
+# dev tools, etc., as those are only used in dev and can be built locally.  It
+# does include non-shipping artifacts like integration tests, library SDK
+# packages, debugging symbols, translation exports, etc.)
 artifacts = Install.new('artifacts')
-
-versionlib = Executable.new("#{Build::Brand}-version", :static)
-    .source(version.artifact(''))
-    .useQt(nil)
-
-commonlib = Executable.new("#{Build::Brand}-commonlib", :dynamic)
-    .define('BUILD_COMMON')
-    .define('DYNAMIC_COMMON', :export)
-    .source('common/src')
-    .source('common/src/builtin')
-    .source('common/src/settings', :none)
-    .use(versionlib.export)
-    .useQt('Network')
-    .tap {|v| PiaBreakpad::add(v)}
-    .install(stage, :lib)
-
-clientlib = Executable.new("#{Build::Brand}-clientlib", :dynamic)
-    .define('BUILD_CLIENTLIB')
-    .define('DYNAMIC_CLIENTLIB', :export)
-    .define('PIA_CLIENT', :export)
-    .source('clientlib/src')
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .useQt('Network')
-    .install(stage, :lib)
-
-if(Build.macos?)
-    clientlib.framework('AppKit')
-end
-
-cli = Executable.new("#{Build::Brand}ctl", :executable)
-    .source('cli/src')
-    .use(clientlib.export)
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .useQt('Network')
-    .install(stage, :bin)
-
-clientName = Build.macos? ? version.productName : "#{Build::Brand}-client"
-client = Executable.new(clientName, :executable)
-    .gui
-    .source('client/src')
-    .source('client/src/nativeacc', :none)
-    .use(clientlib.export)
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .resource('client/res', ['**/*'],
-        ['**/*.qrc', '**/*.svg', '**/*.sh', '**/*.otf',
-         '**/RobotoCondensed-*.ttf', '**/Roboto-*Italic.ttf',
-         '**/Roboto-Black.ttf', '**/Roboto-Medium.ttf', '**/Roboto-Thin.ttf'])
-    .resource("brands/#{Build::Brand}", ['img/**/*'])
-    .resource("brands/#{Build::Brand}/gen_res", ['img/**/*'])
-    .resource('.', ['CHANGELOG.md', 'BETA_AGREEMENT.md'])
-    .useQt('Qml')
-    .useQt('QmlModels') # TODO - should pick up as dependency of Qml
-    .useQt('Quick')
-    .useQt('QuickControls2')
-    .useQt('Gui')
-    .useQt('Network')
-    .install(stage, :bin)
-if(Build.windows?)
-    client
-        .sourceFile("brands/#{Build::Brand}/brand_client.rc")
-        .resource('client/shader_res_rhi', ['**/*'], [])
-        .useQt('WinExtras')
-        .linkArgs(["/MANIFESTINPUT:#{File.absolute_path('client/src/win/res/dpiManifest.xml')}"])
-elsif(Build.macos?)
-    client
-        .include('extras/installer/mac/helper')
-        .resource('client/shader_res_gl', ['**/*'], [])
-        .framework('AppKit')
-        .framework('Security')
-        .framework('ServiceManagement')
-        .useQt('MacExtras')
-elsif(Build.linux?)
-    client
-        .resource('client/shader_res_gl', ['**/*'], [])
-        .useQt('Widgets')
-end
-
-# Translation resource file for client, and OneSky export
-defineTranslationTargets(stage, artifacts)
-
-supportTool = Executable.new("#{Build::Brand}-support-tool", :executable)
-    .gui
-    .source('extras/support-tool')
-    .resource('extras/support-tool', ['components/**/*', 'qtquickcontrols2.conf'])
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .useQt('Network')
-    .useQt('Quick')
-    .useQt('Gui')
-    .useQt('Qml')
-    .useQt('QmlModels') # TODO - should come from Qml dep
-    .useQt('QuickControls2')
-    .install(stage, :bin)
-
-daemonName = Build.windows? ? "#{Build::Brand}-service" : "#{Build::Brand}-daemon"
-daemon = Executable.new(daemonName, :executable)
-    .define('BUILD_CLIENTLIB')
-    .source('daemon/src')
-    .source('deps/embeddable-wg-library/src')
-    .resource('daemon/res', ['ca/*.crt'])
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .useQt('Network')
-    .install(stage, :bin)
-
-if(Build.windows?)
-    daemon
-        .useQt('Xml')
-        .linkArgs(["/MANIFESTUAC:level='requireAdministrator' uiAccess='false'"])
-elsif(Build.macos?)
-    daemon
-        .framework('AppKit')
-        .framework('CoreWLAN')
-        .framework('SystemConfiguration')
-elsif(Build.linux?)
-    daemon.include('/usr/include/libnl3')
-end
-
-# Install LICENSE.txt
-stage.install('LICENSE.txt', :res)
-
-# Download server lists to ship preloaded copies with the app.  These tasks
-# depend on version.txt so they're refreshed periodically (whenver a new commit
-# is made), but not for every build.
-#
-# SERVER_DATA_DIR can be set to use existing files instead of downloading them;
-# this is primarily intended for reproducing a build.
-#
-# Create a probe for SERVER_DATA_DIR so these are updated if it changes.
-serverDataProbe = Probe.new('serverdata')
-serverDataProbe.file('serverdata.txt', "#{ENV['SERVER_DATA_DIR']}")
-# JSON resource build directory
-jsonFetched = Build.new('json-fetched')
-# These are the assets we need to fetch and the URIs we get them from
-{
-    'modern_shadowsocks.json': 'https://serverlist.piaservers.net/shadow_socks',
-    'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/v6',
-    'modern_region_meta.json': 'https://serverlist.piaservers.net/vpninfo/regions/v2'
-}.each do |k, v|
-    fetchedFile = jsonFetched.artifact(k.to_s)
-    serverDataDir = ENV['SERVER_DATA_DIR']
-    file fetchedFile => [version.artifact('version.txt'),
-                         serverDataProbe.artifact('serverdata.txt'),
-                         jsonFetched.componentDir] do |t|
-        if(serverDataDir)
-            # Use the copy provided instead of fetching (for reproducing a build)
-            File.copy(File.join(serverDataDir, k), fetchedFile)
-        else
-            # Fetch from the web API (write with "binary" mode so LF is not
-            # converted to CRLF on Windows)
-            File.binwrite(t.name, Net::HTTP.get(URI(v)))
-        end
-    end
-    stage.install(fetchedFile, :res)
-end
-
-# Install version/brand/arch info in case an upgrade needs to know what is
-# currently installed
-stage.install(version.artifact('version.txt'), :res)
-stage.install(version.artifact('brand.txt'), :res)
-stage.install(version.artifact('architecture.txt'), :res)
-
-# Install dependencies built separately
-depDirs = [
-    'deps/built'
-]
-depPlatformDir = ''
-depPlatformDir = 'win' if Build::windows?
-depPlatformDir = 'mac' if Build::macos?
-depPlatformDir = 'linux' if Build::linux?
-depDirs.each do |d|
-    FileList[File.join(d, depPlatformDir, "#{Build::TargetArchitecture}", '*')].each do |f|
-        # On Linux, shared objects need to go to lib/ and executables to bin/.
-        # On Mac and Windows, :lib and :bin are the same.
-        dir = File.basename(f).include?(".so") ? :lib : :bin
-        stage.install(f, dir, "#{File.basename(f).gsub('pia', Build::Brand)}")
-    end
-end
-
-# Build integration tests.  This is a separate artifact not shipped with the
-# main application; it has a separate staging directory.
-#
-# Stage the artifacts in integtest-stage/pia-integtest, so we can create a ZIP
-# artifact containing the pia-integtest folder.
-integtestStage = Install.new("integtest-stage/#{Build::Brand}-integtest#{Build.macos? ? '.app' : ''}")
-
-# Install clientlib to this staging area too
-clientlib.install(integtestStage, :lib)
-
-# Integration test executable
-# Integration tests are run on an installed PIA client.  The test executable is
-# not deployed with the PIA client, so integration tests produce a
-# separate staged installation.
-# The integ tests don't have an installer, the staged installation is
-# just unzipped and run manually.
-integtestBin = Executable.new("#{Build::Brand}-integtest")
-    .source('integtest/src')
-    .use(clientlib.export)
-    .use(versionlib.export)
-    .use(commonlib.export)
-    .useQt('Network')
-    .useQt('Test')
-    .install(integtestStage, :bin)
-
-# Install built libraries to the integtest staging area
-# This includes OpenSSL (all platforms) and xcb (Linux only)
-FileList[File.join('deps/built',
-                   Build.selectPlatform('win', 'mac', 'linux'),
-                   Build::TargetArchitecture.to_s, 'lib*')].each do |d|
-    integtestStage.install(d, :lib)
-end
 
 # 'tools' builds utility applications that are just part of the development
 # workflow.  These are staged to tools/ in the output directory.  These are not
 # part of the build process itself or any shipped artifacts.
+#
+# Note that these are still built for the target platform - some of them are
+# library test harnesses used on the target, etc.
 toolsStage = Install.new("tools")
-
-# Include platform-specific targets.  These call stage.install() to add
-# additional installation artifacts.
-if(Build.windows?)
-    require_relative('./rake/product/windows.rb')
-    PiaWindows::defineTargets(version, stage)
-    PiaWindows::defineIntegtestArtifact(version, integtestStage, artifacts)
-    PiaWindows::defineInstaller(version, stage, artifacts)
-    PiaWindows::defineTools(toolsStage)
-    task :default => :windeploy
-elsif(Build.macos?)
-    require_relative('./rake/product/macos.rb')
-    PiaMacOS::defineTargets(version, commonlib, stage)
-    PiaMacOS::defineIntegtestArtifact(version, integtestStage, artifacts)
-    PiaMacOS::defineInstaller(version, stage, artifacts)
-    task :default => :stage
-elsif(Build.linux?)
-    require_relative('./rake/product/linux.rb')
-    PiaLinux::defineTargets(version, stage)
-    PiaLinux::defineIntegtestArtifact(version, integtestStage, artifacts)
-    PiaLinux::defineInstaller(version, stage, artifacts)
-    PiaLinux::defineTools(toolsStage)
-    task :default => :stage
-end
-
-# Define unit test targets
-PiaUnitTest.defineTargets(versionlib, artifacts)
-
-task :stage => stage.target do |t|
-    puts "staged installation"
-end
-
-desc "Build the installer"
-task :installer do |t|
-    puts "built installer"
-end
-
-desc "Build integration test artifact"
-task :integtest do |t|
-    puts "built integration tests"
-end
+desc "Build tools (test harnesses, dev tools, etc.)"
 task :tools => toolsStage.target do |t|
     puts "built tools"
 end
 
-# Define debug artifact targets
-def dumpSyms(stage, component, debugSymbols, symbolName)
-    binPath = File.join(stage.dir, component)
-    symbolPath = debugSymbols.artifact("#{symbolName}.sym")
-    dumpSyms = "deps/dump_syms/dump_syms#{Build::selectPlatform('.exe', '_mac', '_linux.bin')}"
+# Export the source directory as an include directory to permit
+# `#include <version.h>`, `#include <brand.h>`.
+versionlib = Executable.new("#{Build::Brand}-version", :static)
+    .source(version.artifact(''), :export)
 
-    dumpCmd = "#{File.absolute_path(dumpSyms)} \"#{File.absolute_path(binPath)}\" > \"#{symbolPath}\""
-    if(Build.windows?)
-        # Add msdia140.dll to PATH so it doesn't have to be registered.
-        path = [
-            File.join(Executable::Tc.toolchainPath.gsub('/', '\\'), 'DIA SDK\bin'),
-            ENV['PATH']
-        ]
-        # dump_syms seems to dump most (all?) of the symbols successfully, then
-        # terminate with an error about finding children.  Since it seems to
-        # yield most of the symbols correctly, that's OK, minidump_stackwalk is
-        # only somewhat reliable on Windows dumps anyway.  (add "| echo." to
-        # ignore failures from dump_syms)
-        sh Util.cmd("set \"PATH=#{path.join(';')}\" & #{dumpCmd.gsub('/', '\\')} | echo.")
-    else
-        sh "#{dumpCmd}"
+# Dependency components
+deps = {
+    jsonmcpp: nil,
+    embeddablewg: nil
+}
+
+# "JSON for Modern C++" (henceforth "jsonmcpp"), is a header-only library, just
+# define a component.
+#
+# Apple Clang claims C++17 support, but std::filesystem wasn't actually provided
+# until macOS 10.15/iOS 13.0 (we target 10.14/12.0).  Tell the lib to use C++14
+# only, which just drops the std::filesystem::path and std::string_view
+# conversions
+deps[:jsonmcpp] = Component.new(nil)
+    .include('deps/jsonmcpp/include')
+    .define('JSON_HAS_CPP_11')
+    .define('JSON_HAS_CPP_14') # but not 17 due to the above
+
+# embeddable-wg-library is a small WireGuard client library for Linux.  The
+# implementation can set up a WireGuard connection using the Linux kernel's
+# native support.
+#
+# The header is used on all platforms as a common descriptor of a WireGuard
+# connection.  The implementation is only used on Linux (it's in src/linux)
+deps[:embeddablewg] = Executable.new("embeddable-wg-library", :static)
+    .source('deps/embeddable-wg-library/src', :export)
+
+# Shared libraries - included in both the PIA artifacts and the library dev
+# artifacts
+kappsModules = {
+    core: nil,
+    net: nil,
+    regions: nil
+}
+
+# We usually use hyphens (pia-clientlib, pia-daemon, etc.), but the KApps libs
+# use an underscore because the framework names on XNU targets really need to be
+# valid C identifiers.
+kappsModules[:core] = Executable.new("kapps_core", :dynamic)
+    .define('BUILD_KAPPS_CORE')
+    .source('kapps_core/src')
+    .include('.', :export)
+    .include('kapps_core/api', :export)
+    .use(versionlib.export)
+    .use(deps[:jsonmcpp], :export)
+
+if Build.macos?
+    kappsModules[:core]
+        .framework('Foundation')
+# Linux needs explicit linking of pthreads library for std::thread support
+# (Not needed on Android, bionic includes pthreads)
+elsif Build.linux?
+    kappsModules[:core]
+        .lib('pthread')
+end
+
+kappsModules[:net] = Executable.new("kapps_net", :dynamic)
+    .define('BUILD_KAPPS_NET')
+    .source('kapps_net/src')
+    .include('kapps_net/api', :export)
+    .use(versionlib.export)
+    .use(kappsModules[:core].export, :export)
+
+kappsModules[:regions] = Executable.new("kapps_regions", :dynamic)
+    .define('BUILD_KAPPS_REGIONS')
+    .source('kapps_regions/src')
+    .include('kapps_regions/api', :export)
+    .use(versionlib.export)
+    .use(kappsModules[:core].export, :export)
+
+# Library SDK artifact for reusable modules
+kappsLibs = Install.new('kapps-libs')
+# Include the version file
+kappsLibs.install(version.artifact('version.txt'), '')
+kappsLibs.install('KAPPS-LIBS.md', '')
+# On Windows, the DLLs/PDBs go into bin/, while import libraries go in lib/.
+# On macOS, Linux, Android, and iOS, so/dylib files go in lib/.
+libBinDir = Build.selectPlatform('bin/', 'lib/', 'lib/', 'lib/', 'lib/')
+# On Android, we have to ship the NDK's C++ shared library ourselves
+kappsLibs.install(Executable::Tc.findLibrary(Build::TargetArchitecture, 'libc++_shared.so'), libBinDir) if Build.android?
+kappsModules.each do |name, executable|
+    # Copy the DLL/so/dylib (and symlinks on macOS/Linux)
+    executable.install(kappsLibs, libBinDir)
+
+    # On Windows, we also need the PDB and import library; these are side
+    # effects of the build/link tasks.  We don't need any other artifacts on
+    # macOS/Linux.
+    if Build.windows? then
+        # Bit kludgy, but just have Rake assume that the PDB/LIB depend on the
+        # DLL output so these install tasks are correctly ordered after the
+        # DLL build.  The DLL build will modify these too if it's rebuilt, so
+        # we don't need to do any touch/etc. to propagate modified times.
+        targetLib = executable.target.ext('.lib')
+        targetPdb = executable.target.ext('.pdb')
+        task targetLib => executable.target
+        task targetPdb => executable.target
+        kappsLibs.install(targetLib, 'lib/')
+        kappsLibs.install(targetPdb, libBinDir)
+    end
+
+    # Include all API headers (but not internal headers)
+    # Eventually all modules will be in kapps_#{name}, but a few haven't yet
+    # been renamed from dtop-#{name}
+    FileList["kapps_#{name}/api/kapps_#{name}/*", "dtop-#{name}/api/kapps_#{name}/*"].each do |h|
+        kappsLibs.install(h, "inc/kapps_#{name}/")
     end
 end
 
-installerArtifact = artifacts.artifact("#{version.packageName}.#{Build::selectPlatform('exe', 'zip', 'run')}")
-debugSymbols = Build.new('debug-symbols')
-
-task :debug_collect => [debugSymbols.componentDir, stage.target,
-                           installerArtifact] do |t|
-    FileList[File.join(debugSymbols.componentDir, '*')].each { |f| FileUtils.rm_rf(f) }
-
-    # On Windows, collect PDB symbols and the original modules, so we can use
-    # them to debug dumps with WinDbg or VS.
-    if(Build.windows?)
-        PiaWindows.collectSymbols(version, stage, debugSymbols)
-    end
-
-    binPath = Build.selectPlatform('', 'Contents/MacOS', 'bin')
-    libPath = Build.selectPlatform('', 'Contents/MacOS', 'lib')
-    clientBin = Build.selectPlatform("#{Build::Brand}-client.exe", version.productName, "#{Build::Brand}-client")
-    clientLib = "#{Build::Brand}-clientlib.#{Build::selectPlatform('dll', 'dylib', 'so')}"
-
-    dumpSyms(stage, File.join(binPath, clientBin), debugSymbols, 'client')
-    daemonBin = "#{Build::Brand}-#{Build::selectPlatform('service.exe', 'daemon', 'daemon')}"
-    dumpSyms(stage, File.join(binPath, daemonBin), debugSymbols, 'daemon')
-    dumpSyms(stage, File.join(libPath, clientLib), debugSymbols, 'clientlib')
-
-    FileUtils.copy_entry(version.artifact('version.txt'),
-                         debugSymbols.artifact('version.txt'))
-    FileUtils.copy_entry(Executable::Qt.artifact('qtversion.txt'),
-                         debugSymbols.artifact('qtversion.txt'))
-    FileUtils.copy_entry(installerArtifact,
-                         debugSymbols.artifact(File.basename(installerArtifact)))
+desc "Build and stage libraries"
+task :libs_stage => kappsLibs.target do |t|
+    puts "staged kapps libraries"
 end
 
-debugArchive = Build.new('debug-archive')
-debugArchivePkg = debugArchive.artifact("debug.zip")
-task debugArchivePkg => [debugArchive.componentDir, :debug_collect] do |t|
-    Archive.zipDirectoryContents(debugSymbols.componentDir, debugArchivePkg)
+# Build a zipped archive of our libs folder
+libsArchive = Build.new('kapps-libs-artifact')
+libsArchivePkg = libsArchive.artifact("kapps-libs-#{version.packageSuffix}.zip")
+file libsArchivePkg => [libsArchive.componentDir, :libs_stage] do |t|
+    Archive.zipDirectory(kappsLibs.dir, libsArchivePkg)
 end
 
-task :debug => debugArchivePkg do |t|
-    puts "built debug symbol package"
+desc "Build library SDK package"
+task :libs_archive => libsArchivePkg do |t|
+    puts "built kapps library development package"
 end
 
-artifacts.install(debugArchivePkg, '')
+# These test applications test the libraries - devs can use these to test the
+# library internals; C-linkage APIs, etc.  All libraries and test apps are
+# staged in tools/
+kappsModules.each do |name, executable|
+    executable.install(toolsStage, :lib)
+end
+toolsStage.install(Executable::Tc.findLibrary(Build::TargetArchitecture, 'libc++_shared.so'), libBinDir) if Build.android?
+
+Executable.new('kapps-lib-test')
+    .source('tools/kapps-lib-test')
+    .use(kappsModules[:net].export)
+    .install(toolsStage, :bin)
+
+Executable.new('kapps-specs')
+    .source('tools/kapps-specs')
+    .use(kappsModules[:net].export)
+    .install(toolsStage, :bin)
+
+Executable.new('kapps-regions-test')
+    .source('tools/kapps-regions-test')
+    .use(kappsModules[:net].export)
+    .use(kappsModules[:regions].export)
+    .install(toolsStage, :bin)
+
+artifacts.install(libsArchivePkg, '')
 artifacts.install(version.artifact('version.txt'), '')
-artifacts.install(Executable::Qt.artifact('qtversion.txt'), '')
 
+desc "Build all artifacts - includes unit tests only when coverage artifacts are possible"
 task :artifacts => artifacts.target do |t|
     puts "produced artifacts:"
     FileList[File.join(artifacts.dir, '**/*')].each do |f|
@@ -367,16 +223,19 @@ task :artifacts => artifacts.target do |t|
     end
 end
 
-# If code coverage is available, :artifacts covers everything already, since all
-# of these targets produce artifacts.
-#
-# If coverage isn't available though, :artifacts doesn't depend on :test.
-#
-# :all is convenient to remember for use from the CLI anyway.
-task :all => [:test, :stage, :export, :installer, :integtest, :debug, :artifacts] do |t|
+# For XNU targets, export each kapps library as a framework with a module
+# definition for use from Swift in Xcode
+if Build.xnuKernel?
+    PiaFrameworks.defineTargets(version, kappsModules, artifacts)
+end
+
+# Add universal targets to :all
+desc "Build everything, including tasks with no artifacts (tools, tests, etc.)"
+task :all => [:tools, :artifacts] do |t|
     puts "build finished"
 end
 
+desc "Clean the output directory (for this configuration)"
 task :clean do |t|
     puts "cleaning #{Build::BuildDir}"
     FileUtils.rm_rf(Build::BuildDir)
@@ -386,4 +245,19 @@ end
 # anything - some scripts do this to find Qt to extract Qt debug symbols, etc.
 # Since probes are always run when the rakefile is invoked, the :probe task just
 # does nothing.
+desc "Run probes only (find toolchains and dependencies, etc.)"
 task :probe
+
+# Load family-specific targets
+if Build.desktop?
+    PiaDesktop.defineTargets(version, versionlib, deps, kappsModules, artifacts, toolsStage)
+else
+    # There are no platform-specific targets for other platforms right now.  Just
+    # hook up the default task, which is platform-dependent.
+    task :default => :libs_stage
+end
+
+desc "Run specs for the Rake build system"
+task :build_specs do
+    sh "bundle exec rspec rake/spec/"
+end

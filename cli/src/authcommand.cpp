@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "authcommand.h"
-#include "output.h"
+#include <common/src/output.h>
 #include "cliclient.h"
 #include "brand.h"
 #include <QFile>

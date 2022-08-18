@@ -20,7 +20,7 @@
 #define TASKS_FUNCTION_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 // Task whose implementation is delegated to separate functions.
 class FunctionTask : public Task

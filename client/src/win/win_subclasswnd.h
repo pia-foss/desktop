@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_subclass.h")
 
 #ifndef WIN_SUBCLASS_H
 #define WIN_SUBCLASS_H
 
-#include <windows.h>
+#include <kapps_core/src/winapi.h>
 
 // SubclassWnd subclasses a window to intercept window messages intended for it.
 // This is mostly necessary with QtQuick.Window objects, since the type that

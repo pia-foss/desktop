@@ -16,10 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "builtin/util.h"
+#include <common/src/builtin/util.h>
 #include <QByteArray>
 #include <QCoreApplication>
-#include <QDebug>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -562,9 +561,9 @@ int main(int argc, char* argv[])
                 }
             }
 
-            qInfo().noquote().nospace() << "Using device:" << env.value(QStringLiteral("dev"))
-                << " local_address:" << env.value(QStringLiteral("ifconfig_local"))
-                << " remote_address:" << env.value(QStringLiteral("route_vpn_gateway"));
+            qInfo().nospace() << "Using device:" << qUtf8Printable(env.value(QStringLiteral("dev")))
+                << " local_address:" << qUtf8Printable(env.value(QStringLiteral("ifconfig_local")))
+                << " remote_address:" << qUtf8Printable(env.value(QStringLiteral("route_vpn_gateway")));
 
             // Parse all foreign_option_{i} variables
             for (int i = 1; ; i++)

@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("backgroundcommand.cpp")
 
 #include "backgroundcommand.h"
 #include "setcommand.h"
-#include "output.h"
+#include <common/src/output.h>
 #include "cliclient.h"
 #include "brand.h"
 

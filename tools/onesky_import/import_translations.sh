@@ -80,8 +80,8 @@ mv fr/fr.ts fr.ts
 mv it/it.ts it.ts
 mv ja/ja.ts ja.ts
 mv ko/ko.ts ko.ts
-mv nl/nl.ts nl.ts
 mv nb/nb.ts nb.ts
+mv nl/nl.ts nl.ts
 mv pl/pl.ts pl.ts
 mv pt-BR/pt_BR.ts pt_BR.ts
 mv ru/ru.ts ru.ts

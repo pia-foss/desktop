@@ -16,12 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("windowformat.h")
 
 #ifndef WINDOWFORMAT_H
 #define WINDOWFORMAT_H
 
+#include <kapps_core/src/winapi.h>
 #include <QQuickWindow>
 
 class WindowFormatAttached;

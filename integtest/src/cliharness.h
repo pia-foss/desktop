@@ -19,8 +19,8 @@
 #ifndef CLIHARNESS_H
 #define CLIHARNESS_H
 
-#include "common.h"
-#include "linebuffer.h"
+#include <common/src/common.h>
+#include <common/src/linebuffer.h>
 #include <QProcess>
 
 // Test harness based on the CLI interface - use this to invoke piactl commands

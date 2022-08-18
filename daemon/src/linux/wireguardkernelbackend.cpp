@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("wireguardkernelbackend.cpp")
 
 #include "wireguardkernelbackend.h"
 #include <cstring>
 #include "brand.h"
-#include "exec.h"
+#include <common/src/exec.h>
 
 void WireguardKernelBackend::cleanup()
 {

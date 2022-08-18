@@ -52,7 +52,7 @@ struct LocalMethodWrapper
     template<typename Func, size_t... I>
     static Async<QJsonValue> invoke(Func&& func, const QJsonArray& params, std::index_sequence<I...>)
     {
-        return Async<QJsonValue>::resolve(func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I])...));
+        return Async<QJsonValue>::resolve(func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I], HERE)...));
     }
 };
 template<typename ArgsTuple>
@@ -61,7 +61,7 @@ struct LocalMethodWrapper<void, ArgsTuple>
     template<typename Func, size_t... I>
     static Async<QJsonValue> invoke(Func&& func, const QJsonArray& params, std::index_sequence<I...>)
     {
-        func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I])...);
+        func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I], HERE)...);
         return Async<QJsonValue>::resolve(QJsonValue::Undefined);
     }
 };
@@ -71,7 +71,7 @@ struct LocalMethodWrapper<Async<Return>, ArgsTuple>
     template<typename Func, size_t... I>
     static Async<QJsonValue> invoke(Func&& func, const QJsonArray& params, std::index_sequence<I...>)
     {
-        return func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I])...)->then([](const Return& value) { return json_cast<QJsonValue>(value); });
+        return func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I], HERE)...)->then([](const Return& value) { return json_cast<QJsonValue>(value, HERE); });
     }
 };
 template<typename ArgsTuple>
@@ -81,7 +81,7 @@ struct LocalMethodWrapper<Async<void>, ArgsTuple>
     static Async<QJsonValue> invoke(Func&& func, const QJsonArray& params, std::index_sequence<I...>)
     {
         // Transform the void return to QJsonValue::Undefined
-        return func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I])...)->then([]() -> QJsonValue { return QJsonValue::Undefined; });
+        return func(json_cast<std::decay_t<std::tuple_element_t<I, ArgsTuple>>>(params[I], HERE)...)->then([]() -> QJsonValue { return QJsonValue::Undefined; });
     }
 };
 
@@ -122,7 +122,7 @@ public:
     // last sizeof...(Args) arguments if they are not supplied in the RPC
     // function invocation.
     template<typename... Args>
-    LocalMethod& defaultArguments(Args&&... args) { _defaultArguments = QJsonArray { json_cast<QJsonValue>(args)... }; return *this; }
+    LocalMethod& defaultArguments(Args&&... args) { _defaultArguments = QJsonArray { json_cast<QJsonValue>(args, HERE)... }; return *this; }
 
     const QString& name() const { return _name; }
 
@@ -317,13 +317,13 @@ private:
 template<typename... Args>
 inline void RemoteNotificationInterface::post(const QString& method, Args&&... args)
 {
-    postWithParams(method, QJsonArray { json_cast<QJsonValue>(args)... });
+    postWithParams(method, QJsonArray { json_cast<QJsonValue>(args, HERE)... });
 }
 
 template<typename... Args>
 Async<QJsonValue> RemoteCallInterface::call(const QString& method, Args&&... args)
 {
-    return callWithParams(method, QJsonArray { json_cast<QJsonValue>(args)... });
+    return callWithParams(method, QJsonArray { json_cast<QJsonValue>(args, HERE)... });
 }
 
 

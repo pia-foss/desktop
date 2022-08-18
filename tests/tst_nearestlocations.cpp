@@ -16,9 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "settings/locations.h"
-#include "common/src/locations.h"
+#include <common/src/common.h>
+#include <common/src/settings/locations.h>
+#include <common/src/locations.h>
 #include <QtTest>
 
 namespace samples
@@ -42,6 +42,7 @@ namespace samples
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -57,6 +58,7 @@ namespace samples
       "dns": "hungary.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
         "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
@@ -87,6 +89,7 @@ namespace samples
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -102,6 +105,7 @@ namespace samples
       "dns": "hungary.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
         "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
@@ -132,6 +136,7 @@ namespace samples
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -147,6 +152,7 @@ namespace samples
       "dns": "hungary.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "217.138.192.218", "cn": "budapest401" }],
         "ovpntcp": [{ "ip": "217.138.192.222", "cn": "budapest401" }],
@@ -162,6 +168,7 @@ namespace samples
       "dns": "us-california.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.107.242", "cn": "losangeles405" }],
         "ovpntcp": [{ "ip": "37.235.107.213", "cn": "losangeles405" }],
@@ -177,6 +184,7 @@ namespace samples
       "dns": "ro.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "143.244.54.160", "cn": "romania407" }],
         "ovpntcp": [{ "ip": "143.244.54.140", "cn": "romania407" }],
@@ -192,6 +200,7 @@ namespace samples
       "dns": "poland.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "217.138.209.245", "cn": "warsaw401" }],
         "ovpntcp": [{ "ip": "217.138.209.246", "cn": "warsaw401" }],
@@ -222,6 +231,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -237,6 +247,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": true,
       "geo": true,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -252,6 +263,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -267,6 +279,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": true,
       "geo": true,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -282,6 +295,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -297,6 +311,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": true,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -312,6 +327,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -327,6 +343,7 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
       "dns": "us-newyorkcity.privacy.network",
       "port_forward": false,
       "geo": true,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "37.235.106.14", "cn": "newyork404" }],
         "ovpntcp": [{ "ip": "37.235.106.10", "cn": "newyork404" }],
@@ -339,6 +356,11 @@ const auto locationsGeo = QJsonDocument::fromJson(R"(
 )").object();
 
     const QJsonArray emptyShadowsocks{};
+    const auto metadata = QJsonDocument::fromJson(R"({
+        "translations":{},
+        "country_groups":{},
+        "gps":{}
+    })").object();
 }
 
 class tst_nearestlocations : public QObject
@@ -353,31 +375,33 @@ class tst_nearestlocations : public QObject
     // poland        900  (has port forwarding)
     void setLatencies()
     {
-        auto &hungary = *locs.at("hungary");
-        auto &usEast = *locs.at("us2");
-        auto &usCalif = *locs.at("us_california");
-        auto &romania = *locs.at("ro");
-        auto &poland = *locs.at("poland");
-
-        hungary.latency(500);
-        usEast.latency(600);
-        usCalif.latency(700);
-        romania.latency(800);
-        poland.latency(900);
+        latencies.clear();
+        latencies[QStringLiteral("hungary")] = 500;
+        latencies[QStringLiteral("us2")] = 600;
+        latencies[QStringLiteral("us_california")] = 700;
+        latencies[QStringLiteral("ro")] = 800;
+        latencies[QStringLiteral("poland")] = 900;
     }
+
+    LatencyMap latencies;
 
     LocationsById locs;
     LocationsById locsNoPF;
     LocationsById locsNoAutoRegions;
     LocationsById locsGeo;
 
-public:
-    tst_nearestlocations(QObject *parent = NULL) : QObject(parent)
-      , locs{buildModernLocations({}, samples::locations, samples::emptyShadowsocks, {}, {})}
-      , locsNoPF{buildModernLocations({}, samples::locationsNoPF, samples::emptyShadowsocks, {}, {})}
-      , locsNoAutoRegions{buildModernLocations({}, samples::locationsNoAutoRegions, samples::emptyShadowsocks, {}, {})}
-      , locsGeo{buildModernLocations({}, samples::locationsGeo, samples::emptyShadowsocks, {}, {})} {
+    auto buildRegionsFromJson(const QJsonObject &locationsJson)
+    {
+        return buildModernLocations(latencies, locationsJson,
+            samples::emptyShadowsocks, samples::metadata, {}, {}).first;
+    }
 
+    void buildRegions()
+    {
+        locs = buildRegionsFromJson(samples::locations);
+        locsNoPF = buildRegionsFromJson(samples::locationsNoPF);
+        locsNoAutoRegions = buildRegionsFromJson(samples::locationsNoAutoRegions);
+        locsGeo = buildRegionsFromJson(samples::locationsGeo);
     }
 
 private slots:
@@ -385,35 +409,39 @@ private slots:
     void testGetNearestSafeVpnLocation()
     {
         setLatencies();
+        buildRegions();
         NearestLocations nearestLocations{locs};
 
         // Don't prioritze port forwarding
         auto &nearest = *nearestLocations.getNearestSafeVpnLocation(false);
         // Note: hungary is ignored even though it has lowest latency
-        QVERIFY(nearest.id() == "us2");
+        QCOMPARE(nearest.id(), "us2");
     }
 
     // Only consider regions with port forwarding
     void testGetNearestSafeVpnLocationWithPF()
     {
         setLatencies();
+        buildRegions();
         NearestLocations nearestLocations{locs};
 
         auto &nearest = *nearestLocations.getNearestSafeVpnLocation(true);
-        QVERIFY(nearest.id() == "ro");
+        QCOMPARE(nearest.id(), "ro");
     }
 
     // If we request PF regions but no PF regions available then fallback to fasted non-PF region
     void testGetNearestSafeVpnLocationWithPFButNoPFRegions()
     {
-        locsNoPF.at("austria")->latency(100);
-        locsNoPF.at("czech")->latency(200);
+        setLatencies();
+        latencies[QStringLiteral("austria")] = 100;
+        latencies[QStringLiteral("czech")] = 200;
+        buildRegions();
         NearestLocations nearestLocations{locsNoPF};
 
         // requesting regions with PF but none are available
         auto &nearest = *nearestLocations.getNearestSafeVpnLocation(true);
 
-        QVERIFY(nearest.id() == "austria");
+        QCOMPARE(nearest.id(), "austria");
     }
 
     // If no regions are part of auto_regions then ALL regions are treated
@@ -421,18 +449,21 @@ private slots:
     // regions can be connected to on auto, which is not acceptable)
     void testGetNearestSafeVpnLocationsWithNoAutoRegions()
     {
-        locsNoAutoRegions.at("aus_melbourne")->latency(100);
-        locsNoAutoRegions.at("aus_perth")->latency(200);
+        setLatencies();
+        latencies[QStringLiteral("aus_melbourne")] = 100;
+        latencies[QStringLiteral("aus_perth")] = 200;
+        buildRegions();
         NearestLocations nearestLocations{locsNoAutoRegions};
 
         auto &nearest = *nearestLocations.getNearestSafeVpnLocation(false);
-        QVERIFY(nearest.id() == "aus_melbourne");
+        QCOMPARE(nearest.id(), "aus_melbourne");
     }
 
     // // Further constrain the output with a predicate function
     void testGetNearestSafeServiceLocation()
     {
         setLatencies();
+        buildRegions();
         NearestLocations nearestLocations{locs};
 
         // Nearest region after constraining output to region ids that begin with "u"
@@ -440,7 +471,7 @@ private slots:
         auto &nearest1 = *nearestLocations.getBestMatchingLocation(
             [](auto loc){ return loc.id().startsWith(QStringLiteral("u")); });
 
-        QVERIFY(nearest1.id() == "us2");
+        QCOMPARE(nearest1.id(), "us2");
 
         // Only regions that begin with "zzz"
         // There are none, so return nothing
@@ -454,19 +485,21 @@ private slots:
     // //
     void testGeoPreferences()
     {
-        LocationsById testLocations{locsGeo};
-
         // Set latencies in reverse precedence order.  This follows the table
         // in NearestLocations (port forwarding is the "context" requirement
         // here).
-        testLocations["pf_auto_ng"]->latency(1000);
-        testLocations["pf_auto_g"]->latency(900);
-        testLocations["pf_nauto_ng"]->latency(800);
-        testLocations["pf_nauto_g"]->latency(700);
-        testLocations["npf_auto_ng"]->latency(600);
-        testLocations["npf_auto_g"]->latency(500);
-        testLocations["npf_nauto_ng"]->latency(400);
-        testLocations["npf_nauto_g"]->latency(300);
+        setLatencies();
+        latencies[QStringLiteral("pf_auto_ng")] = 1000;
+        latencies[QStringLiteral("pf_auto_g")] = 900;
+        latencies[QStringLiteral("pf_nauto_ng")] = 800;
+        latencies[QStringLiteral("pf_nauto_g")] = 700;
+        latencies[QStringLiteral("npf_auto_ng")] = 600;
+        latencies[QStringLiteral("npf_auto_g")] = 500;
+        latencies[QStringLiteral("npf_nauto_ng")] = 400;
+        latencies[QStringLiteral("npf_nauto_g")] = 300;
+        buildRegions();
+        LocationsById testLocations{locsGeo};
+
 
         auto getBestId = [&]() -> QString
         {

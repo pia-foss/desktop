@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #line HEADER_FILE("win/win_messagewnd.h")
 
 #ifndef WIN_MESSAGEWND_H
 #define WIN_MESSAGEWND_H
 
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
 
 // MessageWnd creates and owns a message-only window.  This is a bare-bones
 // interface to create a window for use with other resources that require a

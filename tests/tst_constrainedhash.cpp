@@ -16,8 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "mac/flow_tracker.h"
+#include <kapps_net/src/mac/flow_tracker.h>
 #include <QtTest>
+
+template<class K, class V>
+using ConstrainedHash = kapps::net::ConstrainedHash<K, V>;
 
 class tst_constrainedhash : public QObject
 {

@@ -16,13 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("clientsettings.h")
-
-#ifndef CLIENTSETTINGS_H
-#define CLIENTSETTINGS_H
-
-#include "json.h"
+#pragma once
+#include <common/src/common.h>
+#include <common/src/json.h>
+#include <kapps_regions/src/displaytext.h>
 #include <QVector>
 
 // Settings properties of the client.  Unlike DaemonSettings, these settings are
@@ -212,6 +209,16 @@ class ClientState : public NativeJsonObject
 public:
     ClientState();
 
+private:
+    void updateActiveLanguageTag();
+    QString getTranslatedName(const QString &id,
+        const std::unordered_map<QString, kapps::regions::DisplayText> &names) const;
+
+public:
+    // Client provides the regions metadata JSON whenever the daemon state
+    // changes
+    void setRegionsMetadata(const QJsonObject &metadata);
+
 public:
     // Languages presented as choices in the UI.  Never changes after startup.
     JsonField(QVector<ClientLanguage>, languages, {})
@@ -233,6 +240,33 @@ public:
     // Whether the client has been UAC-elevated on Windows.  This triggers a
     // warning in the UI.
     JsonField(bool, winIsElevated, false)
-};
 
-#endif
+public:
+    // Translations from kapps::regions::DisplayText data are handled in native
+    // code so we can leverage the shared library's language fallback logic.
+    // ClientState keeps a private copy of the metadata read into DisplayText
+    // objects that is updated each time the DaemonState property changes.
+    //
+    // Calls to any of these from QML should add a dependency on uiTr and
+    // Daemon.state.regionsMetadata in order to reevaluate if either changes.
+    Q_INVOKABLE QString getTranslatedRegionName(const QString &regionId) const
+    {
+        return getTranslatedName(regionId, _regionNames);
+    }
+    Q_INVOKABLE QString getTranslatedCountryName(const QString &countryCode) const
+    {
+        return getTranslatedName(countryCode, _countryNames);
+    }
+    Q_INVOKABLE QString getTranslatedCountryPrefix(const QString &countryCode) const
+    {
+        return getTranslatedName(countryCode, _countryPrefixes);
+    }
+
+private:
+    // Current language (derived from activeLanguage) as a Bcp47Tag
+    kapps::regions::Bcp47Tag _activeLanguageTag;
+    // DisplayTexts read from the regions metadata
+    std::unordered_map<QString, kapps::regions::DisplayText> _regionNames;
+    std::unordered_map<QString, kapps::regions::DisplayText> _countryNames;
+    std::unordered_map<QString, kapps::regions::DisplayText> _countryPrefixes;
+};

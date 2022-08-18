@@ -16,21 +16,20 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include "win_nativewifi.h"
+#include <kapps_core/src/win/win_error.h>
 #include <algorithm>
 
 #pragma comment(lib, "wlanapi.lib")
 
-void WinLuid::trace(QDebug &dbg) const
+void WinLuid::trace(std::ostream &os) const
 {
-    QDebugStateSaver save{dbg};
-    dbg.noquote().nospace();
     // Reserved should be zero, if it's not just dump the whole 64-bit value, we
     // can't make sense of this LUID
     if(_luid.Info.Reserved)
     {
-        dbg << "<invalid " << value() << ">";
+        os << "<invalid " << value() << ">";
         return;
     }
 
@@ -38,26 +37,26 @@ void WinLuid::trace(QDebug &dbg) const
     switch(_luid.Info.IfType)
     {
         case IF_TYPE_OTHER:
-            dbg << "other";
+            os << "other";
             break;
         case IF_TYPE_ETHERNET_CSMACD:
-            dbg << "ethernet";
+            os << "ethernet";
             break;
         case IF_TYPE_SOFTWARE_LOOPBACK:
-            dbg << "loopback";
+            os << "loopback";
             break;
         case IF_TYPE_IEEE80211:
-            dbg << "802.11";
+            os << "802.11";
             break;
         case IF_TYPE_TUNNEL:
-            dbg << "tunnel";
+            os << "tunnel";
             break;
         default:
-            dbg << "type " << _luid.Info.IfType;
+            os << "type " << _luid.Info.IfType;
             break;
     }
 
-    dbg << "-" << _luid.Info.NetLuidIndex;
+    os << "-" << _luid.Info.NetLuidIndex;
 }
 
 void WINAPI WinNativeWifi::wlanNotificationCallback(PWLAN_NOTIFICATION_DATA pData,
@@ -89,7 +88,7 @@ WifiHandle WinNativeWifi::createWlanHandle()
     if(err != ERROR_SUCCESS || !client)
     {
         qWarning() << "Unable to open Native Wifi client -"
-            << WinErrTracer{err};
+            << kapps::core::WinErrTracer{err};
 
         // If we weren't able to open the Wi-Fi client, throw.  This happens if
         // the WLAN AutoConfig service ('WlanSvc') isn't running, which can be
@@ -120,7 +119,7 @@ WinNativeWifi::WinNativeWifi()
     if(err != ERROR_SUCCESS)
     {
         qWarning() << "Unable to enable Wifi notifications -"
-            << WinErrTracer{err};
+            << kapps::core::WinErrTracer{err};
         throw SystemError{HERE, err};
     }
 
@@ -137,7 +136,7 @@ WinNativeWifi::WinNativeWifi()
         // We can't load the initial state, the state reported would not be
         // accurate.
         qWarning() << "Unable to load Native Wifi initial state -"
-            << WinErrTracer{err};
+            << kapps::core::WinErrTracer{err};
         throw SystemError{HERE, err};
     }
 
@@ -155,7 +154,7 @@ WinLuid WinNativeWifi::getInterfaceLuid(const GUID &interfaceGuid) const
     if(err != NO_ERROR)
     {
         qWarning() << "Unable to find interface LUID interface"
-            << QUuid{interfaceGuid}.toString() << "-" << WinErrTracer{err};
+            << QUuid{interfaceGuid}.toString() << "-" << kapps::core::WinErrTracer{err};
     }
 
     return interfaceLuid;
@@ -199,7 +198,7 @@ void WinNativeWifi::addInitialInterface(const WLAN_INTERFACE_INFO &info)
         // us to misinterpret the type of interface, which could cause an
         // incorrect rule application since this interface is connected.
         qWarning() << "Unable to get interface status for connected interface"
-            << interfaceLuid << "in initial status dump -" << WinErrTracer{err};
+            << interfaceLuid << "in initial status dump -" << kapps::core::WinErrTracer{err};
         throw SystemError{HERE, err};
     }
 

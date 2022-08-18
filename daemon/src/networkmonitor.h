@@ -19,14 +19,14 @@
 #ifndef NETWORKMONITOR_H
 #define NETWORKMONITOR_H
 
-#include "common.h"
-#include "ipaddress.h"
+#include <common/src/common.h>
+#include <kapps_core/src/ipaddress.h>
 #include <QHostAddress>
 #include <vector>
 
 // NetworkConnection represents a connection to a given network.  These objects
 // are returned by NetworkMonitor to identify the current network connections.
-class NetworkConnection : public DebugTraceable<NetworkConnection>
+class NetworkConnection : public kapps::core::OStreamInsertable<NetworkConnection>
 {
     Q_GADGET
 
@@ -61,10 +61,10 @@ public:
     NetworkConnection(const QString &networkInterface,
                       Medium medium,
                       bool defaultIpv4, bool defaultIpv6,
-                      const Ipv4Address &gatewayIpv4,
-                      const Ipv6Address &gatewayIpv6,
-                      std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
-                      std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6,
+                      const kapps::core::Ipv4Address &gatewayIpv4,
+                      const kapps::core::Ipv6Address &gatewayIpv6,
+                      std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4,
+                      std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6,
                       unsigned mtu4, unsigned mtu6);
 
 public:
@@ -97,7 +97,7 @@ private:
     bool tryParseWifiSsid(const char *data, std::size_t len);
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
 
     // The interface used to connect to this network.  On Windows this is a
     // device GUID; on Mac and Linux it is an interface name.  This isn't
@@ -165,19 +165,19 @@ public:
     void defaultIpv6(bool defaultIpv6) {_defaultIpv6 = defaultIpv6;}
 
     // The IPv4 gateway address of this network connection, if present.
-    const Ipv4Address &gatewayIpv4() const {return _gatewayIpv4;}
-    void gatewayIpv4(const Ipv4Address &gatewayIpv4) {_gatewayIpv4 = gatewayIpv4;}
+    const kapps::core::Ipv4Address &gatewayIpv4() const {return _gatewayIpv4;}
+    void gatewayIpv4(const kapps::core::Ipv4Address &gatewayIpv4) {_gatewayIpv4 = gatewayIpv4;}
 
     // The IPv6 gateway address of this network connection, if present.
-    const Ipv6Address &gatewayIpv6() const {return _gatewayIpv6;}
-    void gatewayIpv6(const Ipv6Address &gatewayIpv6) {_gatewayIpv6 = gatewayIpv6;}
+    const kapps::core::Ipv6Address &gatewayIpv6() const {return _gatewayIpv6;}
+    void gatewayIpv6(const kapps::core::Ipv6Address &gatewayIpv6) {_gatewayIpv6 = gatewayIpv6;}
 
     // The local IPv4 address(es) of this network connection - zero or more.
     // Provides both the local address and the network prefix length.
     // It's unusual for a connection to have more than one IPv4 address, but
     // platforms don't guarantee this; it's possible.
-    const std::vector<std::pair<Ipv4Address, unsigned>> &addressesIpv4() const {return _addressesIpv4;}
-    void addressesIpv4(std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4) {_addressesIpv4 = std::move(addressesIpv4);}
+    const std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> &addressesIpv4() const {return _addressesIpv4;}
+    void addressesIpv4(std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4) {_addressesIpv4 = std::move(addressesIpv4);}
 
     // The globally-routable IPv6 address(es) of this network connection - zero
     // or more.  Like addressesIpv4(), includes network prefix lengths also.
@@ -189,8 +189,8 @@ public:
     // Unlike IPv4, it's common to have more than one IPv6 address (there is
     // usually at least a link-local address and a globally routable address,
     // and there may be additional global addresses that rotate).
-    const std::vector<std::pair<Ipv6Address, unsigned>> &addressesIpv6() const {return _addressesIpv6;}
-    void addressesIpv6(std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6) {_addressesIpv6 = std::move(addressesIpv6);}
+    const std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> &addressesIpv6() const {return _addressesIpv6;}
+    void addressesIpv6(std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6) {_addressesIpv6 = std::move(addressesIpv6);}
 
     // MTU of this network connection.  Separate IPv4 and IPv6 MTUs are provided,
     // because Windows maintains separate IPv4 and IPv6 MTUs.  (On other OSes,
@@ -206,10 +206,10 @@ private:
     bool _wifiAssociated, _wifiEncrypted;
     QString _wifiSsid;
     bool _defaultIpv4, _defaultIpv6;
-    Ipv4Address _gatewayIpv4;
-    Ipv6Address _gatewayIpv6;
-    std::vector<std::pair<Ipv4Address, unsigned>> _addressesIpv4;
-    std::vector<std::pair<Ipv6Address, unsigned>> _addressesIpv6;
+    kapps::core::Ipv4Address _gatewayIpv4;
+    kapps::core::Ipv6Address _gatewayIpv6;
+    std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> _addressesIpv4;
+    std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> _addressesIpv6;
     QString _macosPrimaryServiceKey;
     unsigned _mtu4, _mtu6;
 };

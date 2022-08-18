@@ -20,7 +20,7 @@
 #define TASKS_REGISTRY_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 // Note: these tasks need the SE_BACKUP_NAME and SE_RESTORE_NAME privileges.
 

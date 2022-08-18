@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("platformscreens.cpp")
 
 #include <memory>
@@ -54,7 +54,7 @@ void PlatformScreens::updateScreens(std::vector<Screen> newScreens)
     {
         const auto &traceScreens = [](const std::vector<Screen> &screens)
         {
-            for(int i=0; i<screens.size(); ++i)
+            for(std::size_t i=0; i<screens.size(); ++i)
             {
                 const auto &screen = screens[i];
                 qInfo() << "-" << i << screen.geometry() << screen.availableGeometry()

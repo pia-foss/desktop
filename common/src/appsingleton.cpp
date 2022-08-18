@@ -21,7 +21,7 @@
 
 #if defined(Q_OS_WIN)
 #pragma comment(lib, "Kernel32.lib")
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
 #include <psapi.h>
 #include <array>
 #elif defined(Q_OS_LINUX)

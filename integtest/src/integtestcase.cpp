@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("integtestcase.cpp")
 
 #include "integtestcase.h"
-#include "output.h"
+#include <common/src/output.h>
 
 unsigned IntegTestCase::_totalPassed{0};
 unsigned IntegTestCase::_totalFailed{0};

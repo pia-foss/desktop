@@ -16,10 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("clientlib.cpp")
 
 #include "clientlib.h"
+#include <common/src/dtop.h>
+
+KAPPS_CORE_LOG_MODULE(clientlib, "src/clientlib.cpp")
 
 int runClient(bool logToStdErr, int argc, char *argv[], int (*run)(int argc, char *argv[]))
 {
@@ -48,6 +51,8 @@ int runClient(bool logToStdErr, int argc, char *argv[], int (*run)(int argc, cha
     // to the log files, otherwise they will only go to stderr.
     try
     {
+        // Initialize other kapps::core integration points
+        initKApps();
         return run(argc, argv);
     }
     catch(const Error &ex)

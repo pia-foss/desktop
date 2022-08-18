@@ -19,8 +19,8 @@
 #ifndef SETTINGS_DAEMONDATA_H
 #define SETTINGS_DAEMONDATA_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include "locations.h"
 #include "events.h"
 #include <deque>

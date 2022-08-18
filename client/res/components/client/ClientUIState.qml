@@ -45,6 +45,7 @@ QtObject {
   readonly property var settings: QtObject {
     property bool gatheringDiagnostics: false
     property int currentPage: 0
+    property var knownCustomServers: null
   }
 
   readonly property var onboarding: QtObject {

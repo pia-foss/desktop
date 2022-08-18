@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "networktaskwithretry.h"
-#include "testshim.h"
+#include <common/src/networktaskwithretry.h>
+#include <common/src/testshim.h>
 #include "src/mocknetwork.h"
 #include "src/callbackspy.h"
 #include <QtTest>

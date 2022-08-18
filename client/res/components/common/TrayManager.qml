@@ -102,11 +102,11 @@ Item {
         message.subtitle = uiTr("Internet access has been disabled by the killswitch.")
 
       message.title = Daemon.state.connectedConfig.vpnLocation ?
-                        uiTr("Disconnected from %1").arg(Daemon.getLocationName(Daemon.state.connectedConfig.vpnLocation)) :
+                        uiTr("Disconnected from %1").arg(Client.getDetailedLocationName(Daemon.state.connectedConfig.vpnLocation)) :
                         uiTr("Disconnected")
       break
     case connState.stateConnected:
-      message.title = uiTr("Connected to %1").arg(Daemon.getLocationName(Daemon.state.connectedConfig.vpnLocation))
+      message.title = uiTr("Connected to %1").arg(Client.getDetailedLocationName(Daemon.state.connectedConfig.vpnLocation))
 
       // When connected with port forwarding enabled, check the port forward
       // status.
@@ -153,13 +153,13 @@ Item {
       // we're reconnecting, it's the first connection to that location
       if (Daemon.state.connectionState.indexOf("Reconnect") >= 0 &&
           Daemon.state.connectingConfig.vpnLocation.id === Daemon.state.connectedConfig.vpnLocation.id)
-        message.title = uiTr("Reconnecting to %1...").arg(Daemon.getLocationName(Daemon.state.connectingConfig.vpnLocation))
+        message.title = uiTr("Reconnecting to %1...").arg(Client.getDetailedLocationName(Daemon.state.connectingConfig.vpnLocation))
       else
-        message.title = uiTr("Connecting to %1...").arg(Daemon.getLocationName(Daemon.state.connectingConfig.vpnLocation))
+        message.title = uiTr("Connecting to %1...").arg(Client.getDetailedLocationName(Daemon.state.connectingConfig.vpnLocation))
       break
     case connState.stateDisconnecting:
       message.title = Daemon.state.connectedConfig.vpnLocation ?
-                        uiTr("Disconnecting from %1...").arg(Daemon.getLocationName(Daemon.state.connectedConfig.vpnLocation)) :
+                        uiTr("Disconnecting from %1...").arg(Client.getDetailedLocationName(Daemon.state.connectedConfig.vpnLocation)) :
                         uiTr("Disconnecting...")
       break
     }

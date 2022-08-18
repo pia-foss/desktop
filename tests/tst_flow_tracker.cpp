@@ -16,11 +16,15 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "mac/flow_tracker.h"
-#include "daemon/src/ipaddress.h"
+#include <kapps_net/src/mac/flow_tracker.h>
+#include <kapps_core/src/ipaddress.h>
 #include <QtTest>
 #include <QHostAddress>
 #include <unordered_set>
+
+using FlowTracker = kapps::net::FlowTracker;
+using PacketFlow4 = kapps::net::PacketFlow4;
+using PacketFlow6 = kapps::net::PacketFlow6;
 
 class tst_flow_tracker : public QObject
 {

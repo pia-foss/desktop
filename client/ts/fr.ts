@@ -342,7 +342,7 @@
   <context>
     <name>Client</name>
     <message>
-      <location filename="../../../client/res/components/client/Client.qml" line="161"/>
+      <location filename="../../../client/res/components/client/Client.qml" line="228"/>
       <source>%1 - Best</source>
       <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
       <translation>%1 - Meilleur</translation>
@@ -389,272 +389,273 @@
       <translation>Le système doit être redémarré pour que vous puissiez vous connecter.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="164"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="159"/>
       <source>The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
       <extracomment>&quot;WinTUN&quot; is name of the virtual network adapter and is not localized.</extracomment>
       <translation>L&apos;adaptateur WinTun pour le tunnel VPN n&apos;est pas installé. Vous pouvez le réinstaller à partir des Paramètres.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="177"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="172"/>
       <source>The split tunnel filter is not installed.</source>
       <translation>Le filtre de tunnel divisé n&apos;est pas installé.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="178"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="173"/>
       <source>The App Exclusion feature requires the split tunnel filter.  Reinstall it from Settings.</source>
       <translation>La fonctionnalité d&apos;exclusion d&apos;application nécessite le filtre de tunnel divisé. Réinstallez-le dans les paramètres.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="189"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="184"/>
       <location filename="../../../client/res/components/common/DriverNotificationStatus.qml" line="12"/>
       <source>Reinstall</source>
       <translation>Réinstaller</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="203"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="198"/>
       <source>The App Exclusion feature requires the split tunnel filter.  Restart to finish installation.</source>
       <translation>La fonctionnalité d&apos;exclusion d&apos;application nécessite le filtre de tunnel divisé. Redémarrez pour terminer l&apos;installation.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="222"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="260"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="307"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="377"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="459"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="267"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="299"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="358"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="440"/>
       <source>Settings</source>
       <translation>Paramètres</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="239"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="232"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="45"/>
+      <source>Iptables is not installed.</source>
+      <extracomment>Message for Linux indicating that iptables is missing</extracomment>
+      <translation>Iptables n’est pas installé.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="233"/>
+      <source>Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.</source>
+      <translation>Iptables est nécessaire pour la connexion au VPN. Réinstallez l’application ou installez manuellement le paquet iptables ou iptables-nft, puis relancez votre ordinateur.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="246"/>
       <source>Connection refused.</source>
       <translation>Connexion refusée.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="245"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="252"/>
       <source>The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
       <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
       <translation>Le serveur a refusé la connexion. Veuillez vérifier votre nom d&apos;utilisateur et votre mot de passe et assurez-vous que votre compte n&apos;est pas expiré.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="254"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="261"/>
       <source>Could not configure DNS.</source>
       <translation>Impossible de configurer le DNS</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="255"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="262"/>
       <source>Enable debug logging and check the daemon log for specific details.</source>
       <translation>Activez la journalisation de debug et vérifiez le journal daemon pour plus de détails.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="258"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="265"/>
       <source>Daemon Log</source>
       <translation>Journal daemon</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="268"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="275"/>
       <source>Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
       <translation>Échec de l&apos;exécution de /usr/bin/xdg-open. Veuillez ouvrir le fichier journal daemon depuis&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="285"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
       <source>Can&apos;t connect to Handshake.</source>
       <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>Connexion impossible à Handshake.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="289"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
       <source>Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
       <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>Impossible d&apos;établir une résolution du nom avec Handshake. Continuez de patienter, ou essayez avec un paramètre différent de Nommer les serveurs.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="303"/>
-      <source>There may be a problem with the connection.</source>
-      <translation>Il y a peut-être un problème avec la connexion.</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="304"/>
-      <source>Connected to the VPN, but can&apos;t reach the Internet.  Check Network and Connection settings.</source>
-      <translation>Connecté au VPN mais impossible de joindre Internet. Vérifiez les paramètres du réseau et de la connexion.</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="329"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="310"/>
       <source>Running PIA as administrator is not recommended.</source>
       <translation>Exécuter PIA en tant qu&apos;administrateur n&apos;est pas recommandé.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="330"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="311"/>
       <source>Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
       <translation>Exécuter PIA en tant qu&apos;administrateur peut empêcher «&#xa0;Lancer au démarrage du système&#xa0;» de fonctionner et peut provoquer d&apos;autres problèmes.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="342"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
       <source>KILLSWITCH ENABLED</source>
       <translation>KILLSWITCH ACTIVÉ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="343"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="324"/>
       <source>Killswitch is enabled.</source>
       <translation>Le killswitch est activé.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="344"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="325"/>
       <source>Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
       <translation>L&apos;accès à Internet est bloqué parce que la fonction killswitch est activée dans les paramètres.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="347"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="328"/>
       <source>Change</source>
       <translation>Changer</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="360"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="341"/>
       <source>RECONNECTING...</source>
       <translation>RECONNEXION...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="361"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="342"/>
       <source>The connection to the VPN server was lost.</source>
       <translation>La connexion au serveur VPN a été perdue.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="370"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="388"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="351"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="369"/>
       <source>CONNECTING...</source>
       <translation>CONNEXION...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="354"/>
       <source>Can&apos;t connect to the proxy.</source>
       <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
       <translation>Échec de connexion au proxy.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="374"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="355"/>
       <source>The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
       <translation>Le proxy est injoignable. Vérifiez vos paramètres de proxy et que celui-ci est disponible.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="389"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="370"/>
       <source>We couldn&apos;t establish the connection to the VPN server. Please get in touch with our support department.</source>
       <translation>Nous n&apos;avons pas pu établir la connexion au serveur VPN. Veuillez contacter notre service d&apos;assistance.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="402"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="383"/>
       <source>RECONNECT NEEDED</source>
       <translation>RECONNEXION NÉCESSAIRE</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="403"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="384"/>
       <source>Reconnect to apply settings.</source>
       <translation>Reconnectez pour appliquer les paramètres.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="404"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="385"/>
       <source>Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
       <translation>Certains paramètres ne prendront effet que lors de votre prochaine connexion. Cliquez pour reconnecter maintenant.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="413"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="394"/>
       <source>Connected with OpenVPN.</source>
       <translation>Connecté avec OpenVPN.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="416"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="397"/>
       <source>Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
       <translation>Connecté avec OpenVPN pour la première identification. Reconnectez-vous pour utiliser WireGuard.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="418"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="399"/>
       <source>Connected with OpenVPN to log in for the first time.</source>
       <translation>Connecté avec OpenVPN pour la première identification.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="437"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="418"/>
       <source>Connected using %1 port %2.</source>
       <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
       <translation>Connecté en %1 sur le port %2.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="446"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="427"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
       <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
       <translation>Tester d&apos;autres paramètres est activé. Le serveur n&apos;a pas pu être atteint sur le port par défaut %1, le port %2 %3 a été utilisé à la place.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="454"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="435"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
       <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
       <translation>Tester d&apos;autres paramètres est activé. Impossible de joindre le serveur du port %1 %2, le port %3 %4 a été utilisé à sa place.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="468"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="449"/>
       <source>Subscription expires in %1 days.</source>
       <translation>L&apos;abonnement expire dans %1 jours.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="471"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="452"/>
       <source>Renew</source>
       <translation>Renouveller</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="485"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
       <source>Your dedicated IP will expire in %1 days.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
       <translation>Votre adresse IP dédiée expirera dans %1&#xa0;jours.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="491"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="472"/>
       <source>Your dedicated IP will expire in 1 day.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
       <translation>Votre adresse IP dédiée expirera dans 1&#xa0;jour.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="496"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="477"/>
       <source>Your dedicated IP will expire today.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
       <translation>Votre adresse IP dédiée expirera aujourd&apos;hui.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="501"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="482"/>
       <source>Get a new one</source>
       <translation>En obtenir une nouvelle</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="513"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="494"/>
       <source>Your dedicated IP was updated.</source>
       <translation>Votre adresse IP dédiée a été mise à jour.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="529"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
       <source>Unable to reach login server.</source>
       <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
       <translation>Impossible de joindre le serveur de connexion.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="533"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="514"/>
       <source>Your account details are unavailable, but you may still be able to connect to the VPN.</source>
       <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
       <translation>Les détails de votre compte sont indisponibles, mais vous pouvez quand même vous connecter au VPN.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="537"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="518"/>
       <source>Retry</source>
       <translation>Réessayer</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="550"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="531"/>
       <source>Private Internet Access was updated.</source>
       <translation>Private Internet Access a été mis à jour.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="553"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="534"/>
       <source>See what&apos;s new</source>
       <translation>Voir les nouveautés</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="570"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="551"/>
       <source>The application quit unexpectedly. Your VPN connection was preserved.</source>
       <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
       <translation>L&apos;application a quitté de façon inattendue. Votre connexion VPN a été préservée.</translation>
@@ -747,35 +748,35 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="56"/>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="134"/>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="236"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="137"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="239"/>
       <source>SOCKS5 Proxy</source>
       <translation>Proxy SOCKS5</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="262"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="265"/>
       <source>Server IP Address</source>
       <extracomment>The IP address of the SOCKS proxy server to use when connecting. Labeled with &quot;IP Address&quot; to indicate that it can&apos;t be a hostname.</extracomment>
       <translation>Adresse IP du serveur</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="275"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="278"/>
       <source>Port</source>
       <translation>Port</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="282"/>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="52"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="285"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="58"/>
       <source>Default</source>
       <translation>Par défaut</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="289"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="292"/>
       <source>User (optional)</source>
       <translation>Utilisateur (facultatif)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="299"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="302"/>
       <source>Password (optional)</source>
       <translation>Mot de passe (facultatif)</translation>
     </message>
@@ -879,27 +880,27 @@
       <translation>WireGuard® est une marque déposée de Jason A. Donenfeld, un individu.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="47"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="53"/>
       <source>Transport</source>
       <translation>Transport</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="54"/>
       <source>Remote Port</source>
       <translation>Port distant</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="55"/>
       <source>Data Encryption</source>
       <translation>Chiffrement des données</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="50"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="56"/>
       <source>Data Authentication</source>
       <translation>Authentification des données</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="51"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="57"/>
       <source>Handshake</source>
       <translation>Établissement de liaison</translation>
     </message>
@@ -959,17 +960,17 @@
   <context>
     <name>DedicatedIpAdd</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="72"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="99"/>
       <source>Activate Your Dedicated IP</source>
       <translation>Activez votre IP dédié</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="115"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
       <source>Paste in your token here</source>
       <translation>Collez votre jeton ici</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="142"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="170"/>
       <source>Activate</source>
       <translation>Activer</translation>
     </message>
@@ -977,44 +978,49 @@
   <context>
     <name>DedicatedIpAddRow</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="82"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="109"/>
       <source>Paste your token below.  If you&apos;ve recently purchased a dedicated IP, you can generate the token by going to the [[My Account]] page.</source>
       <extracomment>The [[double square brackets]] are formatted as a link. Please mark the corresponding translated text with double square brackets so the link will be applied correctly.</extracomment>
       <translation>Collez votre jeton ci-dessous. Si vous avez récemment acheté une adresse IP dédiée, vous pouvez générer le jeton en accédant à la page [[Mon compte]].</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="105"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="132"/>
       <source>Dedicated IP Token</source>
       <translation>Jeton d&apos;adresse IP dédiée</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="168"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="196"/>
       <source>Your token has expired.</source>
       <extracomment>Shown when the user attempts to add a Dedicated IP token that is already expired.</extracomment>
       <translation>Votre jeton a expiré.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="169"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="197"/>
       <source>You can purchase a new one from the My Account page.</source>
       <translation>Vous pouvez en acheter un nouveau à partir de la page Mon compte.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="181"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="209"/>
       <source>Your token is invalid.</source>
       <translation>Votre jeton n&apos;est pas valide.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="182"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="210"/>
       <source>Make sure you have entered the token correctly.</source>
       <translation>Assurez-vous d&apos;avoir saisi le jeton correctement.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="194"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="222"/>
+      <source>Too many attempts.</source>
+      <translation>Nombre de tentatives trop élevé.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="236"/>
       <source>Couldn&apos;t check the token.</source>
       <translation>Impossible de vérifier le jeton.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="195"/>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpAdd.qml" line="237"/>
       <source>Can&apos;t reach the server to check the token.  Please try again later.</source>
       <translation>Impossible de joindre le serveur pour vérifier le jeton. Veuillez réessayer plus tard.</translation>
     </message>
@@ -1061,7 +1067,7 @@
   <context>
     <name>DedicatedIpRegion</name>
     <message>
-      <location filename="../../../client/res/components/common/regions/DedicatedIpRegion.qml" line="57"/>
+      <location filename="../../../client/res/components/common/regions/DedicatedIpRegion.qml" line="58"/>
       <source>%1 (Dedicated IP)</source>
       <extracomment>Screen reader annotation for the &quot;detail&quot; line of a Dedicated IP row, which displays the IP address and the &quot;Dedicated IP&quot; tag. %1 is an IPv4 address, such as 100.200.100.200.</extracomment>
       <translation>%1 (Adresse IP dédiée)</translation>
@@ -1136,7 +1142,7 @@
   <context>
     <name>Error</name>
     <message>
-      <location filename="../../../common/src/builtin/error.cpp" line="49"/>
+      <location filename="../../../common/src/builtin/error.cpp" line="51"/>
       <source>No additional information available.</source>
       <translation>Aucune information supplémentaire disponible.</translation>
     </message>
@@ -1665,105 +1671,105 @@
   <context>
     <name>LoginPage</name>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="181"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="205"/>
       <source>Invalid login</source>
       <translation>Connexion invalide</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="183"/>
-      <source>Too many attempts, try again in 1 hour</source>
-      <translation>Trop de tentatives, réessayez dans 1 heure</translation>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="207"/>
+      <source>Too many login attempts.</source>
+      <translation>Nombre de tentatives de connexion trop élevé.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="185"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="209"/>
       <source>Can&apos;t reach the server</source>
       <translation>Impossible de joindre le serveur</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="187"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="211"/>
       <source>Your subscription has expired</source>
       <translation>Votre abonnement a expiré</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="215"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="240"/>
       <source>Username</source>
       <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="224"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="249"/>
       <source>Use your normal username beginning with &apos;p&apos;.</source>
       <extracomment>Shown if the user attempts to login with the wrong account type. &apos;p&apos; refers to the letter prefix on the username; the p should be kept in Latin script. (Example user names are &quot;p0123456&quot;, &quot;p5858587&quot;).</extracomment>
       <translation>Utilisez votre nom d&apos;utilisateur normal commençant par p.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="237"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="262"/>
       <source>Password</source>
       <translation>Mot de passe</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="272"/>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="350"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="297"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="375"/>
       <source>Something went wrong. Please try again later.</source>
       <translation>Un problème est survenu. Veuillez réessayer plus tard.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="274"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="299"/>
       <source>Please check your email.</source>
       <translation>Veuillez vérifier votre e-mail.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="292"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="317"/>
       <source>Email Address</source>
       <translation>Adresse e-mail</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="301"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="326"/>
       <source>SEND EMAIL</source>
       <translation>ENVOYER L&apos;E-MAIL</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="348"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="373"/>
       <source>Please Wait...</source>
       <translation>Veuillez patienter...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="399"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="424"/>
       <source>Log in with Email</source>
       <translation>Se connecter avec un e-mail</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="401"/>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="403"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="426"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="428"/>
       <source>Log in with Username</source>
       <translation>Se connecter avec un nom d&apos;utilisateur</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="419"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="444"/>
       <source>Forgot Password</source>
       <translation>Mot de passe oublié</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="432"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="457"/>
       <source>Buy Account</source>
       <translation>Acheter un compte</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="459"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="481"/>
       <source>Welcome Back!</source>
       <translation>Bienvenue&#xa0;!</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="472"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="494"/>
       <source>In order to use Private Internet Access, you&apos;ll need to renew your subscription.</source>
       <translation>Pour utiliser Private Internet Access, vous devez renouveler votre abonnement.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="482"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="504"/>
       <source>RENEW NOW</source>
       <translation>RENOUVELER MAINTENANT</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="495"/>
+      <location filename="../../../client/res/components/dashboard/login/LoginPage.qml" line="517"/>
       <source>Back to login</source>
       <translation>Retour à la connexion</translation>
     </message>
@@ -1796,6 +1802,21 @@
       <source>Disconnect</source>
       <extracomment>This is an action that is performed automatically by an automation rule</extracomment>
       <translation>Déconnecter</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/Messages.qml" line="75"/>
+      <source>Please try again in %1 seconds.</source>
+      <translation>Veuillez réessayer dans %1 secondes.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/Messages.qml" line="77"/>
+      <source>Please try again in 1 second.</source>
+      <translation>Veuillez réessayer dans 1 seconde.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/Messages.qml" line="79"/>
+      <source>Please try again.</source>
+      <translation>Veuillez réessayer.</translation>
     </message>
   </context>
   <context>
@@ -1837,17 +1858,17 @@
       <translation>Le multi-saut nécessite OpenVPN</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="172"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="175"/>
       <source>Host</source>
       <translation>Hôte</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="195"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="198"/>
       <source>Username</source>
       <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="210"/>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="213"/>
       <source>Password</source>
       <translation>Mot de passe</translation>
     </message>
@@ -1922,7 +1943,7 @@
     <name>NetworkPage</name>
     <message>
       <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="16"/>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="267"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="264"/>
       <source>Handshake DNS</source>
       <extracomment>&quot;Handshake&quot; is a brand name, not translated.</extracomment>
       <translation>DNS Handshake</translation>
@@ -1934,109 +1955,109 @@
       <translation>DNS</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="69"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="66"/>
       <source>Warning: Using a third party DNS could compromise your privacy.</source>
       <translation>Attention : l’utilisation d’un DNS tiers peut porter atteinte à votre vie privée.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="75"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="72"/>
       <source>Handshake is a decentralized naming protocol.  For more information, visit handshake.org.</source>
       <extracomment>&quot;Handshake&quot; is a brand name and should not be translated.</extracomment>
       <translation>Handshake est un protocole d’attribution de noms décentralisé. Pour en savoir plus, rendez-vous sur handshake.org.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="81"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="78"/>
       <source>PIA DNS</source>
       <translation>DNS de PIA</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="84"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="81"/>
       <source>Built-in Resolver</source>
       <extracomment>Indicates that we will run a built-in DNS resolver locally on the user&apos;s computer.</extracomment>
       <translation>Résolveur intégré</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="86"/>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="269"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="83"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="266"/>
       <source>Use Existing DNS</source>
       <translation>Utiliser le DNS existant</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="91"/>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="95"/>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="99"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="88"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="92"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="96"/>
       <source>Custom</source>
       <translation>Personnalisé</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="115"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="112"/>
       <source>Custom DNS</source>
       <translation>DNS personnalisé</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="138"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="135"/>
       <source>Primary DNS:</source>
       <translation>DNS principal&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="156"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="153"/>
       <source>Secondary DNS:</source>
       <translation>DNS secondaire&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="177"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="174"/>
       <source>Request Port Forwarding</source>
       <extracomment>Label for the setting that controls whether the application tries to forward a port from the public VPN IP to the user&apos;s computer. This feature is not guaranteed to work or be available, therefore we label it as &quot;requesting&quot; port forwarding.</extracomment>
       <translation>Demander un transfert de port</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="184"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="181"/>
       <source>Forwards a port from the VPN IP to your computer. The port will be selected for you. Not all locations support port forwarding.</source>
       <extracomment>Tooltip for the port forwarding setting. The user can not choose which port to forward; a port will be automatically assigned by our servers. The user should further be made aware that only some of our servers support forwarding. The string contains embedded linebreaks to prevent it from being displayed too wide on the user&apos;s screen - such breaks should be preserved at roughly the same intervals.</extracomment>
       <translation>Transfère un port de l&apos;IP du VPN vers votre ordinateur. Le port sera sélectionné pour vous. Tous les lieux ne prennent pas en charge le transfert de ports.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="192"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="189"/>
       <source>Allow LAN Traffic</source>
       <translation>Autoriser le trafic LAN</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="193"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="190"/>
       <source>Always permits traffic between devices on your local network, even when using the VPN killswitch.</source>
       <translation>Toujours autoriser le trafic entre les appareils sur votre réseau local, même lors de l&apos;utilisation du killswitch du VPN.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="208"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="205"/>
       <source>Proceed</source>
       <translation>Continuer</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="211"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="208"/>
       <source>Cancel</source>
       <translation>Annuler</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="230"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="227"/>
       <source>Primary DNS</source>
       <translation>DNS primaire</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="241"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="238"/>
       <source>Secondary DNS (optional)</source>
       <translation>DNS secondaire (facultatif)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="251"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="248"/>
       <source>&lt;b&gt;Warning:&lt;/b&gt; Using non-PIA DNS servers could expose your DNS traffic to third parties and compromise your privacy.</source>
       <translation>&lt;b&gt;Attention&#xa0;: &lt;/b&gt; utiliser des serveurs DNS non-PIA peut exposer votre trafic DNS à des tiers et compromettre votre intimité.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="257"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="254"/>
       <source>Set Custom DNS</source>
       <translation>Définir un DNS personnalisé</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="269"/>
+      <location filename="../../../client/res/components/settings/pages/network/NetworkPage.qml" line="266"/>
       <source>Use Custom DNS</source>
       <translation>Utiliser un DNS personnalisé</translation>
     </message>
@@ -2335,38 +2356,38 @@
   <context>
     <name>Page5HelpUsImprove</name>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="19"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="20"/>
       <source>Checklist</source>
       <extracomment>Screen reader annotation for the graphic on the &quot;help us improve&quot; page, which is a checklist.</extracomment>
       <translation>Liste de contrôle</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="28"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="29"/>
       <source>Help us improve our service</source>
       <translation>Aidez-nous à améliorer notre service</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="41"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="42"/>
       <source>To help us ensure our service&apos;s connection performance, you can anonymously share your connection stats with us.</source>
       <translation>Pour nous aider à garantir les performances de connexion de notre service, vous pouvez partager vos statistiques de connexion de manière anonyme avec nous.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="43"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="44"/>
       <source>These reports do not contain any personally identifiable information.</source>
       <translation>Ces rapports ne contiennent aucune information personnellement identifiable.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="59"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="60"/>
       <source>Find out more</source>
       <translation>En savoir plus</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="73"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="74"/>
       <source>ACCEPT</source>
       <translation>ACCEPTER</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="83"/>
+      <location filename="../../../client/res/components/onboarding/pages/Page5HelpUsImprove.qml" line="84"/>
       <source>NO THANKS</source>
       <translation>NON MERCI</translation>
     </message>
@@ -2729,106 +2750,106 @@
   <context>
     <name>QualityEventsRow</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="34"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="39"/>
       <source>Connection attempt</source>
       <translation>Tentative de connexion</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="36"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="41"/>
       <source>Connection established</source>
       <translation>Connexion établie</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="38"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="43"/>
       <source>Connection canceled</source>
       <translation>Connexion annulée</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="73"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="78"/>
       <source>Expand</source>
       <extracomment>Screen reader annotation for the &quot;expand&quot; button shown on a connection event row that is not expanded</extracomment>
       <translation>Agrandir</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="76"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="81"/>
       <source>Collapse</source>
       <extracomment>Screen reader annotation for the &quot;collapse&quot; button shown on a connection event row that is expanded</extracomment>
       <translation>Réduire</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="266"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="271"/>
       <source>Platform:</source>
       <translation>Plateforme&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="282"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="287"/>
       <source>Prerelease:</source>
       <translation>Pré-sortie&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="290"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="295"/>
       <source>Yes</source>
       <translation>Oui</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="290"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="295"/>
       <source>No</source>
       <translation>Non</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="324"/>
-      <source>Protocol:</source>
-      <translation>Protocole&#xa0;:</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="340"/>
-      <source>Source:</source>
-      <translation>Source&#xa0;:</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="348"/>
-      <source>Manual</source>
-      <translation>Manuel</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="348"/>
-      <source>Automatic</source>
-      <translation>Automatique</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="298"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="303"/>
       <source>Version:</source>
       <translation>Version&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="358"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="330"/>
+      <source>Protocol:</source>
+      <translation>Protocole&#xa0;:</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="346"/>
+      <source>Source:</source>
+      <translation>Source&#xa0;:</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="354"/>
+      <source>Manual</source>
+      <translation>Manuel</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="354"/>
+      <source>Automatic</source>
+      <translation>Automatique</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="364"/>
       <source>Time to connect:</source>
       <extracomment>Label for &quot;Time to connect&quot; column - the time for the connection to be established.</extracomment>
       <translation>Temps de connexion :</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="372"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="378"/>
       <source>%1 seconds</source>
       <extracomment>The &quot;%1&quot; is replaced by the number of seconds it takes for the connection to be established. Example: &quot;3.2 seconds&quot;.</extracomment>
       <translation>%1 secondes</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="393"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="399"/>
       <source>User Agent:</source>
       <translation>Agent utilisateur&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="409"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="415"/>
       <source>Aggregation ID:</source>
       <translation>ID d&apos;agrégation&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="425"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="431"/>
       <source>Event ID:</source>
       <translation>ID de l&apos;événement&#xa0;:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="443"/>
+      <location filename="../../../client/res/components/settings/pages/help/QualityEventsRow.qml" line="449"/>
       <source>Product ID:</source>
       <translation>ID du produit&#xa0;:</translation>
     </message>
@@ -2836,13 +2857,13 @@
   <context>
     <name>QuickConnectButton</name>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="157"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="148"/>
       <source>Connect to favorite %1</source>
       <extracomment>Screen reader annotation for a Quick Connect button with a heart icon, which is used for a favorite region. %1 is a region name.</extracomment>
       <translation>Se connecter au favori&#xa0;: %1</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="162"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/QuickConnectButton.qml" line="153"/>
       <source>Connect to %1</source>
       <extracomment>Screen reader annotation for a Quick Connect button without a heart icon, which is for a recently-used or nearby location. %1 is a region name.</extracomment>
       <translation>Se connecter à %1</translation>
@@ -2878,7 +2899,7 @@
   <context>
     <name>RatingRequestNotificationStatus</name>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="392"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
       <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
       <source>Contact Support</source>
       <translation>Contacter l&apos;assistance</translation>
@@ -2931,7 +2952,7 @@
   <context>
     <name>RegionAuto</name>
     <message>
-      <location filename="../../../client/res/components/common/regions/RegionAuto.qml" line="16"/>
+      <location filename="../../../client/res/components/common/regions/RegionAuto.qml" line="17"/>
       <source>Choose automatically</source>
       <translation>Choisir automatiquement</translation>
     </message>
@@ -2958,25 +2979,25 @@
       <translation>Liste des régions</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="717"/>
+      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="720"/>
       <source>Region</source>
       <extracomment>Screen reader annotation for the column in the region list that displays the region names and flags.</extracomment>
       <translation>Région</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="726"/>
+      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="729"/>
       <source>Detail</source>
       <extracomment>Screen reader annotation for the column in the region list that displays additional details about the region, when present. This includes the IP address for &quot;dedicated IP&quot; regions, and the current nearest region for the &quot;auto&quot; row.</extracomment>
       <translation>Détails</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="732"/>
+      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="735"/>
       <source>Latency</source>
       <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; latency measurements.</extracomment>
       <translation>Latence</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="738"/>
+      <location filename="../../../client/res/components/common/regions/RegionListView.qml" line="741"/>
       <source>Favorite</source>
       <extracomment>Screen reader annotation for the column in the region list that displays the regions&apos; &quot;favorite region&quot; buttons.</extracomment>
       <translation>Favoris</translation>
@@ -3139,57 +3160,57 @@
       <translation>Cette fonctionnalité nécessite des événements de processus du noyau.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="42"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="48"/>
       <source>This feature requires OpenVPN.</source>
       <translation>Cette fonctionnalité nécessite OpenVPN.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="43"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="49"/>
       <source>WireGuard requires Windows 8 or later.</source>
       <translation>WireGuard nécessite Windows 8 ou une version ultérieure.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="54"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="60"/>
       <source>MTU</source>
       <translation>MTU</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="59"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="65"/>
       <source>Determines the maximum packet size allowed through the tunnel.</source>
       <translation>Consultez toutes les informations de sortie, d&apos;entrée, de santé et de visa avant de réserver votre prochain voyage.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="60"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="66"/>
       <source>Auto: Detect automatically, best for most connections</source>
       <translation>Auto&#xa0;: Détection automatique, idéal pour la plupart des connexions</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="61"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="67"/>
       <source>Large Packets: Most efficient if the connection is reliable</source>
       <translation>Paquets volumineux&#xa0;: plus efficaces si la connexion est fiable</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="62"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="68"/>
       <source>Small Packets: Less efficient but best on unreliable connections</source>
       <translation>Petits paquets&#xa0;: moins efficaces mais meilleurs pour les connexions peu fiables</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="65"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="71"/>
       <source>You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
       <translation>Vous pouvez rencontrer des problèmes de connexion Internet sur macOS Monterey lorsque la fonctionnalité Tunnel divisé est activée. Veuillez désactiver la fonction Tunnel divisé si vous rencontrez des difficultés pour vous connecter à Internet.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="66"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="72"/>
       <source>Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
       <translation>Veuillez désactiver la fonction Tunnel divisé si vous rencontrez des difficultés pour vous connecter à Internet.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="67"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="73"/>
       <source>macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
       <translation>macOS Monterey a introduit un problème avec Tunnel divisé sur certains systèmes. Si vous ne parvenez pas à accéder à Internet, désactivez Tunnel divisé.</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="68"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="74"/>
       <source>Disable Split Tunnel</source>
       <translation>Désactiver Tunnel divisé</translation>
     </message>
@@ -3784,139 +3805,139 @@
       <translation>Aide</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="67"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="61"/>
       <source>Show Window</source>
       <extracomment>Menu command to display the main app window/dashboard.</extracomment>
       <translation>Afficher la fenêtre</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="74"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="68"/>
       <source>Resume Connection</source>
       <translation>Reprendre la connexion</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="77"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="71"/>
       <source>Connect (Auto)</source>
       <extracomment>Menu command to connect to an automatically chosen region.</extracomment>
       <translation>Se connecter (auto)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="79"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="73"/>
       <source>Connect (%1)</source>
       <extracomment>Menu command to connect to a specific bookmarked region, with the region name in parentheses.</extracomment>
       <translation>Se connecter (%1)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="88"/>
       <source>Disconnect</source>
       <extracomment>Menu command to disconnect from the VPN.</extracomment>
       <translation>Déconnecter</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="91"/>
       <source>Snooze</source>
       <translation>Veille</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="92"/>
       <source>5 Minutes</source>
       <translation>5&#xa0;minutes</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="96"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="93"/>
       <source>10 Minutes</source>
       <translation>10&#xa0;minutes</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="97"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="94"/>
       <source>15 Minutes</source>
       <translation>15&#xa0;minutes</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="98"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="95"/>
       <source>30 Minutes</source>
       <translation>30&#xa0;minutes</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="128"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="125"/>
       <source>Connect to dedicated IP</source>
       <extracomment>Menu label for a submenu containing a list of dedicated IP regions.</extracomment>
       <translation>Se connecter à une adresse IP dédiée</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="167"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="164"/>
       <source>Connect to region</source>
       <extracomment>Menu label for a submenu containing a list of regions to connect to.</extracomment>
       <translation>Se connecter à la région</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="173"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="170"/>
       <source>Log In</source>
       <extracomment>Menu command to display the main app window where the user can log in.</extracomment>
       <translation>Se connecter</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="184"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="181"/>
       <source>Settings...</source>
       <extracomment>Menu command to open the settings dialog.</extracomment>
       <translation>Paramètres...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="188"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="185"/>
       <source>Enable Debug Logging</source>
       <extracomment>Menu label for a submenu containing help and support items. Menu command to enable or disable debug logging, which stores additional information that help developers identify and debug problems.</extracomment>
       <translation>Activer la journalisation du debug</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="187"/>
       <source>Submit Debug Logs...</source>
       <extracomment>Menu command to open a dialog that lets the user submit collected debug logs to developers for debugging.</extracomment>
       <translation>Soumettre les journaux de debug...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="190"/>
       <source>Changelog</source>
       <extracomment>Menu command to display a list of changes introduced in each version of the application.</extracomment>
       <translation>Journal des changements</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="196"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="193"/>
       <source>Support Portal</source>
       <extracomment>Menu command to open the support portal website in the user&apos;s browser.</extracomment>
       <translation>Portail d&apos;assistance</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="198"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="195"/>
       <source>Blog</source>
       <extracomment>Menu command to open the company blog website in the user&apos;s browser.</extracomment>
       <translation>Blog</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="206"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="203"/>
       <source>Copy Public IP (%1)</source>
       <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. The %1 placeholder contains the IP address, e.g. &quot;10.0.23.45&quot;.</extracomment>
       <translation>Copier l&apos;IP publique (%1)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="212"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="209"/>
       <source>Copy Public IP</source>
       <extracomment>Menu command to copy the user&apos;s current public IP address to the clipboard. This variation should match the &quot;Copy Public IP (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when disconnected.</extracomment>
       <translation>Copier l&apos;IP publique</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="220"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="217"/>
       <source>Copy Forwarded Port (%1)</source>
       <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. The %1 placeholder contains the port number, e.g. &quot;47650&quot;.</extracomment>
       <translation>Copier le port transféré (%1)</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="228"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="225"/>
       <source>Copy Forwarded Port</source>
       <extracomment>Menu command to copy the port number that is currently being forwarded (from the VPN to the user&apos;s computer) to the clipboard. This variation should match the &quot;Copy Forwarded Port (%1)&quot; string, but omits the parenthesis and is shown grayed out, used when port forwarding is not available.</extracomment>
       <translation>Copier le port transféré</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="234"/>
+      <location filename="../../../client/res/components/common/TrayMenuBuilder.qml" line="231"/>
       <source>Quit</source>
       <extracomment>Menu command to quit the application.</extracomment>
       <translation>Quitter</translation>
@@ -4082,17 +4103,17 @@
   <context>
     <name>mtu_setting</name>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="55"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="61"/>
       <source>Auto</source>
       <translation>Auto</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="56"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="62"/>
       <source>Large Packets</source>
       <translation>Paquets volumineux</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="57"/>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="63"/>
       <source>Small Packets</source>
       <translation>Petits paquets</translation>
     </message>

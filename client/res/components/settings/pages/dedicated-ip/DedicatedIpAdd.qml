@@ -44,19 +44,40 @@ Item {
     processing: 1,  // Request is in process (UI disabled)
     invalid: 2, // DIP token was invalid
     expired: 3, // DIP token was expired
-    otherError: 4 // Some other error occurred
+    otherError: 4, // Some other error occurred
+    rateLimited: 5 // Rate limited [ Error 429 ]
   })
 
   readonly property bool isErrorState: requestState !== requestStates.idle && requestState !== requestStates.processing
 
   readonly property int errorHeight: expiredMessage.visible ? expiredMessage.implicitHeight : 0 +
             invalidMessage.visible ? invalidMessage.implicitHeight : 0 +
-            otherErrorMessage.visible ? otherErrorMessage.implicitHeight : 0
+            otherErrorMessage.visible ? otherErrorMessage.implicitHeight : 0 +
+            rateLimitedMessage.visible ? rateLimitedMessage.implicitHeight : 0
   readonly property int messageHeight: activateDipDesc.implicitHeight
+
+  property real retryAfterTime: 0
+
+  // The current time which can be updated by a timer
+  property real currentTime: 0
+
+  // A timer that always updates the current time once every second
+  // because we cannot have the current time automatically updated
+  Timer {
+    onTriggered: {
+      currentTime = Date.now();
+    }
+    repeat: true
+    interval: 1000
+    running: retryAfterTime > 0 && retryAfterTime + 2000> currentTime
+  }
+
 
 
   function dialogAccept() {
     requestState = requestStates.processing
+    retryAfterTime = 0
+    currentTime = 0
     Daemon.addDedicatedIp(activateDipToken.text, function(error){
       if(error) {
         switch(error.code) {
@@ -65,6 +86,12 @@ Item {
           break
         case NativeError.DaemonRPCDedicatedIpTokenInvalid:
           requestState = requestStates.invalid
+          break
+        case NativeError.ApiRateLimitedError:
+          requestState = requestStates.rateLimited
+          currentTime = Date.now()
+          retryAfterTime = error.retryAfterTime
+
           break
         default:
           requestState = requestStates.otherError
@@ -139,6 +166,7 @@ Item {
           {
           case addDip.requestStates.otherError:
           case addDip.requestStates.invalid:
+          case addDip.requestStates.rateLimited:
           case addDip.requestStates.expired:
             return Theme.settings.inputTextboxWarningBorderColor
           }
@@ -200,6 +228,20 @@ Item {
             uiTranslate("DedicatedIpAddRow", "Make sure you have entered the token correctly.")
       }
     }
+
+    DialogMessage {
+      id: rateLimitedMessage
+      Layout.fillWidth: true
+      visible: addDip.requestState === addDip.requestStates.rateLimited
+      icon: 'warning'
+      text: {
+        return "<b><font color=\"" +
+            Util.colorToStr(Theme.dashboard.notificationWarningLinkColor) + "\">" +
+            uiTranslate("DedicatedIpAddRow", "Too many attempts.") + "<br></font></b>" +
+            Messages.tryAgainMessage(Math.ceil((retryAfterTime - currentTime) / 1000))
+      }
+    }
+
 
     DialogMessage {
       id: otherErrorMessage

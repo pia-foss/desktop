@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("latencytracker.cpp")
 
 #include "latencytracker.h"
@@ -44,7 +44,7 @@ namespace
     // Select a ping address for a location when using ICMP pings.  A server is
     // selected randomly.  If no server can be selected, this returns a
     // PingLocation with an empty echoIp/echoPort.
-    quint32 selectIcmpPingAddress(const QSharedPointer<Location> &pLocation)
+    quint32 selectIcmpPingAddress(const QSharedPointer<const Location> &pLocation)
     {
         const Server *pLatencyServer{};
         if(pLocation)
@@ -71,12 +71,12 @@ namespace
         // WinIcmpBatchPinger will insert all locations that were successfully
         // pinged into pendingReplies (values are the location IDs).  Ports are
         // always 0 for WinIcmpBatchPinger since it uses ICMP.
-        WinIcmpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
+        WinIcmpBatchPinger(const std::vector<QSharedPointer<const Location>> &locations,
                            PendingRepliesMap &pendingReplies,
                            std::chrono::milliseconds timeout);
     };
 
-    WinIcmpBatchPinger::WinIcmpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
+    WinIcmpBatchPinger::WinIcmpBatchPinger(const std::vector<QSharedPointer<const Location>> &locations,
                                            PendingRepliesMap &pendingReplies,
                                            std::chrono::milliseconds timeout)
     {
@@ -111,14 +111,14 @@ namespace
         // PosixIcmpBatchPinger will insert all locations that were successfully
         // pinged into pendingReplies (values are the location IDs).  Ports are
         // always 0 for PosixIcmpBatchPinger since it uses ICMP.
-        PosixIcmpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
+        PosixIcmpBatchPinger(const std::vector<QSharedPointer<const Location>> &locations,
                              PendingRepliesMap &pendingReplies);
 
     private:
         PosixPing _ping;
     };
 
-    PosixIcmpBatchPinger::PosixIcmpBatchPinger(const std::vector<QSharedPointer<Location>> &locations,
+    PosixIcmpBatchPinger::PosixIcmpBatchPinger(const std::vector<QSharedPointer<const Location>> &locations,
                                                PendingRepliesMap &pendingReplies)
     {
         //Ping each location.
@@ -176,7 +176,7 @@ void LatencyTracker::onMeasureTrigger()
     //Measure all known addresses (if there are any)
     //This vector of PingLocations could in principle be built with _locations
     //and stored, but it shouldn't be a significant cost to just build it here.
-    std::vector<QSharedPointer<Location>> measureLocations;
+    std::vector<QSharedPointer<const Location>> measureLocations;
     measureLocations.reserve(_locations.size());
     for(auto itLocation = _locations.begin(); itLocation != _locations.end();
         ++itLocation)
@@ -211,7 +211,7 @@ void LatencyTracker::onNewMeasurements(const Latencies &measurements)
 
 void LatencyTracker::measureNewLocations()
 {
-    std::vector<QSharedPointer<Location>> newLocations;
+    std::vector<QSharedPointer<const Location>> newLocations;
 
     for(auto &locationEntry : _locations)
     {
@@ -229,7 +229,7 @@ void LatencyTracker::measureNewLocations()
     }
 }
 
-void LatencyTracker::beginMeasurement(const std::vector<QSharedPointer<Location>> &locations)
+void LatencyTracker::beginMeasurement(const std::vector<QSharedPointer<const Location>> &locations)
 {
     //If there's at least one address to measure, start a measurement.
     if(!locations.empty())
@@ -267,13 +267,14 @@ void LatencyTracker::updateLocations(const LocationsById &serverLocations)
     _locations.reserve(serverLocations.size());
     for(const auto &location : serverLocations)
     {
+        QString idQstr{QString::fromStdString(location.first)};
         // Create the location.  No pings have been attempted yet if we don't
         // find this location in oldLocations
-        auto &newLocation = _locations[location.first];
+        auto &newLocation = _locations[idQstr];
         newLocation = {location.second, {}, false};
 
         // Did we have this location before?
-        auto itOldLocation = oldLocations.find(location.first);
+        auto itOldLocation = oldLocations.find(idQstr);
         if(itOldLocation != oldLocations.end())
         {
             //It existed, so preserve its latency measurements
@@ -304,7 +305,7 @@ void LatencyTracker::stop()
     _measureTrigger.stop();
 }
 
-LatencyBatch::LatencyBatch(const std::vector<QSharedPointer<Location>> &locations,
+LatencyBatch::LatencyBatch(const std::vector<QSharedPointer<const Location>> &locations,
                            QObject *pParent)
     : QObject{pParent}
 {

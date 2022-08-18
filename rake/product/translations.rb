@@ -1,5 +1,6 @@
 require_relative '../executable.rb'
 require_relative '../model/build.rb'
+require_relative '../product/pseudolocalizer.rb'
 
 # Define translation targets:
 # - the client's translation resource file
@@ -35,8 +36,6 @@ def defineTranslationTargets(stage, artifacts)
 
     # List the translation files that we need to update
     translations = FileList['client/ts/*.ts']
-    # Only include pseudotranslations in debug builds
-    translations.exclude('client/ts/ro.ts', 'client/ts/ps.ts') unless Build::debug?
 
     translations.each do |ts|
         file tsBuild.artifact(File.basename(ts)) => [ts, tsBuild.componentDir] do |t|
@@ -46,6 +45,7 @@ def defineTranslationTargets(stage, artifacts)
         end
     end
     importedTs = translations.map { |t| tsBuild.artifact(File.basename(t)) }
+    updatedEnUs = tsBuild.artifact('en_US.ts')
 
     # Most of the work goes into one large task targeting translations.qrc.
     # lupdate updates the ts artifacts in-place, and then we export .qm files
@@ -76,6 +76,17 @@ def defineTranslationTargets(stage, artifacts)
         args += importedTs
         # lupdate updates all ts files in one pass, so we only need to run it once.
         sh *args
+
+        # Generate pseudolocalized artifacts if debug mode is on
+        if Build::debug?
+            # Pseudolocalization is based on the latest en_US.ts file generated
+            # with the update
+            ['ro', 'ps'].each do |langId|
+                artifactPath = tsBuild.artifact(langId.ext('ts'))
+                PseudoLocalizer.pseudolocalizeToLang(updatedEnUs, artifactPath, langId)
+                importedTs << artifactPath
+            end
+        end
 
         lreleaseFixed = [
             Executable::Qt.tool('lrelease'), '-silent', '-removeidentical',
@@ -115,9 +126,10 @@ def defineTranslationTargets(stage, artifacts)
 
     exportBuild = Build.new('translations_export')
     sourceFile = exportBuild.artifact('pia_desktop.ts')
-    updatedEnUs = tsBuild.artifact('en_US.ts')
 
-    file sourceFile => [updatedEnUs, exportBuild.componentDir] do |t|
+    # The translation source depends on the qrcFile task because that's the
+    # task that actually updates the translation files
+    file sourceFile => [updatedEnUs, qrcFile, exportBuild.componentDir] do |t|
         puts "export: #{t.name}"
         FileUtils.copy_file(updatedEnUs, t.name)
     end
@@ -131,4 +143,5 @@ def defineTranslationTargets(stage, artifacts)
     task :export => [sourceFile] do |t|
         puts "exported translation artifacts"
     end
+
 end

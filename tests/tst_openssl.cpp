@@ -16,10 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "wireguard.h"
-#include "openssl.h"
-#include "path.h"
+#include <common/src/common.h>
+#include <common/src/openssl.h>
+#include <common/src/builtin/path.h>
 #include "src/testresource.h"
 #include "daemon/src/daemon.h"
 #include "daemon/src/wireguardbackend.h"
@@ -29,7 +28,7 @@
 
 namespace
 {
-    nullable_t<DaemonState> defaultState;
+    nullable_t<StateModel> defaultState;
     nullable_t<Environment> defaultEnv;
 
     // Sample regions list payload and signature.
@@ -135,16 +134,16 @@ private slots:
     // created using the correct key, but are not valid for the payload given
     void testMismatchedSignatures()
     {
-        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:04091068:rsa routines:int_rsa_verify:bad signature:crypto[\/\\]+rsa[\/\\]+rsa_sign\.c:220:\\n"$)"});
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^\d+:error:04091068:rsa routines:int_rsa_verify:bad signature:crypto[\/\\]+rsa[\/\\]+rsa_sign\.c:220:\n$)"});
         QVERIFY(!verifySignature(Environment::defaultRegionsListPublicKey, validSig2, samplePayload1));
-        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:04091068:rsa routines:int_rsa_verify:bad signature:crypto[\/\\]+rsa[\/\\]+rsa_sign\.c:220:\\n"$)"});
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^\d+:error:04091068:rsa routines:int_rsa_verify:bad signature:crypto[\/\\]+rsa[\/\\]+rsa_sign\.c:220:\n$)"});
         QVERIFY(!verifySignature(Environment::defaultRegionsListPublicKey, validSig1, samplePayload2));
     }
 
     // Test that the garbage signature is rejected
     void testGarbageSignature()
     {
-        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:0407008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto[\/\\]+rsa[\/\\]+rsa_pk1.c:\d+:\\n"$)"});
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^\d+:error:0407008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto[\/\\]+rsa[\/\\]+rsa_pk1.c:\d+:\n$)"});
         QVERIFY(!verifySignature(Environment::defaultRegionsListPublicKey, garbageSig, samplePayload1));
     }
 
@@ -155,7 +154,7 @@ private slots:
         QVERIFY(verifySignature(bogusPubKey, bogusSig2, samplePayload2));
         // That bogus signature should be rejected when expecting the real
         // public key
-        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^"\d+:error:04067072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto[\/\\]+rsa[\/\\]+rsa_ossl.c:588:\\n"$)"});
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg, QRegularExpression{R"(^\d+:error:04067072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto[\/\\]+rsa[\/\\]+rsa_ossl.c:588:\n$)"});
         QVERIFY(!verifySignature(Environment::defaultRegionsListPublicKey, bogusSig2, samplePayload2));
     }
 

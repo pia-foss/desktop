@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("nativetrayqt.cpp")
 
 #include "nativetrayqt.h"
 #include "brand.h"
 #include "product.h"
-#include "client.h"
-#include "platformscreens.h"
+#include "../client.h"
+#include "../platformscreens.h"
 #include <QGuiApplication>
 #include <QProcessEnvironment>
 #include <QPainter>
@@ -36,7 +36,6 @@
 #include "linux_env.h"
 #include "linux_scaler.h"
 #include "linux_language.h"
-#include "brand.h"
 
 namespace
 {

@@ -129,7 +129,7 @@ Page {
 
               var expDate = new Date(Daemon.account.expirationTime)
               var expDateStr = expDate.toLocaleString(
-                    Qt.locale(Client.state.activeLanguage.locale),
+                    Qt.locale(),
                     Locale.ShortFormat)
               linkMsg = linkMsg.arg(expDateStr)
 

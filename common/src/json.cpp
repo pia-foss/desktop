@@ -20,12 +20,45 @@
 #line SOURCE_FILE("json.cpp")
 
 #include "json.h"
-#include "path.h"
-#include "util.h"
+#include "builtin/path.h"
+#include "builtin/util.h"
 
 #include <QJsonDocument>
 #include <QFile>
+#include <nlohmann/json.hpp>
 
+std::ostream &operator<<(std::ostream &os, const QJsonValue &val)
+{
+    switch(val.type())
+    {
+        default:
+            // Have to break this up to avoid the ?-?-) trigraph
+            os << "QJsonValue(??" ")";
+            break;
+        case QJsonValue::Type::Undefined:
+            os << "QJsonValue(undefined)";
+            break;
+        case QJsonValue::Type::Null:
+            os << "QJsonValue(null)";
+            break;
+        case QJsonValue::Type::Bool:
+            os << "QJsonValue(bool, " << val.toBool() << ')';
+            break;
+        case QJsonValue::Type::Double:
+            os << "QJsonValue(double, " << val.toDouble() << ')';
+            break;
+        case QJsonValue::Type::String:
+            os << "QJsonValue(string, " << val.toString() << ')';
+            break;
+        case QJsonValue::Type::Array:
+            os << "QJsonValue(array, " << val.toArray() << ')';
+            break;
+        case QJsonValue::Type::Object:
+            os << "QJsonValue(object, " << val.toObject() << ')';
+            break;
+    }
+    return os;
+}
 
 bool json_cast(const QJsonValue &from, bool &to) { return from.isBool() && ((to = from.toBool()), true); }
 bool json_cast(const QJsonValue &from, double &to) { return from.isDouble() && ((to = from.toDouble()), true); }
@@ -376,4 +409,40 @@ void writeProperties(const QJsonObject& object, const Path &settingsDir,
         qDebug() << "Successfully wrote" << filename;
     else
         qCritical() << "Unable to write" << filename;
+}
+
+QJsonObject adaptJsonTextToQJsonObject(kapps::core::StringSlice jsonText)
+{
+    // QJsonDocument can only parse from a QByteArray, which normally owns
+    // its data.  However, QByteArray provides a way to sneak a raw data
+    // pointer/size into it without copying the data, which is done here.
+    auto jsonByteArrayView = QByteArray::fromRawData(jsonText.data(), jsonText.size());
+    QJsonParseError parseError{};
+    auto qtJsonDoc = QJsonDocument::fromJson(jsonByteArrayView, &parseError);
+    if(!qtJsonDoc.isObject())
+    {
+        // Didn't get an object back - this would indicate some sort of
+        // interchange error between nlohmann::json and Qt.  Likely, either:
+        // - qtJsonDoc is "null" - nlohmann::json produced something that
+        //   Qt did not understand at all.  parseError should have info.
+        // - qtJsonDoc is non-null but not an object - somehow the JSON was
+        //   interpreted as an array (Qt does not support anything other
+        //   than object/array at the top level).  parseError won't contain
+        //   anything.
+        const char *qtJsonDocType = "unknown";
+        if(qtJsonDoc.isArray())
+            qtJsonDocType = "array";
+        else if(qtJsonDoc.isNull())
+            qtJsonDocType = "null";
+        // QJsonDocument strangely has "isEmpty" too, this probably means
+        // either an empty array or empty object, but lots of Qt objects
+        // have strange combinations of undefined/empty states, so check it
+        // too if we didn't match the above.
+        else if(qtJsonDoc.isEmpty())
+            qtJsonDocType = "empty";
+        KAPPS_CORE_WARNING() << "Can't read object JSON - Qt returned type"
+            << qtJsonDocType << "and parse error" << parseError.errorString();
+        throw std::runtime_error{"object JSON value could not be read"};
+    }
+    return qtJsonDoc.object();
 }

@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("winsvcstub.cpp")
 
-#include <Windows.h>
-#include "win_util.h"
+#include <kapps_core/src/winapi.h>
+#include <common/src/win/win_util.h>
 
 #pragma comment(lib, "Advapi32.lib")    // Service functions
 

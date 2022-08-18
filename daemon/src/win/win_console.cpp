@@ -16,17 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_console.cpp")
 
 #include "win_console.h"
 #include "win_service.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "win.h"
 #include "version.h"
 #include "product.h"
 #include "brand.h"
-#include "exec.h"
+#include <common/src/exec.h>
 #include "../../../extras/installer/win/tap_inl.h"
 #include "../../../extras/installer/win/tun_inl.h"
 
@@ -294,7 +294,7 @@ void WinConsole::stopDaemon()
 int WinConsole::showHelp()
 {
     QTextStream(stdout)
-            << PIA_PRODUCT_NAME << " Service v" << Version::semanticVersion() << endl
+            << PIA_PRODUCT_NAME << " Service v" << QString::fromStdString(Version::semanticVersion()) << endl
             << endl
             << "Usage:" << endl
             << "  " BRAND_CODE "-service <command>" << endl

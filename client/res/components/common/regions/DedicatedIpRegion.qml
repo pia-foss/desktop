@@ -20,6 +20,7 @@ import QtQuick 2.9
 import "../../common"
 import "../../theme"
 import "../../daemon"
+import "../../client"
 import "../../settings/stores"
 import "qrc:/javascript/keyutil.js" as KeyUtil
 import "qrc:/javascript/util.js" as Util
@@ -109,7 +110,7 @@ RegionRowConstants {
     width: parent.width
     height: 36
 
-    label: Daemon.getLocationName(region)
+    label: Client.getRegionAutoName(region.id)
     labelTextPx: Theme.regions.labelTextPx
     showLatency: true
     latency: (region && Util.isFiniteNumber(region.latency)) ? region.latency : -1
@@ -117,7 +118,7 @@ RegionRowConstants {
     canFavorite: dedicatedIpRegion.canFavorite
     lacksPortForwarding: portForwardEnabled && !region.portForward
     pfWarningTipText: singleRegionPfWarning
-    geoLocation: region.geoOnly
+    geoLocation: region.geoLocated
 
     isFavorite: favoriteSetting.currentValue
     highlightFavorite: effectiveColumnFor(dedicatedIpRegion.highlightColumn) === keyColumns.favorite
@@ -130,7 +131,7 @@ RegionRowConstants {
     FlagImage {
       x: 24
       y: dedicatedIpRegion.height / 2 - height / 2
-      countryCode: region.country
+      countryCode: Daemon.state.getRegionCountryCode(region.id)
     }
 
     DedicatedIpSubtitle {

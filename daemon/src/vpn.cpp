@@ -16,19 +16,19 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("vpn.cpp")
 
 #include "vpn.h"
 #include "vpnmethod.h"
 #include "daemon.h"
-#include "exec.h"
-#include "path.h"
+#include <common/src/exec.h>
+#include <common/src/builtin/path.h>
 #include "brand.h"
 #include "openvpnmethod.h"
 #include "wireguardmethod.h"
-#include "configwriter.h"
-#include "apinetwork.h"
+#include <kapps_core/src/configwriter.h>
+#include <common/src/apinetwork.h>
 
 #include <QFile>
 #include <QTextStream>
@@ -107,6 +107,12 @@ namespace
     // Length of the random suffix added to Dedicated IP region usernames; see
     // ConnectionConfig::ConnectionConfig()
     const int dipUsernameRandSuffixChars{8};
+
+    kapps::core::ConfigWriter &operator<<(kapps::core::ConfigWriter &w, const QString &str)
+    {
+        w << str.toStdString();
+        return w;
+    }
 }
 
 ResolverRunner::ResolverRunner(RestartStrategy::Params restartParams)
@@ -139,7 +145,7 @@ ResolverRunner::ResolverRunner(RestartStrategy::Params restartParams)
                     // Qt regexes don't work on byte arrays but this check works
                     // well enough to trace every 1000 blocks.
                     if(line.endsWith(QByteArrayLiteral("000")))
-                        qInfo() << objectName() << "-" << line;
+                        qInfo() << objectName() << "-" << line.data();
                 }
             });
     // We never clear hnsdSyncFailure() when hnsd starts / stops / restarts.  We
@@ -245,7 +251,7 @@ ShadowsocksRunner::ShadowsocksRunner(RestartStrategy::Params restartParams)
 {
     connect(this, &ShadowsocksRunner::stdoutLine, this, [this](const QByteArray &line)
     {
-        qInfo() << objectName() << "- stdout:" << line;
+        qInfo() << objectName() << "- stdout:" << line.data();
 
         QByteArray marker{QByteArrayLiteral("listening on TCP port ")};
         auto pos = line.indexOf(marker);
@@ -260,7 +266,7 @@ ShadowsocksRunner::ShadowsocksRunner(RestartStrategy::Params restartParams)
             else
             {
                 qInfo() << objectName() << "Could not detect assigned port:"
-                    << line;
+                    << line.data();
                 // This is no good, kill the process and try again
                 kill();
             }
@@ -303,14 +309,16 @@ void ShadowsocksRunner::setupProcess(UidGidProcess &process)
 }
 
 // Custom logging for our OriginalNetworkScan struct
-QDebug operator<<(QDebug debug, const OriginalNetworkScan& netScan) {
-    QDebugStateSaver saver(debug);
-    debug.nospace() << QStringLiteral("Network(gatewayIp: %1, interfaceName: %2, ipAddress: %3, ipAddress6: %4, gatewayIp6: %5)")
-        .arg(netScan.gatewayIp(), netScan.interfaceName(), netScan.ipAddress(), netScan.ipAddress6(), netScan.gatewayIp6());
-
-    return debug;
+/* std::ostream &operator<<(std::ostream &os, const OriginalNetworkScan& netScan)
+{
+    os << "Network(gatewayIp: " << netScan.gatewayIp()
+        << ", interfaceName: " << netScan.interfaceName()
+        << ", ipAddress: " << netScan.ipAddress()
+        << ", ipAddress6: " << netScan.ipAddress6()
+        << ", gatewayIp6: " << netScan.gatewayIp6() << ")";
+    return os;
 }
-
+ */
 TransportSelector::TransportSelector()
     : TransportSelector{preferredTransportTimeout}
 {
@@ -526,11 +534,11 @@ QHostAddress ConnectionConfig::parseIpv4Host(const QString &host)
 ConnectionConfig::ConnectionConfig()
 {}
 
-ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
+ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
                                    DaemonAccount &account)
     : ConnectionConfig{}
 {
-    // Grab the next VPN location.  Copy it in case the locations in DaemonState
+    // Grab the next VPN location.  Copy it in case the locations in StateModel
     // are updated.
     if(state.vpnLocations().nextLocation())
         _pVpnLocation.reset(new Location{*state.vpnLocations().nextLocation()});
@@ -683,7 +691,7 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, DaemonState &state,
         {
             _proxyType = ProxyType::None;
         }
-        
+
         // The protocol might have been forced to TCP if Shadowsocks was enabled.
         if(_openvpnProtocol == Protocol::TCP)
             _openvpnRemotePort = settings.remotePortTCP();
@@ -930,7 +938,7 @@ void VPNConnection::scheduleDnsCacheFlush()
 }
 
 ExternalIpTask::ExternalIpTask() {
-    connect(&g_state, &DaemonState::externalIpChanged, this, &ExternalIpTask::checkExternalIp);
+    g_state.externalIp.changed = [this]{checkExternalIp();};
     checkExternalIp();
 }
 
@@ -938,7 +946,6 @@ void ExternalIpTask::checkExternalIp() {
     if(!g_state.externalIp().isEmpty())
         resolve();
 }
-
 
 bool VPNConnection::needsReconnect()
 {
@@ -1277,7 +1284,7 @@ void VPNConnection::doConnect()
     qInfo() << "Initial netScan for VPN method" << netScan;
 
     bool delayNext = true;
-    const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), QHostAddress{netScan.ipAddress()}, delayNext);
+    const Server *pVpnServer = _transportSelector.beginAttempt(*_connectingConfig.vpnLocation(), QHostAddress{QString::fromStdString(netScan.ipAddress())}, delayNext);
     // When using WireGuard, the TransportSelector is vestigial, since
     // WireGuard currently only supports one protocol and port.  It's still
     // active right now so transports are reported, but it reports the selected
@@ -1324,7 +1331,7 @@ void VPNConnection::doConnect()
         if(_connectionAttemptCount % 100 == 1)
         {
             qWarning() << "Cached modern regions list:"
-                << QJsonDocument{g_data.cachedModernRegionsList()}.toJson();
+                << g_data.cachedModernRegionsList();
         }
         _connectingServer = {};
         scheduleNextConnectionAttempt();
@@ -1360,12 +1367,12 @@ void VPNConnection::doConnect()
     // physical interface whenever we're not going to set the default route to
     // bypass this - even if we're using the preferred transport.
     if(!_connectingConfig.setDefaultRoute())
-        localBindAddress = QHostAddress{netScan.ipAddress()};
+        localBindAddress = QHostAddress{QString::fromStdString(netScan.ipAddress())};
 #endif
 
     try
     {
-        _method->run(_connectingConfig, _connectingServer,
+        _method->run(_connectingConfig, *_connectingServer,
                      _transportSelector.lastUsed(), localBindAddress,
                      _shadowsocksServerIp, _shadowsocksRunner.localPort());
     }
@@ -1401,15 +1408,15 @@ void VPNConnection::vpnMethodStateChanged()
             {
                 // Write the config file
                 {
-                    ConfigWriter conf{Path::UnboundConfigFile};
+                    kapps::core::ConfigWriter conf{Path::UnboundConfigFile};
                     conf << "server:" << conf.endl;
                     conf << "    logfile: \"\"" << conf.endl;   // Log to stderr
                     conf << "    edns-buffer-size: 4096" << conf.endl;
                     conf << "    max-udp-size: 4096" << conf.endl;
                     conf << "    qname-minimisation: yes" << conf.endl;
                     conf << "    do-ip6: no" << conf.endl;
-                    conf << "    interface: " << resolverLocalAddress() << conf.endl;
-                    conf << "    outgoing-interface:" << g_state.tunnelDeviceLocalAddress() << conf.endl;
+                    conf << "    interface: " << resolverLocalAddress().toStdString() << conf.endl;
+                    conf << "    outgoing-interface:" << g_state.tunnelDeviceLocalAddress().toStdString() << conf.endl;
                     conf << "    verbosity: 1" << conf.endl;
                     // We can't let unbound drop rights, even on Mac/Linux - it
                     // drops both user and group rights, and we need it to keep
@@ -1422,7 +1429,9 @@ void VPNConnection::vpnMethodStateChanged()
                     conf << "    use-syslog: no" << conf.endl;
                     conf << "    hide-identity: yes" << conf.endl;
                     conf << "    hide-version: yes" << conf.endl;
-                    conf << "    directory: \"" << Path::InstallationDir << "\"" << conf.endl;
+                    // We don't need to explicitly quote Path::InstallationDir as
+                    // QStrings are implicitly quoted by operator<<(std::ostream&, )
+                    conf << "    directory: " << Path::InstallationDir << conf.endl;
                     conf << "    pidfile: \"\"" << conf.endl;
                     conf << "    chroot: \"\"" << conf.endl;
                 }
@@ -1600,6 +1609,7 @@ void VPNConnection::setState(State state)
             _lastBytecountTime.clear();
         }
 
+        State oldState = _state;
         _state = state;
 
         // Sanity-check location invariants and grab transports if they're
@@ -1626,7 +1636,8 @@ void VPNConnection::setState(State state)
         case State::Connected:
             Q_ASSERT(!_connectingConfig.vpnLocation());
             Q_ASSERT(_connectedConfig.vpnLocation());
-            connectedServer = _connectedServer; // Report only in Connected state
+            Q_ASSERT(_connectedServer);
+            connectedServer = *_connectedServer; // Report only in Connected state
             preferredTransport = _transportSelector.lastPreferred();
             actualTransport = _transportSelector.lastUsed();
             break;
@@ -1641,7 +1652,7 @@ void VPNConnection::setState(State state)
             break;
         }
 
-        emit stateChanged(_state, _connectingConfig, _connectedConfig,
+        emit stateChanged(_state, oldState, _connectingConfig, _connectedConfig,
                           connectedServer, preferredTransport, actualTransport);
     }
 }
@@ -1660,7 +1671,7 @@ void VPNConnection::updateByteCounts(quint64 received, quint64 sent)
     // If we've reached the maximum number of measurements, discard one before
     // adding a new one
     if(_intervalMeasurements.size() == g_maxMeasurementIntervals)
-        _intervalMeasurements.takeFirst();
+        _intervalMeasurements.pop_front();
     _intervalMeasurements.push_back({intervalReceived, intervalSent});
 
     // The interval measurements always change even if the perpetual totals do

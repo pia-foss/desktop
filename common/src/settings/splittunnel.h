@@ -19,8 +19,8 @@
 #ifndef SETTINGS_SPLITTUNNEL_H
 #define SETTINGS_SPLITTUNNEL_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include <QHostAddress>
 #include <QAbstractSocket>
 
@@ -101,7 +101,8 @@ public:
     }
     bool operator!=(const SplitTunnelSubnetRule &other) const {return !(*this == other);}
 
-    QString normalizedSubnet() const {
+    QString normalizedSubnet() const
+    {
         auto subnetPair = QHostAddress::parseSubnet(subnet());
         return subnetPair.first.isNull() ? "" : QStringLiteral("%1/%2").arg(subnetPair.first.toString()).arg(subnetPair.second);
     }

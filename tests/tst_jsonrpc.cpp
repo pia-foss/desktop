@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
-#include "async.h"
-#include "jsonrpc.h"
+#include <common/src/async.h>
+#include <common/src/jsonrpc.h>
 
 #include <QJsonObject>
 

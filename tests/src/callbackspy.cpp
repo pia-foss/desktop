@@ -42,7 +42,7 @@ bool CallbackSpy::checkError(Error::Code code) const
     if(!_spy[0][0].canConvert<Error>())
     {
         qWarning() << "Result wasn't an error, expected code" << code << "- got"
-            << _spy[0][0];
+            << _spy[0][0].typeName();
         return false;
     }
 

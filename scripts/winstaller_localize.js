@@ -64,6 +64,16 @@ function getTsMessage(ts, context, srcText) {
   return getCtxMessage(ctxObj, srcText)
 }
 
+// Test if a line is '#include "resource.h"', and add "../" as needed
+function changeResourceHLine(line, debug) {
+  if(line !== '#include "resource.h"')
+    return
+
+  if(debug) // Debug languages go in a subdir, needs an extra "../"
+    return '#include "../../resource.h"'
+  return '#include "../resource.h"'
+}
+
 // Test if a line is a character set line, and if so, change the character set.
 // Returns the new line, or an empty string if it wasn't a character set line.
 function changeCharsetLine(line, charset) {
@@ -142,7 +152,7 @@ function translateStringLine(line, ts) {
 //
 // Returns a promise that will resolve with the localized resource script
 // content
-function localize(enrc, tspath, lang, sublang, charset, mirror) {
+function localize(enrc, tspath, lang, sublang, charset, mirror, debug) {
   // Load the TS file and parse it.
   const tsContent = fs.readFileSync(tspath, {encoding: 'utf8'})
   const tsContentImported = PiaOneSky.tsImport(tsContent)
@@ -158,7 +168,8 @@ function localize(enrc, tspath, lang, sublang, charset, mirror) {
         const rcLine = rcLines[i]
         const linebreak = rcLines[i+1]
 
-        let updatedLine = changeCharsetLine(rcLine, charset) ||
+        let updatedLine = changeResourceHLine(rcLine, debug) ||
+                          changeCharsetLine(rcLine, charset) ||
                           changeUiMirrorLine(rcLine, mirror) ||
                           changeLangLine(rcLine, lang, sublang) ||
                           translateStringLine(rcLine, ts) ||
@@ -235,7 +246,7 @@ else {
 
   const enUSrc = fs.readFileSync(enUSpath, {encoding: 'utf8'})
 
-  localize(enUSrc, tsPath, winLangId, winSublangId, winCharsetId, winUiMirror)
+  localize(enUSrc, tsPath, winLangId, winSublangId, winCharsetId, winUiMirror, debug)
     .then((outRcContent) => {
       // The file has to be written out in UTF-16LE, this is the only Unicode
       // format that seems to be supported by the resource compiler.

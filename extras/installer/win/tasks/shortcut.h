@@ -20,7 +20,7 @@
 #define TASKS_SHORTCUT_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 #include "file.h"
 
 bool createShortcut(utf16ptr shortcutPath, utf16ptr targetPath, utf16ptr arguments, utf16ptr comment);

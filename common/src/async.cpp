@@ -231,25 +231,23 @@ bool BaseTask::setFinished(BaseTask::State state)
     return true;
 }
 
-QDebug operator<<(QDebug debug, const BaseTask* task)
+std::ostream &operator<<(std::ostream &os, const BaseTask* task)
 {
     // Note: Extra debugging stuff like state and listener count can be added
     // here if debugging task lifetimes etc.
-    QDebugStateSaver saver(debug);
-    debug.nospace().noquote();
     if(task)
     {
-        debug << "Task";
+        os << "Task";
         if (const char* type = task->typeName())
         {
-            debug << '<' << type << '>';
+            os << '<' << type << '>';
         }
-        debug << ' ' << '#' << (task->_state & BaseTask::IndexMask);
+        os << ' ' << '#' << (task->_state & BaseTask::IndexMask);
     }
     else
-        debug << "<nullptr>";
+        os << "<nullptr>";
 
-    return debug;
+    return os;
 }
 
 Task<void>::~Task()

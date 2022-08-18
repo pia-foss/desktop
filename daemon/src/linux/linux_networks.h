@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("linux_networks.h")
 
 #ifndef LINUX_NETWORKS_H
 #define LINUX_NETWORKS_H
 
-#include "networkmonitor.h"
+#include "../networkmonitor.h"
 #include <memory>
 
 // Create the Linux implementation of PosixNetworks

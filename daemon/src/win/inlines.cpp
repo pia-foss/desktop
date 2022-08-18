@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/inlines.cpp")
 
 // Shared functionality between the Windows installer and daemon - see
@@ -36,3 +36,5 @@
 
 #define TUN_LOG qInfo
 #include "../../../extras/installer/win/tun.inl"
+
+#include "../../../extras/installer/win/util.inl"

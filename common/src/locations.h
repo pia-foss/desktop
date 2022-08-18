@@ -16,30 +16,32 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("locations.h")
-
 #ifndef LOCATIONS_H
 #define LOCATIONS_H
 
+#include "common.h"
 #include "settings/connection.h"
 #include "settings/locations.h"
 #include "settings/dedicatedip.h"
+#include <kapps_regions/src/metadata.h>
 
 
 // Build Location and Server objects for the modern region infrastructure from
 // the latencies, modern regions list, and Shadowsocks regions list.
 // Dedicated IPs and the dev manual server are added as additional regions.
-COMMON_EXPORT LocationsById buildModernLocations(const LatencyMap &latencies,
-                                                 const QJsonObject &regionsObj,
-                                                 const QJsonArray &shadowsocksObj,
-                                                 const std::vector<AccountDedicatedIp> &dedicatedIps,
-                                                 const ManualServer &manualServer);
+COMMON_EXPORT auto buildModernLocations(const LatencyMap &latencies,
+                                        const QJsonObject &regionsObj,
+                                        const QJsonArray &shadowsocksObj,
+                                        const QJsonObject &metadataObj,
+                                        const std::vector<AccountDedicatedIp> &dedicatedIps,
+                                        const ManualServer &manualServer)
+    -> std::pair<LocationsById, kapps::regions::Metadata>;
 
 // Build the grouped and sorted locations from the flat locations.
 COMMON_EXPORT void buildGroupedLocations(const LocationsById &locations,
+                                         const kapps::regions::Metadata &metadata,
                                          std::vector<CountryLocations> &groupedLocations,
-                                         std::vector<QSharedPointer<Location>> &dedicatedIpLocations);
+                                         std::vector<QSharedPointer<const Location>> &dedicatedIpLocations);
 
 class COMMON_EXPORT NearestLocations
 {
@@ -57,7 +59,7 @@ public:
     //
     // This uses the selection algorithm below; portForward is applied as a
     // context-specific requirement if set.
-    QSharedPointer<Location> getNearestSafeVpnLocation(bool portForward) const;
+    QSharedPointer<const Location> getNearestSafeVpnLocation(bool portForward) const;
 
     // "Auto" location selections consider three criteria to try to pick the
     // nearest location that meets requirements:
@@ -98,7 +100,7 @@ public:
     // do not match the predicate; use getBestLocation() as a fallback if that
     // is possible and this method fails to find a location.
     template<class LocationTestFunc>
-    QSharedPointer<Location> getBestMatchingLocation(LocationTestFunc isAllowedBase) const
+    QSharedPointer<const Location> getBestMatchingLocation(LocationTestFunc isAllowedBase) const
     {
         if(_locations.empty())
         {
@@ -116,7 +118,7 @@ public:
             [&isAllowed](const auto &pLocation)
             {
                 return pLocation && pLocation->autoSafe() &&
-                    !pLocation->geoOnly() && isAllowed(*pLocation);
+                    !pLocation->geoLocated() && isAllowed(*pLocation);
             });
         if(itResult != _locations.end())
             return *itResult;
@@ -135,7 +137,7 @@ public:
         itResult = std::find_if(_locations.begin(), _locations.end(),
             [&isAllowed](const auto &pLocation)
             {
-                return pLocation && !pLocation->geoOnly() && isAllowed(*pLocation);
+                return pLocation && !pLocation->geoLocated() && isAllowed(*pLocation);
             });
         if(itResult != _locations.end())
             return *itResult;
@@ -154,14 +156,14 @@ public:
         return {};
     }
 
-    QSharedPointer<Location> getBestLocation() const
+    QSharedPointer<const Location> getBestLocation() const
     {
         // No context criterion, just use a default predicate.
         return getBestMatchingLocation([](const Location &){return true;});
     }
 
 private:
-    std::vector<QSharedPointer<Location>> _locations;
+    std::vector<QSharedPointer<const Location>> _locations;
 };
 
 #endif

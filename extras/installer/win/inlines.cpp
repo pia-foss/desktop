@@ -47,3 +47,5 @@
 
 #define SAFEMODE_LOG LOG
 #include "safemode.inl"
+
+#include "util.inl"

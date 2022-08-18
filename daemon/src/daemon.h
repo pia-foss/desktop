@@ -16,17 +16,20 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("daemon.h")
 
 #ifndef DAEMON_H
 #define DAEMON_H
 #pragma once
 
-#include "settings.h"
-#include "async.h"
+#include <common/src/settings/daemonaccount.h>
+#include <common/src/settings/daemondata.h>
+#include "model/state.h"
+#include <common/src/settings/daemonsettings.h>
+#include <common/src/async.h>
 #include "environment.h"
-#include "jsonrpc.h"
+#include <common/src/jsonrpc.h>
 #include "latencytracker.h"
 #include "networkmonitor.h"
 #include "portforwarder.h"
@@ -36,6 +39,7 @@
 #include "vpn.h"
 #include "apiclient.h"
 #include "automation.h"
+#include <kapps_net/src/firewallparams.h>
 
 #include <QCoreApplication>
 #include <QHash>
@@ -72,7 +76,7 @@ public:
     // - If the last active client deactivates (indicating a clean exit), the
     //   VPN is disconnected automatically, and the daemon deactivates
     // - If the last active client unexpectedly exits, it's assumed to be a
-    //   client crash and DaemonState::invalidClientExit is set
+    //   client crash and StateModel::invalidClientExit is set
     //
     // "Inactive" clients do not "own" the VPN connection state.  These are CLI
     // clients, new connections that haven't activated yet, or interactive
@@ -107,114 +111,11 @@ private:
     // daemon remains active (invalidClientExit vs. killedClient)
     bool _killed;
     State _state;
+
 };
 
-// Descriptor for a set of firewall rules to be appled.
-//
-struct FirewallParams
-{
-    // These parameters are specified by VPNConnection (some are passed through
-    // from the VPNMethod)
-
-    // When connecting or connected, these are the connection settings we're
-    // using.  (Empty when neither connecting nor connected.)
-    nullable_t<ConnectionConfig> _connectionSettings;
-
-    // VPN network interface - see VPNMethod::getNetworkAdapter()
-    std::shared_ptr<NetworkAdapter> adapter;
-
-    // The following flags indicate which general rulesets are needed. Note that
-    // this is after some sanity filtering, i.e. an allow rule may be listed
-    // as not needed if there were no block rules preceding it. The rulesets
-    // should be thought of as in last-match order.
-
-    bool leakProtectionEnabled; // Apply leak protection (on for KS=always, or for KS=auto when connected)
-    bool blockAll;      // Block all traffic by default
-    bool allowVPN;      // Exempt traffic through VPN tunnel
-    bool allowDHCP;     // Exempt DHCP traffic
-    bool blockIPv6;     // Block all IPv6 traffic
-    bool allowLAN;      // Exempt LAN traffic, including IPv6 LAN traffic
-    bool blockDNS;      // Block all DNS traffic except specified DNS servers
-    bool allowPIA;      // Exempt PIA executables
-    bool allowLoopback; // Exempt loopback traffic
-    bool allowResolver; // Exempt local DNS resolver traffic
-
-    // Whether we are connected to the VPN right now.  Note that this differs
-    // from 'hasConnected'.
-    bool isConnected;
-    // Have we connected to the VPN since it was enabled?  (Some rules are only
-    // activated once we successfully connect, but remain active even if we lose
-    // the connection while reconnecting.)
-    bool hasConnected;
-    // Whether to bypass the VPN for apps with no split tunnel rules.
-    // When split tunnel is enabled, or when not connecting/connected, this is
-    // false.
-    bool bypassDefaultApps;
-    // Whether the default route has or will be set to the VPN (false when not
-    // connected or connecting).  Note that this _really_ refers to the routing
-    // table itself, not the intended default app behavior (which is indicated
-    // by bypassDefaultApps, and may not be the same on Mac).
-    bool setDefaultRoute;
-
-    // Whether to enable split tunnel.  Split tunnel is enabled whenever the
-    // setting is enabled, even if the PIA client is not logged in.  This is
-    // important to block Only VPN apps - otherwise, they may leak even after
-    // PIA is started/connected, because they could have existing connections
-    // that were permitted.
-    //
-    // Bypass VPN apps though are only affected when we connect
-    // - persistent connections from those apps would be
-    // fine since they bypass the VPN anyway.
-    bool enableSplitTunnel;
-    // Original network information used (among other things) to manage apps for split
-    // tunnel.
-    OriginalNetworkScan netScan;
-    QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
-    QVector<QString> vpnOnlyApps; // Apps to force on the VPN
-
-    QSet<QString> bypassIpv4Subnets; // IPv4 subnets to bypass VPN
-    QSet<QString> bypassIpv6Subnets; // IPv6 subnets to bypass VPN
-};
-Q_DECLARE_METATYPE(FirewallParams)
-
-class RouteManager
-{
-    CLASS_LOGGING_CATEGORY("RouteManager")
-public:
-    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
-    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
-    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const = 0;
-    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const = 0;
-    virtual ~RouteManager() = default;
-};
-
-class SubnetBypass
-{
-    CLASS_LOGGING_CATEGORY("SubnetBypass")
-public:
-
-    // Inject the RouteManager dependency - also makes
-    // this class easily testable
-    SubnetBypass(std::unique_ptr<RouteManager> routeManager)
-        : _routeManager{std::move(routeManager)}
-        , _isEnabled{false}
-    {}
-
-    void updateRoutes(const FirewallParams &params);
-private:
-    void addAndRemoveSubnets4(const FirewallParams &params);
-    void addAndRemoveSubnets6(const FirewallParams &params);
-    void clearAllRoutes4();
-    void clearAllRoutes6();
-    QString boolToString(bool value) {return value ? "ON" : "OFF";}
-    QString stateChangeString(bool oldValue, bool newValue);
-private:
-    std::unique_ptr<RouteManager> _routeManager;
-    OriginalNetworkScan _lastNetScan;
-    QSet<QString> _lastIpv4Subnets;
-    QSet<QString> _lastIpv6Subnets;
-    bool _isEnabled;
-};
+// From kapps-net
+Q_DECLARE_METATYPE(kapps::net::FirewallParams)
 
 class DiagnosticsFile
 {
@@ -314,7 +215,7 @@ public:
     DaemonData& data() { return _data; }
     DaemonAccount& account() { return _account; }
     DaemonSettings& settings() { return _settings; }
-    DaemonState& state() { return _state; }
+    StateModel& state() { return _state; }
 
     virtual std::shared_ptr<NetworkAdapter> getNetworkAdapter() = 0;
 
@@ -324,7 +225,7 @@ public:
     void forcePublicIpRefresh();
 
 protected:
-    virtual void applyFirewallRules(const FirewallParams& params) {}
+    virtual void applyFirewallRules(kapps::net::FirewallParams params) {}
 
 protected:
     Async<QJsonObject> loadAccountInfo(const QString& username, const QString& password, const QString& token);
@@ -338,7 +239,7 @@ protected:
     // daemonActivated() or daemonDeactivated().
     // Normally the daemon is active when any active client is connected, but it
     // can also remain active if an active client exits unexpectedly
-    // (DaemonState::invalidClientExit / killedClient), or if background mode is
+    // (StateModel::invalidClientExit / killedClient), or if background mode is
     // enabled in Settings.
     bool isActive() const;
 
@@ -374,6 +275,18 @@ protected:
     void RPC_disconnectVPN();
     void RPC_startSnooze(qint64 seconds);
     void RPC_stopSnooze();
+    // Get the current "best" region in a country.  While countries themselves
+    // can't be properly selected, the client does provide "country" favorites
+    // that automatically select the best region in the country at the time of
+    // connection.
+    //
+    // This is done via RPC so the client doesn't have to know the details of
+    // the daemon's selection algorithm, which prefers auto-safe and non-geo
+    // regions in general, etc.  This can't be used for UI as it does not
+    // indicate when the preferences change; it can only really be used to
+    // connect to the resulting region.  The intent is that this will be
+    // replaced with proper country selections.
+    QString RPC_getCountryBestRegion(const QString &country);
 
     // Diagnostics
     QJsonValue RPC_writeDiagnostics();
@@ -472,6 +385,7 @@ private:
     void serialize();
     Async<void> loadVpnIp();
     void vpnStateChanged(VPNConnection::State state,
+                         VPNConnection::State oldState,
                          const ConnectionConfig &connectingConfig,
                          const ConnectionConfig &connectedConfig,
                          const nullable_t<Server> &connectedServer,
@@ -483,8 +397,9 @@ private:
     void portForwardUpdated(int port);
 
     // Store new locations built from one of the regions lists and update
-    // dependent properties - used by rebuild*Location().
-    void applyBuiltLocations(const LocationsById &newLocations);
+    // dependent properties - used by rebuildModernLocations().
+    void applyBuiltLocations(LocationsById newLocations,
+                             kapps::regions::Metadata metadata);
 
     // Build the locations list from the modern regions list.  Returns true if
     // the new locations list is not empty, meaning the new data can be cached.
@@ -494,7 +409,8 @@ private:
     // (which should then be cached if successful).  Latencies from DaemonData
     // are used.
     bool rebuildModernLocations(const QJsonObject &regionsObj,
-                                const QJsonArray &shadowsocksObj);
+                                const QJsonArray &shadowsocksObj,
+                                const QJsonObject &metadataObj);
 
     // Rebuild either the legacy or modern locations from the cached data,
     // depending on the infrastructure setting.  Used when latencies are updated
@@ -548,9 +464,9 @@ private:
     void setOverrideActive(const QString &resourceName);
     void setOverrideFailed(const QString &resourceName);
 
-    // Update DaemonState::nextConfig following a property change from
-    // DaemonState, DaemonSettings, or DaemonAccount
-    void updateNextConfig(const QString &changedPropertyName);
+    // Update StateModel::nextConfig following a property change from
+    // StateModel, DaemonSettings, or DaemonAccount
+    void updateNextConfig();
 
     void logCommand(const QString &cmd, const QStringList &args);
     // Log the current routing table; used after connecting
@@ -589,15 +505,15 @@ protected:
     // We should get rid of the ConnectionInfo and instead implement specific
     // JSON conversions for ConnectionConfig so we don't need an explicit
     // NativeJsonObject representation, and we can put ConnectionConfig values
-    // in DaemonState.  In the meantime, the ConnectionConfigs are held here for
-    // internal use, and DaemonState holds the derived ConnectionInfos.
+    // in StateModel.  In the meantime, the ConnectionConfigs are held here for
+    // internal use, and StateModel holds the derived ConnectionInfos.
     ConnectionConfig _connectingConfig;
     ConnectionConfig _connectedConfig;
 
     DaemonData _data;
     DaemonAccount _account;
     DaemonSettings _settings;
-    DaemonState _state;
+    StateModel _state;
 
     Environment _environment;
     ApiClient _apiClient;
@@ -617,7 +533,7 @@ protected:
     QSet<QString> _dataChanges;
     QSet<QString> _accountChanges;
     QSet<QString> _settingsChanges;
-    QSet<QString> _stateChanges;
+    std::unordered_set<std::string> _stateChanges;
 
     unsigned int _pendingSerializations;
     QTimer _serializationTimer;

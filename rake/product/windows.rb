@@ -146,32 +146,22 @@ module PiaWindows
     end
 
     # Define additional installable artifacts and targets for Windows.
-    def self.defineTargets(version, stage)
+    def self.defineTargets(version, stage, kappsModules, commonlib, clientlib)
         # This module is used by the client to indirectly access Windows Runtime
         # APIs.  The client remains compatible with Windows 7 by only loading this
         # module on 8+.  The Windows Runtime APIs themselves are spread among
         # various modules, so this level of indirection avoids introducing a hard
         # dependency on any of those modules from the client itself.
         winrtsupport = Executable.new("#{Build::Brand}-winrtsupport", :dynamic)
-            .include('common/src/builtin') # For common.h
-            .include('common/src/win') # For win_com.h / win_util.h
-            .headerFile('common/src/win/win_com.h')
-            .sourceFile('common/src/win/win_com.cpp')
-            .headerFile('common/src/win/win_util.h')
-            .sourceFile('common/src/win/win_util.cpp')
             .source('extras/winrtsupport/src')
-            .useQt(nil) # Core only
+            .use(commonlib.export)
             .install(stage, '/')
 
         # Service stub used to replace the Dnscache service for split tunnel
         # DNS; see win_dnscachecontrol.cpp
         winsvcstub = Executable.new("#{Build::Brand}-winsvcstub")
-            .include('common/src/builtin')
-            .include('common/src/win')
-            .headerFile('common/src/win/win_util.h')
-            .sourceFile('common/src/win/win_util.cpp')
             .source('extras/winsvcstub/src')
-            .useQt(nil)
+            .use(commonlib.export)
             .install(stage, '/')
 
         # MSVC and UCRT runtime file - enumerate the files and add install targets
@@ -290,10 +280,16 @@ module PiaWindows
             File.write(t.name, "1337 RCDATA \"#{File.absolute_path(payload)}\"\n")
         end
 
+        # The installer uses the LZMA SDK from 7-zip
+        lzmaSdk = Executable.new("lzma-sdk", :static)
+            .define('_STATIC_CPPLIB')
+            .runtime(:static)
+            .source('deps/lzma/src', :export)
+
         # Build the installer using the payload
         install = winstaller(version.packageName, version)
             .define('INSTALLER')
-            .source('deps/lzma/src')
+            .use(lzmaSdk.export)
             .sourceFile(payloadRc)
 
         # Sign the installer and put it in a predicatable location for job

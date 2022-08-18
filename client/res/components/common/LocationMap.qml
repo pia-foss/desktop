@@ -45,18 +45,10 @@ Item {
   Item {
     readonly property var locationGeo: {
       var geo
-      if(location) {
-        // If it's a dedicated IP region, use the corresponding region for geo
-        // coordinates
-        let id = location.dedicatedIpCorrespondingRegion || location.id
-        geo = Daemon.state.locationCoords[id]
-      }
-      if(geo) {
-        // Tolerate numbers passed as strings in JSON
-        // If either value is missing or not parseable as a float, this results
-        // in NaN(s).
-        geo = [parseFloat(geo[0]), parseFloat(geo[1])]
-      }
+      // Get the region's metadata
+      var regionMeta = Daemon.state.getRegionDisplay(location.id)
+      if(regionMeta)
+        geo = [regionMeta.geoLatitude, regionMeta.geoLongitude]
       // Verify that both coordinates are numbers - if we get any placeholder
       // like undefined / "None", ignore it.
       if(geo && Util.isFiniteNumber(geo[0]) && Util.isFiniteNumber(geo[1]))

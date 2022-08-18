@@ -17,11 +17,11 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "wgservice.h"
-#include "common.h"
-#include "util.h"
-#include "tap_inl.h"
-#include "tun_inl.h"
-#include "service_inl.h"
+#include "../common.h"
+#include "../util.h"
+#include "../tap_inl.h"
+#include "../tun_inl.h"
+#include "../service_inl.h"
 #include "brand.h"
 #include "service.h"
 

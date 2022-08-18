@@ -16,9 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
+#include <kapps_core/src/winapi.h>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QDebug>
 #include <QObject>
 #include <QPalette>
 #include <QCommandLineParser>
@@ -29,9 +29,9 @@
 #endif
 #include "reporthelper.h"
 #include "payloadbuilder.h"
-#include "common.h"
-#include "appsingleton.h"
-#include "path.h"
+#include <common/src/common.h>
+#include <common/src/appsingleton.h>
+#include <common/src/builtin/path.h>
 #include "version.h"
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
             const char *roleName = QMetaEnum::fromType<QPalette::ColorRole>().valueToKey(role);
             const auto &color = appPalette.color(static_cast<QPalette::ColorGroup>(group),
                                                  static_cast<QPalette::ColorRole>(role));
-            qInfo().nospace().noquote() << "appPalette.setColor(QPalette::"
+            qInfo().nospace() << "appPalette.setColor(QPalette::"
                 << groupName << ", QPalette::" << roleName << ", {"
                 << color.red() << ", " << color.green() << ", " << color.blue()
                 << ", " << color.alpha() << "});";
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         params->setProperty("files", ReportHelper::ensureFilesExist(parser.values(fileOption))); // A list of files
         params->setProperty("client_crash", parser.value(clientCrashesOption));
         params->setProperty("daemon_crash", parser.value(daemonCrashesOption));
-        params->setProperty("version", Version::semanticVersion());
+        params->setProperty("version", QString::fromStdString(Version::semanticVersion()));
         params->setProperty("invoke_pipe", invokePipeArg);
         params->setProperty("endpointOverride", endpointOverride);
 

@@ -19,9 +19,9 @@
 #ifndef LINUX_NL_H
 #define LINUX_NL_H
 
-#include "common.h"
-#include "posix/posix_objects.h"
-#include "networkmonitor.h"
+#include <common/src/common.h>
+#include <kapps_core/src/posix/posix_objects.h>
+#include "../networkmonitor.h"
 #include <thread>
 #include <future>
 
@@ -53,7 +53,7 @@ private:
     // networksUpdated() with updates.  Catches exceptions and gracefully
     // terminates the thread.
     static void runOnWorkerThread(LinuxNl *pThis,
-                                  std::promise<PosixFd> killSocketPromise);
+                                  std::promise<kapps::core::PosixFd> killSocketPromise);
 
 public:
     // The constructor starts the worker thread and reads the initial state.
@@ -78,7 +78,7 @@ private:
     // sockets.  This is provided by the worker thread using socketpair().
     // If the worker thread couldn't be initialized, it returns a socket handle
     // of -1.
-    std::future<PosixFd> _workerKillSocket;
+    std::future<kapps::core::PosixFd> _workerKillSocket;
 };
 
 #endif

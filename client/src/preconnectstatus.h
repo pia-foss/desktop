@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("preconnectstatus.h")
 
 #ifndef PRECONNECTSTATUS_H
 #define PRECONNECTSTATUS_H
 
-#include "daemonconnection.h"
+#include <clientlib/src/daemonconnection.h>
 #include <QObject>
 
 // PreConnectStatus exposes the initial connection status information and

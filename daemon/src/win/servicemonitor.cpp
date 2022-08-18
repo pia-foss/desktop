@@ -16,11 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("servicemonitor.cpp")
 
 #include "servicemonitor.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
+#include <kapps_core/src/win/win_error.h>
 #include <QProcess>
 #include <QRegularExpression>
 #include <VersionHelpers.h>
@@ -133,7 +134,7 @@ void ServiceMonitor::checkInitialState()
     _scm.reset(::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE));
     if(_scm == nullptr)
     {
-        WinErrTracer error{::GetLastError()};
+        kapps::core::WinErrTracer error{::GetLastError()};
         qWarning() << "Unable to open SCM to monitor" << _serviceName
             << "-" << error;
         reportServiceState(NetExtensionState::Unknown);
@@ -151,7 +152,7 @@ void ServiceMonitor::checkInitialState()
             // There's an ERROR_SERVICE_NOTIFY_CLIENT_LAGGING code that
             // indicates we should reopen the SCM handle, but in this case we
             // just opened it - bail out rather than looping.
-            WinErrTracer error{scmNotifyResult};
+            kapps::core::WinErrTracer error{scmNotifyResult};
             qWarning() << "Unable to monitor service changes -" << error;
             _scm.close();
             _pScmNotify.reset();
@@ -184,7 +185,7 @@ bool ServiceMonitor::checkServiceState()
         return true;
     }
 
-    WinErrTracer openError{::GetLastError()};
+    kapps::core::WinErrTracer openError{::GetLastError()};
     if(openError.code() == ERROR_SERVICE_DOES_NOT_EXIST ||
         openError.code() == ERROR_SERVICE_MARKED_FOR_DELETE)
     {
@@ -238,14 +239,14 @@ void ServiceMonitor::serviceCreatedDestroyed(const WinServiceNotify &scmNotify)
     // If an error was reported, try to reinitialize.
     if(scmNotify.dwNotificationStatus != ERROR_SUCCESS)
     {
-        WinErrTracer error{scmNotify.dwNotificationStatus};
+        kapps::core::WinErrTracer error{scmNotify.dwNotificationStatus};
         qWarning() << "Notification reported error, try to reinitialize -"
             << error;
         checkInitialState();
         return;
     }
 
-    WinErrTracer notifyResult = notifyScm();
+    kapps::core::WinErrTracer notifyResult = notifyScm();
     if(notifyResult.code() == ERROR_SERVICE_NOTIFY_CLIENT_LAGGING)
     {
         // We were not processing notifications fast enough and need to

@@ -16,9 +16,9 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "settings/locations.h"
-#include "common/src/locations.h"
+#include <common/src/common.h>
+#include <common/src/settings/locations.h>
+#include <common/src/locations.h>
 #include <QtTest>
 
 namespace sample_docs {
@@ -28,6 +28,13 @@ const auto emptyJson = QJsonDocument::fromJson("{}").object();
 //JSON doesn't have to have an object at the top level, it could be any JSON
 //value
 const auto arrayJson = QJsonDocument::fromJson(R"(["foo", 2, false])").object();
+
+const auto metadataJson = QJsonDocument::fromJson(R"(
+{
+  "translations":{},
+  "country_groups":{},
+  "gps":{}
+})").object();
 
 const auto twoLocations = QJsonDocument::fromJson(R"(
 {
@@ -48,6 +55,7 @@ const auto twoLocations = QJsonDocument::fromJson(R"(
       "dns": "al.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
         "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
@@ -63,6 +71,7 @@ const auto twoLocations = QJsonDocument::fromJson(R"(
       "dns": "ad.privacy.network",
       "port_forward": true,
       "geo": true,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "45.139.49.245", "cn": "andorra401" }],
         "ovpntcp": [{ "ip": "45.139.49.249", "cn": "andorra401" }],
@@ -93,6 +102,7 @@ const auto oneLocation = QJsonDocument::fromJson(R"(
       "dns": "al.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
         "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
@@ -124,6 +134,7 @@ const auto oneLocationNewIps = QJsonDocument::fromJson(R"(
       "dns": "al.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "31.171.154.42", "cn": "tirana401" }],
         "ovpntcp": [{ "ip": "31.171.154.42", "cn": "tirana401" }],
@@ -154,6 +165,7 @@ const auto partialInvalid = QJsonDocument::fromJson(R"(
       "dns": "al.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "31.171.154.136", "cn": "tirana401" }],
         "ovpntcp": [{ "ip": "31.171.154.138", "cn": "tirana401" }],
@@ -171,12 +183,21 @@ const auto partialInvalid = QJsonDocument::fromJson(R"(
 //Each of these locations is missing one field - none of them are valid.
 const auto invalidLocations = QJsonDocument::fromJson(R"(
 {
+  "groups": {
+    "ovpntcp": [{ "name": "openvpn_tcp", "ports": [80, 443, 853, 8443] }],
+    "ovpnudp": [{ "name": "openvpn_udp", "ports": [8080, 853, 123, 53] }],
+    "wg": [{ "name": "wireguard", "ports": [1337] }],
+    "ikev2": [{ "name": "ikev2", "ports": [500, 4500] }],
+    "proxysocks": [{ "name": "socks", "ports": [1080] }],
+    "proxyss": [{ "name": "shadowsocks", "ports": [443] }]
+  },
   "missing_name": {
     "country": "US",
     "dns": "us-california.privateinternetaccess.com",
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -192,6 +213,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -207,6 +229,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "dns": "us-california.privateinternetaccess.com",
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -223,6 +246,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "serial": "dummy",
     "geo": false,
+    "offline": false,
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
     },
@@ -238,6 +262,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
     },
@@ -253,6 +278,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_tcp": {
       "best": "198.8.80.174:500"
@@ -266,6 +292,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -281,6 +308,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "geo": false,
+    "offline": false,
     "serial": "dummy",
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
@@ -294,6 +322,7 @@ const auto invalidLocations = QJsonDocument::fromJson(R"(
     "port_forward": false,
     "ping": "198.8.80.174:8888",
     "serial": "dummy",
+    "offline": false,
     "openvpn_udp": {
       "best": "198.8.80.174:8080"
     },
@@ -313,9 +342,6 @@ namespace
     // nullptr otherwise.
     const Server *getServerForService(const Location &location, Service service)
     {
-        // Location::allServersForService() returns a temporary vector, avoid
-        // a dangling reference by finding the server in the servers() vector,
-        // which is held in Location
         const Server *pMatchingServer{nullptr};
         for(const auto &server : location.servers())
         {
@@ -339,54 +365,55 @@ class tst_settings : public QObject
 {
     Q_OBJECT
 
+    auto buildRegionsFromJson(const QJsonObject &locationsJson)
+    {
+        return buildModernLocations({}, locationsJson,
+            {}, sample_docs::metadataJson, {}, {}).first;
+    }
+
 private slots:
     //Verify that valid locations can be loaded.
     void testTwoValid()
     {
-        LocationsById locs{buildModernLocations({}, sample_docs::twoLocations,
-                           {}, {}, {})};
+        LocationsById locs{buildRegionsFromJson(sample_docs::twoLocations)};
         QVERIFY(locs.size() == 2);
 
         //The locations don't have to be in the same order as the original
         //JSON, QJsonDocument might re-order them since they're object
         //attributes.
-        QSharedPointer<Location> pAd, pAl;
+        QSharedPointer<const Location> pAd, pAl;
         const Server *pServer{nullptr};
 
-        pAl = locs.at(QStringLiteral("al"));
-        pAd = locs.at(QStringLiteral("ad"));
+        pAl = locs.at("al");
+        pAd = locs.at("ad");
 
         //Both locations must have been found
         QVERIFY(pAd);
         QVERIFY(pAl);
 
         QVERIFY(pAl);
-        QCOMPARE(pAl->name(), "Albania");
-        QCOMPARE(pAl->country(), "AL");
         QCOMPARE(pAl->portForward(), true);
         pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.136");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+        QCOMPARE(pServer->openVpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
 
         pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.138");
-        qDebug () << pServer->openvpnTcpPorts();
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
+        qDebug () << pServer->openVpnTcpPorts();
+        QCOMPARE(pServer->openVpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
 
         QVERIFY(pAd);
-        QCOMPARE(pAd->name(), "Andorra");
-        QCOMPARE(pAd->country(), "AD");
         QCOMPARE(pAd->portForward(), true);
         pServer = getServerForService(*pAd, Service::OpenVpnUdp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "45.139.49.245");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+        QCOMPARE(pServer->openVpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
         pServer = getServerForService(*pAd, Service::OpenVpnTcp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "45.139.49.249");
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
+        QCOMPARE(pServer->openVpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
     //Loading JSON data with no valid locations should fail without changing
@@ -396,36 +423,33 @@ private slots:
         LocationsById locs;
 
         //Attempt to load empty JSON
-        locs = buildModernLocations({}, sample_docs::emptyJson, {}, {}, {});
-        QCOMPARE(locs.empty(), true);
+        QVERIFY_EXCEPTION_THROWN(buildRegionsFromJson(sample_docs::emptyJson), std::exception);
         //Attempt to load non-object JSON
-        locs = buildModernLocations({}, sample_docs::arrayJson, {}, {}, {});
+        QVERIFY_EXCEPTION_THROWN(buildRegionsFromJson(sample_docs::arrayJson), std::exception);
         QCOMPARE(locs.empty(), true);
     }
 
     //Load one valid location
     void testOneValid()
     {
-        LocationsById locs{buildModernLocations({}, sample_docs::oneLocation, {}, {}, {})};
+        LocationsById locs{buildRegionsFromJson(sample_docs::oneLocation)};
         QVERIFY(locs.size() == 1);
 
-        const auto &pAl = locs.at(QStringLiteral("al"));
+        const auto &pAl = locs.at("al");
         const Server *pServer{nullptr};
 
         QVERIFY(pAl);
-        QCOMPARE(pAl->name(), "Albania");
-        QCOMPARE(pAl->country(), "AL");
         QCOMPARE(pAl->portForward(), true);
         pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.136");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+        QCOMPARE(pServer->openVpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
 
         pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.138");
-        qDebug () << pServer->openvpnTcpPorts();
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
+        qDebug () << pServer->openVpnTcpPorts();
+        QCOMPARE(pServer->openVpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
     // //Invalid locations should be ignored when loaded, but any valid locations
@@ -433,26 +457,24 @@ private slots:
     void testPartialInvalid()
     {
         //Load one valid location.  The invalid location should be ignored.
-        LocationsById locs{buildModernLocations({}, sample_docs::partialInvalid, {}, {}, {})};
+        LocationsById locs{buildRegionsFromJson(sample_docs::partialInvalid)};
         QVERIFY(locs.size() == 1);
 
-        const auto &pAl = locs.at(QStringLiteral("al"));
+        const auto &pAl = locs.at("al");
         const Server *pServer{nullptr};
 
         QVERIFY(pAl);
-        QCOMPARE(pAl->name(), "Albania");
-        QCOMPARE(pAl->country(), "AL");
         QCOMPARE(pAl->portForward(), true);
         pServer = getServerForService(*pAl, Service::OpenVpnUdp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.136");
-        QCOMPARE(pServer->openvpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
+        QCOMPARE(pServer->openVpnUdpPorts(), std::vector<quint16>{8080 COMMA 853 COMMA 123 COMMA 53});
 
         pServer = getServerForService(*pAl, Service::OpenVpnTcp);
         QVERIFY(pServer);
         QCOMPARE(pServer->ip(), "31.171.154.138");
-        qDebug () << pServer->openvpnTcpPorts();
-        QCOMPARE(pServer->openvpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
+        qDebug () << pServer->openVpnTcpPorts();
+        QCOMPARE(pServer->openVpnTcpPorts(), std::vector<quint16>{80 COMMA 443 COMMA 853 COMMA 8443});
     }
 
     // // Building locations with a set of latency measurements should apply those
@@ -463,10 +485,12 @@ private slots:
         LatencyMap latencies;
         latencies["al"] = alLatency;
 
-        LocationsById updatedLocs{buildModernLocations(latencies, sample_docs::oneLocationNewIps, {}, {}, {})};
+        LocationsById updatedLocs{buildModernLocations(latencies,
+            sample_docs::oneLocationNewIps, {}, sample_docs::metadataJson, {},
+            {}).first};
         QVERIFY(updatedLocs.size() == 1);
 
-        const auto &pAlUpd = updatedLocs.at(QStringLiteral("al"));
+        const auto &pAlUpd = updatedLocs.at("al");
         QVERIFY(pAlUpd);
         QCOMPARE(pAlUpd->latency().get(), alLatency);
     }

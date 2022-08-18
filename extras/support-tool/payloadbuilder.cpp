@@ -17,11 +17,10 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "payloadbuilder.h"
-#include "logging.h"
 #include <QProcess>
 #include <QUrl>
 #include <QDateTime>
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "reporthelper.h"
 
 QByteArray PayloadBuilder::payloadZipContent() const
@@ -121,8 +120,8 @@ bool PayloadBuilder::finish(const QString &copyToPath)
     if(!success)
     {
         qWarning () << "Zip process failed.";
-        qWarning () << zipProcess.readAllStandardOutput();
-        qWarning () << zipProcess.readAllStandardError();
+        qWarning () << zipProcess.readAllStandardOutput().data();
+        qWarning () << zipProcess.readAllStandardError().data();
     }
 
     // Flag that everything is cleaned up

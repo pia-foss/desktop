@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac_appscanner.mm")
 
 #include "mac_appscanner.h"
-#include "mac/mac_constants.h"
-#include "path.h"
+#include <kapps_core/src/mac/mac_constants.h>
+#include <common/src/builtin/path.h>
 #import <AppKit/AppKit.h>
 #include <QtMac>
 #include <QFileInfo>
@@ -46,7 +46,7 @@ namespace
 
 QString getMacAppName(const QString &path)
 {
-    if(path == webkitFrameworkPath)
+    if(path == QString::fromStdString(webkitFrameworkPath))
         return webkitAppsDisplay;
 
     QFileInfo fi(path);
@@ -92,7 +92,7 @@ QPixmap MacAppIconProvider::requestPixmap(const QString &id, QSize *, const QSiz
     // Qt doesn't decode the id after extracting it from the URI
     QString path = QUrl::fromPercentEncoding(id.toUtf8());
     // Use Safari's icon for the "WebKit Apps" entry
-    if(path == webkitFrameworkPath)
+    if(path == QString::fromStdString(webkitFrameworkPath))
         return getIconForAppBundle(safariPath, requestedSize);
     return getIconForAppBundle(path, requestedSize);
 }

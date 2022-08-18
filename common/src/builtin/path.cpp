@@ -17,11 +17,10 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "common.h"
-#line SOURCE_FILE("builtin/path.cpp")
-
 #include "path.h"
 #include "version.h"
 #include "brand.h"
+#include "logging.h"
 #include "product.h"
 
 #include <QCoreApplication>
@@ -165,7 +164,7 @@ void Path::initializePreApp()
 #elif defined(Q_OS_LINUX)
     QCoreApplication::setApplicationName(QStringLiteral(BRAND_LINUX_APP_NAME));
 #endif
-    QCoreApplication::setApplicationVersion(Version::semanticVersion());
+    QCoreApplication::setApplicationVersion(QString::fromStdString(Version::semanticVersion()));
 
     // Only ClientSettingsDir is needed before QCoreApplication right now, but
     // other paths can be moved here as needed if they do not depend on
@@ -189,7 +188,11 @@ void Path::initializePostApp()
     InstallationDir = QStringLiteral("/Applications/" PIA_PRODUCT_NAME ".app");
     BaseDir = getBaseDir();
     ExecutableDir = BaseDir / "Contents/MacOS";
-    LibraryDir = ExecutableDir;
+    // Bare .dylibs go into Contents/Frameworks.  Although they are not
+    // actually frameworks, this seems to be the norm for bare .dylibs, and in
+    // particular Qt searches this directory specifically for libssl and
+    // libcrypto.
+    LibraryDir = BaseDir / "Contents/Frameworks";
     ResourceDir = BaseDir / "Contents/Resources";
     InstallationExecutableDir = InstallationDir / "Contents/MacOS";
     DaemonDataDir = QStringLiteral("/Library/Application Support/" BRAND_IDENTIFIER);
@@ -527,4 +530,10 @@ Path& Path::up()
     } while (isPathSeparator(*p));
     _path.chop((int)(p - begin));
     return *this;
+}
+
+std::ostream &operator<<(std::ostream &os, const Path &path)
+{
+    const QString &pathStr{path};
+    return os << pathStr;
 }

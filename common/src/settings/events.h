@@ -19,8 +19,8 @@
 #ifndef SETTINGS_EVENTS_H
 #define SETTINGS_EVENTS_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include "version.h"
 #include "product.h"
 
@@ -30,6 +30,10 @@
 class COMMON_EXPORT EventProperties : public NativeJsonObject
 {
     Q_OBJECT
+private:
+    static const QString &semanticVersionQstr();
+    static const QString &userAgentQstr();
+
 public:
     EventProperties() = default;
     EventProperties(const EventProperties &other) { *this = other; }
@@ -58,9 +62,9 @@ public:
 
 public:
     // User agent; client information
-    JsonField(QString, user_agent, Version::userAgent())
+    JsonField(QString, user_agent, userAgentQstr())
     JsonField(QString, platform, PIA_PLATFORM_NAME)
-    JsonField(QString, version, Version::semanticVersion())
+    JsonField(QString, version, semanticVersionQstr())
     JsonField(bool, prerelease, PIA_VERSION_IS_PRERELEASE)
     // The VPN protocol being used
     JsonField(QString, vpn_protocol, {}, {"OpenVPN", "WireGuard"})

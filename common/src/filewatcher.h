@@ -23,7 +23,7 @@
 #define FILEWATCHER_H
 
 #include <QFileSystemWatcher>
-#include "path.h"
+#include "builtin/path.h"
 
 // FileWatcher watches for a file to be modified, created, or deleted.
 // QFileSystemWatcher can't be used directly for this, because it can only

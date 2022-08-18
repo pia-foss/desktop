@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("nativetray.h")
 
 #ifndef NATIVETRAY_H
 #define NATIVETRAY_H
 
-#include "json.h"
+#include <common/src/json.h>
 
 #include <memory>
 

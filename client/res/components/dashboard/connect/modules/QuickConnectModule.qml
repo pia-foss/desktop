@@ -104,7 +104,7 @@ MovableModule {
         buttonLocs.forEach(function (id) {
           var loc = Daemon.state.availableLocations[id]
           if(loc)
-            usedCountries[loc.country] = true
+            usedCountries[Daemon.state.getRegionCountryCode(loc.id)] = true
         })
 
         // Grab the first location from each country that hasn't already been
@@ -113,8 +113,9 @@ MovableModule {
         for(var groupIdx = 0;
             buttonLocs.length < maxButtons && groupIdx < Daemon.state.groupedLocations.length;
             ++groupIdx) {
-          var firstCountryLoc = Daemon.state.groupedLocations[groupIdx].locations[0]
-          if(!usedCountries[firstCountryLoc.country])
+          let group = Daemon.state.groupedLocations[groupIdx]
+          var firstCountryLoc = group.locations[0]
+          if(!usedCountries[group.code])
             buttonLocs.push(firstCountryLoc.id)
         }
       }

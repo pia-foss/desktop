@@ -10,32 +10,21 @@
 # - target executables - so they can be built, started, and debugged in Qt
 #   Creator with no manual setup
 #
-# Qt Creator won't be able to locate QML files by default since they aren't
-# indicated to CMake.  See README.md for instructions to enable the
-# "Files in All Project Directories" locator filter by default.
+# Qt Creator defaults to the "all" target, which is hooked up to the default
+# target in Rake since the true "all" target builds _everything_ including all
+# unit tests, etc.
 #
-# Qt Creator defaults to the "all" target, which builds everything (including
-# tests, exports, installers, artifacts).  To build just the staged installation
-# by default instead:
+# However, this means that actually running unit tests (etc.) from Qt Creator
+# won't build the right target.  To have Qt Creator build the correct target
+# for the currently selected executable:
 #  - Go to the Projects page
-#  - Select "Build" under current kit"
+#  - Select "Build" under "current kit"
 #  - Under "Build Steps", expand the CMake build step
-#  - Select a different target instead of "all":
-#    - "stage" will always build the staged installation (client/cli/daemon)
-#    - "Current executable" will build the current target you have selected in
-#      Qt Creator - for client/cli/daemon this builds the staging area, but for
-#      integtest or unit tests it will build the test instead
-# If you select "stage", Qt Creator will still know how to build tests, etc.
-# if they are started or debugged from the IDE.
+#  - Select "Current Executable" instead of "all"
+# Now Qt Creator will build whatever target you have chosen to run.
 #
 # Some ancillary targets (Windows installer, Mac OpenVPN helpers, etc.) aren't
 # modeled in CMake currently (but could be added if needed).
-#
-# All the source files are _not_ indicated to CMake - Qt Creator is able to find
-# them without this, and CMake would spew lots of output pretending to compile
-# those files.  Qt Creator's "project" view won't show all the source files;
-# just use the "filesystem" view instead, PIA Desktop's source is organized by
-# component already.
 
 cmake_minimum_required(VERSION 3.10)
 project(pia_desktop)
@@ -45,19 +34,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOGEN OFF) # suppress CMake moc/rcc rules
 find_package(Qt5 COMPONENTS Core Quick Network Qml Quick QuickControls2 Gui Test REQUIRED)
-
-include_directories(
-    cli/src
-    client/src
-    clientlib/src
-    common/src
-    common/src/builtin
-    daemon/src
-    deps/embeddable-wg-library/src
-    extras/installer/mac/helper
-    integtest/src
-    tests/src
-)
 
 file(GLOB CLIENT_RES "client/res/**/*")
 file(GLOB SUPPORTTOOL_COMPONENTS "extras/support-tool/components/**/*")
@@ -103,10 +79,23 @@ endfunction()
 # dependencies.
 add_custom_command(OUTPUT always_build COMMAND ${CMAKE_COMMAND} -E echo)
 
-set_for_platform(RAKE "rake.cmd" "rake" "rake")
+set_for_platform(RAKE "rake.bat" "rake" "rake")
+
+include_directories(
+    ./
+    kapps_core/api/
+    kapps_net/api/
+    kapps_regions/api/
+    out/${BRAND}_${RAKE_VARIANT}_x86_64/probe-version
+    deps/jsonmcpp/include/
+    deps/embeddable-wg-library/src/
+    deps/lzma/src/
+)
 
 function(rake_target cmakeName rakeName)
-    add_custom_target(${cmakeName} ${CMAKE_COMMAND} -E env "RUBYOPT=-Eutf-8" ${RAKE} -j16 VARIANT=${RAKE_VARIANT} BRAND=${BRAND} ${rakeName}
+    # Qt Creator now seems to set a PLATFORM variable that conflicts with the
+    # one expected by our build system, clear it when running rake
+    add_custom_target(${cmakeName} ${CMAKE_COMMAND} -E env "RUBYOPT=-Eutf-8" "PLATFORM=" ${RAKE} -j16 VARIANT=${RAKE_VARIANT} BRAND=${BRAND} ${rakeName}
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                       DEPENDS always_build USES_TERMINAL)
 endfunction()
@@ -147,6 +136,11 @@ set_for_platform(RAKE_STAGE_BIN
                  "${RAKE_OUT}/stage/${BRAND_NAME}.app/Contents/MacOS"
                  "${RAKE_OUT}/stage/bin"
                 )
+set_for_platform(RAKE_STAGE_LIB
+                 "${RAKE_OUT}/stage"
+                 "${RAKE_OUT}/stage/${BRAND_NAME}.app/Contents/Frameworks"
+                 "${RAKE_OUT}/stage/lib"
+                )
 set_for_platform(RAKE_INTEGTEST_BIN
                  "${RAKE_OUT}/integtest-stage/${BRAND}-integtest"
                  "${RAKE_OUT}/integtest-stage/${BRAND}-integtest.app/Contents/MacOS"
@@ -158,25 +152,78 @@ set_for_platform(RAKE_INTEGTEST_BIN
 # clean task does anyway.
 set_property(DIRECTORY PROPERTY ADDITIONAL_CLEAN_FILES ${RAKE_OUT})
 
-function(stage_target name sourceFile execWin execMac execLinux)
-    add_executable(${name} EXCLUDE_FROM_ALL ${sourceFile})
+function(source_files name sourceDirectory)
+    aux_source_directory("${sourceDirectory}/src" TARGET_SOURCE_GENERAL_${name})
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        aux_source_directory("${sourceDirectory}/src/win" TARGET_SOURCE_PLATFORM_${name})
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        aux_source_directory("${sourceDirectory}/src/mac" TARGET_SOURCE_PLATFORM_${name})
+        aux_source_directory("${sourceDirectory}/src/posix" TARGET_SOURCE_POSIX_${name})
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        aux_source_directory("${sourceDirectory}/src/linux" TARGET_SOURCE_PLATFORM_${name})
+        aux_source_directory("${sourceDirectory}/src/posix" TARGET_SOURCE_POSIX_${name})
+    endif()
+    set(TARGET_SOURCE_${name} ${TARGET_SOURCE_GENERAL_${name}}
+        ${TARGET_SOURCE_PLATFORM_${name}} ${TARGET_SOURCE_POSIX_${name}}
+        PARENT_SCOPE)
+endfunction()
+
+# Define a library target in the stage directory
+function(stage_lib name sourceDirectory libName)
+    source_files(${name} ${sourceDirectory})
+    add_library(${name} SHARED ${TARGET_SOURCE_${name}})
+    set_for_platform(TARGET_FILE "${libName}.dll" "${libName}.dylib" "${libName}.so")
+    set_property(TARGET ${name} PROPERTY OUTPUT_NAME ${TARGET_FILE})
+    add_dependencies(${name} stage)
+    set_property(TARGET ${name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${RAKE_STAGE_LIB})
+    list(APPEND ALL_LIB_TARGETS ${name})
+endfunction()
+
+# Define a kapps library (these have a consistent convention for target name,
+# source directory, and lib name, the few non-kapps libraries aren't all
+# consistent)
+function(stage_kapps_lib kappsName)
+    stage_lib("kapps_${kappsName}" "kapps_${kappsName}" "kapps_${kappsName}")
+endfunction()
+
+# Define an executable target in the stage directory
+function(stage_target name sourceDirectory execWin execMac execLinux)
+    source_files(${name} ${sourceDirectory})
+    add_executable(${name} EXCLUDE_FROM_ALL "${TARGET_SOURCE_${name}}")
     set_for_platform(TARGET_FILE ${execWin} ${execMac} ${execLinux})
     set_property(TARGET ${name} PROPERTY OUTPUT_NAME ${TARGET_FILE})
     add_dependencies(${name} stage)
     set_property(TARGET ${name} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${RAKE_STAGE_BIN})
+    # Let Qt Creator assume that all executables depend on all libraries.  This
+    # is crude but is sufficient for the code model to work.
+    target_link_libraries(${name} ${ALL_LIB_TARGETS})
 endfunction()
 
-stage_target(cli cli/src/cli.cpp "${BRAND}ctl" "${BRAND}ctl" "${BRAND}ctl")
+# Define all libraries
+stage_kapps_lib(core)
+stage_kapps_lib(net)
+stage_kapps_lib(regions)
+stage_lib(common common "${BRAND}-commonlib")
+stage_lib(clientlib clientlib "${BRAND}-clientlib")
+
+stage_target(cli cli "${BRAND}ctl" "${BRAND}ctl" "${BRAND}ctl")
 target_link_libraries(cli Qt5::Core Qt5::Network)
 
-stage_target(client client/src/main.cpp "${BRAND}-client" ${BRAND_NAME} "${BRAND}-client")
+stage_target(client client "${BRAND}-client" ${BRAND_NAME} "${BRAND}-client")
 target_link_libraries(client Qt5::Core Qt5::Network Qt5::Qml Qt5::Quick Qt5::QuickControls2 Qt5::Gui)
+# Annoyingly, Qt's CMake support only permits listing resources via a QRC file.
+# The rake build system (like qbs) allows picking up resources automatically
+# so we don't have to repeat them all in the build script.
+# Use the generated QRC file, although this means a build must be performed for
+# Qt Creator to find QML sources.
+target_sources(client PRIVATE "${RAKE_OUT}/pia-client/qrc_pia-client.qrc")
 
-stage_target(daemon daemon/src/daemon.cpp "${BRAND}-service" "${BRAND}-daemon" "${BRAND}-daemon")
+stage_target(daemon daemon "${BRAND}-service" "${BRAND}-daemon" "${BRAND}-daemon")
 target_link_libraries(daemon Qt5::Core Qt5::Network)
 
-add_executable(integtest EXCLUDE_FROM_ALL integtest/src/integtest.cpp)
-target_link_libraries(integtest Qt5::Core Qt5::Network Qt5::Test)
+source_files(integtest integtest)
+add_executable(integtest EXCLUDE_FROM_ALL ${TARGET_SOURCE_integtest})
+target_link_libraries(integtest Qt5::Core Qt5::Network Qt5::Test ${ALL_LIB_TARGETS})
 set_property(TARGET integtest PROPERTY OUTPUT_NAME "${BRAND}-integtest")
 add_dependencies(integtest integtest-stage)
 set_property(TARGET integtest PROPERTY RUNTIME_OUTPUT_DIRECTORY ${RAKE_INTEGTEST_BIN})
@@ -190,6 +237,7 @@ function(unit_test name)
     add_dependencies(${TESTNAME} "rake-${TESTNAME}")
 endfunction()
 
+unit_test("any")
 unit_test("apiclient")
 unit_test("check")
 unit_test("connectionconfig")
@@ -197,6 +245,7 @@ unit_test("exec")
 unit_test("json")
 unit_test("jsonrefresher")
 unit_test("jsonrpc")
+unit_test("jsonstate")
 unit_test("latencytracker")
 unit_test("linebuffer")
 unit_test("localsockets")
@@ -210,7 +259,10 @@ unit_test("openssl")
 unit_test("path")
 unit_test("portforwarder")
 unit_test("raii")
+unit_test("regionlist")
+unit_test("retainshared")
 unit_test("semversion")
+unit_test("servicegroup")
 unit_test("settings")
 unit_test("subnetbypass")
 unit_test("tasks")
@@ -218,6 +270,7 @@ unit_test("transportselector")
 unit_test("updatedownloader")
 unit_test("vpnmethod")
 unit_test("wireguarduapi")
+unit_test("workthread")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     unit_test("wfp_filters")

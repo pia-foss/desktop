@@ -19,7 +19,7 @@
 #ifndef LINUX_NL80211_H
 #define LINUX_NL80211_H
 
-#include "common.h"
+#include <common/src/common.h>
 #include "linux_nlcache.h"
 #include "linux_libnl.h"
 

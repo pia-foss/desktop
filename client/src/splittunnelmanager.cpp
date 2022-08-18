@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include "client.h"
 #include "splittunnelmanager.h"
-#include "path.h"
-#include "semversion.h"
+#include <common/src/builtin/path.h>
+#include <common/src/semversion.h>
 
 #include <QFileInfo>
 #include <QProcess>
@@ -28,10 +28,10 @@
 #include <QHostAddress>
 #if defined(Q_OS_MAC)
 #include "mac/mac_appscanner.h"
-#include "mac/mac_constants.h"
+#include <kapps_core/src/mac/mac_constants.h>
 #elif defined(Q_OS_WIN)
 #include "win/win_appscanner.h"
-#include "win/win_linkreader.h"
+#include <kapps_core/src/win/win_linkreader.h>
 #include <VersionHelpers.h>
 #elif defined(Q_OS_LINUX)
 #include "linux/linux_appscanner.h"
@@ -93,14 +93,15 @@ QString SplitTunnelManager::readWinLinkTarget(const QString &path) const
 #if defined(Q_OS_WIN)
     try
     {
-        WinLinkReader linkReader;
-        if(!linkReader.loadLink(path))
+        kapps::core::WinLinkReader linkReader;
+        const auto &pathStr{path.toStdWString()};
+        if(!linkReader.loadLink(pathStr))
             throw Error{HERE, Error::Code::Unknown};
-        return QString::fromStdWString(linkReader.getLinkTarget(path));
+        return QString::fromStdWString(linkReader.getLinkTarget(pathStr));
     }
-    catch(const Error &ex)
+    catch(const std::exception &ex)
     {
-        qWarning() << "Can't read target of link" << path;
+        qWarning() << "Can't read target of link" << path << "-" << ex.what();
     }
 #endif
     return {};
@@ -133,7 +134,7 @@ QString SplitTunnelManager::normalizeSubnet(const QString &subnet) const
 QString SplitTunnelManager::getMacWebkitFrameworkPath() const
 {
 #ifdef Q_OS_MAC
-    return webkitFrameworkPath;
+    return QString::fromStdString(webkitFrameworkPath);
 #else
     return QStringLiteral("");
 #endif

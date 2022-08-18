@@ -16,43 +16,39 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "automation.h"
 
-void AutomationRuleAction::trace(QDebug &dbg) const
+void AutomationRuleAction::trace(std::ostream &os) const
 {
-    QDebugStateSaver save{dbg};
-    dbg.nospace() << "{connection: " << connection() << "}";
+    os << "{connection: " << connection() << "}";
 }
 
-void AutomationRuleCondition::trace(QDebug &dbg) const
+void AutomationRuleCondition::trace(std::ostream &os) const
 {
-    QDebugStateSaver save{dbg};
     bool wroteAnything = false;
-    dbg.nospace() << "{";
+    os << "{";
 
     if(ruleType() != QString(""))
     {
-        dbg << "ruleType: " << ruleType();
+        os << "ruleType: " << ruleType();
         wroteAnything = true;
     }
 
     if(ssid() != QString(""))
     {
         if(wroteAnything)
-            dbg << ", ";
-        dbg << "ssid: " << ssid();
+            os << ", ";
+        os << "ssid: " << ssid();
         wroteAnything = true;
     }
 
     if(!wroteAnything)
-        dbg << "<none>";    // No criteria in this condition
-    dbg << "}";
+        os << "<none>";    // No criteria in this condition
+    os << "}";
 }
 
-void AutomationRule::trace(QDebug &dbg) const
+void AutomationRule::trace(std::ostream &os) const
 {
-    QDebugStateSaver save{dbg};
-    dbg.nospace() << "{condition: " << condition() << ", action: " << action()
-        << "}";
+    os << "{condition: " << condition() << ", action: " << action() << "}";
 }

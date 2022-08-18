@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "timestamp.h"
+#include "../common.h"
+#include "../timestamp.h"
 
 #include <mach/mach.h>
 #include <mach/mach_time.h>

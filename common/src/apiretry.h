@@ -39,13 +39,13 @@ public:
     ApiResource(QString &&val) : QString{std::move(val)} {}
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
 };
 
-inline COMMON_EXPORT QDebug &operator<<(QDebug &dbg, const ApiResource &val)
+inline std::ostream &operator<<(std::ostream &os, const ApiResource &val)
 {
-    val.trace(dbg);
-    return dbg;
+    val.trace(os);
+    return os;
 }
 
 // ApiRetry - interface to a particular retry strategy.

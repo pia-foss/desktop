@@ -86,8 +86,10 @@ class PiaVersion
             packageNameParts.push(versionBuild)
         end
 
-        @packageName = ([Build::Brand] + packageNameParts).join('-')
-        @integtestPackageName = ([Build::Brand, 'integtest'] + packageNameParts).join('-')
+        @packageSuffix = packageNameParts.join('-')
+
+        @packageName = "#{Build::Brand}-#{@packageSuffix}"
+        @integtestPackageName = "#{Build::Brand}-integtest-#{@packageSuffix}"
 
         @probe = Probe.new('version')
         @probe.file('version.txt', "#{version}\n#{@productName}\n#{@packageName}\n#{@timestamp}\n")
@@ -121,9 +123,9 @@ class PiaVersion
         producth.defineLiteral('PIA_VERSION_IS_PRERELEASE',
             (Build::VersionPrerelease != '' || Build::Variant != :release) ? 'true' : 'false')
         # The platform name is used by service quality events and the user
-        # agent string.  Don't use this for platform tests in code; Q_OS_* is
+        # agent string.  Don't use this for platform tests in code; KAPPS_CORE_OS_* is
         # better for that.
-        platformName = Build::selectPlatform('Windows', 'macOS', 'Linux')
+        platformName = Build::selectPlatform('Windows', 'macOS', 'Linux', 'Android', 'iOS')
         producth.defineString('PIA_PLATFORM_NAME', platformName)
         @probe.file('product.h', producth.content)
 
@@ -136,11 +138,11 @@ class PiaVersion
         # these are used a lot and change with every commit.  By externalizing
         # these, version.h itself does not change often, which minimizes build
         # impact of changing version.
-        versionh.line('class QString;')
+        versionh.line('#include <string>')
         versionh.line('namespace Version')
         versionh.line('{')
-        versionh.line('    const QString &semanticVersion();')
-        versionh.line('    const QString &userAgent();')
+        versionh.line('    const std::string &semanticVersion();')
+        versionh.line('    const std::string &userAgent();')
         versionh.line('}')
         @probe.file('version.h', versionh.content)
 
@@ -167,18 +169,17 @@ class PiaVersion
             "#{Build::Variant == :release ? '' : '; debug'})"
         versioncpp = LineContent.new
         versioncpp.line '#include "version.h"'
-        versioncpp.line '#include <QString>'
         versioncpp.line ''
         versioncpp.line 'namespace Version'
         versioncpp.line '{'
-        versioncpp.line '    const QString &semanticVersion()'
+        versioncpp.line '    const std::string &semanticVersion()'
         versioncpp.line '    {'
-        versioncpp.line '        static const QString v{QStringLiteral("' + version + '")};'
+        versioncpp.line '        static const std::string v{"' + version + '"};'
         versioncpp.line '        return v;'
         versioncpp.line '    }'
-        versioncpp.line '    const QString &userAgent()'
+        versioncpp.line '    const std::string &userAgent()'
         versioncpp.line '    {'
-        versioncpp.line '        static const QString v{QStringLiteral("' + userAgent + '")};'
+        versioncpp.line '        static const std::string v{"' + userAgent + '"};'
         versioncpp.line '        return v;'
         versioncpp.line '    }'
         versioncpp.line '}'
@@ -272,6 +273,10 @@ class PiaVersion
     # The short name for the product ("PIA" in the PIA brand)
     def productShortName
         @productShortName
+    end
+    # The version and build suffix applied to all artifact packages
+    def packageSuffix
+        @packageSuffix
     end
     # The complete package name for this release
     def packageName

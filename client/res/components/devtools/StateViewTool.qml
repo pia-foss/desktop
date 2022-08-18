@@ -75,9 +75,9 @@ Item {
         // separately, they're huge and usually not important when viewing state.
         // Location metadata is mostly static.
         onClicked: tool.populate(Daemon.state,
-                                 ["availableLocations", "groupedLocations",
-                                  "vpnLocations", "shadowsocksLocations",
-                                  "locationCoords", "countryNames"])
+                                 ["availableLocations", "regionsMetadata",
+                                  "groupedLocations", "vpnLocations",
+                                  "shadowsocksLocations"])
       }
       ToolButton {
         text: "ClientState"

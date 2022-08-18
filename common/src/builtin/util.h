@@ -23,27 +23,27 @@
 #define BUILTIN_UTIL_H
 #pragma once
 
+#include <kapps_core/src/logger.h>
+
 #include <QtDebug>
 #include <QLoggingCategory>
 #include <QMetaEnum>
+#include <QHostAddress>
 
 #include <functional>
 #include <memory>
 #include <string>
+#include <sstream>
+#include <iostream>
 #include <system_error>
 #include <type_traits>
+#include <ostream>
+#include <iomanip>
 
 class Error;
 
-template<typename T>
-class nullable_t;
-
-template<typename T>
-struct get_nullable;
-
 template<typename Handle, typename FreeFnType = int, FreeFnType... FreeFn>
 class raii_t;
-
 
 
 namespace impl {
@@ -57,7 +57,6 @@ class wrapped_handle
 public:
     wrapped_handle(Handle handle) : _handle(std::move(handle)) {}
 };
-
 
 template<typename T =
          #ifdef Q_OS_WIN
@@ -149,73 +148,11 @@ using select_callback_impl = callback_impl<
 
 }
 
-
-// Helper class to grant a non-pointer type an additional possible assignable
-// value of nullptr, similar to std::optional.
-//
+// TODO - remove both of these aliases
 template<typename T>
-class nullable_t
-{
-    static_assert(!std::is_pointer<T>::value, "not instantiable for pointer types");
-    Q_DECL_ALIGN(T) char _data[sizeof(T)];
-    bool _valid;
-public:
-    nullable_t() : _valid(false) {}
-    nullable_t(const std::nullptr_t&) : _valid(false) {}
-    nullable_t(const T& value) : _valid(true) { new(_data) T(value); }
-    nullable_t(T&& value) : _valid(true) { new(_data) T(std::move(value)); }
-    nullable_t(const nullable_t& copy) : _valid(copy._valid) { if (_valid) new(_data) T(copy.get()); }
-    nullable_t(nullable_t&& move) : _valid(move._valid) { if (_valid) new(_data) T(std::move(move.get())); }
-    template<typename U> nullable_t(const nullable_t<U>& copy) : _valid(copy._valid) { if (_valid) new(_data) T(copy.get()); }
-    template<typename U> nullable_t(nullable_t<U>&& move) : _valid(move._valid) { if (_valid) new(_data) T(std::move(move.get())); }
-    ~nullable_t() { clear(); }
-
-    nullable_t& operator=(const std::nullptr_t&) { clear(); return *this; }
-    nullable_t& operator=(const T& value) { if (_valid) get() = value; else { new(_data) T(value); _valid = true; } return *this; }
-    nullable_t& operator=(T&& value) { if (_valid) get() = std::move(value); else { new(_data) T(std::move(value)); _valid = true; } return *this; }
-    nullable_t& operator=(const nullable_t& copy) { if (copy._valid) { *this = copy.get(); } else clear(); return *this; }
-    nullable_t& operator=(nullable_t&& move) { if (move._valid) { *this = std::move(move.get()); } else clear(); return *this; }
-    template<typename U> nullable_t& operator=(const nullable_t<U>& copy) { if (copy._valid) { *this = copy.get(); } else clear(); return *this; }
-    template<typename U> nullable_t& operator=(nullable_t<U>&& move) { if (move._valid) { *this = std::move(move.get()); } else clear(); return *this; }
-
-    void clear() { if (_valid) { _valid = false; get().~T(); } }
-
-    bool isNull() const { return !_valid; }
-    explicit operator bool() const { return _valid; }
-    bool operator!() const { return !_valid; }
-
-    // Caution: these are not safe unless you check against nullptr first!
-    T& get() { return *reinterpret_cast<T*>(_data); }
-    const T& get() const { return *reinterpret_cast<const T*>(_data); }
-    T* operator->() { return reinterpret_cast<T*>(_data); }
-    const T* operator->() const { return reinterpret_cast<const T*>(_data); }
-    T& operator*() { return *reinterpret_cast<T*>(_data); }
-    const T& operator*() const { return *reinterpret_cast<const T*>(_data); }
-
-    // Retrieve value as a pointer (only safe as long as the nullable_t lives)
-    T* ptr() { return _valid ? reinterpret_cast<T*>(_data) : nullptr; }
-    const T* ptr() const { return _valid ? reinterpret_cast<const T*>(_data) : nullptr; }
-
-    T& defaultConstructIfNull() { if (!_valid) { emplace(); } return get(); }
-
-    // Construct a T in-place.  If a T already exists, destroys it first.
-    // If the new T's constructor throws, the nullable_t becomes empty.
-    template<class... Args_t>
-    T& emplace(Args_t &&... args) { clear(); new(_data) T{std::forward<Args_t>(args)...}; _valid = true; return get(); }
-};
-
-template<typename T, typename U> static inline bool operator==(const nullable_t<T>& a, const nullable_t<U>& b) { return a ? b && *a == *b : !b; }
-template<typename T, typename U> static inline bool operator!=(const nullable_t<T>& a, const nullable_t<U>& b) { return a ? !b || *a != *b : !!b; }
-
-template<typename T, typename U> static inline bool operator==(const nullable_t<T>& a, const U& b) { return a && *a == b; }
-template<typename T, typename U> static inline bool operator==(const U& b, const nullable_t<T>& a) { return a && *a == b; }
-template<typename T, typename U> static inline bool operator!=(const nullable_t<T>& a, const U& b) { return !a || *a != b; }
-template<typename T, typename U> static inline bool operator!=(const U& b, const nullable_t<T>& a) { return !a || *a != b; }
-
-template<typename T> static inline bool operator==(const nullable_t<T>& a, const std::nullptr_t&) { return !a; }
-template<typename T> static inline bool operator==(const std::nullptr_t&, const nullable_t<T>& a) { return !a; }
-template<typename T> static inline bool operator!=(const nullable_t<T>& a, const std::nullptr_t&) { return !!a; }
-template<typename T> static inline bool operator!=(const std::nullptr_t&, const nullable_t<T>& a) { return !!a; }
+using nullable_t = kapps::core::nullable_t<T>;
+template<typename T>
+using Optional = kapps::core::nullable_t<T>;
 
 // Helper template to get an appropriate nullable type for a type T.
 //
@@ -223,20 +160,6 @@ template<typename T> struct get_nullable { typedef nullable_t<T> type; };
 template<typename T> struct get_nullable<T*> { typedef T* type; };
 template<typename T> struct get_nullable<nullable_t<T>> { typedef nullable_t<T> type; };
 template<typename T> using get_nullable_t = typename get_nullable<T>::type;
-
-template<typename T> using Nullable = get_nullable_t<T>;
-template<typename T> using Optional = get_nullable_t<T>;
-
-
-template<typename T>
-inline QDebug& operator<<(QDebug &d, const nullable_t<T> &nullable)
-{
-    if(nullable)
-        d << nullable.get();
-    else
-        d << QStringLiteral("<null>");
-    return d;
-}
 
 // Convenience macro to schedule a block of code (actually a lambda) to run
 // at the end of the current scope. If multiple sentinels are listed in the
@@ -507,49 +430,45 @@ static inline QLatin1String qEnumToString(Enum value)
     return QLatin1String(meta.valueToKey(static_cast<int>(value)));
 }
 
-// CRTP QDebug tracer - implement trace() to provide operator<<
-template<class Derived>
-class DebugTraceable
+// Implementation details for the enum tracers
+namespace detail_
 {
-public:
-    friend QDebug &operator<<(QDebug &dbg, const DebugTraceable &traceable)
+    template<class Enum>
+    class EnumWithMetaTracer : public kapps::core::OStreamInsertable<EnumWithMetaTracer<Enum>>
     {
-        static_cast<const Derived&>(traceable).trace(dbg);
-        return dbg;
-    }
-};
+    private:
+        static void traceNumeric(std::ostream &os, Enum value)
+        {
+            os << static_cast<typename std::underlying_type<Enum>::type>(value);
+        }
+        static void traceWithMeta(std::ostream &os, const QMetaEnum &meta, Enum value)
+        {
+            const char *name = meta.valueToKey(static_cast<int>(value));
+            if(name)
+                os << name;
+            else
+                traceNumeric(os, value);
+        }
+    public:
+        EnumWithMetaTracer(Enum value) : _value{value} {}
+    public:
+        void trace(std::ostream &os) const
+        {
+            traceWithMeta(os, QMetaEnum::fromType<Enum>(), _value);
+        }
+    private:
+        Enum _value;
+    };
+}
 
-// Trace an enum value - traces the name if the value is known, falls back to
-// the numeric value otherwise.
+// Enums can be traced just with operator<<(), which uses
+// kapps:::core::enumValueName() to get a name if possible, or traces the numeric
+// value otherwise.
+//
+// To use Q_ENUM instead, use traceEnum() which fails at compile time if Q_ENUM
+// is missing.
 template<class Enum>
-class EnumTracer : public DebugTraceable<EnumTracer<Enum>>
-{
-private:
-    static const QMetaEnum &meta()
-    {
-        static const QMetaEnum _meta = QMetaEnum::fromType<Enum>();
-        return _meta;
-    }
-
-public:
-    EnumTracer(Enum value) : _value{value} {}
-
-    void trace(QDebug &dbg) const
-    {
-        const char *name = meta().valueToKey(static_cast<int>(_value));
-        if(name)
-            dbg << name;
-        else
-            dbg << static_cast<typename std::underlying_type<Enum>::type>(_value);
-    }
-
-private:
-    Enum _value;
-};
-
-// Deduce the enum type by tracing an enum with this function
-template<class Enum>
-EnumTracer<Enum> traceEnum(Enum value) {return {value};}
+detail_::EnumWithMetaTracer<Enum> traceEnum(Enum value) {return {value};}
 
 namespace impl {
     // This cheekily borrows straight from Qt internals, but it was the only
@@ -596,13 +515,8 @@ inline qint32 msec32(const std::chrono::milliseconds &time)
     return static_cast<qint32>(count);
 }
 
-// Render a millisecond count for tracing (not localized, tracing only)
-COMMON_EXPORT QString traceMsec(qint64 time);
-
-inline QString traceMsec(const std::chrono::milliseconds &time)
-{
-    return traceMsec(msec(time));
-}
+using kapps::core::traceMsec;
+inline auto traceMsec(qint64 msec) {return traceMsec(std::chrono::milliseconds{msec});}
 
 // After starting a process (and writing any necessary input), call this
 // convenience function to correctly wait for it to terminate with the same
@@ -739,4 +653,74 @@ qint64 COMMON_EXPORT getMonotonicTime();
 // so it's possible to test debug symbols for common in a dynamic library.)
 void COMMON_EXPORT testCrash();
 
+// Trace QString by converting to UTF-8 and quoting it.  This obviously incurs
+// overhead to do the conversion, for new work we now prefer to store data in
+// UTF-8 (using std::string) instead of UTF-16 (QString).
+//
+// To avoid the quoting, insert qUtf8Printable(str) instead of str.
+inline std::ostream &operator<<(std::ostream &os, const QString &str)
+{
+    return os << std::quoted(qUtf8Printable(str));
+}
+inline std::ostream &operator<<(std::ostream &os, const QStringView &str)
+{
+    return os << std::quoted(str.toUtf8().data());
+}
+inline std::ostream &operator<<(std::ostream &os, const QLatin1String &str)
+{
+    return os << kapps::core::StringSlice{str.begin(), str.end()};
+}
+
+inline std::ostream &operator<<(std::ostream &os, const QStringList &c)
+{
+    kapps::core::log::streamContainer(os, c);
+    return os;
+}
+template<class ValueT>
+std::ostream &operator<<(std::ostream &os, const QVector<ValueT> &c)
+{
+    kapps::core::log::streamContainer(os, c);
+    return os;
+}
+
+// Tracing a QByteArray directly is explicitly prevented, since it's not clear
+// whether the QByteArray is supposed to contain arbitrary binary data or text
+// (we don't want huge hex dumps for data that's supposed to look like text, but
+// we don't want meaningless text for binary data either).  If it's supposed to
+// be text, use QByteArray::data() to trace it as text.
+//
+// This also prevents directly tracing QJsonDocument::toJson(), which should use
+// the QJsonDocument operator<<() instead (json.h).
+std::ostream &operator<<(std::ostream &, const QByteArray &) = delete;
+
+// Trace some additional Qt types, mimics the QDebug versions of operator<<()
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QRect &rect);
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QDateTime &date);
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QHostAddress &address);
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QUrl &url);
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QSize &size);
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const QUuid &uuid);
+
+// Helper namespace for functions that go between qt <-> stdlib types
+// or otherwise help with stdlib containers
+namespace qs
+{
+    COMMON_EXPORT std::vector<std::string> stdVecFromStringList(const QStringList &list);
+
+    template <typename Container>
+    QStringList stringListFromStdContainer(const Container &con)
+    {
+        QStringList list;
+        list.reserve(con.size());
+
+        for(const auto &str : con)
+            list.push_back(QString::fromStdString(str));
+
+        return list;
+    }
+
+    COMMON_EXPORT QString toQString(const std::string &str);
+    COMMON_EXPORT QString toQString(const kapps::core::StringSlice &str);
+    COMMON_EXPORT QString toQString(const kapps::core::WStringSlice &str);
+}
 #endif // BUILTIN_UTIL_H

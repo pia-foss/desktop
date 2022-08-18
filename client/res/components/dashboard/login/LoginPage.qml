@@ -50,6 +50,24 @@ FocusScope {
   readonly property int maxPageHeight: pageHeight
   readonly property bool emailLoginFeatureEnabled: Daemon.data.flags.includes("email_login")
 
+  property real retryAfterTime: 0
+
+  // The current time which can be updated by a timer
+  property real currentTime: 0
+
+  // A timer that always updates the current time once every second
+  // because we cannot have the current time automatically updated
+  Timer {
+    onTriggered: {
+      currentTime = Date.now();
+    }
+    repeat: true
+    interval: 1000
+    running: retryAfterTime > 0 && retryAfterTime + 2000 > currentTime
+  }
+
+
+
   // The login page can be in one of multiple distinct modes:
   //
   // - login: For a regular email/password login.
@@ -100,6 +118,8 @@ FocusScope {
     if(hasValidInput && !loginInProgress) {
       loginInProgress = true
       shownError = errors.none
+      retryAfterTime = 0
+      currentTime = 0
 
       // We trim off any errant newlines from password (usually introduced by copy/paste)
       Daemon.login(loginInput.text, passwordInput.text.replace(/\n+$/, ''), function(error) {
@@ -112,6 +132,10 @@ FocusScope {
             shownError = errors.auth
             break
           case NativeError.ApiRateLimitedError:
+            if(error.retryAfterTime > 0) {
+              currentTime = Date.now()
+              retryAfterTime = error.retryAfterTime
+            }
             shownError = errors.rate
             break
           case NativeError.ApiPaymentRequiredError:
@@ -152,7 +176,6 @@ FocusScope {
 
     // The "login" page (everything contained in this Rectangle)
     Rectangle {
-      anchors.fill: parent
       color: "transparent"
       clip: true
       Item {
@@ -178,6 +201,7 @@ FocusScope {
         }
       }
 
+
       Item {
         id: loginContent
         anchors.bottom: linkContainer.top
@@ -190,15 +214,15 @@ FocusScope {
           width: parent.width
           height: lb.y + lb.height
           visible: mode === modes.login
-
           Text {
             color: Theme.login.errorTextColor
+            horizontalAlignment: Text.AlignHCenter
             text: {
               switch(shownError) {
               case errors.auth:
                 return uiTr("Invalid login")
               case errors.rate:
-                return uiTr("Too many attempts, try again in 1 hour")
+                return uiTr("Too many login attempts.") + "\n" + Messages.tryAgainMessage(Math.ceil((retryAfterTime - currentTime) / 1000))
               case errors.api:
                 return uiTr("Can't reach the server")
               case errors.expired:
@@ -207,7 +231,8 @@ FocusScope {
                 return ""
               }
             }
-            anchors.top: parent.top
+            anchors.bottom: loginInput.top
+            anchors.bottomMargin: -6
             anchors.horizontalCenter: parent.horizontalCenter
             font.pixelSize: Theme.login.errorTextPx
             visible: shownError !== errors.none
@@ -456,9 +481,6 @@ FocusScope {
     // The "upgrade required" page - shown when the user's subscription has expired
     Item {
      id: upgradeRequired
-     anchors.left: parent.left
-     anchors.horizontalCenter: parent.horizontalCenter
-     width: parent.width * 0.75
 
       Image {
         id: upgradeRocket

@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include "launcher/linux-launcher-cmds.h"
 #endif
-#include <QDebug>
 #include <QHttpMultiPart>
 #include <QFileInfo>
 #include <QNetworkReply>
@@ -33,7 +32,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QTimer>
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "brand.h"
 
 #ifdef Q_OS_WIN
@@ -69,7 +68,7 @@ void ReportHelper::sendPayload(const QByteArray &payloadContent, const QString &
     //
     QHttpPart verPart;
     verPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"version\""));
-    verPart.setBody(Version::semanticVersion().toUtf8());
+    verPart.setBody(QByteArray::fromStdString(Version::semanticVersion()));
 
     QHttpPart commentPart;
     commentPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"comments\""));

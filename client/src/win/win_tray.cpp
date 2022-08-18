@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_tray.cpp")
 
-#include "trayiconmanager.h"
+#include "../trayiconmanager.h"
 #include "win_tray.h"
 #include "win_resources.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <QUuid>
 #include <QRect>
 #include <QPoint>
@@ -35,7 +35,7 @@
 #include <string.h> // For wcsncpy_s(), used to fill NOTIFYICONDATAW buffers
 #include <VersionHelpers.h>
 
-#include <windows.h>
+#include <kapps_core/src/winapi.h>
 #pragma comment(lib, "User32.lib")
 
 namespace

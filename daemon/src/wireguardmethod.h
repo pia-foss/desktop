@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguardmethod.h")
 
 #ifndef WIREGUARDMETHOD_H
 #define WIREGUARDMETHOD_H
 
 #include "vpnmethod.h"
-#include "openssl.h"
+#include <common/src/openssl.h>
 
 // Clean any Wireguard leftovers that could exist if the daemon crashed while a
 // connection was up.  (Cleans for all WG backends supported on this platform.)

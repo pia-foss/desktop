@@ -16,13 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "unixsignalhandler.h"
 #line SOURCE_FILE("unixsignalhandler.cpp")
 #include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <QDebug>
 
 namespace
 {

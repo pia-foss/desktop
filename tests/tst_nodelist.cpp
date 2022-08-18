@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "nodelist.h"
+#include <common/src/common.h>
+#include <common/src/nodelist.h>
 #include <QtTest>
 
 class tst_nodelist : public QObject

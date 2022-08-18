@@ -24,93 +24,18 @@
 #pragma once
 
 #include "util.h"
+#include <kapps_core/src/logger.h>
 
 #include <QtDebug>
 #include <QLoggingCategory>
 #include <QString>
 #include <iostream>
-#include <QDebug>
 #include <QElapsedTimer>
 
-struct COMMON_EXPORT CodeLocation
-{
-    const QLoggingCategory* category;
-    const char* file;
-    int line;
+// TODO - eliminate this alias
+using CodeLocation = kapps::core::SourceLocation;
 
-    CodeLocation() : category(nullptr), file(nullptr), line(0) {}
-    CodeLocation(const char* file, int line, const QLoggingCategory& category);
-
-    explicit operator bool() const {return category && file && line;}
-    bool operator!() const {return !operator bool();}
-
-    const char* categoryName() const { return category ? category->categoryName() : ""; }
-
-    template<class Error, typename... Args>
-    inline Error createError(Args&... args)
-    {
-        return Error(std::move(*this), std::forward<Args>(args)...);
-    }
-};
-
-#define THIS_LOCATION CodeLocation(LOG_FILE, LOG_LINE, currentLoggingCategory())
-#define HERE THIS_LOCATION
-
-inline std::ostream &operator<<(std::ostream &os, const CodeLocation &location)
-{
-    return os << "[" << location.categoryName() << "] "
-        << location.file << ":" << location.line;
-}
-
-inline QDebug operator<<(QDebug d, const CodeLocation &location)
-{
-    QDebugStateSaver saver{d};
-    return d.nospace() << "[" << location.categoryName() << "] "
-        << location.file << ":" << location.line;
-}
-
-class COMMON_EXPORT LogEnableHelper
-{
-    const QLoggingCategory* const _cat;
-public:
-    explicit LogEnableHelper(const QLoggingCategory* cat) : _cat(cat) {}
-    static LogEnableHelper test(const QLoggingCategory* cat, QtMsgType type) { return LogEnableHelper(cat && cat->isEnabled(type) ? cat : nullptr); }
-    operator bool() const { return !_cat; } // evaluate to false if we have a category
-    const char* name() const { return _cat->categoryName(); }
-};
-
-// Custom subclass to handle the qDebug(exception) syntax for logging
-// exceptions with their original location context.
-//
-class COMMON_EXPORT QCustomMessageLogger : public QMessageLogger
-{
-public:
-    using QMessageLogger::QMessageLogger;
-    using QMessageLogger::fatal;
-    using QMessageLogger::critical;
-    using QMessageLogger::warning;
-    using QMessageLogger::info;
-    using QMessageLogger::debug;
-
-    template<typename... Args>
-    inline void Q_NORETURN fatal(const CodeLocation& l, Args&&... args) { QMessageLogger(l.file, l.line, nullptr, l.categoryName()).fatal(std::forward<Args>(args)...); }
-    template<typename... Args>
-    inline auto critical(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).critical(std::forward<Args>(args)...); }
-    template<typename... Args>
-    inline auto warning(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).warning(std::forward<Args>(args)...); }
-    template<typename... Args>
-    inline auto info(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).info(std::forward<Args>(args)...); }
-    template<typename... Args>
-    inline auto debug(const CodeLocation& l, Args&&... args) { return QMessageLogger(l.file, l.line, nullptr, l.categoryName()).debug(std::forward<Args>(args)...); }
-};
-
-
-#define LOG_FILE __FILE__
-#define LOG_LINE __LINE__
-#define LOG_FUNC nullptr
-
-// Redefine the Qt debug logging macros to pick up a contextual category
-
+// Use the logger from kapps::core, we no longer use the Qt logger directly
 #undef qFatal
 #undef qCritical
 #undef qWarning
@@ -121,90 +46,19 @@ public:
 #undef qCInfo
 #undef qCDebug
 
-#define LOG_IMPL(type, category) if (auto __cat = LogEnableHelper::test(&category(), type)) {} else QCustomMessageLogger(LOG_FILE, LOG_LINE, LOG_FUNC, __cat.name())
+#define qFatal KAPPS_CORE_FATAL
+#define qError KAPPS_CORE_ERROR
+#define qCritical KAPPS_CORE_ERROR   // qError was actually an alias to qCritical
+#define qWarning KAPPS_CORE_WARNING
+#define qInfo KAPPS_CORE_INFO
+#define qDebug KAPPS_CORE_DEBUG
+// Manual category macros (qCInfo, etc.) aren't defined, these are used very
+// rarely, use KAPPS_CORE_INFO_CATEGORY(), etc.
 
-#define qFatal    QCustomMessageLogger(LOG_FILE, LOG_LINE, LOG_FUNC, currentLoggingCategory().categoryName()).fatal
-
-#define qCCritical(category, ...) LOG_IMPL(QtCriticalMsg, category).critical(__VA_ARGS__)
-#define qCWarning(category, ...)  LOG_IMPL(QtWarningMsg, category).warning(__VA_ARGS__)
-#define qCInfo(category, ...)     LOG_IMPL(QtInfoMsg, category).info(__VA_ARGS__)
-#define qCDebug(category, ...)    LOG_IMPL(QtDebugMsg, category).debug(__VA_ARGS__)
-
-#define qCritical LOG_IMPL(QtCriticalMsg,currentLoggingCategory).critical
-#define qWarning  LOG_IMPL(QtWarningMsg,currentLoggingCategory).warning
-#define qInfo     LOG_IMPL(QtInfoMsg,currentLoggingCategory).info
-#define qDebug    LOG_IMPL(QtDebugMsg,currentLoggingCategory).debug
-
-#define qCError   qCCritical
-#define qError    qCritical
-
-#ifdef QT_DEBUG
-#define qFatalIfRelease qCritical
-#else
-#define qFatalIfRelease qFatal
-#endif
-
-#if defined(QT_NO_DEBUG_OUTPUT)
-#  undef qDebug
-#  define qDebug QT_NO_QDEBUG_MACRO
-#endif
-#if defined(QT_NO_INFO_OUTPUT)
-#  undef qInfo
-#  define qInfo QT_NO_QDEBUG_MACRO
-#endif
-#if defined(QT_NO_WARNING_OUTPUT)
-#  undef qWarning
-#  define qWarning QT_NO_QDEBUG_MACRO
-#endif
-
-// Support legacy LOG(...) syntax as well
-#define LOG_FATAL qFatal
-#define LOG_CRITICAL qCritical
-#define LOG_ERROR qError
-#define LOG_WARNING qWarning
-#define LOG_INFO qInfo
-#define LOG_VERBOSE qInfo
-#define LOG_DEBUG qDebug
-#define LOG(type,...) LOG_##type(__VA_ARGS__)
-
-
-// Last-resort match for 'currentLoggingCategory' that will return the default category
-template<typename... Args> static inline const QLoggingCategory& currentLoggingCategory(Args&&...)
-{
-    return *QLoggingCategory::defaultCategory();
-}
-
-// Declare that any functions in the class should use its own logging category.
-#define CLASS_LOGGING_CATEGORY(...) \
-    protected: \
-    static const QLoggingCategory& currentLoggingCategory() \
-    { \
-        static const QLoggingCategory category(__VA_ARGS__); \
-        return category; \
-    } \
-    private:
-
-/*
- * This macro doesn't work at the moment, because combined-compilation mode
- * eliminates file scopes
-// Define that the current file should use its own logging category.
-#define FILE_LOGGING_CATEGORY(...) \
-    namespace { \
-        static const QLoggingCategory& currentLoggingCategory() \
-        { \
-            static const QLoggingCategory category(__VA_ARGS__); \
-            return category; \
-        } \
-    }
-*/
-
-// Define that the current scope should use its own logging category.
-#define SCOPE_LOGGING_CATEGORY(...) \
-    static const QLoggingCategory currentLoggingCategory(__VA_ARGS__)
-
-#define FUNCTION_LOGGING_CATEGORY SCOPE_LOGGING_CATEGORY
-
-#define CURRENT_CATEGORY (currentLoggingCategory())
+#define CLASS_LOGGING_CATEGORY KAPPS_CORE_CLASS_CATEGORY
+#define SCOPE_LOGGING_CATEGORY KAPPS_CORE_SCOPE_CATEGORY
+#define FUNCTION_LOGGING_CATEGORY KAPPS_CORE_FUNCTION_CATEGORY
+#define CURRENT_CATEGORY KAPPS_CORE_CURRENT_CATEGORY
 
 class Path;
 class LoggerPrivate;
@@ -283,8 +137,21 @@ public:
     Q_SLOT void configure(bool logToFile, bool largeLogFiles, const QStringList& filters);
     Q_SIGNAL void configurationChanged(bool logToFile, const QStringList& filters);
 
+public:
+    // Used by the kapps::core::LogCallback implementation
+    static void writeMsg(kapps::core::LogMessage msg);
 private:
+    // Qt log callback (for capturing tracing from Qt itself)
     static void loggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    // Log output implementation.  These are used as early as
+    // Logger::initialize(), which is _before_ Logger has been created.  We have
+    // to be able to capture early tracing before Logger is created - we can't
+    // write it to the log files, but it still goes to stderr and can still
+    // trigger fatal exits.
+    static void fatalExit(LoggerPrivate *d);
+    static void writeToConsoleNoLock(const kapps::core::StringSlice &data);
+    static void writePrefixedMsg(LoggerPrivate *d, const std::string &logPrefix,
+                                 std::string msg);
 };
 
 #define g_logger (Logger::instance())

@@ -16,10 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("windowformat.cpp")
 
 #include "windowformat.h"
+#include <kapps_core/src/winapi.h>
 #include <QQuickWindow>
 
 WindowFormatAttached *WindowFormat::qmlAttachedProperties(QObject *object)

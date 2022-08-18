@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include "common.h"
+#include <common/src/common.h>
 
 namespace PosixMtu
 {

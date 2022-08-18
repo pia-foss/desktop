@@ -16,16 +16,19 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("windowmaxsize.h")
 
 #ifndef WINDOWMAXSIZE_H
 #define WINDOWMAXSIZE_H
 
-#include <QWindow>
-#include <QQuickWindow>
 #include "platformscreens.h"
 #include "workspacechange.h"
+// QWindow headers include Windows.h, we have to include winapi.h first since
+// Windows headers are sensitive to macros and inclusion order
+#include <kapps_core/src/winapi.h>
+#include <QWindow>
+#include <QQuickWindow>
 
 // Platform dependent parts of this algorithm
 class NativeWindowMetrics : public QObject

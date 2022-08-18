@@ -24,7 +24,6 @@
 #pragma once
 
 #include <QString>
-#include <QDebug>
 
 namespace Files
 {
@@ -183,7 +182,6 @@ public:
     static Path ModernShadowsocksBundle;
     static Path ModernRegionBundle;
     static Path ModernRegionMetaBundle;
-
 #ifdef Q_OS_WIN
     // Directory of TAP drivers
     // Windows: <BaseDir>/tap
@@ -282,6 +280,9 @@ public:
     operator const QString&() const { return _path; }
     const QString &str() const {return _path; }
 
+    operator std::string() const {return _path.toStdString();}
+    operator std::wstring() const {return _path.toStdWString();}
+
     Path  operator/(const QString& child) const &;
     Path& operator/(const QString& child) &&;
     Path  operator+(const QString& suffix) const &;
@@ -323,10 +324,6 @@ private:
     QString _path;
 };
 
-inline QDebug &operator<<(QDebug &dbg, const Path &path)
-{
-    const QString &pathStr{path};
-    return dbg << pathStr;
-}
+COMMON_EXPORT std::ostream &operator<<(std::ostream &os, const Path &path);
 
 #endif // PATH_H

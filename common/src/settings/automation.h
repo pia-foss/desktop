@@ -19,8 +19,8 @@
 #ifndef SETTINGS_AUTOMATION_H
 #define SETTINGS_AUTOMATION_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 
 // Automation rules
 //
@@ -28,7 +28,7 @@
 // condition determines when the rule applies, and at that point the action is
 // applied.
 class COMMON_EXPORT AutomationRuleAction : public NativeJsonObject,
-    public DebugTraceable<AutomationRuleAction>
+    public kapps::core::OStreamInsertable<AutomationRuleAction>
 {
     Q_OBJECT
 public:
@@ -47,7 +47,7 @@ public:
     bool operator!=(const AutomationRuleAction &other) const {return !(*this == other);}
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
 
     // What to do with the VPN connection when this rule applies:
     // - "enable" - enable the VPN (connect)
@@ -64,7 +64,7 @@ public:
 // criteria; if more than one was non-null then they would all have to match to
 // trigger a rule.
 class COMMON_EXPORT AutomationRuleCondition : public NativeJsonObject,
-    public DebugTraceable<AutomationRuleCondition>
+    public kapps::core::OStreamInsertable<AutomationRuleCondition>
 {
     Q_OBJECT
 
@@ -86,7 +86,7 @@ public:
     bool operator!=(const AutomationRuleCondition &other) const {return !(*this == other);}
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
 
     // Rule type - determines what networks this condition matches
     // - "openWifi" - any unencrypted Wi-Fi network
@@ -110,7 +110,7 @@ public:
 };
 
 class COMMON_EXPORT AutomationRule : public NativeJsonObject,
-    public DebugTraceable<AutomationRule>
+    public kapps::core::OStreamInsertable<AutomationRule>
 {
     Q_OBJECT
 
@@ -132,7 +132,7 @@ public:
     bool operator!=(const AutomationRule &other) const {return !(*this == other);}
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
 
     JsonObjectField(AutomationRuleCondition, condition, {})
     JsonObjectField(AutomationRuleAction, action, {})

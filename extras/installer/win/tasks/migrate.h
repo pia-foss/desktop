@@ -20,7 +20,7 @@
 #define TASKS_MIGRATE_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 #include "list.h"
 
 #ifdef INSTALLER

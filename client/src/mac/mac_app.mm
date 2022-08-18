@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac/mac_app.mm")
 
 #include "mac_app.h"
-#include "client.h"
+#include "../client.h"
 #import <AppKit/AppKit.h>
 
 // App delegate - handle application-wide events

@@ -20,14 +20,18 @@
 #define CLIENT_H
 #pragma once
 
-#include "common.h"
+#include <common/src/common.h>
 #include "clientsettings.h"
 #include "clientqmlcontext.h"
-#include "daemonconnection.h"
-#include "settings.h"
+#include <clientlib/src/daemonconnection.h>
+#include <common/src/settings/daemonaccount.h>
+#include <common/src/settings/daemondata.h>
+#include <clientlib/src/model/daemonstate.h>
+#include <common/src/settings/daemonsettings.h>
 #include "nativehelpers.h"
 #include "preconnectstatus.h"
-#include "appsingleton.h"
+#include <common/src/appsingleton.h>
+#include <kapps_core/src/winapi.h> // Due to QWindow below including windows.h
 
 #include <QFontDatabase>
 #include <QObject>

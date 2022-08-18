@@ -19,12 +19,12 @@
 #ifndef SERVICEQUALITY_H
 #define SERVICEQUALITY_H
 
-#include "common.h"
-#include "settings/daemonaccount.h"
-#include "settings/daemondata.h"
+#include <common/src/common.h>
+#include <common/src/settings/daemonaccount.h>
+#include <common/src/settings/daemondata.h>
+#include <common/src/semversion.h>
 #include "apiclient.h"
 #include "environment.h"
-#include "semversion.h"
 
 // ServiceQuality keeps track of service quality information that's sent back to
 // help us improve our service.  This only occurs when the user has opted in to
@@ -196,13 +196,13 @@ public:
     // (attempts - (established + canceled)), if they do happen a lot then we
     // might add specific event(s) to see what is causing that.
 
-    // The VPN connection has been enabled (DaemonState::vpnEnabled() just
+    // The VPN connection has been enabled (StateModel::vpnEnabled() just
     // became 'true').  Indicate whether this was a manual or automatic change.
     //
     // This generates a "connection attempt" event.
     void vpnEnabled(VpnProtocol protocol, ConnectionSource source);
 
-    // The VPN connection has been disabled (DaemonState::vpnEnabled() just
+    // The VPN connection has been disabled (StateModel::vpnEnabled() just
     // became 'false').  If the VPN state had not reached 'connected' since the
     // last call to vpnEnabled(), and the VPN was disabled manually, this
     // generates a "connection canceled" event.

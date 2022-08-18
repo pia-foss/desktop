@@ -160,7 +160,7 @@ mkdir -p /etc/schroot/piabuild
 
 # Packages needed for host architecture
 # For desktop:
-HOST_PACKAGES_DTOP=(
+HOST_PACKAGES_KAPPS=(
     build-essential
     rake
     clang-7
@@ -181,7 +181,7 @@ HOST_PACKAGES_DEP=(
 )
 # Packages needed for target architecture(s)
 # For desktop:
-TARGET_PACKAGES_DTOP=(
+TARGET_PACKAGES_KAPPS=(
     mesa-common-dev
     libnl-3-dev
     libnl-route-3-dev
@@ -214,12 +214,12 @@ TARGET_PACKAGES_DEP=(
 
 echo "Install host arch packages"
 # Enter the chroot and install additional packages
-schroot -c "piabuild-stretch$ARCH_SUFFIX" -- bash -c "apt-get update && apt-get install -y ${HOST_PACKAGES_DTOP[*]} ${HOST_PACKAGES_DEP[*]}"
+schroot -c "piabuild-stretch$ARCH_SUFFIX" -- bash -c "apt-get update && apt-get install -y ${HOST_PACKAGES_KAPPS[*]} ${HOST_PACKAGES_DEP[*]}"
 
 echo "Install target arch packages"
 # Install development deps for target architecture
 ARCH_DEPS=("${ARCH_SUFFIX:+cross}build-essential$ARCH_SUFFIX")
-for pkg in "${TARGET_PACKAGES_DTOP[@]}" "${TARGET_PACKAGES_DEP[@]}"; do
+for pkg in "${TARGET_PACKAGES_KAPPS[@]}" "${TARGET_PACKAGES_DEP[@]}"; do
     ARCH_DEPS+=("$pkg${CROSS_TARGET:+:$CROSS_TARGET}")
 done
 echo schroot -c "piabuild-stretch$ARCH_SUFFIX" -- bash -c "${CROSS_TARGET:+dpkg --add-architecture $CROSS_TARGET && apt-get update &&} apt-get install -y ${ARCH_DEPS[*]}"

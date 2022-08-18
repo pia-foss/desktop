@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("linux_nl.cpp")
 
 #include "linux_nl.h"
@@ -48,7 +48,7 @@ public:
     // other members should be used; this class works on the worker thread)
     //
     // Worker takes ownership of the kill socket.
-    explicit Worker(LinuxNl &parent, PosixFd killSocket);
+    explicit Worker(LinuxNl &parent, kapps::core::PosixFd killSocket);
 
 private:
     // Read the current state of the caches and send state to main thread
@@ -72,7 +72,7 @@ private:
     // poll configurations - includes kill socket and all netlink sockets
     std::array<pollfd, PollIdx::Count> _pollCfgs;
     // Kill socket - terminates the event loop when signaled
-    PosixFd _killSocket;
+    kapps::core::PosixFd _killSocket;
     // Socket for all "route" caches - link/address/route
     LinuxNlCacheSock _routeSock;
     // Cache of generic netlink families - used to detect when nl80211 is added
@@ -90,14 +90,14 @@ private:
     std::vector<NetworkConnection> _lastConnections;
 };
 
-LinuxNl::Worker::Worker(LinuxNl &parent, PosixFd killSocket)
+LinuxNl::Worker::Worker(LinuxNl &parent, kapps::core::PosixFd killSocket)
     : _parent{parent}, _pollCfgs{}, _killSocket{std::move(killSocket)},
       _routeSock{NETLINK_ROUTE}
 {
     _pollCfgs[PollIdx::KillSocket].fd = _killSocket.get();
     _pollCfgs[PollIdx::RouteSocket].fd = _routeSock.getFd();
     _pollCfgs[PollIdx::GenlFamiliesSocket].fd = _genlFamilies.getFd();
-    _pollCfgs[PollIdx::Nl80211Socket].fd = PosixFd::Invalid; // Set on nl80211 cache creation
+    _pollCfgs[PollIdx::Nl80211Socket].fd = kapps::core::PosixFd::Invalid; // Set on nl80211 cache creation
 
     for(auto &cfg : _pollCfgs)
     {
@@ -146,7 +146,7 @@ bool readNlAddr(libnl::nl_addr *pNlAddr, std::size_t valueSize, void *pValue)
     return true;
 }
 
-Ipv4Address readNlAddr4(libnl::nl_addr *pNlAddr)
+kapps::core::Ipv4Address readNlAddr4(libnl::nl_addr *pNlAddr)
 {
     quint32 ipv4Value{};
     if(readNlAddr(pNlAddr, sizeof(ipv4Value), &ipv4Value))
@@ -162,7 +162,7 @@ Ipv4Address readNlAddr4(libnl::nl_addr *pNlAddr)
     return {};
 }
 
-Ipv6Address readNlAddr6(libnl::nl_addr *pNlAddr)
+kapps::core::Ipv6Address readNlAddr6(libnl::nl_addr *pNlAddr)
 {
     quint8 ipv6Value[16]{};
     if(readNlAddr(pNlAddr, sizeof(ipv6Value), ipv6Value))
@@ -353,21 +353,21 @@ void LinuxNl::Worker::readCaches()
             mtu = libnl::rtnl_link_get_mtu(pItfLink.get());
         }
 
-        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
+        std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4;
         addressesIpv4.reserve(itfAddrs.second._addrs4.size());
         for(const auto &pNlAddr4 : itfAddrs.second._addrs4)
         {
-            Ipv4Address addr4 = readNlAddr4(pNlAddr4);
-            if(addr4 != Ipv4Address{})
+            kapps::core::Ipv4Address addr4 = readNlAddr4(pNlAddr4);
+            if(addr4 != kapps::core::Ipv4Address{})
                 addressesIpv4.push_back({addr4, libnl::nl_addr_get_prefixlen(pNlAddr4)});
         }
 
-        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
+        std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6;
         addressesIpv6.reserve(itfAddrs.second._addrs6.size());
         for(const auto &pNlAddr6 : itfAddrs.second._addrs6)
         {
-            Ipv6Address addr6 = readNlAddr6(pNlAddr6);
-            if(addr6 != Ipv6Address{})
+            kapps::core::Ipv6Address addr6 = readNlAddr6(pNlAddr6);
+            if(addr6 != kapps::core::Ipv6Address{})
                 addressesIpv6.push_back({addr6, libnl::nl_addr_get_prefixlen(pNlAddr6)});
         }
 
@@ -479,7 +479,7 @@ void LinuxNl::Worker::receiveGenlFamilies(short &revents)
             {
                 // nl80211 or config group is gone, or IDs changed, destroy cache
                 _p80211Cache.reset();
-                _pollCfgs[PollIdx::Nl80211Socket].fd = PosixFd::Invalid;
+                _pollCfgs[PollIdx::Nl80211Socket].fd = kapps::core::PosixFd::Invalid;
             }
         }
 
@@ -567,20 +567,20 @@ bool LinuxNl::Worker::receive()
 }
 
 void LinuxNl::runOnWorkerThread(LinuxNl *pThis,
-                                std::promise<PosixFd> killSocketPromise)
+                                std::promise<kapps::core::PosixFd> killSocketPromise)
 {
     // Note that this function is on the worker thread, so we shouldn't access
     // members of pThis, just use it to queue signals back to the main thread
     // (which is why pThis is passed as a parameter to a static function).
 
-    int killSockets[2]{PosixFd::Invalid, PosixFd::Invalid};
+    int killSockets[2]{kapps::core::PosixFd::Invalid, kapps::core::PosixFd::Invalid};
     auto spResult = ::socketpair(AF_UNIX, SOCK_STREAM, 0, killSockets);
     // Provide the socket handle back to the main thread even if ::socketpair()
     // failed.  The main thread now owns it (using PosixFd).
-    killSocketPromise.set_value(PosixFd{killSockets[1]});
+    killSocketPromise.set_value(kapps::core::PosixFd{killSockets[1]});
 
     // This thread owns the other handle.
-    PosixFd killSocket{killSockets[0]};
+    kapps::core::PosixFd killSocket{killSockets[0]};
 
     if(spResult || !killSocket)
     {
@@ -627,7 +627,7 @@ void LinuxNl::runOnWorkerThread(LinuxNl *pThis,
 
 LinuxNl::LinuxNl()
 {
-    std::promise<PosixFd> killSocketPromise;
+    std::promise<kapps::core::PosixFd> killSocketPromise;
     _workerKillSocket = killSocketPromise.get_future();
 
     _workerThread = std::thread{&LinuxNl::runOnWorkerThread, this,
@@ -640,7 +640,7 @@ LinuxNl::~LinuxNl()
     // Terminate the run loop by writing to the kill socket.  If the worker
     // thread is still starting, this blocks until it provides the kill socket.
     unsigned char term = 0;
-    PosixFd killSocket = _workerKillSocket.get();
+    kapps::core::PosixFd killSocket = _workerKillSocket.get();
     if(killSocket)
         ::write(killSocket.get(), &term, sizeof(term));
     _workerThread.join();

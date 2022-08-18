@@ -18,8 +18,8 @@
 
 #include "service.h"
 #include "brand.h"
-#include "service_inl.h"
-#include "safemode_inl.h"
+#include "../service_inl.h"
+#include "../safemode_inl.h"
 
 bool ServiceTask::_rollbackNeedsReinstall = false;
 

@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("main.cpp")
 
 #if defined(UNIT_TEST)
@@ -29,14 +29,14 @@ void dummyClientMain() {}
 #include "brand.h"
 #include "client.h"
 #include "clientsettings.h"
-#include "path.h"
-#include "semversion.h"
+#include <common/src/builtin/path.h>
+#include <common/src/semversion.h>
 #include "product.h"
 #include "nativehelpers.h"
-#include "appsingleton.h"
-#include "apiretry.h"
+#include <common/src/appsingleton.h>
+#include <common/src/apiretry.h>
 
-#include "clientlib.h"
+#include <clientlib/src/clientlib.h>
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -60,7 +60,7 @@ void dummyClientMain() {}
 #if defined(Q_OS_WIN)
 #include "win/win_scaler.h"
 #include "win/win_messagereceiver.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include "win/win_d3d11support.h"
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
@@ -72,7 +72,7 @@ void dummyClientMain() {}
 #endif
 
 #ifdef Q_OS_UNIX
-#include "posix/unixsignalhandler.h"
+#include <common/src/posix/unixsignalhandler.h>
 #endif
 
 #if defined(Q_OS_WIN)

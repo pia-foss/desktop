@@ -70,7 +70,7 @@ QtObject {
     })
   }
 
-  // Connect to a specific location.  Reconnect if already connect, otherwise
+  // Connect to a specific location.  Reconnect if already connected, otherwise
   // connect now.
   // Used for interactions intended to connect to a specific region, like the
   // Quick Connect buttons.
@@ -86,6 +86,19 @@ QtObject {
       else {
         _addRecentLocation(locationId)
         Daemon.connectVPN()
+      }
+    })
+  }
+
+  // Connect to the best region in a given country.
+  function connectCountryBest(countryCode) {
+    Daemon.getCountryBestRegion(countryCode, function(error, region) {
+      if(error) {
+        console.error('Could not get best region in country ' + countryCode, error)
+      }
+      else {
+        console.info('Connecting to ' + region + ' as best region in country ' + countryCode)
+        connectLocation(region)
       }
     })
   }

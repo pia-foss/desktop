@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("watchcommand.cpp")
 
 #include "watchcommand.h"
 #include "cliclient.h"
-#include "output.h"
+#include <common/src/output.h>
 #include <unordered_set>
 
 class JsonChangePrinter : public QObject
@@ -60,13 +60,12 @@ private:
 
 const std::unordered_set<QString> JsonChangePrinter::propertyBlacklist{
     QStringLiteral("availableLocations"),
+    QStringLiteral("regionsMetadata"),
     QStringLiteral("groupedLocations"),
-    QStringLiteral("latencies"),
     QStringLiteral("modernLatencies"),
-    QStringLiteral("cachedLegacyRegionsList"),
-    QStringLiteral("cachedLegacyShadowsocksList"),
     QStringLiteral("cachedModernShadowsocksList"),
-    QStringLiteral("cachedModernRegionsList")
+    QStringLiteral("cachedModernRegionsList"),
+    QStringLiteral("modernRegionsMeta")
 };
 
 void WatchCommand::printHelp(const QString &name)

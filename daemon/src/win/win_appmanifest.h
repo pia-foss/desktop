@@ -16,22 +16,21 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("win_appmanifest.h")
-
-#ifndef WIN_APPMANIFEST_H
-#define WIN_APPMANIFEST_H
-
+#pragma once
+#include <common/src/common.h>
 #include <unordered_set>
 
 struct AppExecutables
 {
-    std::unordered_set<QString> executables;
+    std::unordered_set<std::wstring> executables;
     bool usesWwa;
 };
 
 // Read the manifest for a UWP app to determine what executables it launches,
 // and whether it uses WWA.
+// 
+// This can be called more than once using the same AppExecutables; new
+// executables are added to any existing contents.  Similarly, usesWwa is set if
+// this app uses WWA, but not altered otherwise, so it will true if any of the
+// inspected apps uses WWA.
 bool inspectUwpAppManifest(const QString &installDir, AppExecutables &appExes);
-
-#endif

@@ -19,7 +19,7 @@
 #ifndef TASKS_LAUNCH_H
 #define TASKS_LAUNCH_H
 
-#include "tasks.h"
+#include "../tasks.h"
 
 class LaunchClientTask : public Task
 {

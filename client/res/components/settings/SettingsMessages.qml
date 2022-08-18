@@ -57,6 +57,12 @@ QtObject {
     return desc
   }
 
+  // Messages indicating that the VPN connection can not be established
+  readonly property var vpnSupportErrors: {
+    //: Message for Linux indicating that iptables is missing
+    "iptables_missing": uiTranslate("ClientNotifications", "Iptables is not installed.")
+  }
+
   readonly property string requiresOpenVpnMessage: uiTr("This feature requires OpenVPN.")
   readonly property string wgRequiresWindows8: uiTr("WireGuard requires Windows 8 or later.")
 

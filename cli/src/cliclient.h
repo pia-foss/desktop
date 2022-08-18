@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("cliclient.h")
 
 #ifndef CLICLIENT_H
 #define CLICLIENT_H
 
-#include "daemonconnection.h"
+#include <clientlib/src/daemonconnection.h>
 
 // CliClient creates a DaemonConnection and supporting objects to run the CLI
 // interface.

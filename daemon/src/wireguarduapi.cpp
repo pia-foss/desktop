@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("wireguarduapi.cpp")
 
 #include "wireguarduapi.h"
@@ -420,7 +420,7 @@ void WireguardIpc::processLine(const QByteArray &line)
         auto keyEndIdx = line.indexOf('=');
         if(keyEndIdx < 0 || keyEndIdx >= line.size())
         {
-            qWarning() << "Invalid IPC line:" << line;
+            qWarning() << "Invalid IPC line:" << line.data();
             return;
         }
 
@@ -429,7 +429,7 @@ void WireguardIpc::processLine(const QByteArray &line)
         auto itKeyMatch = Uapi::lookupKey.find(key);
         if(itKeyMatch == Uapi::lookupKey.end())
         {
-            qWarning() << "Unknown key in IPC line:" << line;
+            qWarning() << "Unknown key in IPC line:" << line.data();
             return;
         }
 

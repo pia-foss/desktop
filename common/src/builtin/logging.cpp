@@ -23,8 +23,11 @@
 #include "error.h"
 #include "path.h"
 #include "util.h"
-#include "exec.h"
 #include "version.h"
+
+#if defined(Q_OS_LINUX) && PIA_CLIENT
+#include "../exec.h"
+#endif
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -49,17 +52,31 @@ namespace
 {
     QMutex g_logMutex(QMutex::Recursive);
     bool g_logToStdErr = false;
+
+    // kapps::core::LogCallback implementation, forwards to Logger::writeMessage()
+    // 'final' here silences a warning from clang that a nonvirtual destructor
+    // of LoggerCallback is called on a polymorphic class, which is fine here
+    // since we didn't derive from LoggerCallback.
+    class LoggerCallback final : public kapps::core::LogCallback
+    {
+    public:
+        virtual void write(kapps::core::LogMessage msg) override
+        {
+            Logger::writeMsg(std::move(msg));
+        }
+    };
     // Log redactions - maps redact strings to replacements (which now include
     // the angle brackets).  All redactions are applied sequentially when
     // redacting text, but they're stored in a map so that adding the same
     // redaction again doesn't accumulate.
-    std::unordered_map<QString, QString> g_redactions;
+    std::unordered_map<std::string, std::string> g_redactions;
 
     QString redactTextNoLock(QString text)
     {
         for(const auto &redaction : g_redactions)
         {
-            text.replace(redaction.first, redaction.second);
+            text.replace(QString::fromStdString(redaction.first),
+                         QString::fromStdString(redaction.second));
         }
         return text;
     }
@@ -68,99 +85,31 @@ namespace
     {
         for(const auto &redaction : g_redactions)
         {
-            text.replace(redaction.first.toLocal8Bit(), redaction.second.toLocal8Bit());
+            text.replace(redaction.first.c_str(), redaction.first.size(),
+                         redaction.second.c_str(), redaction.second.size());
         }
         return text;
     }
 
-    // Automatically strip the repo path from file paths in CodeLocation.  This
-    // object is used to determine the prefix length and strip it; it's a
-    // function-local static to ensure that its initialization is thread-safe.
-    class RepoPathPrefix
+    std::string redactTextNoLock(std::string text)
     {
-    public:
-        RepoPathPrefix()
-            : _pathPrefix{__FILE__}, _prefixLen{0}, _pathPrefixAlt{_pathPrefix}
+        for(const auto &redaction : g_redactions)
         {
-            // Switch _pathPrefixAlt to the alternate slash.  (Paths can freely
-            // mix slashes and backslashes on Windows, but we're assuming that
-            // the prefix only contains one or the other.)
-            char nativeSlash = '/';
-            char altSlash = '\\';
-            if(_pathPrefixAlt.find('\\') != std::string::npos)
-                std::swap(nativeSlash, altSlash);
-            for(auto &c : _pathPrefixAlt)
+            while(true)
             {
-                if(c == nativeSlash)
-                    c = altSlash;
-            }
-
-            // Figure out the prefix using the known location of this file in
-            // the source repo.
-            const char *thisFile{"common/src/builtin/logging.cpp"};
-
-            std::size_t thisFileLen = std::strlen(thisFile);
-            std::size_t pathLen = std::strlen(_pathPrefix);
-            std::size_t expectPrefix = pathLen - thisFileLen;
-            // Sanity check - the path should end with the file location above
-            if(thisFileLen <= pathLen &&
-                (std::strncmp(_pathPrefix + expectPrefix, thisFile, thisFileLen) == 0 ||
-                std::strncmp(_pathPrefixAlt.c_str() + expectPrefix, thisFile, thisFileLen) == 0))
-            {
-                _prefixLen = expectPrefix;
-            }
-            // Otherwise, something is wrong, but we can't trace anything as
-            // this is used by the tracing implementation.  Just avoid
-            // destroying file paths.
-            else
-            {
-                _pathPrefix = nullptr;
-                _pathPrefixAlt = {};
+                auto pos = text.find(redaction.first);
+                if(pos == std::string::npos)
+                    break;
+                text.replace(pos, redaction.first.size(), redaction.second);
             }
         }
-
-    public:
-        // Strip the repo prefix from 'path' if it begins with that prefix.
-        // Returns the relevant tail part of 'path' if it does, or 'path'
-        // unmodified otherwise.
-        const char *strip(const char *path) const
-        {
-            if(!path || !_pathPrefix || _pathPrefixAlt.empty())
-                return path;
-            if(std::strncmp(path, _pathPrefix, _prefixLen) == 0 ||
-                std::strncmp(path, _pathPrefixAlt.c_str(), _prefixLen) == 0)
-            {
-                return path + _prefixLen;
-            }
-            return path;
-        }
-
-    private:
-        // The path prefix that we strip is the first _prefixLen characters of
-        // _pathPrefix.  (_pathPrefix is _not_ null-terminated at that position,
-        // it's actually the complete file path of this file.)
-        const char *_pathPrefix;
-        std::size_t _prefixLen;
-        // Path prefix with the opposite type of slashes; we accept either.
-        // This is for Windows but is applied on all platforms.
-        std::string _pathPrefixAlt;
-    };
-
-    const char *stripRepoPath(const char *path)
-    {
-        static const RepoPathPrefix _repoPathPrefix;
-        return _repoPathPrefix.strip(path);
+        return text;
     }
 }
 
 // The log limit in bytes
 const qint64 standardLogFileLimit = 4000000;
 const qint64 largeLogFileLimit = 40000000;
-
-CodeLocation::CodeLocation(const char *file, int line, const QLoggingCategory &category)
-    : category{&category}, file{stripRepoPath(file)}, line{line}
-{
-}
 
 class LoggerPrivate
 {
@@ -194,7 +143,7 @@ class LoggerPrivate
     // Attempt to open the log file for writing
     bool openLogFile(bool newSession = true);
     // Helper to write a pre-formatted chunk of lines to the log file
-    void writeToLogFile(const QString& lines);
+    void writeToLogFile(const kapps::core::StringSlice &data);
 
     // Wipe log file and backup log file if exists
     void wipeLogFile();
@@ -232,6 +181,9 @@ void Logger::initialize(bool logToStdErr)
     qInstallMessageHandler(loggingHandler);
 
     g_logMutex.unlock();
+
+    kapps::core::log::enableLogging(true);
+    kapps::core::log::init(std::make_shared<LoggerCallback>());
 }
 
 void Logger::enableStdErr(bool logToStdErr)
@@ -243,7 +195,7 @@ void Logger::enableStdErr(bool logToStdErr)
 void Logger::addRedaction(const QString &redact, const QString &replace)
 {
     QMutexLocker lock{&g_logMutex};
-    g_redactions[redact] = QStringLiteral("<<%1>>").arg(replace);
+    g_redactions[redact.toStdString()] = QStringLiteral("<<%1>>").arg(replace).toStdString();
 }
 
 QString Logger::redactText(QString text)
@@ -493,13 +445,13 @@ bool LoggerPrivate::openLogFile(bool newSession)
     return false;
 }
 
-void LoggerPrivate::writeToLogFile(const QString& lines)
+void LoggerPrivate::writeToLogFile(const kapps::core::StringSlice &data)
 {
     if (logFile.isOpen())
     {
-        QTextStream(&logFile) << lines;
+        logFile.write(data.data(), data.size());
         logFile.flush();
-        logSize += lines.size();
+        logSize += data.size();
 
         if(logSize > logFileLimit) {
             Path oldFilePath = logFilePath + oldFileSuffix;
@@ -543,56 +495,80 @@ void LoggerPrivate::wipeLogFile()
     }
 }
 
-
-
-static void renderMsgType(QTextStream& s, QtMsgType type)
+namespace
 {
-    switch (type)
+    void renderMsgType(std::ostream &s, QtMsgType type)
     {
-    case QtFatalMsg:    s << "[fatal]"; break;
-    case QtCriticalMsg: s << "[critical]"; break;
-    case QtWarningMsg:  s << "[warning]"; break;
-    case QtInfoMsg:     s << "[info]"; break;
-    case QtDebugMsg:    s << "[debug]"; break;
-    default:            s << "[??]"; break;
+        switch (type)
+        {
+            case QtFatalMsg:    s << "[fatal]"; break;
+            case QtCriticalMsg: s << "[error]"; break;
+            case QtWarningMsg:  s << "[warning]"; break;
+            case QtInfoMsg:     s << "[info]"; break;
+            case QtDebugMsg:    s << "[debug]"; break;
+            default:            s << "[??]"; break;
+        }
     }
-}
 
-static void renderLocation(QTextStream& s, const char* file, int line)
-{
-    if (file)
+    void renderMsgType(std::ostream &s, kapps::core::LogMessage::Level type)
     {
-        s << '[';
-        s << QLatin1String(stripRepoPath(file));
-        if (line)
-            s << ':' << line;
-        s << ']';
+        switch (type)
+        {
+            case kapps::core::LogMessage::Level::Fatal:   s << "[fatal]"; break;
+            case kapps::core::LogMessage::Level::Error:   s << "[error]"; break;
+            case kapps::core::LogMessage::Level::Warning: s << "[warning]"; break;
+            case kapps::core::LogMessage::Level::Info:    s << "[info]"; break;
+            case kapps::core::LogMessage::Level::Debug:   s << "[debug]"; break;
+            default:                                     s << "[??]"; break;
+        }
     }
-}
 
-static QString buildLogFilePrefix(QDateTime now, QtMsgType type,
-                                  const QMessageLogContext &context)
-{
-    QString prefix;
-    QTextStream s(&prefix, QIODevice::WriteOnly);
+    void renderTimeThread(std::ostream &os)
+    {
+        auto tid = reinterpret_cast<quintptr>(QThread::currentThreadId());
+        tid ^= tid >> 16;
+    #if QT_POINTER_SIZE > 4
+        tid ^= tid >> 32;
+    #endif
+        char tidHex[8];
+        std::sprintf(tidHex, "%04x", (quint16)tid);
 
-    auto tid = reinterpret_cast<quintptr>(QThread::currentThreadId());
-    tid ^= tid >> 16;
-#if QT_POINTER_SIZE > 4
-    tid ^= tid >> 32;
-#endif
-    char tidHex[8];
-    std::sprintf(tidHex, "%04x", (quint16)tid);
+        // TODO - Should render directly to UTF-8
+        QDateTime now{QDateTime::currentDateTimeUtc()};
+        os << now.toString("[yyyy-MM-dd hh:mm:ss.zzz]").toStdString();
 
-    s << now.toString("[yyyy-MM-dd hh:mm:ss.zzz]");
+        os << '[' << tidHex << ']';
+    }
 
-    s << '[' << tidHex << ']';
-    if (context.category)
-        s << '[' << QLatin1String(context.category) << ']';
-    renderLocation(s, context.file, context.line);
-    renderMsgType(s, type);
+    std::string buildLogFilePrefix(kapps::core::LogMessage::Level type,
+                                   const kapps::core::SourceLocation &loc,
+                                   const kapps::core::LogCategory &cat)
+    {
+        std::stringstream s{std::ios_base::out};
 
-    return prefix;
+        renderTimeThread(s);
+        s << '[' << cat << "][" << (loc.file() ? loc.file() : "??")
+            << ':' << loc.line() << ']';
+        renderMsgType(s, type);
+        s << ' ';
+
+        // TODO - Can't get content of stringstream without unnecessary copy in
+        // C++14
+        return s.str();
+    }
+
+    std::string buildLogFilePrefix(QtMsgType type, const QMessageLogContext &context)
+    {
+        std::stringstream s{std::ios_base::out};
+
+        renderTimeThread(s);
+        s << '[' << QLatin1String{context.category ? context.category : "??"} << ']';
+        s << '[' << (context.file ? context.file : "??") << ':' << context.line << ']';
+        renderMsgType(s, type);
+        s << ' ';
+
+        return s.str();
+    }
 }
 
 void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -609,45 +585,12 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
     }
 #endif
 
-    // Override with simpler endl; gets converted by text file handling anyway
-    const char endl = '\n';
-
-    QDateTime now{QDateTime::currentDateTimeUtc()};
-    QString logPrefix{buildLogFilePrefix(now, type, context)};
-
-    QString logLinesUnredacted;
-    {
-        QTextStream logStream(&logLinesUnredacted, QIODevice::WriteOnly);
-        for (const auto& line : msg.splitRef('\n'))
-        {
-            logStream << logPrefix << ' ' << line << endl;
-        }
-    }
-
     Logger* self = Logger::instance();
-    LoggerPrivate* const d = self ? self->d_func() : nullptr;
+    LoggerPrivate *d = self ? self->d_func() : nullptr;
 
-    g_logMutex.lock();
+    std::string logPrefix{buildLogFilePrefix(type, context)};
 
-    QString logLines = redactTextNoLock(std::move(logLinesUnredacted));
-
-#if defined(QT_DEBUG) && defined(Q_OS_WIN)
-    if (isDebuggerPresent())
-    {
-        ::OutputDebugStringW(qUtf16Printable(logLines));
-    }
-    else
-#endif
-    {
-        if(g_logToStdErr)
-            QTextStream(stderr, QIODevice::WriteOnly) << logLines;
-    }
-    if (d)
-    {
-        d->writeToLogFile(logLines);
-    }
-
-    g_logMutex.unlock();
+    writePrefixedMsg(d, logPrefix, msg.toStdString());
 
     // Failure to queue arguments is a programming error (and hard to debug),
     // assert to provide a way to debug it.
@@ -655,21 +598,95 @@ void Logger::loggingHandler(QtMsgType type, const QMessageLogContext &context, c
 
     if (type == QtFatalMsg)
     {
-        // One last extra attempt to ensure file data is flushed
-        if (d) d->logFile.close();
-        // Abort - treat this as an unclean exit.  Also gives a chance to debug
-        // in debug builds (this is how failed asserts are handled).
-
-#if defined(Q_OS_LINUX)
-        if(isClientOpenGLFailureTrace(msg)) {
+#if defined(Q_OS_LINUX) && PIA_CLIENT
+        if(msg.contains(QStringLiteral("Failed to create OpenGL context")))
+        {
 #ifdef PIA_CRASH_REPORTING
             stopCrashReporting();
 #endif // PIA_CRASH_REPORTING
             Exec::bashDetached(Path::ExecutableDir / "error-notice.sh");
         }
-#endif // defined(Q_OS_LINUX)
-        std::abort();
+#endif // defined(Q_OS_LINUX) && PIA_CLIENT
+
+        fatalExit(d);
     }
+}
+
+void Logger::writeMsg(kapps::core::LogMessage msg)
+{
+    Logger* self = Logger::instance();
+    LoggerPrivate *d = self ? self->d_func() : nullptr;
+
+    std::string logPrefix{buildLogFilePrefix(msg.level(), msg.loc(), msg.category())};
+    writePrefixedMsg(d, logPrefix, std::move(msg).message());
+
+    if(msg.level() == kapps::core::LogMessage::Level::Fatal)
+        fatalExit(d);
+}
+
+void Logger::fatalExit(LoggerPrivate *d)
+{
+    // One last extra attempt to ensure file data is flushed
+    if (d)
+        d->logFile.close();
+
+    // Abort - treat this as an unclean exit.  Also gives a chance to debug
+    // in debug builds (this is how failed asserts are handled).
+    std::abort();
+}
+
+void Logger::writeToConsoleNoLock(const kapps::core::StringSlice &data)
+{
+#if defined(QT_DEBUG) && defined(Q_OS_WIN)
+    if (isDebuggerPresent())
+    {
+        // Windows needs UTF-16 :-/
+        QString dataUtf16{QString::fromUtf8(data.data(), data.size())};
+        ::OutputDebugStringW(qUtf16Printable(dataUtf16));
+    }
+    else
+#endif
+    {
+        if(g_logToStdErr)
+            std::cerr << data;
+    }
+}
+
+void Logger::writePrefixedMsg(LoggerPrivate *d, const std::string &logPrefix, std::string msg)
+{
+    g_logMutex.lock();
+
+    std::string redacted = redactTextNoLock(std::move(msg));
+
+    // Slice out each line of the message and log it with the prefix
+    std::size_t lineEnd = 0;
+    while(lineEnd < redacted.size())
+    {
+        std::size_t lineStart = lineEnd;
+        lineEnd = redacted.find('\n', lineEnd);
+        if(lineEnd == std::string::npos)
+            lineEnd = redacted.size();   // Consume rest of the string, lineEnd now points to '\0'
+        else
+            ++lineEnd;  // Include the line break in the output
+
+        kapps::core::StringSlice line{redacted.c_str() + lineStart,
+                                     redacted.c_str() + lineEnd};
+
+        writeToConsoleNoLock(logPrefix);
+        writeToConsoleNoLock(line);
+        if(d)
+        {
+            d->writeToLogFile(logPrefix);
+            d->writeToLogFile(line);
+        }
+    }
+
+    // Terminate the last line
+    writeToConsoleNoLock("\n");
+    if(d)
+        d->writeToLogFile("\n");
+
+    g_logMutex.unlock();
 }
 
 const QString oldFileSuffix = QStringLiteral(".old");

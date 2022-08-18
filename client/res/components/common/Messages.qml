@@ -18,7 +18,7 @@
 
 pragma Singleton
 import QtQuick 2.0
-import "../daemon"
+import "../client"
 import PIA.NativeHelpers 1.0
 
 // These are general messages that are used in multiple places throughout the
@@ -50,8 +50,8 @@ QtObject {
     if(!location)
       return uiTranslate("RegionModule", "Auto")
     if(isAuto)
-      return uiTranslate("RegionModule", "Auto (%1)").arg(Daemon.getLocationName(location))
-    return Daemon.getLocationName(location)
+      return uiTranslate("RegionModule", "Auto (%1)").arg(Client.getRegionAutoName(location.id))
+    return Client.getRegionAutoName(location.id)
   }
 
   // Display a location selection based on chosen/auto locations
@@ -84,6 +84,17 @@ QtObject {
       return uiTr("Disconnect");
     default:
       return "Unknown";
+    }
+  }
+
+
+  function tryAgainMessage (seconds) {
+    if(seconds > 1) {
+      return uiTr("Please try again in %1 seconds.").arg(seconds)
+    } else if(seconds === 1) {
+      return uiTr("Please try again in 1 second.")
+    } else {
+      return uiTr("Please try again.")
     }
   }
 }

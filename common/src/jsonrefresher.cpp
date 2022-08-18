@@ -147,7 +147,7 @@ QJsonDocument JsonRefresher::readReply(QByteArray responsePayload) const
     {
         qWarning() << "Could not parse" << _name << "due to error:"
             << parseError.error << "at position" << parseError.offset;
-        qWarning() << "Retrieved JSON:" << responsePayload;
+        qWarning() << "Retrieved JSON:" << responsePayload.data();
         return {};
     }
 

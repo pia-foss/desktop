@@ -78,8 +78,8 @@ TableBase {
       model: Daemon.state.dedicatedIpLocations
       delegate: DedicatedIpRow {
         Layout.fillWidth: true
-        regionCountry: modelData.country
-        regionName: Daemon.getLocationName(modelData)
+        regionCountry: Daemon.state.getRegionCountryCode(regionId)
+        regionName: Client.getRegionAutoName(regionId)
         regionIp: modelData.dedicatedIp
         regionId: modelData.id
 

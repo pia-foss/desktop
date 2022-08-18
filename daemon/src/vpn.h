@@ -20,15 +20,15 @@
 #define VPN_H
 #pragma once
 
-#include "common.h"
-#include "settings/connection.h"
-#include "settings/daemonaccount.h"
-#include "settings/daemonsettings.h"
-#include "settings/daemonstate.h"
+#include <common/src/common.h>
+#include <common/src/settings/connection.h>
+#include <common/src/settings/daemonaccount.h>
+#include <common/src/settings/daemonsettings.h>
+#include "model/state.h"
 #include "processrunner.h"
-#include "vpnstate.h"
-#include "elapsedtime.h"
-#include "async.h"
+#include <common/src/vpnstate.h>
+#include <common/src/elapsedtime.h>
+#include <common/src/async.h>
 
 #include <QDateTime>
 #include <QDeadlineTimer>
@@ -39,6 +39,7 @@
 #include <QObject>
 #include <QFile>
 #include <QTimer>
+#include <kapps_net/src/originalnetworkscan.h>
 
 class VPNMethod;
 
@@ -151,82 +152,7 @@ private:
     quint16 _localPort;
 };
 
-class OriginalNetworkScan
-{
-public:
-    OriginalNetworkScan() = default;    // Required by Q_DECLARE_METATYPE
-    OriginalNetworkScan(const QString &gatewayIp, const QString &interfaceName,
-                        const QString &ipAddress, unsigned prefixLength,
-                        unsigned mtu,
-                        const QString &ipAddress6, const QString &gatewayIp6,
-                        unsigned mtu6)
-        : _gatewayIp{gatewayIp}, _interfaceName{interfaceName},
-          _ipAddress{ipAddress}, _prefixLength{prefixLength}, _mtu{mtu},
-          _ipAddress6{ipAddress6}, _gatewayIp6{gatewayIp6}, _mtu6{mtu6}
-    {
-    }
-
-    bool operator==(const OriginalNetworkScan& rhs) const
-    {
-        return gatewayIp() == rhs.gatewayIp() &&
-            interfaceName() == rhs.interfaceName() &&
-            ipAddress() == rhs.ipAddress() &&
-            prefixLength() == rhs.prefixLength() &&
-            mtu() == rhs.mtu() &&
-            ipAddress6() == rhs.ipAddress6() &&
-            gatewayIp6() == rhs.gatewayIp6() &&
-            mtu6() == rhs.mtu6();
-    }
-
-    bool operator!=(const OriginalNetworkScan& rhs) const
-    {
-        return !(*this == rhs);
-    }
-
-    // Check whether the OriginalNetworkScan has valid (non-empty) values for
-    // all fields.
-    bool ipv4Valid() const {return !gatewayIp().isEmpty() && !interfaceName().isEmpty() && !ipAddress().isEmpty() && _mtu != 0;}
-
-    // Whether the host has IPv6 available (as a global IP)
-    bool hasIpv6() const {return !ipAddress6().isEmpty();}
-
-public:
-    void gatewayIp(const QString &value) {_gatewayIp = value;}
-    void interfaceName(const QString &value) {_interfaceName = value;}
-    void ipAddress(const QString &value) {_ipAddress = value;}
-    void prefixLength(unsigned value) {_prefixLength = value;}
-    void mtu(unsigned value) { _mtu = value; }
-    void ipAddress6(const QString &value) {_ipAddress6 = value;}
-    void gatewayIp6(const QString &value) {_gatewayIp6 = value;}
-    void mtu6(unsigned value) { _mtu6 = value; }
-
-    const QString &gatewayIp() const {return _gatewayIp;}
-    const QString &interfaceName() const {return _interfaceName;}
-    const QString &ipAddress() const {return _ipAddress;}
-    unsigned prefixLength() const {return _prefixLength;}
-    unsigned mtu() const { return _mtu; }
-
-    // An IP address from the default IPv6 interface.  This may not be the same
-    // interface as the default IPv4 interface reported above.
-    const QString &ipAddress6() const {return _ipAddress6;}
-    const QString &gatewayIp6() const {return _gatewayIp6;}
-    // MTU for the default IPv6 interface.  (MTUs are currently only provided
-    // on Windows.)  May differe from the IPv4 MTU even if the interfaces are
-    // the same, because Windows has separate IPv4 and IPv6 MTUs for interfaces.
-    unsigned mtu6() const { return _mtu6; }
-
-private:
-    QString _gatewayIp, _interfaceName, _ipAddress;
-    unsigned _prefixLength;
-    unsigned _mtu;
-    QString _ipAddress6;
-    QString _gatewayIp6;
-    unsigned _mtu6;
-};
-
-// Custom logging for OriginalNetworkScan instances
-QDebug operator<<(QDebug debug, const OriginalNetworkScan& netScan);
-
+// from kapps-net
 Q_DECLARE_METATYPE(OriginalNetworkScan)
 
 // TransportSelector - used by VPNConnection to select transport settings for
@@ -316,16 +242,16 @@ private:
 // settings interact in subtle ways.  Separating the connection configuration
 // logic from the actual implementation of that configuration simplifies the
 // logic, avoids duplicating logic across platform backends, and allows us to
-// express the current/previous connection configuration in DaemonState.
+// express the current/previous connection configuration in StateModel.
 //
 // All state determined by ConnectionConfig requires a reconnect to change.  (We
 // detect the "reconnect required" state by comparing a new ConnectionConfig to
 // the current one.)  Settings that can be changed without a reconnect are not
 // handled by ConnectionConfig; they are applied directly.
 //
-// ConnectionConfig also captures limited information from DaemonState and
+// ConnectionConfig also captures limited information from StateModel and
 // DaemonAccount:
-// * DaemonState contains the available locations
+// * StateModel contains the available locations
 // * DaemonAccount contains authentication information for the VPN connection
 //   (and may force the OpenVPN method if we have not obtained an auth token).
 //
@@ -380,8 +306,8 @@ public:
 public:
     ConnectionConfig();
     // Capture the current location and proxy settings from DaemonSettings and
-    // DaemonState
-    ConnectionConfig(DaemonSettings &settings, DaemonState &state, DaemonAccount &account);
+    // StateModel
+    ConnectionConfig(DaemonSettings &settings, StateModel &state, DaemonAccount &account);
 
 public:
     /*
@@ -612,7 +538,7 @@ public:
     State state() const { return _state; }
     quint64 bytesReceived() const { return _receivedByteCount; }
     quint64 bytesSent() const { return _sentByteCount; }
-    const QList<IntervalBandwidth> &intervalMeasurements() const {return _intervalMeasurements;}
+    const std::deque<IntervalBandwidth> &intervalMeasurements() const {return _intervalMeasurements;}
     void activateMACE ();
 
     bool needsReconnect();
@@ -639,7 +565,7 @@ public slots:
     // In the rare event that we try to start connecting but hit a hard failure
     // due to invalid settings (copySettings() fails), this still returns true
     // because we tried to connect.  (This is the rare state where
-    // DaemonState::vpnEnabled() is set, but we're in the Disconnected state,
+    // StateModel::vpnEnabled() is set, but we're in the Disconnected state,
     // similar to a hard error due to auth failure.)
     bool connectVPN(bool force);
     void disconnectVPN();
@@ -661,14 +587,20 @@ signals:
     // non-connecting state, or when the settings change during a series of
     // connection attempts.
     void slowIntervalChanged(bool usingSlowInterval);
-    // When VPNConnection's state changes, the new connecting/connected
-    // configurations are provided.
-    // Note that the Locations in these configurations are mutable, but
-    // slots receiving this signal *must not* modify them...they're mutable to
-    // work with JsonField-implemented fields in DaemonState.
-    // In the Connected state only, chosenTransport and actualTransport are
-    // provided.
-    void stateChanged(State state,
+    // The VPN state has changed.
+    //
+    // Both old and new states are provided.  The old and new states are always
+    // different.  (In particular, this permits differentiating a Connected
+    // state transition from Connecting or Reconnecting, which indicates whether
+    // it was a new connection.)
+    //
+    // The "connecting" and "connected" configurations may be provided depending
+    // on the new state.  The rules for this are documented in
+    // DaemonState::connectedConfig/connectingConfig.
+    //
+    // The connected server, chosen transport, and actual transport are provided
+    // when entering the Connected state.
+    void stateChanged(State state, State oldState,
                       const ConnectionConfig &connectingConfig,
                       const ConnectionConfig &connectedConfig,
                       const nullable_t<Server> &connectedServer,
@@ -727,7 +659,7 @@ private:
     // _connectingConfig/_connectedConfig, but only the connected server is
     // reported by state changes, and only while connected.  _connectingServer
     // is updated for each connection attempt (unlike _connectingConfig)
-    Server _connectingServer, _connectedServer;
+    nullable_t<Server> _connectingServer, _connectedServer;
 
     // Timer for ensuring a minimum interval between connection attempts
     QDeadlineTimer _timeUntilNextConnectionAttempt;
@@ -751,7 +683,7 @@ private:
     // Last traffic counts received from the current OpenVPN process
     quint64 _lastReceivedByteCount, _lastSentByteCount;
     // Interval measurements for the current OpenVPN process
-    QList<IntervalBandwidth> _intervalMeasurements;
+    std::deque<IntervalBandwidth> _intervalMeasurements;
     // Time since the last bytecount measurement - if it comes in after the
     // abandon deadline, we assume the connection is lost and terminate it.  See
     // updateByteCounts().

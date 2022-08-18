@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("socksserver.cpp")
 
 #include "socksserver.h"
@@ -464,7 +464,7 @@ void SocksConnection::processSocksData()
             {
                 // Failure, no acceptable method
                 qInfo() << "Rejecting SOCKS connection, no acceptable auth method found in:"
-                    << receivedMsg;
+                    << receivedMsg.data();
                 response[AuthMethodResponseMsg::Method] = Method::NotAcceptable;
                 rejectConnection(response); // Goes to Rejecting state
             }

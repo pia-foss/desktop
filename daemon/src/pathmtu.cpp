@@ -17,11 +17,12 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "pathmtu.h"
-#include "ipaddress.h"
+#include <kapps_core/src/ipaddress.h>
 #if defined(Q_OS_WIN)
     #include "win/win_daemon.h"
     #include "win/win_interfacemonitor.h"
-    #include "win/win_util.h"
+    #include <common/src/win/win_util.h>
+    #include <kapps_core/src/win/win_error.h>
 #endif
 
 namespace
@@ -143,7 +144,7 @@ void MtuPinger::applyMtu(int mtu)
     if(getResult != NO_ERROR)
     {
         qWarning() << "Unable to get interface state to set MTU to" << mtu
-            << "-" << WinErrTracer{getResult};
+            << "-" << kapps::core::WinErrTracer{getResult};
     }
     else
     {
@@ -152,7 +153,7 @@ void MtuPinger::applyMtu(int mtu)
         if(setResult != NO_ERROR)
         {
             qWarning() << "Unable to set interface MTU to" << mtu << "-"
-                << WinErrTracer{setResult};
+                << kapps::core::WinErrTracer{setResult};
         }
         else
         {

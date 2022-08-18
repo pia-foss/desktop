@@ -60,19 +60,13 @@ Item {
       return country ? ":/img/flags/" + flagName + ".png" : undefined
     }
     function buildRegionMenuItem(region) {
+      let countryCode = Daemon.state.getRegionCountryCode(region.id)
       return {
-        text: Daemon.getLocationName(region),
+        text: Client.getRegionAutoName(region.id),
         code: "loc/" + region.id,
-        icon: (!region.offline ? flag(region.country) : offline_flag(region.country)),
+        icon: (!region.offline ? flag(countryCode) : offline_flag(countryCode)),
         enabled: !region.offline
       }
-    }
-    function isOffline(loc) {
-      // Convert a possible auto/<countryCode> ("favorite country")
-      // to a real location name (i.e 'best' for that country)
-      var realLocationName = Client.realLocation(loc)
-      var l = Daemon.state.availableLocations[realLocationName]
-      return !l || l.offline;
     }
 
     // On Linux, we can't be sure that the user has any way to 'activate' the
@@ -102,8 +96,11 @@ Item {
           addMenuItem(connectAutoStr, 'connect', Daemon.state.connectionState === "Disconnected")
         }
         else {
+          let chosenVpnId = Daemon.state.vpnLocations.chosenLocation.id
           addMenuItem(connectServerStr.arg(Client.getDetailedLocationName(Daemon.state.vpnLocations.chosenLocation)),
-                      'loc/' + Daemon.state.vpnLocations.chosenLocation.id, Daemon.state.connectionState === "Disconnected", flag(Daemon.state.vpnLocations.chosenLocation.country))
+                      'loc/' + chosenVpnId,
+                      Daemon.state.connectionState === "Disconnected",
+                      flag(Daemon.state.getRegionCountryCode(chosenVpnId)))
         }
         //: Menu command to disconnect from the VPN.
         addMenuItem(uiTr("Disconnect"), 'disconnect', Daemon.state.connectionState !== "Disconnected")
@@ -129,14 +126,14 @@ Item {
           var key = favs[i]
           if (key === chosenLocationId) continue
           var name = Client.getFavoriteLocalizedName(key)
-          if(isOffline(key))
+          if(Client.isFavoriteOffline(key))
           {
             // If the region is offline, show a greyed out flag
             // and make it unclickable
-            addMenuItem(connectServerStr.arg(name), "loc/" + key, false, offline_flag(Client.countryFromLocation(key)))
+            addMenuItem(connectServerStr.arg(name), "loc/" + key, false, offline_flag(Client.countryForFavorite(key)))
           }
           else {
-            addMenuItem(connectServerStr.arg(name), "loc/" + key, true, flag(Client.countryFromLocation(key)))
+            addMenuItem(connectServerStr.arg(name), "loc/" + key, true, flag(Client.countryForFavorite(key)))
           }
         }
         if (Daemon.state.vpnLocations.chosenLocation || favs.length > 0) {
@@ -151,7 +148,7 @@ Item {
             dips.push({
                         text: Client.getDetailedLocationName(dipLoc),
                         code: "loc/" + dipLoc.id,
-                        icon: flag(dipLoc.country)
+                        icon: flag(Daemon.state.getRegionCountryCode(dipLoc.id))
                       })
           }
           content.push({ text: dipMenuItemText, code: 'dedicatedip', children: dips.sort(function(a,b) { return a.text.localeCompare(b.text) }) })
@@ -173,9 +170,9 @@ Item {
           } else {
             var allLocationsOffline = country.locations.every(loc => loc.offline);
             regions.push({
-                           text: Daemon.getCountryName(country.locations[0].country),
-                           code: 'country/' + country.locations[0].country,
-                           icon: (!allLocationsOffline ? flag(country.locations[0].country) : offline_flag(country.locations[0].country)),
+                           text: Client.getCountryName(country.code),
+                           code: 'country/' + country.code,
+                           icon: (!allLocationsOffline ? flag(country.code) : offline_flag(country.code)),
                            children: country.locations.map(loc => buildRegionMenuItem(loc)).sort((a,b) => a.text.localeCompare(b.text)),
                            enabled: !allLocationsOffline
                          })
@@ -262,7 +259,7 @@ Item {
   function handleSelection(code) {
     if(code.startsWith("loc/")) {
       var region = code.slice(4);
-      VpnConnection.connectLocation(Client.realLocation(region));
+      Client.connectFavorite(region);
       return;
     }
     if(code.startsWith("snooze/")) {

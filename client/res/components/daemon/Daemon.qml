@@ -91,6 +91,7 @@ QtObject {
 
         var errObj = new Error(errMsg)
         errObj.code = nativeError.code()
+        errObj.retryAfterTime = nativeError.retryAfterTime();
         cb(errObj)
       })
     } else {
@@ -124,6 +125,9 @@ QtObject {
   }
   function stopSnooze() {
     call ("stopSnooze", arguments);
+  }
+  function getCountryBestRegion(countryCode) {
+    call ("getCountryBestRegion", arguments);
   }
   function writeDiagnostics () {
     call("writeDiagnostics", arguments);
@@ -163,31 +167,5 @@ QtObject {
   }
   function submitRating(rating) {
     call("submitRating", arguments);
-  }
-
-  // Get the translated name of a location.
-  // Returns the location's localized name if possible, otherwise the name
-  // provided by the server list.
-  //
-  // Note that this is not always sufficient to distinguish a location, such as
-  // for Dedicated IP locations, which will have the same name as a normal
-  // location and may have the same name as other Dedicated IP locations.
-  //
-  // When possible, additional details (like dedicated IPs) should be
-  // presented as context in the UI.  If a complete text name is the only
-  // option, Client.getDetailedLocationName() can be used to get a complete text
-  // name uniquely identifying the location.
-  function getLocationName(loc) {
-    return loc ? state.translateName(loc.name) : ''
-  }
-
-  // Get the localized name of a country by country code.
-  function getCountryName(countryCode) {
-    var countryName = state.countryNames[countryCode.toLowerCase()]
-    if(countryName)
-      return state.translateName(countryName)
-    // Fall back to displaying the capitalized country code if no country name
-    // is known
-    return countryCode.toUpperCase()
   }
 }

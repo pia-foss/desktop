@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/portforwarder.h"
-#include "testshim.h"
+#include <common/src/testshim.h>
 #include "src/mocknetwork.h"
 #include <QtTest>
 #include <QNetworkReply>
@@ -86,13 +86,13 @@ namespace
 
 // PortForwarder and PortRequester with defaulted parameters, so we don't have
 // to repeat this in every test
-class TestPortForwarder : public DaemonState, public Environment,
+class TestPortForwarder : public StateModel, public Environment,
     public ApiClient, public DaemonAccount,  public PortForwarder
 {
     CLASS_LOGGING_CATEGORY("TestPortForwarder");
 public:
     TestPortForwarder()
-        : Environment{static_cast<DaemonState&>(*this)},
+        : Environment{static_cast<StateModel&>(*this)},
           PortForwarder{*this, *this, *this, *this}
     {
         // A token is needed for the port forward request to proceed
@@ -130,7 +130,7 @@ private slots:
 
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
         // 'Attempting' is emitted synchronously
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), VpnState::PortForwardState::Attempting);
         // The response is consumed asynchronously
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
         QVERIFY(consumeSpy.wait(1000));
@@ -189,7 +189,7 @@ private slots:
 
         // All signals (if any were emitted) should have set the port to Inactive
         for(const auto &emittedSignal : resultSpy)
-            QCOMPARE(emittedSignal[0].value<int>(), DaemonState::PortForwardState::Inactive);
+            QCOMPARE(emittedSignal[0].value<int>(), VpnState::PortForwardState::Inactive);
         // No requests should have occurred (the reply should not have been
         // consumed)
         QCOMPARE(MockNetworkManager::hasNextReply(), true);
@@ -208,7 +208,7 @@ private slots:
 
         forwarder.enablePortForwarding(true);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), VpnState::PortForwardState::Attempting);
 
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
         QVERIFY(consumeSpy.wait(1000));
@@ -226,13 +226,13 @@ private slots:
         forwarder.updateConnectionState(PortForwarder::State::Disconnected);
         // This signal occurs synchronously, so there's no wait needed here
         QVERIFY(!resultSpy.empty());
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Inactive);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), VpnState::PortForwardState::Inactive);
 
         // Only a bind is sent when we reconnect, because the PF payload is
         // still valid
         auto pBindReply2 = MockNetworkManager::enqueueReply(bindSuccess);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), VpnState::PortForwardState::Attempting);
         pBindReply2->queueFinished();
         QVERIFY(resultSpy.wait());
         QCOMPARE(resultSpy.takeFirst()[0].value<int>(), MockPort);
@@ -252,7 +252,7 @@ private slots:
 
         forwarder.enablePortForwarding(true);
         forwarder.updateConnectionState(PortForwarder::State::ConnectedSupported);
-        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), DaemonState::PortForwardState::Attempting);
+        QCOMPARE(resultSpy.takeFirst()[0].value<int>(), VpnState::PortForwardState::Attempting);
 
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
         QVERIFY(consumeSpy.wait(1000));

@@ -18,8 +18,10 @@
 
 #include "integtestcase.h"
 #include "cliharness.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "version.h"
+
+KAPPS_CORE_LOG_MODULE(integtest, "src/integtest.cpp")
 
 int main(int argc, char **argv)
 {
@@ -30,10 +32,10 @@ int main(int argc, char **argv)
     auto piactlVersion = CliHarness::getVersion();
     // Exact match required, including build tags - the integration test
     // artifact should come from the same build.
-    if(piactlVersion != Version::semanticVersion())
+    if(piactlVersion != QString::fromStdString(Version::semanticVersion()))
     {
         outln() << "WARNING: Integration test version mismatch";
-        outln() << "Test version:" << Version::semanticVersion();
+        outln() << "Test version:" << QString::fromStdString(Version::semanticVersion());
         outln() << "Installed version:" << piactlVersion;
         if(qgetenv("PIA_INTEG_MISMATCH") == QByteArrayLiteral("1"))
         {
@@ -46,7 +48,7 @@ int main(int argc, char **argv)
         }
     }
 
-    outln() << "Running tests for version:" << Version::semanticVersion();
+    outln() << "Running tests for version:" << QString::fromStdString(Version::semanticVersion());
 
     IntegTestCaseDefBase::executeAll(argc, argv);
     return 0;

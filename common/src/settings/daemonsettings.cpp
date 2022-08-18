@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "daemonsettings.h"
 #include "brand.h"
 
@@ -54,6 +54,8 @@ const std::unordered_set<QString> &DaemonSettings::settingsExcludedFromReset()
         // again after resetting settings)
         QStringLiteral("ratingEnabled"),
         QStringLiteral("sessionCount"),
+        QStringLiteral("successfulSessionCount"),
+        QStringLiteral("surveyRequestEnabled"),
         // Last dismissed service message - not a setting (don't show it again)
         QStringLiteral("lastDismissedAppMessageId")
     };

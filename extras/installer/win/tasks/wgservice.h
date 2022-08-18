@@ -20,7 +20,7 @@
 #define TASKS_WGSERVICE_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 #ifdef UNINSTALLER
 class UninstallWgServiceTask : public Task {

@@ -19,11 +19,11 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
-#include "common.h"
-#include "util.h"
-#include "apibase.h"
-#include "openssl.h"
-#include "settings/daemonstate.h"
+#include <common/src/common.h>
+#include <common/src/builtin/util.h>
+#include <common/src/apibase.h>
+#include <common/src/openssl.h>
+#include "model/state.h"
 #include <unordered_map>
 
 // Environment loads constant data defining the production environment, with
@@ -42,7 +42,7 @@ public:
     static const QByteArray defaultRegionsListPublicKey;
 
 public:
-    Environment(const DaemonState &state);
+    Environment(const StateModel &state);
 
 private:
     // Read a file - can be an actual disk file or a Qt resource.
@@ -126,7 +126,7 @@ signals:
     void overrideFailed(const QString &resource);
 
 private:
-    const DaemonState &_state;
+    const StateModel &_state;
     std::unordered_map<QString, QByteArray> _authorities;
     std::shared_ptr<PrivateCA> _pRsa4096CA;
     QByteArray _regionsListPublicKey;

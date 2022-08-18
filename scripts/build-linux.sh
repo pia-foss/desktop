@@ -26,11 +26,12 @@ BRAND=${BRAND:-pia}
 # Instructions to run locally
 # ===========================
 #
-# First, Qt 5.12 or above must be installed on your system. You cannot use Qt from your
-# package manager, get the open source version from https://www.qt.io/
+# First, Qt 5.15 or above must be installed on your system. You cannot use Qt
+# from your package manager, get PIA's build from:
+#   https://github.com/pia-foss/desktop-dep-build/releases
 #
-# If it's installed to /opt/Qt/ or $HOME/Qt/, the build process will find it automatically.
-# Otherwise, set QTROOT to the installation path, such as:
+# If it's installed to /opt/Qt/ or $HOME/Qt/, the build process will find it
+# automatically.  Otherwise, set QTROOT to the installation path, such as:
 #    export QTROOT=.../Qt/5.12.8
 #
 # ===============
@@ -40,10 +41,11 @@ BRAND=${BRAND:-pia}
 # Linux build artifacts are reproducible given the same build environment and
 # source directory location.
 #
-# The build script fetches server lists (daemon/res/{servers,shadowsocks}.json)
-# for each build by default.
-# To override this, build with SERVER_DATA_DIR=<directory> to copy servers.json
-# and shadowsocks.json from the specified directory instead.
+# The build script fetches server lists (daemon/res/*.json) if they do not
+# exist, or after a new commit (see rake/product/desktop.rb).
+#
+# To override this, build with SERVER_DATA_DIR=<directory> to copy data files
+# from the specified directory instead.
 #
 # The build uses the last Git commit timestamp by default.  To override this,
 # you can set SOURCE_DATE_EPOCH=<timestamp> in the environment.
@@ -60,31 +62,21 @@ fi
 
 pushd "$ROOT"
 
-function crossbuild() {
-    ARCH="$1"
-    echo "===Build $ARCH==="
-    ./scripts/chroot/enter.sh "$ARCH" -- rake clean VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCH"
-    ./scripts/chroot/enter.sh "$ARCH" -- rake all VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCH"
-}
-
 # Build the specified architectures.  By default, if PIA_BUILD_ARCHITECTURE
-# isn't set, build everything.  If it is set, build only the specified
-# architecture.
+# isn't set, build for the host architecture.  Otherwise, cross-compile for the
+# target architecture.
+#
+# Note that setting ARCHITECTURE implies a cross build, even if it actually is
+# the host architecture.
 
-# amd64 is assumed by this script to be the host architecture (not a cross
-# build), although in theory cross builds to amd64 should work too
-if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "x86_64" ]; then
+if [ -z "ARCHITECTURE" ]; then
     echo "===Build x86_64==="
     ./scripts/chroot/enter.sh -- rake clean VARIANT=release BRAND="$BRAND"
     ./scripts/chroot/enter.sh -- rake all VARIANT=release BRAND="$BRAND"
-fi
-
-if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "arm64" ]; then
-    crossbuild arm64
-fi
-
-if [ -z "$PIA_BUILD_ARCHITECTURE" ] || [ "$PIA_BUILD_ARCHITECTURE" == "armhf" ]; then
-    crossbuild armhf
+else
+    echo "===Build $ARCHITECTURE==="
+    ./scripts/chroot/enter.sh "$ARCHITECTURE" -- rake clean VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCHITECTURE"
+    ./scripts/chroot/enter.sh "$ARCHITECTURE" -- rake all VARIANT=release BRAND="$BRAND" ARCHITECTURE="$ARCHITECTURE"
 fi
 
 popd

@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("environment.cpp")
 
 #include "environment.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "metaserviceapibase.h"
 #include "brand.h"
 #include <QFile>
@@ -41,7 +41,7 @@ const QByteArray Environment::defaultRegionsListPublicKey = QByteArrayLiteral(
     "-----END PUBLIC KEY-----"
 );
 
-Environment::Environment(const DaemonState &state)
+Environment::Environment(const StateModel &state)
     : _state{state}
 {
     reload();

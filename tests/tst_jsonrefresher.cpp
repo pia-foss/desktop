@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/updatedownloader.h"
-#include "testshim.h"
+#include <common/src/testshim.h>
 #include "src/mocknetwork.h"
 #include <QtTest>
 

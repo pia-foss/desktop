@@ -19,9 +19,9 @@
 #ifndef WIN_NATIVEWIFI_H
 #define WIN_NATIVEWIFI_H
 
-#include "common.h"
+#include <common/src/common.h>
 #include "win.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 #include <Wlanapi.h>
 
 // Close a NativeWifi handle
@@ -33,7 +33,7 @@ struct WinCloseNativeWifi
 using WifiHandle = WinGenericHandle<HANDLE, WinCloseNativeWifi>;
 
 // Interface LUID on Windows.  Can be traced, compared, used as a map key, etc.
-class WinLuid : public DebugTraceable<WinLuid>
+class WinLuid : public kapps::core::OStreamInsertable<WinLuid>
 {
 public:
     // Creates a zero LUID, which isn't a valid interface identifier.  (0 is not
@@ -48,7 +48,7 @@ public:
     bool operator!() const {return !value();}
 
 public:
-    void trace(QDebug &dbg) const;
+    void trace(std::ostream &os) const;
     std::uint64_t value() const {return _luid.Value;}
     // Get a pointer where a NET_LUID can be written; used to receive a LUID
     // from a Win32 API.  The LUID is zeroed before receiving in case no value

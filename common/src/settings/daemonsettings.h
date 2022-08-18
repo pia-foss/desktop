@@ -19,8 +19,8 @@
 #ifndef SETTINGS_DAEMONSETTINGS_H
 #define SETTINGS_DAEMONSETTINGS_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 #include <unordered_set>
 #include <vector>
 #include <QVector>
@@ -193,13 +193,17 @@ public:
 
     JsonField(bool, persistDaemon, false)
 
-    JsonField(QString, macStubDnsMethod, QStringLiteral("NX"), {"NX", "Refuse", "0.0.0.0"})
-
-    // Store the number of attempted sessions used for various metrics
+    // Store the number of attempted sessions used for triggering rating request
     JsonField(int, sessionCount, 0)
+
+    // Store a count of successful sessions - used for triggering survey request
+    JsonField(int, successfulSessionCount, 0)
 
     // Set to false when user opts out, or finishes rating successfully.
     JsonField(bool, ratingEnabled, true)
+
+    // Set to false when user opts out, or finishes rating successfully.
+    JsonField(bool, surveyRequestEnabled, true)
 
     // Keep track of the id of the last dismissed in-app message
     JsonField(quint64, lastDismissedAppMessageId, 0)

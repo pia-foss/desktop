@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("posix/posix_main.cpp")
 
 #if defined(UNIT_TEST)
@@ -28,9 +28,10 @@ void dummyPosixMain() {}
 
 #include "posix.h"
 #include "posix_daemon.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "version.h"
 #include "brand.h"
+#include <common/src/dtop.h>
 
 #include <exception>
 #include <stdexcept>
@@ -69,7 +70,7 @@ static void terminateHandler()
                 snprintf(extra, sizeof(extra), "\n  type = %s", et->name());
         }
     }
-    qFatal("Exiting due to unhandled exception%s", extra);
+    qFatal().nospace() << "Exiting due to unhandled exception" << extra;
 }
 
 
@@ -77,6 +78,7 @@ int main(int argc, char** argv)
 {
     setUtf8LocaleCodec();
     Logger::initialize(isatty(2));
+    initKApps();
 
     FUNCTION_LOGGING_CATEGORY("posix.main");
 
@@ -111,7 +113,7 @@ int main(int argc, char** argv)
     }
     if(parser.isSet(QStringLiteral("version")))
     {
-        QTextStream{stdout} << Version::semanticVersion() << Qt::endl;
+        QTextStream{stdout} << QString::fromStdString(Version::semanticVersion()) << Qt::endl;
         return 0;
     }
     Logger logSingleton{Path::DaemonLogFile};

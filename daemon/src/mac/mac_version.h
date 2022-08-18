@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "semversion.h"
+#include <common/src/common.h>
+#include <common/src/semversion.h>
 #line HEADER_FILE("mac/mac_version.h")
 
 #ifndef MAC_VERSION_H

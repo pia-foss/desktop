@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("interfaces.h")
 
 #ifndef NATIVEACC_INTERFACES_H
@@ -89,7 +89,7 @@ public:
 
 // Both QObject and QAccessibleInterface are streamable; resolve ambiguity for
 // AccessibleElement
-QDebug &operator<<(QDebug &d, AccessibleElement *pImpl);
+std::ostream &operator<<(std::ostream &d, AccessibleElement *pImpl);
 
 }
 

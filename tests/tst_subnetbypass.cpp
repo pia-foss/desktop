@@ -16,18 +16,26 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
+#include <kapps_net/src/routemanager.h>
+#include <kapps_net/src/subnetbypass.h>
 #include "daemon/src/daemon.h"
+
+namespace
+{
+    using SubnetBypass = kapps::net::SubnetBypass;
+    using FirewallParams = kapps::net::FirewallParams;
+}
 
 // Helper class to record method call information
 struct MethodCall
 {
-    QString methodName;
-    QString subnetArg;
-    QString gatewayIpArg;
-    QString interfaceNameArg;
+    std::string methodName;
+    std::string subnetArg;
+    std::string gatewayIpArg;
+    std::string interfaceNameArg;
 
     bool operator==(const MethodCall &other) const
     {
@@ -35,12 +43,6 @@ struct MethodCall
             subnetArg == other.subnetArg &&
             gatewayIpArg == other.gatewayIpArg &&
             interfaceNameArg == other.interfaceNameArg;
-    }
-
-    QString toString() const
-    {
-        return QStringLiteral("%1(%2, %3, %4)")
-            .arg(methodName, subnetArg, gatewayIpArg, interfaceNameArg);
     }
 
     bool operator!=(const MethodCall &other) const {return !(*this == other);}
@@ -58,14 +60,7 @@ public:
     void reset() {_methodCalls.clear();}
 
     const std::vector<MethodCall>&  methodCalls() const {return _methodCalls;}
-    QString toString() const {
-        QStringList list;
-        list << QStringLiteral("Number of method calls: %1").arg(_methodCalls.size());
-        for(const auto &m : _methodCalls)
-            list << m.toString();
 
-        return list.join("\n");
-    }
 private:
    std::vector<MethodCall> _methodCalls;
 };
@@ -77,22 +72,22 @@ class StubRouteManager : public RouteManager
 
 // This is the public interface for RouteManager
 public:
-    virtual void addRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override
+    virtual void addRoute4(const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName, uint32_t metric=0) const override
     {
         _methodRecorder.record({"addRoute4",subnet, gatewayIp, interfaceName});
     }
 
-    virtual void removeRoute4(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override
+    virtual void removeRoute4(const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName) const override
     {
         _methodRecorder.record({"removeRoute4", subnet, gatewayIp, interfaceName});
     }
 
-    virtual void addRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName, uint32_t metric=0) const override
+    virtual void addRoute6(const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName, uint32_t metric=0) const override
     {
         _methodRecorder.record({"addRoute6",subnet, gatewayIp, interfaceName});
     }
 
-    virtual void removeRoute6(const QString &subnet, const QString &gatewayIp, const QString &interfaceName) const override
+    virtual void removeRoute6(const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName) const override
     {
         _methodRecorder.record({"removeRoute6", subnet, gatewayIp, interfaceName});
     }
@@ -117,7 +112,7 @@ FirewallParams validFirewallParams()
     params.hasConnected = true;
     params.bypassDefaultApps = false;
     params.netScan = validNetScan;
-    params.bypassIpv4Subnets = QSet<QString>{"192.168.0.0/16"};
+    params.bypassIpv4Subnets =  std::set<std::string>{"192.168.0.0/16"};
 
     return params;
 }
@@ -133,7 +128,7 @@ static auto createRouteManager(MethodRecorder* &outPtr) -> std::unique_ptr<StubR
 }
 
 // Verify the method was called (when it was called is not important - consequence of using a QSet to store subnets)
-static void verifyMethodCall(const QString &methodName, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, const std::vector<MethodCall> &methodCalls)
+static void verifyMethodCall(const std::string &methodName, const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName, const std::vector<MethodCall> &methodCalls)
 {
     MethodCall methodCall{methodName, subnet, gatewayIp, interfaceName};
 
@@ -146,7 +141,7 @@ static void verifyMethodCall(const QString &methodName, const QString &subnet, c
 }
 
 // Verify the method was called at a certain point, i.e was it the first method invoked?
-static void verifyMethodCalledInOrder(uint order, const QString &methodName, const QString &subnet, const QString &gatewayIp, const QString &interfaceName, const std::vector<MethodCall> &methodCalls)
+static void verifyMethodCalledInOrder(uint order, const std::string &methodName, const std::string &subnet, const std::string &gatewayIp, const std::string &interfaceName, const std::vector<MethodCall> &methodCalls)
 {
     MethodCall methodCall{methodName, subnet, gatewayIp, interfaceName};
     QVERIFY(methodCall == methodCalls.at(order));
@@ -168,7 +163,7 @@ private slots:
         // should be enabled and add a route
         {
             FirewallParams params{validFirewallParams()};
-            params.bypassIpv6Subnets = QSet<QString>{"2001:beef:cafe::1/128"};
+            params.bypassIpv6Subnets =  std::set<std::string>{"2001:beef:cafe::1/128"};
             SubnetBypass bypass{createRouteManager(recorder)};
             bypass.updateRoutes(params);
 
@@ -228,7 +223,7 @@ private slots:
         MethodRecorder *recorder{nullptr};
 
         FirewallParams params{validFirewallParams()};
-        params.bypassIpv4Subnets = QSet<QString> { "192.168.0.0/16" };
+        params.bypassIpv4Subnets = std::set<std::string> { "192.168.0.0/16" };
 
         SubnetBypass bypass{createRouteManager(recorder)};
         bypass.updateRoutes(params);
@@ -249,7 +244,7 @@ private slots:
             MethodRecorder *recorder{nullptr};
 
             FirewallParams params{validFirewallParams()};
-            params.bypassIpv4Subnets = QSet<QString> { "192.168.1.0/24", "10.0.0.0/8", "1.1.1.1/32" };
+            params.bypassIpv4Subnets = std::set<std::string> { "192.168.1.0/24", "10.0.0.0/8", "1.1.1.1/32" };
             SubnetBypass bypass{createRouteManager(recorder)};
             bypass.updateRoutes(params);
 
@@ -263,8 +258,8 @@ private slots:
             MethodRecorder *recorder{nullptr};
 
             FirewallParams params{validFirewallParams()};
-            params.bypassIpv4Subnets = QSet<QString> { "192.168.1.0/24", "10.0.0.0/8", "1.1.1.1/32" };
-            params.bypassIpv6Subnets = QSet<QString> { "2001:cafe::1/128", "2001:cafe::2/128" };
+            params.bypassIpv4Subnets = std::set<std::string> { "192.168.1.0/24", "10.0.0.0/8", "1.1.1.1/32" };
+            params.bypassIpv6Subnets = std::set<std::string> { "2001:cafe::1/128", "2001:cafe::2/128" };
             SubnetBypass bypass{createRouteManager(recorder)};
             bypass.updateRoutes(params);
 
@@ -289,7 +284,7 @@ private slots:
             MethodRecorder *recorder{nullptr};
 
             FirewallParams params{validFirewallParams()};
-            params.bypassIpv4Subnets = QSet<QString>{"192.168.1.0/24"};
+            params.bypassIpv4Subnets = std::set<std::string>{"192.168.1.0/24"};
 
             SubnetBypass bypass{createRouteManager(recorder)};
             bypass.updateRoutes(params);
@@ -298,7 +293,7 @@ private slots:
             verifyMethodCall("addRoute4", "192.168.1.0/24", params.netScan.gatewayIp(), params.netScan.interfaceName(), recorder->methodCalls());
 
             // Now let's change the subnet
-            params.bypassIpv4Subnets = QSet<QString>{"10.0.0.0/8"};
+            params.bypassIpv4Subnets = std::set<std::string>{"10.0.0.0/8"};
 
             // Reset recorder first for convenience
             // This just erases previously stored method calls
@@ -316,7 +311,7 @@ private slots:
 
             FirewallParams params{validFirewallParams()};
             params.bypassIpv4Subnets = {};
-            params.bypassIpv6Subnets = QSet<QString>{"2001:cafe::1/128"};
+            params.bypassIpv6Subnets = std::set<std::string>{"2001:cafe::1/128"};
 
             SubnetBypass bypass{createRouteManager(recorder)};
             bypass.updateRoutes(params);
@@ -325,7 +320,7 @@ private slots:
             verifyMethodCall("addRoute6", "2001:cafe::1/128", params.netScan.gatewayIp6(), params.netScan.interfaceName(), recorder->methodCalls());
 
             // Now let's change the subnet
-            params.bypassIpv6Subnets = QSet<QString>{"2001:beef::1/128"};
+            params.bypassIpv6Subnets = std::set<std::string>{"2001:beef::1/128"};
 
             // Reset recorder first for convenience
             // This just erases previously stored method calls
@@ -343,7 +338,7 @@ private slots:
         MethodRecorder *recorder{nullptr};
 
         FirewallParams params{validFirewallParams()};
-        params.bypassIpv4Subnets = QSet<QString> { "192.168.1.0/24"};
+        params.bypassIpv4Subnets = std::set<std::string> { "192.168.1.0/24"};
 
         SubnetBypass bypass{createRouteManager(recorder)};
 
@@ -364,8 +359,8 @@ private slots:
         MethodRecorder *recorder{nullptr};
 
         FirewallParams params{validFirewallParams()};
-        params.bypassIpv4Subnets = QSet<QString> { "192.168.1.0/24", "10.0.0.0/8" };
-        params.bypassIpv6Subnets = QSet<QString> { "2001:cafe::1/128", "2001:cafe::2/128" };
+        params.bypassIpv4Subnets = std::set<std::string> { "192.168.1.0/24", "10.0.0.0/8" };
+        params.bypassIpv6Subnets = std::set<std::string> { "2001:cafe::1/128", "2001:cafe::2/128" };
 
         SubnetBypass bypass{createRouteManager(recorder)};
         bypass.updateRoutes(params);
@@ -392,7 +387,7 @@ private slots:
         MethodRecorder *recorder{nullptr};
 
         FirewallParams params{validFirewallParams()};
-        params.bypassIpv4Subnets = QSet<QString> { "192.168.1.0/24" };
+        params.bypassIpv4Subnets = std::set<std::string> { "192.168.1.0/24" };
 
         SubnetBypass bypass{createRouteManager(recorder)};
 

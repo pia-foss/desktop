@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
 #include "daemon/src/vpn.h"
@@ -43,6 +43,7 @@ namespace samples
       "dns": "nz.privacy.network",
       "port_forward": true,
       "geo": false,
+      "offline": false,
       "servers": {
         "ovpnudp": [{ "ip": "43.250.207.86", "cn": "newzealand403" }],
         "ovpntcp": [{ "ip": "43.250.207.85", "cn": "newzealand403" }],
@@ -53,6 +54,11 @@ namespace samples
   ]
 }
 )").object();
+    const auto metadataJson = QJsonDocument::fromJson(R"({
+        "translations":{},
+        "country_groups":{},
+        "gps":{}
+    })").object();
 }
 
 namespace
@@ -79,12 +85,18 @@ class tst_transportselector : public QObject
 {
     Q_OBJECT
 
+    auto buildRegionsFromJson(const QJsonObject &locationsJson)
+    {
+        return buildModernLocations({}, locationsJson,
+            {}, samples::metadataJson, {}, {}).first;
+    }
+
 private slots:
 
     void testPreferred()
     {
-        LocationsById locs{buildModernLocations({}, samples::locationJson, {}, {}, {})};
-        Location &location = *locs.at(QStringLiteral("nz"));
+        LocationsById locs{buildRegionsFromJson(samples::locationJson)};
+        const Location &location = *locs.at("nz");
 
         TransportSelector transportSelector;
         QHostAddress dummyAddr{0xC0000201};
@@ -109,8 +121,8 @@ private slots:
         QHostAddress dummyAddr{0xC0000201};
         bool delayNext;
 
-        LocationsById locs{buildModernLocations({}, samples::locationJson, {}, {}, {})};
-        Location &location = *locs.at(QStringLiteral("nz"));
+        LocationsById locs{buildRegionsFromJson(samples::locationJson)};
+        const Location &location = *locs.at("nz");
 
         // We don't want to wait before trying an alternate transport
         // so we set _transportTimeout to 0 in the constructor

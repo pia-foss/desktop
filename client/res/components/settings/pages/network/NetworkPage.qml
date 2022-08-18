@@ -44,81 +44,78 @@ Page {
     rowSpacing: Theme.settings.controlGridDefaultRowSpacing
 
     DropdownInput {
-            id: dnsDropdown
-            //: Label for the setting that controls which DNS servers are used to look up
-            //: domain names and translate them to IP addresses when browsing the internet.
-            //: This setting is also present in OS network settings, so this string should
-            //: preferably match whatever localized term the OS uses.
-            label: uiTr("DNS")
-            setting: Setting {
-              id: customDNSSetting
-              readonly property DaemonSetting daemonSetting: DaemonSetting { name: "overrideDNS"; onCurrentValueChanged: customDNSSetting.currentValue = currentValue }
-              property var knownCustomServers: null
-              sourceValue: daemonSetting.sourceValue
+      id: dnsDropdown
+      //: Label for the setting that controls which DNS servers are used to look up
+      //: domain names and translate them to IP addresses when browsing the internet.
+      //: This setting is also present in OS network settings, so this string should
+      //: preferably match whatever localized term the OS uses.
+      label: uiTr("DNS")
+      setting: Setting {
+        id: customDNSSetting
+        readonly property DaemonSetting daemonSetting: DaemonSetting { name: "overrideDNS"; onCurrentValueChanged: customDNSSetting.currentValue = currentValue }
+        sourceValue: daemonSetting.sourceValue
 
+        function isThirdPartyDNS(value) {
+          return !isStringValue(value, "pia") && !isStringValue(value, "local")
+        }
 
-
-              function isThirdPartyDNS(value) {
-                return !isStringValue(value, "pia") && !isStringValue(value, "local")
-              }
-
-              onSourceValueChanged: {
-                if (Array.isArray(sourceValue) && sourceValue.length > 0) {
-                  knownCustomServers = sourceValue;
-                }
-              }
-              onCurrentValueChanged: {
-                if (currentValue === "custom") {
-                  customDNSDialog.setServers(Array.isArray(daemonSetting.currentValue) ? daemonSetting.currentValue : []);
-                } else if (daemonSetting.currentValue !== currentValue) {
-                  // When changing from a non-third-party value (pia/handshake) to a
-                  // third-party value ("existing" since custom was already handled),
-                  // show the "use existing DNS" prompt.
-                  if (!isThirdPartyDNS(sourceValue) && isThirdPartyDNS(currentValue)) {
-                    customDNSDialog.setExisting();
-                  } else {
-                    daemonSetting.currentValue = currentValue;
-                  }
-                }
-              }
+        onSourceValueChanged: {
+          if (Array.isArray(sourceValue) && sourceValue.length > 0) {
+            Client.uiState.settings.knownCustomServers = sourceValue;
+          }
+        }
+        onCurrentValueChanged: {
+          if (currentValue === "custom") {
+            customDNSDialog.setServers(Array.isArray(daemonSetting.currentValue) ? daemonSetting.currentValue : []);
+          } else if (daemonSetting.currentValue !== currentValue) {
+            // When changing from a non-third-party value (pia/handshake) to a
+            // third-party value ("existing" since custom was already handled),
+            // show the "use existing DNS" prompt.
+            if (!isThirdPartyDNS(sourceValue) && isThirdPartyDNS(currentValue)) {
+              customDNSDialog.setExisting();
+            } else {
+              daemonSetting.currentValue = currentValue;
             }
-            warning: {
-              if(setting.isThirdPartyDNS(setting.sourceValue) && !isStringValue(setting.sourceValue, "hdns"))
-                return uiTr("Warning: Using a third party DNS could compromise your privacy.")
-              return ""
-            }
-            info: {
-              if(setting.sourceValue === "hdns") {
-                //: "Handshake" is a brand name and should not be translated.
-                return uiTr("Handshake is a decentralized naming protocol.  For more information, visit handshake.org.")
-              }
-              return ""
-            }
-            model: {
-              var items = [
-                    { name: uiTr("PIA DNS"), value: "pia" },
-                    //: Indicates that we will run a built-in DNS resolver locally
-                    //: on the user's computer.
-                    { name: uiTr("Built-in Resolver"), value: "local" },
-                    { name: hdnsName, value: "hdns" },
-                    { name: uiTr("Use Existing DNS"), value: "" }
-                  ];
+          }
+        }
+      }
+      warning: {
+        if(setting.isThirdPartyDNS(setting.sourceValue) && !isStringValue(setting.sourceValue, "hdns"))
+          return uiTr("Warning: Using a third party DNS could compromise your privacy.")
+        return ""
+      }
+      info: {
+        if(setting.sourceValue === "hdns") {
+          //: "Handshake" is a brand name and should not be translated.
+          return uiTr("Handshake is a decentralized naming protocol.  For more information, visit handshake.org.")
+        }
+        return ""
+      }
+      model: {
+        var items = [
+              { name: uiTr("PIA DNS"), value: "pia" },
+              //: Indicates that we will run a built-in DNS resolver locally
+              //: on the user's computer.
+              { name: uiTr("Built-in Resolver"), value: "local" },
+              { name: hdnsName, value: "hdns" },
+              { name: uiTr("Use Existing DNS"), value: "" }
+            ];
 
 
-              if (Array.isArray(setting.currentValue) && setting.currentValue.length > 0) {
-                items.push({ name: uiTr("Custom") + " [" +
-                                   setting.currentValue.join(" / ")
-                                   + "]", value: setting.currentValue });
-              } else if (setting.knownCustomServers) {
-                items.push({ name: uiTr("Custom") + " [" +
-                                   setting.knownCustomServers.join(" / ")
-                                   + "]", value: setting.knownCustomServers });
-              } else {
-                items.push({ name: uiTr("Custom"), value: "custom" });
-              }
+        if (Array.isArray(setting.currentValue) && setting.currentValue.length > 0) {
+          items.push({ name: uiTr("Custom") + " [" +
+                              setting.currentValue.join(" / ")
+                              + "]", value: setting.currentValue });
+        } else if (Client.uiState.settings.knownCustomServers) {
+          items.push({ name: uiTr("Custom") + " [" +
+                              Client.uiState.settings.knownCustomServers.join(" / ")
+                              + "]", value: Client.uiState.settings.knownCustomServers });
+        } else {
+          items.push({ name: uiTr("Custom"), value: "custom" });
+        }
 
-              return items;
-            }
+        return items;
+      }
     }
 
     Item {

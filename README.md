@@ -4,53 +4,13 @@ This is the desktop client for the Private Internet Access VPN service. It consi
 
 The project uses Qt 5 for cross-platform development, both in the client and daemon. The client GUI is based on Qt Quick, which uses declarative markup language and JavaScript and offers hardware accelerated rendering when available. Qt and Qt Quick tend to be more memory and CPU efficient compared to web-based UI frameworks like Electron or NW.js.
 
-
 ## Building and developing
 
-The client is intended to be built on the target platform; Windows builds are built on Windows, macOS builds on macOS, and Linux builds on Ubuntu.
+The client is intended to be built on the target platform; Windows builds are built on Windows, macOS builds on macOS, and Linux builds on Debian.
 
 The entire product is built using rake, using the supporting framework in the `rake/` directory.
 
-Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-openvpn) and the [Windows TAP driver](https://github.com/pia-foss/desktop-tap) are included as precompiled binaries under the `deps` directory in this project for convenience. To recompile any of these, please refer to their corresponding directories and/or repositories for build instructions.
-
-### Prerequisites:
-
-- On **Windows**:
-  - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
-  - [Qt 5.15](https://www.qt.io/download) or later (open source edition)
-    - Install CMake (under development tools) to use this project in Qt Creator
-  - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
-     - Requires VS 16.7 or later
-     - The Windows SDK must be at least 10.0.17763.0
-     - Install the "Windows 8.1 SDK and UCRT SDK" to get the UCRT redistributable DLLs for 7/8/8.1
-  - Debugger: Install Debugging Tools from the [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
-     - The VS installer doesn't include the Console Debugger (CDB), which is needed to debug in Qt Creator.  More info: [Setting Up Debugger](https://doc.qt.io/qtcreator/creator-debugger-engines.html)
-  - [Ruby](https://rubyinstaller.org/) - includes Rake
-  - [7-zip](https://www.7-zip.org/)
-- On **macOS**:
-  - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
-  - [Qt 5.15](https://www.qt.io/download) or later (open source edition)
-    - Install CMake (under development tools) to use this project in Qt Creator
-  - Mojave or newer
-  - Up-to-date version of Xcode
-  - Ruby, can be installed using [Homebrew](https://brew.sh) with `brew install ruby`
-- On **Linux**:
-  - Debian 9 (Stretch) or newer
-    - Supported architectures: x86_64, armhf, arm64
-  - [Git](https://git-scm.com/) 1.8.2 or later with [Git LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) installed
-  - Qt 5.15 or later
-    - PIA's build of Qt is recommended: [desktop-dep-build releases](https://github.com/pia-foss/desktop-dep-build/releases)
-    - If you want Qt Creator, also install Qt from [qt.io](https://www.qt.io/download)
-  - To build natively on the host, install the following development packages:
-    - `build-essential`
-    - `rake`
-    - `clang` (or specific version, `clang-7` recommended on Debian Stretch)
-    - `mesa-common-dev`
-    - `libnl-3-dev` (PIA can run without the library installed, but the headers are needed to build)
-    - `libnl-route-3-dev`
-    - `libnl-genl-3-dev`
-    - `git` (needed even in chroot build environment, to determine commit info for version)
-  - To build releasable artifacts (always built under Debian 9, and optionally including arm64/armhf cross builds), set up Debian 9 chroots - see "Building for Distribution" - "Linux" below
+Dependencies such as [OpenVPN](https://github.com/pia-foss/desktop-dep-build) and the [Windows TAP driver](https://github.com/pia-foss/desktop-tap) are included as precompiled binaries under the `deps` directory in this project for convenience. To recompile any of these, please refer to their corresponding directories and/or repositories for build instructions.
 
 ### Cloning the repository
 
@@ -73,6 +33,86 @@ After this, cloning the repository normally should also fetch the precompiled bi
 Filtering content: 100% (24/24), 17.13 MiB | 1.89 MiB/s, done.
 ```
 
+### Prerequisites
+
+- On **Windows**:
+  - [Qt 5.15.2](https://www.qt.io/download) (open source edition)
+    - Get the MSVC 2019 builds.  Source and debug information are optional (useful to debug into Qt code).  You don't need any of the other builds.
+    - Install CMake (under development tools) to use this project in Qt Creator
+  - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
+     - Requires VS 16.7 or later
+     - The Windows SDK must be at least 10.0.17763.0
+     - Install the "Windows 8.1 SDK and UCRT SDK" to get the UCRT redistributable DLLs for 7/8/8.1
+  - Debugger: Install Debugging Tools from the [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
+     - The VS installer doesn't include the Console Debugger (CDB), which is needed to debug in Qt Creator.  More info: [Setting Up Debugger](https://doc.qt.io/qtcreator/creator-debugger-engines.html)
+  - [Ruby](https://rubyinstaller.org/) - includes Rake
+  - [7-zip](https://www.7-zip.org/)
+- On **macOS**:
+  - Qt 5.15.2
+    - PIA's universal build of Qt is recommended: [desktop-dep-build releases](https://github.com/pia-foss/desktop-dep-build/releases)
+    - The universal Qt build can be used for universal or single-architecture PIA builds.
+    - If you want Qt Creator, also install Qt from [qt.io](https://www.qt.io/download)
+  - Big Sur or newer is required to build
+  - Up-to-date version of Xcode
+  - Ruby, can be installed using [Homebrew](https://brew.sh) with `brew install ruby`
+- On **Linux**:
+  - Supported distribution with clang 7 or newer
+  - Supported architectures: x86_64, armhf, arm64
+  - Qt 5.15 or later
+    - PIA's build of Qt is recommended: [desktop-dep-build releases](https://github.com/pia-foss/desktop-dep-build/releases)
+    - If you want Qt Creator, also install Qt from [qt.io](https://www.qt.io/download)
+  - Host build (Debian 10+ and derivatives):
+    - `sudo apt install build-essential rake clang mesa-common-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev git git-lfs`
+  - Host build (Arch and derivatives):
+    - `sudo pacman -S base-devel git-lfs ruby-rake clang llvm libnl zip`
+  - Debian 9 chroot build (used to build published releases for maximum compatibility, and for cross builds)
+    - `sudo apt install schroot debootstrap`
+    - Then use `./scripts/chroot/setup.sh` to set up the build chroots, see "Building for Distribution - Linux" below
+
+### Quick start
+
+* To build the final installer for the host OS and architecture: `rake installer`
+  * Produced in `out/pia_debug_<arch>/installer`
+* To build all artifacts for the host OS and architecture: `rake all`
+  * Artifacts go to `out/pia_debug_<arch>/artifacts`
+* To build just the staged installation for development: `rake`
+  * Staged installation is in `out/pia_debug_<arch>/stage` - run the client or daemon from here
+* To run tests: `rake test`
+* To build for release instead of debug, set `VARIANT=release` with any of the above
+
+### Qt Creator
+
+To open the project in Qt Creator, open CMakeLists.txt as a project.  This CMake script defines targets for Qt Creator and hooks them up to the appropriate rake tasks, which allows Qt Creator to build, run, and debug targets.
+
+Some specific configuration changes are useful in Qt Creator:
+
+#### File Locator
+
+The file locator (Ctrl+K / Cmd+K) can only locate files referenced by targets by default, so it won't be able to find build system files (.rb), scripts (.sh/.bat), etc.  To find any file in the project directory:
+
+1. Open Qt Creator's Preferences
+2. Go to Environment > Locator
+3. Next to "Files in All Project Directories", check the box for "Default"
+4. Select "Files in All Project Directoreis" and click "Edit..."
+5. Add the exclusion pattern "*/out/*" (to exclude build outputs)
+
+#### Default Target
+
+Qt Creator's default target is 'all', which is hooked up to rake's default - the staged installation only.  (The real 'all' target takes a long time since it builds all tests, installers, tools, etc.)
+
+To run or debug unit tests and other targets from Qt Creator, tell it to build the current executable's target instead:
+
+1. Go to the Projects page
+2. Select "Build" under current kit"
+3. Under "Build Steps", expand the CMake build step
+4. Select "Current executable" instead of "all":
+
+#### Kit and Qt version
+
+Qt Creator will still ask to select a kit, which includes a Qt version, compiler, etc.  Just select Qt 5.15.2 (on Windows, the MSVC 2019 64-bit target), so the code model will work.
+
+This has no effect on the build output - the Rake scripts find Qt and the compiler on their own, which allows them to be run with no prior setup.
+
 ### Build system
 
 The following targets can be passed to `rake`.  The default target is `stage`, which stages the built client, daemon, and dependencies for local testing (but does not build installers, tests, etc.)
@@ -84,12 +124,10 @@ The following targets can be passed to `rake`.  The default target is `stage`, w
 | `installer` | Builds the final installer artifact, including code signing if configured. |
 | `export` | Builds extra artifacts needed from CI but not part of any deployable artifact (currently translation exports) |
 | `integtest` | Builds the integration test artifact (ZIP file containing deployable integration tests) |
+| `libs` | Builds the dtop libraries and development artifact (see DTOP-LIBS.md) |
+| `tools` | Builds extra tools for development purposes that are not used as part of the build process or as part of any shipped artifact. |
 | `artifacts` | Builds all artifacts and copies to `out/pia_debug_x86_64/artifacts` (depends on most other targets, execpt `test` when coverage measurement isn't possible) |
 | `all` | All targets. |
-
->>>
-:point_right: In 2.3.0 and earlier, PIA used a qbs-based build system, along with postprocessing to generate final installer artifacts in the various platform build scripts.  This is now all done using Rake, the qbs build system has been removed.
->>>
 
 #### Configurations
 
@@ -100,7 +138,8 @@ These are implemented in `rake/build.rb`.  The output directory name includes th
 | Variable | Values | Default | Explanation |
 |----------|--------|---------|-------------|
 | `VARIANT` | `debug`, `release` | `debug` | Create a debug build (unoptimized, some compression levels reduced for speed), or release build (optimized, maximum compression). |
-| `ARCHITECTURE` | `x86_64`, `x86` | `x86_64` | Select an alternate architecture.  Windows supports `x86` as well as `x86_64`, Mac and Linux only support `x86_64`. |
+| `ARCHITECTURE` | `x86_64`, `x86`, `arm64`, `arm64e`, `armhf`, `universal` | Host architecture | Select an alternate architecture.  Architecture support varies by platform. |
+| `PLATFORM` | `windows`, `macos`, `linux`, `android`, `ios`, `iossim` | Host platform | Select an alternate platform.  Android and iOS targets only build core libraries and tests.  Android builds can be performed from macOS or Linux hosts.  iOS and iOS Simulator builds can be performed from macOS hosts. |
 | `BRAND` | (directories in `brands/`) | `pia` | Build an alternate brand. |
 
 #### Variables
@@ -109,44 +148,7 @@ Some additional environment variables can be configured:
 
 | Variable | Example | Explanation |
 |----------|---------|-------------|
-| `QTROOT` | /opt/Qt/5.12.8 | Path to the installed Qt version, if qt.rb can't find it or you want to force a specific version |
-
-### Qt Creator
-
-To open the project in Qt Creator, open CMakeLists.txt as a project.  This CMake script defines targets for Qt Creator and hooks them up to the appropriate rake tasks, which allows Qt Creator to build, run, and debug targets.
-
-Some specific configuration changes are useful in Qt Creator:
-
-#### File Locator
-
-The file locator (Ctrl+K / Cmd+K) can only locate files referenced by targets by default.  The CMake script allows it to find most C++ source, but it can't find QML source or other ancillary files.  Enable the "Files in All Project Directories" filter by default:
-
-1. Open Qt Creator's Preferences
-2. Go to Environment > Locator
-3. Next to "Files in All Project Directories", check the box for "Default"
-4. Select "Files in All Project Directoreis" and click "Edit..."
-5. Add the exclusion patterns "*/out/*" and "*/node_modules*" (to exclude build outputs and modules installed for ancillary JS utility scripts)
-
-This is a good idea anyway because it also allows you to find files not used by a target, like Rakefile, .gitignore, build scripts, etc.
-
-#### Default Target
-
-Qt Creator's default target is 'all', which is hooked up to rake's default - the staged installation only.  You can also set Qt Creator's default to really build everything (including running tests) or to build the current executable (useful to build specific tests, but not needed to debug them from Qt Creator).
-
-1. Go to the Projects page
-2. Select "Build" under current kit"
-3. Under "Build Steps", expand the CMake build step
-4. Select a different target instead of "all":
-   - "rake-all" will build everything, including running unit tests
-   - "Current executable" will build the current target you have selected in
-     Qt Creator - for client/cli/daemon this builds the staging area, but for
-     integtest or unit tests it will build the test instead
-
-#### Kit and Qt version
-
-Qt Creator will still ask to select a kit, which includes a Qt version, compiler, etc.  This has no effect on the build output - the Rake scripts find Qt and the compiler on their own, which allows them to be run with no prior setup.  Select the same Qt version and compiler in Qt Creator that the rake script uses, so Qt Creator's code model will work.
-
-On Windows, Qt Creator will run rake in an environment set up using vcvarsall.bat, which is not necessary (since the rake scripts run vcvarsall.bat automatically) but may cause stale MSVC variables to remain in the build environment if you update MSVC.  Just do a clean and re-run cmake from Qt Creator, and the environment should be reset.
+| `QTROOT` | /opt/Qt/5.15.2 | Path to the installed Qt version, if qt.rb can't find it or you want to force a specific version |
 
 ### Building for distribution
 
@@ -208,7 +210,7 @@ Each platform requires additional installation steps in order for the client to 
 To debug your own daemon, the installed daemon must first be stopped:
 
 - **Windows**: Run `services.msc` and stop the Private Internet Access Service
-- **macOS**: Run `sudo launchctl unload /Library/LaunchDaemons/com.privateinternetaccess.vpn.plist`
+- **macOS**: Run `sudo launchctl unload /Library/LaunchDaemons/com.privateinternetaccess.vpn.daemon.plist`
 - **Linux**: Run `sudo systemctl stop piavpn`
 
 The daemon must run as root. Consult your IDE/debugger documentation for how to safely run the debugger target as root.
@@ -244,6 +246,43 @@ To test installation, you can generate a self-signed certificate and sign with t
       3. Add a new variable named `PIA_CODESIGN_CERT`, and set the value to the common name for your certificate
    * Manual builds with `build-macos.sh`
       1. Just set `PIA_CODESIGN_CERT` to the common name you gave the certificate when building
+
+## Core Libraries
+
+Some core libraries can be built targeting Android and iOS for use in our mobile clients.
+
+### Prerequisites
+
+- For **Android** targets:
+  - Linux or macOS host.  Windows hosts are not currently supported for Android builds.
+  - Ruby and Rake:
+    - Debian: `sudo apt install rake`
+    - Arch: `sudo pacman -S ruby-rake`
+    - macOS Homebrew: `brew install ruby` (includes Rake)
+  - Android NDK 21.0.6113669 (preferred) or any later version
+    - You can install this from Android Studio or using the command-line SDK tools
+- For **iOS** targets:
+  - macOS host, up-to-date version of Xcode
+  - Ruby and Rake:
+    - macOS Homebrew: `brew install ruby` (includes Rake)
+
+### Building
+
+Invoke `rake` with `PLATFORM=android` or `PLATFORM=ios` to target a mobile platform.  You can also set `ARCHITECTURE` to one of `arm64`, `armhf`, `x86_64`, or `x86` - the host architecture is the default.  (If you do this a lot, you can place overrides in your environment or .buildenv to use these by default.)
+
+(Qt does not need to be installed for mobile targets.)
+
+### Build system
+
+The same `rake`-based build system is used, but the available targets differ.
+
+| Target | Explanation |
+|--------|-------------|
+| (default) | Stages core libraries with dependencies in `out/pia_debug_<platform>_<arch>/dtop-libs` for local testing. |
+| `libs_archive` | Builds the library SDK ZIP containing the built libraries and headers. |
+| `tools` | Builds libraries and internal test harnesses used to test them. |
+| `artifacts` | Builds all artifacts and copies to `out/pia_debug_<platform>_<arch>/artifacts` (depends on most other targets) |
+| `all` | All targets. |
 
 ## Contributing
 

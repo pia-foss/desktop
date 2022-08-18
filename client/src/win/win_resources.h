@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 // Native resource IDs for Windows.  This is referenced by win_resources.rc and
-// the resource compiler; don't include "common.h", etc.
+// the resource compiler; don't include <common/src/common.h>, etc.
 #ifndef WIN_RESOURCES_H
 #define WIN_RESOURCES_H
 

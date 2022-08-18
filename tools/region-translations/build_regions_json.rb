@@ -23,7 +23,21 @@ langs["en-US"].each do |translationKey, enUsValue|
     langs.each do |langKey, langData|
         translatedValue = langData[translationKey]
         if(translatedValue.is_a? String)
-            translations[translationKey][langKey] = langData[translationKey]
+            # We also need to add a zero-width-space to SE Streaming Optimized in
+            # order to prepare for the regions list refactor merge.
+            # The new implementation adapts the v2 metadata to the v3 model,
+            #which provides separate “country prefix” and “region name” texts
+            # (i.e. “SE “ and “Streaming Optimized”; these are combined in v2).
+            #
+            # The v2 compatibility path generates these by finding the common
+            # prefix among regions in a country, which works for all regions/languages
+            # except Sweden.  Sweden only has two regions, “Stockholm” and “Streaming Optimized”,
+            # which both happen to begin with “St”, which fools the prefix detection.
+            #
+            # We need to put a ZWS between “SE “ and “Streaming Optimized” to work with this.
+            markedName = translatedValue.gsub("SE Str", "SE \u200BStr")
+
+            translations[translationKey][langKey] = markedName
         else
             STDERR.puts("No translation for #{translationKey} in #{langKey} (got #{translatedValue})")
         end

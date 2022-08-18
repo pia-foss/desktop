@@ -16,24 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguarduapi.h")
 
 #ifndef WIREGUARDUAPI_H
 #define WIREGUARDUAPI_H
 
-#include "async.h"
-#include "linebuffer.h"
+#include <common/src/async.h>
+#include <common/src/linebuffer.h>
 #include "wireguardbackend.h"
 #include <QLocalSocket>
 #include <memory>
 #include <deque>
-
-// embeddable-wg-library - C header
-extern "C"
-{
-    #include <wireguard.h>
-}
 
 namespace Uapi
 {

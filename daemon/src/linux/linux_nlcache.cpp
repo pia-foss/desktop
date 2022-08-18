@@ -16,11 +16,11 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("linux_nl.cpp")
 
 #include "linux_nlcache.h"
-#include "posix/posix_objects.h"
+#include <kapps_core/src/posix/posix_objects.h>
 #include "linux_libnl.h"
 
 void LibnlError::checkRet(int ret, CodeLocation location, const char *what)

@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_messagereceiver.h")
 
 #ifndef WIN_MESSAGERECEIVER_H
 #define WIN_MESSAGERECEIVER_H
 
-#include <win/win_messagewnd.h>
+#include <common/src/win/win_messagewnd.h>
 
 // - Detects the exit message broadcast by the uninstaller and quits the client.
 //   Message-only windows don't receive broadcasts, so this creates an invisible

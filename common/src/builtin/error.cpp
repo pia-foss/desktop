@@ -46,9 +46,10 @@ Error::Error(const QJsonObject& errorObject)
         _params.append(param.toString());
 
     QJsonObject location = data.value(QLatin1String("location")).toObject();
-    _location.category = nullptr;
-    _location.file = (_storedFile = location.value(QLatin1String("file")).toString().toUtf8()).data();
-    _location.line = location.value(QLatin1String("line")).toInt();
+    _storedFile = location.value(QLatin1String("file")).toString().toUtf8();
+    _location = {_storedFile.data(), location.value(QLatin1String("line")).toInt()};
+
+    _retryAfterTime = QDateTime::fromMSecsSinceEpoch(data.value(QLatin1String("retryAfterTime")).toVariant().toLongLong());
 }
 
 QString Error::errorString() const
@@ -71,13 +72,16 @@ QString Error::errorDescription() const
 
 QJsonObject Error::toJsonObject() const
 {
+    // Convert a StringSlice to a QLatin1String
+    auto toQL1Str = [](const kapps::core::StringSlice &s) -> QLatin1String
+        {return QLatin1String{s.data(), static_cast<int>(s.size())};};
     QJsonObject location;
-    if (const char* categoryName = _location.categoryName())
-        location.insert(QStringLiteral("category"), QLatin1String(categoryName));
-    if (_location.file)
-        location.insert(QStringLiteral("file"), QLatin1String(_location.file));
-    if (_location.line)
-        location.insert(QStringLiteral("line"), _location.line);
+    if (_location.categoryName())
+        location.insert(QStringLiteral("category"), toQL1Str(_location.categoryName()));
+    if (_location.file())
+        location.insert(QStringLiteral("file"), toQL1Str(_location.file()));
+    if (_location.line())
+        location.insert(QStringLiteral("line"), _location.line());
 
     QJsonObject data;
     QLatin1String name = qEnumToString(_code);
@@ -90,6 +94,8 @@ QJsonObject Error::toJsonObject() const
     if (!location.isEmpty())
         data.insert(QStringLiteral("location"), std::move(location));
 
+    data.insert(QStringLiteral("retryAfterTime"), _retryAfterTime.toMSecsSinceEpoch());
+
     return QJsonObject {
         { QStringLiteral("code"), _code },
         { QStringLiteral("message"), errorString() },
@@ -98,10 +104,9 @@ QJsonObject Error::toJsonObject() const
     };
 }
 
-QDebug operator<<(QDebug d, const Error& e)
+std::ostream &operator<<(std::ostream &os, const Error& e)
 {
-    QDebugStateSaver saver(d);
-    return d.noquote() << e.errorString() << e.location();
+    return os << e.errorString() << ' ' << e.location();
 }
 
 // Report unhandled errors by logging them.

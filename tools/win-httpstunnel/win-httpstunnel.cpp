@@ -356,7 +356,7 @@ void secureHandshake(const SecurityInterface &secItf, SspiCredHandle &clientCred
         err = secItf.get().InitializeSecurityContextW(clientCred.get(),
             secureCtxt.get(), nullptr, sspiRequestFlags, 0, 0, &inputBufferDesc,
             0, nullptr, &outputBufferDesc, &sspiContextFlags, nullptr);
-           
+
         // If any response content was given, send it.  This can happen even if the
         // negotiation fails, such as for an error indication.
         if(outputBuffer.cbBuffer > 0 && outputBuffer.pvBuffer)
@@ -418,9 +418,16 @@ public:
     void setMsgSize(std::size_t msgSize) {_data.resize(_headerSize + msgSize + _trailerSize);}
     std::size_t trailerSize() const {return _trailerSize;}
 
+    std::size_t totalSize() const {return _data.size();}
+
     char *headerBuf() {return _data.data();}
     char *msgBuf() {return _data.data() + _headerSize;}
     char *trailerBuf() {return _data.data() + (_data.size() - _trailerSize);}
+
+    // data() is the same as headerBuf(), but this does make it clear that
+    // this context is referring to the whole buffer, not the header
+    char *data() {return _data.data();}
+    const char *data() const {return _data.data();}
 
 private:
     std::size_t _headerSize;
@@ -446,7 +453,50 @@ void appendMsg(MsgBuf &msg, std::size_t &writePos, const std::string &data)
     writePos += data.size();
 }
 
-void syncEncryptSend(const SecurityInterface &secItf, WinSocket &socket,
+// Send the last 'remaining' bytes of 'msg'.  If the socket is async and would
+// block, some data may not be sent, in which case the new remaining count is
+// returned.  (If all data were sent, 0 is returned.)
+unsigned long sendRemainingData(WinSocket &socket, const MsgBuf &msg,
+    unsigned long remaining)
+{
+    // Send until we are out of data or the socket (if async) would block.
+    // send() is allowed to accept part of the buffer, this doesn't necessarily
+    // indicate that the socket is about to block (try again until it actually
+    // says it would block)
+    while(remaining > 0)
+    {
+        auto sent = socket.send(msg.data() + (msg.totalSize() - remaining),
+            remaining, 0);
+        if(sent == SOCKET_ERROR)
+        {
+            auto error = ::WSAGetLastError();
+            // If the socket couldn't send because it would have to block, we're
+            // done, send the remaining bytes later
+            if(error == WSAEWOULDBLOCK)
+                return remaining;
+            // Throw for any other error
+            throw WinError{"Failed to send data to server", error};
+        }
+
+        // Otherwise, subtract the bytes sent
+        if(sent > remaining)
+        {
+            // Shouldn't be possible, would cause underflow
+            WinError err{"Sent more bytes than requested", ::WSAGetLastError()};
+            throw err;
+        }
+
+        remaining -= sent;
+    }
+    // Sent everything
+    return 0;
+}
+
+// Encrypt a data payload (in msg) and attempt to send it.  If the socket
+// is asynchronous and would block, the remaining data size to be sent is
+// returned.  (Otherwise 0 is returned.)  The encrypted data remains in msg in
+// that case (send it with sendRemainingData)
+unsigned long syncEncryptSend(const SecurityInterface &secItf, WinSocket &socket,
     SspiCtxtHandle &secureCtxt, MsgBuf &msg)
 {
     SecBufferDesc sendBufferDesc;
@@ -469,12 +519,37 @@ void syncEncryptSend(const SecurityInterface &secItf, WinSocket &socket,
 
     SECURITY_STATUS err = secItf.get().EncryptMessage(secureCtxt.get(), 0, &sendBufferDesc, 0);
 
-    auto totalSize = sendBuffers[0].cbBuffer + sendBuffers[1].cbBuffer + sendBuffers[2].cbBuffer;
-    auto sent = socket.send(msg.headerBuf(), totalSize, 0);
-    if(sent != totalSize)
-        throw WinError{"Failed to send data to server", ::WSAGetLastError()};
+    // It's not clear whether EncryptMessage can change the section sizes, we
+    // might need to be able to update these sizes in MsgBuf
+    if(sendBuffers[0].cbBuffer != msg.headerSize())
+    {
+        std::cerr << "header changed from" << msg.headerSize() << "to"
+            << sendBuffers[0].cbBuffer << std::endl;
+        throw std::runtime_error{"header changed"};
+    }
+    if(sendBuffers[1].cbBuffer != msg.msgSize())
+    {
+        std::cerr << "message changed from" << msg.msgSize() << "to"
+            << sendBuffers[1].cbBuffer << std::endl;
+        throw std::runtime_error{"message changed"};
+    }
+    if(sendBuffers[2].cbBuffer != msg.trailerSize())
+    {
+        std::cerr << "trailer changed from" << msg.trailerSize() << "to"
+            << sendBuffers[2].cbBuffer << std::endl;
+        throw std::runtime_error{"trailer changed"};
+    }
+
+    return sendRemainingData(socket, msg, msg.totalSize());
 }
 
+// Receive and decrypt data.  The data are decrypted in-place in buffer.  If a
+// complete TLS message record is received, {pMsg, msgLen} are nonzero and
+// denote the message in the buffer.  If additional encrypted data are present,
+// {pExtra, extraLen} are nonzero and denote that data in the buffer.
+//
+// Extra data should be retained at the beginning of buffer for the next
+// receive-decrypt.
 void syncReceiveDecrypt(const SecurityInterface &secItf, WinSocket &socket,
     SspiCtxtHandle &secureCtxt, std::vector<char> &buffer,
     char *(&pMsg), std::size_t &msgLen, char *(&pExtra), std::size_t &extraLen)
@@ -488,17 +563,23 @@ void syncReceiveDecrypt(const SecurityInterface &secItf, WinSocket &socket,
     pExtra = nullptr;
     extraLen = 0;
 
+    unsigned long received{0};
+    bool wouldBlock{false};
+
     do
     {
         // Skip the recv() the first time around if there's already queued data,
         // we might already have a full message
         if(err == SEC_E_INCOMPLETE_MESSAGE || queuedData == 0)
         {
-            auto received = socket.recv(buffer.data() + queuedData, buffer.size() - queuedData, 0);
+            received = socket.recv(buffer.data() + queuedData, buffer.size() - queuedData, 0);
             if(received == SOCKET_ERROR && ::WSAGetLastError() == WSAEWOULDBLOCK)
             {
-                // That's fine, just go on as if we received no data
+                // Proceed without any new data (if there is queued data, we
+                // could still have a complete message).  We won't try to
+                // receive again, wait for more data
                 received = 0;
+                wouldBlock = true;
             }
             else if(received == 0 || received == SOCKET_ERROR)
             {
@@ -544,11 +625,19 @@ void syncReceiveDecrypt(const SecurityInterface &secItf, WinSocket &socket,
                     extraLen = receiveBuffers[i].cbBuffer;
                 }
             }
+            // We got a message, so return - we must return this message to the
+            // caller before receiving or decrypting again
+            return;
         }
         else if(err != SEC_E_INCOMPLETE_MESSAGE)
             throw WinError{"Error decrypting incoming data", err};
     }
-    while(err == SEC_E_INCOMPLETE_MESSAGE);
+    while(!wouldBlock);
+
+    // We didn't complete a messsage, but the async socket would have had to
+    // block.  The entire buffer is "extra data"
+    pExtra = buffer.data();
+    extraLen = queuedData;
 }
 
 void readHttpsConnectResponse(const char *pMsgBegin, const char *pMsgEnd)
@@ -752,7 +841,7 @@ int main(int argc, char **argv)
         SspiCtxtHandle secureCtxt{secItf};
         std::vector<char> receivedData;
         secureHandshake(secItf, clientCred, socket, params->proxyHost(), secureCtxt, receivedData);
-        
+
         SecPkgContext_StreamSizes sizes{};
         err = secItf.get().QueryContextAttributes(secureCtxt.get(), SECPKG_ATTR_STREAM_SIZES, &sizes);
         if(err != SEC_E_OK)
@@ -769,8 +858,10 @@ int main(int argc, char **argv)
         appendMsg(sendBuf, httpsConnectMsgSize, "\r\n\r\n");
         sendBuf.setMsgSize(httpsConnectMsgSize);
 
-        syncEncryptSend(secItf, socket, secureCtxt, sendBuf);
-        sendBuf.setMsgSize(sizes.cbMaximumMessage);
+        auto connectUnsent = syncEncryptSend(secItf, socket, secureCtxt, sendBuf);
+        // The socket is still blocking at this point, so connectUnsent must be 0
+        if(connectUnsent)
+            throw std::runtime_error{"Socket did not send entire CONNECT"};
 
         // At this point, since the TLS handshake is complete, receivedData is
         // now the queue for encrypted data, which might already contain data.
@@ -822,28 +913,73 @@ int main(int argc, char **argv)
         std::cout.write(pResponseEnd, decryptedData.end() - responseEndPos);
         std::cout.flush();
 
-        // Poll both stdin and the socket's read/close events.  Set up an event
-        // to use WaitForMultipleObjects().
+        // Poll both stdin and the socket's read/write/close events.  Set up an
+        // event to use WaitForMultipleObjects().
+        // eventSelect() automatically switches the socket to asynchronous, so
+        // now we have to be able to queue outgoing data that would have
+        // blocked.
         WinSocketEvent socketEvent;
-        if(socket.eventSelect(socketEvent, FD_READ|FD_CLOSE) == SOCKET_ERROR)
+        if(socket.eventSelect(socketEvent, FD_READ|FD_WRITE|FD_CLOSE) == SOCKET_ERROR)
             throw WinError{"Unable to select read/close events on socket", ::WSAGetLastError()};
 
-        HANDLE waitHandles[2]{socketEvent.get(), ::GetStdHandle(STD_INPUT_HANDLE)};
+        // There are two different ways we could poll, which depends on the
+        // condition of the stdin->socket throughput:
+        // 1. Socket write has blocked - don't poll stdin (we can't read any
+        //    more, input will have to wait until we get an FD_WRITE event)
+        // 2. Socket write has not blocked - do poll stdin (we are not expecting
+        //    FD_WRITE since nothing has blocked)
+        //
+        // The mechanism for #2 varies based on whether the input is a pipe due
+        // to yet more quirks of Windows.
+        enum : std::size_t
+        {
+            WaitCfgWriteNotBlocked,
+            WaitCfgWriteBlocked,
+            WaitCfgCount,
+        };
 
+        struct
+        {
+            HANDLE *pHandles;
+            DWORD handleCount;
+            DWORD waitTimeout;
+        } waitConfigs[WaitCfgCount]{};
+
+        HANDLE stdinFile{::GetStdHandle(STD_INPUT_HANDLE)};
+        // Set up the "not blocked" config
+        HANDLE waitNotBlockedHandles[2]{socketEvent.get(), stdinFile};
+        waitConfigs[WaitCfgWriteNotBlocked].pHandles = waitNotBlockedHandles;
+        waitConfigs[WaitCfgWriteNotBlocked].handleCount = 2;
+        waitConfigs[WaitCfgWriteNotBlocked].waitTimeout = INFINITE;
         // Windows pipes are not waitable objects (:facepalm:)  If stdin is a
         // pipe, we have to fall back to short-polling.
-        DWORD waitHandleCount = 2;
-        DWORD waitTimeout = INFINITE;
-        if(GetFileType(waitHandles[1]) == FILE_TYPE_PIPE)
+        if(GetFileType(stdinFile) == FILE_TYPE_PIPE)
         {
-            waitHandleCount = 1;    // Don't wait on the pipe
-            waitTimeout = 100;  // Wake periodically to try reading from the pipe
+            waitConfigs[WaitCfgWriteNotBlocked].handleCount = 1;    // Don't wait on the pipe
+            waitConfigs[WaitCfgWriteNotBlocked].waitTimeout = 100;  // Wake periodically to try reading from the pipe
         }
+
+        // Set up the "blocked" config
+        HANDLE waitBlockedHandles[1]{socketEvent.get()};
+        waitConfigs[WaitCfgWriteBlocked].pHandles = waitBlockedHandles;
+        waitConfigs[WaitCfgWriteBlocked].handleCount = 1;
+        waitConfigs[WaitCfgWriteBlocked].waitTimeout = INFINITE;
+
+        // If the socket blocks, the data to be sent remains in sendBuf, and the
+        // remaining data size is held here.  We can't receive when the socket
+        // has blocked.
+        unsigned long remainingSendSize{0};
 
         bool continueReading{true};
         do
         {
-            switch(::WaitForMultipleObjects(waitHandleCount, waitHandles, FALSE, waitTimeout))
+            std::size_t waitCfg{WaitCfgWriteNotBlocked};
+            if(remainingSendSize)
+                waitCfg = WaitCfgWriteBlocked;
+
+            switch(::WaitForMultipleObjects(waitConfigs[waitCfg].handleCount,
+                waitConfigs[waitCfg].pHandles, FALSE,
+                waitConfigs[waitCfg].waitTimeout))
             {
                 case WAIT_OBJECT_0: // Socket
                 {
@@ -851,6 +987,9 @@ int main(int argc, char **argv)
                     if(socket.enumNetworkEvents(socketEvent, &netEvents) == SOCKET_ERROR)
                         throw WinError{"Failed to get network events from socket", ::WSAGetLastError()};
 
+                    // FD_READ is "level-triggered", i.e. we don't have to
+                    // ensure we read all available data.  Read until we get a
+                    // complete TLS message and emit it.
                     if(netEvents.lNetworkEvents & FD_READ)
                     {
                         // Read and forward to stdout
@@ -880,6 +1019,20 @@ int main(int argc, char **argv)
                         // message.
                         while(pMsg && msgLen > 0 && !receivedData.empty());
                     }
+                    // FD_WRITE is "edge-triggered", it only triggers when a
+                    // write previously blocked, and writing is now possible
+                    // again.
+                    if(netEvents.lNetworkEvents & FD_WRITE)
+                    {
+                        // Socket is writable, if data are queued, send them.
+                        // If we send everything, we'll start listening to
+                        // stdin again (remainingSendSize becomes 0)
+                        if(remainingSendSize)
+                        {
+                            remainingSendSize = sendRemainingData(socket,
+                                sendBuf, remainingSendSize);
+                        }
+                    }
                     if(netEvents.lNetworkEvents & FD_CLOSE)
                     {
                         continueReading = false;
@@ -888,23 +1041,31 @@ int main(int argc, char **argv)
                 }
                 case WAIT_OBJECT_0 + 1: // stdin
                 {
+                    sendBuf.setMsgSize(sizes.cbMaximumMessage);
                     DWORD readSize{};
-                    if(!::ReadFile(waitHandles[1], sendBuf.msgBuf(),
+                    if(!::ReadFile(stdinFile, sendBuf.msgBuf(),
                         sendBuf.msgSize(), &readSize, nullptr))
                     {
                         throw WinError{"Failed to read from stdin", ::GetLastError()};
                     }
                     sendBuf.setMsgSize(readSize);
-                    syncEncryptSend(secItf, socket, secureCtxt, sendBuf);
-                    sendBuf.setMsgSize(sizes.cbMaximumMessage);
+                    // If the socket would block, remainingSendSize becomes
+                    // nonzero, so we hold the data in sendBuf and stop
+                    // listening to stdin
+                    remainingSendSize = syncEncryptSend(secItf, socket,
+                        secureCtxt, sendBuf);
                     break;
                 }
                 case WAIT_TIMEOUT:  // peek stdin pipe
                 {
+                    // For pipe input, it's important to keep looping here until
+                    // no data remain (or until the socket would block).  When
+                    // we return, it will be another 100ms before we check the
+                    // pipe again.
                     DWORD readSize{};
                     do
                     {
-                        if(!PeekNamedPipe(waitHandles[1], nullptr, 0, nullptr,
+                        if(!PeekNamedPipe(stdinFile, nullptr, 0, nullptr,
                             &readSize, nullptr))
                         {
                             throw WinError{"Failed to check for input on stdin", ::GetLastError()};
@@ -913,17 +1074,18 @@ int main(int argc, char **argv)
                         // length (then check again).
                         if(readSize)
                         {
-                            if(!ReadFile(waitHandles[1], sendBuf.msgBuf(),
+                            sendBuf.setMsgSize(sizes.cbMaximumMessage);
+                            if(!ReadFile(stdinFile, sendBuf.msgBuf(),
                                 sendBuf.msgSize(), &readSize, nullptr))
                             {
                                 throw WinError{"Failed to read from stdin", ::GetLastError()};
                             }
                             sendBuf.setMsgSize(readSize);
-                            syncEncryptSend(secItf, socket, secureCtxt, sendBuf);
-                            sendBuf.setMsgSize(sizes.cbMaximumMessage);
+                            remainingSendSize = syncEncryptSend(secItf, socket,
+                                secureCtxt, sendBuf);
                         }
                     }
-                    while(readSize > 0);
+                    while(readSize > 0 && remainingSendSize == 0);
                     break;
                 }
                 default:

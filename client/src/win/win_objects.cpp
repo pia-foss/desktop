@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win_objects.cpp")
 
 #include "win_objects.h"
 #include "win_resources.h"
-#include "win/win_util.h"
+#include <common/src/win/win_util.h>
 
 #include <QPainter>
 #include <QPixmap>

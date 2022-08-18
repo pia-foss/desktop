@@ -167,11 +167,6 @@ Item {
     active: Daemon.settings.method === "openvpn" && NativeHelpers.reinstallTapStatus === 'reboot'
   }
 
-  RatingRequestNotificationStatus {
-    id: ratingRequest
-  }
-
-
   // The WinTUN adapter is missing (Windows only)
   //
   // Similar to the TAP adapter error, but for WinTUN, which is used for WireGuard.
@@ -246,6 +241,18 @@ Item {
             NativeHelpers.macosProductVersion.startsWith('12.')
   }
 
+  // Notification for the "missing iptables" error.
+  // If more errors are added to the vpnSupportErrors array consider 
+  // turning it into a map and checking the content of it.
+  // Right now every error added to the array trigger this notification
+   NotificationStatus {
+    id: vpnMissingIptables
+    message: uiTr("Iptables is not installed.")
+    tipText: uiTr("Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.")
+    severity: severities.error
+	active: Daemon.state.vpnSupportErrors.length > 0
+  }
+
   // Notification for the OpenVPN "authorization failure" error.
   // Although this OpenVPN error has a very specific meaning, for PIA this does
   // not mean that the user's credentials are incorrect.  For example, if the
@@ -314,32 +321,6 @@ Item {
     // Daemon reports these two conditions indicating problems in hnsd.  We show
     // the same warning for both of them since they overlap.
     active: Daemon.state.hnsdFailing > 0 || Daemon.state.hnsdSyncFailure > 0
-  }
-
-  NotificationStatus {
-    id: connectionProblem
-    message: uiTr("There may be a problem with the connection.")
-    tipText: uiTr("Connected to the VPN, but can't reach the Internet.  Check Network and Connection settings.")
-    severity: severities.warning
-    links: [{
-      text: uiTr("Settings"),
-      clicked: function() {showNetworkPage()}
-    }]
-    dismissible: false
-    // Only show this if the user is connected to an auto-safe region.  If the
-    // current region isn't auto-safe, that usually indicates that it's somehow
-    // unhealthy, and our connectivity test probably isn't reliable.  Turkey is
-    // currently affected by this, it's not auto-safe because the PIA API is not
-    // reachable (even via the proxy).
-    //
-    // Problems were found with this warning, in some cases the API is not
-    // reachable for up to ~60 seconds following connection, possibly due to
-    // Qt's internal DNS cache.  For now, disabling this warning in general
-    // releases, test it in beta.
-    active: Client.features.beta &&
-            Daemon.state.connectionProblem && Daemon.state.connectedConfig &&
-            Daemon.state.connectedConfig.vpnLocation &&
-            Daemon.state.connectedConfig.vpnLocation.autoSafe
   }
 
   NotificationStatus {
@@ -593,6 +574,28 @@ Item {
     }
   }
 
+  RatingRequestNotificationStatus {
+    id: ratingRequest
+  }
+
+  NotificationStatus {
+    id: surveyLink
+    active: Daemon.settings.successfulSessionCount >= 15 && Daemon.settings.surveyRequestEnabled
+    severity: severities.info
+    message: "Want to help make PIA better? Let us know how we can improve!"
+    dismissible: true
+     links: [{
+       text: "Take The Survey",
+       clicked: function() {
+         Qt.openUrlExternally("https://privateinternetaccess.typeform.com/to/MtRzgnUB")
+         dismiss()
+       }
+     }]
+    function dismiss() {
+      Daemon.applySettings({surveyRequestEnabled: false})
+    }
+  }
+
   function updateTestMessage(message) {
     testAppMessage.appMessage = message
     testAppMessage.dismissed = false
@@ -655,10 +658,10 @@ Item {
     splitTunnelUninstalled,
     splitTunnelReboot,
     splitTunnelMonterey,
+    vpnMissingIptables,
     authFailure,
     dnsConfigFailed,
     hnsdFailing,
-    connectionProblem,  // Could be caused by DNS-related errors above
     // Possibly unexpected conditions
     winIsElevated, // May cause other issues, list first
     killswitchEnabled,
@@ -675,7 +678,8 @@ Item {
     accountTokenNotAvailable,
     changelogAvailable,
     invalidClientExit,
-    ratingRequest
+    ratingRequest,
+    surveyLink,
   ]
 
   // This is the worst severity among any active notification.  If no

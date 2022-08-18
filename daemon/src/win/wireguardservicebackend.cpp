@@ -16,17 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("wireguardservicebackend.cpp")
 
 #include "wireguardservicebackend.h"
-#include "configwriter.h"
-#include "path.h"
-#include "exec.h"
+#include <kapps_core/src/configwriter.h>
+#include <common/src/builtin/path.h>
+#include <common/src/exec.h>
 #include "win_servicestate.h"
 #include "../../extras/installer/win/service_inl.h"
-#include "win/win_util.h"
-#include "win/win_daemon.h" // WinNetworkAdapter
+#include <common/src/win/win_util.h>
+#include "win_daemon.h" // WinNetworkAdapter
+#include <kapps_core/src/win/win_error.h>
 #include <QElapsedTimer>
 
 #include <WS2tcpip.h>   // inet_pton()
@@ -97,7 +98,7 @@ namespace
     }
 
     // Write an IPv4 address
-    ConfigWriter &operator<<(ConfigWriter &w, const in_addr &addr4)
+    kapps::core::ConfigWriter &operator<<(kapps::core::ConfigWriter &w, const in_addr &addr4)
     {
         char address[INET_ADDRSTRLEN]{};
         if(!::inet_ntop(AF_INET, &addr4, address, sizeof(address)))
@@ -111,7 +112,7 @@ namespace
     }
 
     // Write a WG peer endpoint
-    ConfigWriter &operator<<(ConfigWriter &w, const decltype(wg_peer::endpoint) &endpoint)
+    kapps::core::ConfigWriter &operator<<(kapps::core::ConfigWriter &w, const decltype(wg_peer::endpoint) &endpoint)
     {
         switch(endpoint.addr.sa_family)
         {
@@ -130,7 +131,7 @@ namespace
     }
 
     // Write a WG allowed IP
-    ConfigWriter &operator<<(ConfigWriter &w, const wg_allowedip &ip)
+    kapps::core::ConfigWriter &operator<<(kapps::core::ConfigWriter &w, const wg_allowedip &ip)
     {
         switch(ip.family)
         {
@@ -145,6 +146,12 @@ namespace
                 w.invalidate();
                 break;
         }
+        return w;
+    }
+
+    kapps::core::ConfigWriter &operator<<(kapps::core::ConfigWriter &w, const QString &str)
+    {
+        w << str.toStdString();
         return w;
     }
 
@@ -225,7 +232,7 @@ namespace
             return;
         }
 
-        WinErrTracer connectError{::GetLastError()};
+        kapps::core::WinErrTracer connectError{::GetLastError()};
         if(connectError.code() != ERROR_PIPE_BUSY)
         {
             qWarning() << "Failed to connect to pipe" << _path << "after"
@@ -419,11 +426,11 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
 
     // Write the config file
     {
-        ConfigWriter conf{Path::WireguardConfigFile};
+        kapps::core::ConfigWriter conf{Path::WireguardConfigFile};
         auto endl{conf.endl};
 
         conf << "[Interface]" << endl;
-        conf << "Address = " << peerIpNet.first.toString() << "/" << peerIpNet.second << endl;
+        conf << "Address = " << peerIpNet.first.toString().toStdString() << "/" << peerIpNet.second << endl;
 
         // Unimplemented/ignored flags:
         // - WGDEVICE_REPLACE_PEERS - no effect, this is initial configuration
@@ -432,7 +439,7 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
         Q_ASSERT(!(wgDev.flags & WGDEVICE_HAS_PUBLIC_KEY));
         Q_ASSERT(!(wgDev.flags & WGDEVICE_HAS_FWMARK));
         if(wgDev.flags & WGDEVICE_HAS_PRIVATE_KEY)
-            conf << "PrivateKey = " << wgKeyToB64(wgDev.private_key) << endl;
+            conf << "PrivateKey = " << wgKeyToB64(wgDev.private_key).toStdString() << endl;
 
         if(wgDev.flags & WGDEVICE_HAS_LISTEN_PORT)
             conf << "ListenPort = " << wgDev.listen_port << endl;
@@ -452,7 +459,7 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
             conf << "Endpoint = " << pPeer->endpoint << endl;
 
             if(pPeer->flags & WGPEER_HAS_PUBLIC_KEY)
-                conf << "PublicKey = " << wgKeyToB64(pPeer->public_key) << endl;
+                conf << "PublicKey = " << wgKeyToB64(pPeer->public_key).toStdString() << endl;
 
             if(pPeer->flags & WGPEER_HAS_PERSISTENT_KEEPALIVE_INTERVAL)
             {

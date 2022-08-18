@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("networkmonitor.cpp")
 
 #include "networkmonitor.h"
@@ -41,10 +41,10 @@ QString NetworkConnection::parseSsidWithCodec(const char *data, std::size_t len,
 NetworkConnection::NetworkConnection(const QString &networkInterface,
                                      Medium medium,
                                      bool defaultIpv4, bool defaultIpv6,
-                                     const Ipv4Address &gatewayIpv4,
-                                     const Ipv6Address &gatewayIpv6,
-                                     std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4,
-                                     std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6,
+                                     const kapps::core::Ipv4Address &gatewayIpv4,
+                                     const kapps::core::Ipv6Address &gatewayIpv6,
+                                     std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4,
+                                     std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6,
                                      unsigned mtu4, unsigned mtu6)
     : _networkInterface{networkInterface}, _medium{medium},
       _wifiAssociated{false}, _wifiEncrypted{false}, _wifiSsid{},
@@ -94,26 +94,25 @@ bool NetworkConnection::operator<(const NetworkConnection &other) const
     return false;
 }
 
-void NetworkConnection::trace(QDebug &dbg) const
+void NetworkConnection::trace(std::ostream &os) const
 {
-    QDebugStateSaver save{dbg};
-    dbg.nospace() << "{" << networkInterface() << ": " << traceEnum(medium());
+    os << "{" << networkInterface() << ": " << traceEnum(medium());
 
     if(medium() == Medium::WiFi)
     {
         if(wifiEncrypted())
-            dbg << " enc.";
+            os << " enc.";
         if(!wifiSsid().isEmpty())
-            dbg << " ssid:" << wifiSsid();
+            os << " ssid:" << wifiSsid();
     }
 
     if(defaultIpv4())
-        dbg << " def4";
+        os << " def4";
     if(defaultIpv6())
-        dbg << " def6";
+        os << " def6";
 
     // Gateways and addresses aren't traced in the short summary
-    dbg << "}";
+    os << "}";
 }
 
 bool NetworkConnection::tryParseWifiSsid(const char *data, std::size_t len)

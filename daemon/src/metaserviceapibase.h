@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("metaserviceapibase.h")
 
 #ifndef METASERVICEAPIBASE_H
 #define METASERVICEAPIBASE_H
 
-#include "settings/daemonstate.h"
-#include "apibase.h"
+#include "model/state.h"
+#include <common/src/apibase.h>
 
 // ApiBase that generates base URIs from "meta" services in the modern servers
 // list.
@@ -60,7 +60,7 @@ public:
     // - pDynamicBaseCA - The CA to use to validate certificates returned by
     //   'meta' servers
     // - fixedBaseUris - fixed base URIs to include after the meta service bases
-    MetaServiceApiBase(const DaemonState &state, QString dynamicBasePath,
+    MetaServiceApiBase(const StateModel &state, QString dynamicBasePath,
                        std::shared_ptr<PrivateCA> pDynamicBaseCA,
                        std::vector<QString> fixedBaseUris);
 
@@ -74,7 +74,7 @@ public:
 private:
     QString _dynamicBasePath;
     std::shared_ptr<PrivateCA> _pDynamicBaseCA;
-    const DaemonState &_state;
+    const StateModel &_state;
     std::vector<QString> _fixedBaseUris;
 };
 

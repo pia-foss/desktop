@@ -16,38 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#line HEADER_FILE("win/win.h")
-
-#ifndef WIN_H
-#define WIN_H
 #pragma once
-
-// Avoid including Windows and Winsock headers directly from other headers -
-// they're sensitive to the exact order in which they're referenced, and they're
-// sensitive to the NO* macros defined by builtin/common.h.  Instead, include
-// win.h to get these headers in the exact order that works throughout the
-// client.
-//
-// If you need APIs that are currently excluded by a NO* macro in
-// builtin/common.h, just remove that macro there.  (Don't try to undefine it in
-// your file and re-include Windows.h, etc.)
-
-#undef _WINSOCKAPI_
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <Windows.h>
-#include <objbase.h>
-#include <ws2ipdef.h>
-#include <iphlpapi.h>
-#include <fwpvi.h>
-#include <fwpmu.h>
-
-#include <VersionHelpers.h>
+#include <kapps_core/src/winapi.h>
 
 #pragma comment(lib, "fwpuclnt.lib")
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "rpcrt4.lib")
-
-#endif // WIN_H

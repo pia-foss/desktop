@@ -5,8 +5,6 @@ require "time"
 
 # Set the crowdin parameters in .buildenv
 #CROWDIN_API=
-#CROWDIN_PROJECTID=
-#CROWDIN_FILEID=
 
 projectId = ENV["CROWDIN_PROJECTID"] || '485053'
 apiKey = ENV["CROWDIN_API"]
@@ -23,13 +21,13 @@ fileId = ENV["CROWDIN_FILEID"] || '741'
 @gitlab_mr_id = ENV["CI_MERGE_REQUEST_ID"]
 @gitlab_project_id = ENV["CI_MERGE_REQUEST_PROJECT_ID"]
 
-task :tspull => [ :export ] do |t|
-  if(apiKey && projectId)
-    puts "Using crowdin project ID #{projectId}"
-  end
-end
+# To pull translations:
+# 1. build the 'tools' target on Linux (with libthai-dev installed)
+# 2. download the translations archive from CrowdIn
+# 3. run:
+#    ./out/pia_<target>/tools/bin/import_translations.sh "<path>/pia-desktop (translations).zip"
 
-task :tspush => [ :export ] do |t| 
+task :tspush => [ :export ] do |t|
   if(apiKey && projectId)
     puts "Using crowdin project ID #{projectId}"
 
@@ -66,14 +64,14 @@ task :tspush => [ :export ] do |t|
     response = https.request(request)
     puts response.read_body
   else
-    puts "ERROR: Missing crowdin API and ID."
+    raise "Set CROWDIN_API to the API token for CrowdIn."
   end
 end
 
 def build_index(doc)
   contextItems = doc.xpath("//context")
   index = {}
-  
+
   contextItems.each do |item|
     contextName = item.xpath(".//name").text
     sourceItems = item.xpath(".//source")
@@ -106,7 +104,7 @@ def diff_ts(newDoc, oldDoc)
   out += "New in LOCAL: \n"
   out += newKeys.difference(oldKeys).pretty_inspect
   out += "Present in REMOTE but missing in LOCAL: \n"
-  out += oldKeys.difference(newKeys).pretty_inspect 
+  out += oldKeys.difference(newKeys).pretty_inspect
   out += "\n\nTSDIFFOUT Generated #{timestamp} \n"
   out += "```"
 
@@ -143,7 +141,7 @@ def find_comment(marker)
 
   response = https.request(request)
   result = JSON.parse(response.read_body)
-  result.each do |comment| 
+  result.each do |comment|
     if comment["body"].include?(marker)
       return comment["id"]
     end
@@ -183,8 +181,8 @@ def gitlab_create_or_replace(content, marker)
 end
 
 task :tsdiff => [ :export ] do |t|
-  if apiKey.nil? 
-    puts "Missing CROWDIN_API. Skipping tsdiff"
+  if apiKey.nil?
+    raise "Set CROWDIN_API to the API token for CrowdIn."
   else
     require "nokogiri"
     require "pp"
@@ -203,20 +201,23 @@ task :tsdiff => [ :export ] do |t|
     request["Authorization"] = "Bearer #{apiKey}"
 
     response = https.request(request)
-    result = JSON.parse(response.read_body)
+    if response.code != '200'
+      puts "CrowdIn API returned #{response.code}, skipping tsdiff"
+    else
+      result = JSON.parse(response.read_body)
 
-    oldUrl = result["data"]["url"]
+      oldUrl = result["data"]["url"]
 
-    out = diff_ts(Nokogiri::XML(newContent), Nokogiri::XML(URI.open(oldUrl)))
+      out = diff_ts(Nokogiri::XML(newContent), Nokogiri::XML(Net::HTTP.get(URI(oldUrl))))
 
-    out_string = out[0]
-    diff_count = out[1]
-    puts out_string
+      out_string = out[0]
+      diff_count = out[1]
+      puts out_string
 
-
-    if ENV["CI_MERGE_REQUEST_ID"]
-      puts "Skipping gitlab comment..."
-      # gitlab_create_or_replace(out_string, "TSDIFFOUT")
+      if ENV["CI_MERGE_REQUEST_ID"]
+        puts "Skipping gitlab comment..."
+        # gitlab_create_or_replace(out_string, "TSDIFFOUT")
+      end
     end
   end
 end

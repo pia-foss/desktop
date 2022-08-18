@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("window.cpp")
 
 #include "window.h"
@@ -25,7 +25,7 @@
 #include <QGuiApplication>
 
 #ifdef Q_OS_MAC
-#include "mac/mac_accessibility.h"
+#include "../mac/mac_accessibility.h"
 #endif
 
 namespace NativeAcc {

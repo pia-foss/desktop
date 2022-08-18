@@ -8,7 +8,7 @@ Precompiled binaries are included here to make it easier to get started with dev
 
 The following components are included:
 
-* OpenSSL (libcrypto/libssl - built by openvpn-build)
+* OpenSSL (libcrypto/libssl)
 * OpenVPN (pia-openvpn)
   * Additional libraries on Windows for OpenVPN - lzo2, libpkcs11-helper-1
 * hnsd (pia-hnsd, no longer shipped since 2.2)

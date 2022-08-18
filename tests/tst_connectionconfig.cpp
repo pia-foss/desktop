@@ -16,7 +16,7 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #include <QtTest>
 
 #include "daemon/src/vpn.h"
@@ -43,7 +43,7 @@ private slots:
     void testGenDnsServersHdns()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         settings.overrideDNS(QStringLiteral("hdns"));
@@ -56,7 +56,7 @@ private slots:
     void testGenDnsServersLocal()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         settings.overrideDNS(QStringLiteral("local"));
@@ -69,7 +69,7 @@ private slots:
     void testGetDnsServersCustom()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         auto customDns = QStringList{"1.1.1.1", "8.8.8.8"};
@@ -85,7 +85,7 @@ private slots:
     void testGetDnsServersExisting()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         auto emptyList = QStringList{};
@@ -98,7 +98,7 @@ private slots:
     void testMethodForcedByAuthDefault()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         // Default (OpenVPN)
@@ -111,7 +111,7 @@ private slots:
     void testMethodForcedByAuthWireguard()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         settings.method(QStringLiteral("wireguard"));
@@ -125,7 +125,7 @@ private slots:
     void testMethodForcedByAuthWireguardNoToken()
     {
         DaemonSettings settings;
-        DaemonState state;
+        StateModel state;
         DaemonAccount account;
 
         // Wanted Wireguard but forced to OpenVPN as no valid token

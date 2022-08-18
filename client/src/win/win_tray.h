@@ -16,18 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win/win_tray.h")
 
 #ifndef WIN_TRAY_H
 #define WIN_TRAY_H
 
-#include "nativetray.h"
+#include "../nativetray.h"
 #include "win_objects.h"
 #include "win_scaler.h"
-#include "win/win_messagewnd.h"
-#include "win/win_util.h"
-#include "brand.h"
+#include <common/src/win/win_messagewnd.h>
+#include <common/src/win/win_util.h>
+#include <brand.h>
 
 #include <QAbstractNativeEventFilter>
 #include <QTimer>

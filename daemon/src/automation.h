@@ -19,15 +19,15 @@
 #ifndef AUTOMATION_H
 #define AUTOMATION_H
 
-#include "common.h"
-#include "settings/automation.h"
+#include <common/src/common.h>
+#include <common/src/settings/automation.h>
 #include "networkmonitor.h"
 
 // Automation applies a set of rules to the current network detected by
 // NetworkMonitor.  When a rule is triggered, it's emitted from ruleTriggered().
 // Daemon then determines if the trigger has any effect (e.g. "connect" while
 // already connected has no effect), then applies the action and updates
-// DaemonState.
+// StateModel.
 class Automation : public QObject
 {
     Q_OBJECT

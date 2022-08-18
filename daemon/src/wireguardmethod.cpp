@@ -16,16 +16,17 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("wireguardmethod.cpp")
 
 #include "wireguardmethod.h"
 #include "daemon.h"
 #include "apiclient.h"
 #include "wireguardbackend.h"
-#include "exec.h"
-#include "openssl.h"
-#include "path.h"
+#include "brand.h"
+#include <common/src/exec.h>
+#include <common/src/openssl.h>
+#include <common/src/builtin/path.h>
 #include "pathmtu.h"
 #include <QTimer>
 #include <QRandomGenerator>
@@ -33,27 +34,22 @@
 
 #if defined(Q_OS_LINUX)
     #include "linux/wireguardkernelbackend.h"
-    #include "linux/linux_fwmark.h"
-    #include "linux/linux_routing.h"
+    #include <kapps_net/src/linux/linux_fwmark.h>
+    #include <kapps_net/src/linux/linux_routing.h>
 #endif
 
 #if defined(Q_OS_WIN)
-    #include "win/win_daemon.h"
+    #include <kapps_net/src/win/win_routemanager.h>
+    #include <kapps_core/src/win/win_error.h>
     #include "win/wireguardservicebackend.h"
     #include "win/win_interfacemonitor.h"
-    #include "win/win_util.h"
+    #include <common/src/win/win_util.h>
 #endif
 
 #if defined(Q_OS_UNIX)
     #include "posix/wireguardgobackend.h"
     #include "posix/posix_mtu.h"
 #endif
-
-// embeddable-wg-library - C header
-extern "C"
-{
-    #include <wireguard.h>
-}
 
 namespace
 {
@@ -222,6 +218,11 @@ private:
     virtual void networkChanged() override;
 
 private:
+#if defined(KAPPS_CORE_OS_LINUX)
+    kapps::net::Routing _routing;
+    kapps::net::Fwmark _fwmark;
+#endif
+
     // Authentication API request - set once the request is started (remains set
     // after that).
     Async<void> _pAuthRequest;
@@ -265,8 +266,12 @@ private:
 Executor WireguardMethod::_executor{CURRENT_CATEGORY};
 
 WireguardMethod::WireguardMethod(QObject *pParent, const OriginalNetworkScan &netScan)
-    : VPNMethod{pParent, netScan}, _routesUp{false}, _noRxIntervals{0},
-      _lastReceivedBytes{0}
+    : VPNMethod{pParent, netScan},
+#if defined(KAPPS_CORE_OS_LINUX)
+      _routing{BRAND_CODE},
+      _fwmark{BRAND_LINUX_FWMARK_BASE},
+#endif
+      _routesUp{false}, _noRxIntervals{0}, _lastReceivedBytes{0}
 {
     _firstHandshakeTimer.setInterval(msec(firstHandshakeInterval));
     connect(&_firstHandshakeTimer, &QTimer::timeout, this,
@@ -332,7 +337,7 @@ void WireguardMethod::deleteInterface()
 
     // Remove routing rule for Wireguard (this is safe even if no rule exists)
     _executor.bash(QStringLiteral("ip rule del not from all fwmark %1 lookup %2")
-                   .arg(Fwmark::wireguardFwmark).arg(Routing::wireguardTable));
+                   .arg(_fwmark.wireguardFwmark()).arg(QString::fromStdString(_routing.wireguardTable())));
 
     // Delete the VPN route
     // This route is only created on Linux when _connectionConfig.setDefaultRoute()
@@ -381,7 +386,7 @@ auto WireguardMethod::parseAuthResult(const QJsonDocument &result)
     if(resultStatus != QStringLiteral("OK"))
     {
         qWarning() << "Server rejected key, status:" << resultStatus;
-        qWarning().noquote() << "Server response:" << result.toJson();
+        qWarning() << "Server response:" << result;
         throw Error{HERE, Error::Code::WireguardAddKeyFailed};
     }
 
@@ -461,7 +466,7 @@ void WireguardMethod::createInterface(const WireguardKeypair &clientKeypair,
 #if defined(Q_OS_LINUX)
     // Set the fwmark, this is Linux-specific.
     wgDev.flags = static_cast<wg_device_flags>(wgDev.flags | WGDEVICE_HAS_FWMARK);
-    wgDev.fwmark = Fwmark::wireguardFwmark;
+    wgDev.fwmark = _fwmark.wireguardFwmark();
 #endif
 
     if(_connectionConfig.localPort())
@@ -599,7 +604,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     const OriginalNetworkScan &netScan = originalNetwork();
 
     const auto &peerIpNet = authResult._peerIpNet;
-    _dnsServers = _connectionConfig.getDnsServers();
+    if(_connectionConfig.setDefaultDns())
+        _dnsServers = _connectionConfig.getDnsServers();
 
     // Determine the maximum tunnel MTU before setting up the tunnel interface.
     // The method used to find the physical interface on Linux doesn't simulate
@@ -628,8 +634,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // This rule sends all normal packets through the Wireguard interface, effectively setting the Wireguard interface as the default route
         // All wireguard packets (i.e those going to the wg endpoint) will fall back to the pre-existing gateway and so out the physical interface
         _executor.bash(QStringLiteral("ip rule add not fwmark %1 lookup %2 pri %3")
-            .arg(Fwmark::wireguardFwmark).arg(Routing::wireguardTable).arg(Routing::Priorities::wireguard));
-        _executor.bash(QStringLiteral("ip route replace default dev %1 table %2").arg(WireguardBackend::interfaceName, Routing::wireguardTable));
+            .arg(_fwmark.wireguardFwmark()).arg(QString::fromStdString(_routing.wireguardTable())).arg(kapps::net::Routing::Priorities::wireguard));
+        _executor.bash(QStringLiteral("ip route replace default dev %1 table %2").arg(WireguardBackend::interfaceName).arg(QString::fromStdString(_routing.wireguardTable())));
     }
     else
     {
@@ -637,7 +643,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         _executor.bash(QStringLiteral("ip route add default dev %1 metric 32000").arg(WireguardBackend::interfaceName));
         // Create VPN route (without this, wireguard packets seem to end up on the wireguard interface itself...)
         if(netScan.ipv4Valid())
-            _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+            _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), QString::fromStdString(netScan.gatewayIp())));
         else
         {
             // This is possible in rare cases - if the network connection is
@@ -660,7 +666,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     {
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLocalDNS())
+            if(!kapps::core::Ipv4Address{dnsServer.toStdString()}.isLocalDNS())
                 _executor.bash(QStringLiteral("ip route add %1 dev %2").arg(dnsServer, deviceName));
         }
 
@@ -689,7 +695,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     }
 
     if(netScan.ipv4Valid())
-        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), QString::fromStdString(netScan.gatewayIp())));
     else
     {
         // As on Linux, this is possible in rare cases if the connection races
@@ -706,7 +712,7 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         // Route DNS through the tunnel.
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLocalDNS())
+            if(!kapps::core::Ipv4Address{dnsServer.toStdString()}.isLocalDNS())
                 _executor.bash(QStringLiteral("route -q -n add -inet %1 -interface %2").arg(dnsServer, deviceName));
         }
         setupPosixDNS(deviceName, _dnsServers);
@@ -714,11 +720,51 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
 #elif defined(Q_OS_WIN)
     auto pWinAdapter = std::static_pointer_cast<WinNetworkAdapter>(_pNetworkAdapter);
 
+    // MTU
+    //
+    // The WireGuard service supports setting the MTU, but it doesn't work; it
+    // always fails with "the parameter is incorrect".  Do it manually instead.
+    //
+    // If the MTU can't be set, we do not raise an error - proceed with the
+    // connection without setting the MTU.
+    //
+    // Retrying won't fix this error; if we throw an error we'd just constantly
+    // retry due to this failure.  We might add an in-client notification if it
+    // fails a lot.
+    unsigned mtu = _connectionConfig.mtu();
+    if(mtu)
+    {
+        MIB_IPINTERFACE_ROW tunItf{};
+        InitializeIpInterfaceEntry(&tunItf);
+        tunItf.Family = AF_INET;
+        tunItf.InterfaceLuid.Value = pWinAdapter->luid();
+        auto getResult = GetIpInterfaceEntry(&tunItf);
+        if(getResult != NO_ERROR)
+        {
+            qWarning() << "Unable to get interface state to set MTU to" << mtu
+                << "-" << kapps::core::WinErrTracer{getResult};
+        }
+        else
+        {
+            tunItf.NlMtu = mtu;
+            auto setResult = SetIpInterfaceEntry(&tunItf);
+            if(setResult != NO_ERROR)
+            {
+                qWarning() << "Unable to set interface MTU to" << mtu << "-"
+                    << kapps::core::WinErrTracer{setResult};
+            }
+            else
+            {
+                qInfo() << "Set interface MTU to" << mtu;
+            }
+        }
+    }
+
     // Routing
-    WinRouteManager routeManager;
+    kapps::net::WinRouteManager routeManager;
     // A zero gateway indicates an on-link route
-    QString onLink = QStringLiteral("0.0.0.0");
-    QString luidStr = QString::number(pWinAdapter->luid());
+    std::string onLink{"0.0.0.0"};
+    std::string luidStr{qs::format("%", pWinAdapter->luid())};
 
     // The WireGuard service sets up routing into the VPN tunnel by default.  If
     // we're not using the VPN as the default route, set that up manually.
@@ -726,14 +772,14 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     if(!_connectionConfig.setDefaultRoute())
     {
         // Remove VPN routes created by the service backend (as we don't want VPN to be the default)
-        routeManager.removeRoute4(QStringLiteral("0.0.0.0/1"), onLink, luidStr);
-        routeManager.removeRoute4(QStringLiteral("128.0.0.0/1"), onLink, luidStr);
+        routeManager.removeRoute4("0.0.0.0/1", onLink, luidStr);
+        routeManager.removeRoute4("128.0.0.0/1", onLink, luidStr);
 
         // Create a low-priority default route for the VPN endpoint (so opt-in traffic can bind to it)
-        routeManager.addRoute4(QStringLiteral("0.0.0.0/0"), onLink, luidStr, 32000);
+        routeManager.addRoute4("0.0.0.0/0", onLink, luidStr, 32000);
 
         // Route virtual server IP (ping endpoint) through VPN
-        routeManager.addRoute4(_pingEndpointAddress.toString(), onLink, luidStr);
+        routeManager.addRoute4(_pingEndpointAddress.toString().toStdString(), onLink, luidStr);
     }
 
     // Reset DNS on this interface (even if we're not overriding the system
@@ -743,13 +789,13 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
         "dnsservers", nameParam, "source=static", "address=none", "validate=no",
         "register=both"});
 
-    if(_connectionConfig.setDefaultDns())
+    if(!_dnsServers.isEmpty())
     {
         // Route DNS through the tunnel
         for(const auto &dnsServer : _dnsServers)
         {
-            if(!Ipv4Address{dnsServer}.isLocalDNS())
-                routeManager.addRoute4(dnsServer, onLink, luidStr);
+            if(!kapps::core::Ipv4Address{dnsServer.toStdString()}.isLocalDNS())
+                routeManager.addRoute4(dnsServer.toStdString(), onLink, luidStr);
         }
         // Add each DNS server
         for(const auto &dns : _dnsServers)
@@ -1181,7 +1227,7 @@ void WireguardMethod::networkChanged()
         // Delete old VPN host route
         _executor.bash(QStringLiteral("route delete %1").arg(_vpnHost.toString()));
         // Create new one
-        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+        _executor.bash(QStringLiteral("route -q -n add -inet %1 -gateway %2").arg(_vpnHost.toString(), QString::fromStdString(netScan.gatewayIp())));
 #elif defined(Q_OS_LINUX)
         // We only need to create the VPN route on Linux when the VPN does not have the default route
         if(!_connectionConfig.setDefaultRoute())
@@ -1189,7 +1235,7 @@ void WireguardMethod::networkChanged()
             // Delete old VPN host route
             _executor.bash(QStringLiteral("ip route delete %1").arg(_vpnHost.toString()));
             // Create new one
-            _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), netScan.gatewayIp()));
+            _executor.bash(QStringLiteral("ip route add %1 via %2").arg(_vpnHost.toString(), QString::fromStdString(netScan.gatewayIp())));
         }
 #endif
     }
@@ -1222,9 +1268,11 @@ void WireguardMethod::cleanup()
     WireguardGoBackend::cleanup();
 #endif
 #ifdef Q_OS_LINUX
+    kapps::net::Fwmark fwmark{BRAND_LINUX_FWMARK_BASE};
+    kapps::net::Routing routing{BRAND_CODE};
     // Remove routing rule for Wireguard (this is safe even if no rule exists)
     _executor.bash(QStringLiteral("ip rule del not from all fwmark %1 lookup %2")
-                   .arg(Fwmark::wireguardFwmark).arg(Routing::wireguardTable));
+                   .arg(fwmark.wireguardFwmark()).arg(QString::fromStdString(routing.wireguardTable())));
 
     WireguardKernelBackend::cleanup();
 #endif

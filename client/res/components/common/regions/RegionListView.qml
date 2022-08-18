@@ -451,7 +451,7 @@ Rectangle {
     // Filter by the search term if present
     if(searchTerm) {
       filteredDedicatedIps = filteredDedicatedIps.filter(function(dip) {
-        return matchesSearchTerm(Daemon.getLocationName(dip))
+        return matchesSearchTerm(Client.getRegionAutoName(dip.id))
       })
     }
 
@@ -482,27 +482,32 @@ Rectangle {
       if(filteredLocations.length <= 0)
         continue  // Nothing to display in this country
 
-      // If the country contains exactly one region, just include it if the
-      // region's name matches.  Don't look at the country name, because we
-      // don't display it for single regions.
-      if(filteredLocations.length === 1) {
-        if(matchesSearchTerm(Daemon.getLocationName(filteredLocations[0])))
-          filteredCountries.push({locations: filteredLocations})
+      // If the country contains exactly one region, check the country name.
+      // Note that this still considers locations eliminated by regionFilter,
+      // e.g. CA Vancouver is the only CA region with Shadowsocks but we still
+      // display it as "CA Vancouver", not "Canada", since there are other CA
+      // regions in general.
+      //
+      // For single-region countries, don't look at the city name (nested name),
+      // since we do not display it.
+      if(!Daemon.state.shouldNestCountry(countries[i].code)) {
+        if(matchesSearchTerm(Client.getRegionCountryName(filteredLocations[0].id)))
+          filteredCountries.push({code: countries[i].code, locations: filteredLocations})
       }
       // The country contains more than one region.  If the country name
       // matches, include everything.
-      else if(matchesSearchTerm(Daemon.getCountryName(filteredLocations[0].country)))
-        filteredCountries.push({locations: filteredLocations})
+      else if(matchesSearchTerm(Client.getCountryName(countries[i].code)))
+        filteredCountries.push({code: countries[i].code, locations: filteredLocations})
       // The country has more than one region, and the country name doesn't
       // match.  Filter the individual regions.
       else {
         var filteredRegions = filteredLocations.filter(function(loc) {
-          return matchesSearchTerm(Daemon.getLocationName(loc))
+          return matchesSearchTerm(Client.getRegionNestedName(loc.id))
         })
         // If at least one region matched, include the country with the filtered
         // regions
         if(filteredRegions.length > 0)
-          filteredCountries.push({locations: filteredRegions})
+          filteredCountries.push({code: countries[i].code, locations: filteredRegions})
       }
     }
 
@@ -514,16 +519,14 @@ Rectangle {
   }
 
   function countrySortName(country) {
-    if(country.locations.length === 1)
-      return Daemon.getLocationName(country.locations[0]).toLowerCase()
-    return Daemon.getCountryName(country.locations[0].country).toLowerCase()
+    return Client.getCountryName(country.code).toLowerCase()
   }
 
   function sortLocations(locations) {
     var sortedLocations = locations.slice()
     sortedLocations.sort(function(first, second) {
-      var nameComp = localeCompareRegions(Daemon.getLocationName(first).toLowerCase(),
-                            Daemon.getLocationName(second).toLowerCase())
+      var nameComp = localeCompareRegions(Client.getRegionAutoName(first.id).toLowerCase(),
+                            Client.getRegionAutoName(second.id).toLowerCase())
       if(nameComp !== 0)
         return nameComp
       // For dedicated IP regions, the names could be exactly the same if the
@@ -553,7 +556,7 @@ Rectangle {
       // Create new country objects, because these could still be the actual
       // objects from DaemonState.  sortLocations() creates a new array with the
       // sorted locations.
-      countries[i] = {locations: sortLocations(countries[i].locations)}
+      countries[i] = {code: countries[i].code, locations: sortLocations(countries[i].locations)}
     }
 
     return countries
@@ -564,7 +567,7 @@ Rectangle {
     var result = []
     for(var i=0; i<countries.length; ++i) {
       var rlist = countries[i].locations
-      var countryId = rlist[0].country.toLowerCase()
+      var countryId = countries[i].code
       // Single location
       if (rlist.length === 1) {
         result.push({
@@ -682,7 +685,7 @@ Rectangle {
       // DIPs are all single locations
       table.push({country: "dip", location: dipItem.region.id, level: 0,
                   expanded: false, buried: false,
-                  display: Daemon.getLocationName(dipItem.region),
+                  display: Client.getRegionAutoName(dipItem.region.id),
                   regionItem: dipItem})
     }
 
@@ -697,7 +700,7 @@ Rectangle {
         // Country heading
         table.push({country: regionItem.regionCountry, location: '', level: 0,
                     expanded: !countryCollapsed, buried: false,
-                    display: Daemon.getCountryName(regionItem.regionCountry),
+                    display: Client.getCountryName(regionItem.regionCountry),
                     regionItem: regionItem.getRegionItem()})
 
         for(var j=0; j<regionItem.regionChildren.length; ++j) {
@@ -708,7 +711,7 @@ Rectangle {
                       level: 1,
                       expanded: false,
                       buried: countryCollapsed,
-                      display: subregionLoc ? Daemon.getLocationName(subregionLoc) : subregion.id,
+                      display: subregionLoc ? Client.getRegionNestedName(subregionLoc.id) : subregion.id,
                       regionItem: regionItem.getSubregionItem(j)})
         }
       }
@@ -719,7 +722,7 @@ Rectangle {
         table.push({country: regionItem.regionCountry,
                     location: regionId,
                     level: 0, expanded: false, buried: false,
-                    display: regionLoc ? Daemon.getLocationName(regionLoc) : regionId,
+                    display: regionLoc ? Client.getRegionAutoName(regionLoc.id) : regionId,
                     regionItem: regionItem.getRegionItem()})
       }
     }

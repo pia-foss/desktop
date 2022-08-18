@@ -6,13 +6,17 @@ module PiaUnitTest
     extend BuildDSL
 
     Tests = [
+        'any',
         'apiclient',
         'check',
         'connectionconfig',
+        'core_util',
         'exec',
+        'ipaddress',
         'json',
         'jsonrefresher',
         'jsonrpc',
+        'jsonstate',
         'latencytracker',
         'linebuffer',
         'localsockets',
@@ -26,14 +30,18 @@ module PiaUnitTest
         'path',
         'portforwarder',
         'raii',
+        'regionlist',
+        'retainshared',
         'semversion',
+        'servicegroup',
         'settings',
         'subnetbypass',
         'tasks',
         'transportselector',
         'updatedownloader',
         'vpnmethod',
-        'wireguarduapi'
+        'wireguarduapi',
+        'workthread'
     ].tap do |t|
         if Build.windows?
             t << 'wfp_filters'
@@ -45,34 +53,48 @@ module PiaUnitTest
         end
     end
 
-    def self.defineTargets(versionlib, artifacts)
+    def self.defineTargets(versionlib, deps, artifacts)
         # The all-tests-lib library compiles all client and daemon code once to
         # be shared by all unit tests.
         # This duplicates the source directories and dependencies from the
         # various components.
         allTestsLib = Executable.new('all-tests-lib', :static)
-            .define('BUILD_COMMON') # Common
+            .define('STATIC_COMMON', :export) # Common
             .source('common/src')
             .source('common/src/builtin')
-            .source('common/src/settings', :none)
+            .source('common/src/settings')
             .useQt('Network')
-            .define('BUILD_CLIENTLIB') # Clientlib
+            .define('STATIC_CLIENTLIB', :export) # Clientlib
             .source('clientlib/src')
+            .source('clientlib/src/model')
+            .define('KAPPS_CORE_FULL_WINAPI', :export)
+            .define('STATIC_KAPPS_CORE', :export) # kapps_core
+            .source('kapps_core/src')
+            .include('.', :export)
+            .include('kapps_core/api', :export)
+            .define('STATIC_KAPPS_NET', :export) # kapps_net
+            .source('kapps_net/src')
+            .include('kapps_net/api', :export)
+            .define('STATIC_KAPPS_REGIONS', :export) # kapps_regions
+            .source('kapps_regions/src')
+            .include('kapps_regions/api', :export)
             .define('PIA_CLIENT', :export) # Client (resources not needed)
             .source('client/src')
-            .source('client/src/nativeacc', :none)
+            .source('client/src/nativeacc')
             .useQt('Qml')
             .useQt('Quick')
             .useQt('QuickControls2')
             .useQt('Gui')
             .useQt('Test')
             .source('daemon/src') # Daemon
-            .source('deps/embeddable-wg-library/src')
+            .source('daemon/src/model')
             .resource('daemon/res', ['ca/*.crt'])
             .define('UNIT_TEST', :export) # Unit test
             .source('tests/src') # Unit test source
             .resource('tests/res', ['**/*']) # Unit test resources
-            .use(versionlib.export)
+            .use(versionlib.export, :export)
+            .use(deps[:jsonmcpp], :export)
+            .use(deps[:embeddablewg].export, :export)
             .coverage(true) # Generate coverage information when possible
         if(Build.windows?)
             allTestsLib
@@ -89,7 +111,19 @@ module PiaUnitTest
         end
 
         # This task will depend on running all tests individually
-        multitask :run_all_tests
+        task :run_all_tests
+
+        # Like in executable, we want to build the tests in parallel (there are
+        # a lot), but we can have convergence issues due to all the parallel
+        # tasks converging on the allTestsLib dependency.  Rake ties up threads
+        # just waiting without doing anything.
+        #
+        # Use a similar model here to build allTestsLib serially before all the
+        # tests, then build all the tests in parallel.
+        multitask :run_tests_parallel # This task actually executes tests in parallel
+        task :run_all_tests => [allTestsLib.target, :run_tests_parallel]
+        multitask :build_tests_parallel # This task just builds all tests if we can't run them
+        task :build_all_tests => [allTestsLib.target, :build_tests_parallel]
 
         # Raw coverage data will be placed here if it can be generated
         coverageRawBuild = Build.new('coverage-raw')
@@ -100,7 +134,6 @@ module PiaUnitTest
         Tests.each do |t|
             testExec = Executable.new("test-#{t}", :executable)
                 .use(allTestsLib.export)
-                .use(versionlib.export)
                 .useQt('Network') # Common
                 .useQt('Qml') # Client
                 .useQt('Quick')
@@ -110,6 +143,7 @@ module PiaUnitTest
                 .define("TEST_MOC=\"tst_#{t}.moc\"")
                 .sourceFile("tests/tst_#{t}.cpp")
                 .include('.') # Some tests include headers using a path from the repo root due to historical QBS limitations
+                .forceLinkSymbol('forceLinkTestlogCpp') # See testlog.cpp, for static initializer
                 .coverage(true)
             if(Build.windows?)
                 testExec
@@ -143,7 +177,7 @@ module PiaUnitTest
                 cmd = ''
                 covData = coverageRawBuild.artifact("coverage_#{t}.raw")
                 opensslLibPath = File.absolute_path(File.join('deps/built',
-                                                              Build.selectPlatform('win', 'mac', 'linux'),
+                                                              Build.selectDesktop('win', 'mac', 'linux'),
                                                               Build::TargetArchitecture.to_s))
                 if Build.windows?
                     # Don't bother with covData, not supported on MSVC
@@ -165,27 +199,24 @@ module PiaUnitTest
                 sh cmd
             end
 
-            task :build_all_tests => "test-#{t}"
+            task :build_tests_parallel => "test-#{t}"
 
-            task :run_all_tests => "run-test-#{t}"
+            task :run_tests_parallel => "run-test-#{t}"
         end
 
-        # Put an early dependency on all-tests-lib here - otherwise, the Rake
-        # threads tend to get tied up on the parallel unit test jobs that all
-        # depend on all-tests-lib, and only a few threads will actually be able
-        # to do work.  We still want the run_all_tests task to build and run the
-        # individual tests in parallel though.
-        task :test => allTestsLib.target
+        desc "Build and run all unit tests (for cross targets, build only)"
+        task :test
 
         testTarget = nil
-        if(!Executable::Tc.canExecute?)
+        if(!Build::canExecute?)
             # Can't execute the unit tests - cross compiling with no emulation
             # support.  Just build the tests.
             testTarget = :build_all_tests
         elsif(Executable::Tc.coverageAvailable?)
             defineCoverageTargets(artifacts, coverageRawBuild, anyTestBin)
             # Hook up the 'test' target for use from the command line - include
-            # coverage measurements in this target
+            # coverage measurements in this target.  This in turn depends on
+            # :run_all_tests
             testTarget = :coverage
         else
             # Can execute the tests, but coverage isn't available, hook up the
@@ -222,6 +253,10 @@ module PiaUnitTest
 
         llvmCov = File.join(llvmPath, 'llvm-cov')
 
+        # For universal builds, we have to tell llvm-cov which architecture to
+        # analyze.  (Use the host arch, that's the one we ran.)
+        llvmCovArch = (Build::TargetArchitecture == :universal) ? "-arch=#{Util.hostArchitecture}" : ""
+
         file listing => [merged, coverageBuild.componentDir] do |t|
             # It seems like we'd want to pass all-tests-lib to llvm-cov here to
             # generate coverage for that code, but that doesn't work.  Instead,
@@ -230,17 +265,17 @@ module PiaUnitTest
             # LLVM will complain about conflicting data for each test's main(),
             # but that's OK.
             puts "generate coverage listing"
-            sh "#{llvmCov} show \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
+            sh "#{llvmCov} show #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
         end
 
         file report => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage report"
-            sh "#{llvmCov} report \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
+            sh "#{llvmCov} report #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
         end
 
         file coverage => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage JSON export"
-            sh "#{llvmCov} export -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
+            sh "#{llvmCov} export #{llvmCovArch} -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
         end
 
         file fileCoverage => [coverage, coverageBuild.componentDir] do |t|
@@ -310,6 +345,7 @@ module PiaUnitTest
             File.write(summaryJson, JSON.generate(platformCounts))
         end
 
+        desc "Run all unit tests and process coverage artifacts"
         task :coverage => [merged, listing, report, coverage, fileCoverage, summaryJson]
 
         # The aim of this task is to locate and understand differences in test coverage between platforms

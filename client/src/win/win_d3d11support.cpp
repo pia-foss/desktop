@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("win/win_d3d11support.cpp")
 
 #include "win_d3d11support.h"
-#include "win/win_util.h"
-#include "win/win_com.h"
+#include <common/src/win/win_util.h>
+#include <kapps_core/src/win/win_com.h>
 #include "dxgi.h"
 #include "d3d11.h"
 

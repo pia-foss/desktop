@@ -23,7 +23,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QFileInfo>
-#include "path.h"
+#include <common/src/builtin/path.h>
 
 class PathInterface : public QObject
 {

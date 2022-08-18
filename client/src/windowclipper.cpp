@@ -16,10 +16,10 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("windowclipper.cpp")
 
-#include <windowclipper.h>
+#include "windowclipper.h"
 #ifdef Q_OS_LINUX
 #include "linux/linux_env.h"
 #endif

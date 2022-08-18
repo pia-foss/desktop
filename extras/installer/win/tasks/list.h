@@ -20,7 +20,7 @@
 #define TASKS_LIST_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 #include "function.h"
 
 // Task that performs a list of subtasks.

@@ -5,6 +5,9 @@
 .buildenv
 # Default build directory when opening CMake glue project in most IDEs
 /build/
+# Cache directory used in CI to store the clone of kapps-swift-package, which we
+# must commit to in order to publish a Swift package
+/cache/
 .DS_Store
 *.qm
 node_modules
@@ -30,3 +33,8 @@ cmake-build-debug/*
 # Vagrant box for running Linux-only scripts
 tools/.vagrant
 
+# Ruby gemfile lock 
+Gemfile.lock
+
+# Ruby coverage results from simplecov
+coverage

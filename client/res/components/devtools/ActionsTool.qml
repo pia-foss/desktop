@@ -146,6 +146,31 @@ Item {
           }
         }
         Row {
+
+          spacing: 5
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "SurveySessionCount: <b>" + Daemon.settings.successfulSessionCount+ "</b>"
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "SurveyEnabled: <b>" + Daemon.settings.surveyRequestEnabled + "</b>"
+          }
+
+          Button {
+            text: "Reset: 0 Sessions"
+            onClicked: {
+              Daemon.applySettings({"successfulSessionCount": 0, "surveyRequestEnabled": true})
+            }
+          }
+          Button {
+            text: "Reset: 12 Sessions"
+            onClicked: {
+              Daemon.applySettings({"successfulSessionCount": 12, "surveyRequestEnabled": true})
+            }
+          }
+        }
+        Row {
           spacing: 5
           Button {
             Layout.alignment: Qt.AlignTop|Qt.AlignRight

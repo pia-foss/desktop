@@ -18,7 +18,7 @@ module Util
     # variable is not present or empty, the default value is returned (with no
     # warning).
     #
-    # Unlike String.to_sym(), this fails the build if an unexpceted value is
+    # Unlike String.to_sym(), this fails the build if an unexpected value is
     # given
     def self.selectSymbol(varName, default, symbols)
         value = ENV[varName].to_s
@@ -59,23 +59,17 @@ module Util
                 puts "Architecture not known: #{archProbe.dump}"
                 nil
             end
-        elsif(hostPlatform == :linux)
+        elsif(hostPlatform == :linux || hostPlatform == :macos)
             uname_m = `uname -m`.strip
             if(uname_m == 'x86_64')
                 :x86_64
             elsif(uname_m == 'armv7l')
                 :armhf
-            elsif(uname_m == 'aarch64')
+            elsif(uname_m == 'aarch64' || uname_m == 'arm64')
                 :arm64
             else
                 puts "Architecture not known: #{uname_m}"
             end
-        else
-            # On Mac we currently only support x86_64, so assume this
-            # architecture.  Building on other architectures should work this
-            # way if emulation is available - the dependencies for x86_64 will
-            # be used.
-            :x86_64
         end
     end
 
@@ -92,7 +86,7 @@ module Util
     # On Windows, run a command using the cmd.exe shell (returns the complete
     # command line, can be invoked with sh, backticks, etc.)
     def self.cmd(command)
-        # cmd.exe uses pecular quoting semantics; any quotes in 'command' do not
+        # cmd.exe uses peculiar quoting semantics; any quotes in 'command' do not
         # need to be escaped.  It seems to look for the very last quote to
         # terminate the /C argument, and all intervening quotes are preserved
         # as-is when executing the command.

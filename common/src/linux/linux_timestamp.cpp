@@ -16,13 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "timestamp.h"
+#include "../common.h"
+#include "../timestamp.h"
 
 #include <time.h>
 
 quint64 getContinuousTimestamp()
 {
+
     timespec time{};
     clock_gettime(CLOCK_BOOTTIME, &time);
     // Return time in milliseconds

@@ -19,7 +19,7 @@
 #ifndef LINUX_NLCACHE_H
 #define LINUX_NLCACHE_H
 
-#include "common.h"
+#include <common/src/common.h>
 #include <memory>
 #include <unordered_map>
 #include "linux_libnl.h"
@@ -82,10 +82,9 @@ private:
     const char *_what;
 };
 
-inline QDebug &operator<<(QDebug &d, const LibnlError &err)
+inline std::ostream &operator<<(std::ostream &os, const LibnlError &err)
 {
-    QDebugStateSaver saver{d};
-    return d.nospace() << err.what() << " - libnl error " << err.libnlCode()
+    return os << err.what() << " - libnl error " << err.libnlCode()
         << " (" << err.libnlMsg() << ") (at " << err.location() << ")";
 }
 

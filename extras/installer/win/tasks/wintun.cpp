@@ -18,11 +18,11 @@
 
 #include "wintun.h"
 #include "brand.h"
-#include "util.h"
-#include "service_inl.h"
-#include "safemode_inl.h"
-#include "tap_inl.h"
-#include "tun_inl.h"
+#include "../util.h"
+#include "../service_inl.h"
+#include "../safemode_inl.h"
+#include "../tap_inl.h"
+#include "../tun_inl.h"
 #include <Msi.h>
 #include <MsiQuery.h>
 #include <string>

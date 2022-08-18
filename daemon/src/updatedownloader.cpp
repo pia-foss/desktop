@@ -16,27 +16,27 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("updatedownloader.cpp")
 
 #include "updatedownloader.h"
 #include "daemon.h"
-#include "exec.h"
-#include "semversion.h"
-#include "testshim.h"
+#include <common/src/exec.h>
+#include <common/src/semversion.h>
+#include <common/src/testshim.h>
 #include "version.h"
-#include "path.h"
+#include <common/src/builtin/path.h>
 #include "apiclient.h"
-#include "apinetwork.h"
-#include "openssl.h"
+#include <common/src/apinetwork.h>
+#include <common/src/openssl.h>
 #include "brand.h"
-#include "exec.h"
+#include <common/src/exec.h>
 #include <QNetworkReply>
 #include <QDir>
 #include <QProcess>
 
 #ifdef Q_OS_WIN
-#include <Windows.h>
+#include <kapps_core/src/winapi.h>
 #include <VersionHelpers.h>
 #endif
 
@@ -46,7 +46,10 @@
 
 // Platform name for the supported platforms
 const QString UpdateChannel::platformName =
-#if defined(Q_OS_MAC) && defined(Q_PROCESSOR_X86_64)
+#if defined(Q_OS_MAC)
+        // macOS builds are universal for all supported architectures.
+        // TODO - should we really do this?  What happens when we drop Intel
+        // support?
         QStringLiteral("mac");
 #elif defined(Q_OS_WIN)
     #if defined(Q_PROCESSOR_X86_64)
@@ -277,7 +280,7 @@ UpdateDownloader::UpdateDownloader()
     // doesn't prevent the app from running.
     try
     {
-        _daemonVersion = SemVersion{Version::semanticVersion()};
+        _daemonVersion = SemVersion{QString::fromStdString(Version::semanticVersion())};
     }
     catch(const Error &ex)
     {

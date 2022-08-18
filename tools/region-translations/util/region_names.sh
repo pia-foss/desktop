@@ -56,8 +56,8 @@ function get_translation() {
 
 function check_missing_name() {
   name="$1"
-  # French is checked arbitrarily, we translate everything at once anyway
-  translation="$(get_translation "$name" fr)"
+  # Polish is checked arbitrarily, we translate everything at once anyway
+  translation="$(get_translation "$name" pl)"
   if [ "$translation" = '""' ]; then
     echo "missing: $name" >&2
   fi

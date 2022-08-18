@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("tunnelcheckstatus.h")
 
 #ifndef TUNNELCHECKSTATUS_H
 #define TUNNELCHECKSTATUS_H
 
-#include "jsonrefresher.h"
+#include <common/src/jsonrefresher.h>
 
 // TunnelCheckStatus uses the PIA client/status API to detect whether Internet
 // traffic is currently routing through the VPN tunnel.

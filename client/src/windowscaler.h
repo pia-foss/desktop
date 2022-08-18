@@ -16,13 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("windowscaler.h")
 
 #ifndef WINDOWSCALER_H
 #define WINDOWSCALER_H
 
 #include "nativewindowscaler.h"
+#include <kapps_core/src/winapi.h>
 #include <QtGlobal>
 #include <QQuickWindow>
 

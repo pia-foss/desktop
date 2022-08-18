@@ -44,6 +44,8 @@
 #include <QDateTime>
 #include <QTextCodec>
 #include <QElapsedTimer>
+#include <QTimeZone>
+#include <QRect>
 
 #ifdef QT_DEBUG
 # if defined(Q_OS_WIN)
@@ -62,22 +64,6 @@ namespace
     // Note that this is always 'false' for components that don't initialize
     // crash handling.
     bool isClient{};
-    const Path &getCrashReportDir()
-    {
-        return isClient ? Path::ClientCrashReportDir : Path::DaemonCrashReportDir;
-    }
-}
-
-QString traceMsec(qint64 time)
-{
-    Q_ASSERT(time >= 0);
-    qint64 minutes = time / 60000;
-    qint64 msec = time % 60000;
-    double secDbl = msec / 1000.0;
-
-    if(minutes > 0)
-        return QStringLiteral("%1 min %2 sec").arg(minutes).arg(secDbl);
-    return QStringLiteral("%1 sec").arg(secDbl);
 }
 
 static bool checkIfDebuggerPresent()
@@ -125,6 +111,7 @@ void startSupportTool (const QString &mode, const QString &diagFile)
     args << "--log" << Path::CliLogFile;
     args << "--log" << Path::ConfigLogFile;
     args << "--log" << Path::UpdownLogFile;
+
     if(!diagFile.isEmpty())
         args << "--file" << diagFile;
 
@@ -162,7 +149,7 @@ QString getVersionInfo()
     QString version_info;
     QString timestamp = QDateTime::currentDateTime().toUTC().toString("yyyyMMddhhmmss");
     version_info = isClient ? QStringLiteral("client") : QStringLiteral("daemon");
-    version_info += QString("-") + Version::semanticVersion() + "-" + timestamp;
+    version_info += QString("-") + QString::fromStdString(Version::semanticVersion()) + "-" + timestamp;
     return version_info;
 }
 
@@ -172,6 +159,14 @@ bool isClientOpenGLFailureTrace(const QString &msg)
 }
 
 #ifdef PIA_CRASH_REPORTING
+
+namespace
+{
+    const Path &getCrashReportDir()
+    {
+        return isClient ? Path::ClientCrashReportDir : Path::DaemonCrashReportDir;
+    }
+}
 
 // Different implementations of `DumpCallback for each platform.
 // None of these attempt to write out diagnostics.
@@ -192,8 +187,9 @@ bool DumpCallback(const char *dump_dir,
     QString new_path = QString::fromUtf8(dump_dir) + QLatin1String("/") +
                        getVersionInfo() + "-" +
                        QString::fromUtf8(minidump_id) + ".dmp";
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
-
+    qDebug().nospace()
+        << (succeeded ? "Succeed to write minidump" : "Failed to write minidump")
+        << ", dump path: " << new_path;
 
     if(succeeded)
     {
@@ -221,7 +217,9 @@ bool DumpCallback(const wchar_t* dump_dir,
     QString new_path = QString::fromWCharArray(dump_dir) + QLatin1String("/") +
                        getVersionInfo() + "-" +
                        QString::fromWCharArray(minidump_id) + ".dmp";
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
+    qDebug().nospace()
+        << (succeeded ? "Succeed to write minidump" : "Failed to write minidump")
+        << ", dump path: " << new_path;
 
     if(succeeded)
     {
@@ -238,7 +236,9 @@ bool DumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
                   bool succeeded) {
     QString new_path = QString::fromUtf8(descriptor.directory().c_str()) + QLatin1String("/") +
                        getVersionInfo() + ".dmp";
-    qDebug("%s, dump path: %s\n", succeeded ? "Succeed to write minidump" : "Failed to write minidump", qPrintable(new_path));
+    qDebug().nospace()
+        << (succeeded ? "Succeed to write minidump" : "Failed to write minidump")
+        << ", dump path: " << new_path;
 
     if(succeeded) {
         if(!isClient)
@@ -330,8 +330,6 @@ void monitorDaemonDumps()
     });
 }
 
-
-
 #ifdef Q_OS_LINUX
 void stopCrashReporting()
 {
@@ -359,4 +357,89 @@ void testCrash()
 {
     auto *crash = reinterpret_cast<volatile int *>(0);
     *crash = 0;
+}
+
+std::vector<std::string> qs::stdVecFromStringList(const QStringList &list)
+{
+    std::vector<std::string> vec;
+    vec.reserve(list.size());
+
+    for(const auto &str : list)
+        vec.push_back(str.toStdString());
+
+    return vec;
+}
+
+QString qs::toQString(const std::string &str)
+{
+    return QString::fromStdString(str);
+}
+
+QString qs::toQString(const kapps::core::StringSlice &str)
+{
+    return QString::fromUtf8(str.data(), str.size());
+}
+
+QString qs::toQString(const kapps::core::WStringSlice &str)
+{
+    return QString::fromWCharArray(str.data(), str.size());
+}
+
+std::ostream &operator<<(std::ostream &os, const QRect &rect)
+{
+    os << "QRect(" << rect.x() << ',' << rect.y() << ' ' << rect.width() << 'x'
+        << rect.height() << ')';
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const QDateTime &date)
+{
+    os << "QDateTime(";
+    if(date.isValid())
+    {
+        os << qUtf8Printable(date.toString(u"yyyy-MM-dd HH:mm:ss.zzz t"))
+            << ' ' << date.timeSpec();
+        switch(date.timeSpec())
+        {
+            default:
+                break;
+            case Qt::TimeSpec::OffsetFromUTC:
+                os << ' ' << date.offsetFromUtc() << " s";
+                break;
+            case Qt::TimeSpec::TimeZone:
+                os << ' ' << date.timeZone().id().data();
+                break;
+        }
+    }
+    else
+        os << "Invalid";
+    os << ')';
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const QHostAddress &address)
+{
+    if(address == QHostAddress::Any)
+        os << "QHostAddress(QHostAddress::Any)";
+    else
+        os << "QHostAddress(" << address.toString() << ")";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const QUrl &url)
+{
+    os << "QUrl(" << url.toDisplayString() << ")";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const QSize &size)
+{
+    os << "QSize(" << size.width() << ", " << size.height() << ")";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const QUuid &uuid)
+{
+    os << "QUuid(" << uuid.toString() << ")";
+    return os;
 }

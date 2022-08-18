@@ -1,12 +1,14 @@
 {
-  "de": "Germany",
-  "it": "Italy",
-  "gb": "United Kingdom",
-  "ca": "Canada",
-  "us": "United States",
-  "il": "Israel",
-  "jp": "Japan",
   "au": "Australia",
+  "ca": "Canada",
+  "de": "Germany",
+  "dk": "Denmark",
+  "es": "Spain",
   "fi": "Finland",
-  "se": "Sweden"
+  "gb": "United Kingdom",
+  "il": "Israel",
+  "it": "Italy",
+  "jp": "Japan",
+  "se": "Sweden",
+  "us": "United States"
 }

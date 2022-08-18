@@ -16,18 +16,18 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("wireguardgobackend.h")
 
 #ifndef WIREGUARDGOBACKEND_H
 #define WIREGUARDGOBACKEND_H
 
-#include "wireguardbackend.h"
-#include "wireguarduapi.h"
-#include "processrunner.h"
-#include "recursivedirwatcher.h"
-#include "async.h"
-#include "vpn.h"
+#include "../wireguardbackend.h"
+#include "../wireguarduapi.h"
+#include "../processrunner.h"
+#include <common/src/recursivedirwatcher.h>
+#include <common/src/async.h>
+#include "../vpn.h"
 #include <QLocalSocket>
 
 // ProcessRunner that applies the interface name file environment variable on

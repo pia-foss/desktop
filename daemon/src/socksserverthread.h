@@ -16,14 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("socksserverthread.h")
 
 #ifndef SOCKSSERVERTHREAD_H
 #define SOCKSSERVERTHREAD_H
 
 #include "socksserver.h"
-#include "thread.h"
+#include <common/src/thread.h>
 #include <QPointer>
 
 // SocksServerThread just runs a SocksServer on a worker thread.  The server can

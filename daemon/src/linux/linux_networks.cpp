@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("linux_networks.cpp")
 
 #include "linux_networks.h"
 #include "linux_nl.h"
 #include "linux_libnl.h"
-#include "exec.h"
+#include <common/src/exec.h>
 #include <QRegularExpression>
 #include <QProcess>
 #include <netlink/cache.h>

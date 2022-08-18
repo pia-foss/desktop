@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "networkmonitor.h"
+#include <common/src/common.h>
+#include <daemon/src/networkmonitor.h>
 #include <QtTest>
 
 class tst_networkmonitor : public QObject

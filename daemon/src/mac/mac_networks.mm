@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac_networks.mm")
 
 #include "mac_networks.h"
 #include "mac_dynstore.h"
-#include "exec.h"
-#include <posix/posix_objects.h>
+#include <common/src/exec.h>
+#include <kapps_core/src/posix/posix_objects.h>
 #include <QProcess>
 #include <QRegularExpression>
 #include <unordered_map>
@@ -51,10 +51,10 @@ class MacNetworks;
 @interface MacNetworkWiFiDelegate : NSObject<CWEventDelegate>
 {
 @private
-    PosixFd signalSocket;
+    kapps::core::PosixFd signalSocket;
 }
 // Create the signaling socket pair and return MacNetwork's end of the socket
- - (PosixFd) createSockets;
+ - (kapps::core::PosixFd) createSockets;
  - (void) signalMacNetworks;
  - (void) bssidDidChangeForWiFiInterfaceWithName:(NSString*)interfaceName;
  - (void) clientConnectionInterrupted;
@@ -135,7 +135,7 @@ private:
     // alive here
     MacNetworkWiFiDelegate *_pWifiDelegate;
     // Socket used to receive signals from the WiFi delegate
-    PosixFd _delegateReceiveSocket;
+    kapps::core::PosixFd _delegateReceiveSocket;
     // Notifier for that socket
     nullable_t<QSocketNotifier> _pDelegateNotifier;
 };
@@ -368,34 +368,34 @@ void MacNetworks::readConnections()
         MacArray ipv6PrefixLengths = ipConfig._ipv6.getValueObj(CFSTR("PrefixLength")).as<CFArrayRef>();
         MacString ipv6ServiceRouterIp = ipConfig._ipv6.getValueObj(CFSTR("Router")).as<CFStringRef>();
 
-        std::vector<std::pair<Ipv4Address, unsigned>> addressesIpv4;
+        std::vector<std::pair<kapps::core::Ipv4Address, unsigned>> addressesIpv4;
         addressesIpv4.reserve(ipv4Addrs.getCount());
         for(CFIndex i=0; i<ipv4Addrs.getCount(); ++i)
         {
             MacString addrStr{ipv4Addrs.getObjAtIndex(i).as<CFStringRef>()};
-            Ipv4Address addr{addrStr.toQString()};
+            kapps::core::Ipv4Address addr{addrStr.toStdString()};
 
             // The subnet masks are supposed to correspond to the addresses.
-            Ipv4Address mask{};
+            kapps::core::Ipv4Address mask{};
             if(i<ipv4SubnetMasks.getCount())
             {
                 MacString maskStr{ipv4SubnetMasks.getObjAtIndex(i).as<CFStringRef>()};
-                mask = Ipv4Address{maskStr.toQString()};
+                mask = kapps::core::Ipv4Address{maskStr.toStdString()};
             }
             // If we fail to get a subnet mask for some reason, use /32, so the
             // local address is still known.
-            if(mask == Ipv4Address{})
-                mask = Ipv4Address{0xFFFFFFFF};
+            if(mask == kapps::core::Ipv4Address{})
+                mask = kapps::core::Ipv4Address{0xFFFFFFFF};
 
-            if(addr != Ipv4Address{})
+            if(addr != kapps::core::Ipv4Address{})
                 addressesIpv4.push_back({addr, mask.getSubnetMaskPrefix()});
         }
-        std::vector<std::pair<Ipv6Address, unsigned>> addressesIpv6;
+        std::vector<std::pair<kapps::core::Ipv6Address, unsigned>> addressesIpv6;
         addressesIpv6.reserve(ipv6Addrs.getCount());
         for(CFIndex i=0; i<ipv6Addrs.getCount(); ++i)
         {
             MacString addrStr{ipv6Addrs.getObjAtIndex(i).as<CFStringRef>()};
-            Ipv6Address addr{addrStr.toQString()};
+            kapps::core::Ipv6Address addr{addrStr.toStdString()};
 
             // Prefix lengths correspond to the addresses array.  If we can't
             // find it for some reason, use /128.
@@ -411,7 +411,7 @@ void MacNetworks::readConnections()
                 }
             }
 
-            if(addr != Ipv6Address{})
+            if(addr != kapps::core::Ipv6Address{})
                 addressesIpv6.push_back({addr, prefix});
         }
 
@@ -437,8 +437,8 @@ void MacNetworks::readConnections()
         QString ipv4RouterIp = getRouterIp(ipv4ServiceRouterIp.toQString(), "IPv4", ipConfig._defIpv4);
         QString ipv6RouterIp = getRouterIp(ipv6ServiceRouterIp.toQString(), "IPv6", ipConfig._defIpv6);
 
-        Ipv4Address ipv4RouterAddr{ipv4RouterIp};
-        Ipv6Address ipv6RouterAddr{ipv6RouterIp};
+        kapps::core::Ipv4Address ipv4RouterAddr{ipv4RouterIp.toStdString()};
+        kapps::core::Ipv6Address ipv6RouterAddr{ipv6RouterIp.toStdString()};
 
         Q_ASSERT(!ipConfigEntry.first.isEmpty());    // Didn't put empty interfaces in this map
 
@@ -516,9 +516,9 @@ void MacNetworks::readConnections()
 // We don't care about a lot of these notifications; the ones we do care about
 // call MacNetworks::readConnections().
 @implementation MacNetworkWiFiDelegate {}
- - (PosixFd) createSockets
+ - (kapps::core::PosixFd) createSockets
 {
-    auto [sigSock, rcvSock] = createSocketPair();
+    auto [sigSock, rcvSock] = kapps::core::createSocketPair();
     signalSocket = std::move(sigSock);
     qInfo() << "will signal with fd" << signalSocket.get();
     return std::move(rcvSock);

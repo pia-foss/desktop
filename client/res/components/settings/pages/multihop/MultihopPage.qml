@@ -123,7 +123,10 @@ Page {
         anchors.margins: 20
 
         FlagImage {
-          countryCode: Daemon.state.shadowsocksLocations.nextLocation.country
+          countryCode: {
+            let nextId = Daemon.state.shadowsocksLocations.nextLocation.id
+            return Daemon.state.getRegionCountryCode(nextId)
+          }
         }
 
         StaticText {
@@ -362,13 +365,7 @@ Page {
       implicitHeight: 450
       regionFilter: function (serverLocation) {
         // Show regions that have at least one shadowsocks server
-        for (var i = 0; i < serverLocation.servers.length; ++i) {
-          if (serverLocation.servers[i].shadowsocksPorts.length > 0
-              && serverLocation.servers[i].shadowsocksKey
-              && serverLocation.servers[i].shadowsocksCipher)
-            return true
-        }
-        return false
+        return serverLocation.hasShadowsocks
       }
       // Don't use shadowsocksLocations directly since the chosen location
       // isn't applied until the user clicks OK

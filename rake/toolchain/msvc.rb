@@ -6,9 +6,21 @@ require 'json'
 class MsvcToolchain
     include BuildDSL
 
-    VcArch = (Build::TargetArchitecture == :x86_64) ? 'x64' : 'x86'
-
-    def initialize(qt)
+    # Unlike Clang, the MSVC toolchain can only initialize for one target
+    # architecture, since we need to set a lot of architecture-specific
+    # variables in the environment (from vcvarsall.bat).
+    #
+    # Fortunately, there is no such thing as a "universal" build on Windows, so
+    # we never need to build for multiple targets anyway.  (Otherwise we'd have
+    # to do something funky like storing the environment for each arch and
+    # applying the right one for each cl.exe invocation.)
+    #
+    # So for the MSVC toolchain, the architecture is needed at initialization.
+    # compile() and link() still take an architecture parameter for API
+    # compatibility with the clang toolchain, but it must match the
+    # initialized architecture.
+    def initialize(architecture, qt)
+        @architecture = architecture
         @qt = qt
         @mocPath = @qt.tool('moc')
         @rccPath = @qt.tool('rcc')
@@ -33,8 +45,9 @@ class MsvcToolchain
         #
         # This dump will include the variables already in Rake's environment
         # too, but there's no harm in re-applying those.
+        vcArch = (@architecture == :x86_64) ? 'x64' : 'x86'
         vcEnvScript = File.absolute_path('rake/toolchain/msvc_env.bat')
-        invokeVcEnvScript = "\"#{vcEnvScript}\" \"#{vcvars}\" #{VcArch}"
+        invokeVcEnvScript = "\"#{vcEnvScript}\" \"#{vcvars}\" #{vcArch}"
         vcEnv = `#{Util.cmd(invokeVcEnvScript)}`
 
         vcEnv.each_line do |var|
@@ -54,6 +67,12 @@ class MsvcToolchain
         # rc.exe is in PATH too, we don't get the exact bin/<version>/<arch>
         # path anywhere
         @rc = 'rc.exe'
+    end
+
+    # Within compile() or link(), check that the arch specified was the one that
+    # was initialized.
+    def checkInitializedArchitecture(architecture)
+        raise "MSVC can only target one architecture per build" if architecture != @architecture
     end
 
     # Get platform-specific file extensions
@@ -190,19 +209,14 @@ class MsvcToolchain
         false
     end
 
-    # This toolchain only supports x86_64 hosts and x86/x86_64 targets, both can
-    # be executed
-    def canExecute?
-        true
-    end
-
     def toolchainPath
         @msvcRoot
     end
 
     # Apply moc to a source or header file.  All paths should be absolute paths.
     # frameworkPaths is ignored on MSVC.
-    def moc(sourceFile, outputFile, macros, includeDirs, frameworkPaths)
+    def moc(architecture, sourceFile, outputFile, macros, includeDirs, frameworkPaths)
+        checkInitializedArchitecture(architecture)
         params = [
             @mocPath,
             WinMacros.map { |m| "-D#{m}" },
@@ -368,8 +382,10 @@ class MsvcToolchain
     # - frameworkPaths - ignored for MSVC
     # - options - target options specified by Executable.  :runtime is used in
     #   this step
-    def compile(sourceFile, objectFile, depFile, macros, includeDirs,
-                frameworkPaths, options)
+    def compile(architecture, sourceFile, objectFile, depFile, macros,
+                includeDirs, frameworkPaths, options)
+        checkInitializedArchitecture(architecture)
+
         if(File.extname(sourceFile) == '.rc')
             # Use cl to do a makedep for resource files - see clMakedep()
             clMakedep(sourceFile, objectFile, depFile, macros, includeDirs, false)
@@ -380,7 +396,16 @@ class MsvcToolchain
         end
     end
 
-    def clLink(targetFile, objFiles, libPaths, libs, interface, extraArgs)
+    def decorateCFunction(symbol)
+        # On x86, MSVC does decorate C-linkage functions using calling
+        # convention (only).  Assume the function is __cdecl, which is the
+        # default (it just gets a leading underscore).
+        return "_#{symbol}" if Build::TargetArchitecture == :x86
+        return symbol
+    end
+
+    def clLink(targetFile, objFiles, libPaths, libs, interface,
+               forceLinkSymbols, extraArgs)
         subsys = 'WINDOWS'
         if(interface == :console)
             subsys = 'CONSOLE'
@@ -402,6 +427,7 @@ class MsvcToolchain
             "/MANIFESTINPUT:#{File.absolute_path('common/res/manifest.xml')}",
             "/PDB:#{targetFile.ext('.pdb')}",
             libPaths.map { |l| "/LIBPATH:#{l}" },
+            forceLinkSymbols.map { |s| "/INCLUDE:#{decorateCFunction(s)}" },
             extraArgs
         ]
         params.flatten!
@@ -409,6 +435,7 @@ class MsvcToolchain
     end
 
     # Link a dynamic library or executable.
+    # - architecture - Desired target architecture.
     # - targetFile - Absolute path to the target DLL or EXE to build
     # - objFiles - Compiled object files
     # - libPaths - Library search paths
@@ -418,17 +445,20 @@ class MsvcToolchain
     # - extraArgs - Extra arguments for the linker (passed through cl via /link)
     # - options - Target options specified by Executable.  :type and :interface
     #   are used in this step.
-    def link(targetFile, objFiles, libPaths, libs, frameworkPaths, frameworks,
-             extraArgs, options)
+    def link(architecture, targetFile, objFiles, libPaths, libs, frameworkPaths,
+             frameworks, extraArgs, options)
+        checkInitializedArchitecture(architecture)
+
         if(options[:type] == :dynamic)
             clLink(targetFile, objFiles, libPaths, libs, options[:interface],
+                   options[:forceLinkSymbols],
                    ['/DLL', "/IMPLIB:#{targetFile.ext('.lib')}"] + extraArgs)
         elsif(options[:type] == :static)
             sh('lib.exe', '/nologo', *StaticLinkOpts[Build::Variant],
                "/OUT:#{targetFile}", *objFiles)
         elsif(options[:type] == :executable)
             clLink(targetFile, objFiles, libPaths, libs, options[:interface],
-                   extraArgs)
+                   options[:forceLinkSymbols], extraArgs)
         else
             raise "Unknown target type: #{options[:type]}"
         end

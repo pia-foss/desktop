@@ -16,12 +16,12 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("mac/mac_tray.mm")
 
 #include "mac_tray.h"
-#include "client.h"
-#include "platformuistrings.h"
+#include "../client.h"
+#include "../platformuistrings.h"
 #include "brand.h"
 #include "product.h"
 

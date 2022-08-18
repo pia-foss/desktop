@@ -16,13 +16,13 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line HEADER_FILE("win_interfacemonitor.h")
 
 #ifndef WIN_INTERFACEMONITOR_H
 #define WIN_INTERFACEMONITOR_H
 
-#include "daemon.h" // NetworkAdapter
+#include "../daemon.h" // NetworkAdapter
 #include "win.h"
 
 class WinNetworkAdapter : public NetworkAdapter
@@ -58,10 +58,10 @@ private:
     int getMetric(const ADDRESS_FAMILY);
 };
 
-inline QDebug &operator<<(QDebug &d, const WinNetworkAdapter &adapter)
+inline std::ostream &operator<<(std::ostream &os, const WinNetworkAdapter &adapter)
 {
-    return d << adapter.devNode() << "-" << adapter.description() << "-"
-        << adapter.friendlyName() << "-" << adapter.luid();
+    return os << adapter.devNode() << " - " << adapter.description() << " - "
+        << adapter.friendlyName() << " - " << adapter.luid();
 }
 
 // WinInterfaceMonitor monitors for network interface additions/deletions on

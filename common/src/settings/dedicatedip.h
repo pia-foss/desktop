@@ -19,8 +19,8 @@
 #ifndef SETTINGS_DEDICATEDIP_H
 #define SETTINGS_DEDICATEDIP_H
 
-#include "common.h"
-#include "json.h"
+#include "../common.h"
+#include "../json.h"
 
 // Information for a Dedicated IP stored in DaemonAccount.  The daemon uses
 // this to populate "dedicated IP regions" in the regions list, and to refresh

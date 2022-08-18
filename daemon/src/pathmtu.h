@@ -19,10 +19,9 @@
 #ifndef PATHMTU_H
 #define PATHMTU_H
 
-#include "common.h"
-#include "exec.h"
-#include "thread.h"
-#include "settings.h"
+#include <common/src/common.h>
+#include <common/src/exec.h>
+#include <common/src/thread.h>
 #include "vpn.h"
 #include <QObject>
 #include <QElapsedTimer>

@@ -378,7 +378,7 @@ protected:
     // Try to figure out the name of the result type if possible.
     virtual const char* typeName() const;
     // Pretty print the task when debugging.
-    friend QDebug COMMON_EXPORT operator<<(QDebug debug, const BaseTask* task);
+    friend std::ostream COMMON_EXPORT &operator<<(std::ostream &os, const BaseTask* task);
 
     virtual void connectNotify(const QMetaMethod &signal) override;
 
@@ -1007,9 +1007,9 @@ public:
 
 // Avoid the QSharedPointer(...) decoration you normally get from QSharedPointer.
 template<typename T>
-inline QDebug operator<<(QDebug debug, const QSharedPointer<Task<T>>& task)
+inline std::ostream &operator<<(std::ostream &os, const QSharedPointer<Task<T>>& task)
 {
-    return debug << task.get();
+    return os << task.get();
 }
 
 

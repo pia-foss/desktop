@@ -485,7 +485,51 @@ Item {
         }
       }
       onAboutToShow: { popupShowInitialIndex = control.currentIndex }
-      onClosed: themedComboBox.focusOnDismissFunc()
+      onClosed: {
+             // The popup has been closed, and the combo box has focused itself again
+             // (unless another control already stole the focus - clicking another
+             // control also dismisses the popup).
+             //
+             // However, for table cells, we don't want the control to be focused, we
+             // want the table to get the focus.  It has already navigated the right
+             // cell, so if the focused item is now our control (or nothing), invoke
+             // focusOnDismissFunc() so the right table can be focused instead.
+             //
+             // For regular combo boxes outside of tables, we theoretically shouldn't
+             // need to do anything, but there seems to be a bug in WindowAccImpl
+             // preventing this focus change from being notified to the screen reader
+             // correctly.  The default focusOnDismissFunc() just focuses the control
+             // again which works around this.
+             let focusItem = control && control.Window.window ? control.Window.window.activeFocusItem : null
+             if(!focusItem || focusItem === control) {
+               themedComboBox.focusOnDismissFunc()
+             }
+             // Otherwise, something else stole the focus; do not steal it back.
+           }
+      // Work around a crash in Qt - without this, the client would crash when
+      // a combo box is destroyed while open.
+      //
+      // This appears to occur when:
+      // - A ComboBox's Popup has an 'exit' transition
+      // - That exit transition has at least one 'animation'
+      // - The ComboBox is destroyed while open (such as the Split Tunnel app
+      //   list receiving a change while a combo box is open, since the change
+      //   causes the entire list to be rebuilt.)
+      //
+      // Normally it's difficult to cause that situation from the GUI client
+      // alone (it _is_ possible if you click the combo boxes rapidly enough),
+      // but it's easy to reproduce if you repeatedly change the
+      // splitTunnelRules setting with piactl, and simultaneously attempt to
+      // open one of the combo boxes.
+      //
+      // The crash occurs deep in Qt - the ComboBox is defocused as part of
+      // destruction, which closes the popup, which triggers the exit
+      // transition.  The exit transition is used in a call to
+      // QtQml::qmlExecuteDeferred(), which attempts to find the
+      // QQmlEnginePrivate for any deferred property bindings
+      // (Transition.animations is deferred).  At this point,
+      // data->context->engine is already nullptr, so it crashes.
+      Component.onDestruction: popup.exit = null
     }
   }
 }

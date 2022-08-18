@@ -17,7 +17,7 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "daemon/src/apiclient.h"
-#include "testshim.h"
+#include <common/src/testshim.h>
 #include "src/mocknetwork.h"
 #include "src/callbackspy.h"
 #include <QtTest>
@@ -50,7 +50,7 @@ bool checkSuccessPort(const CallbackSpy &resultSpy)
             const auto &replyPort = resultJson[QStringLiteral("port")].toInt();
             if(replyPort != successPort)
             {
-                qWarning() << "Unexpected JSON result:" << resultJson.toJson();
+                qWarning() << "Unexpected JSON result:" << resultJson;
                 return false;
             }
 
@@ -78,11 +78,11 @@ bool checkConsumedHost(const QSignalSpy &consumedSpy, const QString &host)
 }
 
 // An ApiClient with its own Environment.
-class TestApiClient : public DaemonState, public Environment, public ApiClient
+class TestApiClient : public StateModel, public Environment, public ApiClient
 {
 public:
     TestApiClient()
-        : Environment{static_cast<DaemonState&>(*this)}
+        : Environment{static_cast<StateModel&>(*this)}
     {}
 };
 
@@ -97,8 +97,7 @@ private slots:
     }
 
     // Test rate limiting errors.
-    // Rate limiting errors still allow retries, but they cause the ultimate
-    // error emitted to be a rate limiting error if all retries fail.
+    // Rate limiting errors do not allow retries anymore.
     void testRateLimiting()
     {
         auto pReply1 = MockNetworkManager::enqueueReply();
@@ -112,20 +111,11 @@ private slots:
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
 
-        // Exhaust all retries with a mixture of rate limit and network errors
         auto pReply2 = MockNetworkManager::enqueueReply();
         pReply1->finishNetError();
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
-        auto pReply3 = MockNetworkManager::enqueueReply();
         pReply2->finishRateLimit();
-        QVERIFY(consumeSpy.wait(100));
-        QVERIFY(!MockNetworkManager::hasNextReply());
-        auto pReply4 = MockNetworkManager::enqueueReply();
-        pReply3->finishNetError();
-        QVERIFY(consumeSpy.wait(100));
-        QVERIFY(!MockNetworkManager::hasNextReply());
-        pReply4->finishNetError();
 
         // Make sure we got a rate limiting error.
         QVERIFY(resultSpy.checkError(Error::Code::ApiRateLimitedError));
@@ -153,7 +143,7 @@ private slots:
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
         auto pReply3 = MockNetworkManager::enqueueReply();
-        pReply2->finishRateLimit();
+        pReply2->finishNetError();
         QVERIFY(consumeSpy.wait(100));
         QVERIFY(!MockNetworkManager::hasNextReply());
         // End with an auth error

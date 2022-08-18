@@ -16,20 +16,20 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include <common/src/common.h>
 #line SOURCE_FILE("interfaces.cpp")
 
 #include "interfaces.h"
 
 namespace NativeAcc {
 
-QDebug &operator<<(QDebug &d, AccessibleElement *pImpl)
+std::ostream &operator<<(std::ostream &os, AccessibleElement *pImpl)
 {
     QObject *pImplObj = pImpl;
     QAccessibleInterface *pImplAccItf = pImpl;
 
-    return d << QStringLiteral("{AccessibleElement:") << pImplObj << pImplAccItf
-        << QStringLiteral("}");
+    return os << "{AccessibleElement: " << pImplObj << ' ' << pImplAccItf
+        << "}";
 }
 
 }

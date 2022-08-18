@@ -20,7 +20,7 @@
 #define TASKS_PROCESS_H
 #pragma once
 
-#include "tasks.h"
+#include "../tasks.h"
 
 // Determine if a process with a given filename (path is ignored) is running
 bool isProcessRunning(utf16ptr executable);
