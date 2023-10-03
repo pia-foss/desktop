@@ -1,0 +1,218 @@
+name: pia_desktop/mac
+on:
+  workflow_call:
+    secrets:
+      APPLE_BUILD_CERTIFICATE_BASE64:
+        required: false
+      APPLE_P12_PASSWORD:
+        required: false
+      APPLE_KEYCHAIN_PASSWORD:
+        required: false
+      PIA_APPLE_ID_PASSWORD:
+        required: false
+      PIA_ACCOUNT_NAME:
+        required: true
+      PIA_ACCOUNT_PWD:
+        required: true
+    inputs:
+      BRAND:
+        required: true
+        type: string
+      PIA_APPLE_ID_EMAIL:
+        required: false
+        type: string
+      PIA_APPLE_NOTARIZE_TIMEOUT:
+        required: false
+        type: string
+      PIA_CODESIGN_CERT:
+        required: false
+        type: string
+
+concurrency:
+  group: "${{ github.ref }}-mac"
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: macos_universal_build
+    runs-on: macos-12-xl
+    timeout-minutes: 120
+    env:
+      GITHUB_CI: 1
+      QTROOT: ${{ github.workspace }}/Qt/5.15.2
+      SIGNING_ENABLED: 0
+      BUILD_BRAND: ${{ inputs.BRAND }}
+      BUILD_ARCHITECTURE: universal
+      BUILD_VARIANT: release
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 'head' # Not needed with a .ruby-version file
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Install qt
+      run: |
+        cd ${{ github.workspace }}
+        curl -O https://privateinternetaccess-storage.s3.amazonaws.com/pub/pia_desktop/qt/2022-01-04/qt-5.15.2-pia-macos-universal.run
+        chmod +x qt-5.15.2-pia-macos-universal.run
+        ./qt-5.15.2-pia-macos-universal.run <<< ${{ github.workspace }}/Qt
+        rm qt-5.15.2-pia-macos-universal.run
+    - name: Setup sccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ github.job }}
+        max-size: 1000M
+        variant: sccache
+    - name: Check if signing is enabled
+      id: check_secret
+      run: |
+        function bool_to_set() {
+          case $1 in
+            true) echo set ;;
+            false) echo unset ;;
+          esac
+        }
+        APPLE_BUILD_CERTIFICATE_BASE64_SET=${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 != '' }}
+        echo "Secret APPLE_BUILD_CERTIFICATE_BASE64 is $(bool_to_set $APPLE_BUILD_CERTIFICATE_BASE64_SET)"
+        APPLE_P12_PASSWORD_SET=${{ secrets.APPLE_P12_PASSWORD != '' }}
+        echo "Secret APPLE_P12_PASSWORD is $(bool_to_set $APPLE_P12_PASSWORD_SET)"
+        APPLE_KEYCHAIN_PASSWORD_SET=${{ secrets.APPLE_KEYCHAIN_PASSWORD != '' }}
+        echo "Secret APPLE_KEYCHAIN_PASSWORD is $(bool_to_set $APPLE_KEYCHAIN_PASSWORD_SET)"
+        PIA_APPLE_ID_PASSWORD_SET=${{ secrets.PIA_APPLE_ID_PASSWORD != '' }}
+        echo "Secret PIA_APPLE_ID_PASSWORD is $(bool_to_set $PIA_APPLE_ID_PASSWORD_SET)"
+        PIA_APPLE_ID_EMAIL_SET=${{ inputs.PIA_APPLE_ID_EMAIL != '' }}
+        echo "Input PIA_APPLE_ID_EMAIL is $(bool_to_set $PIA_APPLE_ID_EMAIL_SET)"
+        PIA_APPLE_NOTARIZE_TIMEOUT_SET=${{ inputs.PIA_APPLE_NOTARIZE_TIMEOUT != '' }}
+        echo "Input PIA_APPLE_NOTARIZE_TIMEOUT is $(bool_to_set $PIA_APPLE_NOTARIZE_TIMEOUT_SET)"
+        PIA_CODESIGN_CERT_SET=${{ inputs.PIA_CODESIGN_CERT != '' }}
+        echo "Input PIA_CODESIGN_CERT is $(bool_to_set $PIA_CODESIGN_CERT_SET)"
+
+        # This works by running the true and false commands, they are not types
+        SIGNING_ENABLED=$($APPLE_BUILD_CERTIFICATE_BASE64_SET &&
+                        $APPLE_P12_PASSWORD_SET &&
+                        $APPLE_KEYCHAIN_PASSWORD_SET &&
+                        $PIA_APPLE_ID_PASSWORD_SET &&
+                        $PIA_APPLE_ID_EMAIL_SET &&
+                        $PIA_APPLE_NOTARIZE_TIMEOUT_SET &&
+                        $PIA_CODESIGN_CERT_SET && echo 1 || echo 0)
+        if [ $SIGNING_ENABLED -eq 1 ]; then
+          echo "Signing enabled"
+        else
+          echo "Some value is not set. Signing disabled"
+        fi
+        echo "SIGNING_ENABLED=$SIGNING_ENABLED" >> $GITHUB_ENV
+  
+      shell: bash
+    - name: Install PIA's signing certificate
+      env:
+        APPLE_BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
+        APPLE_P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
+        APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+      if: env.SIGNING_ENABLED == '1'
+      run: |
+        echo "creating variables"
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+        echo "importing certificate from secrets"
+        echo -n "$APPLE_BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+        echo "creating temporary keychain"
+        security create-keychain -p "$APPLE_KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$APPLE_KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+        echo "importing certificate to keychain"
+        echo security import $CERTIFICATE_PATH -P "$APPLE_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security import $CERTIFICATE_PATH -P "$APPLE_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+
+        echo "Done importing certificates"
+    - name: Build, sign, notarize, package
+      env:
+        PIA_ALWAYS_NOTARIZE: ${{ env.SIGNING_ENABLED }}
+        PIA_APPLE_ID_EMAIL: ${{ inputs.PIA_APPLE_ID_EMAIL }}
+        PIA_APPLE_NOTARIZE_TIMEOUT: ${{ inputs.PIA_APPLE_NOTARIZE_TIMEOUT }}
+        PIA_CODESIGN_CERT: ${{ inputs.PIA_CODESIGN_CERT }}
+        PIA_APPLE_ID_PASSWORD: ${{ secrets.PIA_APPLE_ID_PASSWORD }}
+      run: |
+        if [ $SIGNING_ENABLED -ne 1 ]; then
+          unset PIA_ALWAYS_NOTARIZE PIA_APPLE_ID_EMAIL PIA_APPLE_NOTARIZE_TIMEOUT PIA_CODESIGN_CERT PIA_APPLE_ID_PASSWORD
+        fi
+        # debug.zip contains all that we need to actually release in CSI
+        scripts-internal/ci_rake out/pia_release_universal/artifacts/debug.zip
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "macos-universal-debug"
+        retention-days: 28
+        path: |-
+          out/pia_release_universal/artifacts/debug.zip
+    - name: Run integration tests
+      env:
+        APP_OUT_PATH: ./out/pia_release_universal
+        PIA_ACCOUNT_NAME: ${{ secrets.PIA_ACCOUNT_NAME }}
+        PIA_ACCOUNT_PWD: ${{ secrets.PIA_ACCOUNT_PWD }}
+      run: |
+        echo "Installing app..."
+        sudo $APP_OUT_PATH/stage/Private\ Internet\ Access.app/Contents/Resources/vpn-installer.sh
+        echo "Launching app..."
+        open /Applications/Private\ Internet\ Access.app
+        touch ~/pia_login
+        echo "$PIA_ACCOUNT_NAME" >> ~/pia_login
+        echo "$PIA_ACCOUNT_PWD" >> ~/pia_login
+        piactl login ~/pia_login
+
+        echo "Building integration tests..."
+        scripts-internal/ci_rake integtest_deploy
+        echo "Running integration tests..."
+        sudo $APP_OUT_PATH/integtest-stage/pia-integtest.app/Contents/MacOS/pia-integtest
+  macos_test:
+    name: macos_unit_test
+    runs-on: macos-12-xl
+    timeout-minutes: 120
+    env:
+      GITHUB_CI: 1
+      QTROOT: ${{ github.workspace }}/Qt/5.15.2
+      BUILD_BRAND: ${{ inputs.BRAND }}
+      BUILD_ARCHITECTURE: x86_64
+      BUILD_VARIANT: release
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Setup sccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ github.job }}
+        max-size: 500M
+        variant: sccache
+    - name: Install qt
+      run: |
+        cd ${{ github.workspace }}
+        curl -O https://privateinternetaccess-storage.s3.amazonaws.com/pub/pia_desktop/qt/2022-01-04/qt-5.15.2-pia-macos-universal.run
+        chmod +x qt-5.15.2-pia-macos-universal.run
+        ./qt-5.15.2-pia-macos-universal.run <<< ${{ github.workspace }}/Qt
+        rm qt-5.15.2-pia-macos-universal.run
+    - name: Build unit tests
+      run: |
+        # Build tests only for the arch we can run
+        export BUILD_ARCHITECTURE=x86_64
+        scripts-internal/ci_rake build_tests_parallel
+    - name: Run tests with coverage
+      run: |
+        # Build tests only for the arch we can run
+        export BUILD_ARCHITECTURE=x86_64
+        scripts-internal/ci_rake coverage
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "macos-x86_64-coverage"
+        retention-days: 28
+        path: |-
+          out/pia_release_x86_64/coverage

@@ -203,6 +203,12 @@ module PiaDesktop
         # Install clientlib to this staging area too
         clientlib.install(integtestStage, :lib)
 
+        # Ensure these libs are available for integtest too
+        commonlib.install(integtestStage, :lib)
+        kappsModules[:core].install(integtestStage, :lib)
+        kappsModules[:regions].install(integtestStage, :lib)
+        kappsModules[:net].install(integtestStage, :lib)
+
         # Integration test executable
         # Integration tests are run on an installed PIA client.  The test executable is
         # not deployed with the PIA client, so integration tests produce a

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -36,6 +36,7 @@
 #include <QGuiApplication>
 #include <QDir>
 #include <QElapsedTimer>
+#include <QOperatingSystemVersion>
 #include <QCursor>
 #include <QLibrary>
 #include <QOperatingSystemVersion>
@@ -332,12 +333,14 @@ void NativeHelpers::setDockVisibility(bool enabled)
 #endif
 }
 
-QString NativeHelpers::getMacosProductVersion() const
+bool NativeHelpers::isMacOSSplitTunnelSupported() const
 {
 #if defined(Q_OS_MACOS)
-    return Exec::cmdWithOutput(QStringLiteral("sw_vers"), {QStringLiteral("-productVersion")});
+    // Split tunnel is mostly broken on macOS >= 12 (Monterey)
+    return QOperatingSystemVersion::current().majorVersion() < 12;
 #else
-    return QString();
+    // Meaningless return value if the platform isn't macOS
+    return true;
 #endif
 }
 

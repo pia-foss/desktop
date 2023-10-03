@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -50,6 +50,9 @@ int main(int argc, char **argv)
 
     outln() << "Running tests for version:" << QString::fromStdString(Version::semanticVersion());
 
-    IntegTestCaseDefBase::executeAll(argc, argv);
-    return 0;
+    // Return the result as a number of total failed tests.
+    // This will convert into a non-zero exit code so that any number of 
+    // failures will cause the test run to error when run in the CI.
+    int integrationTestRunOutcome = static_cast<int>(IntegTestCaseDefBase::executeAll(argc, argv));
+    return integrationTestRunOutcome;
 }

@@ -40,8 +40,8 @@ class Qt
         # Locate Qt.  QTROOT can be set to the path to a Qt version to force
         # the use of that build (if we can't find Qt automatically, or to force
         # a particular version)
-        qtVersion = ENV['QTROOT']
-        if qtVersion
+        qtVersion = ENV['QTROOT'].to_s.gsub('\\', '/')
+        if !qtVersion.empty?
             if(!File.directory?(qtVersion))
                 raise "QTROOT in environment does not exist: #{qtVersion}"
             end
@@ -244,10 +244,15 @@ class Qt
         score
     end
 
+    # Gets Qt's minor and patch version from its path.
     def getQtPathVersion(path)
-        verMatch = path.match('^.*/Qt[^/]*/5\.(\d+)\.?(\d*)$')
+        # Valid paths need to end in the versioned directory, but a parent
+        # called Qt is only required for autodetection in /opt or C:/
+        #   e.g [/opt/Qt/5.15.2, /opt/5.15.2, /home/user/5.15.2, /home/user/5.15.2, C:/5.15.2]
+        # Note that the path must use forward slash, even on windows.
+        verMatch = path.match('^.*/5\.(\d+)\.?(\d*)$')
         if(verMatch == nil)
-            nil
+            raise "Cannot parse Qt version from #{path}"
         else
             [verMatch[1].to_i, verMatch[2].to_i]
         end

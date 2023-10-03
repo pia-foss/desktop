@@ -92,4 +92,22 @@ module Util
         # as-is when executing the command.
         "#{ENV['ComSpec']} /C \"#{command}\""
     end
+
+    # Retrieve the command verbosity specified by the caller. Defaults to false
+    def self.verbose?
+        verboseSymbol = selectSymbol('VERBOSE', :undefined, [:false, :no, :off, :true, :yes, :on])
+        if verboseSymbol != :undefined 
+            [:true, :yes, :on].include?(verboseSymbol)
+        else
+            ENV.include?('RAKE_VERBOSE_SH') && ["on", "true", "yes"].include?(ENV['RAKE_VERBOSE_SH'].downcase)
+        end
+    end
+
+    def self.shellRun(*cmd)
+        Rake.sh *cmd, verbose: self.verbose? do |ok, res|
+            if !ok
+                puts "Command failed: #{cmd.join(' ')}"
+            end
+        end
+    end
 end

@@ -135,7 +135,7 @@ class ClangXnu
 
     def extractSymbols(targetFile)
         # Extract the symbols to a separate .dSYM bundle
-        sh 'dsymutil', '-o', "#{targetFile}.dSYM", targetFile
-        sh 'strip', '-S', targetFile
+       Util.shellRun 'dsymutil', '-o', "#{targetFile}.dSYM", targetFile
+       Util.shellRun 'strip', '-S', targetFile
     end
 end

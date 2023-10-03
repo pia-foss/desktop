@@ -1,0 +1,124 @@
+name: pia_desktop/windows
+on:
+  workflow_call:
+    inputs:
+      BRAND:
+        required: true
+        type: string
+    secrets:
+      WINDOWS_BUILD_CERTIFICATE_BASE64:
+        required: false
+      WINDOWS_PFX_PASSWORD:
+        required: false
+
+concurrency:
+  group: "${{ github.ref }}-windows"
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: windows_${{ matrix.target.arch }}
+    runs-on: windows-2019
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        target: [ 
+          {arch: x64, arch_full: x86_64, qt_arch: win64_msvc2019_64}, 
+          {arch: x86, arch_full: x86, qt_arch: win32_msvc2019}
+        ]
+    env:
+      GITHUB_CI: 1
+      QTROOT: ${{ github.workspace }}/QtBuild/Qt/5.15.2
+      BUILD_BRAND: ${{ inputs.BRAND }}
+      BUILD_ARCHITECTURE: ${{ matrix.target.arch_full }}
+      BUILD_VARIANT: release
+      SIGNING_ENABLED: 0
+      PIA_SIGNTOOL_CERTFILE: C:/cert.pfx
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 'head' # Not needed with a .ruby-version file
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Setup sccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ github.job }}-${{ matrix.target.arch }}
+        max-size: 1500M
+        variant: sccache
+    - uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        dir: '${{ github.workspace }}/QtBuild/'
+        cache: 'true'
+        arch: ${{ matrix.target.qt_arch }}
+    - name: Check if signing is enabled
+      id: check_secret
+      shell: bash
+      run: |
+        function bool_to_set() {
+          case $1 in
+            true) echo set ;;
+            false) echo unset ;;
+          esac
+        }
+        WINDOWS_BUILD_CERTIFICATE_BASE64_SET=${{ secrets.WINDOWS_BUILD_CERTIFICATE_BASE64 != '' }}
+        echo "Secret WINDOWS_BUILD_CERTIFICATE_BASE64 is $(bool_to_set $WINDOWS_BUILD_CERTIFICATE_BASE64_SET)"
+        WINDOWS_PFX_PASSWORD_SET=${{ secrets.WINDOWS_PFX_PASSWORD != '' }}
+        echo "Secret WINDOWS_PFX_PASSWORD is $(bool_to_set $WINDOWS_PFX_PASSWORD_SET)"
+
+        # This works by running the true and false commands, they are not types
+        SIGNING_ENABLED=$($WINDOWS_BUILD_CERTIFICATE_BASE64_SET &&
+                        $WINDOWS_PFX_PASSWORD_SET && echo 1 || echo 0)
+        if [ $SIGNING_ENABLED -eq 1 ]; then
+          echo "Signing enabled"
+        else
+          echo "Some value is not set. Signing disabled"
+        fi
+        echo "SIGNING_ENABLED=$SIGNING_ENABLED" >> $GITHUB_ENV
+    - name: Install signing certificate
+      if: env.SIGNING_ENABLED == '1'
+      env:
+        WINDOWS_BUILD_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_BASE64 }}
+      run: |
+        # Retrieve the Base64 encoded certificate from the environment variable
+        $base64Cert = $env:WINDOWS_BUILD_CERTIFICATE_BASE64
+        
+        # Convert the Base64 string to bytes
+        $certBytes = [Convert]::FromBase64String($base64Cert)
+        
+        try {
+            # Write the certificate bytes to the temporary file
+            [System.IO.File]::WriteAllBytes($env:PIA_SIGNTOOL_CERTFILE, $certBytes)
+            Write-Host "Certificate installed to $env:PIA_SIGNTOOL_CERTFILE"
+        }
+        catch {
+            Write-Host "An error occurred while installing the certificate."
+            Write-Host "Signing will fail"
+        }
+    - name: Build, sign, package
+      env:
+        PIA_SIGNTOOL_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
+      run: |
+        if ($env:SIGNING_ENABLED -eq "0") {
+            Remove-Item env:PIA_SIGNTOOL_CERTFILE
+        }
+        scripts-internal/ci_rake.ps1 out/pia_release_${{ matrix.target.arch_full }}/artifacts/debug.zip
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "windows-${{ matrix.target.arch }}-debug"
+        retention-days: 28
+        path: |-
+          out/pia_release_${{ matrix.target.arch_full }}/artifacts/debug.zip
+    - name: Build unit tests
+      run: |
+        scripts-internal/ci_rake.ps1 build_tests_parallel
+    - name: Run unit tests
+      run: |
+        scripts-internal/ci_rake.ps1 run_all_tests

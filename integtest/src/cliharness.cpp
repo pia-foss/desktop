@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -23,6 +23,7 @@
 #include "integtestcase.h"
 #include "brand.h"
 #include <common/src/builtin/path.h>
+#include <common/src/settings/daemonsettings.h>
 #include <QProcess>
 #include <QTest>
 #include <QJsonDocument>
@@ -125,18 +126,61 @@ namespace CliHarness
             QJsonDocument{settings}.toJson(QJsonDocument::JsonFormat::Compact)});
     }
 
-    bool waitFor(const QString &monitorType, const QString &value,
-                             std::chrono::milliseconds timeout)
+    void resetSettings()
+    {
+        // Although there is a 'resetsettings' CLI command that uses the
+        // resetSettings RPC, here we need to exclude a few additional settings.
+        QJsonObject defaultsJson{DaemonSettings{}.toJsonObject()};
+        // Remove settings that are normally excluded
+        for (const auto &excludedSetting : DaemonSettings::settingsExcludedFromReset())
+            defaultsJson.remove(excludedSetting);
+
+        // Also exclude settings that were specifically set up by initSettings()
+        defaultsJson.remove(QStringLiteral("automaticTransport"));
+        // Debug logging is already excluded by default in settingsExcludedFromReset()
+
+        // Also exclude the update channels.  The GA update channel must
+        // sometimes be overridden during tests to run the test with feature
+        // flags that aren't yet published.  (The beta update channel doesn't
+        // impact feature flags, but it'd strange to reset one and not the
+        // other.)
+        defaultsJson.remove(QStringLiteral("updateChannel"));
+        defaultsJson.remove(QStringLiteral("betaUpdateChannel"));
+
+        // Exclude the service quality events setting - if this has been turned
+        // on, keep it on.  Currently, we're testing events with integ tests.
+        // In the future this may stay on since we typically run integ tests
+        // against builds using the "staging" (prerelease) product ID, although
+        // we should avoid sending production events from integ tests.
+        defaultsJson.remove(QStringLiteral("sendServiceQualityEvents"));
+
+        applySettings(defaultsJson);
+    }
+
+    bool waitForPredicate(const QString &monitorType, std::function<bool(const QString &)> predicate,
+                          std::chrono::milliseconds timeout) 
     {
         CliMonitor monitor{monitorType};
-        auto success = QTest::qWaitFor([&]() -> bool {return monitor.value() == value;}, msec(timeout));
+        auto success = QTest::qWaitFor([&]() -> bool {return predicate(monitor.value());}, msec(timeout));
         if(!success)
         {
-            qWarning() << "Failed to wait for" << monitorType << "to be" << value
-                << "after" << traceMsec(timeout);
+            qWarning() << "Failed to wait for" << monitorType
+                       << "to match the predicate after " << traceMsec(timeout) << "ms";
         }
         VERIFY_CONTINUE(success);
         return success;
+    }
+
+    bool waitFor(const QString &monitorType, const QString &value,
+                 std::chrono::milliseconds timeout) 
+    {
+        return waitForPredicate(monitorType, [&](auto currentValue) -> bool { return currentValue == value;});
+    }
+
+    bool waitForNotEqual(const QString &monitorType, const QString &value,
+                         std::chrono::milliseconds timeout)
+    {
+        return waitForPredicate(monitorType, [&](auto currentValue) -> bool { return currentValue.size() > 0 && currentValue != value;});
     }
 
     bool disconnectAndWait(std::chrono::milliseconds timeout)
@@ -150,7 +194,9 @@ CliMonitor::CliMonitor(const QString &type)
 {
     connect(&_piactlStdout, &LineBuffer::lineComplete, this, [this](const QByteArray &line)
     {
+        if (line.size() == 0) return;
         _value = QString::fromLocal8Bit(line);
+        // Ignore empty strings
         qInfo() << "monitor updated with value" << _value;
         emit valueChanged(_value);
     });

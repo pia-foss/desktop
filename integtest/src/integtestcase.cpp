@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -30,6 +30,11 @@ void IntegTestCase::printTotals()
 {
     outln() << "TOTAL:" << _totalPassed << "passed," << _totalFailed
         << "failed";
+}
+
+unsigned IntegTestCase::returnTotalFailed()
+{
+    return _totalFailed;
 }
 
 void IntegTestCase::verifyImpl(bool success, const char *expr, const char *file, int line)
@@ -127,7 +132,7 @@ auto IntegTestCaseDefBase::allTestCases() -> std::deque<IntegTestCaseDefBase*>&
     return _allTestCases;
 }
 
-void IntegTestCaseDefBase::executeAll(int argc, char **argv)
+unsigned IntegTestCaseDefBase::executeAll(int argc, char **argv)
 {
     // Sort all the test cases by name
     auto allTests = allTestCases();
@@ -147,4 +152,5 @@ void IntegTestCaseDefBase::executeAll(int argc, char **argv)
     }
 
     IntegTestCase::printTotals();
+    return IntegTestCase::returnTotalFailed();
 }

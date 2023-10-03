@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -26,6 +26,7 @@
 #include <string>
 #include <ostream>
 #include <sstream>
+#include <fstream>
 #include <type_traits>
 #include <cstring>
 #include <memory>
@@ -40,6 +41,9 @@
 #endif
 
 namespace kapps { namespace core {
+
+// Splits a std::string and returns the components in a std::vector<std::string>
+std::vector<std::string> KAPPS_CORE_EXPORT splitString(const std::string &s, char delimiter);
 
 // CRTP ostream inserter - implement void trace(std::ostream &os) const to
 // provide operator<<().

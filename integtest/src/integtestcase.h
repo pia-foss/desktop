@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -96,6 +96,7 @@ public:
     // Used to implement VERIFY_CONTINUE and COMPARE_CONTINUE
     static void continueAssertionFailed() { _continueAssertionFailed = true; }
     static void printTotals();
+    static unsigned returnTotalFailed();
 
     static void verifyImpl(bool success, const char *expr, const char *file, int line);
     template<class Actual, class Expected>
@@ -168,7 +169,7 @@ private:
 
 public:
     // Execute all test cases
-    static void executeAll(int argc, char **argv);
+    static unsigned executeAll(int argc, char **argv);
 
 public:
     IntegTestCaseDefBase();

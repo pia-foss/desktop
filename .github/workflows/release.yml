@@ -1,0 +1,54 @@
+name: Build, Test and Sign a RC
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+      - 'v*/*'
+  workflow_dispatch:
+
+jobs:
+  linux-release-build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build_linux.yml
+    secrets:
+      PIA_ACCOUNT_NAME: ${{ secrets.PIA_ACCOUNT_NAME }}
+      PIA_ACCOUNT_PWD: ${{ secrets.PIA_ACCOUNT_PWD }}
+    with:
+      BRAND: pia
+
+  linux-release-arm-build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build_linux_arm.yml
+    with:
+      BRAND: pia
+
+  macos-release-build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build_mac.yml
+    secrets:
+      APPLE_BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
+      APPLE_P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
+      APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+      PIA_APPLE_ID_PASSWORD: ${{ secrets.PIA_APPLE_ID_PASSWORD }}
+      PIA_ACCOUNT_NAME: ${{ secrets.PIA_ACCOUNT_NAME }}
+      PIA_ACCOUNT_PWD: ${{ secrets.PIA_ACCOUNT_PWD }}
+    with:
+      BRAND: pia
+      PIA_APPLE_ID_EMAIL: ${{ vars.PIA_APPLE_ID_EMAIL }}
+      PIA_APPLE_NOTARIZE_TIMEOUT: ${{ vars.PIA_APPLE_NOTARIZE_TIMEOUT }}
+      PIA_CODESIGN_CERT: ${{ vars.PIA_CODESIGN_CERT }}
+
+  windows-release-build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build_windows.yml
+    secrets:
+      WINDOWS_BUILD_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_BASE64 }}
+      WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
+    with:
+      BRAND: pia

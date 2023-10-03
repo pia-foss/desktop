@@ -40,7 +40,7 @@ module PiaLinux
         FileList[File.join(stageRoot, 'bin/*')].exclude('**/*.sh').each do |f|
             # Only patchelf QT binaries
             if QT_BINARIES.include?(File.basename(f))
-                sh(Patchelf, '--force-rpath', '--set-rpath', '$ORIGIN/../lib', f)
+                Util.shellRun(Patchelf, '--force-rpath', '--set-rpath', '$ORIGIN/../lib', f)
             end
         end
 
@@ -202,7 +202,7 @@ module PiaLinux
             FileUtils.rm(Dir.glob(installerBuild.artifact('*.run')), force: true)
             # Don't embed a timestamp when gzipping
             ENV['GZIP'] = '-n'
-            sh('extras/installer/linux/makeself/makeself.sh', '--tar-quietly',
+            Util.shellRun('extras/installer/linux/makeself/makeself.sh', '--tar-quietly',
                '--keep-umask', '--tar-extra',
                "--mtime=@#{version.timestamp} --sort=name --owner=0 --group=0 --numeric-owner",
                '--packaging-date', `date -d @"#{version.timestamp}"`,

@@ -75,7 +75,7 @@ def defineTranslationTargets(stage, artifacts)
         args << '-ts'
         args += importedTs
         # lupdate updates all ts files in one pass, so we only need to run it once.
-        sh *args
+        Util.shellRun *args
 
         # Generate pseudolocalized artifacts if debug mode is on
         if Build::debug?
@@ -100,7 +100,7 @@ def defineTranslationTargets(stage, artifacts)
             File.write(t, tsContent)
             # Run lrelease on each .ts file to generate .qm files
             puts "lrelease: #{t}"
-            sh *(lreleaseFixed + [t, '-qm', t.ext('.qm')])
+            Util.shellRun *(lreleaseFixed + [t, '-qm', t.ext('.qm')])
         end
 
         # Generate the qrc file.  We do want to rewrite this even if it hasn't
@@ -119,7 +119,7 @@ def defineTranslationTargets(stage, artifacts)
     rccFile = tsBuild.artifact('translations.rcc')
     file rccFile => qrcFile do |t|
         puts "rcc: #{qrcFile}"
-        sh Executable::Qt.tool('rcc'), '-binary', qrcFile, '-o', t.name
+       Util.shellRun Executable::Qt.tool('rcc'), '-binary', qrcFile, '-o', t.name
     end
 
     stage.install(rccFile, :res)

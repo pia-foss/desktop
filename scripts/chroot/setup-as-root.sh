@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2022 Private Internet Access, Inc.
+# Copyright (c) 2023 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -129,7 +129,7 @@ rm -rf "$STRETCH_CHROOT"
 
 echo "Run debootstrap"
 mkdir -p "$STRETCH_CHROOT"
-debootstrap stretch "$STRETCH_CHROOT"
+debootstrap stretch "$STRETCH_CHROOT" http://archive.debian.org/debian/
 
 echo "Configure schroot"
 # Create the fstab for the chroot - this is similar to the 'desktop'
@@ -166,6 +166,7 @@ HOST_PACKAGES_KAPPS=(
     clang-7
     git
     arch-test
+    patchelf
 )
 # For desktop-dep-build:
 HOST_PACKAGES_DEP=(

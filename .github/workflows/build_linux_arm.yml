@@ -1,0 +1,78 @@
+name: pia_desktop/linux_arm
+on:
+  workflow_call:
+    inputs:
+      BRAND:
+        required: true
+        type: string
+
+concurrency:
+  group: "${{ github.ref }}-linux-arm"
+  cancel-in-progress: true
+
+jobs:
+  linux_arm:
+    strategy:
+      matrix:
+        arch: ['armhf', 'arm64']
+    runs-on:
+      - ubuntu-latest
+    container:
+      image: debian:10-slim
+      # chroot must run with privileges
+      options: --privileged
+    timeout-minutes: 120
+    env:
+      GITHUB_CI: 1
+      QTROOT: /opt/5.15.2
+      LANG: en_US.UTF-8
+      CROSS_ARCH: ${{ matrix.arch }}
+    steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        apt-get update
+        apt-get install -y debootstrap schroot curl git git-lfs xz-utils python
+        git lfs install --system
+        # Avoid git permission issues
+        git config --global --add safe.directory '*'
+        (
+          PIA_QT_INSTALLER_URL="https://privateinternetaccess-storage.s3.amazonaws.com/pub/pia_desktop/qt/2021-01-23/qt-5.15.2-pia-linux-${CROSS_ARCH}.run" &&
+          wget $PIA_QT_INSTALLER_URL -nv -O qt_installer_${CROSS_ARCH}.sh && chmod +x qt_installer_${CROSS_ARCH}.sh &&
+          bash -c "./qt_installer_${CROSS_ARCH}.sh --accept --quiet --noprogress --nox11 --target /tmp/Qt <<< /opt" &&
+          rm -f qt_installer_${CROSS_ARCH}.sh
+        ) &
+        (
+          PIA_QT_INSTALLER_URL="https://privateinternetaccess-storage.s3.amazonaws.com/pub/pia_desktop/qt/2021-01-23/qt-5.15.2-pia-linux-x86_64.run" &&
+          wget $PIA_QT_INSTALLER_URL -nv -O qt_installer_x86_64.sh && chmod +x qt_installer_x86_64.sh &&
+          bash -c "./qt_installer_x86_64.sh --accept --quiet --noprogress --nox11 --target /tmp/Qt_x86_64 <<< /opt" &&
+          rm -f qt_installer_x86_64.sh
+        ) & 
+        echo Waiting for Qt installations
+        wait
+        # Requirement for chroot setup
+        addgroup crontab
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Build chroot
+      run: |
+        scripts/chroot/setup-as-root.sh --bind $(pwd) --bind /opt --cross-target $CROSS_ARCH
+    - name: Build and package
+      shell: bash
+      run: |
+        OPTIONS="VARIANT=release ARCHITECTURE=$CROSS_ARCH BRAND=${{ inputs.BRAND }}"
+        TARGET="out/pia_release_${CROSS_ARCH}_stretch/artifacts/debug.zip"
+        scripts/chroot/enter.sh $CROSS_ARCH -- rake -j$(nproc) $OPTIONS $TARGET
+        # Move the target file to the working directory to simplify its path
+        mv $TARGET debug.zip
+        # Remove any other debug.zip files to avoid uploading unnecesary files
+        find out -name 'debug.zip' -exec rm -f {} \;
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "linux-${{ matrix.arch }}-debug"
+        retention-days: 28
+        # For whatever reason, the upload won't find the file if we specify the full path
+        path: ./**/debug.zip

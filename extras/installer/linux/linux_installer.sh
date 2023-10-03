@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Private Internet Access, Inc.
+# Copyright (c) 2023 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -42,10 +42,6 @@ readonly openrcServiceLocation="/etc/init.d/${brandCode}vpn"
 readonly serviceName="${brandCode}vpn"
 readonly groupName="${brandCode}vpn"
 readonly hnsdGroupName="${brandCode}hnsd"                # The group used by the Handshake DNS service
-readonly routingTableName="${serviceName}rt"             # for split tunnel
-readonly vpnOnlyroutingTableName="${serviceName}Onlyrt"  # for inverse split tunnel
-readonly wireguardRoutingTableName="${serviceName}Wgrt"
-readonly forwardedRoutingTableName="${serviceName}Fwdrt" # For forwarded packets
 readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/bin/${ctlExecutableName}"
 readonly ctlSymlinkPath="/usr/local/bin/${ctlExecutableName}"
@@ -211,9 +207,9 @@ function installDependencies() {
     if hasDependencies; then return 0; fi
 
     # Here we are installing the "iptables" package in every distribution
-    # This, depending on the distribution, can be the legacy one or the 
+    # This, depending on the distribution, can be the legacy one or the
     # nftables backend one.
-    # 
+    #
     # Debian:   "iptables" uses nf_tables backend
     # Fedora:   "iptables" is the legacy package installed by default
     #           "iptables-nft" is nf_tables backend one
@@ -258,20 +254,6 @@ function addGroups() {
             echoPass "Added group $group"
         fi
     done
-
-    true
-}
-
-function addRoutingTable() {
-    local highestIndex=$(awk '/^[0-9]/{print $1}' /etc/iproute2/rt_tables | sort -n | tail -1)
-    local newIndex=$(($highestIndex + 1))
-    local routingTable="$1"
-
-    local routesLocation=/etc/iproute2/rt_tables
-    if [[ -f $routesLocation ]] && ! grep -q "$routingTable" $routesLocation; then
-        echo -e "$newIndex\t$routingTable" | sudo tee -a $routesLocation > /dev/null
-        echoPass "Added $routingTable routing table"
-    fi
 
     true
 }
@@ -328,12 +310,6 @@ function installPia() {
         sudo update-desktop-database 2>/dev/null
     fi
     echoPass "Created desktop entry"
-
-    # Create routing tables for split-tunneling
-    addRoutingTable $routingTableName
-    addRoutingTable $vpnOnlyroutingTableName
-    addRoutingTable $wireguardRoutingTableName
-    addRoutingTable $forwardedRoutingTableName
 
     # Instruct NetworkManager not to interfere with DNS on the wireguard interface
     wireguardUnmanaged

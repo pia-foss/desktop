@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -26,11 +26,27 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "posix_objects.h"
+#include <sys/stat.h>
 
 namespace kapps { namespace core {
 
 namespace fs
 {
+    bool exists(const std::string &path)
+    {
+        struct stat buffer{};
+        return stat(path.c_str(), &buffer) == 0;
+    }
+
+    bool dirExists(const std::string &path)
+    {
+        struct stat buffer{};
+        if(stat(path.c_str(), &buffer) != 0)
+            return false;
+
+        return S_ISDIR(buffer.st_mode);
+    }
+
     std::string dirName(const std::string &path)
     {
         // + 1 for null terminator
@@ -50,6 +66,66 @@ namespace fs
         }
 
         return ret == 0;
+    }
+
+    bool mkDir_p(const std::string &path, bool silent) {
+        if(path.empty() || dirExists(path)) return true;
+
+        // Find the last '/' and recursively ensure parent directory exists
+        size_t pos = path.find_last_of('/');
+        if(pos != std::string::npos)
+        {
+            std::string parentPath = path.substr(0, pos);
+            if(!mkDir_p(parentPath, silent))
+                return false;
+        }
+
+        return mkDir(path, silent);
+    }
+
+    bool copyFile(const std::string &srcPath, const std::string &destPath, bool silent)
+    {
+        std::ifstream source{srcPath, std::ios::binary};
+        std::ofstream dest{destPath, std::ios::binary};
+
+        if(!source.is_open()) {
+            if(!silent)
+                KAPPS_CORE_WARNING() << "Error opening source file: " << srcPath << ErrnoTracer{};
+            return false;
+        }
+
+        if(!dest.is_open()) {
+            if(!silent)
+                KAPPS_CORE_WARNING() << "Error opening destination file: " << destPath << ErrnoTracer{};
+            return false;
+        }
+
+        // Use the rdbuf() method to read the contents
+        dest << source.rdbuf();
+
+        // Get the perms of srcFile
+        struct stat srcInfo{};
+        if(::stat(srcPath.c_str(), &srcInfo))
+        {
+            // Not getting the perms is not a critical error
+            // so we just trace it.
+            KAPPS_CORE_WARNING() << "stat()" << ErrnoTracer{};
+        }
+
+        // We can't just get the result of st_mode as that also includes info
+        // about the file type (i.e symlink, regular file, etc)
+        mode_t permissionsToCopy = static_cast<mode_t>(srcInfo.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+
+        // Set destFile perms to that of srcFile
+        // We'd like to imitate the 'cp' command behaviour
+        // which also preserves file modes.
+        if(::chmod(destPath.c_str(), permissionsToCopy))
+        {
+            // Failure to set the file mode is not a critcal error, just trace;
+            KAPPS_CORE_WARNING() << "chmod()" << ErrnoTracer{};
+        }
+
+        return true;
     }
 
     bool writeString(const std::string &path, const std::string &content, bool silent)
@@ -97,7 +173,7 @@ namespace fs
 
         std::vector<char> content(bytes);
 
-        // Try writing content to file
+        // Try reading all content from file
         int ret{-1};
         NO_EINTR(ret = ::read(fd.get(), content.data(), content.size()));
         if(ret == -1)

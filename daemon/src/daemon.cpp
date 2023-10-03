@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -81,8 +81,6 @@ namespace
     // use a JsonRefresher since DIP info comes from an authenticated API POST.
     const std::chrono::minutes dipRefreshFastInterval{10};
     const std::chrono::hours dipRefreshSlowInterval{24};
-    // Check for new messages
-    const std::chrono::minutes appMessagesCheckInterval{10};
 
     // Resource paths for various regions-related resource (relative to the API
     // base)
@@ -331,9 +329,6 @@ Daemon::Daemon(QObject* parent)
     _dedicatedIpRefreshTimer.setInterval(msec(dipRefreshFastInterval));
     connect(&_dedicatedIpRefreshTimer, &QTimer::timeout, this, &Daemon::refreshDedicatedIps);
 
-    _checkForAppMessagesTimer.setInterval(msec(appMessagesCheckInterval));
-    connect(&_checkForAppMessagesTimer, &QTimer::timeout, this, &Daemon::checkForAppMessages);
-
     _memTraceTimer.setInterval(msec(std::chrono::minutes(5)));
     connect(&_memTraceTimer, &QTimer::timeout, this, &Daemon::traceMemory);
 
@@ -548,7 +543,7 @@ Daemon::Daemon(QObject* parent)
 
         _modernLatencyTracker.start();
         _dedicatedIpRefreshTimer.start();
-        _checkForAppMessagesTimer.start();
+
         _modernRegionRefresher.startOrOverride(environment().getModernRegionsListApi(),
                                                Path::ModernRegionOverride,
                                                Path::ModernRegionBundle,
@@ -588,7 +583,6 @@ Daemon::Daemon(QObject* parent)
         _shadowsocksRefresher.stop();
         _dedicatedIpRefreshTimer.stop();
         _modernLatencyTracker.stop();
-        _checkForAppMessagesTimer.stop();
         queueNotification(&Daemon::RPC_disconnectVPN);
         queueNotification(&Daemon::reapplyFirewallRules);
         updatePublicIpRefresher(_connection->state());
@@ -1308,7 +1302,6 @@ void Daemon::RPC_crash()
 void Daemon::RPC_refreshMetadata()
 {
     refreshDedicatedIps();
-    checkForAppMessages();
     refreshAccountInfo();
     _updateDownloader.refreshUpdate();
 }
@@ -2792,70 +2785,6 @@ void Daemon::refreshDedicatedIps()
     }
 }
 
-AppMessage Daemon::parseAppMessage(const QJsonObject &messageJson) const
-{
-    // The API returns an empty object when no message is available; that's not
-    // an error - remove any existing message
-    if(messageJson.isEmpty())
-    {
-        qInfo() << "No app messages available (received empty object from endpoint)";
-        return {};
-    }
-
-    try
-    {
-        AppMessage message;
-        message.id(json_cast<quint64>(messageJson["id"], HERE));
-        message.messageTranslations(json_cast<AppMessage::TextTranslations>(messageJson["message"], HERE));
-
-        // A link exists
-        if(messageJson.contains("link"))
-        {
-            message.hasLink(true);
-
-            const auto &linkJson = messageJson["link"].toObject();
-            message.linkTranslations(json_cast<AppMessage::TextTranslations>(linkJson["text"], HERE));
-
-            const auto &actionJson = linkJson["action"].toObject();
-            if(actionJson.contains("settings"))
-                message.settingsAction(actionJson["settings"].toObject());
-            if(actionJson.contains("view"))
-                message.viewAction(json_cast<QString>(actionJson["view"], HERE));
-            if(actionJson.contains("uri"))
-                message.uriAction(json_cast<QString>(actionJson["uri"], HERE));
-        }
-        return message;
-    }
-    catch(const Error &err)
-    {
-        qWarning() << "Invalid Json for App Message -" << err << "-"
-            << messageJson;
-    }
-
-    return {};
-}
-
-void Daemon::checkForAppMessages()
-{
-    const auto version = SemVersion{QString::fromStdString(Version::semanticVersion())};
-    // Strip off pre-release tag leaving only major.minor.patch
-    const auto versionString = QStringLiteral("%1.%2.%3").arg(version.major()).arg(version.minor()).arg(version.patch());
-    const QString queryParams = QStringLiteral("version=%1&client=%2").arg(versionString).arg(UpdateChannel::platformName);
-    qInfo() << QStringLiteral("Checking for app Messages (%1)").arg(queryParams);
-    _apiClient.getRetry(*_environment.getApiv2(), QStringLiteral("messages?%1").arg(queryParams),
-        ApiClient::autoAuth(_account.username(), _account.password(), _account.token()))
-        ->notify(this, [this](const Error &err, const QJsonDocument &json)
-        {
-            if(err)
-            {
-                qWarning() << "Unable to check app messages:" << err;
-                return;
-            }
-
-            _data.appMessage(parseAppMessage(json.object()));
-        });
-}
-
 // Load account info from the web API and return the result asynchronously
 // as a QJsonObject appropriate for assigning to DaemonAccount.
 //
@@ -2885,8 +2814,12 @@ Async<QJsonObject> Daemon::loadAccountInfo(const QString& username, const QStrin
                 assignOrDefault(daysRemaining, "days_remaining");
                 assignOrDefault(renewable, "renewable");
                 assignOrDefault(renewURL, "renew_url", {
-                    if (value == QStringLiteral("https://www.privateinternetaccess.com/pages/client-support/"))
+                    // If the web response directs us to the client-support/helpdesk, we set it to the subscription panel
+                    if (value == QStringLiteral("https://www.privateinternetaccess.com/pages/client-support/") ||
+                        value == QStringLiteral("https://helpdesk.privateinternetaccess.com/"))
+                    {
                         value = QStringLiteral("https://www.privateinternetaccess.com/pages/client-control-panel#subscription-overview");
+                    }
                 });
                 assignOrDefault(expirationTime, "expiration_time", {
                     value = value.toDouble() * 1000.0;

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -19,6 +19,7 @@
 #include "linux_firewall.h"
 #include "linux_fwmark.h"
 #include "linux_routing.h"
+#include "rt_tables_initializer.h"
 #include <kapps_core/src/newexec.h>
 #include <kapps_core/src/ipaddress.h>
 #include "proc_tracker.h"
@@ -30,6 +31,10 @@ namespace
 {
     // for convenience
     using IPVersion = IpTablesFirewall::IPVersion;
+
+    // Define the location of the rt_tables files
+    const std::string etcRoutingLocation{"/etc/iproute2/rt_tables"};
+    const std::string libRoutingLocation{"/usr/lib/iproute2/rt_tables"};
 }
 
 LinuxFirewall::LinuxFirewall(FirewallConfig config)
@@ -40,6 +45,14 @@ LinuxFirewall::LinuxFirewall(FirewallConfig config)
 
     // Setup cgroup object for retrieving and configuring cgroup information for split tunnel
     _pCgroup.emplace(_config);
+
+    // Add our custom routing tables to the rt_tables file.
+    // We do this here rather than in the installer as there is some complexity involved.
+    RtTablesInitializer rtTablesInitializer{
+        _config.brandInfo.code,
+        {etcRoutingLocation, libRoutingLocation}
+    };
+    rtTablesInitializer.install();
 
     _pFilter->install();
 }
@@ -231,14 +244,14 @@ void LinuxFirewall::updateRules(const FirewallParams &params)
             _pFilter->replaceAnchor(TableEnum::Nat, IPVersion::IPv4, "90.fwdSnatDNS", {
                 qs::format("-p udp --match mark --mark % -m udp --dport 53 -j SNAT --to-source %",
                     _pFilter->fwmark().forwardedPacketTag(), routedDnsInfo.sourceIp()),
-                qs::format("-p tcp --match mark --mark % -m tcp --dport 53 -j SNAT --to-source %", 
+                qs::format("-p tcp --match mark --mark % -m tcp --dport 53 -j SNAT --to-source %",
                     _pFilter->fwmark().forwardedPacketTag(), routedDnsInfo.sourceIp())
                 });
 
             _pFilter->replaceAnchor(TableEnum::Nat, IPVersion::IPv4, "80.fwdSplitDNS", {
-                qs::format("-p udp --match mark --mark % -m udp --dport 53 -j DNAT --to-destination %:53", 
+                qs::format("-p udp --match mark --mark % -m udp --dport 53 -j DNAT --to-destination %:53",
                     _pFilter->fwmark().forwardedPacketTag(), routedDnsInfo.dnsServer()),
-                qs::format("-p tcp --match mark --mark % -m tcp --dport 53 -j DNAT --to-destination %:53", 
+                qs::format("-p tcp --match mark --mark % -m tcp --dport 53 -j DNAT --to-destination %:53",
                     _pFilter->fwmark().forwardedPacketTag(), routedDnsInfo.dnsServer()),
                 });
 
@@ -318,7 +331,7 @@ void LinuxFirewall::updateRules(const FirewallParams &params)
     {
         // If the adapter name isn't set, getDNSRules() returns an empty list
         std::vector<std::string> effectiveDnsRules = getDNSRules(adapterName, params.effectiveDnsServers);
-        
+
         std::vector<std::string> ruleList;
 
         // When DNS rules are being applied, and split tunnel DNS is enabled,
@@ -339,7 +352,7 @@ void LinuxFirewall::updateRules(const FirewallParams &params)
             // Only one server is used
             const auto &forcedDnsServer = appDnsInfo.dnsServer();
             const auto &forcedDnsCgroup = appDnsInfo.cGroupId();
-            
+
             if(!forcedDnsCgroup.empty())
             {
                 // Permit forced apps to reach the forced DNS.
@@ -369,7 +382,7 @@ void LinuxFirewall::updateRules(const FirewallParams &params)
                 }
             }
         }
-        
+
         // Permit apps that get through all of the cgroup filters (above) to
         // reach the configured DNS.
         //
@@ -378,7 +391,7 @@ void LinuxFirewall::updateRules(const FirewallParams &params)
         // leak protection above.
         for(auto &dnsRule : effectiveDnsRules)
             ruleList.push_back(std::move(dnsRule));
-        
+
         // Re-allow localhost DNS now we've plugged the leaks.
         // localhost DNS is important for systemd which uses a 127.0.0.53 DNS proxy
         // for all DNS traffic.

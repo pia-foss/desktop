@@ -1,0 +1,159 @@
+name: pia_desktop/linux
+on:
+  workflow_call:
+    secrets:
+      PIA_ACCOUNT_NAME:
+        required: true
+      PIA_ACCOUNT_PWD:
+        required: true
+    inputs:
+      BRAND:
+        required: true
+        type: string
+
+concurrency:
+  group: "${{ github.ref }}-linux"
+  cancel-in-progress: true
+
+jobs:
+  linux_x64_build:
+    runs-on:
+      - ubuntu-latest
+    container: 
+      image: debian:10-slim
+      options: --privileged
+    timeout-minutes: 120
+    env:
+      GITHUB_CI: 1
+      QTROOT: /opt/5.15.2
+      LANG: en_US.UTF-8
+      BUILD_BRAND: ${{ inputs.BRAND }}
+      BUILD_ARCHITECTURE: x86_64
+      BUILD_VARIANT: release
+      APP_OUT_PATH: ./out/pia_release_x86_64
+    steps:
+    - name: Install dependencies
+      run: |
+        apt-get update 
+        apt-get install -y build-essential git git-lfs ruby-full rake clang-7 git python3 python3-pip arch-test mesa-common-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev zlib1g libglib2.0-0 libgl1-mesa-glx patchelf curl
+        git lfs install --system
+        # Avoid git permission issues
+        git config --global --add safe.directory '*'
+        gem install bundler -v 2.3.17
+        cd /opt
+        python3 -m pip install -U pip 
+        python3 -m pip install aqtinstall 
+        python3 -m aqt install-qt linux desktop 5.15.2 gcc_64
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Setup sccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ github.job }}
+        max-size: 1000M
+        variant: sccache
+    - name: Build and package
+      shell: bash
+      run: |
+        scripts-internal/ci_rake out/pia_release_x86_64/artifacts/debug.zip
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "linux-debug"
+        retention-days: 28
+        path: |-
+          out/pia_release_x86_64/artifacts/debug.zip
+    - name: Install app and log in
+      env:
+        PIA_ACCOUNT_NAME: ${{ secrets.PIA_ACCOUNT_NAME }}
+        PIA_ACCOUNT_PWD: ${{ secrets.PIA_ACCOUNT_PWD }}
+      run: |
+        echo "Installing dependencies..."
+        apt-get install -y procps sudo iproute2 iptables libglib2.0-0 
+        # Create a non-root user to run the installation scripts
+        useradd pia 
+        echo "pia     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+        install_file=$(find $APP_OUT_PATH/artifacts/ -name "pia-linux*.run")
+        echo "Installing $install_file..."
+
+        # Run with --skip-service as the install script can't find a boot manager in the docker container
+        su pia -c "$install_file -- --skip-service"
+
+        echo "Launching PIA..."
+        # Launch the daemon and send the logs to a file
+        # The daemon doesn't log anything to the file with a standard redirect
+        setsid script --return -c '/opt/piavpn/bin/pia-daemon' pia-daemon.log > /dev/null < /dev/null &
+        piactl background enable
+
+        echo "Signing in..."
+        touch ~/pia_login
+        echo "$PIA_ACCOUNT_NAME" >> ~/pia_login
+        echo "$PIA_ACCOUNT_PWD" >> ~/pia_login
+        piactl login ~/pia_login
+    - name: Build integration tests
+      run: |
+        echo "Building integration tests..."
+        scripts-internal/ci_rake integtest_deploy
+    - name: Run integration tests
+      id: int_tests
+      run: |
+        echo "Running integration tests..."
+        $APP_OUT_PATH/integtest/pia-integtest/bin/pia-integtest
+    - name: Show pia logs if integration tests fail
+      if: always() && steps.int_tests.outcome == 'failure'
+      run: |    
+        cat pia-daemon.log
+  linux_x64_unit_test:
+    runs-on:
+      - ubuntu-latest
+    container: 
+      image: debian:10-slim
+    timeout-minutes: 120
+    env:
+      GITHUB_CI: 1
+      QTROOT: /opt/5.15.2
+      LANG: en_US.UTF-8
+      BUILD_BRAND: ${{ inputs.BRAND }}
+      BUILD_ARCHITECTURE: x86_64
+      BUILD_VARIANT: release
+    steps:
+    - name: Install dependencies
+      run: |
+        apt-get update 
+        apt-get install -y build-essential git git-lfs ruby-full rake clang-7 git python3 python3-pip arch-test mesa-common-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev zlib1g libglib2.0-0 libgl1-mesa-glx patchelf curl
+        git lfs install --system
+        # Avoid git permission issues
+        git config --global --add safe.directory '*'
+        gem install bundler -v 2.3.17
+        cd /opt
+        python3 -m pip install -U pip 
+        python3 -m pip install aqtinstall 
+        python3 -m aqt install-qt linux desktop 5.15.2 gcc_64
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Setup sccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ github.job }}
+        max-size: 1000M
+        variant: sccache
+    - name: Build unit tests
+      shell: bash
+      run: |
+        scripts-internal/ci_rake build_tests_parallel
+    - name: Run tests with coverage
+      shell: bash
+      run: |
+        scripts-internal/ci_rake coverage
+    - uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: "linux-coverage"
+        retention-days: 28
+        path: |-
+          out/pia_release_x86_64/coverage

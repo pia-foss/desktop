@@ -284,7 +284,7 @@ class ClangToolchain
             sourceFile
         ]
 
-        sh *params
+        Util.shellRun *params
     end
 
     # Invoke rcc to compile QRC resources to a source file
@@ -299,13 +299,13 @@ class ClangToolchain
             '-o', outputFile
         ]
 
-        sh *params
+        Util.shellRun *params
     end
 
     def compileForLang(clang, architecture, langCompileOpts, sourceFile,
                        objectFile, depFile, macros, includeDirs, frameworkPaths,
                        coverage)
-        params = [clang]
+        params = [Build::CompilerLauncher, clang].compact
         params += langCompileOpts
         params += [
             '-g',   # Generate debug information
@@ -334,7 +334,7 @@ class ClangToolchain
             '-c', File.absolute_path(sourceFile) # Absolute path allows Qt Creator to open files from diagnostics
         ]
 
-        sh *params
+        Util.shellRun *params
     end
 
     # Compile one source file to an object file.  All paths should be absolute
@@ -360,7 +360,7 @@ class ClangToolchain
         elsif(ext == '.s' && Build.xnuKernel?)
             # There's no way to specify additional assembler include directories
             # currently.
-            sh 'as', *@platform.driverTargetOpts(architecture), '-o', objectFile, sourceFile
+           Util.shellRun 'as', *@platform.driverTargetOpts(architecture), '-o', objectFile, sourceFile
         else
             raise "Don't know how to compile #{sourceFile}"
         end
@@ -390,9 +390,10 @@ class ClangToolchain
         puts "link #{coverage ? "(with code coverage) " : ""}- #{targetFile}"
 
         params = [
+            Build::CompilerLauncher,
             @clangpp,
             "-Wl,#{linkParams.join(',')}",
-        ]
+        ].compact
         params += driverArgs
         params += @platform.driverTargetOpts(architecture)
         params += coverageOpts(architecture, coverage, CoverageDriverOpts)
@@ -410,7 +411,7 @@ class ClangToolchain
         params += frameworks.uniq.flat_map { |f| ['-framework', f] }
         params += forceLinkSymbols.flat_map { |s| ['--force-link', @platform.decorateCFunction(s)] }
 
-        sh *params
+        Util.shellRun *params
 
         @platform.extractSymbols(targetFile)
     end
@@ -437,7 +438,7 @@ class ClangToolchain
             # existing members in the archive that were supposed to
             # be removed.
             File.delete(targetFile) if File.exist?(targetFile)
-            sh @platform.ar, 'rcs', targetFile, *objFiles
+            Util.shellRun @platform.ar, 'rcs', targetFile, *objFiles
         end
     end
 end

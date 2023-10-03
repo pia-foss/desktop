@@ -72,7 +72,7 @@ module PiaFrameworks
                 FileUtils.cp(executable.target, dylib)
                 # Update this module's install name and references to any other
                 # modules
-                sh *installNameUpdate, '-id', "@rpath/#{fwName}.framework/#{fwName}", dylib
+                Util.shellRun *installNameUpdate, '-id', "@rpath/#{fwName}.framework/#{fwName}", dylib
             end
 
             # Build a framework containing this module

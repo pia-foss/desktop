@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,6 +32,20 @@ std::string KAPPS_CORE_EXPORT qs::joinVec(const std::vector<std::string> &vec, c
 void KAPPS_CORE_EXPORT qs::detail::formatImpl(std::stringstream &s, const char *format)
 {
     s << format;
+}
+
+std::vector<std::string> kapps::core::splitString(const std::string &s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream{s};
+
+    while(std::getline(tokenStream, token, delimiter))
+    {
+        tokens.push_back(token);
+    }
+
+    return tokens;
 }
 
 bool KAPPS_CORE_EXPORT kapps::core::removeFile(const std::string &path)

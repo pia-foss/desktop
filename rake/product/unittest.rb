@@ -46,8 +46,11 @@ module PiaUnitTest
         if Build.windows?
             t << 'wfp_filters'
         elsif Build.linux?
+            t << 'core_fs'
             t << 'splitdnsinfo'
+            t << 'rt_tables_initializer'
         elsif Build.macos?
+           t << 'core_fs'
            t << 'constrainedhash'
            t << 'flow_tracker'
         end
@@ -196,7 +199,7 @@ module PiaUnitTest
                     ]
                     cmd = "LD_LIBRARY_PATH=\"#{libPath.join(':')}\" LLVM_PROFILE_FILE=\"#{covData}\" UNIT_TEST_LIB=\"#{opensslLibPath}\" \"#{testBin}\""
                 end
-                sh cmd
+               Util.shellRun cmd
             end
 
             task :build_tests_parallel => "test-#{t}"
@@ -246,7 +249,7 @@ module PiaUnitTest
 
         file merged => [:run_all_tests, coverageBuild.componentDir] do |t|
             puts "merge test coverage data"
-            sh File.join(llvmPath, 'llvm-profdata'), 'merge',
+           Util.shellRun File.join(llvmPath, 'llvm-profdata'), 'merge',
                *Tests.map{|test|coverageRawBuild.artifact("coverage_#{test}.raw")},
                '-o', merged
         end
@@ -265,17 +268,17 @@ module PiaUnitTest
             # LLVM will complain about conflicting data for each test's main(),
             # but that's OK.
             puts "generate coverage listing"
-            sh "#{llvmCov} show #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
+           Util.shellRun "#{llvmCov} show #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
         end
 
         file report => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage report"
-            sh "#{llvmCov} report #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
+           Util.shellRun "#{llvmCov} report #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
         end
 
         file coverage => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage JSON export"
-            sh "#{llvmCov} export #{llvmCovArch} -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
+           Util.shellRun "#{llvmCov} export #{llvmCovArch} -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
         end
 
         file fileCoverage => [coverage, coverageBuild.componentDir] do |t|

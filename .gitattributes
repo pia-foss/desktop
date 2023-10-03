@@ -1,13 +1,11 @@
 *.ts text eol=lf
 /CHANGELOG.md merge=union eol=lf text
 *.sh text eol=lf
-
 # Diff UTF-16LE *.rc Windows resource scripts
 *.rc diff=rcdiff
 # Add to your ~/.gitconfig:
 #[diff "rcdiff"]
 #        textconv = "iconv -f utf-16le -t utf-8"
-
 # Use LFS for everything under deps/built/
 # While file extension globs are pretty good for most LFS files,
 # these directories contain macOS/Linux executables with no
@@ -20,10 +18,13 @@ deps/built/*/** filter=lfs diff=lfs merge=lfs -text
 deps/built/linux/**/*.so !filter !diff !merge
 deps/built/linux/**/*.so.? !filter !diff !merge
 
+# Missing lfs files after migration
+deps/zip/zip.exe filter=lfs diff=lfs merge=lfs -text
+tools/crash_test_dll/crashtest.dll filter=lfs diff=lfs merge=lfs -text
+
 # dump_syms binaries - similar to deps/built, contains
 # extensionless macOS binary
 deps/dump_syms/** filter=lfs diff=lfs merge=lfs -text
-
 # File types to store in LFS
 *.sys filter=lfs diff=lfs merge=lfs -text
 *.cat filter=lfs diff=lfs merge=lfs -text

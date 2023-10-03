@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -33,7 +33,6 @@ private slots:
         // Use Qt to open a file using a known encoding, then verify that
         // removeFile() is able to delete the same file
         QString tempFilePath;
-
         {
             QTemporaryFile tempFile{QDir::tempPath() + "/kapps_test_Русский.XXXXXX"};
             tempFile.setAutoRemove(false);
@@ -43,6 +42,41 @@ private slots:
 
         QVERIFY(kapps::core::removeFile(tempFilePath.toStdString()));
         QVERIFY(!QFile::exists(tempFilePath));
+    }
+
+    void testSplitString()
+    {
+        using kapps::core::splitString;
+
+        // Empty string
+        {
+            std::string emptyString;
+            QVERIFY(splitString(emptyString, '/').empty());
+        }
+
+        // one token to left of delim
+        {
+            std::string path{"hello/"};
+            auto tokens = splitString(path, '/');
+
+            QVERIFY(tokens == (std::vector<std::string>{"hello"}));
+        }
+
+        // one token to right of delim
+        {
+            std::string path{"/hello"};
+            auto tokens = splitString(path, '/');
+
+            QVERIFY(tokens == (std::vector<std::string>{"", "hello"}));
+        }
+
+        // token on either side of delim
+        {
+            std::string path{"hello/world"};
+            auto tokens = splitString(path, '/');
+
+            QVERIFY(tokens == (std::vector<std::string>{"hello", "world"}));
+        }
     }
 
     void testConfigWriterOpen()

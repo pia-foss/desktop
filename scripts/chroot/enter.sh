@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Copyright (c) 2022 Private Internet Access, Inc.
+# Copyright (c) 2023 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -58,4 +58,4 @@ while [ -z "$ARGS_DONE" ] && [ "$#" -gt 0 ]; do
     esac
 done
 
-schroot -c "piabuild-stretch${CROSS_TARGET:+-$CROSS_TARGET}" "$@"
+schroot -c "piabuild-stretch${CROSS_TARGET:+-$CROSS_TARGET}" -- "$@"

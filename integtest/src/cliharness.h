@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,6 +22,7 @@
 #include <common/src/common.h>
 #include <common/src/linebuffer.h>
 #include <QProcess>
+#include <functional>
 
 // Test harness based on the CLI interface - use this to invoke piactl commands
 // from integration tests.  If the CLI interface fails in any unexpected way,
@@ -50,15 +51,27 @@ namespace CliHarness
     void applySetting(const QString &name, const QJsonValue &value);
     // Change any number of settings
     void applySettings(const QJsonObject &settings);
+    // Reset all settings back to default to test from a `fresh` state
+    void resetSettings();
 
-    // Wait for a specific monitored state value.  Success is checked using
-    // VERIFY_CONTINUE.
+    // The following functions wait for a monitored value to change.
+    // Success is checked using `VERIFY_CONTINUE`.
     // Returns false if the value isn't reached in time - tests can abort if
     // necessary in this case.  Many tests can just ignore this.
     // Note that the default timeout is higher than qWaitFor() since VPN state
     // changes can take several seconds.
+
+    // Wait for the value of monitorType to make the predicate true.
+    bool waitForPredicate(const QString &monitorType, std::function<bool(const QString &)> predicate,
+                          std::chrono::milliseconds timeout = std::chrono::milliseconds{30000});
+
+    // Wait for the value of monitorType to match the given value.
     bool waitFor(const QString &monitorType, const QString &value,
                  std::chrono::milliseconds timeout = std::chrono::milliseconds{30000});
+
+    // Wait for the value of monitorType to differ from the given value.
+    bool waitForNotEqual(const QString &monitorType, const QString &value,
+                         std::chrono::milliseconds timeout = std::chrono::milliseconds{30000});
 
     // Disconnect and wait for it to complete.  Shortcut for disconnectVpn()
     // followed by waitFor(), which is very common.

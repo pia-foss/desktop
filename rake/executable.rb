@@ -245,7 +245,7 @@ class Executable
             end
             file @moduleTarget => [@dependencyTarget, archesTarget] do |t|
                 FileUtils.rm(@moduleTarget) if File.exist?(@moduleTarget)
-                sh 'lipo', '-create', *builderTargets, '-output', @moduleTarget
+                Util.shellRun 'lipo', '-create', *builderTargets, '-output', @moduleTarget
                 # Combine the dSYM bundles too
                 if(type != :static)
                     FileUtils.rm_rf(@moduleTarget + ".dSYM")
@@ -255,7 +255,7 @@ class Executable
                     builderSyms = builderTargets.map do |t|
                         t + ".dSYM/Contents/Resources/DWARF/" + File.basename(t)
                     end
-                    sh 'lipo', '-create', *builderSyms, '-output',
+                    Util.shellRun 'lipo', '-create', *builderSyms, '-output',
                         @moduleTarget + ".dSYM/Contents/Resources/DWARF/" + File.basename(@moduleTarget)
                 end
             end

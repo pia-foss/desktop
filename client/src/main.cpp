@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -531,8 +531,48 @@ int clientMain(int argc, char *argv[])
     return result;
 }
 
+#ifdef Q_OS_WIN
+void setSafeDllSearchPaths()
+{
+    // The very first thing we do is override the DLL search order for subsequent
+    // LoadLibrary calls to only load system DLLs (and specifically not to check
+    // the current executable directory). This provides a way to guard against
+    // DLL overriding by delay-loading any DLLs outside the system's core set of
+    // "known DLLs" with fixed locations.
+    //
+    // This function was provided in an update on Windows 7, so skip the call if
+    // it isn't available, out-of-date 7 boxes don't support this hardening
+    // measure.
+    HMODULE kernel32 = ::LoadLibraryW(L"kernel32.dll");
+    using SDDDFunc = BOOL (WINAPI *)(DWORD);
+    SDDDFunc pSetDefaultDllDirectories = nullptr;
+
+    if(kernel32)
+    {
+        pSetDefaultDllDirectories = reinterpret_cast<SDDDFunc>(::GetProcAddress(kernel32, "SetDefaultDllDirectories"));
+
+        if(pSetDefaultDllDirectories)
+        {
+            // Unlike the installer (which only uses system DLLs found in the system32 folder)
+            // the client also uses DLLs from other locations - such as the application folder.
+            // So we slightly broaden the DLL search path to include a larger set of locations,
+            // the "Default" directories - which is a combination of system32, application directory,
+            // user-added directories but NOT the CWD. This also prevents an unconstrained search
+            // of the user's PATH environment variable.
+            pSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+        }
+
+        ::FreeLibrary(kernel32);
+    }
+}
+#endif
+
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN
+    setSafeDllSearchPaths();
+#endif
+
     return runClient(true, argc, argv, &clientMain);
 }
 

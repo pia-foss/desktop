@@ -1,4 +1,4 @@
-rem Copyright (c) 2022 Private Internet Access, Inc.
+rem Copyright (c) 2023 Private Internet Access, Inc.
 rem
 rem This file is part of the Private Internet Access Desktop Client.
 rem
@@ -33,21 +33,54 @@ set "RUBYOPT=-Eutf-8"
 
 rem  Build all products in the project in release mode for both 32-bit and
 rem  64-bit configurations
-for %%G in (x86_64,x86) do (
+
+set "BUILD64=0"
+set "BUILD32=0"
+if "%1"=="all" (
+  set "BUILD64=1"
+  set "BUILD32=1"
+)
+if "%1"=="x86_64" (
+  set "BUILD64=1"
+)
+if "%1"=="x86" (
+  set "BUILD32=1"
+)
+
+if %BUILD64%==1 (
   echo.
-  echo Building %%G...
+  echo Building x86_64...
   echo.
 
   rem  'rake' refers to rake.cmd on Windows; running it directly causes delayed
   rem  expansion to be disabled.  (Wrapping this in a local scope doesn't help.)
   rem  Call it in a subshell to isolate it.
-  call rake clean VARIANT=release ARCHITECTURE=%%G
-  call rake all VARIANT=release ARCHITECTURE=%%G
+  call rake clean VARIANT=release ARCHITECTURE=x86_64
+  call rake all VARIANT=release ARCHITECTURE=x86_64
 
   rem  Check if anything went wrong
   if !errorlevel! neq 0 (
     echo.
-    echo Error: %%G build failed: !errorlevel!
+    echo Error: x86_64 build failed: !errorlevel!
+    goto error
+  )
+)
+
+if %BUILD32%==1 (
+  echo.
+  echo Building x86...
+  echo.
+
+  rem  'rake' refers to rake.cmd on Windows; running it directly causes delayed
+  rem  expansion to be disabled.  (Wrapping this in a local scope doesn't help.)
+  rem  Call it in a subshell to isolate it.
+  call rake clean VARIANT=release ARCHITECTURE=x86
+  call rake all VARIANT=release ARCHITECTURE=x86
+
+  rem  Check if anything went wrong
+  if !errorlevel! neq 0 (
+    echo.
+    echo Error: x86 build failed: !errorlevel!
     goto error
   )
 )

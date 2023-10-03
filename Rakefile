@@ -5,7 +5,7 @@ require 'open3'
 # Don't mess with bundler on CI servers - we currently only need
 # bundler when developing locally to install extra gems for
 # testing (rspec) and debugging (pry)
-if ENV['GITLAB_CI'].nil?
+if ENV['GITHUB_CI'].nil?
     begin
         print "Installing gems (if needed)..."
         # Run bundler to install the gems in our Gemfile
@@ -259,5 +259,5 @@ end
 
 desc "Run specs for the Rake build system"
 task :build_specs do
-    sh "bundle exec rspec rake/spec/"
+    Util.shellRun "bundle exec rspec rake/spec/"
 end

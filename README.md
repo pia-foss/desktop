@@ -1,4 +1,5 @@
 # Private Internet Access Desktop Client
+[![pia_desktop/pia_desktop](https://github.com/xvpn/pia_desktop/actions/workflows/release.yml/badge.svg)](https://github.com/xvpn/pia_desktop/actions/workflows/release.yml)
 
 This is the desktop client for the Private Internet Access VPN service. It consists of an unprivileged thin GUI client (the "client") and a privileged background service/daemon (the "daemon"). The daemon runs a single instance on the machine and is responsible for not only network configuration but also settings and account handling, talking to PIA servers as necessary. The client meanwhile runs in each active user's desktop and consists almost entirely of presentation logic. No matter how many users are active on a machine, they control the same single VPN instance and share a single PIA account.
 
@@ -36,17 +37,40 @@ Filtering content: 100% (24/24), 17.13 MiB | 1.89 MiB/s, done.
 ### Prerequisites
 
 - On **Windows**:
-  - [Qt 5.15.2](https://www.qt.io/download) (open source edition)
-    - Get the MSVC 2019 builds.  Source and debug information are optional (useful to debug into Qt code).  You don't need any of the other builds.
-    - Install CMake (under development tools) to use this project in Qt Creator
-  - [Visual Studio Community 2019](https://www.visualstudio.com/downloads/) or [Build Tools for Visual Studio 2019](https://www.visualstudio.com/downloads/)
+  - [Qt 5.15.2](https://www.qt.io/download)
+    - If you want to be able to fully debug into Qt code and debug QML as well, you will need to follow this process:
+      - Download Qt from the official website: https://www.qt.io/download-open-source, scroll down and click "Download the Qt Online Installer"
+      - The installer name should look like this "qt-unified-windows-x64-4.6.0-online.exe"
+      - You will need to create an account and login
+      - Select path C:\Qt and "Custom installation"
+      - When selecting components check these boxes:
+        - Qt / Qt 5.15.2 / MSVC2019 32-bit, MSVC2019 64-bit, Sources, Qt Debug Information Files
+        - Qt / Developer and Designer Tools / Qt Creator, ...CDB Debugger support, Debugging Tools for Windows, CMake
+      - (optional) If you have multiple installations of Qt, set user environment variable `QTROOT` to `C:\Qt\5.15.2`
+    - Otherwise, if you just need to build the client, you can use aqt. Run these commands in Powershell with admin priviledges:  
+      - Install choco: (skip this step if you already have a working choco. Run `choco` to find out)   
+        `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+      - `choco install python`
+      - Close Powershell and open a new Admin istance
+      - `pip install aqtinstall`
+      - `mkdir C:\Qt-aqt`
+      - `cd C:\Qt-aqt`
+      - `aqt install-qt windows desktop 5.15.2 win64_msvc2019_64`
+      - (optional) If you have multiple installations of Qt, set user environment variable `QTROOT` to `C:\Qt-aqt\5.15.2`
+  - [Visual Studio Community 2019](https://my.visualstudio.com/Downloads?q=visual%20studio%202019&wt.mc_id=o~msft~vscom~older-downloads)
+     - Unfortunately now, you need to login in order to download the old installer
+     - Select "Desktop development with C++" and check these boxes:
+       - MSVC v142
+       - Windows 10 SDK
+       - Just-In-Time debugger
      - Requires VS 16.7 or later
      - The Windows SDK must be at least 10.0.17763.0
      - Install the "Windows 8.1 SDK and UCRT SDK" to get the UCRT redistributable DLLs for 7/8/8.1
-  - Debugger: Install Debugging Tools from the [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
      - The VS installer doesn't include the Console Debugger (CDB), which is needed to debug in Qt Creator.  More info: [Setting Up Debugger](https://doc.qt.io/qtcreator/creator-debugger-engines.html)
   - [Ruby](https://rubyinstaller.org/) - includes Rake
   - [7-zip](https://www.7-zip.org/)
+  - [Git Bash](https://gitforwindows.org/)
+    - Cloning and performing git operations via git bash instead of powershell is recommended, due to some knows bugs in Windows built-in openssh service in regards to git-lfs. 
 - On **macOS**:
   - Qt 5.15.2
     - PIA's universal build of Qt is recommended: [desktop-dep-build releases](https://github.com/pia-foss/desktop-dep-build/releases)
@@ -68,6 +92,27 @@ Filtering content: 100% (24/24), 17.13 MiB | 1.89 MiB/s, done.
   - Debian 9 chroot build (used to build published releases for maximum compatibility, and for cross builds)
     - `sudo apt install schroot debootstrap`
     - Then use `./scripts/chroot/setup.sh` to set up the build chroots, see "Building for Distribution - Linux" below
+
+### Running and debugging
+
+Each platform requires additional installation steps in order for the client to be usable (e.g. the Windows TAP adapter needs to be installed).  
+The easiest way to perform these steps is to build and run an installer, after which you can stop and run individual executables in a debugger instead.
+
+To debug your own daemon, the installed daemon must first be stopped:
+
+- **Windows**: Run `services.msc` and stop the Private Internet Access Service. Set it to manual
+- **macOS**: Run `sudo launchctl unload /Library/LaunchDaemons/com.privateinternetaccess.vpn.daemon.plist`
+- **Linux**: Run `sudo systemctl stop piavpn`
+
+The daemon must run as root. Consult your IDE/debugger documentation for how to safely run the debugger target as root.
+
+**Windows** only: 
+  - If you have installed Qt using the official installer, add `C:\Qt\5.15.2\msvc2019_64\bin` to your user environment variable path.   
+    This is needed if you want to run `pia-client.exe` or `pia-service.exe` via command line.
+  - To run the pia-daemon, execute `.\pia-service.exe run` in Powershell with admin privileges
+
+To check PIA logs, go to your `*installation_path*\data` (The default path on Windows is `C:\Program Files\Private Internet Access\data`).  
+In order to enable all the logs, in PIA app *Settings* page go to Help and select *Enable Debug Logging*.
 
 ### Quick start
 
@@ -202,18 +247,6 @@ Set environment variables:
 | BRAND | (Optional) Brand to build (defaults to `pia`) |
 
 Then call `scripts/build-linux.sh`.
-
-### Running and debugging
-
-Each platform requires additional installation steps in order for the client to be usable (e.g. the Windows TAP adapter needs to be installed). The easiest way to perform these steps is to build and run an installer, after which you can stop and run individual executables in a debugger instead.
-
-To debug your own daemon, the installed daemon must first be stopped:
-
-- **Windows**: Run `services.msc` and stop the Private Internet Access Service
-- **macOS**: Run `sudo launchctl unload /Library/LaunchDaemons/com.privateinternetaccess.vpn.daemon.plist`
-- **Linux**: Run `sudo systemctl stop piavpn`
-
-The daemon must run as root. Consult your IDE/debugger documentation for how to safely run the debugger target as root.
 
 ### Mac installation
 

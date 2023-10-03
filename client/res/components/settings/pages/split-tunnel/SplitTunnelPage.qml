@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -158,7 +158,7 @@ Page {
             daemonSetting.currentValue = currentValue
             return
           }
-          if (Qt.platform.os === 'osx' && NativeHelpers.macosProductVersion.startsWith('12.')) {
+          if (Qt.platform.os === 'osx' && !NativeHelpers.macosSplitTunnelSupported) {
             confirming = true
             currentValue = false
             confirmDialog.show()

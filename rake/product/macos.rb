@@ -63,7 +63,7 @@ module PiaMacOS
             File.write(brandedInstallShDef,
                         "extern unsigned char vpn_installer_sh[];\n" +
                         "extern unsigned int vpn_installer_sh_len;\n")
-            sh "cd \"#{File.dirname(brandedInstallSh)}\" && xxd -i \"#{File.basename(brandedInstallSh)}\" - >>\"#{File.absolute_path(brandedInstallShDef)}\""
+           Util.shellRun "cd \"#{File.dirname(brandedInstallSh)}\" && xxd -i \"#{File.basename(brandedInstallSh)}\" - >>\"#{File.absolute_path(brandedInstallShDef)}\""
         end
 
         # Helper installed with SMJobBless to install/repair/update the
@@ -407,9 +407,9 @@ module PiaMacOS
                 # it's in Library/LaunchServices
                 installHelper = File.join(bundle, 'Contents/Library/LaunchServices',
                                           "#{Build::ProductIdentifier}.installhelper")
-                sh *codesignArgs, '--sign', cert, '--verbose', '--force', installHelper
+                Util.shellRun *codesignArgs, '--sign', cert, '--verbose', '--force', installHelper
 
-                sh *codesignArgs, '--deep', '--sign', cert, '--verbose', '--force', bundle
+                Util.shellRun *codesignArgs, '--deep', '--sign', cert, '--verbose', '--force', bundle
             end
         end
 
@@ -423,7 +423,7 @@ module PiaMacOS
                 Archive.zipDirectory(bundle, notarizeZip)
 
                 # Perform notarization
-                sh './scripts/notarize-macos.sh', notarizeZip,
+               Util.shellRun './scripts/notarize-macos.sh', notarizeZip,
                     Build::ProductIdentifier, bundle
 
                 # The original app bundle was stapled, we don't need the

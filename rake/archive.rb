@@ -19,11 +19,11 @@ module Archive
 
         File.delete(archive) if File.exist?(archive)
         if(Build::windows?)
-            sh Util.cmd("cd \"#{workDir}\" & \"#{SevenZip}\" a -mx#{Compression} \"#{archiveAbs}\" #{content}")
+            Util.shellRun Util.cmd("cd \"#{workDir}\" & \"#{SevenZip}\" a -mx#{Compression} \"#{archiveAbs}\" #{content}")
         else
             # '-y' preserves symlinks, important for Mac frameworks, Mac/Linux
             # versioned library symlinks, etc.
-            sh "cd \"#{workDir}\" && zip -y -#{Compression} -r \"#{archiveAbs}\" #{content}"
+            Util.shellRun "cd \"#{workDir}\" && zip -y -#{Compression} -r \"#{archiveAbs}\" #{content}"
         end
     end
 

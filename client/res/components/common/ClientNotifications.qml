@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Private Internet Access, Inc.
+// Copyright (c) 2023 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -220,13 +220,12 @@ Item {
       NativeHelpers.reinstallWfpCalloutStatus === "reboot"
   }
 
-  // Display the notification whenever split tunnel is enabled and the user is on macOS Monterey.
+  // Display the notification whenever split tunnel is enabled and the user is on macOS Monterey or later
   // Don't allow the notification to be dismissed.  Use "info" level (green)
   // Use the following message: `Please disable the Split Tunnel feature if you're having trouble
   // connecting to the internet.`
   // Add a link labeled `Disable Split Tunnel` that turns off the split tunnel setting.
   // (This should consequently hide the notification, since it only appears when ST is enabled.)
-
   NotificationStatus {
     id: splitTunnelMonterey
     message: SettingsMessages.stMontereyNotification
@@ -238,11 +237,11 @@ Item {
     dismissible: false
     active: Daemon.settings.splitTunnelEnabled &&
             Qt.platform.os === "osx" &&
-            NativeHelpers.macosProductVersion.startsWith('12.')
+            !NativeHelpers.macosSplitTunnelSupported
   }
 
   // Notification for the "missing iptables" error.
-  // If more errors are added to the vpnSupportErrors array consider 
+  // If more errors are added to the vpnSupportErrors array consider
   // turning it into a map and checking the content of it.
   // Right now every error added to the array trigger this notification
    NotificationStatus {
@@ -250,7 +249,7 @@ Item {
     message: uiTr("Iptables is not installed.")
     tipText: uiTr("Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.")
     severity: severities.error
-	active: Daemon.state.vpnSupportErrors.length > 0
+    active: Daemon.state.vpnSupportErrors.length > 0
   }
 
   // Notification for the OpenVPN "authorization failure" error.

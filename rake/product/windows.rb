@@ -28,9 +28,14 @@ module PiaWindows
                 "/MANIFESTUAC:level='requireAdministrator' uiAccess='false'",
                 # Specify these as delay-loaded since they're not "known DLLs" (i.e.
                 # can be subject to executable path lookup rules)
+                # By delaying it we allow our anti-hijacking rules to
+                # apply (see _tWinMain in win/main.cpp) which tightly control
+                # DLL load paths.
                 'delayimp.lib',
                 '/DELAYLOAD:newdev.dll',
-                '/DELAYLOAD:userenv.dll'
+                '/DELAYLOAD:userenv.dll',
+                '/DELAYLOAD:msi.dll',
+                '/DELAYLOAD:bcrypt.dll'
             ])
         # Include pseudolocalizations only in debug builds
         target.source('extras/installer/win/translations/debug') if Build::debug?
@@ -52,8 +57,21 @@ module PiaWindows
         if(Build::debug?)
             crtDir = File.join(crtDir, 'debug_nonredist')
         end
-        crtDir = File.join(crtDir, arch,
-            Build::debug? ? 'Microsoft.VC142.DebugCRT' : 'Microsoft.VC142.CRT')
+
+        # VC143 is only experimentally supported for VS2022.
+        for vcVer in ["VC142", "VC143"]
+            vcCrtDir = File.join(crtDir, arch,
+                Build::debug? ? 'Microsoft.'+vcVer+'.DebugCRT' : 'Microsoft.'+vcVer+'.CRT')
+            if File.exist?(vcCrtDir)
+                crtDir = vcCrtDir
+                break
+            end
+            puts "Couldn't find " + vcVer
+        end
+
+        if !File.exist?(crtDir)
+            raise "error: cannot find CRT. Install MSVC v142+"
+        end
 
         msvcLibs.each do |l|
             libPath = File.join(crtDir, "#{l}#{Build.debug? ? 'd' : ''}.dll")
@@ -87,7 +105,7 @@ module PiaWindows
             '--no-translations', '--no-opengl-sw'
         ]
         args += binaryFilePaths
-        sh *args
+        Util.shellRun *args
     end
 
     # Invoke signtool on Windows - signs one time
@@ -129,7 +147,7 @@ module PiaWindows
             args << description
         end
 
-        sh *(args + files)
+        Util.shellRun *(args + files)
     end
 
     # Double-sign files using both SHA-1 and SHA-256.
@@ -204,7 +222,8 @@ module PiaWindows
             # windeployqt is intended to work on DLLs, but it does work (and
             # EXEs/DLLs are both just PE executables of course)
             winDeploy([], [File.join(integtestStage.dir, "#{Build::Brand}-integtest.exe"),
-                           File.join(integtestStage.dir, "#{Build::Brand}-clientlib.dll")])
+                           File.join(integtestStage.dir, "#{Build::Brand}-clientlib.dll"),
+                           File.join(integtestStage.dir, "#{Build::Brand}-commonlib.dll")])
         end
 
         # Create a ZIP containing the deployed integ tests as the final artifact

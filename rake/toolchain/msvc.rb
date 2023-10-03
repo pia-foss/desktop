@@ -25,14 +25,7 @@ class MsvcToolchain
         @mocPath = @qt.tool('moc')
         @rccPath = @qt.tool('rcc')
 
-        # Find Visual Studio, use the version matching the Qt build
-        vsVer = @qt.targetQtRoot.match(/msvc([0-9]+)/)[1]
-        vsRoot = File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'),
-                           'Microsoft Visual Studio', vsVer)
-        vsEdition = Util.find(['Professional','Community','BuildTools']) do |e|
-            File.exist?(File.join(vsRoot, e))
-        end
-        @msvcRoot = File.join(vsRoot, vsEdition)
+        @msvcRoot = locateVisualStudio
         puts "Found VS: #{@msvcRoot}"
         vcvars = File.join(@msvcRoot, 'VC/Auxiliary/Build/vcvarsall.bat')
 
@@ -61,12 +54,41 @@ class MsvcToolchain
         # bin/Host<arch>/<arch>/... path anywhere.
         @cl = 'cl.exe'
         # This include directory has to be passed to moc explicitly
-        @msvcInclude = File.join(ENV['VCToolsInstallDir'].gsub('\\', '/'), 'INCLUDE')
+        vcToolsDir = ENV['VCToolsInstallDir']
+        if !vcToolsDir
+            raise "VC Tools not installed."
+        end
+        @msvcInclude = File.join(vcToolsDir.gsub('\\', '/'), 'INCLUDE')
         # Grab the SDK root so we can ignore system headers in makedep
         @sdkRoot = ENV['WindowsSdkDir']
         # rc.exe is in PATH too, we don't get the exact bin/<version>/<arch>
         # path anywhere
         @rc = 'rc.exe'
+    end
+
+    # Find Visual Studio path, prefer to use the version matching the Qt build
+    # Note: support for VS 2022 is experimental.
+    def locateVisualStudio()
+        qtVsVer = @qt.targetQtRoot.match(/msvc([0-9]+)/)[1]
+        vsRoots = [File.join(ENV['ProgramFiles'].gsub('\\', '/'),
+                        'Microsoft Visual Studio', "2022"),
+                   File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'),
+                        'Microsoft Visual Studio', "2019")].sort { |path| path.end_with?(qtVsVer) ? 0 : 1 }
+        vsRoot = vsRoots[0]
+        # Keep the first valid VS installation we find
+        for root in vsRoots
+            vsEdition = Util.find(['Professional','Community','BuildTools','Enterprise']) do |e|
+                File.exist?(File.join(root, e))
+            end
+            if vsEdition
+                vsRoot = root
+                break
+            end
+        end
+        if !vsEdition
+            raise "Could not locate a valid VS installation"
+        end
+        File.join(vsRoot, vsEdition)
     end
 
     # Within compile() or link(), check that the arch specified was the one that
@@ -228,7 +250,7 @@ class MsvcToolchain
             sourceFile
         ]
         params.flatten!
-        sh winJoinArgs(params)
+       Util.shellRun winJoinArgs(params)
     end
 
     # Invoke rcc to compile QRC resources to a source file
@@ -239,7 +261,7 @@ class MsvcToolchain
             '-name', name,
             '-o', outputFile
         ]
-        sh winJoinArgs(params)
+       Util.shellRun winJoinArgs(params)
     end
 
     class MakedepWriter
@@ -285,14 +307,14 @@ class MsvcToolchain
     def clMakedep(sourceFile, objectFile, depFile, macros, includeDirs, useUtf8)
         params = [
             # Preprocess only, and ignore preprocessed output
-            @cl, '/nologo', '/P', '/showIncludes', '/FiNUL',
+            Build::CompilerLauncher, @cl, '/nologo', '/P', '/showIncludes', '/FiNUL',
             WinMacros.map { |m| "/D#{m}" },
             VariantMacros[Build::Variant].map { |m| "/D#{m}" },
             macros.map { |m| "/D#{m}" },
             includeDirs.map { |d| "/I#{d}" },
             sourceFile,
             '/utf-8',
-        ]
+        ].compact
         # '/utf-8' is omitted for .rc files, which are usually in UTF-16 with a
         # BOM for rc.exe
         if(useUtf8)
@@ -316,7 +338,7 @@ class MsvcToolchain
     # Compile a source file with cl.exe
     def clCompile(sourceFile, objectFile, depFile, macros, includeDirs, runtime)
         params = [
-            @cl, '/nologo',
+            Build::CompilerLauncher, @cl, '/nologo',
             '/c', # Compile only, don't link
             msvcRuntimeArg(runtime), # Specify runtime variant
             '/Zi', # Generate separate PDB file
@@ -339,9 +361,9 @@ class MsvcToolchain
             '/Fd' + objectFile.ext('.pdb'),
             '/Fo' + objectFile,
             File.absolute_path(sourceFile) # Absolute path allows Qt Creator to open files from diagnostics
-        ]
+        ].compact
         params.flatten!
-        sh winJoinArgs(params)
+       Util.shellRun winJoinArgs(params)
 
         # Transform the headers from the JSON source dependency output to a
         # Makefile that Rake can import
@@ -362,7 +384,7 @@ class MsvcToolchain
             '/FO', objectFile, sourceFile
         ]
         params.flatten!
-        sh winJoinArgs(params)
+       Util.shellRun winJoinArgs(params)
     end
 
     # Compile one source file to an object file.  All paths should be absolute
@@ -413,6 +435,7 @@ class MsvcToolchain
             raise "Unknown target interface: #{interface}"
         end
         params = [
+            Build::CompilerLauncher, 
             @cl,
             '/nologo',
             objFiles,
@@ -429,9 +452,9 @@ class MsvcToolchain
             libPaths.map { |l| "/LIBPATH:#{l}" },
             forceLinkSymbols.map { |s| "/INCLUDE:#{decorateCFunction(s)}" },
             extraArgs
-        ]
+        ].compact
         params.flatten!
-        sh winJoinArgs(params)
+       Util.shellRun winJoinArgs(params)
     end
 
     # Link a dynamic library or executable.
@@ -454,7 +477,7 @@ class MsvcToolchain
                    options[:forceLinkSymbols],
                    ['/DLL', "/IMPLIB:#{targetFile.ext('.lib')}"] + extraArgs)
         elsif(options[:type] == :static)
-            sh('lib.exe', '/nologo', *StaticLinkOpts[Build::Variant],
+           Util.shellRun('lib.exe', '/nologo', *StaticLinkOpts[Build::Variant],
                "/OUT:#{targetFile}", *objFiles)
         elsif(options[:type] == :executable)
             clLink(targetFile, objFiles, libPaths, libs, options[:interface],
