@@ -241,6 +241,7 @@ module PiaUnitTest
         listing = coverageBuild.artifact('unittest_listing.txt')
         report = coverageBuild.artifact('unittest_report.txt')
         coverage = coverageBuild.artifact('unittest_coverage.json')
+        coverage_lcov = coverageBuild.artifact('unittest_coverage.lcov')
         fileCoverage = coverageBuild.artifact('file_coverage.json')
         summaryJson = coverageBuild.artifact('pia_unittest_summary.json')
         # toolchainPath() is only provided by the clang toolchain; MSVC always
@@ -249,7 +250,7 @@ module PiaUnitTest
 
         file merged => [:run_all_tests, coverageBuild.componentDir] do |t|
             puts "merge test coverage data"
-           Util.shellRun File.join(llvmPath, 'llvm-profdata'), 'merge',
+            Util.shellRun File.join(llvmPath, 'llvm-profdata'), 'merge',
                *Tests.map{|test|coverageRawBuild.artifact("coverage_#{test}.raw")},
                '-o', merged
         end
@@ -260,6 +261,8 @@ module PiaUnitTest
         # analyze.  (Use the host arch, that's the one we ran.)
         llvmCovArch = (Build::TargetArchitecture == :universal) ? "-arch=#{Util.hostArchitecture}" : ""
 
+        # Ignore some source files for which we don't get coverage anyway so the reports are cleaner
+        common_ignore_regex = "-ignore-filename-regex='#{Executable::Qt.targetQtRoot}/.*|.*/deps/.*|.*.moc.cpp|.*\.moc'"
         file listing => [merged, coverageBuild.componentDir] do |t|
             # It seems like we'd want to pass all-tests-lib to llvm-cov here to
             # generate coverage for that code, but that doesn't work.  Instead,
@@ -268,17 +271,22 @@ module PiaUnitTest
             # LLVM will complain about conflicting data for each test's main(),
             # but that's OK.
             puts "generate coverage listing"
-           Util.shellRun "#{llvmCov} show #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
+            Util.shellRun "#{llvmCov} show #{common_ignore_regex} #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{listing}\""
         end
 
         file report => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage report"
-           Util.shellRun "#{llvmCov} report #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
+            Util.shellRun "#{llvmCov} report #{common_ignore_regex} #{llvmCovArch} \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{report}\""
         end
 
         file coverage => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage JSON export"
-           Util.shellRun "#{llvmCov} export #{llvmCovArch} -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
+            Util.shellRun "#{llvmCov} export #{common_ignore_regex} #{llvmCovArch} -format=text \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage}\""
+        end
+
+        file coverage_lcov => [merged, coverageBuild.componentDir] do |t|
+            puts "generate coverage LCOV export"
+            Util.shellRun "#{llvmCov} export #{common_ignore_regex} #{llvmCovArch} -format=lcov \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage_lcov}\""
         end
 
         file fileCoverage => [coverage, coverageBuild.componentDir] do |t|
@@ -312,7 +320,7 @@ module PiaUnitTest
             end
 
             # The relevant source directories for code coverage
-            srcDirs = ['client/src', 'common/src', 'daemon/src'].map{|d|File.absolute_path(d)}
+            srcDirs = ['client/src', 'clientlib/src','common/src', 'daemon/src', 'kapps_core/src', 'kapps_net/src', 'kapps_regions/src'].map{|d|File.absolute_path(d)}
 
             platformSrcDirs = []
             platformCounts = {}
@@ -349,7 +357,7 @@ module PiaUnitTest
         end
 
         desc "Run all unit tests and process coverage artifacts"
-        task :coverage => [merged, listing, report, coverage, fileCoverage, summaryJson]
+        task :coverage => [merged, listing, report, coverage, coverage_lcov, fileCoverage, summaryJson]
 
         # The aim of this task is to locate and understand differences in test coverage between platforms
         # Run this on the file_coverage.json build artifacts from two different platforms

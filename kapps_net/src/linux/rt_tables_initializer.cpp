@@ -149,6 +149,12 @@ bool RtTablesInitializer::prepareRtLocation() const
                 << "to" << _rtLocations.etcPath << _errorEpilogue;
             return false;
         }
+        // Adjust file permissions to match the original rt_tables
+        if(!fs::copyFilePermissions(_rtLocations.libPath, _rtLocations.etcPath))
+        {
+            KAPPS_CORE_WARNING() << "Could not copy permissions from" << _rtLocations.libPath
+                << "to" << _rtLocations.etcPath << "- Will continue" << _errorEpilogue;
+        }
 
         KAPPS_CORE_INFO() << "Successfully copied" << _rtLocations.libPath
             << "to" << _rtLocations.etcPath;

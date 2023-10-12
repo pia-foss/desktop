@@ -317,6 +317,21 @@ The same `rake`-based build system is used, but the available targets differ.
 | `artifacts` | Builds all artifacts and copies to `out/pia_debug_<platform>_<arch>/artifacts` (depends on most other targets) |
 | `all` | All targets. |
 
+### Headless testing
+
+In the `headless_tests` directory you will find a suite of tests written in ruby with the help of RSpec.
+They work similarly to `integtest`, using `piactl` in the background to manipulate the state of the daemon and run diverse tests.
+The advantages of testing in ruby as opposed to our code in `integtest` are mainly simplicity, where doing things like calling API endpoints is much simpler than from C++ code.
+
+With these _almost_ end to end tests we hope to drastically reduce manual testing for releases to the point that we can release more frequently.  
+
+Install rspec Ruby gem using `gem install rspec`.  
+Run the tests locally using `rspec headless_tests/*.rb`  
+
+#### Windows
+
+Add `C:\Program Files\Private Internet Access` to your user environment variable Path in order to be able to run `piactl` from the command line. (You can still run piactl using the full path, but the headless tests won't work).
+
 ## Contributing
 
 By contributing to this project you are agreeing to the terms stated in the [Contributor License Agreement](CLA.md). For more details please see our [Contribution Guidelines](https://pia-foss.github.io/contribute) or [CONTRIBUTING](/CONTRIBUTING.md).

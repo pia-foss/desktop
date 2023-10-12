@@ -18,6 +18,21 @@
 
 #pragma once
 #include "stringslice.h"
+#if __clang__
+    #if __clang_major__ >= 16
+        #define IGNORE_CONSTEXPR_CONVERSION _Pragma("clang diagnostic ignored \"-Wenum-constexpr-conversion\"") 
+    #else 
+        #define IGNORE_CONSTEXPR_CONVERSION
+    #endif
+    #define DISABLE_ENUM_CONSTEXPR_CONVERSION _Pragma("clang diagnostic push") \
+                                              IGNORE_CONSTEXPR_CONVERSION \
+                                              _Pragma("clang diagnostic ignored \"-Wswitch\"")
+    #define RESET_ENUM_CONSTEXPR_CONVERSION   _Pragma("clang diagnostic pop")
+#else
+    #define DISABLE_ENUM_CONSTEXPR_CONVERSION
+    #define RESET_ENUM_CONSTEXPR_CONVERSION
+#endif
+
 
 namespace kapps { namespace core {
 
@@ -94,8 +109,10 @@ StringSlice typeName()
 template<class E, E V>
 StringSlice enumValueName()
 {
+    DISABLE_ENUM_CONSTEXPR_CONVERSION
     return detail_::nameSlicer().sliceEnumValue(typeName<E>(),
         detail_::enumValueFunc<E, V>());
+    RESET_ENUM_CONSTEXPR_CONVERSION
 }
 
 // Get the name of an enumeration value known at runtime.
@@ -105,30 +122,50 @@ StringSlice enumValueName()
 template<class E>
 StringSlice enumValueName(E value)
 {
-    // If we used a switch for this, clang generates "case value not in
-    // enumerated type" warnings, which are reasonable normally but not here
-    if(value == static_cast<E>(0))
-        return enumValueName<E, static_cast<E>(0)>();
-    if(value == static_cast<E>(1))
-        return enumValueName<E, static_cast<E>(1)>();
-    if(value == static_cast<E>(2))
-        return enumValueName<E, static_cast<E>(2)>();
-    if(value == static_cast<E>(3))
-        return enumValueName<E, static_cast<E>(3)>();
-    if(value == static_cast<E>(4))
-        return enumValueName<E, static_cast<E>(4)>();
-    if(value == static_cast<E>(5))
-        return enumValueName<E, static_cast<E>(5)>();
-    if(value == static_cast<E>(6))
-        return enumValueName<E, static_cast<E>(6)>();
-    if(value == static_cast<E>(7))
-        return enumValueName<E, static_cast<E>(7)>();
-    if(value == static_cast<E>(8))
-        return enumValueName<E, static_cast<E>(8)>();
-    if(value == static_cast<E>(9))
-        return enumValueName<E, static_cast<E>(9)>();
-
+    // We are stretching the type system a bit by just checking a few common values for enums.
+    // Any value outside the switch will just return an empty string.
+    DISABLE_ENUM_CONSTEXPR_CONVERSION
+    switch(value) 
+    {
+        case static_cast<E>(0):
+            return enumValueName<E, static_cast<E>(0)>();
+        case static_cast<E>(1):
+            return enumValueName<E, static_cast<E>(1)>();
+        case static_cast<E>(2):
+            return enumValueName<E, static_cast<E>(2)>();
+        case static_cast<E>(3):
+            return enumValueName<E, static_cast<E>(3)>();
+        case static_cast<E>(4):
+            return enumValueName<E, static_cast<E>(4)>();
+        case static_cast<E>(5):
+            return enumValueName<E, static_cast<E>(5)>();
+        case static_cast<E>(6):
+            return enumValueName<E, static_cast<E>(6)>();
+        case static_cast<E>(7):
+            return enumValueName<E, static_cast<E>(7)>();
+        case static_cast<E>(8):
+            return enumValueName<E, static_cast<E>(8)>();
+        case static_cast<E>(9):
+            return enumValueName<E, static_cast<E>(9)>();
+        case static_cast<E>(10):
+            return enumValueName<E, static_cast<E>(10)>();
+        case static_cast<E>(11):
+            return enumValueName<E, static_cast<E>(11)>();
+        case static_cast<E>(12):
+            return enumValueName<E, static_cast<E>(12)>();
+        case static_cast<E>(13):
+            return enumValueName<E, static_cast<E>(13)>();
+        case static_cast<E>(14):
+            return enumValueName<E, static_cast<E>(14)>();
+        case static_cast<E>(127):
+            return enumValueName<E, static_cast<E>(127)>();
+    }
     return {};
+    RESET_ENUM_CONSTEXPR_CONVERSION
 }
 
 }}
+
+#undef IGNORE_CONSTEXPR_CONVERSION
+#undef DISABLE_ENUM_CONSTEXPR_CONVERSION
+#undef RESET_ENUM_CONSTEXPR_CONVERSION

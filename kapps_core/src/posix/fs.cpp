@@ -103,13 +103,18 @@ namespace fs
         // Use the rdbuf() method to read the contents
         dest << source.rdbuf();
 
-        // Get the perms of srcFile
+        return true;
+    }
+
+    bool copyFilePermissions(const std::string &srcPath, const std::string &destPath)
+    {
+        // Get metadata of srcFile
         struct stat srcInfo{};
         if(::stat(srcPath.c_str(), &srcInfo))
         {
-            // Not getting the perms is not a critical error
-            // so we just trace it.
+            // Failing to get metadata we cannot set permissions, trace it and end.
             KAPPS_CORE_WARNING() << "stat()" << ErrnoTracer{};
+            return false;
         }
 
         // We can't just get the result of st_mode as that also includes info
@@ -121,10 +126,17 @@ namespace fs
         // which also preserves file modes.
         if(::chmod(destPath.c_str(), permissionsToCopy))
         {
-            // Failure to set the file mode is not a critcal error, just trace;
+            // Failure to set the file mode means we failed
             KAPPS_CORE_WARNING() << "chmod()" << ErrnoTracer{};
+            return false;
         }
-
+        // Set destFile owner and group to that of srcFile.
+        if(::chown(destPath.c_str(), srcInfo.st_uid, srcInfo.st_gid))
+        {
+            // Failure to set the owner means we failed
+            KAPPS_CORE_WARNING() << "chown()" << ErrnoTracer{};
+            return false;
+        }
         return true;
     }
 

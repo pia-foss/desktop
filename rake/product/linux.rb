@@ -163,6 +163,13 @@ module PiaLinux
                 'QtQuick'
             ])
 
+            # unbound and hnsd run on different effective users, which disables RPATHs with $ORIGIN .
+            # Here we hardcode the RPATH to the installation directory on linux. We currently cannot 
+            # choose a different install directory, so hardcoding it here is okay.
+            FileList[File.join(piafiles, 'bin/pia-unbound'), File.join(piafiles, 'bin/pia-hnsd')].each do |f|
+                Util.shellRun(Patchelf, '--force-rpath', '--set-rpath', "/opt/#{Build::Brand}vpn/lib", f)
+            end
+    
             # Brand the installer script
             installScript = File.join(pkg, 'install.sh')
             version.brandFile('extras/installer/linux/linux_installer.sh',

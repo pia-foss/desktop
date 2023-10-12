@@ -114,10 +114,6 @@ private slots:
             sourceFilePath = srcFile.fileName().toStdString();
         }
 
-        // Set an unusual chmod so we can verify
-        // perms are maintained in the copy
-        ::chmod(sourceFilePath.c_str(), 0765);
-
         // Get a temporary file name
         // The file is created and then deleted at the end of the block
         // Unfortunately this is the only way of getting a tmp file path
@@ -137,6 +133,47 @@ private slots:
         QVERIFY(srcFile.open(QIODevice::ReadOnly) && destFile.open(QIODevice::ReadOnly));
         // Verify the two files contain identical content
         QVERIFY((srcFile.readAll()) == (destFile.readAll()));
+    }
+
+    void testCopyFileWithPermissions()
+    {
+        std::string sourceFilePath;
+        {
+            QTemporaryFile srcFile;
+            srcFile.setAutoRemove(false);
+            QVERIFY(srcFile.open());
+
+            QTextStream out(&srcFile);
+            out << "hello world";
+            out << "goodbye cruel world!";
+
+            sourceFilePath = srcFile.fileName().toStdString();
+        }
+
+        // Set an unusual chmod so we can verify
+        // perms are maintained in the copy
+        ::chmod(sourceFilePath.c_str(), 0765);
+
+        // Get a temporary file name
+        // The file is created and then deleted at the end of the block
+        // Unfortunately this is the only way of getting a tmp file path
+        std::string destFilePath;
+        {
+            QTemporaryFile destFile;
+            QVERIFY(destFile.open());
+            destFilePath = destFile.fileName().toStdString();
+        }
+
+        // The API we want to test - verify that destFilePath
+        // contains the same content as sourceFilePath
+        QVERIFY(kapps::core::fs::copyFile(sourceFilePath, destFilePath));
+        QVERIFY(kapps::core::fs::copyFilePermissions(sourceFilePath, destFilePath));
+
+        QFile srcFile{QString::fromStdString(sourceFilePath)};
+        QFile destFile{QString::fromStdString(destFilePath)};
+        QVERIFY(srcFile.open(QIODevice::ReadOnly) && destFile.open(QIODevice::ReadOnly));
+        // Verify the two files contain identical content
+        QVERIFY((srcFile.readAll()) == (destFile.readAll()));
 
         // Verify the mode is also maintained
         struct stat dstInfo{};
@@ -146,7 +183,6 @@ private slots:
         // about the file type (i.e symlink, regular file, etc) we have to extract
         // out just the permission bits before we do the comparison
         QVERIFY((dstInfo.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))  == 0765);
-
     }
 };
 

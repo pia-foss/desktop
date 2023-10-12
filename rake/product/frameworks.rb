@@ -73,6 +73,12 @@ module PiaFrameworks
                 # Update this module's install name and references to any other
                 # modules
                 Util.shellRun *installNameUpdate, '-id', "@rpath/#{fwName}.framework/#{fwName}", dylib
+                Util.shellRun 'install_name_tool', '-rpath', '@loader_path/../Frameworks', '@loader_path/..', dylib
+                # Delete Qt's rpath if it exists.  Only some modules have this
+                # path, so it's fine if this fails.
+                if Executable::Qt != nil
+                    Util.shellRun "install_name_tool -delete_rpath '#{File.join(Executable::Qt.targetQtRoot, 'lib')}' '#{dylib}' || true"
+                end
             end
 
             # Build a framework containing this module

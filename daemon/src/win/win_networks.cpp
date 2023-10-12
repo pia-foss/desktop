@@ -127,7 +127,7 @@ void WINAPI WinNetworks::routeChangeCallback(PVOID callerContext,
         auto destination = parseWinSockaddr(pRow->DestinationPrefix.Prefix);
         auto nextHop = parseWinSockaddr(pRow->NextHop);
         qInfo() << "Route change:" << changeTraceName(notificationType) << "-"
-            << destination.toString() << "/" << pRow->DestinationPrefix.PrefixLength
+            << destination.toString() << "/" << static_cast<int>(pRow->DestinationPrefix.PrefixLength)
             << "->" << nextHop.toString();
     }
 

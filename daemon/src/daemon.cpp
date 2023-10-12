@@ -2444,7 +2444,8 @@ void Daemon::modernRegionsMetaLoaded(const QJsonDocument &modernRegionsMetaJsonD
     _modernRegionMetaRefresher.loadSucceeded();
 }
 
-void Daemon::publicIpLoaded(const QJsonDocument &publicIpDoc) {
+void Daemon::publicIpLoaded(const QJsonDocument &publicIpDoc)
+{
     qDebug () << "Loaded public IP";
     if(publicIpDoc[QStringLiteral("connected")].isBool()  // Check to see if there is a "connected" key
       && !publicIpDoc[QStringLiteral("connected")].toBool(true)) { // and that it is indeed "false"
@@ -2453,15 +2454,20 @@ void Daemon::publicIpLoaded(const QJsonDocument &publicIpDoc) {
     }
 }
 
-void Daemon::updatePublicIpRefresher (VPNConnection::State state) {
-    if(state == VPNConnection::State::Disconnected || state == VPNConnection::State::Connecting && isActive()) {
+void Daemon::updatePublicIpRefresher (VPNConnection::State state)
+{
+    if((state == VPNConnection::State::Disconnected || state == VPNConnection::State::Connecting) && isActive())
+    {
          _publicIpRefresher.start(environment().getIpAddrApi());
-    } else {
+    }
+    else
+    {
          _publicIpRefresher.stop();
     }
 }
 
-void Daemon::forcePublicIpRefresh () {
+void Daemon::forcePublicIpRefresh ()
+{
      _publicIpRefresher.refresh();
 }
 
@@ -3670,7 +3676,8 @@ void logProcessMemoryWindows(const QString &id, DWORD pid) {
 }
 #endif
 
-void Daemon::traceMemory() {
+void Daemon::traceMemory()
+{
     qDebug () << "Tracing memory";
 #ifdef Q_OS_MACOS
     logProcessMemoryUnix(QStringLiteral("client"), QStringLiteral(BRAND_NAME));

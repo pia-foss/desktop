@@ -181,7 +181,10 @@ WinFirewall::WinFirewall(FirewallConfig config)
     : _config{std::move(config)},
       _subnetBypass{std::make_unique<WinRouteManager>()},
       _firewall{new FirewallEngine{_config.brandInfo}},
-      _filterAdapterLuid{0}
+      _filterAdapterLuid{0},
+      // Ensure our filters are zero-initialized - since
+      // it's an aggregate with simple members this wont happen by default.
+      _filters{}
 {
     // Product and resolver executables can't be changed after the firewall is
     // created, size our GUID vectors appropriately now

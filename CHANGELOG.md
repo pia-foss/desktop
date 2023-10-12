@@ -1,5 +1,10 @@
 # Changelog
 
+### v3.5.1
+
+* Fix a variety of firewall and split tunnel issues on Windows
+* Fix local DNS resolver on some Linux distributions
+
 ### v3.5.0
 
 * Builds for macOS are now universal for x86_64 and arm64

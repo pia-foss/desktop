@@ -26,10 +26,15 @@ ldd (Debian GLIBC 2.28-10+deb10u2) 2.28
 ## Where does the system look for dynamic libraries?
 
 On **Linux**:  
-1. rpath
-2. LD_LIBRARY_PATH
-3. The ld cache
-4. System paths
+1. rpath  
+   If it has been specified at link-time or afterwards using patchelf.  
+   Check if a rpath has been set using `readelf -d myBinary`
+2. LD_LIBRARY_PATH  
+   If the environment variable is defined
+3. The ld cache  
+   Check if a library is in the ld cache using `sudo ldconfig -p | grep myLibrary`
+4. System paths  
+   The directory /lib and /usr/lib are searched, in that order
 
 ## Differences between platforms
 

@@ -21,6 +21,7 @@
 #include "countrydisplay.h"
 #include "regiondisplay.h"
 #include "regionlist.h"
+#include <unordered_set>
 
 namespace kapps::regions {
 
@@ -216,6 +217,9 @@ private:
     std::vector<const CountryDisplay*> _countryDisplays;
     std::unordered_map<core::StringSlice, std::shared_ptr<const RegionDisplay>> _regionDisplaysById;
     std::vector<const RegionDisplay*> _regionDisplays;
+    // Debug records for logging missing metadata
+    std::unordered_set<std::string> _regionsMissingTranslation{};
+    std::unordered_set<std::string> _regionsMissingCoords{};
 };
 
 }

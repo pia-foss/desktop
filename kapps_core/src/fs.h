@@ -42,8 +42,10 @@ namespace fs
     bool KAPPS_CORE_EXPORT mkDir(const std::string &path, bool silent=false);
     // Make all directories (recursively) for a given path, analogous to mkdir -p in Linux
     bool KAPPS_CORE_EXPORT mkDir_p(const std::string &path, bool silent=false);
-    // Copy a file from a src path to a destination path preserving the file mode
+    // Copy a file from a src path to a destination path
     bool KAPPS_CORE_EXPORT copyFile(const std::string &srcPath, const std::string &destPath, bool silent=false);
+    // Copy the file mode, owner, and group from the srcPath to the destPath.
+    bool KAPPS_CORE_EXPORT copyFilePermissions(const std::string &srcPath, const std::string &destPath);
     // Read the target of a filesystem symlink.  Returns the target path, or
     // "" if it couldn't be read.
     std::string KAPPS_CORE_EXPORT readLink(const std::string &path, bool silent=false);

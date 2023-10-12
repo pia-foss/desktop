@@ -195,6 +195,14 @@ Metadata::Metadata(core::StringSlice regionsv6Json, core::StringSlice metadatav2
 
     buildFlatVector(_countryDisplaysById, _countryDisplays);
     buildFlatVector(_regionDisplaysById, _regionDisplays);
+    if(_regionsMissingTranslation.size() > 0) 
+    {
+        KAPPS_CORE_DEBUG() << "Missing translations for:" << _regionsMissingTranslation;
+    }
+    if(_regionsMissingCoords.size() > 0) 
+    {
+        KAPPS_CORE_DEBUG() << "Missing coordinates for:" << _regionsMissingCoords;
+    }
 }
 
 template<class StringT>
@@ -224,15 +232,13 @@ auto Metadata::buildPiav2DisplayText(const nlohmann::json &metadata,
             }
             catch(const std::exception &ex)
             {
-                KAPPS_CORE_WARNING() << "Ignoring translation" << lang
-                    << "of" << name << "-" << ex.what();
+                _regionsMissingTranslation.emplace(name.to_string());
             }
         }
     }
     catch(const std::exception &ex)
     {
-        KAPPS_CORE_WARNING() << "Can't build display text for name" << name
-            << "-" << ex.what();
+        _regionsMissingTranslation.emplace(name.to_string());
     }
     return result;
 }
@@ -265,8 +271,7 @@ std::pair<double, double> Metadata::findPiav2RegionCoords(const nlohmann::json &
     }
     catch(const std::exception &ex)
     {
-        KAPPS_CORE_WARNING() << "Could not find geo coords for region"
-            << regionId << "-" << ex.what();
+        _regionsMissingCoords.emplace(regionId.to_string());
     }
     return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()};
 }

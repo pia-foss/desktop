@@ -30,6 +30,8 @@ elif [ -x /usr/bin/xterm ]; then
     TERMCMD=/usr/bin/xterm
 elif [ -x /usr/bin/xfce4-terminal ]; then
     TERMCMD=/usr/bin/xfce4-terminal
+elif [ -x /usr/bin/kgx ]; then
+    TERMCMD=/usr/bin/kgx
 else
     exit 3
 fi

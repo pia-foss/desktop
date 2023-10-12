@@ -151,9 +151,35 @@ static bool checkOpenSSL()
     // unload the library)
     QLibrary libcrypto{libcryptoPath};
 
+    // We load libcrypto from our App Library path. 
+    // We specify the full path to the library to prevent it falling back to system libraries if it fails.
+    // (Path::LibraryDir - /opt/piavpn/lib/ on Linux)
+    // The LibraryDir path depends on QCoreApplication::applicationDirPath(),
+    // which is where the pia-daemon binary is located.
+    //
+    // Qt (via the QtNetwork library) also attempts to load libcrypto (and libssl). 
+    // It starts its search in our App Library path too (as we set an rpath) but upon failure, 
+    // it WILL search and use system libraries if it finds them.
+    // Check the section "Where does the system look for dynamic libraries?"
+    // in this document: docs/Dynamic libraries.md
+    // to know the exact order in which these libs will be searched.
+    //
+    // We therefore need to be careful that both PIA and Qt expect the same libraries with the same names
+    // to prevent them loading incompatible versions of libcrypto.
+    //
+    //
+    // On Linux use this command: 
+    // `sudo pldd $(pgrep pia-daemon) | grep crypto`
+    // to list both:
+    // - the libraries that have been dynamically loaded using dlopen(3)
+    // - the dynamic shared objects (DSOs) that are linked into the process
+    // $ sudo pldd $(pgrep pia-daemon) | grep crypto
+    //
+    // Check also Openssl historical notes in this document: docs/Openssl.md
     if(!libcrypto.load())
     {
-        qWarning() << "Unable to load libcrypto from" << libcryptoPath;
+        qWarning() << "Unable to load libcrypto from" << libcryptoPath
+            << "-" << libcrypto.errorString();
         return false;
     }
 

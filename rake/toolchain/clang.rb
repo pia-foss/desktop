@@ -371,8 +371,16 @@ class ClangToolchain
         linkParams = []
         # Include '$ORIGIN/../lib' in the rpath to find PIA-specific libraries
         # (specifically pia-clientlib) when testing builds from the staging
-        # directory.
-        linkParams.concat(['-rpath', '$ORIGIN/../lib'])
+        # directory. 
+        pathOrigin = ""
+        if Build.linuxKernel?
+            # On linux, `$ORIGIN` resolves to the path of the binary being loaded.
+            pathOrigin = '$ORIGIN/../lib'
+        elsif Build.xnuKernel?
+            # On Mac, `@loader_path` resolves to the path of the binary being loaded.
+            pathOrigin = '@loader_path/../Frameworks' 
+        end
+        linkParams.concat(['-rpath', "#{pathOrigin}"])
         # If Qt is used, add the Qt installation to the rpath.  (Otherwise, we
         # don't need to set an rpath.)  During the deploy step, rpaths will be
         # patched to the final installation directory; this rpath is needed for

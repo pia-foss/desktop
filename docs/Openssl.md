@@ -18,6 +18,35 @@ Currently these are the components that are using openssl libs:
   - pia-unbound
   - pia-hnsd
 
+## Historical notes
+
+Here goes an explanation of why we load OpenSSL in runtime instead of in load time
+It's unclear whether any of these reasons apply any more, but it isn't completely
+uncommon for OpenSSL to be loaded at runtime.
+Qt does essentially the same thing, and PIA has always done it this way.
+Reasons:
+- There was a time historically when we tolerated a failure to load OpenSSL.
+For instance, the regions list signature validation would 'fail closed',
+and we just didn't validate the signature, this was the only thing at the
+time. The only way to do that is to link at runtime.
+- That in turn was because we didn't ship our own OpenSSL on macOS (I think
+we always did on Win/Linux), and because OpenSSL historically has broken its API
+significantly between 0.9/1.0/1.1/.etc., there was the possibility we would run
+against a version we didn't expect or not find it at all. So it was tricky to
+locate OpenSSL on the system and tricky to know if it was the right version.
+- Qt does the same thing, and I think there was a possibility that trying to
+link at load time vs. runtime would conflict with Qt loading the lib at runtime.
+Today we ship OpenSSL on all platforms and try to ensure we load first and that Qt
+loads the same one, which should avoid any conflicts.
+*Edit: Qt does actually load from other paths if it can not find libcrypto in the 
+apps library path (e.g. /opt/piavpn/lib in Linux)*
+- OpenSSL is under a weird license, the SSLeay license (thanks Eric A Young :-/).
+Technically we should probably offer the OpenSSL linking exception on the GPL we apply
+to PIA, this never occurred to me until now. SSLeay is not GPL-compatible, in my mind
+keeping it "as far as possible" from us by runtime linking suggests that it is an
+independent component we are driving through an interface, although there is no
+case law on this so this may also be nothing useful.
+
 ## How different components load Openssl
 
 ### Openvpn

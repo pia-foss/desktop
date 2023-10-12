@@ -97,7 +97,7 @@ int main(int argc, char** argv)
     // daemon can be linked and executed.
     QCommandLineParser parser;
     parser.addVersionOption();
-    parser.addHelpOption();
+    parser.addOption({QStringList{"help", "h"}, "Displays help on commandline options."});
     parser.setApplicationDescription(QStringLiteral(
         BRAND_SHORT_NAME " daemon - manages the " BRAND_SHORT_NAME " VPN connection as root."));
     if(!parser.parse(QCoreApplication::arguments()))
