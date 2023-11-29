@@ -374,7 +374,6 @@ public:
     // For the WireGuard method only, whether to use kernel support if available
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
 
-    quint16 localPort() const {return _localPort;}
     int mtu() const {return _mtu;}
 
     // Whether to try alternate transports.  Requires OpenVPN and no proxy.
@@ -467,7 +466,6 @@ private:
     Protocol _openvpnProtocol{Protocol::UDP};
     quint16 _openvpnRemotePort{};
     bool _wireguardUseKernel{false};
-    quint16 _localPort{0};
     int _mtu{-1};
     bool _automaticTransport{false};
 

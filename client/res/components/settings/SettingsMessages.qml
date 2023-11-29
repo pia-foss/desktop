@@ -42,7 +42,7 @@ QtObject {
     "libnl_invalid": uiTr("This feature requires libnl-3, libnl-route-3, and libnl-genl-3."),
     //: Message for Linux indicating that a kernel feature has to be mounted at
     //: a specific location to use the split tunnel feature.  %1 is a file path,
-    //: currently /sys/fs/cgroups/net_cls.
+    //: currently /opt/piavpn/etc/cgroup/net_cls.
     "cgroups_invalid": uiTr("This feature requires net_cls to be available at %1.").arg(SplitTunnelManager.linuxNetClsPath),
     "cn_proc_invalid": uiTr("This feature requires kernel process events.")
   }

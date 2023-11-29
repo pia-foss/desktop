@@ -171,6 +171,27 @@ kapps::core::Ipv6Address readNlAddr6(libnl::nl_addr *pNlAddr)
     return {};
 }
 
+// Returns true if pRoute is a default route
+// We identify a route as default if its destination has 0 length or equals 0.0.0.0/0.
+bool isDefaultRoute(libnl::rtnl_route *pRoute)
+{
+    libnl::nl_addr *pDest = libnl::rtnl_route_get_dst(pRoute);
+
+    // Not a default route if it doesn't have a destination address somehow. 
+    // This is a sanity check and should not happen.
+    if (!pDest)
+        return false;
+
+    // The destination address has zero length.
+    if (libnl::nl_addr_get_len(pDest) == 0)
+        return true;
+
+    // Matches 0.0.0.0/0
+    // Some routes will have destination 0.0.0.0 but a prefix != 0 (e.g. the openvpn tunnel interface).
+    // Those are not default routes here, so we will return false.
+    return libnl::nl_addr_iszero(pDest) && libnl::nl_addr_get_prefixlen(pDest) == 0;
+}
+
 // Check if pRoute is a default-gateway route, and return the gateway if it is.
 // Looks for a route with all of the following:
 // - in the main routing table
@@ -195,13 +216,7 @@ libnl::nl_addr *getNlRouteGateway(libnl::rtnl_route *pRoute, int &ifIndex)
     if(table != RT_TABLE_MAIN)
         return nullptr; // Not in the main routing table, don't care
 
-    // Is this a default route?  Default routes do not have a destination,
-    // which is represented by libnl as a 0-length address.
-    libnl::nl_addr *pDest = libnl::rtnl_route_get_dst(pRoute);
-    // Skip if it doesn't have a destination address somehow (makes no sense,
-    // sanity check), or if the destination address has nonzero length (not a
-    // default route)
-    if(!pDest || libnl::nl_addr_get_len(pDest) != 0)
+    if(!isDefaultRoute(pRoute))
         return nullptr;
 
     // We don't support network detection in the presence of multipath routing.
@@ -289,45 +304,45 @@ void LinuxNl::Worker::readCaches()
         int ifindex{};
         libnl::nl_addr *pGateway = getNlRouteGateway(pRoute, ifindex);
 
-        if(pGateway)
+        if(!pGateway)
+            continue;
+
+        auto itItfAddrs = interfaceAddrs.find(ifindex);
+        // It does sometimes happen that we get routes from libnl for
+        // interfaces that no longer exist.  Specifically, this has been
+        // observed with a USB Ethernet adapter by unplugging USB while it
+        // is connected to a network.
+        //
+        // It seems the IPv4 gateway route is removed in this case (the
+        // kernel no longer returns it in dumps), but no "delete route"
+        // notification is sent.  (The IPv6 gateway route deletion is sent
+        // correctly.)  It's not clear why this happens, but the route no
+        // longer matters anyway since the interface is gone, and libnl
+        // resyncs the next time it dumps IPv4 routes (which happens pretty
+        // frequently), so it should not cause accumulation of memory even
+        // if it happens a lot.
+        if(itItfAddrs == interfaceAddrs.end())
+            continue;
+
+        // Get the metric (called "priority" by the kernel, "metrics" are other
+        // parameters)
+        std::uint32_t metric = libnl::rtnl_route_get_priority(pRoute);
+        int family = libnl::rtnl_route_get_family(pRoute);
+        switch(family)
         {
-            auto itItfAddrs = interfaceAddrs.find(ifindex);
-            // It does sometimes happen that we get routes from libnl for
-            // interfaces that no longer exist.  Specifically, this has been
-            // observed with a USB Ethernet adapter by unplugging USB while it
-            // is connected to a network.
-            //
-            // It seems the IPv4 gateway route is removed in this case (the
-            // kernel no longer returns it in dumps), but no "delete route"
-            // notification is sent.  (The IPv6 gateway route deletion is sent
-            // correctly.)  It's not clear why this happens, but the route no
-            // longer matters anyway since the interface is gone, and libnl
-            // resyncs the next time it dumps IPv4 routes (which happens pretty
-            // frequently), so it should not cause accumulation of memory even
-            // if it happens a lot.
-            if(itItfAddrs != interfaceAddrs.end())
-            {
-                // Get the metric (called "priority" by the kernel, "metrics" are other
-                // parameters)
-                std::uint32_t metric = libnl::rtnl_route_get_priority(pRoute);
-                int family = libnl::rtnl_route_get_family(pRoute);
-                switch(family)
-                {
-                    case AF_INET:
-                        itItfAddrs->second._pIpv4Gateway = pGateway;
-                        if(lowestGateway4.ifindex == -1 || metric < lowestGateway4.metric)
-                            lowestGateway4 = {metric, ifindex};
-                        break;
-                    case AF_INET6:
-                        itItfAddrs->second._pIpv6Gateway = pGateway;
-                        if(lowestGateway6.ifindex == -1 || metric < lowestGateway6.metric)
-                            lowestGateway6 = {metric, ifindex};
-                        break;
-                    default:
-                        // Something else, don't care
-                        break;
-                }
-            }
+            case AF_INET:
+                itItfAddrs->second._pIpv4Gateway = pGateway;
+                if(lowestGateway4.ifindex == -1 || metric < lowestGateway4.metric)
+                    lowestGateway4 = {metric, ifindex};
+                break;
+            case AF_INET6:
+                itItfAddrs->second._pIpv6Gateway = pGateway;
+                if(lowestGateway6.ifindex == -1 || metric < lowestGateway6.metric)
+                    lowestGateway6 = {metric, ifindex};
+                break;
+            default:
+                // Something else, don't care
+                break;
         }
     }
 
@@ -446,69 +461,70 @@ void LinuxNl::Worker::receiveRoute(short &revents)
 
 void LinuxNl::Worker::receiveGenlFamilies(short &revents)
 {
-    if(revents)
+    // Skip if zero
+    if(!revents)
+        return;
+
+    _genlFamilies.receive(revents);
+    revents = 0;
+
+    const auto *pNl80211Family = _genlFamilies.getFamily(QStringLiteral(NL80211_GENL_NAME));
+    // Get the group IDs if the family and group exist, or 0 otherwise.
+    // 0 isn't a valid multicast group ID.
+    int configGroupId = 0;
+    int mlmeGroupId = 0;
+    if(pNl80211Family)
     {
-        _genlFamilies.receive(revents);
-        revents = 0;
+        const auto &mcastGroups = pNl80211Family->_multicastGroups;
+        auto itConfigGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_CONFIG));
+        if(itConfigGroup != mcastGroups.end())
+            configGroupId = itConfigGroup->second;
+        auto itMlmeGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_MLME));
+        if(itMlmeGroup != mcastGroups.end())
+            mlmeGroupId = itMlmeGroup->second;
+    }
 
-        const auto *pNl80211Family = _genlFamilies.getFamily(QStringLiteral(NL80211_GENL_NAME));
-        // Get the group IDs if the family and group exist, or 0 otherwise.
-        // 0 isn't a valid multicast group ID.
-        int configGroupId = 0;
-        int mlmeGroupId = 0;
-        if(pNl80211Family)
+
+    // If we have a cache; we might need to destroy it if nl80211 is gone or
+    // the protocol IDs have changed
+    if(_p80211Cache)
+    {
+        if(!pNl80211Family ||
+            pNl80211Family->_protocol != _p80211Cache->nl80211Protocol() ||
+            configGroupId != _p80211Cache->configGroup() ||
+            mlmeGroupId != _p80211Cache->mlmeGroup())
         {
-            const auto &mcastGroups = pNl80211Family->_multicastGroups;
-            auto itConfigGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_CONFIG));
-            if(itConfigGroup != mcastGroups.end())
-                configGroupId = itConfigGroup->second;
-            auto itMlmeGroup = mcastGroups.find(QStringLiteral(NL80211_MULTICAST_GROUP_MLME));
-            if(itMlmeGroup != mcastGroups.end())
-                mlmeGroupId = itMlmeGroup->second;
+            // nl80211 or config group is gone, or IDs changed, destroy cache
+            _p80211Cache.reset();
+            _pollCfgs[PollIdx::Nl80211Socket].fd = kapps::core::PosixFd::Invalid;
         }
+    }
 
-
-        // If we have a cache; we might need to destroy it if nl80211 is gone or
-        // the protocol IDs have changed
-        if(_p80211Cache)
-        {
-            if(!pNl80211Family ||
-               pNl80211Family->_protocol != _p80211Cache->nl80211Protocol() ||
-               configGroupId != _p80211Cache->configGroup() ||
-               mlmeGroupId != _p80211Cache->mlmeGroup())
-            {
-                // nl80211 or config group is gone, or IDs changed, destroy cache
-                _p80211Cache.reset();
-                _pollCfgs[PollIdx::Nl80211Socket].fd = kapps::core::PosixFd::Invalid;
-            }
-        }
-
-        // If we don't have a cache (including if it was destroyed above), and
-        // we have all the protocol IDs, create a cache
-        if(!_p80211Cache && pNl80211Family && configGroupId && mlmeGroupId)
-        {
-            qInfo() << "Creating nl80211 cache (protocol"
-                << pNl80211Family->_protocol << "- config grp" << configGroupId
-                << "- mlme grp" << mlmeGroupId << ")";
-            _p80211Cache.reset(new LinuxNl80211Cache{pNl80211Family->_protocol,
-                                                     configGroupId,
-                                                     mlmeGroupId});
-            _pollCfgs[PollIdx::Nl80211Socket].fd = _p80211Cache->getFd();
-        }
+    // If we don't have a cache (including if it was destroyed above), and
+    // we have all the protocol IDs, create a cache
+    if(!_p80211Cache && pNl80211Family && configGroupId && mlmeGroupId)
+    {
+        qInfo() << "Creating nl80211 cache (protocol"
+            << pNl80211Family->_protocol << "- config grp" << configGroupId
+            << "- mlme grp" << mlmeGroupId << ")";
+        _p80211Cache.reset(new LinuxNl80211Cache{pNl80211Family->_protocol,
+                                                    configGroupId,
+                                                    mlmeGroupId});
+        _pollCfgs[PollIdx::Nl80211Socket].fd = _p80211Cache->getFd();
     }
 }
 
 void LinuxNl::Worker::receiveNl80211(short &revents)
 {
-    if(revents)
+    if(!revents)
+        return;
+
+    if(_p80211Cache)
     {
-        if(_p80211Cache)
-        {
-            qInfo() << "Receiving nl80211 events";
-            _p80211Cache->receive(revents);
-        }
-        revents = 0;
+        qInfo() << "Receiving nl80211 events";
+        _p80211Cache->receive(revents);
     }
+    revents = 0;
 }
 
 bool LinuxNl::Worker::receive()

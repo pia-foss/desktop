@@ -286,7 +286,11 @@ module PiaUnitTest
 
         file coverage_lcov => [merged, coverageBuild.componentDir] do |t|
             puts "generate coverage LCOV export"
-            Util.shellRun "#{llvmCov} export #{common_ignore_regex} #{llvmCovArch} -format=lcov \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage_lcov}\""
+            begin
+                Util.shellRun "#{llvmCov} export #{common_ignore_regex} #{llvmCovArch} -format=lcov \"#{anyTestBin}\" \"-instr-profile=#{merged}\" >\"#{coverage_lcov}\""
+            rescue
+                puts "Couldn't run llvm-lcov, probably lcov format not supported"
+            end
         end
 
         file fileCoverage => [coverage, coverageBuild.componentDir] do |t|

@@ -233,6 +233,8 @@ public:
 
 public:
     QString toQString() const {return QString::fromCFString(get());}
+    // Convert to a QByteArray containing the UTF-8 byte sequence
+    QByteArray toUtf8QByteArray() const {return toQString().toUtf8();}
     // TODO: don't go through QString
     std::string toStdString() const {return toQString().toStdString();}
 };

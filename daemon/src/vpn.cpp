@@ -618,10 +618,6 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
         _setDefaultDns = false;
     }
 
-    if (!g_daemon || !g_data.hasFlag(QStringLiteral("remove_local_port_setting")))
-        _localPort = static_cast<quint16>(settings.localPort());
-    else
-        _localPort = 0;
     _mtu = settings.mtu();
 
     _requestMace = settings.enableMACE();
@@ -807,7 +803,6 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         openvpnProtocol() != other.openvpnProtocol() ||
         openvpnRemotePort() != other.openvpnRemotePort() ||
         wireguardUseKernel() != other.wireguardUseKernel() ||
-        localPort() != other.localPort() ||
         mtu() != other.mtu() ||
         automaticTransport() != other.automaticTransport() ||
         dnsType() != other.dnsType() ||
@@ -1050,6 +1045,9 @@ bool VPNConnection::connectVPN(bool force)
         // still requested and we're doing it - it just happened that we didn't
         // actually have to initiate a reconnect due to timing.
         return force || needsReconnect();
+    case State::Disconnecting:
+        // If we are disconnecting ignore the connection attempt.
+        return false;
     default:
         qWarning() << "Connecting in unhandled state " << _state;
         // fallthrough
@@ -1065,7 +1063,7 @@ bool VPNConnection::connectVPN(bool force)
 
 void VPNConnection::disconnectVPN()
 {
-    if (_state != State::Disconnected)
+    if (_state != State::Disconnected && _state != State::Disconnecting)
     {
         _connectingConfig = {};
         _connectingServer = {};

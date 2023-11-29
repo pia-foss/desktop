@@ -1,6 +1,7 @@
 require 'net/http'
 require 'openssl'
 require 'open3'
+require_relative 'rake/toolchain/compiler_database'
 
 # Don't mess with bundler on CI servers - we currently only need
 # bundler when developing locally to install extra gems for
@@ -260,4 +261,15 @@ end
 desc "Run specs for the Rake build system"
 task :build_specs do
     Util.shellRun "bundle exec rspec rake/spec/"
+end
+
+desc "Create compilation database compile_commands.json"
+task :compile_commands => :stage do
+    CompilerDatabase.build_compile_commands
+end
+task :default => :compile_commands
+
+desc "Run headless integration tests"
+task :headless do
+  chdir('headless_tests') {Util.shellRun("rspec .")}
 end

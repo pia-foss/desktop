@@ -165,21 +165,21 @@ private slots:
 
         QSignalSpy consumeSpy{&MockNetworkManager::_replyConsumed, &ReplyConsumedSignal::signal};
 
-        // Do a GET request.  Act as if www.privateinternetaccess.com is not
+        // Do a GET request.  Act as if api.privateinternetaccess.com is not
         // reachable, but piaproxy.net is.
         auto pHeadReply1 = MockNetworkManager::enqueueReply();
         CallbackSpy headSpy;
         client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&headSpy, headSpy.callback());
         QVERIFY(consumeSpy.wait(100));
-        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.privateinternetaccess.com")));
+        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("api.privateinternetaccess.com")));
         consumeSpy.clear();
 
         auto pHeadReply2 = MockNetworkManager::enqueueReply(TestData::success);
         // Host is unreachable
         pHeadReply1->finishNetError();
         QVERIFY(consumeSpy.wait(100));
-        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.piaproxy.net")));
+        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("api.piaproxy.net")));
         consumeSpy.clear();
 
         // Success on the alternate host
@@ -193,7 +193,7 @@ private slots:
         client.getRetry(*client.getApiv1(), TestData::status, TestData::passwordAuth())
             ->notify(&getSpy, getSpy.callback());
         QVERIFY(consumeSpy.wait(100));
-        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("www.piaproxy.net")));
+        QVERIFY(TestData::checkConsumedHost(consumeSpy, QStringLiteral("api.piaproxy.net")));
         consumeSpy.clear();
 
         emit pGetReply->finished();

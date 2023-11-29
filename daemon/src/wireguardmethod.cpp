@@ -469,12 +469,6 @@ void WireguardMethod::createInterface(const WireguardKeypair &clientKeypair,
     wgDev.fwmark = _fwmark.wireguardFwmark();
 #endif
 
-    if(_connectionConfig.localPort())
-    {
-        wgDev.listen_port = _connectionConfig.localPort();
-        wgDev.flags = static_cast<wg_device_flags>(wgDev.flags | WGDEVICE_HAS_LISTEN_PORT);
-    }
-
     // Just specify the private key.  UAPI doesn't support the public key at
     // all, and kernel mode presumably does not need it on a set (since it can
     // be derived from the private key anyway).

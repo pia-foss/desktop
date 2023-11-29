@@ -43,7 +43,7 @@ int main (int argc, char** argv) {
           printf ("Attribute not set.\n");
           return 0;
         }
-        printf ("Failed to remove attr due to error - ", errno);
+        printf ("Failed to remove attr due to error - %d", errno);
     }
   }
   else {

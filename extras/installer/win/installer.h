@@ -104,7 +104,7 @@ public:
 
     void setError(UIString description);
     void warnCorruptInstallation();
-    int messageBox(UIString text, UIString caption, UIString msgSuffix, UINT type, int silentResult = 0);
+    int messageBox(const UIString& text, const UIString& caption, const UIString& msgSuffix, UINT type, int silentResult = 0);
 
     // Called from main thread
     void install();

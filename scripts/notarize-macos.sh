@@ -23,9 +23,6 @@ set -e
 # Environment variables:
 # PIA_APPLE_ID_EMAIL - (required) Email address of Apple ID to notarize with
 # PIA_APPLE_ID_PASSWORD - (required) Password to that Apple ID
-# PIA_APPLE_ID_PROVIDER - (optional) If the Apple ID is a member of multiple
-#                         teams, specify the provider ID to use (see
-#                         `xcrun altool --help`; `--asc-provider` option)
 # PIA_APPLE_NOTARIZE_TIMEOUT - (optional) Override the time to wait for the
 #                              package to be approved (time in seconds, default
 #                              600 = 10 minutes)
@@ -43,70 +40,19 @@ echo "Performing notarization."
 echo "Release zip: $RELEASE_ZIP"
 echo "Bundle ID: $RELEASE_ZIP"
 echo "App Bundle: $APP_BUNDLE"
-
-NOTARIZE_EXTRA_ARGS=()
-if [ -n "$PIA_APPLE_ID_PROVIDER" ]; then
-    NOTARIZE_EXTRA_ARGS+=("--asc-provider=$PIA_APPLE_ID_PROVIDER")
-fi
-
+echo "Team ID: $PIA_APPLE_TEAM_ID"
 # Outputs are written to stderr
 # Upload the tool for notarization
 # (Tee through /dev/stderr so the output is logged in case we exit here due to set -e)
-notarizeOutput=$( (xcrun altool --notarize-app -t osx -f "$RELEASE_ZIP" --primary-bundle-id="$BUNDLE_ID" -u "$PIA_APPLE_ID_EMAIL" -p "$PIA_APPLE_ID_PASSWORD" "${NOTARIZE_EXTRA_ARGS[@]}") 2>&1 | tee /dev/stderr)
+notarizeOutput=$( (xcrun notarytool submit --team-id "$PIA_APPLE_TEAM_ID" --apple-id "$PIA_APPLE_ID_EMAIL" --password "$PIA_APPLE_ID_PASSWORD" --wait --timeout "$PIA_APPLE_NOTARIZE_TIMEOUT" --progress "$RELEASE_ZIP") 2>&1 | tee /dev/stderr)
+notarizeExit=$?
+echo "$notarizeOutput"
 
-# notarizeOutput="2019-07-09 10:20:48.926 altool[70312:1478958] No errors uploading './out/artifacts/pia-macos-1.3-mac-notarization-20190701210616-b2471ea6.zip'.
-# RequestUUID = 6e6265a3-03e8-42e6-9ff6-146780ae8952
-# "
-
-if [[ $notarizeOutput == *"No errors uploading"* ]];
+if [ $notarizeExit -ne 0 ]
 then
-    REQUEST_ID=$(echo "$notarizeOutput"| grep RequestUUID |awk '{print $NF}')
-    echo "Request ID is: $REQUEST_ID"
-else
-    echo "Notarization upload failed."
-    echo "$notarizeOutput"
+    echo "Notarization failed, will exit without stapling"
     exit 3
 fi
-
-# Wait 20 seconds otherwise we may get the error "Could not find the RequestUUID"
-echo "Waiting 20 seconds"
-sleep 20
-
-# Wait up to 10 minutes (or PIA_APPLE_NOTARIZE_TIMEOUT)
-deadline=$(($(date "+%s") + ${PIA_APPLE_NOTARIZE_TIMEOUT:-600}))
-
-while :
-do
-    notarizationStatus=$( (xcrun altool --notarization-info "$REQUEST_ID" -u "$PIA_APPLE_ID_EMAIL" -p "$PIA_APPLE_ID_PASSWORD") 2>&1 | tee /dev/stderr)
-
-    if [[ $notarizationStatus == *"in progress"* ]];
-    then
-        now="$(date "+%s")"
-        if [[ "$now" -ge "$deadline" ]];
-        then
-            echo "Timed out waiting for approval"
-            echo "Last status:"
-            echo "$notarizationStatus"
-            exit 3
-        fi
-        # In progress
-        echo "Waiting for notarization"
-    elif [[ $notarizationStatus == *"Package Approved"* ]];
-    then
-        echo "Package has been approved"
-        break;
-    elif [[ $notarizationStatus == *"invalid"* ]];
-    then
-        echo "Notarization invalid"
-        echo "$notarizationStatus"
-        exit 3
-    else
-        echo "Unknown notarization status"
-        echo "$notarizationStatus"
-    fi
-
-    sleep 5
-done
 
 # Assuming that the package has been approved by this point
 stapleOutput=$( (xcrun stapler staple "$APP_BUNDLE") 2>&1)

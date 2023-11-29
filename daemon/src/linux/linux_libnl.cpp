@@ -82,6 +82,7 @@ namespace libnl
         loadLibnl(nl_addr_get_prefixlen);
         loadLibnl(nl_addr_get_family);
         loadLibnl(nl_addr_get_len);
+        loadLibnl(nl_addr_iszero);
         loadLibnl(nl_cache_alloc_name);
         loadLibnl(nl_cache_dump);
         loadLibnl(nl_cache_free);
@@ -154,6 +155,7 @@ namespace libnl
     LIBNL_FUNC(nl_addr_get_prefixlen);
     LIBNL_FUNC(nl_addr_get_family);
     LIBNL_FUNC(nl_addr_get_len);
+    LIBNL_FUNC(nl_addr_iszero);
     LIBNL_FUNC(nl_cache_alloc_name);
     LIBNL_FUNC(nl_cache_dump);
     LIBNL_FUNC(nl_cache_free);

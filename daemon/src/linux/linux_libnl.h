@@ -24,6 +24,7 @@
 #include <linux/genetlink.h>
 #include <netlink/genl/genl.h>
 #include <netlink/cache.h>
+#include <netlink/addr.h>
 #include <netlink/route/addr.h>
 #include <netlink/route/route.h>
 #include <netlink/genl/mngt.h>
@@ -132,6 +133,7 @@ namespace libnl
     LIBNL_FUNC(nl_addr_get_prefixlen);
     LIBNL_FUNC(nl_addr_get_family);
     LIBNL_FUNC(nl_addr_get_len);
+    LIBNL_FUNC(nl_addr_iszero);
     LIBNL_FUNC(nl_cache_alloc_name);
     LIBNL_FUNC(nl_cache_dump);
     LIBNL_FUNC(nl_cache_free);

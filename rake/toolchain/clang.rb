@@ -1,9 +1,10 @@
-require_relative '../model/build.rb'
-require_relative '../util/util.rb'
-require_relative '../util/dsl.rb'
+require_relative '../model/build'
+require_relative '../util/util'
+require_relative '../util/dsl'
 
-require_relative './clangplatform/linux.rb' if Build.linuxKernel?
-require_relative './clangplatform/xnu.rb' if Build.xnuKernel?
+require_relative './compiler_database'
+require_relative './clangplatform/linux' if Build.linuxKernel?
+require_relative './clangplatform/xnu' if Build.xnuKernel?
 
 class ClangToolchain
     include BuildDSL
@@ -335,6 +336,7 @@ class ClangToolchain
         ]
 
         Util.shellRun *params
+        CompilerDatabase.create_fragment(sourceFile, objectFile, params)
     end
 
     # Compile one source file to an object file.  All paths should be absolute

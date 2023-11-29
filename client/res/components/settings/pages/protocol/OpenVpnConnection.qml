@@ -126,23 +126,6 @@ Item {
       }
       model: portSelection(Daemon.state.openvpnTcpPortChoices)
     }
-    TextboxInput {
-      visible: !Daemon.data.flags.includes("remove_local_port_setting")
-      textBoxVerticalPadding: 4
-      label: uiTranslate("ConnectionPage", "Local Port")
-      setting: Setting {
-        readonly property DaemonSetting actual: DaemonSetting { name: "localPort" }
-        sourceValue: actual.sourceValue > 0 && actual.sourceValue <= 65535 ? actual.sourceValue.toString() : ""
-        onCurrentValueChanged: {
-          var newValue = Number(currentValue); // "" becomes 0
-          if (newValue !== actual.currentValue) {
-            actual.currentValue = newValue;
-          }
-        }
-      }
-      validator: RegExpValidator { regExp: /(?:[0-9]{,5})?/ }
-      placeholderText: uiTranslate("ConnectionPage", "Auto")
-    }
 
     // Row 4
     DropdownInput {

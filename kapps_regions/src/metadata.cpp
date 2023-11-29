@@ -55,6 +55,51 @@ namespace
         for(const auto &[id, group] : elementsById)
             elements.push_back(group.get());
     }
+
+    // A class to store up items to trace but only trace the items
+    // when the trace() method is called.
+    class BulkTracer
+    {
+        using TraceElements = std::unordered_set<std::string>;
+
+    public:
+        explicit BulkTracer(const std::string &tracePrefix)
+        : _prefix{tracePrefix}
+        {}
+
+        // Add an element that will be traced later
+        void add(std::string element)
+        {
+            std::lock_guard<std::mutex> lock{_mutex}; // Ensure thread-safety
+            _traceElements.insert(std::move(element));
+        }
+
+        // Trace all trace elements at once - but only trace
+        // if the new trace is different to the prior trace - this prevents
+        // repetitive and unhelpful spam in the logs
+        void trace()
+        {
+            std::lock_guard<std::mutex> lock{_mutex};
+            if(_traceElements.size() && _oldTraceElements != _traceElements)
+            {
+                _oldTraceElements = _traceElements;
+                KAPPS_CORE_DEBUG() << _prefix << _traceElements;
+            }
+        }
+
+     private:
+         std::string _prefix;
+         TraceElements _traceElements;
+         TraceElements _oldTraceElements;
+         std::mutex _mutex;
+     };
+
+     // Make these global so they're shared by all instances of the Metadata class.
+     // Since the Metadata constructor is called multiple times and will likely
+     // encounter the same missing translations each time. The bulk tracer
+     // is written to only trace if the tracing elements have changed since it was last called.
+     BulkTracer g_MissingTranslationsTracer{"Missing translations for:"};
+     BulkTracer g_MissingCoordsTracer{"Missing coordinates for:"};
 }
 
 Metadata::Metadata(core::StringSlice metadataJson,
@@ -195,14 +240,9 @@ Metadata::Metadata(core::StringSlice regionsv6Json, core::StringSlice metadatav2
 
     buildFlatVector(_countryDisplaysById, _countryDisplays);
     buildFlatVector(_regionDisplaysById, _regionDisplays);
-    if(_regionsMissingTranslation.size() > 0) 
-    {
-        KAPPS_CORE_DEBUG() << "Missing translations for:" << _regionsMissingTranslation;
-    }
-    if(_regionsMissingCoords.size() > 0) 
-    {
-        KAPPS_CORE_DEBUG() << "Missing coordinates for:" << _regionsMissingCoords;
-    }
+
+    g_MissingCoordsTracer.trace();
+    g_MissingTranslationsTracer.trace();
 }
 
 template<class StringT>
@@ -232,13 +272,13 @@ auto Metadata::buildPiav2DisplayText(const nlohmann::json &metadata,
             }
             catch(const std::exception &ex)
             {
-                _regionsMissingTranslation.emplace(name.to_string());
+                g_MissingTranslationsTracer.add(name.to_string());
             }
         }
     }
     catch(const std::exception &ex)
     {
-        _regionsMissingTranslation.emplace(name.to_string());
+        g_MissingTranslationsTracer.add(name.to_string());
     }
     return result;
 }
@@ -271,7 +311,7 @@ std::pair<double, double> Metadata::findPiav2RegionCoords(const nlohmann::json &
     }
     catch(const std::exception &ex)
     {
-        _regionsMissingCoords.emplace(regionId.to_string());
+        g_MissingCoordsTracer.add(regionId.to_string());
     }
     return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()};
 }

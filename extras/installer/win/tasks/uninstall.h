@@ -26,7 +26,7 @@
 
 #define UNINSTALL_DATA_FILENAME "uninstall.dat"
 
-std::wstring getUninstallDataPath(std::wstring uninstallPath);
+std::wstring getUninstallDataPath(const std::wstring& uninstallPath);
 
 // Task to remove an existing installation by obeying its uninstall.dat file.
 class ExecuteUninstallDataTask : public TaskList

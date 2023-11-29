@@ -23,7 +23,7 @@ module Archive
         else
             # '-y' preserves symlinks, important for Mac frameworks, Mac/Linux
             # versioned library symlinks, etc.
-            Util.shellRun "cd \"#{workDir}\" && zip -y -#{Compression} -r \"#{archiveAbs}\" #{content}"
+            Util.shellRun "cd \"#{workDir}\" && zip -q -y -#{Compression} -r \"#{archiveAbs}\" #{content}"
         end
     end
 

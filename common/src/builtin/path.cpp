@@ -301,9 +301,9 @@ void Path::initializePostApp()
 #endif
 #ifdef Q_OS_LINUX
     // Currently only tested on Ubuntu
-    VpnExclusionsFile = Path { "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/cgroup.procs" };
-    VpnOnlyFile = Path { "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnonly/cgroup.procs" };
-    ParentVpnExclusionsFile = Path { "/sys/fs/cgroup/net_cls/cgroup.procs" };
+    VpnExclusionsFile = Path { "/opt/piavpn/etc/cgroup/net_cls/" BRAND_CODE "vpnexclusions/cgroup.procs" };
+    VpnOnlyFile = Path { "/opt/piavpn/etc/cgroup/net_cls/" BRAND_CODE "vpnonly/cgroup.procs" };
+    ParentVpnExclusionsFile = Path { "/opt/piavpn/etc/cgroup/net_cls/cgroup.procs" };
 #endif
 
     ClientExecutable = QCoreApplication::applicationFilePath();

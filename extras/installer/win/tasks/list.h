@@ -44,11 +44,11 @@ private:
 private:
     std::vector<std::shared_ptr<Task>> _tasks;
     int _currentTaskIndex = -1;
-    double _totalExecutionTime; // Sum of all estimates
-    double _completedExecutionTime; // Sums of estimates (not actual time) of completed tasks
-    double _currentExecutionTime; // Estimated execution time for current task
-    double _remainingRollbackTime; // Estimate of remaining rollback tasks
-    double _currentRollbackTime; // Estimate of current rollback task
+    double _totalExecutionTime = 0.0; // Sum of all estimates
+    double _completedExecutionTime = 0.0; // Sums of estimates (not actual time) of completed tasks
+    double _currentExecutionTime = 0.0; // Estimated execution time for current task
+    double _remainingRollbackTime = 0.0; // Estimate of remaining rollback tasks
+    double _currentRollbackTime = 0.0; // Estimate of current rollback task
     bool _rollingBack = false;
 };
 

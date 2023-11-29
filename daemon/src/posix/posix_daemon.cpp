@@ -556,6 +556,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeText("Overview", diagnosticsOverview());
     file.writeCommand("Distro", "lsb_release", QStringList{QStringLiteral("-a")});
+    file.writeCommand("OS Release", "cat", QStringList{"/etc/os-release"});
     file.writeCommand("ifconfig", "ifconfig", emptyArgs);
     file.writeCommand("ip addr", "ip", QStringList{QStringLiteral("addr")});
     file.writeCommand("netstat -nr", "netstat", QStringList{QStringLiteral("-nr")});
@@ -611,10 +612,10 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // net_cls cgroup required for split tunnel
     file.writeCommand("ls -l <net_cls>", "ls", QStringList{"-l", Path::ParentVpnExclusionsFile.parent()});
-    file.writeText("cat piavpnonly: cgroup.procs", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnonly/cgroup.procs"));
-    file.writeText("ps -p piavpnonly", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnonly/cgroup.procs | xargs -n1 ps -p"));
-    file.writeText("cat piavpnexclusions: cgroup.procs", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnexclusions/cgroup.procs"));
-    file.writeText("ps -p piavpnexclusions", Exec::bashWithOutput("cat /sys/fs/cgroup/net_cls/piavpnexclusions/cgroup.procs | xargs -n1 ps -p"));
+    file.writeText("cat piavpnonly: cgroup.procs", Exec::bashWithOutput("cat " + Path::VpnOnlyFile));
+    file.writeText("ps -p piavpnonly", Exec::bashWithOutput("cat " + Path::VpnOnlyFile + " | xargs -n1 ps -p"));
+    file.writeText("cat piavpnexclusions: cgroup.procs", Exec::bashWithOutput("cat " + Path::VpnExclusionsFile));
+    file.writeText("ps -p piavpnexclusions", Exec::bashWithOutput("cat " + Path::VpnExclusionsFile + " | xargs -n1 ps -p"));
     file.writeCommand("ip rule list", "ip", QStringList{"rule", "list"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnrt"});
     file.writeCommand("ip route show table " BRAND_CODE "vpnWgrt", "ip", QStringList{"route", "show", "table", BRAND_CODE "vpnWgrt"});
@@ -634,7 +635,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
 void PosixDaemon::checkFeatureSupport()
 {
-    // Probably needs to be refactored since wrong errors can end up in 
+    // Probably needs to be refactored since wrong errors can end up in
     // the splitTunnelSupportErrors JsonProperty.
     std::vector<QString> errors;
 
@@ -675,7 +676,7 @@ void PosixDaemon::checkFeatureSupport()
     auto patch = match.captured(5).toInt();
     // output.data() is "iptables vX.X.X (nf_tables)" when iptables is installed
     // otherwise it is empty when no iptables package is installed.
-    qInfo().nospace() << "iptables version command output " << output.data() 
+    qInfo().nospace() << "iptables version command output " << output.data()
     << " -> " << major << "." << minor << "." << patch;
 
     // SemVersion implements a suitable operator<(), we don't use it to parse

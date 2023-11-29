@@ -228,17 +228,17 @@ function installDependencies() {
 
     if hash yum 2>/dev/null; then
         # libnsl is no longer part of of the glibc package on Fedora
-        sudo yum -y install libxkbcommon-x11 libnl3 libnsl iptables
+        sudo yum -y install libxkbcommon-x11 libnl3 libnsl iptables psmisc
     elif hash pacman 2>/dev/null; then
-        sudo pacman -S --noconfirm libxkbcommon-x11 libnl iptables
+        sudo pacman -S --noconfirm libxkbcommon-x11 libnl iptables psmisc
     elif hash zypper 2>/dev/null; then
-        sudo zypper install libxkbcommon-x11-0 iptables
+        sudo zypper install -y libxkbcommon-x11-0 iptables psmisc
     # Check for apt-get last.  Apparently some RPM-based distributions (such as
     # openSUSE) have an RPM port of apt in addition to their preferred package
     # manager.  This check uses Debian package names though that aren't
     # necessarily the same on other distributions.
     elif hash apt-get 2>/dev/null; then
-        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200 iptables"
+        APT_PKGS="libxkbcommon-x11-0 libnl-3-200 libnl-route-3-200 iptables psmisc"
         sudo apt-get install --yes $APT_PKGS
     else
         promptManualDependencies

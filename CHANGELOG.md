@@ -1,5 +1,14 @@
 # Changelog
 
+### v3.5.2
+
+* Linux: Fix split tunnel on rolling release distributions
+* Linux: Fix compatibility with LXC containers
+* macOS: Fix Wifi SSID detection for Automation
+* Windows: Fix occasional Split Tunnel crash when 'Existing DNS' is used
+* All: Remove local port option for OpenVPN connections
+* All: Fix a bug that would sometimes cause a crash when trying to connect while disconnecting
+
 ### v3.5.1
 
 * Fix a variety of firewall and split tunnel issues on Windows

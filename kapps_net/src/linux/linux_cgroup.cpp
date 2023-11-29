@@ -119,7 +119,7 @@ namespace CGroup
                 << "Attempting to create.";
 
         // create net_cls directory and mount VFS
-        if(core::fs::mkDir(netClsDir) && mountNetCls(netClsDir))
+        if(core::fs::mkDir_p(netClsDir) && mountNetCls(netClsDir))
         {
             KAPPS_CORE_INFO() << "Successfully created" << netClsDir;
             return true;

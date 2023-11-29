@@ -1,5 +1,6 @@
-require_relative 'checksystem'
+require_relative 'systemutil'
 require 'ipaddr'
+require 'socket'
 
 # Helper class for networking constants, Ip addresses, etc.
 class NetHelp 
@@ -22,18 +23,25 @@ class NetHelp
     # These can be used as the source of an outgoing package in leak tests. 
     # If they  the outside world the system is leaking its real IP address.
     def self.get_valid_sources
-        case check_system
-        when :linux
-            # Get all interfaces that are not a VPN tunnel or loopback
-            Socket.getifaddrs.map { |ifaddr| ifaddr.name }.uniq.select { |ifname| !ifname.start_with?("tun", "wgpia", "lo") }
+        if SystemUtil.linux?
+            get_valid_interfaces
         else
-            Socket.ip_address_list.select {|ip_address| ip_address.ipv4? }.map { |ip_address| ip_address.inspect_sockaddr }.select { |address| rfc1918? address }
+            get_valid_addresses
         end
+    end
+
+    def self.get_valid_interfaces
+        # Get all interfaces that are not a VPN tunnel or loopback
+        Socket.getifaddrs.map(&:name).uniq.reject { |ifname| ifname.start_with?("tun", "wgpia", "lo") }
+    end
+
+    def self.get_valid_addresses
+        Socket.ip_address_list.select(&:ipv4?).map(&:inspect_sockaddr).select { |address| rfc1918? address }
     end
 
     # function used in allowlan tests to get the default gateway IP address
     def self.get_default_gateway_ip
-        case check_system
+        case SystemUtil.os
         when :windows
             get_gateway = `ipconfig | findstr "Default Gateway"`
             gateway_match = /Default Gateway . . . . . . . . . : (\S+)/.match(get_gateway)
@@ -46,9 +54,76 @@ class NetHelp
         end
 
         if gateway_match
-            return gateway_match[1]
-        else
-            return nil
+            gateway_match[1]
+        else 
+            nil
+        end
+    end
+
+    def self.get_default_nameserver
+        nslu_output = `nslookup privateinternetaccess.com 2>&1`
+        nslu_output.each_line do |line|
+            if line =~ /Address:[\t ]*(\d+\.\d+\.\d+\.\d+)/  
+                return $1
+            end
+        end
+    end
+
+    def self.can_send_message_externally?
+        messenger_lambda = ENV["PIA_AWS_SEND_MESSAGE_LAMBDA"]
+        AWSLambda.has_credentials? && messenger_lambda
+    end
+
+    def self.send_message_externally(address, port, message)
+        messenger_lambda = ENV["PIA_AWS_SEND_MESSAGE_LAMBDA"]
+        lambda_client = AWSLambda.new
+        lambda_client.invoke(messenger_lambda, {ip: address, port: port, message: message})
+    end
+
+    class SimpleMessageReceiver
+        def initialize(port)
+            @message = nil
+            @server = TCPServer.new('0.0.0.0', port)
+            @server_thread = Thread.new do
+                client_sock = nil
+                client_sock = @server.accept
+                @message = client_sock.readpartial(1024)
+            ensure
+                client_sock.close if client_sock != nil
+            end
+        end
+
+        def message_received?
+            @message != nil
+        end
+
+        def message
+            @message
+        end
+
+        def cleanup
+            @server.close
+            @server_thread.join
+        end
+
+        def kill_and_cleanup
+            @server_thread.kill
+            cleanup
+        end
+    end
+
+    class SimpleMessageSender
+        # Attempts to send a message. It will time out with no errors nor indication.
+        def self.send(address, port, message, local_host, timeout=1)
+            begin
+                socket = Timeout::timeout(timeout) do
+                    client_socket = TCPSocket.new(address, port, local_host)
+                    client_socket.write(message)
+                ensure
+                    client_socket.close
+                end
+            rescue Timeout::Error
+            end
         end
     end
 end

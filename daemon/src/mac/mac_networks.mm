@@ -452,19 +452,26 @@ void MacNetworks::readConnections()
         auto &connection = connectionInfo.back();
 
         auto itWifiConfig = wifiConfigs.find(ipConfigEntry.first);
+
         if(itWifiConfig != wifiConfigs.end() && itWifiConfig->second.pInterface)
         {
             CWInterface *pItf = itWifiConfig->second.pInterface;
 
-            NSData *pSsidData = pItf.ssidData;
-            if(pSsidData)
+            // Store the interfaceName CFStringRef in a MacString so it's properly managed and released
+            MacString interfaceName{connection.networkInterface().toCFString()};
+            // Given the interfaceName, retrieve the associated SSID as a UTF-8 QByteArray
+            QByteArray ssidName{_dynStore.ssidFromInterface(interfaceName.get()).toUtf8QByteArray()};
+
+            if(!ssidName.isEmpty())
             {
+                // parseWifiSsid() expects a C string and a length - so we use constData to get a const char*
+                // parseWifiSsid validates the string - checking for length, encoding and embedded null chars
+                connection.parseWifiSsid(ssidName.constData(), ssidName.size());
                 connection.wifiAssociated(true);
-                // Note that if parseWifiSsid() fails to store the SSID, this
-                // means the SSID can't be represented as text, not that the
-                // interface is not associated.  (All we do is trace the
-                // SSID data, parseWifiSsid() handles that.)
-                connection.parseWifiSsid(reinterpret_cast<const char *>(pSsidData.bytes), pSsidData.length);
+
+                // Note the special pItf.security syntax even though pItf is a CWInterface*
+                // This is special objective-c syntax, equivalent to using: [pItf security]
+                // It is not a member invocation, hence why pItf->security doesn't work. It's obj-c++ magic.
                 switch(pItf.security)
                 {
                     default:

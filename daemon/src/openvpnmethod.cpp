@@ -569,12 +569,10 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
         out << "local " << localAddress.toString() << endl;
         // We can't use nobind with a specific local address.  We can set lport
         // to 0 to let the network stack pick an ephemeral port though.
-        out << "lport " << _connectingConfig.localPort() << endl;
+        out << "lport 0" << endl;
     }
-    else if (_connectingConfig.localPort() == 0)
-        out << "nobind" << endl;
     else
-        out << "lport " << _connectingConfig.localPort() << endl;
+        out << "nobind" << endl;
 
     out << "cipher " << sanitize(_connectingConfig.openvpnCipher()) << endl;
 

@@ -58,6 +58,9 @@ public:
     // Get a list of keys matching a regex that are currently in the store.
     MacArray copyKeyList(CFStringRef pattern) const;
 
+    // Get the wifi SSID from the interface name
+    MacString ssidFromInterface(CFStringRef interfaceName) const;
+
 private:
     // Callback used when monitored keys changed; called by dynStoreCallback()
     // on main thread.

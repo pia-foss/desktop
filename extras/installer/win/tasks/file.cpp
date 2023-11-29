@@ -267,6 +267,6 @@ void CreateRollbackDirectoryTask::rollback()
     if (!g_rollbackPath.empty())
     {
         LOG("Deleting rollback directory");
-        deleteEntireDirectory(g_rollbackPath.c_str());
+        deleteEntireDirectory(g_rollbackPath);
     }
 }

@@ -39,7 +39,6 @@ QtObject {
   readonly property bool enableMACE: NativeDaemon.settings.enableMACE
   readonly property int remotePortUDP: NativeDaemon.settings.remotePortUDP
   readonly property int remotePortTCP: NativeDaemon.settings.remotePortTCP
-  readonly property int localPort: NativeDaemon.settings.localPort
   readonly property int mtu: NativeDaemon.settings.mtu
   readonly property string cipher: NativeDaemon.settings.cipher
   readonly property string windowsIpMethod: NativeDaemon.settings.windowsIpMethod

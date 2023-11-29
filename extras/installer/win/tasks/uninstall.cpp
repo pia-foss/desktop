@@ -20,7 +20,7 @@
 #include "shortcut.h"
 #include "registry.h"
 
-std::wstring getUninstallDataPath(std::wstring uninstallPath)
+std::wstring getUninstallDataPath(const std::wstring& uninstallPath)
 {
     return uninstallPath + L"\\" UNINSTALL_DATA_FILENAME;
 }

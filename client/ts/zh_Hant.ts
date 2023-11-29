@@ -3151,7 +3151,7 @@
     <message>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="28"/>
       <source>This feature requires net_cls to be available at %1.</source>
-      <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /sys/fs/cgroups/net_cls.</extracomment>
+      <extracomment>Message for Linux indicating that a kernel feature has to be mounted at a specific location to use the split tunnel feature. %1 is a file path, currently /opt/piavpn/etc/cgroup/net_cls.</extracomment>
       <translation>此功能需要允許在 %1 使用 net_cls。</translation>
     </message>
     <message>

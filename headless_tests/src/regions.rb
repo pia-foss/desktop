@@ -16,25 +16,18 @@ class Regions
         end
 
         # Shuffle the regions list so we try a different subset every time
-        return available_regions.sample(10)
+        available_regions.sample(max_regions)
     end
 
     def self.check_region_connectivity(region)
         # Set the region to the specified value and connect the vpn.
         # Returns the Ip address obtained for the region.
-        puts "Trying to connect to #{region}..."
         PiaCtl.set("region", region)
         PiaCtl.connect
-
-        ip = "Unknown"
-        timeout = Time.now + 60
-        while ip == "Unknown" && Time.now < timeout do
-            ip = PiaCtl.get("vpnip").chomp
-        end
-        
+        ip = PiaCtl.get_vpn_ip
         puts "#{region} connected at IP: #{ip}"
 
         PiaCtl.disconnect
-        return ip
+        ip
     end
 end

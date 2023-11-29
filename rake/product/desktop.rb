@@ -2,7 +2,9 @@ require_relative '../executable.rb'
 require_relative '../archive.rb'
 require_relative '../product/version.rb'
 require_relative '../model/build.rb'
+require_relative '../util/dumpsyms'
 require_relative '../util/dsl.rb'
+require_relative '../makeqtsymbols'
 require_relative 'windows' if Build.windows?
 require_relative 'macos' if Build.macos?
 require_relative 'linux' if Build.linux?
@@ -280,29 +282,39 @@ module PiaDesktop
         task :debug_collect => [debugSymbols.componentDir, stage.target,
                                 installerArtifact] do |t|
             FileList[File.join(debugSymbols.componentDir, '*')].each { |f| FileUtils.rm_rf(f) }
-
-            # On Windows, collect PDB symbols and the original modules, so we can use
-            # them to debug dumps with WinDbg or VS.
-            if(Build.windows?)
-                PiaWindows.collectSymbols(version, stage, debugSymbols)
+            symbols_path = File.join(debugSymbols.componentDir, "syms")
+            
+            skipDebugSymbols = Util.selectBooleanSymbol('SKIP_DEBUG_SYMBOLS', false)
+            skipQtDebugSymbols = Util.selectBooleanSymbol('SKIP_QT_DEBUG_SYMBOLS', false)
+            # We can skip Qt symbols separately because some Qt installs do not have debug symbols.
+            if !skipDebugSymbols && !skipQtDebugSymbols
+                MakeQtSymbols.process_symbols symbols_path
             end
 
-            binPath = Build.selectDesktop('', 'Contents/MacOS', 'bin')
-            libPath = Build.selectDesktop('', 'Contents/MacOS', 'lib')
-            clientBin = Build.selectDesktop("#{Build::Brand}-client.exe", version.productName, "#{Build::Brand}-client")
-            clientLib = "#{Build::Brand}-clientlib.#{Build::selectDesktop('dll', 'dylib', 'so')}"
+            if !skipDebugSymbols
+                # On Windows, collect PDB symbols and the original modules, so we can use
+                # them to debug dumps with WinDbg or VS.
+                if(Build.windows?)
+                    PiaWindows.collectSymbols(version, stage, debugSymbols)
+                end
 
-            PiaDesktop.dumpSyms(stage, File.join(binPath, clientBin), debugSymbols, 'client')
-            daemonBin = "#{Build::Brand}-#{Build::selectDesktop('service.exe', 'daemon', 'daemon')}"
-            PiaDesktop.dumpSyms(stage, File.join(binPath, daemonBin), debugSymbols, 'daemon')
-            PiaDesktop.dumpSyms(stage, File.join(libPath, clientLib), debugSymbols, 'clientlib')
+                binPath = Build.selectDesktop('', 'Contents/MacOS', 'bin')
+                libPath = Build.selectDesktop('', 'Contents/Frameworks', 'lib')
 
-            FileUtils.copy_entry(version.artifact('version.txt'),
-                                debugSymbols.artifact('version.txt'))
-            FileUtils.copy_entry(Executable::Qt.artifact('qtversion.txt'),
-                                debugSymbols.artifact('qtversion.txt'))
-            FileUtils.copy_entry(installerArtifact,
-                                debugSymbols.artifact(File.basename(installerArtifact)))
+                clientBin = Build.selectDesktop("#{Build::Brand}-client.exe", version.productName, "#{Build::Brand}-client")
+                DumpSyms.dump_syms(File.join(stage.dir, binPath, clientBin), symbols_path)
+                
+                ["#{Build::Brand}-clientlib", "kapps_core", "kapps_net", "kapps_regions", "#{Build::Brand}-commonlib"].each do |libname|
+                    lib = "#{libname}.#{Build::selectDesktop('dll', 'dylib', 'so')}"
+                    DumpSyms.dump_syms(File.join(stage.dir, libPath, lib), symbols_path)
+                end
+                daemonBin = "#{Build::Brand}-#{Build::selectDesktop('service.exe', 'daemon', 'daemon')}"
+                DumpSyms.dump_syms(File.join(stage.dir, binPath, daemonBin), symbols_path)
+            end
+
+            FileUtils.copy_entry(version.artifact('version.txt'), debugSymbols.artifact('version.txt'))
+            FileUtils.copy_entry(Executable::Qt.artifact('qtversion.txt'),  debugSymbols.artifact('qtversion.txt'))
+            FileUtils.copy_entry(installerArtifact,  debugSymbols.artifact(File.basename(installerArtifact)))
         end
 
         debugArchive = Build.new('debug-archive')
@@ -326,39 +338,7 @@ module PiaDesktop
         # If coverage isn't available though, :artifacts doesn't depend on :test.
         #
         # :all is convenient to remember for use from the CLI anyway.
-        task :all => [:test, :stage, :export, :installer, :integtest, :debug]
+        task :all => [:test, :stage, :export, :installer, :integtest, :debug, :compile_commands]
     end
 
-    def self.dumpSyms(stage, component, debugSymbols, symbolName)
-        binPath = File.absolute_path(File.join(stage.dir, component))
-        dumpSyms = File.absolute_path("deps/dump_syms/dump_syms#{Build::selectDesktop('.exe', '_mac', '_linux.bin')}")
-
-        if Build.windows?
-            # Add msdia140.dll to PATH so it doesn't have to be registered.
-            path = [
-                File.join(Executable::Tc.toolchainPath.gsub('/', '\\'), 'DIA SDK\bin'),
-                ENV['PATH']
-            ]
-            symbolPath = debugSymbols.artifact("#{symbolName}.sym")
-            # dump_syms seems to dump most (all?) of the symbols successfully, then
-            # terminate with an error about finding children.  Since it seems to
-            # yield most of the symbols correctly, that's OK, minidump_stackwalk is
-            # only somewhat reliable on Windows dumps anyway.
-            system({"ENV"=>path.join(';')},
-                dumpSyms, binPath, out: symbolPath)
-        elsif Build::TargetArchitecture == :universal
-            Build::PlatformUniversalArchitectures[Build::Platform].each do |arch|
-                # x86_64 has no infix for compatibility with macOS x86_64
-                # builds, other arches get an infix
-                archInfix = (arch == :x86_64) ? "" : ".#{arch}"
-                symbolPath = debugSymbols.artifact("#{symbolName}#{archInfix}.sym")
-                # dump_syms dumps only one arch at a time for universal binaries,
-                # specify the arch with -a
-                system(dumpSyms, "-a", arch.to_s, binPath, out: symbolPath)
-            end
-        else
-            symbolPath = debugSymbols.artifact("#{symbolName}.sym")
-            system(dumpSyms, binPath, out: symbolPath)
-        end
-    end
 end

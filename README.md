@@ -79,6 +79,9 @@ Filtering content: 100% (24/24), 17.13 MiB | 1.89 MiB/s, done.
   - Big Sur or newer is required to build
   - Up-to-date version of Xcode
   - Ruby, can be installed using [Homebrew](https://brew.sh) with `brew install ruby`
+  - Install rake gem: `sudo gem install rake`
+  - (Only on Apple silicon macs) Before running rake, install the arm64 version of Nokogiri  
+    `sudo ARCHFLAGS="-arch arm64" gem install nokogiri -v 1.13.10`
 - On **Linux**:
   - Supported distribution with clang 7 or newer
   - Supported architectures: x86_64, armhf, arm64
@@ -325,8 +328,9 @@ The advantages of testing in ruby as opposed to our code in `integtest` are main
 
 With these _almost_ end to end tests we hope to drastically reduce manual testing for releases to the point that we can release more frequently.  
 
-Install rspec Ruby gem using `gem install rspec`.  
-Run the tests locally using `rspec headless_tests/*.rb`  
+Use `bundle install` to ensure you get all the dependencies.  
+Run the tests from within the `headless_tests` to pick up configuration in `.rspec` and `spec_helper`.
+Run all tests locally using `bundle exec rspec .`.
 
 #### Windows
 

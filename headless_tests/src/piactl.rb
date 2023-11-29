@@ -1,20 +1,21 @@
-require_relative 'checksystem'
+require 'timeout'
+require 'json'
+require_relative 'systemutil'
 
 # Helper class to manipulate PIA state through the piactl binary.
 class PiaCtl
     # Set path to piactl from env if available.
     # Otherwise use whichever can be found in path
     PIACTL = ENV['PIACTL'] || 'piactl'
-    puts "Using PIACTL=#{PIACTL}"
 
-    def self.run(*args)
-        IO.popen([PIACTL, *args].join(' '), "r+")
+    def self.run(args)
+        IO.popen [PIACTL, *args], "r+"
     end
   
-    def self.run_and_wait(*args)
-      io = self.run(args)
-      _pid, status = Process.waitpid2(io.pid)
-      return status.exitstatus
+    def self.run_and_wait(args)
+        io = self.run(args)
+        _pid, status = Process.waitpid2(io.pid)
+        status.exitstatus
     end
   
     # Connect to the configured region
@@ -22,8 +23,9 @@ class PiaCtl
         connection_monitor = PiaCtlMonitor.new("connectionstate")
         exit_code = run_and_wait(['connect'])
         if exit_code != 0
-            return exit_code
+            raise "Failed to connect"
         end
+
         connection_monitor.expect "Connected"
         connection_monitor.stop
     end
@@ -31,35 +33,39 @@ class PiaCtl
     def self.disconnect
         connection_monitor = PiaCtlMonitor.new("connectionstate")
         exit_code = run_and_wait(['disconnect'])
-        if exit_code != 0
-            return exit_code
-        end
         connection_monitor.expect "Disconnected"
         connection_monitor.stop
     end
 
     def self.login(credentials_file)
-        exit_code = run_and_wait(['login', credentials_file, '-t', '20'])
+        exit_code = run_and_wait(['login', credentials_file, '-t', '60'])
+        if exit_code != 0
+            raise "Login failed!"
+        end
     end
 
     def self.logout
-        exit_code = run_and_wait(['logout', '-t', '20'])
+        exit_code = run_and_wait(['logout', '-t', '60'])
+        if exit_code != 0
+            raise "Logout failed!"
+        end
     end
 
     def self.get(type)
-       get = PiaCtl.run(['get', type])
-       result = get.read
-       get.close
-       return result
+        get = PiaCtl.run(['get', type])
+        result = get.read
+        get.close
+        result = result.chomp if result
+        result
     end
 
-    # Set the value of a setting
     def self.set(setting, value)
         PiaCtl.run_and_wait(['set', setting, value])
     end
 
     def self.set_unstable(setting, value)
-        PiaCtl.run_and_wait(['--unstable', 'applysettings', "{\\\"#{setting}\\\":\\\"#{value}\\\"}"])
+        settings = {setting => value}.to_json
+        PiaCtl.run_and_wait(['--unstable', 'applysettings', settings])
     end
 
     def self.get_unstable(setting)
@@ -70,6 +76,26 @@ class PiaCtl
         end
         settings = JSON.parse(json_output)
         settings[setting]
+    end
+
+    def self.get_vpn_ip
+        monitor = PiaCtlMonitor.new("vpnip")
+        monitor.expect_match /\d+\.\d+\.\d+\.\d+/
+        vpn_ip = monitor.peek
+        monitor.stop
+        vpn_ip
+    end
+
+    def self.get_forwarded_port
+        monitor = PiaCtlMonitor.new "portforward"
+        monitor.expect_match /\d+/
+        port = monitor.peek.to_i
+        monitor.stop
+        port
+    end
+
+    def self.resetsettings
+        PiaCtl.run_and_wait(['resetsettings'])
     end
 end
 
@@ -94,12 +120,47 @@ class PiaCtlMonitor
             end
         end
     end
-  
+
     # Wait for the monitored value to equal new_value
-    def expect(new_value)
-        while @queue.pop != new_value; end
+    def expect(new_value, timeout=20)
+        begin
+            Timeout.timeout(timeout) do
+                loop do
+                    current_value = @queue.pop
+                    break if current_value == new_value
+                end
+            end
+        rescue Timeout::Error => e
+            self.stop
+            puts "Timed out!"
+            raise
+        end
+        true
     end
-  
+
+    def expect_match(regex, timeout=20)
+        Timeout.timeout(timeout, Timeout::Error) do
+            while @queue.pop !~ regex
+            end
+        rescue Timeout::Error => e
+            raise Timeout::Error
+        end
+        true
+    end
+
+    # Returns true if the value changes before the timeout runs out.
+    # Call it *before* performing an action that you expect should (or shouldn't) change a setting.
+    def expect_change(timeout=20)
+        # Make sure the queue is empty
+        @queue.clear()
+        Timeout.timeout(timeout, Timeout::Error) do
+            @queue.pop
+            true
+        rescue Timeout::Error => e
+            false
+        end
+    end
+    
     # Retrieve the last monitored value
     def peek
       @last_line
@@ -107,8 +168,7 @@ class PiaCtlMonitor
   
     def stop
         # We cannot kill directly for windows, so we call taskkill
-        case check_system
-        when :windows
+        if SystemUtil.windows?
             system "taskkill /F /pid #{@io.pid}", :out => File::NULL
         else
             Process.kill("TERM", @io.pid)

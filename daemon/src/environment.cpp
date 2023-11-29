@@ -243,13 +243,13 @@ void Environment::loadApiBases()
     // Load each API base
     loadApiBase(overridePresent, apiOverride, _pApiv1, QStringLiteral("apiv1"),
                 QStringLiteral("API v1"), {
-                    QStringLiteral("https://www.privateinternetaccess.com/api/client"),
-                    QStringLiteral("https://www.piaproxy.net/api/client")
+                    QStringLiteral("https://api.privateinternetaccess.com/api/client"),
+                    QStringLiteral("https://api.piaproxy.net/api/client")
                 });
     loadDynamicApiBase(overridePresent, apiOverride, _pApiv2, QStringLiteral("apiv2"),
                 QStringLiteral("API v2"), QStringLiteral("/apiv2/"), {
-                    QStringLiteral("https://www.privateinternetaccess.com/api/client/v2/"),
-                    QStringLiteral("https://www.piaproxy.net/api/client/v2/")
+                    QStringLiteral("https://apiv2.privateinternetaccess.com/api/client/v2/"),
+                    QStringLiteral("https://apiv2.piaproxy.net/api/client/v2/")
                 });
 
     loadDynamicApiBase(overridePresent, apiOverride, _pModernRegionsListApi,
@@ -260,11 +260,11 @@ void Environment::loadApiBases()
 
     loadApiBase(overridePresent, apiOverride, _pIpAddrApi, QStringLiteral("ip_api"),
                 QStringLiteral("IP API"), {
-                    QStringLiteral("https://www.privateinternetaccess.com/")
+                    QStringLiteral("https://api.privateinternetaccess.com/")
                 });
     loadApiBase(overridePresent, apiOverride, _pIpProxyApi, QStringLiteral("ip_proxy_api"),
                 QStringLiteral("IP proxy API"), {
-                    QStringLiteral("https://www.piaproxy.net/")
+                    QStringLiteral("https://api.piaproxy.net/")
                 });
     loadApiBase(overridePresent, apiOverride, _pUpdateApi, QStringLiteral("update_api"),
                 QStringLiteral("update API"), {

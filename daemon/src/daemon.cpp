@@ -1241,12 +1241,22 @@ QString Daemon::diagnosticsOverview() const
         return connectionMethod == QStringLiteral("openvpn") ? displayString : QStringLiteral("");
     };
 
+    // We need a more explicit description of the killswitch state.
+    // "Advanced" killswitch can cause a lot of problems so we need to emphasize it.
+    auto killswitchText = [](const QString &killswitchState) {
+        if(killswitchState == QStringLiteral("on"))
+            return QStringLiteral("%1 - Advanced killswitch is active!").arg(killswitchState);
+        else
+            return killswitchState;
+    };
+
     auto commonDiagnostics = [&] {
         auto strings = QStringList {
             QStringLiteral("Connected: %1").arg(boolToString(isConnected)),
             QStringLiteral("Split Tunnel enabled: %1").arg(boolToString(_settings.splitTunnelEnabled())),
+            QStringLiteral("Split Tunnel DNS enabled: %1").arg(_settings.splitTunnelEnabled() ? boolToString(_settings.splitTunnelDNS()) : "N/A"),
             QStringLiteral("VPN has default route: %1").arg(boolToString(_settings.splitTunnelEnabled() ?  _settings.defaultRoute() : true)),
-            QStringLiteral("Killswitch: %1").arg(_settings.killswitch()),
+            QStringLiteral("Killswitch: %1").arg(killswitchText(_settings.killswitch())),
             QStringLiteral("Allow LAN: %1").arg(boolToString(_settings.allowLAN())),
 #ifdef Q_OS_WIN
             ifOpenVPN(QStringLiteral("Windows IP config: %1").arg(_settings.windowsIpMethod())),
@@ -3121,8 +3131,6 @@ void Daemon::upgradeSettings(bool existingSettingsFile)
         }
         if ((value = legacy.take(QStringLiteral("killswitch"))).isBool())
             _settings.killswitch(value.toBool() ? QStringLiteral("on") : QStringLiteral("auto"));
-        if ((value = legacy.take(QStringLiteral("lport"))).isString())
-            _settings.localPort(value.toString().toUShort());
         if ((value = legacy.take(QStringLiteral("mssfix"))).isBool())
             _settings.mtu(value.toBool() ? 1250 : 0);
         if ((value = legacy.take(QStringLiteral("portforward"))).isBool())

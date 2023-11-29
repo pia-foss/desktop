@@ -8,7 +8,7 @@ require 'json'
 # and creates a per-component build directory for this component.
 class Build
     # The major-minor-patch parts of this version
-    VersionMMP = [3, 5, 1]
+    VersionMMP = [3, 5, 2]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
@@ -238,7 +238,7 @@ class Build
     # Minimum macOS version supported by the project.  (In addition to clang.rb,
     # also used in some generated Info.plist files.)
     MacosVersionMajor = 10
-    MacosVersionMinor = 13
+    MacosVersionMinor = 14
 
     # Shortcuts to check for specific build variants
     def self.debug?

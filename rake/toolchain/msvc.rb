@@ -363,7 +363,8 @@ class MsvcToolchain
             File.absolute_path(sourceFile) # Absolute path allows Qt Creator to open files from diagnostics
         ].compact
         params.flatten!
-       Util.shellRun winJoinArgs(params)
+        Util.shellRun winJoinArgs(params)
+        CompilerDatabase.create_fragment(sourceFile, objectFile, params)
 
         # Transform the headers from the JSON source dependency output to a
         # Makefile that Rake can import

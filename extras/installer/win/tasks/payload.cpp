@@ -122,7 +122,7 @@ void MemoryInStream_CreateVTable(CMemoryInStream* p, const Byte* buf, size_t siz
 PayloadTask::UnpackTask* PayloadTask::_currentUnpackTask = nullptr;
 
 PayloadTask::UnpackTask::UnpackTask(UInt32 folderIndex, size_t folderSize)
-    : _folderIndex(folderIndex), _folderSize(folderSize)
+    : _folderIndex(folderIndex), _folderSize(folderSize), _inputStreamOffset(0), _inputStreamLength(0)
 {
 
 }

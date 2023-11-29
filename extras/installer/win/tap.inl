@@ -393,9 +393,8 @@ private:
 };
 
 inline WinInf::WinInf(PCWSTR fileName)
-    : _hInf{INVALID_HANDLE_VALUE}
+    : _hInf{::SetupOpenInfFileW(fileName, nullptr, INF_STYLE_WIN4, nullptr)}
 {
-    _hInf = ::SetupOpenInfFileW(fileName, nullptr, INF_STYLE_WIN4, nullptr);
     if(_hInf == INVALID_HANDLE_VALUE)
     {
         WinErrorEx error{::GetLastError()};

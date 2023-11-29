@@ -55,6 +55,21 @@ MacDynamicStore::MacDynamicStore()
     _eventThread.emplace(dynStoreSource);
 }
 
+MacString MacDynamicStore::ssidFromInterface(CFStringRef interfaceName) const
+{
+    MacString key{SCDynamicStoreKeyCreateNetworkInterfaceEntity(NULL, kSCDynamicStoreDomainState, interfaceName, kSCEntNetAirPort)};
+    qInfo() << "Looking up SSID from dynamic store using" << key;
+
+    // Get the value associated with the key from the dynamic store.
+    // This will return a dictionary with many elements, including the SSID_STR (which we're interested in)
+    const auto info = copyValue(key.get());
+
+    // Store the dictionary in a MacDict to manage its life-time and release
+    MacDict props{info.as<CFDictionaryRef>()};
+    // The SSID_STR field contains the SSID of the interface
+    return {props.getValueObj(CFSTR("SSID_STR")).as<CFStringRef>()};
+}
+
 bool MacDynamicStore::setNotificationKeys(CFArrayRef keys, CFArrayRef patterns)
 {
     return ::SCDynamicStoreSetNotificationKeys(_dynStore.get(), keys, patterns);

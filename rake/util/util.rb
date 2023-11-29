@@ -34,6 +34,19 @@ module Util
         end
     end
 
+    def self.selectBooleanSymbol(varName, default)
+        truthy_symbols = [:on, :yes, :true, 1]
+        falsey_symbols = [:off, :no, :false, 0]
+        value = selectSymbol(varName, default, truthy_symbols + falsey_symbols + [:undefined])
+        if truthy_symbols.include? value
+            return true
+        elsif falsey_symbols.include? value
+            return false
+        else
+            return value
+        end
+    end
+
     def self.hostPlatform
         # "darwin" includes "win", so check it first
         if(RUBY_PLATFORM.include?('darwin'))
@@ -95,18 +108,21 @@ module Util
 
     # Retrieve the command verbosity specified by the caller. Defaults to false
     def self.verbose?
-        verboseSymbol = selectSymbol('VERBOSE', :undefined, [:false, :no, :off, :true, :yes, :on])
-        if verboseSymbol != :undefined 
-            [:true, :yes, :on].include?(verboseSymbol)
-        else
-            ENV.include?('RAKE_VERBOSE_SH') && ["on", "true", "yes"].include?(ENV['RAKE_VERBOSE_SH'].downcase)
+        verboseSymbol = selectBooleanSymbol('VERBOSE', :undefined)
+        if verboseSymbol == :undefined 
+            verboseSymbol = selectBooleanSymbol('RAKE_VERBOSE_SH', :undefined)
+            if verboseSymbol != :undefined 
+                return verboseSymbol
+            end
+            return false
         end
+        return verboseSymbol
     end
 
     def self.shellRun(*cmd)
         Rake.sh *cmd, verbose: self.verbose? do |ok, res|
             if !ok
-                puts "Command failed: #{cmd.join(' ')}"
+                raise "Command failed: #{cmd.join(' ')}"
             end
         end
     end

@@ -480,7 +480,7 @@ static int g_defaultButtons[][3] {
     { IDCANCEL, IDTRYAGAIN, IDCONTINUE },
 };
 
-int Installer::messageBox(UIString text, UIString caption, UIString msgSuffix, UINT type, int silentResult)
+int Installer::messageBox(const UIString& text, const UIString& caption, const UIString& msgSuffix, UINT type, int silentResult)
 {
     if (g_silent)
     {
@@ -1213,7 +1213,7 @@ void Installer::doPaint()
         _spinnerTickCount = 0;
         KillTimer(_hWnd, 1);
     }
-    else if (!_spinnerTickCount && ((progress > 0.0 && progress < 0.0) || timeRemaining > 0.0))
+    else if (!_spinnerTickCount && timeRemaining > 0.0)
     {
         _spinnerTickCount = GetTickCount();
         // Paranoia: if we accidentally got a zero tick count, subtract one

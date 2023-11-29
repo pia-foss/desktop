@@ -507,18 +507,7 @@ void WinFirewall::applyRules(const FirewallParams &params)
     newSplitParams._vpnDefaultRoute = !params.bypassDefaultApps;
     newSplitParams._blockDNS = params.blockDNS;
     newSplitParams._forceVpnOnlyDns = newSplitParams._forceBypassDns = false;
-    if(params.splitTunnelDnsEnabled)
-    {
-        if(_config.brandInfo.enableDnscache)
-        {
-            newSplitParams._forceVpnOnlyDns = params.bypassDefaultApps;
-            newSplitParams._forceBypassDns = !params.bypassDefaultApps;
-        }
-        else
-        {
-            KAPPS_CORE_WARNING() << "_config.brandInfo.enableDnscache must be provided to enable split tunnel DNS; ignoring splitTunnelDnsEnabled";
-        }
-    }
+
     newSplitParams._effectiveDnsServers.reserve(params.effectiveDnsServers.size());
     for(const auto &effectiveDnsServer : params.effectiveDnsServers)
     {
@@ -527,6 +516,29 @@ void WinFirewall::applyRules(const FirewallParams &params)
             newSplitParams._effectiveDnsServers.push_back(serverIp.address());
     }
     newSplitParams._existingDnsServers = findExistingDNS(newSplitParams._effectiveDnsServers);
+
+    if(params.splitTunnelDnsEnabled)
+    {
+        if(_config.brandInfo.enableDnscache)
+        {
+            // When _effectiveDnsServers is empty the user has likely selected "Use Existing DNS" in their DNS
+            // settings - in this case we disable split tunnel DNS. We do this because when "Use Existing DNS" is set
+            // it disables the blockDNS firewall rules and DNS will be blasted out all interfaces anyway.
+            if(!newSplitParams._effectiveDnsServers.empty())
+            {
+                newSplitParams._forceVpnOnlyDns = params.bypassDefaultApps;
+                newSplitParams._forceBypassDns = !params.bypassDefaultApps;
+            }
+            else
+            {
+                KAPPS_CORE_WARNING() << "Split tunnel DNS is disabled - there are no effective DNS servers - 'Use Existing DNS' is likely selected.";
+            }
+        }
+        else
+        {
+            KAPPS_CORE_WARNING() << "_config.brandInfo.enableDnscache must be provided to enable split tunnel DNS; ignoring splitTunnelDnsEnabled";
+        }
+    }
 
     reapplySplitTunnelFirewall(newSplitParams, newExcludedApps, newVpnOnlyApps,
                                newVpnOnlyResolvers);

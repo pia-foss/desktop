@@ -1,4 +1,4 @@
-require_relative 'checksystem'
+require_relative 'systemutil'
 require_relative 'nethelp'
 
 # Helper class to test for leaks.
@@ -24,17 +24,6 @@ class LeakChecker
         end
     end
 
-    # Sometimes a failure can happen because the firewall rules
-    # cannot keep up with the test. For such cases we simply retry.
-    # This helper will retry n times, sleeping 750 ms in between.
-    def leaks_with_retry?(method, expect, n: 10)
-        n.times do
-            return expect if leaks?(method) == expect
-            sleep 0.75
-        end
-        return !expect
-    end
-
     # Checks if it is possible to reach an external IP
     # by forcing ping to use private LAN addresses as the source.
     # If this is possible, the firewall rules in the system allow
@@ -42,7 +31,7 @@ class LeakChecker
     def ping_leaks?
         @source_endpoints.each do |source|
             extra_options = []
-            case check_system
+            case SystemUtil.os
             when :linux
                 source_option = "-I"
                 count_option = "-c"
