@@ -173,6 +173,19 @@ PosixDaemon::PosixDaemon()
 
 PosixDaemon::~PosixDaemon()
 {
+#ifdef Q_OS_LINUX
+    QFileInfo netClsDir(Path::ParentVpnExclusionsFile.parent());
+
+    // If the net_cls mount point is not a symlink - that means we own it
+    // so we're responsible for unmounting it when the daemon shuts down.
+    // If we fail to unmount it then the application directory cannot be fully removed
+    // when PIA is uninstalled.
+    if(!netClsDir.isSymLink())
+    {
+        qInfo() << "Unmounting the net_cls cgroup:" << netClsDir.absoluteFilePath();
+        Exec::cmd("umount", {netClsDir.absoluteFilePath()});
+    }
+#endif
 }
 
 std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
@@ -696,9 +709,25 @@ void PosixDaemon::checkFeatureSupport()
         _state.automationSupportErrors({QStringLiteral("libnl_invalid")});
     }
 
+    // If the net_cls directory is a symlink to another
+    // folder (most likely a pre-existing net_cls mount-point on the disk) -
+    // then we remove it as we can't be sure the symlink is still valid - i.e it still points to
+    // an existing net_cls mount. We *could* investigate to determine if the link target corresponds
+    // to a cgroup net_cls mount point - but it's easier to just delete the symlink and let
+    // it be re-created in the createNetCls call later on
+    QFileInfo netClsDir(Path::ParentVpnExclusionsFile.parent());
+    if(netClsDir.isSymLink())
+    {
+        QFileInfo targetFile(netClsDir.symLinkTarget());
+        qWarning() << "net_cls is a symlink:" << netClsDir.absoluteFilePath()
+            << "->"  << targetFile.absoluteFilePath()
+            << "- removing the symlink (it will be recreated later if necessary).";
+        QFile::remove(netClsDir.absoluteFilePath());
+    }
+
+    // This file is net_cls/cgroups.proc
     // This cgroup must be mounted in this location for this feature.
     QFileInfo cgroupFile(Path::ParentVpnExclusionsFile);
-
     if(!cgroupFile.exists())
     {
         // Try to create the net_cls VFS (if we have no other errors)

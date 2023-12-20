@@ -15,8 +15,13 @@ test_cases = [
     {dns: ["127.0.0.1", "1.1.1.2"], expected: ["127.0.0.1", "1.1.1.2"], allowed_to_leak: true},
 ]
 # Local DNS does not play nice with our windows CI runner. Not worth to keep fighting it now, skip.
-if !(ENV["GITHUB_CI"] && SystemUtil.windows?)
-    test_cases << {dns: "", expected: :default_name_server, allowed_to_leak: true}
+if !(SystemUtil.CI? && SystemUtil.windows?)
+    test_cases << {dns: "", expected: :default_name_servers, allowed_to_leak: true}
+end
+
+def any_in(array1, array2)
+    matches = array1.select { |element| array2.include?(element) }
+    !matches.empty?
 end
 
 test_cases.each do |test_case|
@@ -25,14 +30,14 @@ test_cases.each do |test_case|
         before(:each) do
             # Start from a disconnected state
             PiaCtl.set_unstable("overrideDNS", test_case[:dns])
-            @default_name_server = NetHelp.get_default_nameserver
-            test_case[:expected] = [@default_name_server] if test_case[:expected] == :default_name_server
+            @default_name_servers = NetHelp.default_nameservers
+            test_case[:expected] = @default_name_servers if test_case[:expected] == :default_name_servers
         end
 
         describe "when disconnected from the VPN" do
-            it "the default nameserver is unchanged from the system default" do
-                current_nameserver = NetHelp.get_default_nameserver
-                expect(current_nameserver).to eq @default_name_server
+            it "the default nameservers is unchanged from the system default" do
+                current_nameservers = NetHelp.default_nameservers
+                expect(any_in(current_nameservers, @default_name_servers)).to be_truthy
             end
         end
 
@@ -41,9 +46,9 @@ test_cases.each do |test_case|
                 Retriable.run(attempts: 2, delay: 2) { PiaCtl.connect }
             end
 
-            it "the default nameserver is any of #{test_case[:expected]}" do
-                current_nameserver = NetHelp.get_default_nameserver
-                expect(test_case[:expected].include? current_nameserver).to be_truthy, "Unexpected nameserver #{current_nameserver}"
+            it "the default nameservers is any of #{test_case[:expected]}" do
+                current_nameservers = NetHelp.default_nameservers
+                expect(any_in(test_case[:expected], current_nameservers)).to be_truthy, "Unexpected nameservers #{current_nameservers}"
             end
 
             if test_case[:allowed_to_leak]

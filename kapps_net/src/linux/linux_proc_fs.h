@@ -46,6 +46,14 @@ namespace ProcFs
     // processes, as it's common for transient processes to fail).
     std::string pathForPid(pid_t pid, bool silent=false);
 
+    // Given a pid, get the mount namespace id for that pid.
+    // This enables us to verify that a given path (returned from pidsForPath)
+    // belongs to a namespace we accept - otherwise users can bypass
+    // the VPN by setting up their own mount namespace and creating a process
+    // that maps to one set to bypass the VPN in settings.json
+    // Currently, we only accept mount namespaces that match the mount namespace of pia-daemon
+    std::string mountNamespaceId(pid_t pid, bool silent=false);
+
     // Is pid a child of parentPid ?
     bool isChildOf(pid_t parentPid, pid_t pid, bool silent=false);
 

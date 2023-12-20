@@ -26,18 +26,30 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = :random
 
+  # Allows the suite to be run specifying the protocol at runtime, or else defaults
+  # to selecting at random. Example usage:
+  # PROTOCOL=wireguard rspec .
+  protocol_choice = ENV['PROTOCOL'] || "random"
+ 
+  # Don't run tests that rely on the other protocol when one is specified at runtime
+  config.filter_run_excluding :openVPNOnly => true if protocol_choice == "wireguard"
+  config.filter_run_excluding :wireguardOnly => true if protocol_choice == "openvpn"
+
   config.before(:suite) do
-      # Ensure the app is in a default state before the suite is run
-      PiaCtl.disconnect
-      PiaCtl.resetsettings
-      PiaCtl.set("region", "auto")
+    # Ensure the app is in a default state before each test is run
+    set_up_state protocol_choice
   end
 
-  config.after(:each) do |test|
-      # Clean up app state after each test is run.
-      PiaCtl.disconnect
-      PiaCtl.resetsettings
-      PiaCtl.set("region", "auto")
+  config.after(:each) do
+    # Clean up app state after the suite is run.
+    set_up_state protocol_choice
   end
 
+  def set_up_state(protocol)
+    PiaCtl.disconnect
+    PiaCtl.resetsettings
+    PiaCtl.set("region", "auto")
+    protocol = PiaCtl::Protocols.sample if protocol == "random"    
+    PiaCtl.set("protocol", protocol)
+  end
 end

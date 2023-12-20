@@ -195,58 +195,19 @@ module PiaDesktop
             end
         end
 
-        # Build integration tests.  This is a separate artifact not shipped with the
-        # main application; it has a separate staging directory.
-        #
-        # Stage the artifacts in integtest-stage/pia-integtest, so we can create a ZIP
-        # artifact containing the pia-integtest folder.
-        integtestStage = Install.new("integtest-stage/#{Build::Brand}-integtest#{Build.macos? ? '.app' : ''}")
-
-        # Install clientlib to this staging area too
-        clientlib.install(integtestStage, :lib)
-
-        # Ensure these libs are available for integtest too
-        commonlib.install(integtestStage, :lib)
-        kappsModules[:core].install(integtestStage, :lib)
-        kappsModules[:regions].install(integtestStage, :lib)
-        kappsModules[:net].install(integtestStage, :lib)
-
-        # Integration test executable
-        # Integration tests are run on an installed PIA client.  The test executable is
-        # not deployed with the PIA client, so integration tests produce a
-        # separate staged installation.
-        # The integ tests don't have an installer, the staged installation is
-        # just unzipped and run manually.
-        integtestBin = Executable.new("#{Build::Brand}-integtest")
-            .source('integtest/src')
-            .use(clientlib.export)
-            .useQt('Test')
-            .install(integtestStage, :bin)
-
-        # Install built libraries to the integtest staging area
-        # This includes OpenSSL (all platforms) and xcb (Linux only)
-        FileList[File.join('deps/built',
-                        Build.selectDesktop('win', 'mac', 'linux'),
-                        Build::TargetArchitecture.to_s, 'lib*')].each do |d|
-            integtestStage.install(d, :lib)
-        end
-
         # Include platform-specific targets.  These call stage.install() to add
         # additional installation artifacts.
         if(Build.windows?)
             PiaWindows::defineTargets(version, stage, kappsModules, commonlib, clientlib)
-            PiaWindows::defineIntegtestArtifact(version, integtestStage, artifacts)
             PiaWindows::defineInstaller(version, stage, artifacts)
             PiaWindows::defineTools(toolsStage)
             task :default => :windeploy
         elsif(Build.macos?)
             PiaMacOS::defineTargets(version, stage, kappsModules, commonlib, clientlib)
-            PiaMacOS::defineIntegtestArtifact(version, integtestStage, artifacts)
             PiaMacOS::defineInstaller(version, stage, artifacts)
             task :default => :stage
         elsif(Build.linux?)
             PiaLinux::defineTargets(version, stage)
-            PiaLinux::defineIntegtestArtifact(version, integtestStage, artifacts)
             PiaLinux::defineInstaller(version, stage, artifacts)
             PiaLinux::defineTools(toolsStage)
             task :default => :stage
@@ -263,15 +224,6 @@ module PiaDesktop
         desc "Build the product installer package"
         task :installer do |t|
             puts "built installer"
-        end
-        desc "Build the integration test harness (staged, suitable for local use)"
-        task :integtest_deploy do |t|
-            puts "built integration tests"
-        end
-
-        desc "Build integration test artifact"
-        task :integtest do |t|
-            puts "built integration test artifact"
         end
 
 
@@ -338,7 +290,7 @@ module PiaDesktop
         # If coverage isn't available though, :artifacts doesn't depend on :test.
         #
         # :all is convenient to remember for use from the CLI anyway.
-        task :all => [:test, :stage, :export, :installer, :integtest, :debug, :compile_commands]
+        task :all => [:test, :stage, :export, :installer, :debug, :compile_commands]
     end
 
 end

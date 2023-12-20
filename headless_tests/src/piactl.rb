@@ -8,6 +8,8 @@ class PiaCtl
     # Otherwise use whichever can be found in path
     PIACTL = ENV['PIACTL'] || 'piactl'
 
+    Protocols = ["openvpn", "wireguard"]
+    
     def self.run(args)
         IO.popen [PIACTL, *args], "r+"
     end

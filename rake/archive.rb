@@ -30,10 +30,6 @@ module Archive
     # Create a ZIP archive containing the specified directory.  The directory
     # itself is included in the archive (so it's not a ZIP-bomb), but the path
     # leading to it is not.
-    #
-    # For example, zipping '.../out/pia_debug_x86_64/integtest/pia-integtest'
-    # yields an archive that expands to a "pia-integtest" folder.
-    #
     # On Mac/Linux, uses zip -<comp> -r.  On Windows, uses 7z.exe -mx<comp> a.
     def self.zipDirectory(directory, archive)
         zip(File.dirname(directory), "\"#{File.basename(directory)}\"", archive)

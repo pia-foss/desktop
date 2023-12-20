@@ -3,7 +3,8 @@ require_relative 'command'
 require_relative 'retry'
 
 class SplitTunnel
-    IP_CHECK_SERVICE_URL = "api.ipify.org"
+    IP_CHECK_SERVICE_URL = "api.privateinternetaccess.com"
+    IP_CHECK_SERVICE_URL_PATH = "#{IP_CHECK_SERVICE_URL}/api/client/status"
 
     def self.resolve_url_for_split_tunnelling
         # This method queries an ip checker with multiple ips, 
@@ -20,10 +21,10 @@ class SplitTunnel
     end
 
     def self.curl_for_ip(route)
-        puts "curl #{IP_CHECK_SERVICE_URL} via #{route}..."
-        output = Retriable.run(attempts: 3, delay: 0.75) { Command.execute_with_output("curl #{IP_CHECK_SERVICE_URL} --resolve *:80:#{route} --connect-timeout 30") }
+        puts "curl #{IP_CHECK_SERVICE_URL_PATH} via #{route}..."
+        output = Retriable.run(attempts: 3, delay: 0.75) { Command.execute_with_output("curl #{IP_CHECK_SERVICE_URL_PATH} --resolve *:80:#{route} --connect-timeout 30") }
         puts "Response: #{output}"
-        output
+        JSON.parse(output)['ip']
     end
 
     def self.setup_split_tunnel_default_route(default_tunnel_action)

@@ -6,6 +6,7 @@
     "brandReleaseChannelGA": "release",
     "brandReleaseChannelBeta": "beta",
     "brandReleaseUpdateUris": ["https://www.privateinternetaccess.com/clients/desktop", "https://www.piaproxy.net/clients/desktop"],
+    "changelogUri": "https://www.privateinternetaccess.com/pages/changelog",
     "forgotPasswordLink": "https://www.privateinternetaccess.com/pages/reset-password",
     "manageAccountLink":"https://www.privateinternetaccess.com/pages/client-control-panel#account-settings",
     "buyAccountLink": "https://www.privateinternetaccess.com/pages/buy-vpn/",

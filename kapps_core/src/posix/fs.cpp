@@ -264,5 +264,28 @@ namespace fs
         buf.resize(realSize);
         return buf;
     }
+
+    bool isSymlink(const std::string &path)
+    {
+        struct stat pathStat{};
+        if(lstat(path.c_str(), &pathStat) != 0)
+        {
+            return false; // Error occurred, assume it's not a symlink
+        }
+
+        return S_ISLNK(pathStat.st_mode) != 0;
+    }
+
+    bool createSymlink(const std::string &from, const std::string &to)
+    {
+        if(0 != ::symlink(from.c_str(), to.c_str()))
+        {
+            KAPPS_CORE_WARNING() << "::symlink failed on" << "from:" << from << "to:" << to
+                << "-" << ErrnoTracer{};
+            return false;
+        }
+
+        return true;
+    }
 }
 }}

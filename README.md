@@ -171,7 +171,6 @@ The following targets can be passed to `rake`.  The default target is `stage`, w
 | `test` | Builds and runs unit tests; produces code coverage artifacts if possible on the current platform (requires clang 6+) |
 | `installer` | Builds the final installer artifact, including code signing if configured. |
 | `export` | Builds extra artifacts needed from CI but not part of any deployable artifact (currently translation exports) |
-| `integtest` | Builds the integration test artifact (ZIP file containing deployable integration tests) |
 | `libs` | Builds the dtop libraries and development artifact (see DTOP-LIBS.md) |
 | `tools` | Builds extra tools for development purposes that are not used as part of the build process or as part of any shipped artifact. |
 | `artifacts` | Builds all artifacts and copies to `out/pia_debug_x86_64/artifacts` (depends on most other targets, execpt `test` when coverage measurement isn't possible) |
@@ -323,8 +322,8 @@ The same `rake`-based build system is used, but the available targets differ.
 ### Headless testing
 
 In the `headless_tests` directory you will find a suite of tests written in ruby with the help of RSpec.
-They work similarly to `integtest`, using `piactl` in the background to manipulate the state of the daemon and run diverse tests.
-The advantages of testing in ruby as opposed to our code in `integtest` are mainly simplicity, where doing things like calling API endpoints is much simpler than from C++ code.
+They use `piactl` in the background to manipulate the state of the daemon and run diverse tests.
+The advantage of testing in ruby is mainly simplicity, where doing things like calling API endpoints is much simpler than from C++ code.
 
 With these _almost_ end to end tests we hope to drastically reduce manual testing for releases to the point that we can release more frequently.  
 

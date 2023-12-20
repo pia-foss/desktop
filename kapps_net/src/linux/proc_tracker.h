@@ -26,6 +26,7 @@
 #include "../firewallparams.h"
 #include <unordered_map>
 #include "linux_cgroup.h"
+#include "linux_proc_fs.h"
 
 namespace kapps { namespace net {
 
@@ -41,6 +42,12 @@ public:
     {
         // TODO: only need to pass params
         initiateConnection(params, params.tunnelDeviceName, params.tunnelDeviceLocalAddress);
+
+        // Get the mount namespace of the daemon - we use this to validate the paths
+        // we get when deciding to split tunnel an app. We only want to consider paths
+        // that belong to the same mount namespace - otherwise malicious apps in a different namespace
+        // could bypass the VPN by setting their path to a bypassed app.
+        _defaultMountNamespaceId = ProcFs::mountNamespaceId(getpid());
     }
 
     ~ProcTracker()
@@ -83,6 +90,13 @@ private:
     void teardownReversePathFiltering();
     void updateApps(std::vector<std::string> excludedApps, std::vector<std::string> vpnOnlyApps);
 
+    // Whether a given process belongs to an allowed mount namespace
+    // Currently the only mount namespace we allow is the one that pia-daemon
+    // runs in.
+    bool isProcessInAllowedMountNamespace(pid_t pid) const { return ProcFs::mountNamespaceId(pid) == _defaultMountNamespaceId; }
+
+    void showInvalidMountNamespaceWarning(const std::string &appName, pid_t pid) const;
+
 private:
     CnProc _cnProc;
     OriginalNetworkScan _previousNetScan;
@@ -95,6 +109,7 @@ private:
     std::string _previousTunnelDeviceLocalAddress;
     std::string _previousTunnelDeviceName;
     CGroupIds _cgroup;
+    std::string _defaultMountNamespaceId;
 
     // IpTablesFirewall provided by LinuxFirewall - used to update firewall
     // rules.

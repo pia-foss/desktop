@@ -190,7 +190,7 @@ QtObject {
     readonly property string performanceChartBackgroundColor: Theme.dark ? "#22252E" : "#ffffff"
     readonly property string performanceChartBorderColor: Theme.dark ? "transparent" : "#D7D8D9"
     readonly property string performanceChartBarActive : Theme.dark ? "#5DDF5A" : "#5DDF5A"
-    readonly property string performanceChartBarInactive : Theme.dark ? "#2B2E39" : "#EEEEEE"
+    readonly property string performanceChartBarInactive : Theme.dark ? "#889099" : "#889099"
     readonly property string performanceChartText : Theme.dark ? "#ffffff" : "#323642"
 
     readonly property color locationMarkerCenterColor : Theme.dark ? "#5DDF5A" : "#4CB649"

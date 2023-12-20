@@ -105,7 +105,6 @@ endfunction()
 # area).
 rake_target(stage default)
 rake_target(rake-test test)
-rake_target(integtest-stage integtest)
 rake_target(rake-all all)
 # Hook up CMake's 'all' to rake's default only - this is the default target for
 # Qt Creator.  It still will know how to build unit tests / integ tests if they
@@ -140,11 +139,6 @@ set_for_platform(RAKE_STAGE_LIB
                  "${RAKE_OUT}/stage"
                  "${RAKE_OUT}/stage/${BRAND_NAME}.app/Contents/Frameworks"
                  "${RAKE_OUT}/stage/lib"
-                )
-set_for_platform(RAKE_INTEGTEST_BIN
-                 "${RAKE_OUT}/integtest-stage/${BRAND}-integtest"
-                 "${RAKE_OUT}/integtest-stage/${BRAND}-integtest.app/Contents/MacOS"
-                 "${RAKE_OUT}/integtest-stage/${BRAND}-integtest/bin"
                 )
 
 # Implement the clean target by removing the entire output directory.  There's
@@ -220,13 +214,6 @@ target_sources(client PRIVATE "${RAKE_OUT}/pia-client/qrc_pia-client.qrc")
 
 stage_target(daemon daemon "${BRAND}-service" "${BRAND}-daemon" "${BRAND}-daemon")
 target_link_libraries(daemon Qt5::Core Qt5::Network)
-
-source_files(integtest integtest)
-add_executable(integtest EXCLUDE_FROM_ALL ${TARGET_SOURCE_integtest})
-target_link_libraries(integtest Qt5::Core Qt5::Network Qt5::Test ${ALL_LIB_TARGETS})
-set_property(TARGET integtest PROPERTY OUTPUT_NAME "${BRAND}-integtest")
-add_dependencies(integtest integtest-stage)
-set_property(TARGET integtest PROPERTY RUNTIME_OUTPUT_DIRECTORY ${RAKE_INTEGTEST_BIN})
 
 function(unit_test name)
     set(TESTNAME "test-${name}")

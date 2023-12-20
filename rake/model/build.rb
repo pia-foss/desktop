@@ -7,17 +7,38 @@ require 'json'
 # Build determines the overall build directory (based on configuration, etc.)
 # and creates a per-component build directory for this component.
 class Build
+    # Captures v3.4.5.beta.1-RC1 into groups [3, 4, 5, beta.1-RC1]
+    version_regex = /v(\d+)\.(\d+)\.(\d+)(?:\.(.+))?/
+    # Captures beta.1-RC1 into groups [beta.1, RC1]
+    release_candidate_regex = /(.+)[-\/](.*)/
+    # Retrieve the newest parent tag indicating the version.
+    latestTag = `git tag -l --sort=-creatordate`.lines.find { |tag| tag.match(version_regex) }
+
+    version_mmp, version_prerelease =
+        if version_regex =~ ENV['PIA_OVERRIDE_VERSION'] || version_regex =~ latestTag
+            version = [$1, $2, $3].map(&:to_i)
+            pre_release = $4
+            if release_candidate_regex =~ pre_release
+                pre_release = $1
+                puts "Ignoring version suffix #{$2}"
+            end
+            [version, pre_release]
+        end
+
     # The major-minor-patch parts of this version
-    VersionMMP = [3, 5, 2]
+    VersionMMP = version_mmp || [3, 5, 2]
     # The base major-minor-patch version, as a string
     VersionBase = "#{VersionMMP[0]}.#{VersionMMP[1]}.#{VersionMMP[2]}"
     # The prerelease tags for this build (dot-separated, excluding leading
     # dash), or empty string if none
-    VersionPrerelease = ''
+    VersionPrerelease = version_prerelease || ''
 
     # Select a build configuration based on environment variables, or use
     # defaults for the host platform if unspecified
     Brand = ENV['BRAND'] || 'pia'
+
+    puts "Building #{Build::Brand} version #{VersionBase}#{"." if !VersionPrerelease.empty?}#{VersionPrerelease}"
+
     Variant = Util.selectSymbol('VARIANT', :debug, [:release, :debug])
     # Platform can be overridden to select mobile platforms, since mobile builds
     # are done from a desktop host.  Desktop cross-OS builds are not supported.

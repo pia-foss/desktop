@@ -157,7 +157,7 @@ void WINAPI WinNetworks::ipInterfaceChangeCallback(PVOID callerContext,
     {
         qInfo() << "Interface change:" << changeTraceName(notificationType)
             << pRow->InterfaceLuid.Value << "=" << pRow->InterfaceIndex
-            << "connected:" << pRow->Connected << "metric:" << pRow->Metric;
+            << "connected:" << static_cast<bool>(pRow->Connected) << "metric:" << pRow->Metric;
     }
 
     queueUpdate(callerContext);

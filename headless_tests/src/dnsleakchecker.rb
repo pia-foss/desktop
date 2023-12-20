@@ -1,6 +1,7 @@
 require 'json'
 require 'securerandom'
 require 'net/http'
+require 'open3'
 
 # Uses bash.ws API to test for dns leaks
 class DNSLeakChecker
@@ -14,8 +15,10 @@ class DNSLeakChecker
         # Send all ping requests in parallel, as they will all fail and timeout
         10.times.map { |i| Thread.new { system("ping", "-c", "1", "#{i+1}.#{id}.#{API_DOMAIN}", out: File::NULL, err: File::NULL) } }.each(&:join) 
         
-        response = Net::HTTP.get_response URI("https://#{API_DOMAIN}/dnsleak/test/#{id}?json") 
-        result_json = JSON.parse(response.body)
+        output, err_out, status = Open3.capture3("curl https://#{API_DOMAIN}/dnsleak/test/#{id}?json")
+        raise "Could not reach DNS leaks API #{err_out}" if status != 0
+
+        result_json = JSON.parse(output)
         conclusion = result_json.select { |r| r["type"] == "conclusion" }.first["ip"]
         conclusion == "DNS may be leaking."
     end

@@ -55,5 +55,9 @@ class SystemUtil
     def self.macos?
         os == :macos
     end
+
+    def self.CI?
+        ENV["GITHUB_CI"] != nil
+    end
 end
 

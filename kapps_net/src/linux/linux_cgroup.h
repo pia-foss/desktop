@@ -43,7 +43,7 @@ public:
     // Remove the cgroup routing rules - we do not need to remove the cgroups
     // as they have no impact without the routing rules
     void teardownNetCls();
-    
+
     // Get the configured fwmark values; CGroupIds owns this because they also
     // determine the cgroup IDs
     const Fwmark &fwmark() const {return _fwmark;}
@@ -70,9 +70,14 @@ private:
 
 namespace CGroup
 {
+    // Find a pre-existing net_cls mount (if one exists)
+    std::string KAPPS_NET_EXPORT findPreExistingNetClsMount(const std::string &mountsFile);
+    // Create a symlink from the pre-existing net_cls to our pia net_cls location
+    // We only do this if there's a pre-existing net_cls mount.
+    bool KAPPS_NET_EXPORT createNetClsSymlink(const std::string &preExistingNetClsDir, const std::string& netClsSymlink);
     // Actually make the net_cls cgroup directory and mount the VFS.
     // This function is only called if the host system does not already have a net_cls VFS
-    bool KAPPS_NET_EXPORT createNetCls(const std::string &netClsDir);
+    bool KAPPS_NET_EXPORT createNetCls(const std::string &netClsDir, const std::string &mountsFile="/proc/mounts");
     void KAPPS_NET_EXPORT addPidToCgroup(pid_t pid, const std::string &cGroupPath);
     void KAPPS_NET_EXPORT removePidFromCgroup(pid_t pid, const std::string &cGroupPath);
 };

@@ -194,8 +194,6 @@ module PiaMacOS
             FileUtils.ln_sf("../../../../MacOS/#{Build::Brand}-support-tool", t.name)
         end
         stage.install(stSymlink, File.join(stBundleContents, 'MacOS/'))
-
-        # TODO - Integtest Info.plist and PkgInfo
     end
 
     # Run two processes with arguments - redirect both stdout and stderr from
@@ -273,7 +271,7 @@ module PiaMacOS
         # - Ignore libssl, libcrypto, etc. - only include binaries starting
         #   with the brand code
         # - Ignore the bundle executable, the default executable is implied
-        #   to macdeployqt (matters for pia-integtest, and if a brand name would
+        #   to macdeployqt (matters if a brand name would
         #   happen to begin with the brand code)
         bundleName = File.basename(bundleDir)
         deployBins = FileList[File.join(bundleDir, "Contents/MacOS/#{Build::Brand}*")]
@@ -332,28 +330,6 @@ module PiaMacOS
                 end
             end
         end
-    end
-
-    def self.defineIntegtestArtifact(version, integtestStage, artifacts)
-        integtestBuild = Build.new('integtest')
-        bundle = integtestBuild.artifact("#{Build::Brand}-integtest.app")
-
-        task :integtest_deploy => [integtestStage.target, integtestBuild.componentDir] do |t|
-            FileUtils.rm_rf(bundle) if File.exist?(bundle)
-            FileUtils.cp_r(integtestStage.dir, bundle)
-
-            macdeploy(bundle, [])
-        end
-
-        # Create the integtest ZIP artifact
-        integtest = integtestBuild.artifact("#{version.integtestPackageName}.zip")
-        file integtest => [:integtest_deploy, integtestBuild.componentDir] do |t|
-            Archive.zipDirectory(bundle, integtest)
-        end
-
-        artifacts.install(integtest, '')
-
-        task :integtest => integtest
     end
 
     def self.defineInstaller(version, stage, artifacts)

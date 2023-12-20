@@ -4000,6 +4000,11 @@
       <source>Version %1 is available</source>
       <translation>バージョン%1が利用可能です</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="180"/>
+      <source>Changelog</source>
+      <translation>変更ログ</translation>
+    </message>
   </context>
   <context>
     <name>UsageModule</name>

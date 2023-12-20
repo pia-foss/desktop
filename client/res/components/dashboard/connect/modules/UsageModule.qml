@@ -41,8 +41,10 @@ MovableModule {
       // yet, say "0 KB"
       if(exponent < 1)
         return "0 KB"
+
       // Calculate the mantissa and pick a unit with the exponent
-      return Math.round(bytes / Math.pow(1024, exponent), 2) + ' ' + sizes[exponent-1];
+      // Include two decimal places in the output - i.e 1.52 GB
+      return (bytes / Math.pow(1024, exponent)).toFixed(2) + ' ' + sizes[exponent-1];
 }
 
   Text {

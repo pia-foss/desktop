@@ -1,5 +1,12 @@
 # Changelog
 
+### v3.5.3
+* UI: Increase contrast of graph in performance tile
+* UI: Add two extra decimal places to data usage values
+* UI: Add changelog link to update notification
+* Linux: Improve split tunnel robustness in the presence of mount namespaces
+* Linux: Fix split tunnel on Linux Mint 20.0+
+
 ### v3.5.2
 
 * Linux: Fix split tunnel on rolling release distributions

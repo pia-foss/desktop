@@ -97,7 +97,7 @@ void CGroupIds::setupNetCls()
     // Split tunnel (exclusions) - we want the bypass rule to have lower priority than the vpnOnly rule (see Routing::Priorities)
     // so that an app set to vpnOnly has all its packets sent over the VPN even if a bypass rule (such as a subnet bypass) would otherwise
     // allow those packets to escape the VPN. "vpnOnly" should always win.
-    setupCgroup(bypassDir, _bypassId, _fwmark.excludePacketTag(), _routing.bypassTable(), 
+    setupCgroup(bypassDir, _bypassId, _fwmark.excludePacketTag(), _routing.bypassTable(),
         Routing::Priorities::bypass);
     // Inverse split tunnel (vpn only)
     setupCgroup(vpnOnlyDir, _vpnOnlyId, _fwmark.vpnOnlyPacketTag(), _routing.vpnOnlyTable(),
@@ -112,8 +112,61 @@ void CGroupIds::teardownNetCls()
 
 namespace CGroup
 {
-    bool createNetCls(const std::string &netClsDir)
+    // Check if there is already a net_cls mount - if so, attempting to mount another net_cls will fail.
+    // We return the mount point if it exists, otherwise we return an empty string.
+    std::string findPreExistingNetClsMount(const std::string &mountsFile)
     {
+        // Use awk to find the mount point of an existing net_cls file system.
+        // Example line from the mountsFile (/proc/mounts):
+        // none /sys/fs/cgroup/net_cls cgroup rw,relatime,net_cls 0 0
+        // We only care about field 2 (the mount point) and field 4 (options - we care about the existence of net_cls)
+        const std::string preExistingNetClsDir = core::Exec::bashWithOutput(qs::format("awk '$4 ~ /net_cls/ { print $2 }' %", mountsFile));
+        return preExistingNetClsDir;
+    }
+
+    // Create a symlink from our "pia" net_cls folder to the pre-existing net_cls mount point. We only do this if there is a pre-existing net_cls
+    // mount, otherwise we create our own net_cls mount
+    bool createNetClsSymlink(const std::string &preExistingNetClsDir, const std::string& netClsSymlink)
+    {
+        // Ensure we remove any existing pia net_cls directory (if necessary) to allow us to create the symlink
+        if(core::fs::exists(netClsSymlink) && !(core::fs::readLink(netClsSymlink, true) == preExistingNetClsDir))
+        {
+            KAPPS_CORE_INFO() << "Removing PIA net_cls directory" << netClsSymlink << "to create new symlink" ;
+            core::Exec::cmd("rm", {"-rf", netClsSymlink});
+        }
+
+        // Now create the symlink
+        if(!core::fs::createSymlink(preExistingNetClsDir, netClsSymlink))
+        {
+            KAPPS_CORE_WARNING() << "Could not create symlink to net_cls location. Split tunnel will not work.";
+            return false;
+        }
+
+        KAPPS_CORE_INFO() << "Created symlink to net_cls location!" << netClsSymlink << "->" << preExistingNetClsDir;
+        return true;
+    }
+
+    // mountsFile defaults to /proc/mounts - see the header file
+    bool createNetCls(const std::string &netClsDir, const std::string &mountsFile)
+    {
+        // First, We need to ensure the 'cgroup' parent folder exists
+        const std::string parentFolder{core::fs::dirName(netClsDir)};
+        if(!core::fs::dirExists(parentFolder))
+        {
+            KAPPS_CORE_INFO() << "First creating parent folder for net_cls" << parentFolder;
+            core::fs::mkDir(parentFolder);
+        }
+
+        // First check for a pre-existing net_cls folder - if we find one then create
+        // a symlink to it from our "pia" net_cls folder - if we don't find one then we
+        // mount it ourselves.
+        const std::string preExistingNetClsDir = findPreExistingNetClsMount(mountsFile);
+        if(!preExistingNetClsDir.empty())
+        {
+            KAPPS_CORE_INFO() << "Found pre-existing net_cls mount-point:" << preExistingNetClsDir;
+            return createNetClsSymlink(preExistingNetClsDir, netClsDir);
+        }
+
         KAPPS_CORE_WARNING() << "The directory" << netClsDir
                 << "is not found, but is required by the split tunnel feature."
                 << "Attempting to create.";

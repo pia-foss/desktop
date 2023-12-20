@@ -69,7 +69,7 @@ QPixmap getIconForAppBundle(const QString &path, const QSize &size)
           hasAlpha:YES
           isPlanar:NO
           colorSpaceName:NSDeviceRGBColorSpace
-          bitmapFormat:NSAlphaFirstBitmapFormat
+          bitmapFormat:NSBitmapFormatAlphaFirst
           bytesPerRow:0
           bitsPerPixel:0
           ];
@@ -78,7 +78,7 @@ QPixmap getIconForAppBundle(const QString &path, const QSize &size)
     [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:bmp]];
 
     // assume NSImage nsimage
-    [img drawInRect:NSMakeRect(0,0,width,height) fromRect:NSZeroRect operation: NSCompositeSourceOver fraction: 1];
+    [img drawInRect:NSMakeRect(0,0,width,height) fromRect:NSZeroRect operation: NSCompositingOperationSourceOver fraction: 1];
 
     [NSGraphicsContext restoreGraphicsState];
 

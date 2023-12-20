@@ -4001,6 +4001,11 @@
       <source>Version %1 is available</source>
       <translation>Wersja %1 jest dostępna</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="180"/>
+      <source>Changelog</source>
+      <translation>Dziennik zmian</translation>
+    </message>
   </context>
   <context>
     <name>UsageModule</name>

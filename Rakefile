@@ -43,8 +43,8 @@ version = PiaVersion.new
 # Artifacts - These are the final outputs preserved from CI builds.
 # _Everything_ we keep from CI builds is included here.  (This does not include
 # dev tools, etc., as those are only used in dev and can be built locally.  It
-# does include non-shipping artifacts like integration tests, library SDK
-# packages, debugging symbols, translation exports, etc.)
+# does include non-shipping artifacts like library SDK packages,
+# debugging symbols, translation exports, etc.)
 artifacts = Install.new('artifacts')
 
 # 'tools' builds utility applications that are just part of the development

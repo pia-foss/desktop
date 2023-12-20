@@ -24,13 +24,19 @@
 #include <kapps_core/src/newexec.h>
 #include "iptables_firewall.h"
 #include "linux_routing.h"
-#include "linux_proc_fs.h"
 
 namespace kapps { namespace net {
 
 namespace
 {
     using IPVersion = IpTablesFirewall::IPVersion;
+}
+
+void ProcTracker::showInvalidMountNamespaceWarning(const std::string &appName, pid_t pid) const
+{
+    KAPPS_CORE_WARNING() << "Process:" << pid << "with path" << appName << "has a split tunnel path but was rejected"
+        << "as it belongs to the wrong mount namespace. Expected:" << _defaultMountNamespaceId
+        << "but got" << ProcFs::mountNamespaceId(pid);
 }
 
 void ProcTracker::initiateConnection(const FirewallParams &params, std::string tunnelDeviceName, std::string tunnelDeviceLocalAddress)
@@ -94,6 +100,12 @@ void ProcTracker::addApps(const std::vector<std::string> &apps, AppMap &appMap, 
         // silence these errors since this happens a lot.
         for(pid_t pid : ProcFs::pidsForPath(app, true))
         {
+            if(!isProcessInAllowedMountNamespace(pid))
+            {
+                showInvalidMountNamespaceWarning(app, pid);
+                continue;
+            }
+
             // Both these calls are no-ops if the PID is already excluded
             CGroup::addPidToCgroup(pid, cGroupPath);
             appPids.insert(pid);
@@ -191,8 +203,19 @@ void ProcTracker::addLaunchedApp(pid_t pid)
     if(appName.empty())
         return;
 
+    // Ensure the process belongs to an allowed mount namespace
+    if(_exclusionsMap.count(appName) > 0 || _vpnOnlyMap.count(appName) > 0)
+    {
+        if(!isProcessInAllowedMountNamespace(pid))
+        {
+            showInvalidMountNamespaceWarning(appName, pid);
+            return;
+        }
+    }
+
     if(_exclusionsMap.count(appName) > 0)
     {
+
         // Add it if we're currently tracking excluded apps.
         if(_previousNetScan.ipv4Valid())
         {

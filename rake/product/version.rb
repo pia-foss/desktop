@@ -89,7 +89,6 @@ class PiaVersion
         @packageSuffix = packageNameParts.join('-')
 
         @packageName = "#{Build::Brand}-#{@packageSuffix}"
-        @integtestPackageName = "#{Build::Brand}-integtest-#{@packageSuffix}"
 
         @probe = Probe.new('version')
         @probe.file('version.txt', "#{version}\n#{@productName}\n#{@packageName}\n#{@timestamp}\n")
@@ -281,10 +280,6 @@ class PiaVersion
     # The complete package name for this release
     def packageName
         @packageName
-    end
-    # Package name for integration test artifacts
-    def integtestPackageName
-        @integtestPackageName
     end
     def timestamp
         @timestamp

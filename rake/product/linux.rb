@@ -81,37 +81,6 @@ module PiaLinux
         stage.install(updown, :bin)
     end
 
-    def self.defineIntegtestArtifact(version, integtestStage, artifacts)
-        integtestBuild = Build.new('integtest')
-        deployStage = integtestBuild.artifact(File.basename(integtestStage.dir))
-        task :integtest_deploy => [integtestStage.target, integtestBuild.componentDir] do |t|
-            # Copy the staging root since we're going to patch the binaries (keep
-            # unpatched binaries in the staging root since the original rpath is
-            # preferred for debugging locally)
-            FileUtils.rm_rf(deployStage) if File.exist?(deployStage)
-            FileUtils.cp_r(integtestStage.dir, deployStage)
-
-            deployQt(deployStage, [
-                "libicudata.so.#{ICU_VERSION}",
-                "libicui18n.so.#{ICU_VERSION}",
-                "libicuuc.so.#{ICU_VERSION}",
-                'libQt5Core.so.5',
-                'libQt5Network.so.5',
-                'libQt5Test.so.5'
-            ], [], [])
-        end
-
-        # Create a ZIP containing the deployed integtests
-        integtest = integtestBuild.artifact("#{version.integtestPackageName}.zip")
-        file integtest => [:integtest_deploy, integtestBuild.componentDir] do |t|
-            Archive.zipDirectory(deployStage, integtest)
-        end
-
-        artifacts.install(integtest, '')
-
-        task :integtest => integtest
-    end
-
     def self.defineInstaller(version, stage, artifacts)
         installerBuild = Build.new('installer')
 

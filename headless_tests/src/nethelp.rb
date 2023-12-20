@@ -1,6 +1,7 @@
 require_relative 'systemutil'
 require 'ipaddr'
 require 'socket'
+require 'open3'
 
 # Helper class for networking constants, Ip addresses, etc.
 class NetHelp 
@@ -60,13 +61,31 @@ class NetHelp
         end
     end
 
-    def self.get_default_nameserver
+    def self.default_nameservers
+        ip_addresses = []
         nslu_output = `nslookup privateinternetaccess.com 2>&1`
         nslu_output.each_line do |line|
-            if line =~ /Address:[\t ]*(\d+\.\d+\.\d+\.\d+)/  
-                return $1
+            if line =~ /Address:[\t ]*(\d+\.\d+\.\d+\.\d+)/
+                ip_addresses << $1
             end
         end
+
+        # Specify the path to the resolv.conf file
+        resolv_conf_path = '/etc/resolv.conf'
+
+        # Check if the file exists
+        if File.exist?(resolv_conf_path)
+            # Open and read the file line by line
+            File.open(resolv_conf_path, 'r') do |file|
+                file.each_line do |line|
+                    # Use a regular expression to match lines containing "nameserver"
+                    if line =~ /^nameserver\s+(\S+)/
+                        ip_addresses << $1
+                    end
+                end
+            end
+        end
+        ip_addresses
     end
 
     def self.can_send_message_externally?
@@ -78,6 +97,12 @@ class NetHelp
         messenger_lambda = ENV["PIA_AWS_SEND_MESSAGE_LAMBDA"]
         lambda_client = AWSLambda.new
         lambda_client.invoke(messenger_lambda, {ip: address, port: port, message: message})
+    end
+
+    def self.pia_connected?
+        output, errout, status = Open3.capture3('curl https://www.privateinternetaccess.com/api/client/status')
+        raise "Could not test connection: #{errout}" if status != 0
+        JSON.parse(output)['connected']
     end
 
     class SimpleMessageReceiver

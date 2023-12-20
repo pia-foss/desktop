@@ -53,5 +53,7 @@ namespace fs
     std::string KAPPS_CORE_EXPORT readString(const std::string &path, size_t bytes, bool silent=false);
     // Returns a std::vector<std::string> of the files inside a directory
     std::vector<std::string> KAPPS_CORE_EXPORT listFiles(const std::string &dirName, unsigned filterFlags, bool silent=false);
+    bool KAPPS_CORE_EXPORT isSymlink(const std::string &path);
+    bool KAPPS_CORE_EXPORT createSymlink(const std::string &from, const std::string &to);
 }
 }}

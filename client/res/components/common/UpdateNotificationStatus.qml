@@ -20,6 +20,7 @@ import QtQuick 2.9
 import "../daemon"
 import "../../javascript/util.js" as Util
 import PIA.NativeHelpers 1.0
+import PIA.BrandHelper 1.0
 
 // UpdateNotificationStatus is a NotificationStatus for piaX updates.
 //
@@ -165,6 +166,13 @@ NotificationStatus {
     }
   }
 
+  // Is the version available a full release ? i.e not beta or alpha
+  // We just check for the existence of alphabetical characters in the version
+  // as a 'beta' release would have the word 'beta' present, etc
+  function isAvailableVersionFullRelease() {
+    return !/[a-zA-Z]/.test(Daemon.state.availableVersion)
+  }
+
   links: {
     switch(state)
     {
@@ -172,10 +180,27 @@ NotificationStatus {
     case states.inactive:
       return []
     case states.available:
-      return [{
+      let linksToShow = [
+        {
         text: uiTr("Download"),
         clicked: function(){startDownload()}
-      }]
+        }
+      ]
+
+      // Some brands may not provide a changelog URI
+      let changelogUri = BrandHelper.getBrandParam("changelogUri")
+
+      // Only show changelog link if it exists (some brands may not provide one)
+      // and the available version is a full release.
+      // This is because the changelog page only has changelogs for full releases (not betas)
+      if(changelogUri.length != 0 && isAvailableVersionFullRelease()) {
+        linksToShow.push({
+          text: uiTr("Changelog"),
+          clicked: () => { Qt.openUrlExternally(changelogUri) }
+        })
+      }
+
+      return linksToShow
     case states.downloading:
       return []
     case states.ready:

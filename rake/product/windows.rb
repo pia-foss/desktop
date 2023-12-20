@@ -211,34 +211,6 @@ module PiaWindows
             .install(stage, '/')
     end
 
-    def self.defineIntegtestArtifact(version, integtestStage, artifacts)
-        # MSVC and UCRT runtime files
-        installRuntime(integtestStage)
-
-        # Deploy Qt for the integration tests
-        task :integtest_deploy => integtestStage.target do |t|
-            # clientlib has Qt dependencies of its own, include it here to make
-            # sure we pick those up.  The doc doesn't really indicate that
-            # windeployqt is intended to work on DLLs, but it does work (and
-            # EXEs/DLLs are both just PE executables of course)
-            winDeploy([], [File.join(integtestStage.dir, "#{Build::Brand}-integtest.exe"),
-                           File.join(integtestStage.dir, "#{Build::Brand}-clientlib.dll"),
-                           File.join(integtestStage.dir, "#{Build::Brand}-commonlib.dll")])
-        end
-
-        # Create a ZIP containing the deployed integ tests as the final artifact
-        integtestBuild = Build.new('integtest')
-        integtest = integtestBuild.artifact("#{version.integtestPackageName}.zip")
-        file integtest => [:integtest_deploy, integtestBuild.componentDir] do |t|
-            Archive.zipDirectory(integtestStage.dir, integtest)
-        end
-
-        # Preserve the integtest distribution artifact
-        artifacts.install(integtest, '')
-
-        task :integtest => integtest
-    end
-
     # Define the task to build the Windows installer artifact.  This depends on the
     # staged output and becomes a dependency of the :installer task.
     def self.defineInstaller(version, stage, artifacts)

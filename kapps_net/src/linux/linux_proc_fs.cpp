@@ -19,22 +19,30 @@
 #include "linux_proc_fs.h"
 #include <unistd.h>
 
-std::unordered_set<pid_t> ProcFs::pidsForPath(const std::string &path, bool silent)
+namespace ProcFs
+{
+
+std::unordered_set<pid_t> pidsForPath(const std::string &path, bool silent)
 {
     return filterPids([&](pid_t pid) { return pathForPid(pid, silent) == path; });
 }
 
-std::unordered_set<pid_t> ProcFs::childPidsOf(pid_t parentPid, bool silent)
+std::unordered_set<pid_t> childPidsOf(pid_t parentPid, bool silent)
 {
     return filterPids([&](pid_t pid) { return isChildOf(parentPid, pid, silent); });
 }
 
-std::string ProcFs::pathForPid(pid_t pid, bool silent)
+std::string pathForPid(pid_t pid, bool silent)
 {
     return kapps::core::fs::readLink(qs::format("%/%/exe", kProcDirName, pid), silent);
 }
 
-bool ProcFs::isChildOf(pid_t parentPid, pid_t pid, bool silent)
+std::string mountNamespaceId(pid_t pid, bool silent)
+{
+    return kapps::core::fs::readLink(qs::format("%/%/ns/mnt", kProcDirName, pid), silent);
+}
+
+bool isChildOf(pid_t parentPid, pid_t pid, bool silent)
 {
     static const std::regex parentPidRegex{"PPid:\\s+([0-9]+)"};
 
@@ -51,4 +59,5 @@ bool ProcFs::isChildOf(pid_t parentPid, pid_t pid, bool silent)
     }
 
     return false;
+}
 }
