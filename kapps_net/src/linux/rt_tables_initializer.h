@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,13 +22,17 @@
 
 namespace kapps { namespace net {
 
+// NOTE: since iproute2 6.7.0 they changed the fallback file to /usr/share/iproute2/rt_tables rather than
+// /usr/lib/iproute2/rt_tables
+//
 // This class is responsible for creating and appending our routing tables to the rt_tables file on Linux.
 // There is some complexity now as iproute2 recently changed to a 'stateless configuration' approach
 // whereby /etc/iproute2/rt_tables (which we were previously using) will not exist until a user needs to
 // make changes to rt_tables. Prior to that /usr/lib/iproute2/rt_tables will be used instead and should
 // never be modified.
-// When modifications are necessary copy /usr/lib/iproute2/rt_tables to /etc/iproute2/rt_tables (ensuring the iproute2/ directory first exists)
-// and then make changes to that file.
+// When modifications are necessary write to /etc/iproute2/rt_tables (ensuring the iproute2/ directory first exists)
+// and then make changes to that file. Tables added to /etc/iproute2/rt_tables are then applied on top of the tables that
+// already exist in /usr/lib/iproute2/rt_tables
 // For the rationale behind the changes to iproute2 - see this link to the mailing list:
 // https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/commit/?id=0a0a8f12fa1b03dd0ccbebf5f85209d1c8a0f580
 // Full text description from link above provided here:
@@ -44,8 +48,13 @@ class KAPPS_NET_EXPORT RtTablesInitializer
 public:
     struct KAPPS_NET_EXPORT RtLocations
     {
+        // Used if it exists
         std::string etcPath;
-        std::string libPath;
+        // Otherwise search in order for a fallback
+        // and copy that fallback into etcPath
+        // Current fallback paths are: /usr/share/iproute2/rt_tables
+        // and /usr/lib/iproute2/rt_tables and should be searched in that order.
+        std::vector<std::string> fallbackPaths;
     };
 
 public:
@@ -61,12 +70,15 @@ public:
 private:
     // Insert our routing tables at the end of rt_tables file
     void appendRoutingTables(int availableIndex) const;
-    // The start index for our custom routing tables
-    int nextAvailableTableIndex() const;
+    // The next available index based on the passed-in rt_tables file
+    int nextAvailableTableIndexFromFile(const std::string &rtPath) const;
+    // The start index will use for our custom routing tables in /etc/iproute2/rt_tables
+    // this index is either calculated from /etc/iproute2/rt_tables itself or (if that file is empty)
+    // from one of the fallback files
+    int nextAvailableIndex() const;
     // This method checks for the presence of /etc/iproute2/rt_tables.
     // If not found, it ensures the parent directory (/etc/iproute2) exists
-    // and then copies the file from /usr/lib/iproute2/rt_tables to use as a base
-    // for our modifications.
+    // and then creates the /etc/iproute2/rt_tables file
     bool prepareRtLocation() const;
     // Whether the specific routing table is already installed
     bool isRoutingTableInstalled(const std::string &tableName) const;

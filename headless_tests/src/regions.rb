@@ -3,20 +3,17 @@
 class Regions
     def self.get_subset_of_regions
         max_regions = 10
-        available_regions = PiaCtl.get("regions").split("\n")
-        #Remove the auto region as it could repeat an Ip address, failing the test.
-        available_regions.delete("auto")
 
-        puts "Found #{available_regions.length} regions."
+        all_regions = get_all_regions
 
-        if available_regions.length < max_regions
+        if all_regions.length < max_regions
             puts "List of regions is not returning. Dumping the contents of the list:"
-            puts available_regions
+            puts all_regions
             exit 1
         end
 
         # Shuffle the regions list so we try a different subset every time
-        available_regions.sample(max_regions)
+        all_regions.sample(max_regions)
     end
 
     def self.check_region_connectivity(region)
@@ -29,5 +26,12 @@ class Regions
 
         PiaCtl.disconnect
         ip
+    end
+
+    def self.get_all_regions
+        available_regions = PiaCtl.get("regions").split("\n")
+        #Remove the auto region as it could repeat an Ip address, failing the test.
+        available_regions.delete("auto")
+        available_regions
     end
 end

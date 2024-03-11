@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <kapps_net/net.h>
 #include <kapps_core/core.h>
-#include <kapps_core/src//posix/posix_objects.h>
+#include <kapps_core/src/posix/posix_objects.h>
 #include "pf_firewall.h"
 #include "utun.h"
 #include "port_finder.h"

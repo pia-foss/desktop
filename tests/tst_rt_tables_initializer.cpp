@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -44,6 +44,11 @@ private:
         return randomString;
     }
 
+    QString randomTempFilePath() const
+    {
+        return QDir::tempPath() + "/" + randomString(DirLength);
+    }
+
     // The parent folder is QDir::tempPath()
     // so it's safe to create this path if necessary
     QString randomDirPath() const
@@ -81,7 +86,7 @@ private slots:
                   out << "100\ttable1\n";
               }
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), "libPathNotProvided"} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {"libPathNotProvided"}} };
               QVERIFY(rt.install());
           }
 
@@ -95,7 +100,7 @@ private slots:
           QFile etcFile{etcPath};
           QVERIFY(etcFile.open(QIODevice::ReadOnly));
           auto actualContent = etcFile.readAll();
-          QVERIFY(actualContent == expectedContent);
+          QCOMPARE(actualContent, expectedContent);
       }
 
       // When etc rt_tables exists and lib rt_tables - lib should be ignored
@@ -123,7 +128,7 @@ private slots:
                   outLib << "500\ttable2\n";
               }
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), libFile.fileName().toStdString()} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {libFile.fileName().toStdString()}} };
               QVERIFY(rt.install());
           }
 
@@ -137,13 +142,54 @@ private slots:
           QFile etcFile{etcPath};
           QVERIFY(etcFile.open(QIODevice::ReadOnly));
           auto actualContent = etcFile.readAll();
-          QVERIFY(actualContent == expectedContent);
+          QCOMPARE(actualContent, expectedContent);
+      }
+
+      // When etc rt_tables exists and lib rt_tables exist - but etc does not contain a valid index
+      // it should get the index from lib
+      {
+          QString etcPath;
+          {
+              QTemporaryFile etcFile;
+              QTemporaryFile libFile;
+              etcFile.setAutoRemove(false);
+              libFile.setAutoRemove(false);
+              QVERIFY(etcFile.open() && libFile.open());
+
+              etcPath = etcFile.fileName();
+
+              {
+                  // note the content doesn't include an index
+                  QTextStream outEtc(&etcFile);
+                  outEtc << "#table1\n";
+
+                  // We also add content to the lib file
+                  // The index should be extracted from here
+                  QTextStream outLib(&libFile);
+                  outLib << "500\ttable2\n";
+              }
+
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {libFile.fileName().toStdString()}} };
+              QVERIFY(rt.install());
+          }
+
+          QByteArray expectedContent =
+          "#table1\n"
+          "501\tpiavpnrt\n"
+          "502\tpiavpnOnlyrt\n"
+          "503\tpiavpnWgrt\n"
+          "504\tpiavpnFwdrt\n";
+
+          QFile etcFile{etcPath};
+          QVERIFY(etcFile.open(QIODevice::ReadOnly));
+          auto actualContent = etcFile.readAll();
+          QCOMPARE(actualContent, expectedContent);
       }
 
       // etc file exists but does not contain a valid (numerical) table index
-      // This is a critical error we cannot recover from
+      // it should fall back to the "fallbackIndex" which is 100
       {
-        QString etcPath;
+          QString etcPath;
           {
               QTemporaryFile etcFile;
               etcFile.setAutoRemove(false);
@@ -158,30 +204,49 @@ private slots:
                   out << "not_an_index\ttable1\n";
               }
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), "libPathNotProvided"} };
-              QVERIFY(!rt.install());
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {"libPathNotProvided"}} };
+              QVERIFY(rt.install());
           }
 
-          QByteArray expectedContent{"not_an_index\ttable1\n"};
+          QByteArray expectedContent =
+          "not_an_index\ttable1\n"
+          "100\tpiavpnrt\n"
+          "101\tpiavpnOnlyrt\n"
+          "102\tpiavpnWgrt\n"
+          "103\tpiavpnFwdrt\n";
 
           QFile etcFile{etcPath};
           QVERIFY(etcFile.open(QIODevice::ReadOnly));
           auto actualContent = etcFile.readAll();
-          QVERIFY(actualContent == expectedContent);
 
+          // When no valid index can be found, we fallback to an index of 100
+          QCOMPARE(actualContent, expectedContent);
       }
   }
   void testEtcDoesNotExist()
   {
       // Neither etc or lib exist
+      // it should create the etcFile and append the content
       {
-          RtTablesInitializer rt{"pia", {"etcFileDoesNotExist", "libFileDoesNotExist"} };
-          // install fails - it returns false and traces the errors
-          QVERIFY(!rt.install());
+          RtTablesInitializer rt{"pia", {"etcFile", {"libFileDoesNotExist"}} };
+          QVERIFY(rt.install());
+
+          QByteArray expectedContent =
+          "100\tpiavpnrt\n"
+          "101\tpiavpnOnlyrt\n"
+          "102\tpiavpnWgrt\n"
+          "103\tpiavpnFwdrt\n";
+
+          QFile etcFile{"etcFile"};
+          QVERIFY(etcFile.open(QIODevice::ReadOnly));
+          auto actualContent = etcFile.readAll();
+
+          // When no valid index can be found, we fallback to an index of 100
+          QCOMPARE(actualContent, expectedContent);
       }
   }
 
-  void testEtcDoesNotExistButLibDoes()
+  void testEtcDoesNotExistButFallbackDoes()
   {
       // When etc rt_tables does not exist but lib rt_tables does
       // Expected behaviour is we create an etc file and then
@@ -189,7 +254,7 @@ private slots:
       // before then appending the etc file with our tables
       // so etc file content should be: lib file + our content
       {
-          QString etcPath;
+          QString etcPath = randomTempFilePath();
           QString libPath;
           {
               QTemporaryFile libFile;
@@ -202,25 +267,13 @@ private slots:
                   out << "100\ttable1\n";
               }
 
-
-              // Unfortunately have to create (and then immediately delete - it'll get deleted at end of the block)
-              // the etcFile just to get a name we can use. We don't want
-              // this file hanging around, we just need a name :/
-              {
-                QTemporaryFile etcFile;
-                QVERIFY(etcFile.open());
-
-                etcPath = etcFile.fileName();
-              }
-
               libPath = libFile.fileName();
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), libPath.toStdString()} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {libPath.toStdString()}} };
               QVERIFY(rt.install());
           }
 
           QByteArray expectedEtcContent =
-          "100\ttable1\n"
           "101\tpiavpnrt\n"
           "102\tpiavpnOnlyrt\n"
           "103\tpiavpnWgrt\n"
@@ -237,7 +290,7 @@ private slots:
           QFile libFile{libPath};
           QVERIFY(libFile.open(QIODevice::ReadOnly));
           auto actualLibContent = libFile.readAll();
-          QVERIFY(actualLibContent == "100\ttable1\n");
+          QCOMPARE(actualLibContent, "100\ttable1\n");
       }
 
       // Same as before, but etcPath lives in a nested folder
@@ -266,12 +319,11 @@ private slots:
               etcPath = QStringLiteral("%1/rt_tables").arg(etcParentFolder);
               libPath = libFile.fileName();
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), libPath.toStdString()} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {libPath.toStdString()}} };
               QVERIFY(rt.install());
           }
 
           QByteArray expectedEtcContent =
-          "100\ttable1\n"
           "101\tpiavpnrt\n"
           "102\tpiavpnOnlyrt\n"
           "103\tpiavpnWgrt\n"
@@ -288,7 +340,66 @@ private slots:
           QFile libFile{libPath};
           QVERIFY(libFile.open(QIODevice::ReadOnly));
           auto actualLibContent = libFile.readAll();
-          QVERIFY(actualLibContent == "100\ttable1\n");
+          QCOMPARE(actualLibContent, "100\ttable1\n");
+      }
+  }
+
+  void testUsesFallbackPathsInOrder()
+  {
+      // When etc rt_tables does not exist but share and lib rt_tables do
+      // Expected behaviour is we create an etc file and then
+      // copy across the seed content from the share file - not the lib file
+      // as the share file appears first in the fallback list
+      {
+          // Generate a random file path
+          QString etcPath = randomTempFilePath();
+          QString libPath;
+          QString sharePath;
+          {
+
+              // Share file
+              QTemporaryFile shareFile;
+              shareFile.setAutoRemove(false);
+              QVERIFY(shareFile.open());
+              {
+                  QTextStream out(&shareFile);
+                  out << "100\ttableShare\n";
+              }
+
+              // Lib file
+              QTemporaryFile libFile;
+              libFile.setAutoRemove(false);
+              QVERIFY(libFile.open());
+              {
+                  QTextStream out(&libFile);
+                  out << "100\ttableLib\n";
+              }
+
+              sharePath = shareFile.fileName();
+              libPath = libFile.fileName();
+
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {sharePath.toStdString(), libPath.toStdString()}} };
+              QVERIFY(rt.install());
+          }
+
+          QByteArray expectedEtcContent =
+          "101\tpiavpnrt\n"
+          "102\tpiavpnOnlyrt\n"
+          "103\tpiavpnWgrt\n"
+          "104\tpiavpnFwdrt\n";
+
+          // Verify etcFile has been created and contains
+          // the share file content + our tables appended.
+          QFile etcFile{etcPath};
+          QVERIFY(etcFile.open(QIODevice::ReadOnly));
+          auto actualEtcContent = etcFile.readAll();
+          QCOMPARE(actualEtcContent, expectedEtcContent);
+
+          // Verify shareFile content remains unchanged
+          QFile shareFile{sharePath};
+          QVERIFY(shareFile.open(QIODevice::ReadOnly));
+          auto actualShareContent = shareFile.readAll();
+          QCOMPARE(actualShareContent, "100\ttableShare\n");
       }
   }
 
@@ -313,7 +424,7 @@ private slots:
                   out << "87\ttable3\n";
               }
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), "libPathNotProvided"} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {"libPathNotProvided"}} };
               QVERIFY(rt.install());
           }
 
@@ -329,7 +440,7 @@ private slots:
           QFile etcFile{etcPath};
           QVERIFY(etcFile.open(QIODevice::ReadOnly));
           auto actualContent = etcFile.readAll();
-          QVERIFY(actualContent == expectedContent);
+          QCOMPARE(actualContent, expectedContent);
   }
 
  // Should only add the tables that don't already exist in the file
@@ -353,7 +464,7 @@ private slots:
                   out << "102\tpiavpnOnlyrt\n";
               }
 
-              RtTablesInitializer rt{"pia", {etcPath.toStdString(), "libPathNotProvided"} };
+              RtTablesInitializer rt{"pia", {etcPath.toStdString(), {"libPathNotProvided"}} };
               QVERIFY(rt.install());
           }
 
@@ -367,7 +478,7 @@ private slots:
           QFile etcFile{etcPath};
           QVERIFY(etcFile.open(QIODevice::ReadOnly));
           auto actualContent = etcFile.readAll();
-          QVERIFY(actualContent == expectedContent);
+          QCOMPARE(actualContent, expectedContent);
     }
   }
 };

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -218,26 +218,6 @@ Item {
     dismissible: false
     active: Daemon.settings.splitTunnelEnabled &&
       NativeHelpers.reinstallWfpCalloutStatus === "reboot"
-  }
-
-  // Display the notification whenever split tunnel is enabled and the user is on macOS Monterey or later
-  // Don't allow the notification to be dismissed.  Use "info" level (green)
-  // Use the following message: `Please disable the Split Tunnel feature if you're having trouble
-  // connecting to the internet.`
-  // Add a link labeled `Disable Split Tunnel` that turns off the split tunnel setting.
-  // (This should consequently hide the notification, since it only appears when ST is enabled.)
-  NotificationStatus {
-    id: splitTunnelMonterey
-    message: SettingsMessages.stMontereyNotification
-    severity: severities.info
-    links: [{
-      text: uiTr("Settings"),
-      clicked: function() { showPage("split-tunnel")}
-    }]
-    dismissible: false
-    active: Daemon.settings.splitTunnelEnabled &&
-            Qt.platform.os === "osx" &&
-            !NativeHelpers.macosSplitTunnelSupported
   }
 
   // Notification for the "missing iptables" error.

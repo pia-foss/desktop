@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -40,9 +40,12 @@ void dummyPosixMain() {}
 #include <stdio.h>
 #include <sys/stat.h>
 #include <QCommandLineParser>
+#include <sys/resource.h>
 
 static void (*g_oldTerminateHandler)() = nullptr;
-
+// Override open file descriptor limit.
+// By default 256 on macOS, can be too restrictive in sleep scenarios.
+static constexpr int FD_LIMIT = 1024;
 
 static void terminateHandler()
 {
@@ -73,6 +76,28 @@ static void terminateHandler()
     qFatal().nospace() << "Exiting due to unhandled exception" << extra;
 }
 
+void setFileDescriptorLimits()
+{
+    struct rlimit limit;
+
+    // Get the current limits for open file descriptors
+    if (getrlimit(RLIMIT_NOFILE, &limit) == 0) {
+        qInfo() << "Soft limit on open file descriptors:" << (unsigned long)limit.rlim_cur;
+        qInfo() << "Hard limit on open file descriptors:" << (unsigned long)limit.rlim_max;
+    } else {
+        qWarning() << "Failed to retrieve file descriptor limits";
+    }
+    
+    // Increase the limit. Default on macOS is 256, linux is 1024 (usually)
+    if (limit.rlim_cur < FD_LIMIT)
+    {
+        limit.rlim_cur = FD_LIMIT;
+        qInfo() << "Setting file descriptor limit to" << limit.rlim_cur;
+        if (setrlimit(RLIMIT_NOFILE, &limit) != 0) {
+            qWarning() << "Failed to set file descriptor limits";
+        }
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -91,6 +116,8 @@ int main(int argc, char** argv)
     g_oldTerminateHandler = std::set_terminate(terminateHandler);
 
     Path::initializePostApp();
+
+    setFileDescriptorLimits();
 
     // The daemon just has the general --help and --version options.
     // --version is used by the install script on Linux to verify that the

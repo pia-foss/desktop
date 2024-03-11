@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -80,14 +80,13 @@ QtObject {
   readonly property string mtuSettingLargePackets: uiTranslate("mtu_setting", "Large Packets")
   readonly property string mtuSettingSmallPackets: uiTranslate("mtu_setting", "Small Packets")
   readonly property string mtuSettingDescription: [
-      uiTr("Determines the maximum packet size allowed through the tunnel."),
-      uiTr("Auto: Detect automatically, best for most connections"),
-      uiTr("Large Packets: Most efficient if the connection is reliable"),
-      uiTr("Small Packets: Less efficient but best on unreliable connections")
-    ].join("\n\u2022\xA0\xA0")
+    uiTr("Determines the maximum packet size allowed through the tunnel."),
+    uiTr("Auto: Detect automatically, best for most connections"),
+    uiTr("Large Packets: Most efficient if the connection is reliable"),
+    uiTr("Small Packets: Less efficient but best on unreliable connections")
+  ].join("\n\u2022\xA0\xA0")
   
-  readonly property string stMontereyConfirmation: uiTr("You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you're having trouble connecting to the internet.")
-  readonly property string stMontereyNotification: uiTr("Please disable the Split Tunnel feature if you're having trouble connecting to the internet.")
-  readonly property string stMontereyPushNotification: uiTr("macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can't reach the internet, disable Split Tunnel.")
-  readonly property string stMontereyPushLink: uiTr("Disable Split Tunnel")
+  readonly property string stUpdateOSMessage: uiTr("The split tunnel feature is available only on macOS 11 (Big Sur) or newer versions. Please update your OS if you want to use this feature")
+
+  readonly property string stMacOSNotInstalledMessage: uiTr("Split Tunnel is not installed. Go to System Settings -> Privacy & Security, scroll down to Security section and \"Allow\" PIA. Then click \"Allow\" on the Proxy Configurations popup")
 }

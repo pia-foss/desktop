@@ -1,2 +1,4 @@
 --require spec_helper
 --format documentation
+# Run with this tag to test status of backend services (these tests are for overall service health, not client tests)
+--tag ~@servicecheck

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -133,6 +133,8 @@ struct KAPPS_NET_EXPORT FirewallConfig
 #elif defined(KAPPS_CORE_OS_MACOS)
     std::string unboundDnsStubConfigFile;
     std::string unboundExecutableFile;
+    std::string transparentProxyCliExecutable;
+    std::string transparentProxyLogFile;
 #endif
 
     BrandInfo brandInfo;

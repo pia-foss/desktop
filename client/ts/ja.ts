@@ -342,7 +342,7 @@
   <context>
     <name>Client</name>
     <message>
-      <location filename="../../../client/res/components/client/Client.qml" line="228"/>
+      <location filename="../../../client/res/components/client/Client.qml" line="229"/>
       <source>%1 - Best</source>
       <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
       <translation>%1 - ベスト</translation>
@@ -416,246 +416,245 @@
       <translation>「アプリ除外」機能にはスプリットトンネルフィルタが必要です。再起動してインストールを終了させてください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="267"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="299"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="358"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="440"/>
-      <source>Settings</source>
-      <translation>設定</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="232"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="211"/>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="45"/>
       <source>Iptables is not installed.</source>
       <extracomment>Message for Linux indicating that iptables is missing</extracomment>
       <translation>Iptablesがインストールされていません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="233"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="212"/>
       <source>Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.</source>
       <translation>VPNに接続するには、iptablesが必要です。アプリケーションを再インストールするか、iptablesまたはiptables-nftパッケージを手動でインストールし、その後、お使いのコンピュータを再起動してください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="225"/>
       <source>Connection refused.</source>
       <translation>接続が拒否されました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="252"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="231"/>
       <source>The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
       <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
       <translation>サーバーが接続を拒否しました。ユーザー名とパスワードを確認し、アカウントの有効期限が切れていないことを確認してください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="261"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="240"/>
       <source>Could not configure DNS.</source>
       <translation>DNSを構成できませんでした。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="262"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="241"/>
       <source>Enable debug logging and check the daemon log for specific details.</source>
       <translation>デバッグログ作成を有効にし、デーモンログの特定の詳細を確認します。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="265"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="244"/>
       <source>Daemon Log</source>
       <translation>デーモンログ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="275"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="278"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="337"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="419"/>
+      <source>Settings</source>
+      <translation>設定</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="254"/>
       <source>Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
       <translation>/usr/bin/xdg-openの実行に失敗しました。下からデーモンログファイルを開いてください:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="271"/>
       <source>Can&apos;t connect to Handshake.</source>
       <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>ハンドシェイクに接続できません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="275"/>
       <source>Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
       <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>ハンドシェイクで名前解決を設定できません。引き続き待つか、別の名前サービス設定をお試しください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="310"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="289"/>
       <source>Running PIA as administrator is not recommended.</source>
       <translation>PIAを管理者として実行することは推奨されていません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="311"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="290"/>
       <source>Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
       <translation>PIAを管理者として実行するすると、システム起動時のローンチが機能しなくなったり、その他の問題が発生したりする場合があります。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="302"/>
       <source>KILLSWITCH ENABLED</source>
       <translation>キルスイッチ有効</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="324"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="303"/>
       <source>Killswitch is enabled.</source>
       <translation>キルスイッチが有効にされました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="325"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="304"/>
       <source>Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
       <translation>設定でキルスイッチ機能が有効にされているためインターネットへのアクセスがブロックされています。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="328"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="307"/>
       <source>Change</source>
       <translation>変更</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="341"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="320"/>
       <source>RECONNECTING...</source>
       <translation>再度接続中…</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="342"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="321"/>
       <source>The connection to the VPN server was lost.</source>
       <translation>VPNサーバーへの接続が失われました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="351"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="369"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="330"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="348"/>
       <source>CONNECTING...</source>
       <translation>接続中…</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="354"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="333"/>
       <source>Can&apos;t connect to the proxy.</source>
       <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
       <translation>プロキシに接続できません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="355"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="334"/>
       <source>The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
       <translation>プロキシに接続できません。プロキシ設定を確認し、プロキシが利用可能であるか確認してください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="370"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="349"/>
       <source>We couldn&apos;t establish the connection to the VPN server. Please get in touch with our support department.</source>
       <translation>VPNサーバーへの接続を確立できませんでした。サポートにお問い合わせください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="383"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="362"/>
       <source>RECONNECT NEEDED</source>
       <translation>再度接続が必要です</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="384"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="363"/>
       <source>Reconnect to apply settings.</source>
       <translation>設定を適用するには再度接続してください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="385"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="364"/>
       <source>Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
       <translation>いくつかの設定変更は次回接続されるまで適用されません。今すぐ再度接続するにはクリックします。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="394"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
       <source>Connected with OpenVPN.</source>
       <translation>OpenVPNに接続済み。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="397"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="376"/>
       <source>Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
       <translation>初回ログインのためにOpenVPNにで接続されています。WireGuardを使用するには再度接続します。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="399"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="378"/>
       <source>Connected with OpenVPN to log in for the first time.</source>
       <translation>初回ログインのためにOpenVPNにで接続されています。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="418"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="397"/>
       <source>Connected using %1 port %2.</source>
       <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
       <translation>%1ポート%2を使用して接続されました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="427"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="406"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
       <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
       <translation>「代替設定」をオンに設定してみてください。サーバーがデフォルトの%1ポートに到達できなかったため、代わりに%2ポート%3が使用されました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="435"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="414"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
       <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
       <translation>代替設定が有効にされています。%1ポート%2でサーバーに接続できなかったため、%3ポート%4が使用されました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="449"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="428"/>
       <source>Subscription expires in %1 days.</source>
       <translation>サブスクリプションは%1日後に期限切れとなります。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="452"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="431"/>
       <source>Renew</source>
       <translation>更新</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="445"/>
       <source>Your dedicated IP will expire in %1 days.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
       <translation>あなたの専用IPは%1日後に期限が切れます。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="472"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="451"/>
       <source>Your dedicated IP will expire in 1 day.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
       <translation>あなたの専用IPは1日後に期限が切れます。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="477"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="456"/>
       <source>Your dedicated IP will expire today.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
       <translation>あなたの専用IPは今日期限が切れます。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="482"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="461"/>
       <source>Get a new one</source>
       <translation>新しい専用IPを入手する</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="494"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="473"/>
       <source>Your dedicated IP was updated.</source>
       <translation>あなたの専用IPが更新されました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="489"/>
       <source>Unable to reach login server.</source>
       <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
       <translation>ログインサーバーに接続できません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="514"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="493"/>
       <source>Your account details are unavailable, but you may still be able to connect to the VPN.</source>
       <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
       <translation>アカウントの詳細を利用することはできませんが、VPNに接続することができる場合があります。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="518"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="497"/>
       <source>Retry</source>
       <translation>再試行</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="531"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
       <source>Private Internet Access was updated.</source>
       <translation>Private Internet Accessがアップデートされました。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="534"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="513"/>
       <source>See what&apos;s new</source>
       <translation>最新情報を見る</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="551"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="530"/>
       <source>The application quit unexpectedly. Your VPN connection was preserved.</source>
       <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
       <translation>アプリケーションが予期せず終了しました。お客様のVPN接続は保持されました。</translation>
@@ -791,53 +790,41 @@
       <translation>警告: あなたのトラフィックは暗号化されない状態で送信されるため、傍受される脆弱性があります。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="114"/>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="25"/>
-      <source>Local Port</source>
-      <translation>ローカルポート</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="126"/>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="37"/>
-      <source>Auto</source>
-      <translation>自動</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="149"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="132"/>
       <source>Configuration Method</source>
       <translation>構成方法</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="156"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="139"/>
       <source>DHCP</source>
       <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
       <translation>DHCP</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="160"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="143"/>
       <source>Static</source>
       <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
       <translation>静的</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="165"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="148"/>
       <source>Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
       <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
       <translation>TAPアダプタでのアドレスの構成方法を決定します。接続に問題がある場合は、別の方法の方が安定する可能性があります。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="182"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="165"/>
       <source>Try Alternate Settings</source>
       <translation>代替設定を試行する</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="190"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="173"/>
       <source>If the connection type and remote port above do not work, try other settings automatically.</source>
       <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
       <translation>上の接続タイプとリモートポートで接続できない場合、自動的に他の設定を試行します。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="196"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="179"/>
       <source>Alternate settings can&apos;t be used when a proxy is configured.</source>
       <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
       <translation>プロキシが構成済みである場合、代替設定を使用することはできません。</translation>
@@ -2077,28 +2064,28 @@
       <translation>この機能を有効にするとスプリットトンネルフィルタがインストールされます。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="114"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="123"/>
       <source>The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
       <translation>スプリットトンネルフィルタがインストールされていません。「ヘルプ」ページに再インストールしてください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="119"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="128"/>
       <source>Choose which applications use the VPN.</source>
       <translation>VPNを使用するアプリを選択します。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="120"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="129"/>
       <source>Learn More</source>
       <translation>詳細</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="205"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="210"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="216"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="221"/>
       <source>App Exclusions</source>
       <translation>アプリ除外</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="274"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="287"/>
       <source>Apps may need to be restarted for changes to be applied.</source>
       <translation>変更内容を適用するには、アプリを再起動する必要がある場合があります。</translation>
     </message>
@@ -2899,7 +2886,7 @@
   <context>
     <name>RatingRequestNotificationStatus</name>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="352"/>
       <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
       <source>Contact Support</source>
       <translation>サポートに問い合わせる</translation>
@@ -3196,23 +3183,28 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="71"/>
-      <source>You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-      <translation>スプリットトンネル機能をオンに設定している場合、macOS Montereyでインターネット接続の問題が発生する場合があります。インターネットへの接続に問題がある場合は、スプリットトンネル機能をオフにしてください。</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="72"/>
-      <source>Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-      <translation>インターネットへの接続に問題がある場合は、スプリットトンネル機能をオフにしてください。</translation>
+      <source>The split tunnel feature is available only on macOS 11 (Big Sur) or newer versions. Please update your OS if you want to use this feature</source>
+      <translation>スプリットトンネリング機能は、macOS 11 (Big Sur) 以降のバージョンでのみ利用できます。この機能を使用する場合は、OSを更新してください。</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="73"/>
-      <source>macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
-      <translation>スプリットトンネル機能を使用している場合、macOS Montereyによって一部のシステムで問題が発生します。インターネットに接続できない場合は、スプリットトンネル機能をオフにしてください。</translation>
+      <source>Split Tunnel is not installed.</source>
+      <translation>スプリットトンネリングがインストールされていません。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="74"/>
-      <source>Disable Split Tunnel</source>
-      <translation>スプリットトンネル機能をオフに設定</translation>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="75"/>
+      <source>Go to System Settings -&gt; Privacy &amp; Security, then click &quot;Allow&quot; in the Security section.</source>
+      <translation>システム設定 -&gt; プライバシーとセキュリティを選択し、セキュリティセクションの&quot;許可&quot;をクリックします。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="77"/>
+      <source>Allow PIA Proxy Configurations.</source>
+      <translation>PIAプロキシ設定を許可します。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="79"/>
+      <source>Split Tunnel is not installed. Go to System Settings -&gt; Privacy &amp; Security, scroll down to Security section and &quot;Allow&quot; PIA. Then click &quot;Allow&quot; on the Proxy Configurations popup</source>
+      <translation>スプリットトンネリングはインストールされていません。システム設定 &gt; プライバシーとセキュリティに移動します。セキュリティセクションまで下にスクロールし、PIAを&quot;許可&quot;をクリックします。次に、プロキシ設定ポップアップで&quot;許可&quot;をクリックします。</translation>
     </message>
   </context>
   <context>
@@ -3430,7 +3422,7 @@
     <name>SplitTunnelAddAppRow</name>
     <message>
       <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="158"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="242"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="253"/>
       <source>Add Application</source>
       <translation>アプリケーションを追加</translation>
     </message>
@@ -3449,7 +3441,7 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="251"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="262"/>
       <source>Add IP Address</source>
       <translation>IPアドレスを追加</translation>
     </message>
@@ -3552,7 +3544,7 @@
   <context>
     <name>SplitTunnelPage</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="236"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="247"/>
       <source>Your Split Tunnel Rules</source>
       <translation>スプリットトンネルのルール</translation>
     </message>
@@ -3946,64 +3938,64 @@
   <context>
     <name>UpdateNotificationStatus</name>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="76"/>
       <source>Download of v%1 failed</source>
       <translation>V%1のダウンロードに失敗しました</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="80"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="81"/>
       <source>Ready to install v%1</source>
       <translation>V%1のインストール準備完了</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="109"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="110"/>
       <source>Download v%1</source>
       <translation>V%1をダウンロードする</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="111"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="112"/>
       <source>(%2%) Install v%1</source>
       <translation>（%2%）V%1をインストールする</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="114"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="115"/>
       <source>Install v%1</source>
       <translation>V%1をインストールする</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="142"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="143"/>
       <source>Version %1 is available.</source>
       <translation>V.%1が利用可能です。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="144"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="145"/>
       <source>Downloading v%1...</source>
       <translation>V%1をダウンロード中…</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="146"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="147"/>
       <source>Ready to install v%1.</source>
       <translation>V%1のインストールが準備完了です。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="158"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="167"/>
       <source>Download</source>
       <translation>ダウンロード</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="165"/>
-      <source>Install</source>
-      <translation>インストール</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="219"/>
-      <source>Version %1 is available</source>
-      <translation>バージョン%1が利用可能です</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="180"/>
       <source>Changelog</source>
       <translation>変更ログ</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="190"/>
+      <source>Install</source>
+      <translation>インストール</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="244"/>
+      <source>Version %1 is available</source>
+      <translation>バージョン%1が利用可能です</translation>
     </message>
   </context>
   <context>
@@ -4015,17 +4007,17 @@
       <translation>使用量タイル</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="31"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="33"/>
       <source>USAGE</source>
       <translation>使用</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="42"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="44"/>
       <source>Download</source>
       <translation>ダウンロード</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="66"/>
       <source>Upload</source>
       <translation>アップロード</translation>
     </message>
@@ -4063,44 +4055,44 @@
   <context>
     <name>WireguardConnection</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="41"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
       <source>Connection Timeout</source>
       <translation>接続タイムアウト</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="44"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="26"/>
       <source>30 seconds</source>
       <translation>30秒</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="45"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="27"/>
       <source>1 minute</source>
       <translation>1分</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="46"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="28"/>
       <source>2 minutes</source>
       <translation>2分</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="76"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="58"/>
       <source>Use Kernel Module</source>
       <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
       <translation>カーネルモジュールを使用する</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="90"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="72"/>
       <source>Install the WireGuard kernel module for the best performance.</source>
       <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
       <translation>最高のパフォーマンスを得るには、WireGuardカーネルモジュールをインストールしてください。</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="97"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="79"/>
       <source>Install</source>
       <translation>インストール</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="130"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="112"/>
       <source>For distribution-specific installation instructions, visit:</source>
       <translation>ディストリビューション特有のインストールの手順はこちら:</translation>
     </message>

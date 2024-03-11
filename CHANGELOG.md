@@ -1,5 +1,11 @@
 # Changelog
 
+### v3.5.5
+* MacOS: New Split Tunnel system has arrived!
+* MacOS: Improve PIA's behavior during sleep to fix crashes after long sleeps
+* Linux: Fix Split Tunnel and Wireguard issues when using the latest version of iproute2
+* Linux: Fix OpenVPN on Suse variants
+
 ### v3.5.3
 * UI: Increase contrast of graph in performance tile
 * UI: Add two extra decimal places to data usage values

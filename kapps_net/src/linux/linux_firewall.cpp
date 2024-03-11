@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -35,6 +35,8 @@ namespace
     // Define the location of the rt_tables files
     const std::string etcRoutingLocation{"/etc/iproute2/rt_tables"};
     const std::string libRoutingLocation{"/usr/lib/iproute2/rt_tables"};
+    // Used by iproute2 versions >= 6.7.0
+    const std::string shareRoutingLocation{"/usr/share/iproute2/rt_tables"};
 }
 
 LinuxFirewall::LinuxFirewall(FirewallConfig config)
@@ -50,7 +52,7 @@ LinuxFirewall::LinuxFirewall(FirewallConfig config)
     // We do this here rather than in the installer as there is some complexity involved.
     RtTablesInitializer rtTablesInitializer{
         _config.brandInfo.code,
-        {etcRoutingLocation, libRoutingLocation}
+        {etcRoutingLocation, {shareRoutingLocation, libRoutingLocation}}
     };
     rtTablesInitializer.install();
 

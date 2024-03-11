@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -31,7 +31,7 @@
 
 namespace kapps { namespace net {
 
-// Descriptor for a set of firewall rules to be appled.
+// Descriptor for a set of firewall rules to be applied.
 //
 struct KAPPS_NET_EXPORT FirewallParams
 {
@@ -146,6 +146,11 @@ struct KAPPS_NET_EXPORT FirewallParams
 
     // The DNS servers prior to connecting
     std::vector<uint32_t> existingDNSServers;
+#if defined(KAPPS_CORE_OS_MACOS)
+    // This parameter controls if Split Tunnel transparent proxy logs
+    // are saved in the same folder as pia-daemon 
+    bool transparentProxyLogEnabled;
+#endif
 };
 
 }}

@@ -11,7 +11,9 @@ class SystemUtil
             if !process_pid
                 raise ProcessNotFound.new "No process #{process_name} found"
             end
-            pldd_cmd = "pldd #{process_pid}"
+
+            # Include timeout in case password prompt is not noticed when running locally. 
+            pldd_cmd = "timeout 30s sudo pldd #{process_pid}"
             io = IO.popen(pldd_cmd, "r+")
             loaded_libs = []
             while (line = io.gets)
@@ -58,6 +60,20 @@ class SystemUtil
 
     def self.CI?
         ENV["GITHUB_CI"] != nil
+    end
+
+    def self.local_traffic_test_command
+        if macos?
+            # pings are blocked in Github-hosted runners, so we use nslookup.
+            "nslookup google.com"
+        elsif Command.execute("which traceroute")
+            # This will be the default for Linux in CI, and for any local Linux machine with traceroute installed. 
+            # Ping is blocked in GHA hosted runners, and nslookup gives false failures in ubuntu.
+            "traceroute -m 1"
+        else
+            # We use self-hosted Windows runners in CI so ping is not blocked.
+            "ping -n 1"
+        end
     end
 end
 

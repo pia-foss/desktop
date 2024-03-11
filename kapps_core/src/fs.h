@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,6 +32,8 @@ namespace kapps { namespace core {
 // TODO: These are not implemented for Windows yet.
 namespace fs
 {
+    // Create a file
+    bool KAPPS_CORE_EXPORT touch(const std::string &path, uint16_t mode=0644);
     // Whether a file exists on disk
     bool KAPPS_CORE_EXPORT exists(const std::string &path);
     // Whether a directory exists on disk - returns false if given a file

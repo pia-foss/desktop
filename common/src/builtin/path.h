@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -236,7 +236,9 @@ public:
     // Path to the launch agent property list used to launch the client at login
     static Path ClientLaunchAgentPlist;
 
-
+    // Path to the PIA Split Tunnel Binary binary used to control the split tunnel on macos
+    static Path TransparentProxyCliExecutable;
+    static Path TransparentProxyLogFile;
 #endif
 
 #ifdef Q_OS_LINUX

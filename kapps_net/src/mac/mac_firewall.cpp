@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -147,12 +147,15 @@ void MacFirewall::applyRules(const FirewallParams &params)
 
     _pFilter->ensureRootAnchorPriority();
 
-    _pFilter->setTranslationEnabled("000.natVPN", params.hasConnected, { {"interface", params.tunnelDeviceName} });
-    _pFilter->setFilterWithRules("001.natPhys", params.enableSplitTunnel, natPhysRules(netScan));
     _pFilter->setFilterEnabled("000.allowLoopback", params.allowLoopback);
     _pFilter->setFilterEnabled("100.blockAll", params.blockAll);
     _pFilter->setFilterEnabled("200.allowVPN", params.allowVPN, { {"interface", params.tunnelDeviceName} });
-    _pFilter->setFilterEnabled("250.blockIPv6", params.blockIPv6);
+
+    // Turn off blockIPv6 if the default route is not the VPN - this is so
+    // default and bypass apps can operate as if there's no VPN when in this mode.
+    // vpnOnly apps will have their IPv6 blocked - but this blocking is done in the transparent proxy,
+    // we don't need a firewall rule for it.
+    _pFilter->setFilterEnabled("250.blockIPv6", params.blockIPv6 && !params.bypassDefaultApps);
 
     _pFilter->setFilterEnabled("290.allowDHCP", params.allowDHCP);
     _pFilter->setFilterEnabled("299.allowIPv6Prefix", netScan.hasIpv6() && params.allowLAN);
@@ -186,24 +189,15 @@ void MacFirewall::applyRules(const FirewallParams &params)
 
 void MacFirewall::aboutToConnectToVpn()
 {
-    if(!_pSplitTunnel)
+    if(!_pTransparentProxy)
         return;
+
     assert(_pSplitTunnelWorker);   // Class invariant - exists only when _pSplitTunnel exists
-
-    // Cycle the split tunnel device synchronously.  This needs to happen before
-    // the VPN connection occurs.
-    _pSplitTunnelWorker->syncInvoke([&]()
-        {
-            KAPPS_CORE_INFO() << "Notifying split tunnel that we're about to connect the VPN";
-
-            // Cycle the split tunnel device
-            _pSplitTunnel->aboutToConnectToVpn();
-        });
 }
 
 void MacFirewall::startSplitTunnel(const FirewallParams &params)
 {
-    if(_pSplitTunnel)
+    if(_pTransparentProxy)
         return;
     assert(!_pSplitTunnelWorker);   // Class invariant - exists only when _pSplitTunnel exists
 
@@ -213,10 +207,9 @@ void MacFirewall::startSplitTunnel(const FirewallParams &params)
     // empty.
     _pSplitTunnelWorker.emplace([](core::Any){});
 
-    // Start the split tunnel implementation on the worker thread.
     _pSplitTunnelWorker->syncInvoke([&]
     {
-        _pSplitTunnel.emplace(params, _executableDir, *_pFilter);
+        _pTransparentProxy.emplace(params, _config);
     });
 }
 
@@ -224,14 +217,15 @@ void MacFirewall::stopSplitTunnel()
 {
     // Shut down the worker thread
     _pSplitTunnelWorker.clear();
-    // Then, shut down the utun device
-    _pSplitTunnel.clear();
+    // Shutdown the proxy
+    _pTransparentProxy.clear();
 }
 
 void MacFirewall::updateSplitTunnel(const FirewallParams &params)
 {
-    if(!_pSplitTunnel)
+    if(!_pTransparentProxy)
         return;
+
     assert(_pSplitTunnelWorker);   // Class invariant - exists only when _pSplitTunnel exists
 
     // Reconfigure the firewall synchronously on the worker thread.
@@ -243,30 +237,8 @@ void MacFirewall::updateSplitTunnel(const FirewallParams &params)
     _pSplitTunnelWorker->syncInvoke([&]()
         {
             KAPPS_CORE_INFO() << "Updating split tunnel configuration";
-            _pSplitTunnel->updateSplitTunnel(params);
+            _pTransparentProxy->update(params);
         });
-}
-
-std::vector<std::string> MacFirewall::natPhysRules(const OriginalNetworkScan &netScan)
-{
-    // Mojave (10.14.* and below) kernel panics when we enable nat for ipv6
-    // so the first version safe for nat6 is 10.15.0
-    const Version safeNat6Version{10, 15, 0};
-    const Version currentVersion{core::currentMacosVersion()};
-
-    const std::string itfName = netScan.interfaceName();
-    std::string inetLanIps{"{ 10.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32 }"};
-    std::string inet6LanIps{"{ fc00::/7, fe80::/10, ff00::/8 }"};
-    std::vector<std::string> ruleList{qs::format("no nat on % inet6 from any to %", itfName, inet6LanIps),
-                         qs::format("no nat on % inet from any to %", itfName, inetLanIps),
-                         qs::format("nat on % inet -> (%)", itfName, itfName)};
-
-    if(currentVersion >= safeNat6Version)
-        ruleList.push_back(qs::format("nat on % inet6 -> (%)", itfName, itfName));
-    else
-        KAPPS_CORE_INFO() << qs::format("Not creating inet6 nat rule for % - current mac version is < 10.15.0", itfName);
-
-    return ruleList;
 }
 
 std::vector<std::string> MacFirewall::subnetsToBypass(const FirewallParams &params)

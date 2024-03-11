@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -42,9 +42,9 @@ Page {
     // disabled, or if the driver hasn't been installed yet
     if(Qt.platform.os === 'windows')
       return appExclusionCheckbox.enabled && !appExclusionCheckbox.needsInstall && Daemon.settings.splitTunnelEnabled
-    // On all other platforms, enable it all the time (on Linux, there's no
-    // install; on Mac, we don't reliably know whether the kext has been
-    // approved yet).
+    if(Qt.platform.os === 'osx')
+        return Daemon.state.netExtensionState === "Installed" && Daemon.settings.splitTunnelEnabled
+    // On Linux enable it all the time (there's no install)
     return Daemon.settings.splitTunnelEnabled
   }
 
@@ -111,7 +111,7 @@ Page {
           case "working":
             // Only report the installation if it was started here.
             // (We still disable the control and/or report Reboot status, etc.,
-            // even if the isntallation was started from the Help page.)
+            // even if the installation was started from the Help page.)
             if(setting.installingDriver)
               return uiTranslate("NetworkPage", "Installing split tunnel filter...")
         }
@@ -124,15 +124,23 @@ Page {
           if(!setting.currentValue)
             return uiTranslate("NetworkPage", "Enabling this feature will install the split tunnel filter.")
           else {
-            // This state normally shouldn't happen, but it is possible if the
-            // driver was somehow uninstalled.
-            // The daemon doesn't disable split tunnel if the driver is not
-            // installed, because this state briefly occurs during a reinstall
-            // too.
-            return uiTranslate("NetworkPage", "The split tunnel filter is not installed.  Reinstall it on the Help page.")
+            if(Qt.platform.os === 'osx')
+            {
+                // Extension is not installed, checkbox has been enabled, the installation process is started
+                return SettingsMessages.stMacOSNotInstalledMessage + " [[" +
+            uiTranslate("NetworkPage", "Learn More") + "]]"
+            }
+            else if(Qt.platform.os === 'windows')
+            {
+                // This state normally shouldn't happen, but it is possible if the
+                // driver was somehow uninstalled.
+                // The daemon doesn't disable split tunnel if the driver is not
+                // installed, because this state briefly occurs during a reinstall
+                // too.
+                return uiTranslate("NetworkPage", "The split tunnel filter is not installed.  Reinstall it on the Help page.")
+            }
           }
         }
-
         // Driver is installed or there was an error monitoring it.
         return  uiTranslate("NetworkPage", "Choose which applications use the VPN.") + " [[" +
             uiTranslate("NetworkPage", "Learn More") + "]]"
@@ -158,6 +166,8 @@ Page {
             daemonSetting.currentValue = currentValue
             return
           }
+          // Prompt the users to update to macOS 11 or newer
+          // if they want to use the split tunnel feature 
           if (Qt.platform.os === 'osx' && !NativeHelpers.macosSplitTunnelSupported) {
             confirming = true
             currentValue = false
@@ -284,6 +294,8 @@ Page {
       enabled: splitTunnelEnabled
     }
 
+    // This is the text at the botton. This never changes since the text right below the checkbox will change
+    // depending on the installation state (if an installation is required)
     StaticText {
       Layout.columnSpan: 2
       Layout.fillWidth: true
@@ -291,7 +303,7 @@ Page {
       color: Theme.settings.inputDescriptionColor
       text: uiTranslate("NetworkPage", "Apps may need to be restarted for changes to be applied.")
     }
-
+     
     SplitTunnelAppDialog {
       id: addApplicationDialog
     }
@@ -303,13 +315,13 @@ Page {
       id: confirmDialog
 
       title: appExclusionCheckbox.label
-      buttons: [Dialog.Ok, Dialog.Cancel]
+      buttons: [Dialog.Ok]
       contentWidth: 300
 
       DialogMessage {
         width: parent.width
         icon: 'info'
-        text: SettingsMessages.stMontereyConfirmation
+        text: SettingsMessages.stUpdateOSMessage
         color: Theme.settings.inputLabelColor
       }
 
@@ -319,9 +331,6 @@ Page {
         open()
       }
       onAccepted: {
-        appExclusionSetting.continueEnabling();
-      }
-      onRejected: {
         appExclusionSetting.cancelEnabling();
       }
     }

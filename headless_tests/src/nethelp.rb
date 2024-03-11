@@ -72,6 +72,10 @@ class NetHelp
 
         # Specify the path to the resolv.conf file
         resolv_conf_path = '/etc/resolv.conf'
+        # in ubuntu /etc/resolv/conf doesn't update so need to go to the root
+        if File.exist?('/run/systemd/resolve/resolv.conf')
+            resolv_conf_path = '/run/systemd/resolve/resolv.conf'
+        end
 
         # Check if the file exists
         if File.exist?(resolv_conf_path)
@@ -103,6 +107,12 @@ class NetHelp
         output, errout, status = Open3.capture3('curl https://www.privateinternetaccess.com/api/client/status')
         raise "Could not test connection: #{errout}" if status != 0
         JSON.parse(output)['connected']
+    end
+
+    def self.curl_for_ip
+        output, errout, status = Open3.capture3('curl https://api.myip.com')
+        raise "Could not test connection: #{errout}" if status != 0
+        JSON.parse(output)['ip']
     end
 
     class SimpleMessageReceiver

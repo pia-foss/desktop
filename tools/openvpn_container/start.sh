@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Private Internet Access, Inc.
+# Copyright (c) 2024 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #

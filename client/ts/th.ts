@@ -342,7 +342,7 @@
   <context>
     <name>Client</name>
     <message>
-      <location filename="../../../client/res/components/client/Client.qml" line="228"/>
+      <location filename="../../../client/res/components/client/Client.qml" line="229"/>
       <source>%1 - Best</source>
       <extracomment>Text that indicates the best (lowest ping) region is being used for a given country. The %1 placeholder contains the name of the country, e.g &quot;UNITED STATES - BEST&quot;</extracomment>
       <translation>%1 - ดี​ที่สุด</translation>
@@ -416,246 +416,245 @@
       <translation>คุณลักษณะ​การ​ยกเว้น​แอป​ต้อง​ใช้​ฟิลเตอร์​การ​แยก​อุโมงค์ รี​สตาร์ท​เพื่อ​ทำ​การ​ติดตั้ง​ให้​เสร็จสิ้น</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="267"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="299"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="358"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="440"/>
-      <source>Settings</source>
-      <translation>การ​ตั้ง​ค่า</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="232"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="211"/>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="45"/>
       <source>Iptables is not installed.</source>
       <extracomment>Message for Linux indicating that iptables is missing</extracomment>
       <translation>Iptables ยัง​ไม่​ถูก​ติดตั้ง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="233"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="212"/>
       <source>Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.</source>
       <translation>Iptables จำเป็น​สำหรับ​เชื่อม​ต่อ​กับ VPN ติดตั้ง​แอปพลิเคชัน​นี้​อีก​ครั้ง​หรือ​ติดตั้ง​แพ็ค​เก​จ iptables หรือ iptables-nft ด้วย​ตัวเอง​แล้ว​รี​สตาร์ท​คอมพิวเตอร์​ของ​คุณ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="225"/>
       <source>Connection refused.</source>
       <translation>การ​เชื่อม​ต่อ​ถูก​ปฏิเสธ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="252"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="231"/>
       <source>The server refused the connection.  Please check your username and password, and verify that your account is not expired.</source>
       <extracomment>This error could be caused by incorrect credentials or an expired account, but it could have other causes too. The message should suggest checking those things without implying that they&apos;re necessarily the cause (to avoid frustrating users who are sure their account is current).</extracomment>
       <translation>เซิร์ฟเวอร์​ปฏิเสธ​การ​เชื่อม​ต่อ โปรด​ตรวจสอบ​ชื่อ​ผู้​ใช้​และ​รหัส​ผ่าน​ของ​คุณ​และ​ตรวจสอบ​ว่า​บัญชี​ของ​คุณ​ยัง​ไม่​หมด​อายุ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="261"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="240"/>
       <source>Could not configure DNS.</source>
       <translation>ไม่​สามารถ​กำหนด​ค่า DNS</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="262"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="241"/>
       <source>Enable debug logging and check the daemon log for specific details.</source>
       <translation>เปิด​ใช้งาน​การ​บันทึก​ดีบั๊ก​และ​ตรวจสอบ​บันทึก​ดี​มอน​เพื่อ​ดู​รายละเอียด​เฉพาะ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="265"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="244"/>
       <source>Daemon Log</source>
       <translation>บันทึก​ดี​มอน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="275"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="246"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="278"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="337"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="419"/>
+      <source>Settings</source>
+      <translation>การ​ตั้ง​ค่า</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="254"/>
       <source>Failed to run /usr/bin/xdg-open.  Please open the daemon log file from:</source>
       <translation>ไม่​สามารถ​เรียก​ใช้ /usr/bin/xdg-open กรุณา​เปิด​ไฟล์​บันทึก​ดี​มอน​จาก:</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="292"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="271"/>
       <source>Can&apos;t connect to Handshake.</source>
       <extracomment>Indicates that we can&apos;t connect to the Handshake name-resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>ไม่​สามารถ​เชื่อม​ต่อ​กับ Handshake</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="275"/>
       <source>Can&apos;t set up name resolution with Handshake.  Continue waiting, or try a different Name Server setting.</source>
       <extracomment>Detailed message about failure to connect to the Handshake name- resolution network. &quot;Handshake&quot; is a brand name and should be left as-is.</extracomment>
       <translation>ไม่​สามารถ​ตั้ง​ค่า​การ​แก้ไข​ชื่อ​ด้วย Handshake รอ​ต่อ​ไป​หรือ​ลอง​ใช้​การ​ตั้ง​ค่า​เซิร์ฟเวอร์​ใน​ชื่อ​อื่น</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="310"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="289"/>
       <source>Running PIA as administrator is not recommended.</source>
       <translation>ไม่​แนะนำ​ให้​ใช้ PIA ใน​ฐานะ​ผู้​ดูแล​ระบบ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="311"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="290"/>
       <source>Running PIA as administrator can prevent Launch on System Startup from working and may cause other problems.</source>
       <translation>การ​เรียก​ใช้ PIA ใน​ฐานะ​ผู้​ดูแล​ระบบ​สามารถ​ป้องกัน​ไม่​ให้​ฟังก์ชัน​เปิด​ตัว​เมื่อ​เริ่มต้น​ระบบ​ทำงาน​และ​อาจ​ทำให้​เกิด​ปัญหา​อื่นๆ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="323"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="302"/>
       <source>KILLSWITCH ENABLED</source>
       <translation>เปิด​ใช้งาน​ปุ่ม​ตัด​การ​ทำงาน​แล้ว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="324"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="303"/>
       <source>Killswitch is enabled.</source>
       <translation>ปุ่ม​ตัด​การ​ทำงาน​ถูก​เปิด​ใช้งาน​อยู่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="325"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="304"/>
       <source>Access to the Internet is blocked because the killswitch feature is enabled in Settings.</source>
       <translation>การ​เข้าถึง​อินเทอร์เน็ต​ถูก​บล็อก​เนื่อง​จาก​มี​การ​เปิด​ใช้งาน​ปุ่ม​ตัด​การ​ทำงาน​ใน​การ​ตั้ง​ค่า</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="328"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="307"/>
       <source>Change</source>
       <translation>เปลี่ยน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="341"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="320"/>
       <source>RECONNECTING...</source>
       <translation>กำลัง​เชื่อม​ต่อ​ใหม่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="342"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="321"/>
       <source>The connection to the VPN server was lost.</source>
       <translation>การ​เชื่อม​ต่อ​ไป​ยัง​เซิร์ฟเวอร์ VPN สูญหาย</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="351"/>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="369"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="330"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="348"/>
       <source>CONNECTING...</source>
       <translation>กำลัง​เชื่อม​ต่อ...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="354"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="333"/>
       <source>Can&apos;t connect to the proxy.</source>
       <extracomment>Warning message used when the app is currently trying to connect to a proxy, but the proxy can&apos;t be reached.</extracomment>
       <translation>ไม่​สามารถ​เชื่อม​ต่อ​กับ​พร็อกซี</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="355"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="334"/>
       <source>The proxy can&apos;t be reached.  Check your proxy settings, and check that the proxy is available.</source>
       <translation>ไม่​สามารถ​เข้าถึง​พรอก​ซี ตรวจสอบ​การ​ตั้ง​ค่า​พร็อกซี​ของ​คุณ​และ​ตรวจสอบ​ว่า​มี​พร็อกซี​ที่​สามารถ​ใช้งาน​ได้​หรือ​ไม่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="370"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="349"/>
       <source>We couldn&apos;t establish the connection to the VPN server. Please get in touch with our support department.</source>
       <translation>เรา​ไม่​สามารถ​สร้าง​การ​เชื่อม​ต่อ​กับ​เซิร์ฟเวอร์ VPN โปรด​ติดต่อ​ฝ่าย​สนับสนุน​ของ​เรา</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="383"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="362"/>
       <source>RECONNECT NEEDED</source>
       <translation>จำเป็น​ต้อง​เชื่อม​ต่อ​อีก​ครั้ง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="384"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="363"/>
       <source>Reconnect to apply settings.</source>
       <translation>เชื่อม​ต่อ​อีก​ครั้ง​เพื่อ​ปรับ​ใช้​การ​ตั้ง​ค่า</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="385"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="364"/>
       <source>Some settings changes won&apos;t take effect until the next time you connect. Click to reconnect now.</source>
       <translation>การ​เปลี่ยนแปลง​การ​ตั้ง​ค่า​บาง​อย่าง​จะ​ยัง​ไม่​มี​ผล​จน​กว่า​จะ​มี​การ​เชื่อม​ต่อ​อีก​ครั้ง คลิก​เพื่อ​เชื่อม​ต่อ​ใหม่​ตอน​นี้</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="394"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
       <source>Connected with OpenVPN.</source>
       <translation>เชื่อม​ต่อ​กับ OpenVPN</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="397"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="376"/>
       <source>Connected with OpenVPN to log in for the first time. Reconnect to use WireGuard.</source>
       <translation>เชื่อม​ต่อ​กับ OpenVPN เพื่อ​เข้า​สู่​ระบบ​เป็น​ครั้ง​แรก เชื่อม​ต่อ​อีก​ครั้ง​เพื่อ​ใช้ WireGuard</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="399"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="378"/>
       <source>Connected with OpenVPN to log in for the first time.</source>
       <translation>เชื่อม​ต่อ​กับ OpenVPN เพื่อ​เข้า​สู่​ระบบ​เป็น​ครั้ง​แรก</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="418"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="397"/>
       <source>Connected using %1 port %2.</source>
       <extracomment>Message when the client automatically uses a transport other than the user&apos;s chosen transport (because the user&apos;s settings did not work). &quot;Connected&quot; means the client is currently connected right now using this setting. %1 is the protocol used (&quot;UDP&quot; or &quot;TCP&quot;), and %2 is the port number. For example: &quot;UDP port 8080&quot; or &quot;TCP port 443&quot;.</extracomment>
       <translation>เชื่อม​ต่อ​โดย​ใช้ %1 พอร์ต %2</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="427"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="406"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on the default %1 port, so %2 port %3 was used instead.</source>
       <extracomment>Detailed message used when the client automatically uses an alternate transport, and the user has selected the &quot;default&quot; port (the actual value used for the default is not shown, since it could vary among servers). %1 is the chosen protocol (&quot;UDP&quot; or &quot;TCP&quot;), and &quot;%2 port %3&quot; refers to the actual transport used, such as &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;.</extracomment>
       <translation>เปิด​ฟังก์ชั่น​ลอง​ใช้​การ​ตั้ง​ค่า​สำรอง ไม่​สามารถ​ติดต่อ​เซิร์ฟเวอร์​ได้​บน​พอร์ต %1 ซึ่ง​เป็น​ค่า​เริ่มต้น จึง​ใช้​พอร์ต %2 พอร์ต %3 แทน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="435"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="414"/>
       <source>Try Alternate Settings is enabled.  The server could not be reached on %1 port %2, so %3 port %4 was used instead.</source>
       <extracomment>Detailed message when the client automatically uses an alternate transport. &quot;%1 port %2&quot; refers to the chosen transport, and &quot;%3 port %4&quot; refers to the actual transport; for example &quot;TCP port 443&quot; or &quot;UDP port 8080&quot;. The &quot;Try Alternate Settings&quot; setting is on the Connection page.</extracomment>
       <translation>เปิด​ฟังก์ชั่น​ลอง​ใช้​การ​ตั้ง​ค่า​สำรอง ไม่​สามารถ​ติดต่อ​เซิร์ฟเวอร์​ได้​บน %1 พอร์ต %2 จึง​ใช้ %3 พอร์ต %4 แทน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="449"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="428"/>
       <source>Subscription expires in %1 days.</source>
       <translation>สถานะ​สมาชิก​จะ​หมด​อายุ​ใน %1 วัน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="452"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="431"/>
       <source>Renew</source>
       <translation>ต่อ​อายุ​ใหม่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="466"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="445"/>
       <source>Your dedicated IP will expire in %1 days.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire soon. %1 is at least 2; there are specific messages for 1 day or 0 days remaining.</extracomment>
       <translation>IP เฉพาะ​ของ​คุณ​จะ​หมด​อายุ​ใน %1 วัน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="472"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="451"/>
       <source>Your dedicated IP will expire in 1 day.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in 1 day. (Specifically, in 12-36 hours, since the time remaining is rounded to the nearest day.)</extracomment>
       <translation>IP เฉพาะ​ของ​คุณ​จะ​หมด​อายุ​ใน 1 วัน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="477"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="456"/>
       <source>Your dedicated IP will expire today.</source>
       <extracomment>Message displayed when a purchased dedicated IP will expire in less than 12 hours.</extracomment>
       <translation>IP เฉพาะ​ของ​คุณ​จะ​หมด​อายุ​ใน​วัน​นี้</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="482"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="461"/>
       <source>Get a new one</source>
       <translation>รับ IP ใหม่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="494"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="473"/>
       <source>Your dedicated IP was updated.</source>
       <translation>อัปเดต IP เฉพาะ​ของ​คุณ​แล้ว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="489"/>
       <source>Unable to reach login server.</source>
       <extracomment>Dashboard notification for being unable to reach our main API server in order to authenticate the user&apos;s account. The phrase should convey that the problem is network related and that we are merely offline or &quot;out of touch&quot; rather than there being any account problem.</extracomment>
       <translation>ไม่​สามารถ​เข้าถึง​เซิร์ฟเวอร์​การ​เข้า​สู่​ระบบ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="514"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="493"/>
       <source>Your account details are unavailable, but you may still be able to connect to the VPN.</source>
       <extracomment>Infotip to explain to the user that a login authentication failure is not necessarily a critical problem, but that the app will have reduced functionality until this works.</extracomment>
       <translation>รายละเอียด​บัญชี​ของ​คุณ​ไม่​สามารถ​ใช้งาน​ได้ แต่​คุณ​อาจ​ยัง​สามารถ​เชื่อม​ต่อ​กับ VPN ได้</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="518"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="497"/>
       <source>Retry</source>
       <translation>ลอง​อีก​ครั้ง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="531"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="510"/>
       <source>Private Internet Access was updated.</source>
       <translation>อัพเดท Private Internet Access แล้ว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="534"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="513"/>
       <source>See what&apos;s new</source>
       <translation>ดู​ว่า​มี​อะไร​ใหม่</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="551"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="530"/>
       <source>The application quit unexpectedly. Your VPN connection was preserved.</source>
       <extracomment>Indicates that Private Internet Access had previously crashed or otherwise stopped unexpectedly - shown the next time the user starts the app.</extracomment>
       <translation>แอปพลิเคชัน​หยุด​ทำงาน​โดย​ไม่​คาดหมาย การ​เชื่อม​ต่อ VPN ของ​คุณ​ถูก​ระงับ​ไว้</translation>
@@ -791,53 +790,41 @@
       <translation>คำ​เตือน: การ​เข้า​ชม​ของ​คุณ​จะ​ถูก​ส่ง​โดย​ไม่​เข้า​รหัส​และ​มี​ความ​เสี่ยง​ที่​จะ​ถูก​ดักฟัง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="114"/>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="25"/>
-      <source>Local Port</source>
-      <translation>พอร์ต​ใน​เครื่อง</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="126"/>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="37"/>
-      <source>Auto</source>
-      <translation>อัตโนมัติ</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="149"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="132"/>
       <source>Configuration Method</source>
       <translation>วิธีการ​กำหนด​ค่า</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="156"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="139"/>
       <source>DHCP</source>
       <extracomment>&quot;DHCP&quot; refers to Dynamic Host Configuration Protocol, a network configuration technology. This probably is not translated for most languages.</extracomment>
       <translation>DHCP</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="160"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="143"/>
       <source>Static</source>
       <extracomment>&quot;Static&quot; is an alternative to DHCP - instead of using dynamic configuration on the network adapter, it is configured with static addresses.</extracomment>
       <translation>สถิติ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="165"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="148"/>
       <source>Determines how addresses are configured on the TAP adapter.  If you have trouble connecting, a different method may be more reliable.</source>
       <extracomment>Description of the configuration method choices for Windows. This should suggest that the only reason to change this setting is if you have trouble connecting.</extracomment>
       <translation>กำหนด​วิธีการ​กำหนด​ค่า​บน​อะ​แด​ปเตอร์ TAP หาก​คุณ​ประสบ​ปัญหา​การ​เชื่อม​ต่อ วิธีการ​อื่น​อาจ​เชื่อถือ​ได้​มาก​กว่า</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="182"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="165"/>
       <source>Try Alternate Settings</source>
       <translation>ลอง​ใช้​การ​ตั้ง​ค่า​สำรอง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="190"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="173"/>
       <source>If the connection type and remote port above do not work, try other settings automatically.</source>
       <extracomment>Tip for the automatic transport setting. Refers to the &quot;Connection Type&quot; and &quot;Remote Port&quot; settings above on the Connection page.</extracomment>
       <translation>หาก​ประเภท​การ​เชื่อม​ต่อ​และ​พอร์ต​ระยะ​ไกล​ด้าน​บน​ใช้งาน​ไม่​ได้ ให้​ลอง​การ​ตั้ง​ค่า​อื่น​โดย​อัตโนมัติ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="196"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="179"/>
       <source>Alternate settings can&apos;t be used when a proxy is configured.</source>
       <extracomment>Tip used for the automatic transport setting when a proxy is configured - the two settings can&apos;t be used together.</extracomment>
       <translation>ไม่​สามารถ​ใช้​การ​ตั้ง​ค่า​อื่น​ได้​เมื่อ​กำหนด​ค่า​พร็อกซี</translation>
@@ -2077,28 +2064,28 @@
       <translation>การ​เปิด​ใช้งาน​คุณสมบัติ​นี้​จะ​ติดตั้ง​ฟิลเตอร์​การ​แยก​อุโมงค์</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="114"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="123"/>
       <source>The split tunnel filter is not installed.  Reinstall it on the Help page.</source>
       <translation>ไม่​ได้​ติดตั้ง​ฟิลเตอร์​การ​แยก​อุโมงค์ คุณ​สามารถ​ติดตั้ง​ใหม่​ได้​จาก​หน้า​ความ​ช่วยเหลือ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="119"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="128"/>
       <source>Choose which applications use the VPN.</source>
       <translation>เลือก​แอพพลิเคชั่น​ที่​จะ​ใช้ VPN</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="120"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="129"/>
       <source>Learn More</source>
       <translation>เรียนรู้​เพิ่มเติม</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="205"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="210"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="216"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="221"/>
       <source>App Exclusions</source>
       <translation>การ​ยกเว้น​แอป</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="274"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="287"/>
       <source>Apps may need to be restarted for changes to be applied.</source>
       <translation>อาจ​ต้อง​รี​สตาร์ท​แอป​เพื่อ​ให้การ​เปลี่ยนแปลง​มี​ผล</translation>
     </message>
@@ -2899,7 +2886,7 @@
   <context>
     <name>RatingRequestNotificationStatus</name>
     <message>
-      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="373"/>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="352"/>
       <location filename="../../../client/res/components/common/RatingRequestNotificationStatus.qml" line="39"/>
       <source>Contact Support</source>
       <translation>ติดต่อ​ฝ่าย​สนับสนุน</translation>
@@ -3196,23 +3183,28 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="71"/>
-      <source>You may encounter internet connection issues on macOS Monterey when the Split Tunnel feature is turned on. Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-      <translation>คุณ​อาจ​พบ​ปัญหา​การ​เชื่อม​ต่อ​อินเทอร์เน็ต​ใน macOS Monterey เมื่อ​เปิด​คุณสมบัติ​การ​แยก​อุโมงค์ โปรด​ปิด​ใช้งาน​คุณสมบัติ​การ​แยก​อุโมงค์ หาก​คุณ​ประสบ​ปัญหา​ใน​การ​เชื่อม​ต่อ​อินเทอร์เน็ต</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="72"/>
-      <source>Please disable the Split Tunnel feature if you&apos;re having trouble connecting to the internet.</source>
-      <translation>โปรด​ปิด​ใช้งาน​คุณสมบัติ​การ​แยก​อุโมงค์ หาก​คุณ​ประสบ​ปัญหา​ใน​การ​เชื่อม​ต่อ​อินเทอร์เน็ต</translation>
+      <source>The split tunnel feature is available only on macOS 11 (Big Sur) or newer versions. Please update your OS if you want to use this feature</source>
+      <translation>คุณสมบัติ​การ​แยก​อุโมงค์​มี​เฉพาะ​บน macOS 11 (Big Sur) หรือ​เวอร์ชัน​ที่​ใหม่​กว่า​เท่านั้น โปรด​อัปเดต​ระบบ​ปฏิบัติการ​ของ​คุณ​หาก​คุณ​ต้องการ​ใช้​คุณสมบัติ​นี้</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="73"/>
-      <source>macOS Monterey has introduced an issue with Split Tunnel on some systems.  If you can&apos;t reach the internet, disable Split Tunnel.</source>
-      <translation>macOS Monterey ได้​ระบุ​ปัญหา​ด้วย​การ​แยก​อุโมงค์​ใน​บาง​ระบบ หาก​คุณ​ไม่​สามารถ​เชื่อม​ต่อ​อินเทอร์เน็ต​ได้ ให้​ปิด​การ​ใช้งาน​การ​แยก​อุโมงค์</translation>
+      <source>Split Tunnel is not installed.</source>
+      <translation>ไม่​ได้​ติดตั้ง​การ​แยก​อุโมงค์</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="74"/>
-      <source>Disable Split Tunnel</source>
-      <translation>ปิด​การ​ใช้งาน​การ​แยก​อุโมงค์</translation>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="75"/>
+      <source>Go to System Settings -&gt; Privacy &amp; Security, then click &quot;Allow&quot; in the Security section.</source>
+      <translation>ไป​ที่​การ​ตั้ง​ค่า​ระบบ -&gt; ความ​เป็น​ส่วนตัว​และ​ความ​ปลอดภัย จาก​นั้น​คลิก &quot;อนุญาต&quot; ใน​ส่วน​ความ​ปลอดภัย</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="77"/>
+      <source>Allow PIA Proxy Configurations.</source>
+      <translation>อนุญาต​การ​กำหนด​ค่า​พร็อกซี PIA</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="79"/>
+      <source>Split Tunnel is not installed. Go to System Settings -&gt; Privacy &amp; Security, scroll down to Security section and &quot;Allow&quot; PIA. Then click &quot;Allow&quot; on the Proxy Configurations popup</source>
+      <translation>ไม่​ได้​ติดตั้ง​การ​แยก​อุโมงค์ ไป​ที่​การ​ตั้ง​ค่า​ระบบ -&gt; ความ​เป็น​ส่วนตัว​และ​ความ​ปลอดภัย เลื่อน​ลง​ไป​ที่​ส่วน​ความ​ปลอดภัย​และ &quot;อนุญาต&quot; พี​ไอ​เอ จาก​นั้น​คลิก &quot;อนุญาต&quot; บน​ป๊อป​อัป​การ​กำหนด​ค่า​พร็อกซี</translation>
     </message>
   </context>
   <context>
@@ -3430,7 +3422,7 @@
     <name>SplitTunnelAddAppRow</name>
     <message>
       <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAppDialog.qml" line="158"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="242"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="253"/>
       <source>Add Application</source>
       <translation>เพิ่ม​แอปพลิเคชัน</translation>
     </message>
@@ -3449,7 +3441,7 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelAddIpDialog.qml" line="77"/>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="251"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="262"/>
       <source>Add IP Address</source>
       <translation>เพิ่ม​ไอ​พี​แอดเดรส</translation>
     </message>
@@ -3552,7 +3544,7 @@
   <context>
     <name>SplitTunnelPage</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="236"/>
+      <location filename="../../../client/res/components/settings/pages/split-tunnel/SplitTunnelPage.qml" line="247"/>
       <source>Your Split Tunnel Rules</source>
       <translation>กฎ​การ​แยก​อุโมงค์​ของ​คุณ</translation>
     </message>
@@ -3946,64 +3938,64 @@
   <context>
     <name>UpdateNotificationStatus</name>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="75"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="76"/>
       <source>Download of v%1 failed</source>
       <translation>การ​ดาวน์โหลด v%1 ล้มเหลว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="80"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="81"/>
       <source>Ready to install v%1</source>
       <translation>พร้อม​ติดตั้ง v%1 แล้ว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="109"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="110"/>
       <source>Download v%1</source>
       <translation>ดาวน์โหลด v%1</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="111"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="112"/>
       <source>(%2%) Install v%1</source>
       <translation>(%2%) ติดตั้ง v%1</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="114"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="115"/>
       <source>Install v%1</source>
       <translation>ติดตั้ง v%1</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="142"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="143"/>
       <source>Version %1 is available.</source>
       <translation>เวอร์ชัน %1 พร้อม​ใช้งาน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="144"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="145"/>
       <source>Downloading v%1...</source>
       <translation>กำลัง​ดาวน์โหลด v%1...</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="146"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="147"/>
       <source>Ready to install v%1.</source>
       <translation>พร้อม​ติดตั้ง v%1 แล้ว</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="158"/>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="167"/>
       <source>Download</source>
       <translation>ดาวน์โหลด</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="165"/>
-      <source>Install</source>
-      <translation>ติดตั้ง</translation>
-    </message>
-    <message>
-      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="219"/>
-      <source>Version %1 is available</source>
-      <translation>เวอร์ชัน %1 พร้อม​ใช้งาน</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="180"/>
       <source>Changelog</source>
       <translation>บันทึก​การ​เปลี่ยนแปลง</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="190"/>
+      <source>Install</source>
+      <translation>ติดตั้ง</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/UpdateNotificationStatus.qml" line="244"/>
+      <source>Version %1 is available</source>
+      <translation>เวอร์ชัน %1 พร้อม​ใช้งาน</translation>
     </message>
   </context>
   <context>
@@ -4015,17 +4007,17 @@
       <translation>ช่อง​การ​ใช้งาน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="31"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="33"/>
       <source>USAGE</source>
       <translation>การ​ใช้งาน</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="42"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="44"/>
       <source>Download</source>
       <translation>ดาวน์โหลด</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="64"/>
+      <location filename="../../../client/res/components/dashboard/connect/modules/UsageModule.qml" line="66"/>
       <source>Upload</source>
       <translation>อัพโหลด</translation>
     </message>
@@ -4063,44 +4055,44 @@
   <context>
     <name>WireguardConnection</name>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="41"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
       <source>Connection Timeout</source>
       <translation>หมด​เวลา​เชื่อม​ต่อ</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="44"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="26"/>
       <source>30 seconds</source>
       <translation>30 วินาที</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="45"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="27"/>
       <source>1 minute</source>
       <translation>1 นาที</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="46"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="28"/>
       <source>2 minutes</source>
       <translation>2 นาที</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="76"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="58"/>
       <source>Use Kernel Module</source>
       <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
       <translation>ใช้​โมดูล​เคอร์เนล</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="90"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="72"/>
       <source>Install the WireGuard kernel module for the best performance.</source>
       <extracomment>On Linux, the WireGuard kernel module is supported and has better performance than the userspace implementation. https://en.wikipedia.org/wiki/Loadable_kernel_module</extracomment>
       <translation>ติดตั้ง​โมดูล​เคอร์เนล WireGuard เพื่อ​ประสิทธิภาพ​ที่​ดี​ที่สุด</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="97"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="79"/>
       <source>Install</source>
       <translation>ติดตั้ง</translation>
     </message>
     <message>
-      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="130"/>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="112"/>
       <source>For distribution-specific installation instructions, visit:</source>
       <translation>สำหรับ​คำ​แนะนำ​ใน​การ​ติดตั้ง​เฉพาะ​การ​จำหน่าย กรุณา​ไป​ที่:</translation>
     </message>

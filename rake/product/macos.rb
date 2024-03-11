@@ -370,7 +370,7 @@ module PiaMacOS
                 puts "Not signing, build will have to be manually installed"
                 puts "Set PIA_CODESIGN_CERT to enable code signing, and see README.md for more information"
             else
-                codesignArgs = ['codesign']
+                codesignArgs = []
                 # If the build will be notarized, sign with the hardened runtime
                 # (required for notarization).  Don't do this when not notarizing
                 # so a dev build can still be made with a self-signed cert (hardened
@@ -379,13 +379,26 @@ module PiaMacOS
                     codesignArgs << '--options=runtime'
                 end
 
-                # codesign --deep does not find the install helper, probably because
-                # it's in Library/LaunchServices
-                installHelper = File.join(bundle, 'Contents/Library/LaunchServices',
-                                          "#{Build::ProductIdentifier}.installhelper")
-                Util.shellRun *codesignArgs, '--sign', cert, '--verbose', '--force', installHelper
-
-                Util.shellRun *codesignArgs, '--deep', '--sign', cert, '--verbose', '--force', bundle
+                if ENV['PIA_DEV_ST_APP'] != nil
+                    puts "Installing development version of SplitTunnelManager from #{ENV['PIA_DEV_ST_APP']}"
+                    `ditto "#{ENV['PIA_DEV_ST_APP']}" "#{File.join(bundle, 'Contents/MacOS/', File.basename(ENV['PIA_DEV_ST_APP']))}"`
+                else
+                    # Install system extension launched (includes system extension)
+                    Util.shellRun 'unzip', 'deps/built/mac/stmanager.zip', '-d', File.join(bundle, 'Contents/MacOS/')
+                end
+                puts 'Signing bundle files manually'
+                bundleItems = ['Info.plist', 'PkgInfo']
+                bundleItems.each do |filename|
+                    puts "Signing #{filename}"
+                    signSingleFile codesignArgs, cert, File.join(bundle, 'Contents', filename)
+                end
+                bundleDirs = ['Frameworks', 'Library', 'PlugIns', 'Resources', 'MacOS']
+                bundleDirs.each do |subdir|
+                    puts "Signing #{subdir} recursively"
+                    signDirRecursively codesignArgs, cert, File.join(bundle, 'Contents', subdir), ['PIA Split Tunnel.app']
+                end
+                puts 'Signing the bundle itself'
+                signSingleFile [*codesignArgs, '--force'], cert, bundle
             end
         end
 
@@ -424,5 +437,14 @@ module PiaMacOS
         artifacts.install(installerPackage, '')
 
         task :installer => installerPackage
+    end
+
+    def self.signSingleFile(codesignArgs, cert, filepath)
+        Util.shellRun('codesign', *codesignArgs, '--sign', cert, filepath)
+    end
+
+    def self.signDirRecursively(codesignArgs, cert, directory, excludeList)
+        # Since we have a lot of small files, we use find to have xargs run codesign in parallel.
+        `find "#{directory}" -type f -print | grep -v -e #{excludeList.map { |item| "'#{item}'" }.join(' -e ')} | xargs -P 8 -I {} codesign #{codesignArgs.join('" "')} --sign "#{cert}" {}`
     end
 end

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -625,15 +625,7 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
     if(settings.splitTunnelEnabled())
     {
         _otherAppsUseVpn = settings.defaultRoute();
-
-        // On Windows and Linux, _setDefaultRoute follows _otherAppsUseVPN.
-        // On Mac, _setDefaultRoute is always false when split tunnel is enabled
-        // due to the split tunnel device taking the default route.
-#if defined(Q_OS_MAC)
-        _setDefaultRoute = false;
-#else
         _setDefaultRoute = _otherAppsUseVpn;
-#endif
 
         // Do we want to split DNS too?
         // (Not currently available on Mac)
@@ -1358,15 +1350,6 @@ void VPNConnection::doConnect()
     connect(_method, &VPNMethod::error, this, &VPNConnection::raiseError);
 
     QHostAddress localBindAddress = _transportSelector.lastLocalAddress();
-
-#if defined(Q_OS_MAC)
-    // On Mac, if split tunnel is enabled, the split tunnel device gets the
-    // default route, even when not connected.  We need OpenVPN to bind to the
-    // physical interface whenever we're not going to set the default route to
-    // bypass this - even if we're using the preferred transport.
-    if(!_connectingConfig.setDefaultRoute())
-        localBindAddress = QHostAddress{QString::fromStdString(netScan.ipAddress())};
-#endif
 
     try
     {

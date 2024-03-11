@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -22,6 +22,13 @@
 #include <kapps_core/src/fs.h>
 
 namespace kapps { namespace net {
+
+namespace
+{
+    // If we cannot find a table index to use (by looking at the existing rt_tables files)
+    // then fall back to a table index of 100 as a last resort.
+    constexpr int kFallbackIndex{100};
+}
 
 // For convenience
 namespace fs = core::fs;
@@ -52,23 +59,53 @@ bool RtTablesInitializer::install() const
     if(!prepareRtLocation())
         return false;
 
-    // Get the next available routing table index
-    int availableIndex = nextAvailableTableIndex();
-    // No index was found - this should never be the case .
-    // There should always be routing tables in the file - so this
-    // is an error we cannot recover from.
-    if(availableIndex == -1)
-    {
-        KAPPS_CORE_WARNING() << "Could not find a routing table index to use."
-            << _errorEpilogue;
-        return false;
-    }
-
-    // This function cannot fail - the wrost it can do
+    // This function cannot fail - the worst it can do
     // is not append anything (if the tables already exist in the file)
-    appendRoutingTables(availableIndex);
+    appendRoutingTables(nextAvailableIndex());
 
     return true;
+}
+
+int RtTablesInitializer::nextAvailableIndex() const
+{
+    std::vector<std::string> pathsToCheck = {_rtLocations.etcPath};
+    pathsToCheck.insert(pathsToCheck.end(), _rtLocations.fallbackPaths.begin(), _rtLocations.fallbackPaths.end());
+
+    for(const auto& path : pathsToCheck)
+    {
+        if(fs::exists(path))
+        {
+            int availableIndex = nextAvailableTableIndexFromFile(path);
+            if(availableIndex != -1)
+            {
+                KAPPS_CORE_INFO() << qs::format("Found next table index: % (from %)", availableIndex, path);
+                return availableIndex;
+            }
+        }
+    }
+
+    KAPPS_CORE_WARNING() << "Could not find a table index to use, falling back to:" << kFallbackIndex;
+    return kFallbackIndex; // Use kFallbackIndex if no available index is found
+}
+
+int RtTablesInitializer::nextAvailableTableIndexFromFile(const std::string &rtPath) const
+{
+    // Routing tables are formatted like this in rt_tables:
+    // 100  myTable1
+    // 101  myTable2
+    // 99   myTable3
+    // 70   myTable4
+    // 200  myTable5
+    // Note that the index (on the left) is not guaranteed to increment linearly or in order
+    // The awk snippet below finds the highest valued index.
+    // TODO: rewrite this in pure C++
+    std::string highestIndex = core::Exec::bashWithOutput(qs::format("awk '/^[0-9]/{print $1}' \"%\" | sort -n | tail -1", rtPath));
+
+    if(highestIndex.empty())
+        return -1; // Indicate no index was found
+
+    // Add 1 for the next available index
+    return std::stoi(highestIndex) + 1;
 }
 
 void RtTablesInitializer::appendRoutingTables(int availableIndex) const
@@ -84,7 +121,7 @@ void RtTablesInitializer::appendRoutingTables(int availableIndex) const
             rtFile << index << "\t" << tableName << "\n";
             ++index;
 
-            KAPPS_CORE_INFO() << qs::format("Added % routing table to %", tableName, _rtLocations.etcPath);
+            KAPPS_CORE_INFO() << qs::format("Added % routing table to % with index %", tableName, _rtLocations.etcPath, index);
         }
     }
 
@@ -97,26 +134,6 @@ bool RtTablesInitializer::isRoutingTableInstalled(const std::string &tableName) 
     return 0 == core::Exec::bash(qs::format("grep % %", tableName, _rtLocations.etcPath), true);
 }
 
-int RtTablesInitializer::nextAvailableTableIndex() const
-{
-    // Routing tables are formatted like this in rt_tables:
-    // 100  myTable1
-    // 101  myTable2
-    // 99   myTable3
-    // 70   myTable4
-    // 200  myTable5
-    // Note that the index (on the left) is not guaranteed to increment linearly or in order
-    // The awk snippet below finds the highest valued index.
-    // TODO: rewrite this in pure C++
-    std::string highestIndex = core::Exec::bashWithOutput(qs::format("awk '/^[0-9]/{print $1}' \"%\" | sort -n | tail -1", _rtLocations.etcPath));
-
-    if(highestIndex.empty())
-        return -1; // Indicate no index was found
-
-    // Add 1 for the next available index
-    return std::stoi(highestIndex) + 1;
-}
-
 bool RtTablesInitializer::prepareRtLocation() const
 {
     // If the etcPath already exists we're ready to go.
@@ -126,48 +143,22 @@ bool RtTablesInitializer::prepareRtLocation() const
         return true;
     }
 
-    // Since etcPath doesn't exist we have to create it, and possibly its
-    // containing directory.
-    else if(fs::exists(_rtLocations.libPath))
+    // Otherwise, create /etc/iproute2/
+    const auto etcDirName{fs::dirName(_rtLocations.etcPath)};
+    if(!fs::mkDir_p(etcDirName))
     {
-        KAPPS_CORE_INFO() << "Did not find" << _rtLocations.etcPath << "- Looking for"
-            << _rtLocations.libPath;
-
-        const auto etcDirName{fs::dirName(_rtLocations.etcPath)};
-        // This is also successful if the directory already exists.
-        if(!fs::mkDir_p(etcDirName))
-        {
-            KAPPS_CORE_WARNING() << "Could not create the" << etcDirName << "directory"
-                << _errorEpilogue << core::ErrnoTracer{};
-            return false;
-        }
-        // At this point the containing directory should exist
-        // So we copy the rt_tables file from the libPath
-        if(!fs::copyFile(_rtLocations.libPath, _rtLocations.etcPath))
-        {
-            KAPPS_CORE_WARNING() << "Could not copy rt_tables from" << _rtLocations.libPath
-                << "to" << _rtLocations.etcPath << _errorEpilogue;
-            return false;
-        }
-        // Adjust file permissions to match the original rt_tables
-        if(!fs::copyFilePermissions(_rtLocations.libPath, _rtLocations.etcPath))
-        {
-            KAPPS_CORE_WARNING() << "Could not copy permissions from" << _rtLocations.libPath
-                << "to" << _rtLocations.etcPath << "- Will continue" << _errorEpilogue;
-        }
-
-        KAPPS_CORE_INFO() << "Successfully copied" << _rtLocations.libPath
-            << "to" << _rtLocations.etcPath;
-
-        // We succesfully copied the file
-        return true;
-    }
-    else
-    {
-        KAPPS_CORE_WARNING() << "Could not find location of rt_tables!"
-            << _errorEpilogue;
+        KAPPS_CORE_WARNING() << "Could not create the" << etcDirName << "directory"
+            << _errorEpilogue << core::ErrnoTracer{};
+        return false;
     }
 
-    return false;
+    // Finally create the /etc/iproute2/rt_tables file
+    if(!fs::touch(_rtLocations.etcPath, 0644))
+    {
+        KAPPS_CORE_WARNING() << "Unable to create" << _rtLocations.etcPath << _errorEpilogue;
+        return false;
+    }
+
+    return true;
 }
 }}

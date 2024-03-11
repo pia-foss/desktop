@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -58,6 +58,17 @@
 
     return NSTerminateNow;
 }
+
+- (void)systemWillSleep:(NSNotification *)notification {
+    qInfo() << "System will sleep now";
+    g_daemonConnection->post("systemSleep", {});
+}
+
+- (void)systemDidWake:(NSNotification *)notification {
+    qInfo() << "System will wake now";
+    g_daemonConnection->post("systemWake", {});
+}
+
 @end
 
 // The NSApplication.delegate property is a weak property; keep the delegate
@@ -75,4 +86,12 @@ void macAppInit()
     Q_ASSERT(!pApp.delegate);
     pAppDelegate = [PiaMacAppDelegate alloc];
     pApp.delegate = pAppDelegate;
+
+    // Register sleep/wake notifications for the daemon to handle.
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:pAppDelegate
+                                                           selector:@selector(systemWillSleep:)
+                                                               name:NSWorkspaceWillSleepNotification object:nil];
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:pAppDelegate
+                                                           selector:@selector(systemDidWake:)
+                                                               name:NSWorkspaceDidWakeNotification object:nil];
 }

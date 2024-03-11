@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -32,6 +32,19 @@ namespace kapps { namespace core {
 
 namespace fs
 {
+    bool touch(const std::string &path, uint16_t mode)
+    {
+      PosixFd fd{::open(path.c_str(), O_WRONLY | O_CREAT, mode)};
+      if(!fd)
+      {
+          KAPPS_CORE_WARNING() << "fs::touch failed on" << path << "-"
+              << ErrnoTracer{};
+          return false;
+      }
+
+      return true;
+    }
+
     bool exists(const std::string &path)
     {
         struct stat buffer{};

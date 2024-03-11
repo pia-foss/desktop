@@ -1,6 +1,7 @@
 require_relative 'src/piactl.rb'
 require_relative 'src/allowlan.rb'
 require_relative 'src/nethelp.rb'
+require_relative 'src/retry.rb'
 
 describe "Testing that, the Allow LAN option" do
 

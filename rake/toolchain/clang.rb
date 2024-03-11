@@ -315,6 +315,7 @@ class ClangToolchain
             '-pipe',
             '-fvisibility=hidden', # Exports from dynamic libraries are explicitly marked
             '-Wno-unused-parameter',
+            '-Wno-enum-constexpr-conversion',
             '-Wno-dangling-else',
             '-Werror=unused-result',
             '-Werror=return-type',

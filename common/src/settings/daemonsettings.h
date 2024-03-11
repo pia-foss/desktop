@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -216,6 +216,8 @@ public:
 
     // Manual server dev setting - for testing specific servers
     JsonField(ManualServer, manualServer, {})
+
+    JsonField(bool, connectOnWake, false);
 };
 
 

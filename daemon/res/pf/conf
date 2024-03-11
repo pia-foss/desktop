@@ -2,8 +2,6 @@
 # individually turned on or off; they have a numeric prefix in order to
 # produce a well-defined alphabetical order.
 
-nat-anchor "000.natVPN"
-nat-anchor "001.natPhys"
 rdr-anchor "000.stubDNS"
 anchor "000.allowLoopback"
 anchor "100.blockAll"

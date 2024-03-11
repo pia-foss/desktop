@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Private Internet Access, Inc.
+# Copyright (c) 2024 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -233,6 +233,12 @@ function installDependencies() {
         sudo pacman -S --noconfirm libxkbcommon-x11 libnl iptables psmisc
     elif hash zypper 2>/dev/null; then
         sudo zypper install -y libxkbcommon-x11-0 iptables psmisc
+        # Ensure that libnsl.so.1 is available - required by openvpn.
+        # On recent versions of opensuse this is not installed by default.
+        # NOTE: this install will fail on systems that already have libnsl.so.1
+        # but that won't matter as it's already installed.
+        sudo zypper install -y libnsl1 || true
+
     # Check for apt-get last.  Apparently some RPM-based distributions (such as
     # openSUSE) have an RPM port of apt in addition to their preferred package
     # manager.  This check uses Debian package names though that aren't

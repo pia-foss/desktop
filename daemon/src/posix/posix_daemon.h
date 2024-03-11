@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -30,6 +30,7 @@
 
 #if defined(Q_OS_MAC)
 #include "../mac/mac_dns.h"
+#include "../mac/net_extension_checker.h"
 #elif defined(Q_OS_LINUX)
 #include "../linux/linux_modsupport.h"
 #include <kapps_net/src/linux/linux_cn_proc.h>
@@ -91,6 +92,9 @@ private:
 #ifdef Q_OS_MAC
     MacDns _macDnsMonitor;
     // Network scan last used to create bound route (see applyFirewallRules())
+    std::unique_ptr<NetExtensionChecker> _pNetExtensionChecker;
+    StateModel::NetExtensionState getNetExtensionState() const;
+    void monitorNetExtensionInstallation();
 #endif
 
     // The firewall implementation from kapps::net.  Note that unlike WinDaemon,

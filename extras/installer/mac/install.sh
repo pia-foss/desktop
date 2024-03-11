@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Private Internet Access, Inc.
+# Copyright (c) 2024 Private Internet Access, Inc.
 #
 # This file is part of the Private Internet Access Desktop Client.
 #
@@ -47,7 +47,8 @@ readonly ctlExecutableName="{{BRAND_CODE}}ctl"
 readonly ctlExecutablePath="${installDir}/Contents/MacOS/${ctlExecutableName}"
 readonly ctlSymlinkDir="/usr/local/bin"
 readonly ctlSymlinkPath="${ctlSymlinkDir}/${ctlExecutableName}"
-
+readonly splitTunnelManagerName='PIA Split Tunnel'
+readonly splitTunnelManagerPath="${installDir}/Contents/MacOS/${splitTunnelManagerName}.app/Contents/MacOS/${splitTunnelManagerName}"
 readonly daemonExecutable="$brandCode-daemon"
 
 function enableLogging() {
@@ -284,6 +285,15 @@ elif [[ "$1" == "uninstall" ]] ; then ##########################################
         echoPass "Stopped daemon"
     fi
 
+    echoPass "deactivating split tunnel extension"
+    echoPass $("${splitTunnelManagerPath}" proxy status)
+    if "${splitTunnelManagerPath}" sysext deactivate
+    then
+        echoPass "System extension deactivated successfully"
+    else
+        echoFail "System extension failed to deactivate. Will continue uninstalling without removing the system extension"
+    fi
+
     # Remove the piactl symlink, as long as it points to the correct piactl
     # (this is very paranoid since it's in /usr/bin)
     existingSymlinkTarget=$(readlink "${ctlSymlinkPath}" || true)
@@ -482,9 +492,16 @@ else ###########################################################################
 
     # Fix permissions (root owner, group+sgid)
     chown -R root:wheel "$appDir" 2>> "$logFile" || fail "Failed to set app ownership"
-    #chgrp "$groupName" "$appDir/Contents/MacOS/$appName" 2>> "$logFile" || fail "Failed to set group owner on client executable"
-    #chmod g+s "$appDir/Contents/MacOS/$appName" 2>> "$logFile" || fail "Failed to set the sgid bit on client executable"
-    echoPass "Updated permissions"
+    echoPass "Updated app ownership"
+
+    # Unsigned builds don't contain split tunnel manager, skip.
+    if [ -f "${splitTunnelManagerPath}" ]; then
+        # Ensure we give piavpn group ownership
+        chown -R root:${groupName} "${splitTunnelManagerPath}"
+        # For security, remove the user execute bits so only root and piavpn group can run it.
+        chmod 554 "${splitTunnelManagerPath}"
+        echoPass "Updated split tunnel app permissions"
+    fi
 
     # Install daemon
     cat <<EOF > "$launchDaemonPlist" 2>> "$logFile" || fail "Failed to install LaunchDaemon"

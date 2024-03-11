@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -305,6 +305,12 @@ protected:
     void RPC_notifyClientActivate();
     void RPC_notifyClientDeactivate();
 
+    // Sleep-related events for robust macOS sleep
+    // Notify the daemon that the system is about to go to sleep
+    void RPC_systemSleep();
+    // Notify the daemon that the system just woke from sleep
+    void RPC_systemWake();
+
     // Login
     // Request an email login link
     Async<void> RPC_emailLogin(const QString &email);
@@ -432,6 +438,31 @@ private:
     void refreshDedicatedIps();
     void reapplyFirewallRules();
 
+    // Handle system sleep by:
+    // If connected: killswitch `on`, disconnect
+    // If disconnected: just update the state
+    void systemSleep();
+    // Handle system sleep by:
+    // If was connected: connect, killswitch `off`
+    // If was disconnected: just update the state
+    void systemWake();
+    // Call this function in key places where we know the system must be awake.
+    // This is to avoid a potential situation where the system goes to sleep but 
+    // we never receive the wake notification (client crashed for instance?). 
+    // If we never set it back to awake the killswitch would be stuck on, without giving
+    // the user a way to know it.
+    void mustBeAwake();
+    // Check if the system has gone to sleep or just woken up and handle it according to:
+    // * just went to sleep, and VPN was connected -> disconnect.
+    // * just woke up, and VPN was connected before sleep -> connect.
+    // It will only connect/disconnect if the VPN is in a stable state,
+    // i.e. connected before disconnecting, and disconnected before connecting.
+    // This is to make sure the action really resolves, and the VPN is not left in
+    // an invalid state.
+    // 
+    // Will be called whenever the state transitions from sleep to awake and whenever
+    // the VPN connection changes state.
+    void handleSleepWakeTransitions();
 private:
     // Rebuild location preferences from the grouped locations.  Used when
     // settings are changed that affect the location preferences.  (Latency and

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -376,7 +376,7 @@ Item {
           wrapMode: Text.WordWrap
           subtext: {
             if(!isPrerelease) {
-              return "contact support:<br><a href='https://www.privateinternetaccess.com/helpdesk/new-ticket?ticket[subject]=Debug%20log%20reference%20id%3A%20" + referenceId + "'>Support Helpdesk</a>"
+              return `contact support:<br><a href='${ReportHelper.getBrandParam("helpDeskLink")}'>Support Helpdesk</a>`
             } else {
               return "email development:<br><a href='mailto:" + betaEmail
                      + "?subject=Debug log reference id: "

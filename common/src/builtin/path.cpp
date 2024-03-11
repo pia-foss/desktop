@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -90,6 +90,8 @@ Path Path::CliLogFile;
 #ifdef Q_OS_MAC
 Path Path::ClientUpdateDir;
 Path Path::ClientLaunchAgentPlist;
+Path Path::TransparentProxyCliExecutable;
+Path Path::TransparentProxyLogFile;
 #endif
 
 #ifdef Q_OS_LINUX
@@ -225,6 +227,8 @@ void Path::initializePostApp()
 #ifdef Q_OS_MAC
     ClientUpdateDir = ClientDataDir / "update";
     ClientLaunchAgentPlist = Path{QStandardPaths::writableLocation(QStandardPaths::HomeLocation)} / "Library/LaunchAgents/" BRAND_IDENTIFIER ".client.plist";
+    TransparentProxyCliExecutable = InstallationExecutableDir / "PIA Split Tunnel.app/Contents/MacOS/PIA Split Tunnel";
+    TransparentProxyLogFile =  DaemonDataDir / "transparent_proxy.log";
 #endif
 
 #ifdef Q_OS_LINUX

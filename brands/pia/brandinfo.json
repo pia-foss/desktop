@@ -11,7 +11,7 @@
     "manageAccountLink":"https://www.privateinternetaccess.com/pages/client-control-panel#account-settings",
     "buyAccountLink": "https://www.privateinternetaccess.com/pages/buy-vpn/",
     "blogLink":"https://www.privateinternetaccess.com/blog/",
-    "helpDeskLink":"https://www.privateinternetaccess.com/helpdesk/",
+    "helpDeskLink":"https://helpdesk.privateinternetaccess.com/",
     "encryptionSettingsLink":"https://www.privateinternetaccess.com/pages/vpn-encryption",
     "deprecatedOpenVPNSettingsLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/removing-openvpn-handshake-and-authentication-settings",
     "appExclusionsHelpLink":"https://www.privateinternetaccess.com/helpdesk/kb/articles/split-tunnel-app-examples",

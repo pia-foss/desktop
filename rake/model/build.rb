@@ -12,7 +12,7 @@ class Build
     # Captures beta.1-RC1 into groups [beta.1, RC1]
     release_candidate_regex = /(.+)[-\/](.*)/
     # Retrieve the newest parent tag indicating the version.
-    latestTag = `git tag -l --sort=-creatordate`.lines.find { |tag| tag.match(version_regex) }
+    latestTag = `git describe --tags --match='v*.*.*' --abbrev=0 --first-parent`.lines.find { |tag| tag.match(version_regex) }
 
     version_mmp, version_prerelease =
         if version_regex =~ ENV['PIA_OVERRIDE_VERSION'] || version_regex =~ latestTag
@@ -37,7 +37,7 @@ class Build
     # defaults for the host platform if unspecified
     Brand = ENV['BRAND'] || 'pia'
 
-    puts "Building #{Build::Brand} version #{VersionBase}#{"." if !VersionPrerelease.empty?}#{VersionPrerelease}"
+    puts "Building #{Build::Brand} version v#{VersionBase}#{"." if !VersionPrerelease.empty?}#{VersionPrerelease}"
 
     Variant = Util.selectSymbol('VARIANT', :debug, [:release, :debug])
     # Platform can be overridden to select mobile platforms, since mobile builds

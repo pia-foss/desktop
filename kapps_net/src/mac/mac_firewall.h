@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -25,6 +25,7 @@
 #include "pf_firewall.h"
 #include "../originalnetworkscan.h"
 #include "mac_splittunnel.h"
+#include "transparent_proxy.h"
 #include <kapps_core/src/posix/pollthread.h>
 #include <kapps_core/src/util.h>
 #include <kapps_core/src/processrunner.h>
@@ -82,7 +83,6 @@ public:
     void aboutToConnectToVpn() override;
 
     void updateBoundRoute(const FirewallParams &params);
-    std::vector<std::string> natPhysRules(const OriginalNetworkScan &netScan);
     std::vector<std::string> subnetsToBypass(const FirewallParams &params);
     DNSLeakProtectionInfo getDnsLeakProtectionInfo(const FirewallParams &params);
 
@@ -108,6 +108,8 @@ private:
     // Thread used to run the split tunnel implementation asynchronously.
     core::nullable_t<core::PollThread> _pSplitTunnelWorker;
     BoundRouteUpdater _boundRouteUpdater;
+    // Split tunnel implementation based on Apple's transparent proxy APIs
+    core::nullable_t<TransparentProxy> _pTransparentProxy;
 };
 
 }}

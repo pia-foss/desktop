@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -159,12 +159,11 @@ class StateModel : public JsonState<clientjson::json>
 
 public:
     // Installation states for the network extension (WFP callout on
-    // Windows, network kernel extension on Mac).
+    // Windows, system extension on Mac).
     enum class NetExtensionState
     {
         // We couldn't determine the state.  Can happen due to errors (failure
-        // to open the SCM on Windows, etc.) or because there's no way to test
-        // the state (initial state on Mac OS).
+        // to open the SCM on Windows, etc.)
         Unknown,
         // It isn't installed.
         NotInstalled,
@@ -336,6 +335,11 @@ public:
     // that the connection duration would exclude the sleep time.
     JsonProperty(qint64, connectionTimestamp);
 
+    // Set to true when the system goes in sleep mode. 
+    // Set to false when waking up
+    // Note: Only implemented on macOS.
+    JsonProperty(bool, systemSleeping, false);
+
     // These fields all indicate errors/warnings/notification conditions
     // detected by the Daemon that can potentially be displayed in the client.
     // The actual display semantics, including the message localization and
@@ -402,7 +406,7 @@ public:
     // offers to reinstall it, and this is not dismissible.
     JsonProperty(bool, wintunMissing);
     // State of the network extension - the WFP callout on Windows, the
-    // network kernel extension on Mac.  See Daemon::NetExtensionState.
+    // transparent proxy system extension on Mac.  See Daemon::NetExtensionState.
     // This extension is currently used for the split tunnel feature but may
     // have other functionality in the future.
     // This causes the client to try to install the driver before enabling the

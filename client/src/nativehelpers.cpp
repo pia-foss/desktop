@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -307,7 +307,22 @@ void NativeHelpers::quitAndUninstall()
         QCoreApplication::quit();
     }
 #elif defined(Q_OS_MACOS)
-    if (macExecuteUninstaller())
+    // Uninstall Split Tunnel system extension if present.
+    // Here we tolerate some repetition with TransparentProxy class.
+    // Beware updates to the command line syntax.
+    // Run it in a detached process so as not to block the UI
+    // as deactivating can take some time.
+    if(QProcess::startDetached(Path::TransparentProxyCliExecutable, {"sysext", "deactivate"}))
+    {
+        qInfo() << "Attempting to deactivate system extension.";
+    }
+    else
+    {
+        qWarning() << "Failed to start deactivation of system extension";
+    }
+
+
+    if(macExecuteUninstaller())
     {
         qInfo() << "Quit due to uninstall";
         QCoreApplication::quit();
@@ -336,8 +351,10 @@ void NativeHelpers::setDockVisibility(bool enabled)
 bool NativeHelpers::isMacOSSplitTunnelSupported() const
 {
 #if defined(Q_OS_MACOS)
-    // Split tunnel is mostly broken on macOS >= 12 (Monterey)
-    return QOperatingSystemVersion::current().majorVersion() < 12;
+    // Split tunnel is not supported on macOS < 11 (Big Sur),
+    // due to NETransparentProxyProvider limitations:
+    // https://developer.apple.com/documentation/networkextension/netransparentproxyprovider
+    return QOperatingSystemVersion::current().majorVersion() >= 11;
 #else
     // Meaningless return value if the platform isn't macOS
     return true;

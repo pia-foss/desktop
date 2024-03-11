@@ -17,6 +17,7 @@ class PiaCtl
     def self.run_and_wait(args)
         io = self.run(args)
         _pid, status = Process.waitpid2(io.pid)
+        io.close
         status.exitstatus
     end
   
@@ -77,6 +78,7 @@ class PiaCtl
             json_output << line
         end
         settings = JSON.parse(json_output)
+        io.close
         settings[setting]
     end
 

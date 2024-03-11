@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -460,6 +460,8 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(submitRating));
     _methodRegistry->add(RPC_METHOD(inspectUwpApps));
     _methodRegistry->add(RPC_METHOD(checkDriverState));
+    _methodRegistry->add(RPC_METHOD(systemSleep));
+    _methodRegistry->add(RPC_METHOD(systemWake));
     #undef RPC_METHOD
 
     connect(_connection, &VPNConnection::stateChanged, this, &Daemon::vpnStateChanged);
@@ -595,11 +597,21 @@ Daemon::Daemon(QObject* parent)
     connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::splitTunnelRulesChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_settings, &DaemonSettings::routedPacketsOnVPNChanged, this, &Daemon::queueApplyFirewallRules);
+    connect(&_settings, &DaemonSettings::connectOnWakeChanged, this, &Daemon::queueApplyFirewallRules);
     _state.existingDNSServers.changed = [this]{queueApplyFirewallRules();};
+    _state.systemSleeping.changed = [this]{handleSleepWakeTransitions();};
     // 'method' causes a firewall rule application because it can toggle split tunnel
     connect(&_settings, &DaemonSettings::methodChanged, this, &Daemon::queueApplyFirewallRules);
     connect(&_account, &DaemonAccount::loggedInChanged, this, &Daemon::queueApplyFirewallRules);
+
+#ifdef Q_OS_MAC
+    // Our macOS Split tunnel extension does logging itself, so we need to inform it when logging state changes
+    // so it can adjust to reflect our new settings
+    connect(&_settings, &DaemonSettings::debugLoggingChanged, this, &Daemon::queueApplyFirewallRules);
+#endif
+
     connect(_connection, &VPNConnection::stateChanged, this, &Daemon::updatePublicIpRefresher);
+    connect(_connection, &VPNConnection::stateChanged, this, &Daemon::handleSleepWakeTransitions);
     connect(&_settings, &DaemonSettings::updateChannelChanged, this,
             [this]()
             {
@@ -722,6 +734,7 @@ bool Daemon::isActive() const
 
 void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeeded)
 {
+    mustBeAwake(); // If this runs, the system must be awake
     // Filter sensitive settings for logging
     QJsonObject logSettings{settings};
     // Mask proxyCustom.username and proxyCustom.password if they're non-empty.
@@ -870,6 +883,7 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
 
 void Daemon::RPC_resetSettings()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     // Reset the settings by applying all default values.
     // This ensures that any logic that is applied when changing settings takes
     // place (the needs-reconnect and chosen/next location state fields).
@@ -1012,6 +1026,7 @@ void Daemon::RPC_dismissDedicatedIpChange()
 
 void Daemon::RPC_connectVPN()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     Error err = connectVPN(ServiceQuality::ConnectionSource::Manual);
     // If we can't connect now (not logged in or daemon is inactive), forward
     // the error to the client.  The CLI has specific support for these errors.
@@ -1029,6 +1044,7 @@ void Daemon::RPC_connectVPN()
 
 void Daemon::RPC_disconnectVPN()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     // There's no additional logic needed for a manual disconnect.  This can't
     // fail, we don't count these, etc.
     disconnectVPN(ServiceQuality::ConnectionSource::Manual);
@@ -1036,11 +1052,13 @@ void Daemon::RPC_disconnectVPN()
 
 void Daemon::RPC_startSnooze(qint64 seconds)
 {
+    mustBeAwake(); // If this runs, the system must be awake
     _snoozeTimer.startSnooze(seconds);
 }
 
 void Daemon::RPC_stopSnooze()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     _snoozeTimer.stopSnooze();
 }
 
@@ -1323,6 +1341,7 @@ void Daemon::RPC_sendServiceQualityEvents()
 
 void Daemon::RPC_notifyClientActivate()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     ClientConnection *pClient = ClientConnection::getInvokingClient();
 
     if(!pClient)
@@ -1349,6 +1368,7 @@ void Daemon::RPC_notifyClientActivate()
 
 void Daemon::RPC_notifyClientDeactivate()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     ClientConnection *pClient = ClientConnection::getInvokingClient();
 
     if(!pClient)
@@ -1383,6 +1403,7 @@ void Daemon::RPC_notifyClientDeactivate()
 
 Async<void> Daemon::RPC_emailLogin(const QString &email)
 {
+    mustBeAwake(); // If this runs, the system must be awake
     qDebug () << "Requesting email login";
     return _apiClient.postRetry(*_environment.getApiv2(),
                 QStringLiteral("login_link"),
@@ -1420,6 +1441,7 @@ Async<void> Daemon::RPC_setToken(const QString &token)
 
 Async<void> Daemon::RPC_login(const QString& username, const QString& password)
 {
+    mustBeAwake(); // If this runs, the system must be awake
     // If there's already an attempt, abort it before starting another,
     // otherwise they could overwrite each other's results.
     if(_pLoginRequest)
@@ -1497,6 +1519,7 @@ Async<void> Daemon::RPC_retryLogin()
 
 void Daemon::RPC_logout()
 {
+    mustBeAwake(); // If this runs, the system must be awake
     // If we were still trying to log in, abort that attempt, otherwise we might
     // log back in after logging out.  In particular, this could happen if we
     // weren't able to get a token initially, used credential auth to connect,
@@ -1583,6 +1606,90 @@ void Daemon::RPC_checkDriverState()
 {
     // Not implemented; overridden on Windows with implementation
     throw Error{HERE, Error::Code::Unknown};
+}
+
+void Daemon::RPC_systemSleep()
+{
+    qInfo() << "Received system sleep notification";
+    systemSleep();
+}
+
+void Daemon::systemSleep()
+{
+    // Whenever the system goes to sleep while connected we will enable killswitch
+    // to protect from any potential leaks during sleep, disconnect if VPN is connected,
+    // and reconnect it when it wakes.
+    //
+    // We do this mainly as a workaround for a macOS issue where a long sleep would
+    // result in crashes after running out of file descriptors. MacOS wants to wake up
+    // every hour or so during sleep, does a few network checks and goes back to sleep.
+    // During those checks, we detect the VPN connection is dead (makes sense as we've been asleep),
+    // which triggers a reconnect.
+    // It is during these reconnects that we seem to be leaking some resources.
+    // Given it's a very hard bug to track, we aim to fix it by just disconnecting the VPN
+    // before sleep.
+    // It is anyway a good thing to do in general, as it doesn't make sense to be connected
+    // while the system sleeps.
+
+    _state.systemSleeping(true);
+}
+
+void Daemon::RPC_systemWake()
+{
+    qInfo() << "Received system wake notification";
+    systemWake();
+}
+
+void Daemon::systemWake()
+{
+    _state.systemSleeping(false);
+}
+
+void Daemon::mustBeAwake()
+{
+    if(_state.systemSleeping())
+    {
+        qWarning() << "System was thought to be sleeping, but must be awake";
+        systemWake();
+    }
+}
+
+// Connected to systemSleeping and connection state changes.
+void Daemon::handleSleepWakeTransitions()
+{
+    if(_state.systemSleeping())
+    {
+        if(_connection->state() == VPNConnection::State::Connected)
+        {
+            qInfo() << "VPN will disconnect for sleep";
+            _settings.connectOnWake(true);
+            _connection->disconnectVPN();
+        }
+    }
+    else
+    {
+        if(_settings.connectOnWake())
+        {
+            if(_connection->state() == VPNConnection::State::Disconnected)
+            {
+                qInfo() << "Woke from sleep, will reconnect VPN";
+                _settings.connectOnWake(false);
+                _connection->connectVPN(_state.needsReconnect());
+            }
+            else if(_connection->state() == VPNConnection::State::Disconnecting)
+            {
+                qInfo() << "Woke from sleep too quick, will reconnect once disconnected";
+            }
+            else if(_connection->state() == VPNConnection::State::Connected)
+            {
+                // Safeguard. If this ever happens there's an issue with this function's logic or the connections.
+                _settings.connectOnWake(false);
+                qWarning() << "Already connected when waking, will remove connect on wake flag. This should not happen";
+            }
+        }
+        // Else: We are not sleeping and we did not just wake up, do nothing.
+        // This should be the most common case from connection state changes
+    }
 }
 
 void Daemon::start()
@@ -2895,6 +3002,10 @@ void Daemon::reapplyFirewallRules()
         params.leakProtectionEnabled = false;
     else if (_settings.killswitch() == QLatin1String("on"))
         params.leakProtectionEnabled = true;
+    else if (_state.systemSleeping() && _settings.connectOnWake())
+    {
+        params.leakProtectionEnabled = true;
+    }
     else if (_settings.killswitch() == QLatin1String("auto") && _state.vpnEnabled())
         params.leakProtectionEnabled = params.hasConnected;
 

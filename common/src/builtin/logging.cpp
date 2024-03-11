@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -278,6 +278,12 @@ void Logger::configure(bool logToFile, bool largeLogFiles, const QStringList& fi
         {
             d->logFile.close();
             d->logFile.remove();
+#ifdef Q_OS_MAC
+            // Delete macos split tunnel transparent proxy logs file
+            QFile transparentProxyLogFile(Path::TransparentProxyLogFile);
+            transparentProxyLogFile.close();
+            transparentProxyLogFile.remove();
+#endif
             d->logFile.setFileName({});
             d->logSize = 0;
             changed = true;

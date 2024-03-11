@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -29,7 +29,7 @@
 #include <common/src/locations.h>
 
 #if defined(Q_OS_MACOS)
-#include <sys/types.h>
+#include <kapps_core/src/newexec.h>
 #include <sys/sysctl.h>
 #endif
 
@@ -37,7 +37,6 @@
 #include <kapps_net/src/linux/linux_cn_proc.h>
 #include <kapps_net/src/linux/linux_cgroup.h>
 #endif
-
 #include <QFileSystemWatcher>
 #include <QSocketNotifier>
 #include <QVersionNumber>
@@ -49,12 +48,20 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include <kapps_net/src/firewall.h>
 
 #include <QDir>
 
 #define VPN_GROUP BRAND_CODE "vpn"
+
+namespace
+{
+    // Periodic checks of MacOS Network Extension (aka Split Tunnel) Status
+    const std::chrono::seconds netExtensionCheckerShortInterval{1};
+    const std::chrono::seconds netExtensionCheckerLongInterval{30};
+}
 
 void setUidAndGid()
 {
@@ -115,6 +122,8 @@ PosixDaemon::PosixDaemon()
 #elif defined(Q_OS_MACOS)
     config.unboundDnsStubConfigFile = Path::UnboundDnsStubConfigFile;
     config.unboundExecutableFile = Path::UnboundExecutable;
+    config.transparentProxyCliExecutable = Path::TransparentProxyCliExecutable;
+    config.transparentProxyLogFile = Path::TransparentProxyLogFile;
 #endif
 
     KAPPS_CORE_INFO() << "Configuring firewall";
@@ -122,8 +131,15 @@ PosixDaemon::PosixDaemon()
 
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
 
-    // There's no installation required for split tunnel on Mac or Linux (!)
+#if defined(Q_OS_LINUX)
+    // There's no installation required for split tunnel on Linux (!)
     _state.netExtensionState(qEnumToString(StateModel::NetExtensionState::Installed));
+#elif defined(Q_OS_MACOS)
+    // This will create and start the service that will monitor the network
+    // extension installation state. The service is long-lived and will
+    // periodically actively check for the state
+    monitorNetExtensionInstallation();
+#endif
 
 #ifdef Q_OS_LINUX
     //IpTablesFirewall::install();
@@ -187,6 +203,47 @@ PosixDaemon::~PosixDaemon()
     }
 #endif
 }
+
+#ifdef Q_OS_MAC
+StateModel::NetExtensionState PosixDaemon::getNetExtensionState() const
+{
+    if(_state.netExtensionState() == "Installed")
+        return StateModel::NetExtensionState::Installed;
+    else
+        return StateModel::NetExtensionState::NotInstalled;
+}
+
+void PosixDaemon::monitorNetExtensionInstallation()
+{
+    _pNetExtensionChecker = std::make_unique<NetExtensionChecker>(
+        Path::TransparentProxyCliExecutable,
+        netExtensionCheckerShortInterval,
+        netExtensionCheckerLongInterval);
+    // Manually checking once, at startup
+    auto state = _pNetExtensionChecker->checkInstallationState();
+    // Setting the state
+    _state.netExtensionState(qEnumToString(state));
+
+    // Dynamically update installation state based on the signal value
+    connect(_pNetExtensionChecker.get(), &NetExtensionChecker::stateChanged,
+            this, [this](StateModel::NetExtensionState netExtState)
+            {
+                _state.netExtensionState(qEnumToString(netExtState));
+                _pNetExtensionChecker->updateTimer(getNetExtensionState(), _settings.splitTunnelEnabled());
+            });
+
+    // Dynamically adjust timer.
+    // We set the short one if Split Tunnel is enabled and the extension
+    // is not (yet) installed
+    connect(&_settings, &DaemonSettings::splitTunnelEnabledChanged,
+            this, [&]()
+            {
+                _pNetExtensionChecker->updateTimer(getNetExtensionState(), _settings.splitTunnelEnabled());
+            });
+
+    _pNetExtensionChecker->start(getNetExtensionState(), _settings.splitTunnelEnabled());
+}
+#endif
 
 std::shared_ptr<NetworkAdapter> PosixDaemon::getNetworkAdapter()
 {
@@ -394,6 +451,11 @@ void PosixDaemon::applyFirewallRules(kapps::net::FirewallParams params)
         params.vpnOnlyApps.push_back(Path::UnboundExecutable);
     }
 
+#ifdef Q_OS_MAC
+        const auto& daemonDebugLogEnabled = _settings.debugLogging();
+        params.transparentProxyLogEnabled = (daemonDebugLogEnabled != nullptr) ? true : false;
+#endif
+
     if(_pFirewall)
         _pFirewall->applyRules(params);
     else
@@ -536,8 +598,6 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
     file.writeCommand("PF (pfctl -sR)", "pfctl", QStringList{QStringLiteral("-sR")});
     file.writeCommand("PF (NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn")});
     file.writeCommand("PF (App NAT anchors)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/*")});
-    file.writeCommand("PF (000.natVPN)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.natVPN")});
-    file.writeCommand("PF (001.natPhys)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/001.natPhys")});
     file.writeCommand("PF (000.stubDNS)", "pfctl", QStringList{QStringLiteral("-sn"), QStringLiteral("-a"), QStringLiteral(BRAND_IDENTIFIER "/000.stubDNS")});
     file.writeCommand("dig (dig www.pia.com)", "dig", QStringList{QStringLiteral("www.privateinternetaccess.com"),
         QStringLiteral("+time=4"), QStringLiteral("+tries=1")});
@@ -565,6 +625,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
             QStringLiteral("SPMemoryDataType"), QStringLiteral("SPStorageDataType")});
     file.writeCommand("Install log", "cat",
         {QStringLiteral("/Library/Application Support/" BRAND_IDENTIFIER "/install.log")});
+    file.writeCommand("Transparent Proxy Log", "cat", {Path::TransparentProxyLogFile});
 #elif defined(Q_OS_LINUX)
     file.writeCommand("OS Version", "uname", QStringList{QStringLiteral("-a")});
     file.writeText("Overview", diagnosticsOverview());

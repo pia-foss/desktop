@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Private Internet Access, Inc.
+// Copyright (c) 2024 Private Internet Access, Inc.
 //
 // This file is part of the Private Internet Access Desktop Client.
 //
@@ -23,6 +23,7 @@
 #include "win/win_firewall.h"
 #elif defined(KAPPS_CORE_OS_MACOS)
 #include "mac/mac_firewall.h"
+#include "mac/transparent_proxy.h"
 #elif defined(KAPPS_CORE_OS_LINUX)
 #include "linux/linux_firewall.h"
 #endif
@@ -74,7 +75,6 @@ void PlatformFirewall::toggleSplitTunnel(const FirewallParams &params)
     {
         KAPPS_CORE_INFO() << "Starting Split Tunnel";
         startSplitTunnel(params);
-
     }
     // Deactivate if it's supposed to be inactive but is currently active
     else if(!params.enableSplitTunnel && _enableSplitTunnel)
