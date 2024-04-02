@@ -194,6 +194,13 @@ bool PiaClientApplication::event(QEvent *event)
 
 int clientMain(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX
+   // Work-around Wayland bug to force X11 compatibility mode for now
+   // TODO: Remove this in the future when Wayland support is complete
+   qputenv("XDG_SESSION_TYPE", "X11");
+#endif
+
+
     Path::initializePreApp();
 
     // We never use Qt's built-in high-DPI scaling.  On Windows, it has a number

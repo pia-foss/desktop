@@ -73,6 +73,9 @@ const QString &ClientSettings::dashboardFrameDefault()
 ClientSettings::ClientSettings()
     : NativeJsonObject{SaveUnknownProperties}
 {
+    // This isn't really the appropriate place for this trace but it will do for now.
+    KAPPS_CORE_INFO() << "XDG_SESSION_TYPE" << QString{qgetenv("XDG_SESSION_TYPE")};
+    KAPPS_CORE_INFO() << "XDG_CURRENT_DESKTOP" << QString{qgetenv("XDG_CURRENT_DESKTOP")};
 }
 
 ClientState::ClientState()

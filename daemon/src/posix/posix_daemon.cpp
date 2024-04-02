@@ -684,6 +684,7 @@ void PosixDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
                               "cat", QStringList{QStringLiteral("/run/resolvconf/interface/%1").arg(fileName)});
     }
 
+    file.writeCommand("cat rt_tables", "cat", QStringList{"/etc/iproute2/rt_tables"});
     // net_cls cgroup required for split tunnel
     file.writeCommand("ls -l <net_cls>", "ls", QStringList{"-l", Path::ParentVpnExclusionsFile.parent()});
     file.writeText("cat piavpnonly: cgroup.procs", Exec::bashWithOutput("cat " + Path::VpnOnlyFile));

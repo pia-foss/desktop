@@ -459,8 +459,31 @@ void MacNetworks::readConnections()
 
             // Store the interfaceName CFStringRef in a MacString so it's properly managed and released
             MacString interfaceName{connection.networkInterface().toCFString()};
+
+            // This is the prior (possibly deprecated or just bugged approach) to retrieve SSID info about the current Wifi interface
+            // We keep it here in case it's just a bug so we can restore it later if possible
+            // QByteArray ssidName{_dynStore.ssidFromInterface(interfaceName.get()).toUtf8QByteArray()};
+
             // Given the interfaceName, retrieve the associated SSID as a UTF-8 QByteArray
-            QByteArray ssidName{_dynStore.ssidFromInterface(interfaceName.get()).toUtf8QByteArray()};
+            // We're doing this using an unsatisfactory approach (running an external network tool) since Apple have
+            // deprecated all the APIs we've used before and have now even deprecated the DynStore we were using previously
+            // In order to do this the 'Apple way' we need to assign the com.apple.security.personal-information.location entitlement
+            // to the PIA daemon - but this is non trivial and it requires a total app bundle restructuring. So we use these band-aid approaches
+            // until our hand is forced.
+            QByteArray fullOutput = Exec::bashWithOutput(QStringLiteral("networksetup -getairportnetwork %1").arg(connection.networkInterface())).toUtf8();
+            QByteArray ssidName;
+            // Find the last occurrence of ": " and extract everything after it. We can't split on spaces (to get the last 'word')
+            // as SSIDs can have spaces in them.
+            int index = fullOutput.lastIndexOf(": ");
+            if(index != -1)
+            {
+                ssidName = fullOutput.mid(index + 2); // +2 to skip over the ": " itself
+                qInfo() << "Found ssidName using networksetup" << QString{ssidName};
+            }
+            else
+            {
+                qInfo() << "Unable to find the ssidName using networksetup";
+            }
 
             if(!ssidName.isEmpty())
             {

@@ -37,11 +37,13 @@ describe "Connecting to all available regions", :servicecheck=>true do
         it "Can succesfully connect to #{region}", :aggregate_failures do
             PiaCtl.set("region", region)
             PiaCtl.connect
-            region_ip = PiaCtl.get_vpn_ip
+            region_ip = Retriable.run(attempts: 2, delay: 0.1) { PiaCtl.get_vpn_ip }
 
-            expect(NetHelp.pia_connected?).to be_truthy, "#{region} unable to connect to the internet"
+            connected = NetHelp.pia_connected?
+            expect(connected).to be_truthy, "#{region} unable to connect to the internet"
 
-            expect(NetHelp.curl_for_ip).to match(region_ip), "IP from VPN not matching query for IP"
+            external_ip_query = Retriable.run(attempts: 3, delay: 1) { NetHelp.curl_for_ip }
+            expect(external_ip_query).to match(region_ip), "IP from VPN not matching query for IP"
 
             puts "#{region} connected at IP: #{region_ip}"
 

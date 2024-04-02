@@ -110,9 +110,17 @@ class NetHelp
     end
 
     def self.curl_for_ip
-        output, errout, status = Open3.capture3('curl https://api.myip.com')
+        # We want to check the ip against an external source, as otherwise we are essentially comparing our internal status api against itself.
+        # To avoid rate limits and reduce risk of occasional downtime for specific site, pick from a list. 
+        sites = ["https://api.ipify.org?format=json", "https://api.myip.com", "https://ipapi.co/json", "https://jsonip.com/", "https://api.seeip.org/jsonip?", "https://ifconfig.co/json"]
+        output, errout, status = Open3.capture3("curl \"#{sites.sample}\"")
+        if output.include? '"ip"'
+            ip = JSON.parse(output)['ip']
+        else
+            status = 1
+        end
         raise "Could not test connection: #{errout}" if status != 0
-        JSON.parse(output)['ip']
+        ip
     end
 
     class SimpleMessageReceiver

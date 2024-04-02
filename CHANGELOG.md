@@ -1,5 +1,15 @@
 # Changelog
 
+### v3.5.7
+* MacOS: Minor improvements to wake from sleep behavior
+* Linux: Improve Wayland workaround
+* All: Fix client notifications
+
+### v3.5.6
+* MacOS: Fix Wifi SSID detection for Automation (again!)
+* Linux: Implement Workaround for bleeding-edge Wayland issues
+* All: Improve diagnostics
+
 ### v3.5.5
 * MacOS: New Split Tunnel system has arrived!
 * MacOS: Improve PIA's behavior during sleep to fix crashes after long sleeps

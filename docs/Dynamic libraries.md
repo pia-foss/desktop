@@ -23,12 +23,42 @@ ldd (Debian GLIBC 2.28-10+deb10u2) 2.28
 ```
 - Double check that all artifacts have 755 permission.
 
-## Where does the system look for dynamic libraries?
+## Possible ways of loading a library dynamically
 
-On **Linux**:  
+### Linux:
+
+There are two possible ways to load a library dynamically:
+
+- Linking against it at build-time:  
+  This is done during the build process.  
+  Using tools like `patchelf` it is possible to modify the `rpath` without having to rebuild.  
+  The symbols of the library are embedded in the binary, but not the actual code.  
+  When the binary is executed, the dynamic loader `ld.so` will load the library  
+  before the binary starts and it will try to resolve the symbols.  
+  If the symbols do not match, the program will not start.  
+  It is possible to check any library linked in this manner using `ldd` or `readelf`.
+
+- Loading it at run-time:  
+  In this second scenario, no reference whatsoever to the library are present in the binary.  
+  The OS is unaware that the binary will use the library and `ld.so` does nothing when the  
+  program starts.  
+  The program contains some logic that will call `dlopen()` to load the library at run-time.  
+  When the library is actually loaded, depends on the program logic.  
+  `dlsym()` is used to obtain the addresses of the library's functions and variables.  
+  To check which library has been loaded by a binary in this manner, use `sudo pldd $(pgrep binary-name)`
+
+## Where does the system look for dynamic libraries linked at build time?
+
+### Linux:
+
+When a binary is linked to a library at build-time the OS will try to load that library,  
+when the binary is started.
+This is where the OS will start to look for those libraries:
+
 1. rpath  
-   If it has been specified at link-time or afterwards using patchelf.  
-   Check if a rpath has been set using `readelf -d myBinary`
+   This is the first place in which the OS will look for a valid library.  
+   If it finds it, it will load it otherwise it will continue looking.  
+   Check if an rpath has been set using `readelf -d myBinary`
 2. LD_LIBRARY_PATH  
    If the environment variable is defined
 3. The ld cache  
@@ -48,7 +78,8 @@ Instead, it just prepares to make calls into that library.
 
 The behaviour can change depending on which of these two flags is set:  
 - `RTLD_LAZY`:  
-  The first time a particular function (or variable) from the loaded library is referenced using `dlsym()`, the address of that function is looked up (or "resolved").  
+  The first time a particular function (or variable) from the loaded library is referenced using `dlsym()`,  
+  the address of that function is looked up (or "resolved").  
   Subsequent calls to the same function don't need to perform the lookup again.  
   If a function or variable is never referenced, its address is never resolved.
 

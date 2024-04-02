@@ -94,7 +94,9 @@ function startClient() {
     # might (in particular, Terminator does, and it might be the user's
     # preferred terminal emulator for updates / installation)
     pushd "$installDir/bin/" >/dev/null 2>&1
-    nohup "$installDir/bin/${brandCode}-client" --clear-cache >/dev/null 2>&1 &
+    # Force X11 session type to work around Wayland bug
+    # TODO: Remove this workaround after we finish Qt6 upgrade
+    XDG_SESSION_TYPE=X11 nohup "$installDir/bin/${brandCode}-client" --clear-cache >/dev/null 2>&1 &
     popd >/dev/null 2>&1
     true
 }

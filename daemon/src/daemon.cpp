@@ -1268,11 +1268,24 @@ QString Daemon::diagnosticsOverview() const
             return killswitchState;
     };
 
+    // Generate split tunnel app diagnostic string (show the apps in each ST mode)
+    QStringList bypassRules;
+    QStringList vpnOnlyRules;
+    for(const auto &rule : _settings.splitTunnelRules())
+    {
+        if(rule.mode() == "exclude")
+            bypassRules << rule.path();
+        else
+            vpnOnlyRules << rule.path();
+    }
+
     auto commonDiagnostics = [&] {
         auto strings = QStringList {
             QStringLiteral("Connected: %1").arg(boolToString(isConnected)),
             QStringLiteral("Split Tunnel enabled: %1").arg(boolToString(_settings.splitTunnelEnabled())),
             QStringLiteral("Split Tunnel DNS enabled: %1").arg(_settings.splitTunnelEnabled() ? boolToString(_settings.splitTunnelDNS()) : "N/A"),
+            QStringLiteral("Split Tunnel Bypass Apps: %1").arg(!_settings.splitTunnelEnabled() ? "N/A" : bypassRules.isEmpty() ?  "None" : bypassRules.join(", ")),
+            QStringLiteral("Split Tunnel VpnOnly Apps: %1").arg(!_settings.splitTunnelEnabled() ? "N/A" : vpnOnlyRules.isEmpty() ?  "None" : vpnOnlyRules.join(", ")),
             QStringLiteral("VPN has default route: %1").arg(boolToString(_settings.splitTunnelEnabled() ?  _settings.defaultRoute() : true)),
             QStringLiteral("Killswitch: %1").arg(killswitchText(_settings.killswitch())),
             QStringLiteral("Allow LAN: %1").arg(boolToString(_settings.allowLAN())),
@@ -1659,7 +1672,8 @@ void Daemon::handleSleepWakeTransitions()
 {
     if(_state.systemSleeping())
     {
-        if(_connection->state() == VPNConnection::State::Connected)
+        if(_connection->state() == VPNConnection::State::Connected &&
+           _settings.killswitch() != QLatin1String("off"))
         {
             qInfo() << "VPN will disconnect for sleep";
             _settings.connectOnWake(true);

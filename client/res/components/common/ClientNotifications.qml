@@ -636,7 +636,6 @@ Item {
     wintunMissing,
     splitTunnelUninstalled,
     splitTunnelReboot,
-    splitTunnelMonterey,
     vpnMissingIptables,
     authFailure,
     dnsConfigFailed,
