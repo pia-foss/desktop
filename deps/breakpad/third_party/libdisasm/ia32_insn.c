@@ -223,16 +223,16 @@ static void ia32_handle_prefix( x86_insn_t *insn, unsigned int prefixes ) {
 
         /* concat all prefix strings */
         if ( (unsigned int)insn->prefix & PREFIX_LOCK ) {
-                strncat(insn->prefix_string, "lock ", 32 - 
-				strlen(insn->prefix_string));
+                strncat(insn->prefix_string, "lock ", sizeof(insn->prefix_string) - 
+				strlen(insn->prefix_string) - 1);
         }
 
         if ( (unsigned int)insn->prefix & PREFIX_REPNZ ) {
-                strncat(insn->prefix_string, "repnz ", 32  - 
-				strlen(insn->prefix_string));
+                strncat(insn->prefix_string, "repnz ", sizeof(insn->prefix_string) - 
+				strlen(insn->prefix_string) - 1);
         } else if ( (unsigned int)insn->prefix & PREFIX_REPZ ) {
-                strncat(insn->prefix_string, "repz ", 32 - 
-				strlen(insn->prefix_string));
+                strncat(insn->prefix_string, "repz ", sizeof(insn->prefix_string) - 
+				strlen(insn->prefix_string) - 1);
         }
 
         return;
