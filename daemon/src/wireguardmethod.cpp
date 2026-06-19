@@ -44,6 +44,9 @@
     #include "win/wireguardservicebackend.h"
     #include "win/win_interfacemonitor.h"
     #include <common/src/win/win_util.h>
+    #include <netcfgx.h>
+    #include <devguid.h>
+    #pragma comment(lib, "uuid.lib")
 #endif
 
 #if defined(Q_OS_UNIX)
@@ -599,6 +602,215 @@ unsigned WireguardMethod::findMaxMtu(const QHostAddress &host)
     return mtu;
 }
 
+#if defined(Q_OS_WIN)
+// Disable protocol bindings that serve no purpose on a VPN tunnel adapter.
+// Windows inherits all default components when a new adapter is created; only
+// ms_tcpip (IPv4) is needed for tunnel operation. ms_server (SMB) is the most
+// critical to remove -- it silently exposes local file shares to the VPN
+// server's subnet. COM must already be initialized on the calling thread
+// (the daemon main thread does this at startup).
+static void hardenAdapterBindings(quint64 luidValue)
+{
+    static const LPCWSTR kDisable[] = {
+        L"ms_server",   // File and Printer Sharing (SMB) -- exposes shares to VPN subnet
+        L"ms_msclient", // Client for Microsoft Networks
+        L"ms_tcpip6",   // IPv6 -- PIA WireGuard tunnel is IPv4 only
+        L"ms_lldp",     // Link-Layer Discovery Protocol
+        L"ms_lltdio",   // Link Layer Topology Discovery I/O
+        L"ms_rspndr",   // Link Layer Topology Discovery Responder
+        L"ms_pacer",    // QoS Packet Scheduler
+        L"ms_l2bridge", // MAC Bridge
+    };
+
+    // Convert LUID to interface GUID for reliable adapter matching in INetCfg
+    NET_LUID luid;
+    luid.Value = luidValue;
+    GUID ifGuid{};
+    if(ConvertInterfaceLuidToGuid(&luid, &ifGuid) != NO_ERROR)
+    {
+        qWarning() << "hardenAdapterBindings: ConvertInterfaceLuidToGuid failed";
+        return;
+    }
+
+    INetCfg *pNetCfg = nullptr;
+    HRESULT hr = CoCreateInstance(CLSID_CNetCfg, nullptr, CLSCTX_INPROC_SERVER,
+                                  IID_INetCfg, reinterpret_cast<void**>(&pNetCfg));
+    if(FAILED(hr))
+    {
+        qWarning() << "hardenAdapterBindings: CoCreateInstance failed" << "0x" << QString::number(hr, 16);
+        return;
+    }
+
+    INetCfgLock *pLock = nullptr;
+    hr = pNetCfg->QueryInterface(IID_INetCfgLock, reinterpret_cast<void**>(&pLock));
+    if(FAILED(hr))
+    {
+        qWarning() << "hardenAdapterBindings: QI INetCfgLock failed" << "0x" << QString::number(hr, 16);
+        pNetCfg->Release();
+        return;
+    }
+
+    LPWSTR pLockedBy = nullptr;
+    hr = pLock->AcquireWriteLock(5000, L"PIA Daemon", &pLockedBy);
+    // AcquireWriteLock returns S_FALSE (not a FAILED hr) if it times out -- anything but S_OK means no lock
+    if(hr != S_OK)
+    {
+        qWarning() << "hardenAdapterBindings: could not acquire write lock" << "0x" << QString::number(hr, 16)
+            << "- held by" << (pLockedBy ? QString::fromWCharArray(pLockedBy) : QStringLiteral("(unknown)"));
+        CoTaskMemFree(pLockedBy);
+        pLock->Release();
+        pNetCfg->Release();
+        return;
+    }
+    CoTaskMemFree(pLockedBy);
+
+    hr = pNetCfg->Initialize(nullptr);
+    if(FAILED(hr))
+    {
+        qWarning() << "hardenAdapterBindings: Initialize failed" << "0x" << QString::number(hr, 16);
+        pLock->ReleaseWriteLock();
+        pLock->Release();
+        pNetCfg->Release();
+        return;
+    }
+
+    // Find our adapter by matching its instance GUID against the LUID-derived GUID
+    INetCfgComponent *pAdapter = nullptr;
+    {
+        IEnumNetCfgComponent *pEnum = nullptr;
+        hr = pNetCfg->EnumComponents(&GUID_DEVCLASS_NET, &pEnum);
+        if(FAILED(hr))
+            qWarning() << "hardenAdapterBindings: EnumComponents failed" << "0x" << QString::number(hr, 16);
+        else
+        {
+            INetCfgComponent *pComp = nullptr;
+            while(!pAdapter && pEnum->Next(1, &pComp, nullptr) == S_OK)
+            {
+                GUID compGuid{};
+                if(SUCCEEDED(pComp->GetInstanceGuid(&compGuid)) &&
+                   IsEqualGUID(compGuid, ifGuid))
+                    pAdapter = pComp;
+                else
+                    pComp->Release();
+            }
+            pEnum->Release();
+        }
+    }
+
+    if(!pAdapter)
+    {
+        qWarning() << "hardenAdapterBindings: adapter not found in INetCfg";
+        pNetCfg->Uninitialize();
+        pLock->ReleaseWriteLock();
+        pLock->Release();
+        pNetCfg->Release();
+        return;
+    }
+
+    // Enumerate binding paths above the adapter; disable any that are in kDisable
+    bool changed = false;
+    bool inspectionFailed = false;
+    INetCfgComponentBindings *pAdapterBindings = nullptr;
+    if(SUCCEEDED(pAdapter->QueryInterface(IID_INetCfgComponentBindings,
+                                         reinterpret_cast<void**>(&pAdapterBindings))))
+    {
+        IEnumNetCfgBindingPath *pPathEnum = nullptr;
+        hr = pAdapterBindings->EnumBindingPaths(EBP_ABOVE, &pPathEnum);
+        if(FAILED(hr))
+        {
+            qWarning() << "hardenAdapterBindings: EnumBindingPaths failed" << "0x" << QString::number(hr, 16);
+            inspectionFailed = true;
+        }
+        else
+        {
+            INetCfgBindingPath *pPath = nullptr;
+            while(pPathEnum->Next(1, &pPath, nullptr) == S_OK)
+            {
+                // EBP_ABOVE paths enumerate interfaces top-down (protocol first).
+                // The first interface's upper component is the topmost protocol.
+                IEnumNetCfgBindingInterface *pIfEnum = nullptr;
+                if(SUCCEEDED(pPath->EnumBindingInterfaces(&pIfEnum)))
+                {
+                    INetCfgBindingInterface *pIf = nullptr;
+                    if(pIfEnum->Next(1, &pIf, nullptr) == S_OK)
+                    {
+                        INetCfgComponent *pUpper = nullptr;
+                        if(SUCCEEDED(pIf->GetUpperComponent(&pUpper)))
+                        {
+                            LPWSTR pId = nullptr;
+                            if(SUCCEEDED(pUpper->GetId(&pId)) && pId)
+                            {
+                                for(auto target : kDisable)
+                                {
+                                    if(_wcsicmp(pId, target) == 0 &&
+                                       pPath->IsEnabled() == S_OK)
+                                    {
+                                        if(SUCCEEDED(pPath->Enable(FALSE)))
+                                        {
+                                            qInfo() << "Disabled binding"
+                                                << QString::fromWCharArray(pId);
+                                            changed = true;
+                                        }
+                                        else
+                                        {
+                                            qWarning() << "hardenAdapterBindings: Enable(FALSE) failed for"
+                                                << QString::fromWCharArray(pId);
+                                            inspectionFailed = true;
+                                        }
+                                        break;
+                                    }
+                                }
+                                CoTaskMemFree(pId);
+                            }
+                            pUpper->Release();
+                        }
+                        pIf->Release();
+                    }
+                    pIfEnum->Release();
+                }
+                pPath->Release();
+            }
+            pPathEnum->Release();
+        }
+        pAdapterBindings->Release();
+    }
+    else
+    {
+        qWarning() << "hardenAdapterBindings: QI INetCfgComponentBindings failed";
+        inspectionFailed = true;
+    }
+    pAdapter->Release();
+
+    if(changed)
+    {
+        hr = pNetCfg->Apply();
+        if(FAILED(hr))
+        {
+            qWarning() << "hardenAdapterBindings: Apply failed" << "0x" << QString::number(hr, 16);
+            HRESULT cancelHr = pNetCfg->Cancel();
+            if(FAILED(cancelHr))
+                qWarning() << "hardenAdapterBindings: Cancel after Apply failure also failed"
+                    << "0x" << QString::number(cancelHr, 16);
+        }
+        else
+            qInfo() << "Adapter bindings hardened";
+    }
+    else if(inspectionFailed)
+    {
+        qWarning() << "hardenAdapterBindings: inspection incomplete, bindings may not be fully hardened";
+    }
+    else
+    {
+        qInfo() << "Adapter bindings: nothing to change (already hardened)";
+    }
+
+    pNetCfg->Uninitialize();
+    pLock->ReleaseWriteLock();
+    pLock->Release();
+    pNetCfg->Release();
+}
+#endif // Q_OS_WIN
+
 void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthResult &authResult)
 {
     TraceStopwatch stopwatch{"Configuring WireGuard interface"};
@@ -721,6 +933,8 @@ void WireguardMethod::finalizeInterface(const QString &deviceName, const AuthRes
     }
 #elif defined(Q_OS_WIN)
     auto pWinAdapter = std::static_pointer_cast<WinNetworkAdapter>(_pNetworkAdapter);
+
+    hardenAdapterBindings(pWinAdapter->luid());
 
     // MTU
     //
