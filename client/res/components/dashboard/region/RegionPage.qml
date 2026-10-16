@@ -45,6 +45,13 @@ FocusScope {
 
     serviceLocations: Daemon.state.vpnLocations
     portForwardEnabled: Daemon.settings.portForward
+    obfuscationMode: {
+      // The setting only affects WireGuard connections, and Windows ships
+      // vanilla WireGuard-NT, which never uses AmneziaWG
+      if(Qt.platform.os === "windows" || Daemon.settings.method !== "wireguard")
+        return ""
+      return Daemon.settings.wireguardObfuscation ? "on" : "off"
+    }
     canFavorite: true
     collapsedCountriesSettingName: "vpnCollapsedCountries"
     scrollStateGroupName: "dashboard"

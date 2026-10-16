@@ -45,7 +45,8 @@ public:
         auto pServiceGroup = std::make_shared<kapps::regions::ServiceGroup>(
             std::vector<std::uint16_t>{}, false,
             std::vector<std::uint16_t>{}, false,
-            std::vector<std::uint16_t>{1337}, false,
+            std::vector<std::uint16_t>{1337}, std::vector<std::uint16_t>{},
+            false,
             std::vector<std::uint16_t>{}, std::string{}, std::string{},
             std::vector<std::uint16_t>{});
         // Create some mock servers to listen for pings from LatencyTracker
@@ -299,7 +300,8 @@ private slots:
         auto pServiceGroup = std::make_shared<kapps::regions::ServiceGroup>(
             std::vector<std::uint16_t>{}, false,
             std::vector<std::uint16_t>{}, false,
-            std::vector<std::uint16_t>{1337}, false,
+            std::vector<std::uint16_t>{1337}, std::vector<std::uint16_t>{},
+            false,
             std::vector<std::uint16_t>{}, std::string{}, std::string{},
             std::vector<std::uint16_t>{});
 

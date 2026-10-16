@@ -39,6 +39,8 @@ QtObject {
   readonly property bool enableMACE: NativeDaemon.settings.enableMACE
   readonly property int remotePortUDP: NativeDaemon.settings.remotePortUDP
   readonly property int remotePortTCP: NativeDaemon.settings.remotePortTCP
+  readonly property int dipRemotePortUDP: NativeDaemon.settings.dipRemotePortUDP
+  readonly property int dipRemotePortTCP: NativeDaemon.settings.dipRemotePortTCP
   readonly property int mtu: NativeDaemon.settings.mtu
   readonly property string cipher: NativeDaemon.settings.cipher
   readonly property string windowsIpMethod: NativeDaemon.settings.windowsIpMethod
@@ -53,11 +55,13 @@ QtObject {
   readonly property string betaUpdateChannel: NativeDaemon.settings.betaUpdateChannel
   readonly property bool offerBetaUpdates: NativeDaemon.settings.offerBetaUpdates
   readonly property string serviceQualityAcceptanceVersion: NativeDaemon.settings.serviceQualityAcceptanceVersion
+  readonly property bool splitTunnelActivationFailed: NativeDaemon.settings.splitTunnelActivationFailed
   readonly property bool splitTunnelEnabled: NativeDaemon.settings.splitTunnelEnabled
   readonly property bool splitTunnelDNS: NativeDaemon.settings.splitTunnelDNS
   readonly property var splitTunnelRules: NativeDaemon.settings.splitTunnelRules
   readonly property var bypassSubnets: NativeDaemon.settings.bypassSubnets
   readonly property bool wireguardUseKernel: NativeDaemon.settings.wireguardUseKernel
+  readonly property bool wireguardObfuscation: NativeDaemon.settings.wireguardObfuscation
   readonly property int wireguardPingTimeout: NativeDaemon.settings.wireguardPingTimeout
   readonly property bool persistDaemon: NativeDaemon.settings.persistDaemon
   readonly property int sessionCount: NativeDaemon.settings.sessionCount

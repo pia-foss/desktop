@@ -154,7 +154,7 @@ public:
         _dips.push_back({apiSlice("dip-abcd01234"), apiIpv4(2, 3, 4, 5),
             apiSlice("chicago400"), apiSlice(""),
             {_dipServiceGroups.data(), _dipServiceGroups.size()},
-            apiSlice("us_chicago")});
+            apiSlice("us_chicago"), KACPortArray{}, KACPortArray{}});
     }
 
 public:

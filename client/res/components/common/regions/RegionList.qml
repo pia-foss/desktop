@@ -44,6 +44,7 @@ Item {
   property alias regionFilter: regionListView.regionFilter
   property alias serviceLocations: regionListView.serviceLocations
   property alias portForwardEnabled: regionListView.portForwardEnabled
+  property alias obfuscationMode: regionListView.obfuscationMode
   property alias canFavorite: regionListView.canFavorite
   property alias collapsedCountriesSettingName: regionListView.collapsedCountriesSettingName
   property alias scrollStateGroupName: regionListView.scrollStateGroupName

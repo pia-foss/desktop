@@ -145,7 +145,7 @@ module PiaDesktop
         # These are the assets we need to fetch and the URIs we get them from
         {
             'modern_shadowsocks.json': 'https://serverlist.piaservers.net/shadow_socks',
-            'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/v6',
+            'modern_servers.json': 'https://serverlist.piaservers.net/vpninfo/servers/v7',
             'modern_region_meta.json': 'https://serverlist.piaservers.net/vpninfo/regions/v2'
         }.each do |k, v|
             fetchedFile = jsonFetched.artifact(k.to_s)
@@ -189,10 +189,17 @@ module PiaDesktop
                 installName = File.basename(f)
                 # Don't brand pia-wintun.dll - it's a driver artifact, and drivers
                 # aren't supported for rebranding by the brand kit.  This name is
-                # hard-coded in pia-wgservice.exe.
+                # hard-coded in the daemon (win_wintun.cpp) for the OpenVPN
+                # WinTUN driver.
                 installName = installName.gsub('pia', Build::Brand) if installName != 'pia-wintun.dll'
                 stage.install(f, dir, installName)
             end
+        end
+
+        # Install WireGuard-NT DLL from deps/wireguard-nt (Windows only)
+        if Build::windows?
+            wireguardDll = "deps/wireguard-nt/#{Build::TargetArchitecture}/wireguard.dll"
+            stage.install(wireguardDll, :lib, 'wireguard.dll')
         end
 
         # Include platform-specific targets.  These call stage.install() to add

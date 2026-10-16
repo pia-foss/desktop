@@ -22,6 +22,7 @@
 #include <kapps_net/net.h>
 #include "firewallconfig.h"
 #include "firewallparams.h"
+#include <kapps_core/src/coresignal.h>
 #include <kapps_core/src/logger.h>
 #include <functional>
 
@@ -100,6 +101,9 @@ public:
 #if defined(KAPPS_CORE_OS_MACOS)
     // macOS only - see Firewall::aboutToConnectToVpn()
     virtual void aboutToConnectToVpn() = 0;
+
+public:
+    kapps::core::Signal<bool> splitTunnelActivationFailed;
 #endif
 
 public:
@@ -131,6 +135,9 @@ public:
     // firewall rules, so the regular split tunnel machinery is not active when
     // not connected to the VPN.)
     void aboutToConnectToVpn();
+
+public:
+    kapps::core::Signal<bool> macSplitTunnelActivationFailed;
 #endif
 
 protected:

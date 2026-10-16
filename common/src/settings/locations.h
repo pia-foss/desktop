@@ -36,6 +36,7 @@ enum class Service
     // The "meta" service provides access to servers lists and the web API in
     // the modern infrastructure.
     Meta,
+    WireGuardAmnezia,
 };
 
 // The available connection ports are listed and attempted in descending order.
@@ -94,8 +95,11 @@ public:
     kapps::regions::Ports openVpnTcpPorts() const {return _pImpl->openVpnTcpPorts();}
     kapps::regions::Ports openVpnUdpPorts() const {return _pImpl->openVpnUdpPorts();}
     kapps::regions::Ports wireGuardPorts() const {return _pImpl->wireGuardPorts();}
+    kapps::regions::Ports wireGuardAmneziaPorts() const {return _pImpl->wireGuardAmneziaPorts();}
     kapps::regions::Ports shadowsocksPorts() const {return _pImpl->shadowsocksPorts();}
     kapps::regions::Ports metaPorts() const {return _pImpl->metaPorts();}
+
+    bool hasWireGuardAmnezia() const {return !wireGuardAmneziaPorts().empty();}
 
     // Service-specific additional fields
 
@@ -221,6 +225,11 @@ public:
     // Whether this region offers Shadowsocks (this is the only service the
     // UI cares about distinguishing)
     bool hasShadowsocks() const {return _pImpl->hasService(kapps::regions::Service::Shadowsocks);}
+
+    // Whether this region has any AmneziaWG server, and whether it has any
+    // vanilla WireGuard server.  A region can have both, either, or neither.
+    bool hasObfuscatedWireGuard() const;
+    bool hasPlainWireGuard() const;
 
 private:
     // Count the servers that satisfy a predicate

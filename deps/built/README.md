@@ -14,5 +14,5 @@ The following components are included:
 * hnsd (pia-hnsd, no longer shipped since 2.2)
 * Unbound (pia-unbound)
 * Shadowsocks local client (pia-ss-local)
-* WireGuard userspace implementation (Windows - pia-wgservice, Mac/Linux - pia-wireguard-go)
-  * pia-wgservice is based on embeddable-dll-service from the WireGuard project, by Jason A. Donenfeld.
+* WireGuard userspace implementation (Windows - pia-wgservice, Mac/Linux - pia-amneziawg-go)
+  * pia-wgservice is based on embeddable-dll-service from the WireGuard project, by Jason A. Donenfeld; it uses the WireGuard-NT kernel driver (deps/wireguard-nt).

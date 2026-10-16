@@ -251,6 +251,19 @@ Token Lexer::nextToken()
         _currentIndex += NoKeyErrorText.length();
         return {TokenType::NoKeyError, "NoKeyError"};
     }
+    // Ignore non-newline whitespace between lexemes.  This allows multi-token
+    // scalar values and trailing spaces before a newline without getting stuck
+    // on an empty identifier token.
+    else if(_input.at(_currentIndex).isSpace())
+    {
+        while(_currentIndex < _input.length() && _input.at(_currentIndex).isSpace() &&
+              _input.at(_currentIndex) != '\n')
+        {
+            _currentIndex++;
+        }
+
+        return nextToken();
+    }
     // Treat all remaining text as "identifiers", these include dictionary keys, values, and array indices
     else
     {
@@ -359,11 +372,14 @@ QJsonValue Parser::containerValue()
     // Values can be any kind of identifier (not just alphabetic)
     if(_lookahead.type == TokenType::Identifier)
     {
-        // Must store str here as following match will otherwise consume it
-        auto str = _lookahead.text;
-        match(TokenType::Identifier);
+        QStringList parts;
+        do
+        {
+            parts.push_back(_lookahead.text);
+            match(TokenType::Identifier);
+        } while(_lookahead.type == TokenType::Identifier);
 
-        return str;
+        return parts.join(' ');
     }
     else if(_lookahead.type == TokenType::DictionaryOpen)
         return dictionary();

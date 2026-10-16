@@ -137,7 +137,9 @@ std::ostream &operator<<(std::ostream &os, const CmdTrace &trace)
 int Executor::cmdImpl(const std::string &program, const StringVector &args,
                       void(*traceFunc)(std::ostream &, const std::string&, const StringVector&),
                       const StringVector &env, std::string *pOut,
-                      bool ignoreErrors)
+                      bool ignoreErrors,
+                      std::chrono::milliseconds timeout,
+                      std::chrono::milliseconds gracePeriod)
 {
     assert(traceFunc);    // Ensured by caller
 
@@ -147,7 +149,21 @@ int Executor::cmdImpl(const std::string &program, const StringVector &args,
     //if(!env.isEmpty()) p.setProcessEnvironment(env);
 
     StringSink outSink, errSink;
-    p.run(outSink.readyFunc(), errSink.readyFunc());
+    // A negative timeout means "no deadline" - keep the plain run() behaviour
+    // so existing callers are unaffected.
+    bool timedOut = false;
+    if(timeout.count() < 0)
+        p.run(outSink.readyFunc(), errSink.readyFunc());
+    else
+        timedOut = !p.runWithTimeout(outSink.readyFunc(), errSink.readyFunc(), timeout, gracePeriod);
+
+    if(timedOut && !ignoreErrors)
+    {
+        KAPPS_CORE_WARNING_CATEGORY(_category).nospace()
+            << "Process timed out (" << timeout.count() << "ms): "
+            << CmdTrace{program, args, traceFunc};
+    }
+
     int exitCode = p.exitCode();
     auto out = std::move(outSink).data();
     trim(out);
@@ -212,6 +228,14 @@ int Executor::cmd(const std::string &program, const StringVector &args, bool ign
     return cmdWithEnv(program, args, {}, ignoreErrors);
 }
 
+// Execute a specific program with arguments and a timeout
+int Executor::cmdWithTimeout(const std::string &program, const StringVector &args,
+                             std::chrono::milliseconds timeout,
+                             std::chrono::milliseconds gracePeriod, bool ignoreErrors)
+{
+    return cmdImpl(program, args, traceCmd, {}, nullptr, ignoreErrors, timeout, gracePeriod);
+}
+
 // Execute a specific program with arguments and an environment
 int Executor::cmdWithEnv(const std::string &program, const StringVector &args, const StringVector &env, bool ignoreErrors)
 {
@@ -272,6 +296,13 @@ namespace Exec
     int cmd(const std::string &program, const StringVector &args, bool ignoreErrors)
     {
         return defaultExecutor().cmd(program, args, ignoreErrors);
+    }
+
+    int cmdWithTimeout(const std::string &program, const StringVector &args,
+                       std::chrono::milliseconds timeout,
+                       std::chrono::milliseconds gracePeriod, bool ignoreErrors)
+    {
+        return defaultExecutor().cmdWithTimeout(program, args, timeout, gracePeriod, ignoreErrors);
     }
 
     int cmdWithEnv(const std::string &program, const StringVector &args, const StringVector &env, bool ignoreErrors)

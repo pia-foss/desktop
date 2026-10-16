@@ -165,6 +165,9 @@ QtObject {
   function cancelDownloadUpdate() {
     call("cancelDownloadUpdate", arguments);
   }
+  function clearSplitTunnelActivationFailed() {
+    call("clearSplitTunnelActivationFailed", arguments);
+  }
   function submitRating(rating) {
     call("submitRating", arguments);
   }

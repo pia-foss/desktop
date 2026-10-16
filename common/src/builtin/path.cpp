@@ -29,7 +29,7 @@
 
 namespace Files
 {
-    const QString wireguardGoBasename{QStringLiteral(BRAND_CODE "-wireguard-go")};
+    const QString wireguardBasename{QStringLiteral(BRAND_CODE "-amneziawg-go")};
 }
 
 Path Path::InstallationDir;
@@ -62,7 +62,7 @@ Path Path::SsLocalExecutable;
 Path Path::UnboundExecutable;
 Path Path::UnboundConfigFile;
 Path Path::UnboundDnsStubConfigFile;
-Path Path::WireguardGoExecutable;
+Path Path::WireguardExecutable;
 Path Path::WireguardInterfaceFile;
 Path Path::ModernShadowsocksOverride;
 Path Path::ModernRegionOverride;
@@ -73,6 +73,7 @@ Path Path::ModernRegionMetaBundle;
 #ifdef Q_OS_WIN
 Path Path::TapDriverDir;
 Path Path::WfpCalloutDriverDir;
+Path Path::DcoDriverDir;
 Path Path::WireguardServiceExecutable;
 Path Path::WireguardConfigFile;
 #elif defined(Q_OS_MAC)
@@ -259,7 +260,7 @@ void Path::initializePostApp()
     HnsdExecutable = ExecutableDir / BRAND_CODE "-hnsd";
     SsLocalExecutable = ExecutableDir / BRAND_CODE "-ss-local";
     UnboundExecutable = ExecutableDir / BRAND_CODE "-unbound";
-    WireguardGoExecutable = ExecutableDir / Files::wireguardGoBasename;
+    WireguardExecutable = ExecutableDir / Files::wireguardBasename;
 #ifdef Q_OS_LINUX
     SupportToolExecutable = ExecutableDir / "support-tool-launcher";
 #else
@@ -304,6 +305,7 @@ void Path::initializePostApp()
 #ifdef Q_OS_WIN
     TapDriverDir = BaseDir / "tap";
     WfpCalloutDriverDir = BaseDir / "wfp_callout";
+    DcoDriverDir = BaseDir / "dco";
     WireguardServiceExecutable = BaseDir / BRAND_CODE "-wgservice.exe";
     WireguardConfigFile = DaemonDataDir / "wg" BRAND_CODE "0.conf";
 #elif defined(Q_OS_MAC)

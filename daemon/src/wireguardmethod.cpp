@@ -141,6 +141,7 @@ private:
         QHostAddress _serverIp;
         quint16 _serverPort;
         QHostAddress _serverVirtualIp;
+        std::optional<AmneziaObfuscation> _obfuscation;
     };
 
 public:
@@ -154,9 +155,11 @@ private:
     // Delete the PIA Wireguard interface, if it exists
     void deleteInterface();
 
+    // useAmnezia indicates that the server was authenticated as an Amnezia
+    // endpoint, so it must return obfuscation parameters.
     void handleAuthResult(const WireguardKeypair &clientKeypair,
-                          const QJsonDocument &result);
-    AuthResult parseAuthResult(const QJsonDocument &result);
+                          const QJsonDocument &result, bool useAmnezia);
+    AuthResult parseAuthResult(const QJsonDocument &result, bool useAmnezia);
     void createInterface(const WireguardKeypair &clientKeypair,
                          const AuthResult &authResult);
 
@@ -307,7 +310,7 @@ bool WireguardMethod::setupPosixDNS(const QString &deviceName, const QStringList
     env.remove("LD_LIBRARY_PATH");
 
 #ifdef Q_OS_MACOS
-    // kill_pid of 0 instructs helper not to kill wireguard-go when network changes
+    // kill_pid of 0 instructs helper not to kill wireguard when network changes
     env.insert("kill_pid", QString::number(0));
 #endif
     env.insert("dev", deviceName);
@@ -372,9 +375,10 @@ void WireguardMethod::deleteInterface()
 }
 
 void WireguardMethod::handleAuthResult(const WireguardKeypair &clientKeypair,
-                                       const QJsonDocument &result)
+                                       const QJsonDocument &result,
+                                       bool useAmnezia)
 {
-    auto authResult = parseAuthResult(result);
+    auto authResult = parseAuthResult(result, useAmnezia);
 
     auto serverPubkeyTrace = wgKeyToB64(authResult._serverPubkey);
     qInfo().nospace() << "Server address: " << authResult._serverIp << ":"
@@ -387,7 +391,7 @@ void WireguardMethod::handleAuthResult(const WireguardKeypair &clientKeypair,
     createInterface(clientKeypair, authResult);
 }
 
-auto WireguardMethod::parseAuthResult(const QJsonDocument &result)
+auto WireguardMethod::parseAuthResult(const QJsonDocument &result, bool useAmnezia)
     -> AuthResult
 {
     const auto &resultStatus = result[QStringLiteral("status")].toString();
@@ -455,6 +459,68 @@ auto WireguardMethod::parseAuthResult(const QJsonDocument &result)
 
     std::copy(serverPubkey.begin(), serverPubkey.end(), std::begin(authResult._serverPubkey));
 
+    // Parse Amnezia obfuscation parameters if present (AWG servers only).
+    // Vanilla WG servers omit this key; _obfuscation stays nullopt and the
+    // driver runs vanilla WireGuard.
+    const auto obfVal = result[QStringLiteral("obfuscation")];
+    // An AWG endpoint has to provide these - connecting without them would
+    // build a vanilla WireGuard config against a server expecting obfuscation,
+    // which only fails later as a handshake timeout.
+    if(useAmnezia && !obfVal.isObject())
+    {
+        qWarning() << "Amnezia server did not return obfuscation parameters";
+        throw Error{HERE, Error::Code::WireguardAddKeyFailed};
+    }
+    if(obfVal.isObject())
+    {
+        const auto &obf = obfVal.toObject();
+        // Every parameter is required.  A missing one would silently become 0,
+        // which the driver treats as "use the default", i.e. it would connect
+        // as vanilla WireGuard.
+        const auto obfParam = [&obf](const QString &key) -> quint64
+        {
+            const auto value = obf.value(key);
+            bool ok{false};
+            const auto parsed = value.toVariant().toULongLong(&ok);
+            if(!ok)
+            {
+                qWarning() << "Invalid Amnezia obfuscation parameter" << key
+                    << "-" << value;
+                throw Error{HERE, Error::Code::WireguardAddKeyFailed};
+            }
+            return parsed;
+        };
+
+        // The header values replace WireGuard's own message types, which are
+        // 1-4, so the driver only applies them when they are 5 or greater.  A
+        // lower value would be ignored and the tunnel would use vanilla
+        // WireGuard framing against a server expecting obfuscation.
+        const quint64 minHeaderValue{5};
+        const auto obfHeader = [&obfParam, minHeaderValue](const QString &key) -> quint64
+        {
+            const auto parsed = obfParam(key);
+            if(parsed < minHeaderValue)
+            {
+                qWarning() << "Amnezia obfuscation header" << key << "is"
+                    << parsed << "- must be at least" << minHeaderValue;
+                throw Error{HERE, Error::Code::WireguardAddKeyFailed};
+            }
+            return parsed;
+        };
+
+        authResult._obfuscation = AmneziaObfuscation{
+            obfParam(QStringLiteral("s1")),
+            obfParam(QStringLiteral("s2")),
+            obfParam(QStringLiteral("jc")),
+            obfParam(QStringLiteral("jmin")),
+            obfParam(QStringLiteral("jmax")),
+            obfHeader(QStringLiteral("h1")),
+            obfHeader(QStringLiteral("h2")),
+            obfHeader(QStringLiteral("h3")),
+            obfHeader(QStringLiteral("h4"))};
+        qInfo() << "Amnezia obfuscation params received from server";
+    }
+
     return authResult;
 }
 
@@ -503,9 +569,19 @@ void WireguardMethod::createInterface(const WireguardKeypair &clientKeypair,
 
     // Create the backend in order to create the interface
 #if defined(Q_OS_LINUX)
-    // Prefer the kernel backend if it's enabled and available
+    // Prefer the kernel backend if it's enabled and available, but never for
+    // Amnezia - the kernel module cannot apply obfuscation parameters, so
+    // those connections fall through to the userspace backend below.
     if(_connectionConfig.wireguardUseKernel() && g_state.wireguardKernelSupport())
-        _pBackend.reset(new WireguardKernelBackend{});
+    {
+        if(authResult._obfuscation)
+        {
+            qInfo() << "Kernel WireGuard is enabled and available, but this endpoint"
+                       " uses obfuscation - using the userspace go binary instead";
+        }
+        else
+            _pBackend.reset(new WireguardKernelBackend{});
+    }
 #endif
 #if defined(Q_OS_WIN)
     _pBackend.reset(new WireguardServiceBackend{});
@@ -538,7 +614,7 @@ void WireguardMethod::createInterface(const WireguardKeypair &clientKeypair,
 
     // Create the device; this throws if the device can't be created.
     // The backend may modify wgDev, we don't use it after this point.
-    _pBackend->createInterface(wgDev, authResult._peerIpNet)
+    _pBackend->createInterface(wgDev, authResult._obfuscation, authResult._peerIpNet)
         .timeout(createInterfaceTimeout)
         ->notify(this, [this, authResult](const Error &err, const std::shared_ptr<NetworkAdapter> &pDevice)
         {
@@ -1141,7 +1217,10 @@ void WireguardMethod::run(const ConnectionConfig &connectingConfig,
     qInfo() << "Authenticating with server" << authHost
         << "with expected common name" << certCommonName;
 
-    QString resource = QStringLiteral("addKey?pubkey=");
+    const bool useAmnezia = vpnServer.hasWireGuardAmnezia();
+    QString resource = useAmnezia
+        ? QStringLiteral("add-awg-key?pubkey=")
+        : QStringLiteral("addKey?pubkey=");
     resource += QString::fromLatin1(QUrl::toPercentEncoding(clientKeypair.publicKeyStr()));
     QByteArray authHeader;
     // For normal regions, WireGuard only supports token auth; we get vpnToken().
@@ -1163,9 +1242,9 @@ void WireguardMethod::run(const ConnectionConfig &connectingConfig,
     FixedApiBase hostAuthBase{authHost, g_daemon->environment().getRsa4096CA(), certCommonName};
 
     _pAuthRequest = g_daemon->apiClient().getRetry(hostAuthBase, resource, authHeader)
-        ->then(this, [this, clientKeypair=std::move(clientKeypair)](const QJsonDocument &result)
+        ->then(this, [this, clientKeypair=std::move(clientKeypair), useAmnezia](const QJsonDocument &result)
             {
-                handleAuthResult(clientKeypair, result);
+                handleAuthResult(clientKeypair, result, useAmnezia);
             })
         ->except(this, [this](const Error &ex){raiseError(ex);});
 }

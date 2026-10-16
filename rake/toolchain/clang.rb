@@ -31,9 +31,17 @@ class ClangToolchain
         elsif ENV['CLANG_VERSION']
             @clang = "clang-#{ENV['CLANG_VERSION']}"
             @clangpp = "clang++-#{ENV['CLANG_VERSION']}"
-        # Otherwise, find the newest clang available.  This applies to Linux,
-        # macOS, and iOS - note that iOS builds use the host toolchain from
-        # macOS.
+        # On macOS/iOS, always use the Xcode toolchain clang via xcrun.
+        # Homebrew LLVM (e.g. /opt/homebrew/bin/clang) is not compatible with
+        # the macOS SDK (missing TARGET_OS_OSX, incomplete std::views, etc.)
+        elsif Build.xnuKernel?
+            @clang = `xcrun --find clang`.chomp
+            @clangpp = `xcrun --find clang++`.chomp
+            if @clang.empty? || @clangpp.empty?
+                raise "Unable to find Xcode clang via xcrun - is Xcode installed?"
+            end
+        # Otherwise, find the newest clang available.  This applies to Linux -
+        # note that multiple versions of clang might be installed.
         #
         # Searching for clang++ conveniently excludes things like
         # clang-tblgen-<ver>, and we need clang++ anyway.

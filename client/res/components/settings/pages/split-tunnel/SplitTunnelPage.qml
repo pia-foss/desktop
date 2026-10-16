@@ -128,7 +128,12 @@ Page {
             if(Qt.platform.os === 'osx')
             {
                 // Extension is not installed, checkbox has been enabled, the installation process is started
-                if(NativeHelpers.macosVersion15)
+                if(NativeHelpers.macosVersion26OrNewer)
+                {
+                    return SettingsMessages.stMacOS26NotInstalledMessage + " [[" +
+                    uiTranslate("NetworkPage", "Learn More") + "]]"
+                }
+                else if(NativeHelpers.macosVersion15)
                 {
                     return SettingsMessages.stMacOS15NotInstalledMessage + " [[" +
                     uiTranslate("NetworkPage", "Learn More") + "]]"

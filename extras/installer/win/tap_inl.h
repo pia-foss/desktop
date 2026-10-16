@@ -16,46 +16,14 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-#ifndef TAP_INL_H
-#define TAP_INL_H
-
+#pragma once
+// DriverStatus and WinErrorEx are shared by all the driver install tasks, and
+// the callout driver API is declared in callout_inl.h.
+#include "common_inl.h"
+#include "callout_inl.h"
 #include "service_inl.h"
 #include <string>
 #include <Windows.h>
-
-enum DriverStatus
-{
-    DriverUpdated = 10,
-    DriverUpdatedReboot,
-    DriverUpdateNotNeeded,
-    DriverUpdateFailed,
-    DriverUpdateDisallowed,
-    DriverNothingToUpdate,
-
-    DriverInstalled = 20,
-    DriverInstalledReboot,
-    DriverInstallFailed,
-    DriverInstallDisallowed,
-
-    DriverUninstalled = 30,
-    DriverUninstallFailed,
-    DriverNothingToUninstall,
-    DriverUninstalledReboot,
-};
-
-class WinErrorEx
-{
-public:
-    WinErrorEx(DWORD code) : _code{code} {}
-
-public:
-    DWORD code() const {return _code;}
-
-    std::string message() const;
-
-private:
-    DWORD _code;
-};
 
 class WinDriverVersion
 {
@@ -106,10 +74,3 @@ private:
 DriverStatus installTapDriver(LPCWSTR inf, bool alwaysCreateNew, bool forceUpdate, bool nonInteractive = false);
 bool uninstallTapDriverInf();
 DriverStatus uninstallTapDriver(bool removeInf, bool onlyDifferentVersion);
-
-DriverStatus installCalloutDriver(LPCWSTR inf, bool nonInteractive);
-DriverStatus uninstallCalloutDriver(LPCWSTR inf, bool nonInteractive);
-ServiceStatus startCalloutDriver(int timeoutMs);
-ServiceStatus stopCalloutDriver();
-
-#endif

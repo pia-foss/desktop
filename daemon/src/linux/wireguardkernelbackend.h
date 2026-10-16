@@ -44,6 +44,7 @@ public:
 
 public:
     virtual auto createInterface(wg_device &wgDev,
+                                 const std::optional<AmneziaObfuscation> &obfuscation,
                                  const QPair<QHostAddress, int> &peerIpNet)
         -> Async<std::shared_ptr<NetworkAdapter>> override;
     virtual Async<WgDevPtr> getStatus() override;

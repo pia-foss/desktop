@@ -62,8 +62,9 @@
 namespace
 {
     // Periodic checks of MacOS Network Extension (aka Split Tunnel) Status
-    const std::chrono::seconds netExtensionCheckerShortInterval{2};
+    const std::chrono::seconds netExtensionCheckerShortInterval{3};
     const std::chrono::seconds netExtensionCheckerLongInterval{60};
+    const int netExtensionCheckerMaxActivationAttempts{30};
 }
 #endif
 
@@ -142,6 +143,24 @@ PosixDaemon::PosixDaemon()
     KAPPS_CORE_INFO() << "Configuring firewall";
     _pFirewall.emplace(config);
 
+#if defined(Q_OS_MACOS)
+    // Connect to the firewall signal
+    _pFirewall->macSplitTunnelActivationFailed = [this](bool failed)
+        {
+            // This is emitted on the transparent proxy's sync thread, so hop to
+            // the daemon thread before touching settings - the main thread reads
+            // them concurrently.
+            QMetaObject::invokeMethod(this, [this, failed]()
+            {
+                qInfo() << "posix daemon split tunnel activation failed:" << failed;
+
+                // Disable split tunnel and show banner
+                _settings.splitTunnelEnabled(false);
+                _settings.splitTunnelActivationFailed(true);
+            }, Qt::ConnectionType::QueuedConnection);
+        };
+#endif
+
     connect(&_signalHandler, &UnixSignalHandler::signal, this, &PosixDaemon::handleSignal);
 
 #if defined(Q_OS_LINUX)
@@ -203,7 +222,8 @@ void PosixDaemon::setUpMacosSTMonitoring()
     _pNetExtensionChecker = std::make_unique<NetExtensionChecker>(
         Path::TransparentProxyCliExecutable,
         netExtensionCheckerShortInterval,
-        netExtensionCheckerLongInterval);
+        netExtensionCheckerLongInterval,
+        netExtensionCheckerMaxActivationAttempts);
 
     if(_settings.splitTunnelEnabled())
     {
@@ -225,6 +245,10 @@ void PosixDaemon::setUpMacosSTMonitoring()
             {
                 if(_settings.splitTunnelEnabled())
                 {
+                    // Clear the failed activation banner (if present) when the user tries to
+                    // activate again. This also ensures that if the activation fails again, the
+                    // banner reappears.
+                    _settings.splitTunnelActivationFailed(false);
                     const auto NEState = _pNetExtensionChecker->checkInstallationState();
                     _state.netExtensionState(qEnumToString(NEState));
                     _pNetExtensionChecker->start(NEState);
@@ -235,7 +259,7 @@ void PosixDaemon::setUpMacosSTMonitoring()
                 }
             });
 
-    // React to sysext installation state change: adjust timer
+    // React to sysext installation state change: adjust timer or disable split tunnel
     connect(_pNetExtensionChecker.get(), &NetExtensionChecker::stateChanged,
             this, [this](StateModel::NetExtensionState NEState)
             {
@@ -251,7 +275,22 @@ void PosixDaemon::setUpMacosSTMonitoring()
                         // It's better if we disable the feature, since the proxy has been removed anyway.
                         // Users will have to enable the feature again (instead of having to manually disable it first)
                         qInfo() << "MacOS Network Extension has been uninstalled by the user. Disabling Split tunnel";
+                        // Showing a main page banner to give users some feedback on what happened
+                        _settings.splitTunnelActivationFailed(true);
                         _settings.splitTunnelEnabled(false);
+                    }
+                    else if(NEState == StateModel::NetExtensionState::FailedActivation)
+                    {
+                        qInfo() << "The user failed to fully activate the macOS Network Extension. Disabling Split tunnel";
+                        // Showing a main page banner to give users some feedback on what happened
+                        _settings.splitTunnelActivationFailed(true);
+                        _settings.splitTunnelEnabled(false);
+                    }
+                    else if(NEState == StateModel::NetExtensionState::Installed)
+                    {
+                        qInfo() << "The macOS Network Extension is fully activated!";
+                        // Hide the failed activation banner, in case it was showing
+                        _settings.splitTunnelActivationFailed(false);
                     }
                 }
             });

@@ -59,6 +59,7 @@ Item {
   // Configuration properties forwarded from RegionListView
   property var serviceLocations
   property bool portForwardEnabled
+  property string obfuscationMode
   property bool canFavorite
   property string collapsedCountriesSettingName
 
@@ -139,6 +140,12 @@ Item {
       return true // Lacks PF
     }
     pfWarningTipText: hasSubRegions ? regionGroupPfWarning : singleRegionPfWarning
+    // Only individual locations are indicated - a country group isn't, its
+    // subregions are indicated on their own rows
+    obfuscationMismatch: !!regionDelegate.obfuscationMode && !!region &&
+      !locationMatchesObfuscation(region, regionDelegate.obfuscationMode)
+    obfuscationWarningTipText: regionDelegate.obfuscationMode === "off" ?
+      singleRegionNoPlainWarning : singleRegionObfuscationWarning
     offline: region ? region.offline : regionChildren.every(e => e.subregion.offline)
     geoLocation: {
       if(region)
@@ -240,6 +247,10 @@ Item {
         canFavorite: regionDelegate.canFavorite
         favoriteRegionId: subregionKey
         lacksPortForwarding: regionDelegate.portForwardEnabled && !subregion.portForward
+        obfuscationMismatch: !!regionDelegate.obfuscationMode &&
+          !locationMatchesObfuscation(subregion, regionDelegate.obfuscationMode)
+        obfuscationWarningTipText: regionDelegate.obfuscationMode === "off" ?
+          singleRegionNoPlainWarning : singleRegionObfuscationWarning
         geoLocation: subregion.geoLocated
         pfWarningTipText: singleRegionPfWarning
         offline: subregion.offline

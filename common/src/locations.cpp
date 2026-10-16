@@ -95,7 +95,9 @@ auto buildModernLocations(const LatencyMap &latencies,
                         qstrSlice(accountDip.cn()),
                         {}, // FQDN is not used in PIA
                         serviceGroupsSlice(accountDip.serviceGroups()),
-                        qstrSlice(accountDip.regionId())});
+                        qstrSlice(accountDip.regionId()),
+                        accountDip.openvpnUdpPorts(),
+                        accountDip.openvpnTcpPorts()});
     }
 
     std::vector<kapps::regions::ManualRegion> manual;
@@ -229,6 +231,66 @@ void buildGroupedLocations(const LocationsById &locations,
             Q_ASSERT(pSecondNearest);
             return compareEntries(*pFirstNearest, *pSecondNearest);
         });
+}
+
+void buildOpenVpnPortChoices(const LocationsById &locations,
+                             DescendingPortSet &udpPorts,
+                             DescendingPortSet &tcpPorts,
+                             std::vector<quint16> &dipUdpPorts,
+                             std::vector<quint16> &dipTcpPorts)
+{
+    // Append the ports of a service in server order, skipping duplicates
+    auto appendOrderedPorts = [](const Location &location, Service service,
+                                 std::vector<quint16> &ports)
+    {
+        for(const auto &server : location.servers())
+        {
+            for(quint16 port : server.servicePorts(service))
+            {
+                if(std::find(ports.begin(), ports.end(), port) == ports.end())
+                    ports.push_back(port);
+            }
+        }
+    };
+
+    udpPorts.clear();
+    tcpPorts.clear();
+    dipUdpPorts.clear();
+    dipTcpPorts.clear();
+    for(const auto &locationEntry : locations)
+    {
+        Q_ASSERT(locationEntry.second);
+        const Location &location = *locationEntry.second;
+        if(location.isDedicatedIp())
+        {
+            appendOrderedPorts(location, Service::OpenVpnUdp, dipUdpPorts);
+            appendOrderedPorts(location, Service::OpenVpnTcp, dipTcpPorts);
+        }
+        else
+        {
+            location.allPortsForService(Service::OpenVpnUdp, udpPorts);
+            location.allPortsForService(Service::OpenVpnTcp, tcpPorts);
+        }
+    }
+}
+
+quint16 dedicatedIpPortToUse(uint selectedPort, const std::vector<quint16> &dipPorts)
+{
+    if(dipPorts.empty())
+        return 0;
+    if(std::find(dipPorts.begin(), dipPorts.end(), selectedPort) != dipPorts.end())
+        return static_cast<quint16>(selectedPort);
+    return dipPorts.front();
+}
+
+bool dedicatedIpLacksOpenVpn(const DaemonSettings &settings, const Location &location)
+{
+    if(!location.isDedicatedIp() || settings.method() != QStringLiteral("openvpn"))
+        return false;
+
+    const bool useTcp = settings.protocol() == QStringLiteral("tcp") ||
+        (settings.proxyEnabled() && settings.proxyType() == QStringLiteral("shadowsocks"));
+    return !location.hasService(useTcp ? Service::OpenVpnTcp : Service::OpenVpnUdp);
 }
 
 NearestLocations::NearestLocations(const LocationsById &allLocations)

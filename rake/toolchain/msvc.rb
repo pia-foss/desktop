@@ -76,10 +76,13 @@ class MsvcToolchain
     # Note: support for VS 2022 is experimental.
     def locateVisualStudio()
         qtVsVer = @qt.targetQtRoot.match(/msvc([0-9]+)/)[1]
-        vsRoots = [File.join(ENV['ProgramFiles'].gsub('\\', '/'),
-                        'Microsoft Visual Studio', "2022"),
-                   File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'),
-                        'Microsoft Visual Studio', "2019")].sort { |path| path.end_with?(qtVsVer) ? 0 : 1 }
+        # Check both Program Files locations for both VS versions
+        vsRoots = [
+            File.join(ENV['ProgramFiles'].gsub('\\', '/'), 'Microsoft Visual Studio', "2022"),
+            File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'), 'Microsoft Visual Studio', "2022"),
+            File.join(ENV['ProgramFiles'].gsub('\\', '/'), 'Microsoft Visual Studio', "2019"),
+            File.join(ENV['ProgramFiles(x86)'].gsub('\\', '/'), 'Microsoft Visual Studio', "2019"),
+        ].sort { |path| path.end_with?(qtVsVer) ? 0 : 1 }
         vsRoot = vsRoots[0]
         # Keep the first valid VS installation we find
         for root in vsRoots

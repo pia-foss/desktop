@@ -44,6 +44,25 @@ Item {
   readonly property string singleRegionPfWarning: uiTranslate("RegionDelegate", "Port forwarding is not available for this location.")
   readonly property string regionGroupPfWarning: uiTranslate("RegionDelegate", "Port forwarding is not available for this country.")
 
+  //: Shown when obfuscation is turned on but this location has no servers that
+  //: support it, so the location can't be used until obfuscation is turned off.
+  readonly property string singleRegionObfuscationWarning: uiTranslate("RegionDelegate", "Obfuscation is not available for this location.")
+  //: Shown when obfuscation is turned off but this location only has obfuscated
+  //: servers, so the location can't be used until obfuscation is turned on.
+  readonly property string singleRegionNoPlainWarning: uiTranslate("RegionDelegate", "This location only offers obfuscated servers.")
+
+  // Whether a location has servers matching the given obfuscation mode - "on"
+  // needs AmneziaWG servers, "off" needs vanilla WireGuard servers.
+  // 'obfuscationMode' is "" when the setting doesn't apply (any method other
+  // than WireGuard, or Windows, which never uses AmneziaWG).
+  function locationMatchesObfuscation(location, obfuscationMode) {
+    if(obfuscationMode === "on")
+      return location.hasObfuscatedWireGuard
+    if(obfuscationMode === "off")
+      return location.hasPlainWireGuard
+    return true
+  }
+
   // All region rows have a highlightColumn property, which highlights a
   // keyboard cell in the row (the effective cell for the given value, if the
   // region doesn't have that cell).

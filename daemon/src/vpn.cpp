@@ -59,7 +59,8 @@ static std::initializer_list<const char*> g_connectionSettingNames = {
     "remotePortUDP",
     "remotePortTCP",
     "blockIPv6",
-    "windowsIpMethod"
+    "windowsIpMethod",
+    "openvpnUseDco"
 };
 
 namespace
@@ -650,11 +651,16 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
     if(_method == Method::OpenVPN)
     {
         _openvpnCipher = settings.cipher();
+        // Select the Windows virtual network driver.  DCO is the default; the
+        // TAP values differ only in the IP configuration method used.
         if(settings.windowsIpMethod() == QStringLiteral("wintun"))
-            _openvpnUseWintun = true; // WinTUN; IP method does not apply
+            _openvpnWindowsDriver = WindowsDriver::WinTun;
+        else if(settings.windowsIpMethod() == QStringLiteral("dhcp"))
+            _openvpnWindowsDriver = WindowsDriver::TapDhcp;
         else if(settings.windowsIpMethod() == QStringLiteral("static"))
-            _openvpnUseStaticTapConfig = true; // TAP with static method
-        // Otherwise, the default is TAP with the DHCP configuration method
+            _openvpnWindowsDriver = WindowsDriver::TapStatic;
+        else
+            _openvpnWindowsDriver = WindowsDriver::Dco;
         if(settings.protocol() == QStringLiteral("tcp"))
             _openvpnProtocol = Protocol::TCP;
 
@@ -686,10 +692,13 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
         }
 
         // The protocol might have been forced to TCP if Shadowsocks was enabled.
+        // Dedicated IPs have their own port settings, DIP over OpenVPN targets
+        // DIP-specific ports.
+        const bool dedicatedIp = _pVpnLocation && _pVpnLocation->isDedicatedIp();
         if(_openvpnProtocol == Protocol::TCP)
-            _openvpnRemotePort = settings.remotePortTCP();
+            _openvpnRemotePort = dedicatedIp ? settings.dipRemotePortTCP() : settings.remotePortTCP();
         else
-            _openvpnRemotePort = settings.remotePortUDP();
+            _openvpnRemotePort = dedicatedIp ? settings.dipRemotePortUDP() : settings.remotePortUDP();
 
         // Automatic transport - can't be used with a proxy (we could not be
         // confident that a failure to connect is due to a port being
@@ -699,7 +708,16 @@ ConnectionConfig::ConnectionConfig(DaemonSettings &settings, StateModel &state,
     }
     // Capture WireGuard-specific settings
     else if(_method == Method::Wireguard)
+    {
         _wireguardUseKernel = settings.wireguardUseKernel();
+#if defined(Q_OS_WIN)
+        // WireGuard-NT cannot apply Amnezia obfuscation, so it is never used
+        // on Windows regardless of the setting
+        _wireguardObfuscation = false;
+#else
+        _wireguardObfuscation = settings.wireguardObfuscation();
+#endif
+    }
 
     // The port forwarding setting is more complex, because changes are
     // applied on the fly in some cases, but require reconnects in others.
@@ -797,11 +815,11 @@ bool ConnectionConfig::hasChanged(const ConnectionConfig &other) const
         vpnPassword() != other.vpnPassword() ||
         vpnToken() != other.vpnToken() ||
         openvpnCipher() != other.openvpnCipher() ||
-        openvpnUseWintun() != other.openvpnUseWintun() ||
-        openvpnUseStaticTapConfig() != other.openvpnUseStaticTapConfig() ||
+        openvpnWindowsDriver() != other.openvpnWindowsDriver() ||
         openvpnProtocol() != other.openvpnProtocol() ||
         openvpnRemotePort() != other.openvpnRemotePort() ||
         wireguardUseKernel() != other.wireguardUseKernel() ||
+        wireguardObfuscation() != other.wireguardObfuscation() ||
         mtu() != other.mtu() ||
         automaticTransport() != other.automaticTransport() ||
         dnsType() != other.dnsType() ||
@@ -1291,17 +1309,32 @@ void VPNConnection::doConnect()
     if(_connectingConfig.method() == ConnectionConfig::Method::Wireguard)
     {
         const auto location = _connectingConfig.vpnLocation();
-        const auto serverCount{location->countServersForService(Service::WireGuard)};
+        // When obfuscation is enabled, only AmneziaWG servers are eligible;
+        // when disabled, AmneziaWG servers are discarded.  A region without
+        // any server of the chosen kind is handled like any other region
+        // with no servers for the method - the attempt fails and is retried.
+        const bool useObfuscation{_connectingConfig.wireguardObfuscation()};
+        std::vector<const Server*> eligibleServers;
+        for(const auto &server : location->servers())
+        {
+            if(server.hasService(Service::WireGuard) &&
+                server.hasWireGuardAmnezia() == useObfuscation)
+            {
+                eligibleServers.push_back(&server);
+            }
+        }
 
-        if(serverCount != 0)
+        if(!eligibleServers.empty())
         {
             // Attempt to connect to the next server for this location
-            pVpnServer = location->serverWithIndexForService(_connectionAttemptCount % serverCount, Service::WireGuard);
+            pVpnServer = eligibleServers[_connectionAttemptCount % eligibleServers.size()];
         }
         else
         {
             // No servers available
-            qWarning() << "No WireGuard servers are available in this location";
+            qWarning() << (useObfuscation
+                ? "No obfuscated WireGuard servers are available in this location"
+                : "No WireGuard servers are available in this location");
             pVpnServer = nullptr;
         }
     }

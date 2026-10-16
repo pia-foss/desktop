@@ -21,9 +21,11 @@
 #include "../originalnetworkscan.h"
 #include <kapps_net/net.h>
 #include <kapps_core/core.h>
+#include <kapps_core/src/coresignal.h>
 #include <kapps_core/src/util.h>
 #include <kapps_net/src/firewall.h>
 #include <string.h>
+#include <atomic>
 #include <mutex>
 #include <chrono>
 #include <kapps_core/src/posix/pollthread.h>
@@ -90,12 +92,19 @@ private:
     // but the most likely use case is waiting for the user to manually allow.
     // Returns true if the extension is activated when it finishes.
     bool ensureActivateSystemExtension();
-    int proxyCliRun(const std::vector<std::string> &parameters) const;
+    // Wait until the proxy is allowed, this is the second (and final) step of the activation
+    // process.
+    bool ensureAllowedProxy(const std::vector<std::string> &syncArgs);
+    int proxyCliRun(const std::vector<std::string> &parameters,
+                    std::chrono::milliseconds timeout = std::chrono::milliseconds{-1}) const;
     void setState(State newState);
     State getState() const;
     std::string checkSystemExtensionStatus() const;
     std::string checkProxyConnectivity() const;
     void updateVpnBoundRouteIfNecessary();
+
+public:
+    kapps::core::Signal<bool> activationFailed;
 
 private:
     Config _config;
@@ -105,6 +114,14 @@ private:
     mutable std::mutex _mutex;
     core::nullable_t<core::PollThread> _pSyncThread;
     bool _vpnBoundRouteExists;
-    bool _sysExtIsActivated{false};
+    // Read and written only by the current sync thread, but that is a
+    // succession of threads across sync() calls - atomic rather than relying on
+    // emplace() joining the predecessor to order the handover.
+    std::atomic<bool> _sysExtIsActivated{false};
+    // True from the moment a sync is queued until both of its approval waits
+    // (system extension, then proxy configuration) finish.  Set by sync() on
+    // the caller's thread and cleared on the sync thread; sync() uses it to
+    // skip a sync that would otherwise join - and block on - those waits.
+    std::atomic<bool> _waitingForUserApproval{false};
 };
 }

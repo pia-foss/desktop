@@ -70,7 +70,9 @@ function resolvconf_apply() {
   # this is so we can ensure high priority as per /run/resolvconf/interface-order
   # Wireguard interfaces (wg*) do not appear in this file and
   # would have lowest priority (if we had used ${dev}.openvpn) meaning our chosen DNS might not be set at all
-  echo $final_dns_servers | resolvconf -a "tun0.{{BRAND_CODE}}" || dns_error "Failed to reconfigure using resolvconf"
+  # NOTE: we enclose the $final_dns_servers in quotes to preserve the newline separator between each "nameserver xxx" line.
+  # Without the quotes it converts the newlines to spaces, which can break resolvconf behaviour
+  echo "$final_dns_servers" | resolvconf -a "tun0.{{BRAND_CODE}}" || dns_error "Failed to reconfigure using resolvconf"
 }
 
 [ -n "$script_type" ] || dns_error "Missing script_type env var"

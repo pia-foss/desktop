@@ -102,7 +102,14 @@ MovableModule {
           return Daemon.state.actualTransport.port.toString()
         // Otherwise, show the setting value
         var port = 0
-        if(Daemon.settings.protocol === "udp")
+        var nextLocation = Daemon.state.vpnLocations.nextLocation
+        // When the next connection goes to a dedicated IP, show the DIP port
+        // the daemon will use instead of the regular port setting.
+        if(nextLocation && nextLocation.dedicatedIp) {
+          port = Daemon.settings.protocol === "udp" ?
+            Daemon.state.dedicatedIpOpenvpnUdpPort : Daemon.state.dedicatedIpOpenvpnTcpPort
+        }
+        else if(Daemon.settings.protocol === "udp")
           port = Daemon.settings.remotePortUDP
         else
           port = Daemon.settings.remotePortTCP

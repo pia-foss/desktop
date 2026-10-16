@@ -284,6 +284,16 @@ public:
         TCP,
     };
     Q_ENUM(Protocol);
+    // The Windows virtual network driver to use for OpenVPN.  The two TAP
+    // values select the same driver with different IP configuration methods.
+    enum class WindowsDriver
+    {
+        Dco,
+        WinTun,
+        TapDhcp,
+        TapStatic,
+    };
+    Q_ENUM(WindowsDriver);
     enum class DnsType
     {
         Pia,
@@ -364,11 +374,11 @@ public:
 
     // Settings for OpenVPN; only captured when method is OpenVPN
     QString openvpnCipher() const {return _openvpnCipher;}
-    // Use WinTUN instead of TAP
-    bool openvpnUseWintun() const {return _openvpnUseWintun;}
-    // Use the static configuration method for TAP instead of the default DHCP
-    // method
-    bool openvpnUseStaticTapConfig() const {return _openvpnUseStaticTapConfig;}
+    // The Windows virtual network driver selected by the windowsIpMethod
+    // setting.  Note that Dco is a preference, not a guarantee - DCO only
+    // supports UDP and can't do compression stub framing, so OpenVPNMethod
+    // falls back to WinTUN when it can't carry the connection.
+    WindowsDriver openvpnWindowsDriver() const {return _openvpnWindowsDriver;}
     // Preferred protocol and port (collectively "transport") for OpenVPN.  Note
     // that the actual transport can differ if "Try Alternate Settings" is
     // enabled and this transport isn't reachable.
@@ -378,6 +388,11 @@ public:
 
     // For the WireGuard method only, whether to use kernel support if available
     bool wireguardUseKernel() const {return _wireguardUseKernel;}
+
+    // For the WireGuard method only, whether to obfuscate the connection with
+    // Amnezia.  Only servers matching this setting are used.  Always false on
+    // Windows, which ships vanilla WireGuard-NT.
+    bool wireguardObfuscation() const {return _wireguardObfuscation;}
 
     int mtu() const {return _mtu;}
 
@@ -468,10 +483,11 @@ private:
     bool _vpnLocationAuto{false};
     QString _vpnUsername, _vpnPassword, _vpnToken;
     QString _openvpnCipher;
-    bool _openvpnUseWintun{false}, _openvpnUseStaticTapConfig{false};
+    WindowsDriver _openvpnWindowsDriver{WindowsDriver::Dco};
     Protocol _openvpnProtocol{Protocol::UDP};
     quint16 _openvpnRemotePort{};
     bool _wireguardUseKernel{false};
+    bool _wireguardObfuscation{false};
     int _mtu{-1};
     bool _automaticTransport{false};
 

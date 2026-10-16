@@ -169,6 +169,10 @@ public:
         NotInstalled,
         // It is installed.
         Installed,
+        // This could happen in two cases:
+        // - the user not allowing the proxy on the first setup
+        // - the user removing the proxy (or the sysext) using system settings
+        FailedActivation,
     };
     Q_ENUM(NetExtensionState)
 
@@ -315,8 +319,29 @@ public:
     //
     // This is just used to define the choices presented in the "Remote Port"
     // drop-down.
+    //
+    // Dedicated IP ports are not included, they are in the
+    // dedicatedIpOpenvpn*PortChoices below.
     JsonProperty(DescendingPortSet, openvpnUdpPortChoices);
     JsonProperty(DescendingPortSet, openvpnTcpPortChoices);
+
+    // All supported ports for the OpenVpnUdp and OpenVpnTcp services among the
+    // dedicated IP regions.  DIP over OpenVPN targets DIP-specific ports, so
+    // these are the choices for the dedicated IP remote port settings
+    // (DaemonSettings::dipRemotePortUDP/TCP).
+    //
+    // These keep the order from the DIP API; the first port is used when the
+    // DIP port setting is 0 or is a port the DIP doesn't offer.
+    JsonProperty(std::vector<quint16>, dedicatedIpOpenvpnUdpPortChoices);
+    JsonProperty(std::vector<quint16>, dedicatedIpOpenvpnTcpPortChoices);
+
+    // The OpenVPN UDP/TCP ports used for a dedicated IP connection, computed by
+    // dedicatedIpPortToUse() from DaemonSettings::dipRemotePortUDP/TCP and the
+    // choices above.  0 if no DIP offers that service.  Only the user changes
+    // the settings, so if the selected port stops being offered and is offered
+    // again later, it is used again.
+    JsonProperty(quint16, dedicatedIpOpenvpnUdpPort);
+    JsonProperty(quint16, dedicatedIpOpenvpnTcpPort);
 
     // Per-interval bandwidth measurements while connected to the VPN.  Only a
     // limited number of intervals are kept (new values past the limit will bump
@@ -403,12 +428,15 @@ public:
     // set), being downloaded (when updateDownloadProgress is set), or that
     // failed (when updateDownloadFailure is set)
     JsonProperty(QString, updateVersion);
-    // The TAP adapter is missing on Windows (the client offers to reinstall it)
-    // Not dismissible, so this is just a boolean flag.
+    // The TAP adapter is missing on Windows.  The client offers to reinstall
+    // it, and this is not dismissible.
     JsonProperty(bool, tapAdapterMissing);
-    // The WinTUN driver is missing on Windows.  Like the TAP error, the client
-    // offers to reinstall it, and this is not dismissible.
+    // The WinTUN driver is missing on Windows.  The client offers to
+    // reinstall it, and this is not dismissible.
     JsonProperty(bool, wintunMissing);
+    // The DCO driver is missing on Windows.  This is not fatal - OpenVPN
+    // falls back to WinTUN - so the client's notification is dismissible.
+    JsonProperty(bool, dcoAdapterMissing);
     // State of the network extension - the WFP callout on Windows, the
     // transparent proxy system extension on Mac.  See Daemon::NetExtensionState.
     // This extension is currently used for the split tunnel feature but may

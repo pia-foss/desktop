@@ -28,16 +28,21 @@
 #include "../networkmonitor.h"
 #include "win.h"
 #include "brand.h"
-#include <common/src/exec.h>
-#include "../../../extras/installer/win/tap_inl.h"
+#include "../../../extras/installer/win/callout_inl.h"
+#include "../../../extras/installer/win/dco_inl.h" // DCO_DEVICE_NAME
 #include "../../../extras/installer/win/util_inl.h" // getSystemTempPath()
 #include <QDir>
+#include <Netioapi.h> // ConvertInterfaceGuidToLuid
+#include <SetupAPI.h>
+#include <devguid.h> // GUID_DEVCLASS_NET
+#include <string>
+#include <vector>
 
-#include <Msi.h>
-#include <MsiQuery.h>
 #include <WinDNS.h>
 
-#pragma comment(lib, "Msi.lib")
+#pragma comment(lib, "Setupapi.lib")
+#pragma comment(lib, "Iphlpapi.lib")
+#pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Dnsapi.lib")
 
 #include <TlHelp32.h>
@@ -235,6 +240,137 @@ WinDaemon::~WinDaemon()
     qInfo() << "WinDaemon shutdown complete";
 }
 
+static bool getDeviceRegPropString(HDEVINFO hdi, SP_DEVINFO_DATA &did, DWORD prop,
+                                   std::wstring &out)
+{
+    DWORD dataType = 0, needed = 0;
+    SetupDiGetDeviceRegistryPropertyW(hdi, &did, prop, &dataType, nullptr, 0, &needed);
+    if(GetLastError() != ERROR_INSUFFICIENT_BUFFER || needed == 0)
+    {
+        return false;
+    }
+
+    std::vector<BYTE> buf(needed);
+    if(!SetupDiGetDeviceRegistryPropertyW(hdi, &did, prop, &dataType, buf.data(),
+                                          (DWORD) buf.size(), nullptr))
+    {
+        return false;
+    }
+
+    if(dataType != REG_SZ && dataType != REG_EXPAND_SZ)
+    {
+        return false;
+    }
+
+    out.assign(reinterpret_cast<const wchar_t *>(buf.data()));
+    return !out.empty();
+}
+
+static bool getNetCfgInstanceIdFromDriverKey(HDEVINFO hdi, SP_DEVINFO_DATA &did, GUID &outGuid)
+{
+    HKEY hKey = SetupDiOpenDevRegKey(hdi, &did, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_READ);
+    if(hKey == INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    wchar_t guidStr[128] = {};
+    DWORD cb = sizeof(guidStr);
+    DWORD type = 0;
+    LONG rc = RegQueryValueExW(hKey, L"NetCfgInstanceId", nullptr, &type, (LPBYTE) guidStr, &cb);
+
+    RegCloseKey(hKey);
+
+    if(rc != ERROR_SUCCESS || (type != REG_SZ && type != REG_EXPAND_SZ))
+    {
+        return false;
+    }
+
+    GUID g{};
+    if(FAILED(CLSIDFromString(guidStr, &g)))
+    {
+        return false;
+    }
+
+    outGuid = g;
+    return true;
+}
+
+static bool findInterfaceGuidByDriverServiceName(const std::wstring &serviceName, GUID &outIfGuid)
+{
+    HDEVINFO hdi = SetupDiGetClassDevsW(&GUID_DEVCLASS_NET, nullptr, nullptr, DIGCF_PRESENT);
+    if(hdi == INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    bool found = false;
+    SP_DEVINFO_DATA did{};
+    did.cbSize = sizeof(did);
+
+    for(DWORD i = 0; SetupDiEnumDeviceInfo(hdi, i, &did); ++i)
+    {
+        std::wstring svc;
+        if(!getDeviceRegPropString(hdi, did, SPDRP_SERVICE, svc))
+        {
+            continue;
+        }
+
+        if(_wcsicmp(svc.c_str(), serviceName.c_str()) != 0)
+        {
+            continue;
+        }
+
+        GUID ifGuid{};
+        if(getNetCfgInstanceIdFromDriverKey(hdi, did, ifGuid))
+        {
+            outIfGuid = ifGuid;
+            found = true;
+            break;
+        }
+    }
+
+    SetupDiDestroyDeviceInfoList(hdi);
+    return found;
+}
+
+std::shared_ptr<NetworkAdapter> WinDaemon::getDcoAdapter()
+{
+    // Matches the hardware ID and service name declared by the signed driver
+    // payload in deps/dco
+    const std::wstring dcoServiceName = DCO_DEVICE_NAME;
+
+    GUID ifGuid{};
+    if(!findInterfaceGuidByDriverServiceName(dcoServiceName, ifGuid))
+    {
+        qWarning() << "DCO: no adapter device found for service"
+                   << QString::fromWCharArray(dcoServiceName.c_str());
+        state().dcoAdapterMissing(true);
+        return {};
+    }
+
+    NET_LUID luid{};
+    auto st = ConvertInterfaceGuidToLuid(&ifGuid, &luid);
+    if(st != NO_ERROR || luid.Value == 0)
+    {
+        qWarning() << "DCO: ConvertInterfaceGuidToLuid failed, status=" << (int) st;
+        state().dcoAdapterMissing(true);
+        return {};
+    }
+
+    auto adapter = WinInterfaceMonitor::getAdapterForLuid(luid.Value);
+    if(!adapter)
+    {
+        qWarning() << "DCO: did not resolve adapter for LUID" << (qulonglong) luid.Value;
+    }
+    // Like getTapAdapter(), keep the "adapter missing" state in sync for the
+    // client.  Unlike TAP, this isn't fatal - OpenVPNMethod falls back to
+    // WinTUN, so the client's notification is dismissible.
+    state().dcoAdapterMissing(!adapter);
+
+    return adapter;
+}
+
 std::shared_ptr<NetworkAdapter> WinDaemon::getTapAdapter()
 {
     // For robustness, when making a connection, we always re-query for the
@@ -258,6 +394,13 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getTapAdapter()
     // entering the grace period after the "suspend" notification).
     state().tapAdapterMissing(false);
     return adapters[0];
+}
+
+void WinDaemon::checkTapAdapter()
+{
+    // To check the network adapter state, just call getTapAdapter() and let
+    // it update DaemonState.  Ignore the result.
+    getTapAdapter();
 }
 
 std::shared_ptr<NetworkAdapter> WinDaemon::getTunAdapter()
@@ -293,8 +436,13 @@ std::shared_ptr<NetworkAdapter> WinDaemon::getTunAdapter()
     {
         qWarning() << "Did not find any OpenVPN WinTUN adapter for LUID"
             << tunAdapterLuid.Value;
+        // The WinTUN adapter is created on demand, so don't report it missing
+        // yet - recreateTunAdapter() is tried next, and it updates the state
+        // if that also fails.
+        return {};
     }
-    
+
+    state().wintunMissing(false);
     return pTunAdapter;
 }
 
@@ -304,6 +452,9 @@ std::shared_ptr<NetworkAdapter> WinDaemon::recreateTunAdapter()
     if(!_wintunAdapter)
     {
         qWarning() << "Unable to create OpenVPN WinTUN adapter";
+        // Creating the adapter on demand also failed, so the WinTUN driver
+        // really is missing
+        state().wintunMissing(true);
         return {};
     }
 
@@ -319,14 +470,8 @@ std::shared_ptr<NetworkAdapter> WinDaemon::recreateTunAdapter()
             << tunAdapterLuid.Value << "but could not find network interface";
     }
 
+    state().wintunMissing(!pTunAdapter);
     return pTunAdapter;
-}
-
-void WinDaemon::checkTapAdapter()
-{
-    // To check the network adapter state, just call getNetworkAdapter() and let
-    // it update DaemonState.  Ignore the result.
-    getTapAdapter();
 }
 
 void WinDaemon::onAboutToConnect()
@@ -399,21 +544,10 @@ LRESULT WinDaemon::proc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
         case PBT_APMRESUMEAUTOMATIC:
         case PBT_APMSUSPEND:
-            // After the system resumes, allow 1 minute for the TAP adapter to
-            // come back.
-            //
-            // This isn't perfectly reliable since it's a hard-coded timeout,
-            // but there is no way to know at this point whether the TAP adapter
-            // is really missing or if it's still coming back from the resume.
-            // PBT_APMRESUMEAUTOMATIC typically occurs before the TAP adapter is
-            // restored.  PBM_APMRESUMESUSPEND _seems_ to typically occur after
-            // it is restored, but the doc indicates that this isn't sent in all
-            // cases, we can't rely on it.
-            //
-            // This just suppresses the "TAP adapter missing" error, so the
-            // failure modes are acceptable:
-            // - if the adapter is really missing, we take 1 minute to actually
-            //   show the error
+            // The TAP adapter is often reported missing briefly after a resume.
+            // Suppress that for a minute so we don't show a spurious error:
+            // - if the adapter really is missing, we'll show the error a minute
+            //   later
             // - if the adapter is present but takes >1 minute to come back, we
             //   show the error incorrectly in the interim
             //
@@ -481,8 +615,18 @@ QJsonValue WinDaemon::RPC_inspectUwpApps(const QJsonArray &familyIds)
 
 void WinDaemon::RPC_checkDriverState()
 {
+    // Sent by the client after a driver install/uninstall/reinstall (see
+    // sendCheckDriverHint()), so this is where those operations show up in the
+    // daemon log - the elevated pia-service process logs to its own console.
+    qInfo() << "Received driver state check request";
     // Re-check the WFP callout state, this is only relevant on Win 10 1507
     _wfpCalloutMonitor.doManualCheck();
+    // Re-check the DCO adapter and update DaemonState.  TAP is re-checked
+    // whenever the network interfaces change, and WinTUN is created on demand,
+    // but the DCO device only appears when its driver is installed - this is
+    // how the client's notification clears after the user reinstalls it.
+    const bool dcoAdapterFound = getDcoAdapter() != nullptr;
+    qInfo() << "Driver state check complete - DCO adapter found:" << dcoAdapterFound;
 }
 
 namespace
@@ -492,7 +636,7 @@ namespace
     {
         "wintun.inf",
         "pia-wgservice.exe",
-        "tap-pia-0901.sys"
+        "pia-ovpn-dco.inf"
     };
 }
 
@@ -573,10 +717,10 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     // Collect relevant parts of setupapi.dev.log.  This is important for
     // troubleshooting driver installation errors, such as:
-    // - TAP installation or configuration errors
-    // - WinTUN installation errors (note that WireGuard creates a WinTUN
-    //   device instance at connection time, so this can manifest as a
-    //   connection failure rather than an install issue).
+    // - WinTUN installation errors (the WinTUN adapter is created at
+    //   connection time, so this can manifest as a connection failure rather
+    //   than an install issue).
+    // - OpenVPN DCO driver installation errors
     //
     // setupapi.dev.log can be huge and contains a lot that we don't really
     // care about, so try to filter this down just to sections relevant to PIA
@@ -643,47 +787,6 @@ void WinDaemon::writePlatformDiagnostics(DiagnosticsFile &file)
 
     file.writeCommand("Installer log", "cmd.exe",
         QString::fromStdWString(LR"(/C "type ")" + installLog + LR"("")"));
-}
-
-void WinDaemon::applyPlatformInstallFeatureFlags()
-{
-     // The default OpenVPN network adapter was changed to WinTUN in 2.11.
-    // If any significant issues occur in the field, we can publish this
-    // feature flag to revert to TAP by default.
-    if(_data.hasFlag(QStringLiteral("install_win_use_tap")))
-    {
-        qInfo() << "Applying install_win_use_tap feature flag, install and select TAP";
-        // We need to install the TAP driver now, as it's not part of the
-        // default installation in 2.11.  Note that we are currently in session
-        // 0, not a user session, so this is not able to prompt for approval.
-        // The TAP adapter for Windows 10+ is WHQL-signed, so approval
-        // shouldn't be needed.  If the install fails we'll stay on WinTUN,
-        // this is sufficient for a failsafe feature flag.
-        int installResult = Exec::cmd(Path::DaemonExecutable, {QStringLiteral("tap"), QStringLiteral("install")});
-        qInfo() << "TAP installation completed with result" << installResult;
-        switch(installResult)
-        {
-            case DriverStatus::DriverUpdated:
-            case DriverStatus::DriverUpdateNotNeeded:
-            case DriverStatus::DriverInstalled:
-            case DriverStatus::DriverUninstalled:
-                qInfo() << "TAP installation succeeded, select TAP now";
-                _settings.windowsIpMethod(QStringLiteral("dhcp"));
-                break;
-            case DriverStatus::DriverUpdatedReboot:
-            case DriverStatus::DriverInstalledReboot:
-            case DriverStatus::DriverUninstalledReboot:
-                // This is rare on modern Windows.  The client does have a
-                // "reboot needed" notification but we would need to add more
-                // state to indicate this state, it's not really worth it for
-                // such a rare corner case of a failsafe - just stay on WinTUN.
-                qInfo() << "TAP installation requires reboot, not selecting TAP now";
-                break;
-            default:
-                qWarning() << "TAP installation failed, not selecting TAP now";
-                break;
-        }
-    }
 }
 
 void WinDaemon::updateSplitTunnelRules()

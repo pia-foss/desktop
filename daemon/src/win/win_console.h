@@ -42,6 +42,9 @@ public:
     static int installCalloutDriver();
     static int uninstallCalloutDriver();
     static int reinstallCalloutDriver();
+    static int installDcoDriver();
+    static int uninstallDcoDriver();
+    static int reinstallDcoDriver();
     static int showHelp();
 
     int run();

@@ -39,6 +39,7 @@
 #include <QOperatingSystemVersion>
 #include <QCursor>
 #include <QLibrary>
+#include <QTimer>
 
 #ifdef Q_OS_MACOS
 #include "mac/mac_install.h"
@@ -53,7 +54,7 @@
 #include "win/win_resources.h"
 #include "win/win_tray.h"
 // DriverStatus enum needed for driver reinstallation
-#include "../../extras/installer/win/tap_inl.h"
+#include "../../extras/installer/win/common_inl.h"
 #include <VersionHelpers.h>
 #endif
 
@@ -363,11 +364,24 @@ bool NativeHelpers::isMacOSSplitTunnelSupported() const
 bool NativeHelpers::isMacOSVersion15() const
 {
 #if defined(Q_OS_MACOS)
-    // We use this because installation instructions are different in macos 15 (and above)
-    return QOperatingSystemVersion::current().majorVersion() >= 15;
+    // We use this because installation instructions are different in macos 15.
+    // Note macOS jumped straight from 15 to 26, so 26 and newer is the only
+    // other tier - see isMacOSVersion26OrNewer().
+    return QOperatingSystemVersion::current().majorVersion() == 15;
 #else
     // Meaningless return value if the platform isn't macOS
-    return true;
+    return false;
+#endif
+}
+
+bool NativeHelpers::isMacOSVersion26OrNewer() const
+{
+#if defined(Q_OS_MACOS)
+    // The Network Extensions pane was reworded again in macOS 26
+    return QOperatingSystemVersion::current().majorVersion() >= 26;
+#else
+    // Meaningless return value if the platform isn't macOS
+    return false;
 #endif
 }
 
@@ -535,9 +549,15 @@ void NativeHelpers::reinstallTap()
 
 void NativeHelpers::reinstallTun()
 {
-    // Repairing the WinTUN driver just uninstalls it.  The next connection
-    // with WireGuard will reinstall it (handled by pia-wintun.dll)
+    // Repairing the WinTUN driver just uninstalls it.  The next OpenVPN
+    // connection will reinstall it (handled by pia-wintun.dll)
     reinstallDriver(Driver::WinTun, L"tun uninstall");
+}
+
+void NativeHelpers::reinstallDco()
+{
+    // Removes the DCO device and installs it again from the staged INF
+    reinstallDriver(Driver::Dco, L"dco reinstall");
 }
 
 void NativeHelpers::installWfpCallout()
@@ -562,6 +582,19 @@ void NativeHelpers::forceWfpCalloutRebootState()
 }
 
 void NativeHelpers::reinstallDriver(Driver type, const wchar_t *commandParams)
+{
+#ifdef Q_OS_WIN
+    // This is called from QML click/selection handlers.  ShellExecuteEx blocks
+    // for the whole UAC prompt, and doing that in the middle of a pointer event
+    // can leave Qt Quick with a deleted mouse grabber, which crashes on the
+    // next mouse event.  Run it once the current event has been delivered.
+    QTimer::singleShot(0, this, [this, type, commandParams]() {
+        startDriverReinstall(type, commandParams);
+    });
+#endif
+}
+
+void NativeHelpers::startDriverReinstall(Driver type, const wchar_t *commandParams)
 {
 #ifdef Q_OS_WIN
     if (_reinstallDriverNotifier)
@@ -851,6 +884,10 @@ void NativeHelpers::setDriverReinstallStatus(Driver type, const QString &status)
         case Driver::WinTun:
             _reinstallTunStatus = status;
             emit reinstallTunStatusChanged();
+            break;
+        case Driver::Dco:
+            _reinstallDcoStatus = status;
+            emit reinstallDcoStatusChanged();
             break;
         case Driver::WfpCallout:
             _reinstallWfpCalloutStatus = status;

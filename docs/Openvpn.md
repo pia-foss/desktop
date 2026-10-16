@@ -19,6 +19,6 @@ We currently ship Openvpn with a couple of changes on top
 (check out pia_desktop_dep_build repository for more details).
 
 The only patch that is really needed, is the one regarding driver IDs on Windows.  
-The reason for this is that other vpn software could install TAP and WinTun drivers,  
-so we brand the one that we install with PIA, so that only PIA openvpn process can use them,  
+The reason for this is that other vpn software could install TAP, WinTun and DCO drivers,  
+so we brand the ones that we install with PIA, so that only PIA openvpn process can use them,  
 in order to avoid possible conflict or other processes acting on or using our network virtual adapters.

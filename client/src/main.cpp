@@ -222,12 +222,15 @@ int clientMain(int argc, char *argv[])
     } clientRunMode{RunMode::Normal};
     QString resourceURL;
     GraphicsMode gfxMode{GraphicsMode::Normal};
+    bool noInstall{false};
     for(auto i=1; i<argc; ++i)
     {
         if(argv[i] && ::strcmp(argv[i], "--quiet") == 0)
             quietLaunch = true;
         else if(argv[i] && ::strcmp(argv[i], "--clear-cache") == 0)
             forceClearCache = true;
+        else if(argv[i] && ::strcmp(argv[i], "--no-install") == 0)
+            noInstall = true;
         else if(argv[i] && ::strcmp(argv[i], "--safe-mode") == 0)
             gfxMode = GraphicsMode::PersistSafe;
 #ifdef Q_OS_LINUX
@@ -500,7 +503,8 @@ int clientMain(int argc, char *argv[])
     //
     // This depends on Path initialization, etc., but we do this before starting
     // the main event loop since it may decide to exit if an install occurred.
-   macCheckInstallation();
+    if(!noInstall)
+        macCheckInstallation();
 #endif
 
     client.setupFonts();

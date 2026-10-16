@@ -1,8 +1,16 @@
 # Changelog
+### v3.8.0
+* Windows: WireGuard now uses the WireGuard-NT 1.1 kernel driver, boosting WireGuard speeds by more than 3x on higher-bandwidth systems
+* Windows: Added the OpenVPN DCO kernel driver, selectable as the virtual network driver for OpenVPN. It can boost connection bandwidth by 2x or more, depending on the system and connection
+* All: WireGuard is now the default protocol for new installations
+* Linux/macOS: New WireGuard Amnezia driver obfuscates WireGuard traffic to get through networks that block it. To enable it, select WireGuard on the Protocol page, then turn on obfuscation
+* macOS: Fixed an issue where the app would hang indefinitely if the split tunnel system extension setup wasn't completed in macOS System Settings
+
 ### v3.7.0
 * macOS: Fix a macOS26 related issue where DNS was not always restored on disconnecting from the VPN
 * Windows/Linux: Turn off split DNS by default (it can be enabled in settings)
 * Linux: Fix zypper dependencies (libatomic)
+
 ### v3.6.2
 * Windows: Updated tap-windows6 driver with latest security patches
 * Linux: Prevent local unauthorized users from disconnecting or altering VPN settings

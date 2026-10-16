@@ -20,6 +20,7 @@
 #include <kapps_core/core.h>
 #include "logger.h"
 #include "util.h"
+#include <chrono>
 
 #ifndef KAPPS_CORE_OS_WINDOWS    // TODO - Windows backend for Process
 
@@ -71,7 +72,9 @@ private:
     int cmdImpl(const std::string &program, const StringVector &args,
                 void(*traceFunc)(std::ostream &, const std::string&, const StringVector&),
                 const StringVector &env, std::string *pOut,
-                bool ignoreErrors);
+                bool ignoreErrors,
+                std::chrono::milliseconds timeout = std::chrono::milliseconds{-1},
+                std::chrono::milliseconds gracePeriod = std::chrono::milliseconds{5000});
 
 public:
 #if defined(KAPPS_CORE_OS_POSIX)
@@ -86,6 +89,16 @@ public:
     // Execute a specific program with arguments
     int cmd(const std::string &program, const StringVector &args,
             bool ignoreErrors = false);
+
+    // Execute a specific program with arguments and a timeout.  If the process
+    // does not exit within the timeout, it is terminated (SIGTERM, then SIGKILL
+    // after gracePeriod), so this always returns within timeout + gracePeriod.
+    // Returns the exit code; if the process was terminated due to the timeout
+    // it will be a signal-terminated exit code.
+    int cmdWithTimeout(const std::string &program, const StringVector &args,
+                       std::chrono::milliseconds timeout,
+                       std::chrono::milliseconds gracePeriod = std::chrono::milliseconds{5000},
+                       bool ignoreErrors = false);
 
     // Execute a command with a specific environment.  If env is empty, the
     // existing environment is used.
@@ -136,6 +149,13 @@ namespace Exec
     // default logging category
     int KAPPS_CORE_EXPORT cmd(const std::string &program, const Executor::StringVector &args,
                           bool ignoreErrors = false);
+
+    // Execute a process with arguments and a timeout, using the default logging
+    // category - see Executor::cmdWithTimeout()
+    int KAPPS_CORE_EXPORT cmdWithTimeout(const std::string &program, const Executor::StringVector &args,
+                                     std::chrono::milliseconds timeout,
+                                     std::chrono::milliseconds gracePeriod = std::chrono::milliseconds{5000},
+                                     bool ignoreErrors = false);
 
     // Execute a process with arguments and return the stdout (or empty string on error)
     std::string KAPPS_CORE_EXPORT cmdWithOutput(const std::string &program, const Executor::StringVector &args);

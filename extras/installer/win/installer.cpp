@@ -19,11 +19,12 @@
 #include "installer.h"
 #include "brand.h"
 #include "service_inl.h"
-#include "tun_inl.h"
 #include "safemode_inl.h"
+#include "tun_inl.h"
 #include "tasks.h"
 #include "product.h"
 #include "tasks/callout.h"
+#include "tasks/dco.h"
 #include "tasks/file.h"
 #include "tasks/function.h"
 #include "tasks/launch.h"
@@ -41,8 +42,6 @@
 
 #include <shlobj_core.h>
 #include <shlwapi.h>
-
-#pragma comment(lib, "Msi.lib")
 
 #if defined(INSTALLER)
 #define WINDOW_CLASS_NAME _T("PIAInstaller")
@@ -631,7 +630,7 @@ DWORD Installer::workerThreadMain()
         #endif
 
         // Create the target directory
-        tasks.addNew<CreateDirectoryTask>(g_installPath, true);
+        tasks.addNew<CreateProtectedDirectoryTask>(g_installPath, true);
     #endif
 
         // Create the rollback directory
@@ -668,6 +667,10 @@ DWORD Installer::workerThreadMain()
         // rollback during aborted installation)
         tasks.addNew<UninstallTapDriverTask>();
 
+        // Uninstall existing OpenVPN DCO driver (noop in installation, may
+        // perform rollback during aborted installation)
+        tasks.addNew<UninstallDcoDriverTask>();
+
     #ifdef INSTALLER
         // Remove any existing installation (listed in uninstall.dat)
         if (uninstallDataExists)
@@ -703,6 +706,12 @@ DWORD Installer::workerThreadMain()
         // Plant any remembered account/settings
         tasks.addNew<WriteSettingsTask>(g_daemonDataPath);
 
+        // Update callout driver if installed
+        tasks.addNew<UpdateCalloutDriverTask>();
+
+        // Install Wireguard service
+        tasks.addNew<InstallWgServiceTask>();
+
         // Install TAP driver
         tasks.addNew<InstallTapDriverTask>();
 
@@ -710,11 +719,8 @@ DWORD Installer::workerThreadMain()
         // remove it.  (WinTUN is now deployed automatically by pia-wintun.dll)
         tasks.addNew<UninstallWintunMsiTask>();
 
-        // Update callout driver if installed
-        tasks.addNew<UpdateCalloutDriverTask>();
-
-        // Install Wireguard service
-        tasks.addNew<InstallWgServiceTask>();
+        // Install OpenVPN DCO driver
+        tasks.addNew<InstallDcoDriverTask>();
 
         // Install service
         tasks.addNew<InstallServiceTask>();
@@ -794,6 +800,9 @@ DWORD Installer::workerThreadMain()
 
         // Wipe the TAP driver from the driver store if possible
         tasks.addNew<CleanupTapDriverTask>();
+
+        // Wipe the OpenVPN DCO driver from the driver store if possible
+        tasks.addNew<CleanupDcoDriverTask>();
     #endif
 
     #ifdef INSTALLER

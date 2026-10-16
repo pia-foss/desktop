@@ -103,7 +103,9 @@ struct serializer<Location>
             {"latency", l.latency()},
             {"dedicatedIp", l.dedicatedIp()},
             {"offline", l.offline()},
-            {"hasShadowsocks", l.hasShadowsocks()}
+            {"hasShadowsocks", l.hasShadowsocks()},
+            {"hasObfuscatedWireGuard", l.hasObfuscatedWireGuard()},
+            {"hasPlainWireGuard", l.hasPlainWireGuard()}
         };
     }
 };

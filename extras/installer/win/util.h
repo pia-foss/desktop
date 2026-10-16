@@ -21,6 +21,7 @@
 #pragma once
 
 #include "common.h"
+#include "util_inl.h" // utf16ptr, appendQuotedArgument, runProgram
 
 // A lot of this file concerns string handling and converting between ASCII/UTF8
 // and UTF16, and many of the functions/macros rely on the defined lifetime of
@@ -46,15 +47,6 @@ struct utf8ptr
     operator LPCSTR() const { return ptr; }
     bool empty() const { return !ptr || !*ptr; }
     size_t length() const { return strlen(ptr); }
-};
-struct utf16ptr
-{
-    LPCWSTR ptr;
-    utf16ptr(LPCWSTR ptr) : ptr(ptr) {}
-    utf16ptr(const std::wstring& ptr) : ptr(ptr.c_str()) {}
-    operator LPCWSTR() const { return ptr; }
-    bool empty() const { return !ptr || !*ptr; }
-    size_t length() const { return wcslen(ptr); }
 };
 
 static inline LPCSTR ptr(const std::string& str) { return str.c_str(); }
@@ -117,9 +109,6 @@ private:
 
 std::string getMessageName(UINT msg);
 
-void appendQuotedArgument(std::wstring& cmdline, utf16ptr arg, bool forceQuoting = false);
-
-int runProgram(utf16ptr executable, const std::initializer_list<utf16ptr> args = {}, utf16ptr cwd = nullptr);
 bool launchProgramAsDesktopUser(utf16ptr executable, const std::initializer_list<utf16ptr> args = {}, utf16ptr cwd = nullptr);
 
 // UIString loads a string resource identified by resource ID.

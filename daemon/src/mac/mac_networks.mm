@@ -457,19 +457,49 @@ void MacNetworks::readConnections()
         {
             CWInterface *pItf = itWifiConfig->second.pInterface;
 
-            // Store the interfaceName CFStringRef in a MacString so it's properly managed and released
-            MacString interfaceName{connection.networkInterface().toCFString()};
+            // Use CoreWLAN to tell if this Wi-Fi interface is connected and
+            // whether it is secured. SSID access can get blocked on newer
+            // macOS versions, but the generic Wi-Fi automation rules should
+            // still work without it.
+            const auto security = pItf.security;
+            if(security != kCWSecurityUnknown)
+            {
+                connection.wifiAssociated(true);
+            }
 
-            // This is the prior (possibly deprecated or just bugged approach) to retrieve SSID info about the current Wifi interface
-            // We keep it here in case it's just a bug so we can restore it later if possible
-            // QByteArray ssidName{_dynStore.ssidFromInterface(interfaceName.get()).toUtf8QByteArray()};
+            // pItf.security is Obj-C property syntax. Same thing as
+            // [pItf security].
+            switch(security)
+            {
+                default:
+                case kCWSecurityNone:
+                case kCWSecurityUnknown:
+                // It's not clear what kCWSecurityEnterprise is - it does not
+                // seem to be documented at all.
+                case kCWSecurityEnterprise:
+                    // Default to not encrypted for any future modes we do not
+                    // know about.
+                    break;
+                case kCWSecurityDynamicWEP:
+                case kCWSecurityWEP:
+                case kCWSecurityWPA2Enterprise:
+                case kCWSecurityWPA2Personal:
+                case kCWSecurityWPAEnterprise:
+                case kCWSecurityWPAEnterpriseMixed:
+                case kCWSecurityWPAPersonal:
+                case kCWSecurityWPAPersonalMixed:
+                // WPA3 constants aren't available in the 10.14 SDK that we
+                // currently build with, but are supported by PIA.
+                case 12: // kCWSecurityWPA3Enterprise
+                case 11: // kCWSecurityWPA3Personal
+                case 13: // kCWSecurityWPA3Transition
+                    connection.wifiEncrypted(true);
+                    break;
+            }
 
-            // Given the interfaceName, retrieve the associated SSID as a UTF-8 QByteArray
-            // We're doing this using an unsatisfactory approach (running an external network tool) since Apple have
-            // deprecated all the APIs we've used before and have now even deprecated the DynStore we were using previously
-            // In order to do this the 'Apple way' we need to assign the com.apple.security.personal-information.location entitlement
-            // to the PIA daemon - but this is non trivial and it requires a total app bundle restructuring. So we use these band-aid approaches
-            // until our hand is forced.
+            // Still try to grab the SSID for SSID-specific rules. We shell out
+            // here because the old dynamic-store path stopped working and the
+            // CoreWLAN SSID APIs need extra location permission.
             QByteArray fullOutput = Exec::bashWithOutput(QStringLiteral("networksetup -getairportnetwork %1").arg(connection.networkInterface())).toUtf8();
             QByteArray ssidName;
             // Find the last occurrence of ": " and extract everything after it. We can't split on spaces (to get the last 'word')
@@ -490,38 +520,6 @@ void MacNetworks::readConnections()
                 // parseWifiSsid() expects a C string and a length - so we use constData to get a const char*
                 // parseWifiSsid validates the string - checking for length, encoding and embedded null chars
                 connection.parseWifiSsid(ssidName.constData(), ssidName.size());
-                connection.wifiAssociated(true);
-
-                // Note the special pItf.security syntax even though pItf is a CWInterface*
-                // This is special objective-c syntax, equivalent to using: [pItf security]
-                // It is not a member invocation, hence why pItf->security doesn't work. It's obj-c++ magic.
-                switch(pItf.security)
-                {
-                    default:
-                    case kCWSecurityNone:
-                    case kCWSecurityUnknown:
-                    // It's not clear what kCWSecurityEnterprise is - it does
-                    // not seem to be documented at all.
-                    case kCWSecurityEnterprise:
-                        // Default is "not encrypted" for any future modes we're not
-                        // aware of
-                        break;
-                    case kCWSecurityDynamicWEP:
-                    case kCWSecurityWEP:
-                    case kCWSecurityWPA2Enterprise:
-                    case kCWSecurityWPA2Personal:
-                    case kCWSecurityWPAEnterprise:
-                    case kCWSecurityWPAEnterpriseMixed:
-                    case kCWSecurityWPAPersonal:
-                    case kCWSecurityWPAPersonalMixed:
-                    // WPA3 constants aren't available in the 10.14 SDK that we
-                    // currently build with, but are supported by PIA
-                    case 12: //kCWSecurityWPA3Enterprise
-                    case 11: //kCWSecurityWPA3Personal
-                    case 13: //kCWSecurityWPA3Transition
-                        connection.wifiEncrypted(true);
-                        break;
-                }
             }
         }
 

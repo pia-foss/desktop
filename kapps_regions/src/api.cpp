@@ -90,7 +90,9 @@ namespace
             dips.push_back({fromApi(pDips->dipRegionId), fromApi(pDips->address),
                             fromApi(pDips->commonName), fromApi(pDips->fqdn),
                             serviceGroupsStorage.back(),
-                            fromApi(pDips->correspondingRegionId)});
+                            fromApi(pDips->correspondingRegionId),
+                            fromApi(pDips->openVpnUdpPorts),
+                            fromApi(pDips->openVpnTcpPorts)});
             ++pDips;
             --dipCount;
         }

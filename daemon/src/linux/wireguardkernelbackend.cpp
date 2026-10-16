@@ -54,9 +54,20 @@ WireguardKernelBackend::~WireguardKernelBackend()
 }
 
 auto WireguardKernelBackend::createInterface(wg_device &wgDev,
+                                             const std::optional<AmneziaObfuscation> &obfuscation,
                                              const QPair<QHostAddress, int> &)
     -> Async<std::shared_ptr<NetworkAdapter>>
 {
+    // The kernel module cannot apply obfuscation parameters.  Refuse to create
+    // the interface rather than silently connecting with vanilla WireGuard,
+    // which would only fail later as a hard-to-diagnose handshake timeout.
+    if(obfuscation.has_value())
+    {
+        qWarning() << "Obfuscation parameters were passed to the WireGuard kernel"
+                      " module backend, which cannot apply them";
+        throw Error{HERE, Error::Code::WireguardCreateDeviceFailed};
+    }
+
     // Specify the device.
     // Length of interfaceName checked with static_assert above.
     Q_ASSERT(interfaceName.size() <= static_cast<int>(sizeof(wgDev.name)-1));

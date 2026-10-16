@@ -27,7 +27,7 @@
 
 namespace Files
 {
-    extern const COMMON_EXPORT QString wireguardGoBasename;
+    extern const COMMON_EXPORT QString wireguardBasename;
 }
 
 class COMMON_EXPORT Path
@@ -173,10 +173,10 @@ public:
     // Config file for Unbound instance used to block DNS on Mac
     static Path UnboundDnsStubConfigFile;
 
-    // wireguard-go executable (Userspace Wireguard implementation - Mac/Linux)
-    static Path WireguardGoExecutable;
+    // wireguard executable (Userspace Wireguard implementation - Mac/Linux)
+    static Path WireguardExecutable;
 
-    // Interface name file written by wireguard-go or wgservice.exe (Mac/Win only)
+    // Interface name file written by wireguard executable or wgservice.exe (Mac/Win only)
     static Path WireguardInterfaceFile;
 
     // Region override files
@@ -195,6 +195,9 @@ public:
     // Directory of WFP Callout drivers
     // Windows: <BaseDir>/wfp_callout
     static Path WfpCalloutDriverDir;
+    // OpenVPN DCO driver directory
+    // Windows: <BaseDir>/dco
+    static Path DcoDriverDir;
     // wgservice executable (Userspace Wireguard implementation - Windows)
     static Path WireguardServiceExecutable;
     // Wireguard config file (Userspace Wireguard implementation - Windows)

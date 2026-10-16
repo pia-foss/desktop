@@ -254,8 +254,18 @@ module PiaWindows
             winVerDir = File.basename(File.dirname(f))
             stage.install(f, "wfp_callout/#{winVerDir}/")
         end
+        # Note there's actually no win10 drivers for arm. The list is just empty and this won't fail
+        FileList["deps/dco/win/#{Build::TargetArchitecture}/win10/*"].each do |f|
+            stage.install(f, "dco/win10/")
+        end
+        FileList["deps/dco/win/#{Build::TargetArchitecture}/win11/*"].each do |f|
+            stage.install(f, "dco/win11/")
+        end
 
-        # OpenVPN updown script (used for 'static' configuration method)
+        # Tapinstall used to install the OpenVPN DCO driver
+        stage.install('deps/tapinstall/tapinstall.exe', '/')
+
+        # OpenVPN updown script (applies DNS servers to the tunnel)
         stage.install('extras/openvpn/win/openvpn_updown.bat', '/')
 
         # zip.exe, used by support tool on Windows

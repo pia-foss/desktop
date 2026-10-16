@@ -45,6 +45,13 @@ Item {
   // Tip shown for the port forwarding warning (depends on whether this is a
   // single region or a group).
   property string pfWarningTipText
+  // Whether to show indicators for regions whose servers don't match the
+  // current obfuscation setting - either the setting is on and the region has
+  // no AmneziaWG servers, or it's off and the region has only AmneziaWG servers
+  property bool obfuscationMismatch
+  // Tip shown for the obfuscation warning (depends on which way the setting
+  // makes this region unusable).
+  property string obfuscationWarningTipText
   // Whether to show the "geo" location indicator
   property bool geoLocation
   // Whether the region is unavailable (offline)
@@ -56,7 +63,8 @@ Item {
 
   // Tells the parent to show the region row highlight when an InfoTip in the
   // row is pointed - MouseArea doesn't propagate hover events.
-  readonly property bool showRowHighlight: pfWarningTip.containsMouse || geoTip.containsMouse
+  readonly property bool showRowHighlight: pfWarningTip.containsMouse || geoTip.containsMouse ||
+    obfuscationWarningTip.containsMouse
 
   // Although the region's MouseArea is actually part of the background, the
   // accessibility cell is defined by RegionRowLabels
@@ -145,9 +153,11 @@ Item {
     id: opacityWrapper
     anchors.fill: parent
 
-    // Dim the row when the region is offline or the port forward notice is
-    // shown (the region probably shouldn't be selected, but it still could be)
-    opacity: (regionRowLabels.offline || pfWarningTip.visible) ? 0.4 : 1.0
+    // Dim the row when the region is offline, the port forward notice is shown,
+    // or the region's servers don't match the obfuscation setting (the region
+    // probably shouldn't be selected, but it still could be)
+    opacity: (regionRowLabels.offline || pfWarningTip.visible ||
+              regionRowLabels.obfuscationMismatch) ? 0.4 : 1.0
 
     // Label text
     Text {
@@ -179,12 +189,15 @@ Item {
           w += pfWarningTip.implicitWidth + horzMargins
         if(geoTip.show)
           w += geoTip.implicitWidth + horzMargins
+        if(obfuscationWarningTip.show)
+          w += obfuscationWarningTip.implicitWidth + horzMargins
         // If anything was visible, add another margin for the right side
         if(w > 0)
           w += horzMargins
         return w
       }
-      height: Math.max(geoTip.implicitHeight, pfWarningTip.implicitHeight)
+      height: Math.max(geoTip.implicitHeight, pfWarningTip.implicitHeight,
+                       obfuscationWarningTip.implicitHeight)
       visible: width > 0
 
       GeoTip {
@@ -223,6 +236,38 @@ Item {
         // Tab focus is just ignored, they don't show enough additional info to
         // be worth the navigation.
         // Screen readers see the warnings as part of the Regions table model.
+        accessible: false
+      }
+
+      // Warning sign - shown when this region's servers don't match the
+      // obfuscation setting, so it can't be used until the setting or the
+      // region is changed
+      InfoTip {
+        id: obfuscationWarningTip
+
+        anchors.verticalCenter: parent.verticalCenter
+        x: {
+          var prev = parent.horzMargins
+          if(geoTip.visible)
+            prev = geoTip.x + geoTip.implicitWidth + parent.horzMargins
+          if(pfWarningTip.visible)
+            prev = pfWarningTip.x + pfWarningTip.implicitWidth + parent.horzMargins
+          return prev
+        }
+        icon: icons.warning
+        // The shared warning image is larger than the other badges; size it to
+        // match them rather than using its own dimensions
+        implicitWidth: 18
+        implicitHeight: 18
+        // See pfWarningTip - 'badges.width' has to use this rather than
+        // 'visible', which also reflects the parent items' visibilities.
+        readonly property bool show: regionRowLabels.obfuscationMismatch
+        visible: show
+
+        tipText: obfuscationWarningTipText
+
+        // As above, the warnings are part of the Regions table model for
+        // screen readers.
         accessible: false
       }
     }

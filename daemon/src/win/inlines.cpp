@@ -28,6 +28,18 @@
 // but it's in product.h in the daemon.
 #include "product.h"
 
+#include "../../../extras/installer/win/common_inl.h"
+
+// callout.inl defines the setupapi helpers shared with the TAP and DCO code, so
+// it has to precede them.
+#define CALLOUT_LOG(...) \
+do { \
+    char buffer[1024]; \
+    snprintf(buffer, sizeof(buffer), __VA_ARGS__); \
+    qInfo() << buffer; \
+} while(0)
+#include "../../../extras/installer/win/callout.inl"
+
 #define TAP_LOG(...) \
 do { \
     char buffer[1024]; \
@@ -35,6 +47,9 @@ do { \
     qInfo() << buffer; \
 } while(0)
 #include "../../../extras/installer/win/tap.inl"
+
+#define DCO_LOG qInfo
+#include "../../../extras/installer/win/dco.inl"
 
 #define SERVICE_LOG qInfo
 #include "../../../extras/installer/win/service.inl"

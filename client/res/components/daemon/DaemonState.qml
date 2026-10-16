@@ -46,6 +46,10 @@ QtObject {
   readonly property var dedicatedIpLocations: NativeDaemon.state.dedicatedIpLocations
   readonly property var openvpnUdpPortChoices: NativeDaemon.state.openvpnUdpPortChoices
   readonly property var openvpnTcpPortChoices: NativeDaemon.state.openvpnTcpPortChoices
+  readonly property var dedicatedIpOpenvpnUdpPortChoices: NativeDaemon.state.dedicatedIpOpenvpnUdpPortChoices
+  readonly property var dedicatedIpOpenvpnTcpPortChoices: NativeDaemon.state.dedicatedIpOpenvpnTcpPortChoices
+  readonly property int dedicatedIpOpenvpnUdpPort: NativeDaemon.state.dedicatedIpOpenvpnUdpPort
+  readonly property int dedicatedIpOpenvpnTcpPort: NativeDaemon.state.dedicatedIpOpenvpnTcpPort
   readonly property var intervalMeasurements: NativeDaemon.state.intervalMeasurements
   readonly property double connectionTimestamp: NativeDaemon.state.connectionTimestamp
   readonly property var overridesFailed: NativeDaemon.state.overridesFailed
@@ -63,6 +67,8 @@ QtObject {
   readonly property string updateVersion: NativeDaemon.state.updateVersion
   readonly property double dnsConfigFailed: NativeDaemon.state.dnsConfigFailed
   readonly property bool tapAdapterMissing: NativeDaemon.state.tapAdapterMissing
+  readonly property bool wintunMissing: NativeDaemon.state.wintunMissing
+  readonly property bool dcoAdapterMissing: NativeDaemon.state.dcoAdapterMissing
   readonly property string netExtensionState: NativeDaemon.state.netExtensionState
   readonly property bool connectionProblem: NativeDaemon.state.connectionProblem
   readonly property double dedicatedIpExpiring: NativeDaemon.state.dedicatedIpExpiring

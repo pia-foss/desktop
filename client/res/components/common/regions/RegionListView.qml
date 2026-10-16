@@ -56,6 +56,10 @@ Rectangle {
   // Whether port forwarding is enabled for this service - causes non-PF regions
   // to show an indicator
   property bool portForwardEnabled
+  // The obfuscation setting to indicate regions for - "on", "off", or "" when
+  // the setting doesn't apply and no indicators should be shown.  Regions that
+  // can't carry a connection with this setting are dimmed and show a warning.
+  property string obfuscationMode
   // Whether regions in this list can be favorited (only applicable to VPN
   // regions currently; settings for this are fixed in RegionListView)
   property bool canFavorite
@@ -207,6 +211,7 @@ Rectangle {
             region: modelData
             serviceLocations: regionListView.serviceLocations
             portForwardEnabled: regionListView.portForwardEnabled
+            obfuscationMode: regionListView.obfuscationMode
             canFavorite: regionListView.canFavorite
             highlightColumn: {
               if(keyboardRow.country === "dip" && keyboardRow.location === region.id) {
@@ -234,6 +239,7 @@ Rectangle {
             regionCountry: modelData.regionCountry
             regionChildren: modelData.regionChildren
             portForwardEnabled: regionListView.portForwardEnabled
+            obfuscationMode: regionListView.obfuscationMode
             serviceLocations: regionListView.serviceLocations
             canFavorite: regionListView.canFavorite
             collapsedCountriesSettingName: regionListView.collapsedCountriesSettingName

@@ -308,6 +308,12 @@ SecondaryWindow {
     function onReinstallTapAdapter() {
       startDriverReinstall('tap')
     }
+    function onReinstallWintunAdapter() {
+      startDriverReinstall('wintun')
+    }
+    function onReinstallDcoAdapter() {
+      startDriverReinstall('dco')
+    }
     function onReinstallSplitTunnel() {
       startDriverReinstall('callout')
     }

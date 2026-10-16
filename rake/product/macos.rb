@@ -1,3 +1,4 @@
+require 'open3'
 require_relative '../executable.rb'
 require_relative '../model/probe.rb'
 require_relative '../macinfoplist.rb'
@@ -285,13 +286,11 @@ module PiaMacOS
 
         # FileUtils::sh doesn't accept environment variables
         puts macdeployArgs.join(" ")
-        Open3.popen3(macdeployEnv, *macdeployArgs) do |stdin, stdout, stderr, wait_thr|
-            # Here, stdout and stderr are ignored, effectively silencing them.
-            # This is because we often get error messages that don't really break the build
-            exit_status = wait_thr.value
-            if !exit_status.success?
-                raise "macdeployqt failed with result #{exit_status.to_s}. stdout: #{stdout.read}, stderr: #{stderr.read}"
-            end
+        # Output is captured and only shown on failure - macdeployqt prints errors that don't break
+        # the build. capture3 drains both pipes, so large output can't deadlock.
+        stdout, stderr, exit_status = Open3.capture3(macdeployEnv, *macdeployArgs)
+        if !exit_status.success?
+            raise "macdeployqt failed with result #{exit_status.to_s}. stdout: #{stdout}, stderr: #{stderr}"
         end
 
         # Qt 5.15.2 doesn't actually support cross-arch builds, and macdeployqt

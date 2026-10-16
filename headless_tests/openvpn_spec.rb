@@ -64,7 +64,10 @@ describe "OpenVPN options" do
 
     if SystemUtil.windows?
         describe "OpenVPN windows tunnel driver", :openVPNOnly do
-            tunnel_drivers = ["static", "dhcp", "wintun"]
+            # Note that "dco" may connect over WinTUN instead - DCO only
+            # supports UDP, and it falls back when the server applies
+            # compression framing.  Either way the connection must succeed.
+            tunnel_drivers = ["static", "dhcp", "wintun", "dco"]
             tunnel_drivers.each do |tunnel_driver|
                 it "#{tunnel_driver} can connect" do
                     PiaCtl.set_unstable("windowsIpMethod", tunnel_driver)

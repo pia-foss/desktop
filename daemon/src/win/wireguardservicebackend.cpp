@@ -20,6 +20,7 @@
 #line SOURCE_FILE("wireguardservicebackend.cpp")
 
 #include "wireguardservicebackend.h"
+#include "wg_service_cli_task.h"
 #include <kapps_core/src/configwriter.h>
 #include <common/src/builtin/path.h>
 #include <common/src/exec.h>
@@ -155,111 +156,17 @@ namespace
         return w;
     }
 
-    // Task to connect to a local socket asynchronously...to the extent possible
-    // on Windows.
-    //
-    // Connecting to a named pipe on Windows can fail in a 'busy' state if the
-    // server has accepted a connection but has not called ConnectNamedPipe()
-    // again to wait for another connection.  Servers are supposed to minimize
-    // this time by calling ConnectNamedPipe() again ASAP, but some busy time is
-    // unavoidable.
-    //
-    // MS recommends WaitNamedPipe() to detect when the pipe is no longer busy,
-    // but this is essentially just a blocking busy wait.  QLocalSocket does
-    // this too.
-    //
-    // Instead, WinLocalSocketTask delays for 100ms and tries again if the pipe
-    // is busy.  The worst effect of this is ~100ms extra delay if the pipe
-    // becomes ready just as we begin a delay, which is not bad.  The pipe
-    // should not be busy much; PIA should be the main client of the pipe, and
-    // we don't send requests too frequently.
-    //
-    // WinLocalSocketTask continues to retry as long as the pipe is busy; an
-    // overall timeout can be applied with Async::timeout().  (It does not retry
-    // for other errors.)
-    class WinLocalSocketTask : public Task<std::shared_ptr<QLocalSocket>>
-    {
-        Q_OBJECT
-        CLASS_LOGGING_CATEGORY("winlocalsockettask")
-
-    public:
-        // Start an asynchronous connection attempt to the pipe specified.
-        explicit WinLocalSocketTask(QString path)
-            : _path{std::move(path)}, _attempts{0}
-        {
-            _totalTime.start();
-            connect();
-        }
-
-    private:
-        // Try to connect now, schedule a retry if the pipe is busy;
-        // resolve/reject otherwise.
-        void connect();
-
-    private:
-        QString _path;
-        QElapsedTimer _totalTime;
-        unsigned _attempts;
-    };
-
-    void WinLocalSocketTask::connect()
-    {
-        // Class invariant; only called when pending (timer is not scheduled if
-        // the task resolves)
-        Q_ASSERT(isPending());
-
-        auto keepAlive = sharedFromThis();
-
-        ++_attempts;
-
-        // QLocalSocket expects an overlapped socket handle
-        HANDLE socket = ::CreateFile(qstringWBuf(_path),
-                                     GENERIC_READ|GENERIC_WRITE,
-                                     0,
-                                     nullptr,
-                                     OPEN_EXISTING,
-                                     FILE_FLAG_OVERLAPPED,
-                                     nullptr);
-        if(socket && socket != INVALID_HANDLE_VALUE)
-        {
-            // Put the socket handle in a QLocalSocket
-            auto pLocalSocket = std::make_shared<QLocalSocket>();
-            // setSocketDescriptor() returns bool, but it always returns true on
-            // Windows.
-            bool openSuccess = pLocalSocket->setSocketDescriptor(reinterpret_cast<qintptr>(socket));
-            Q_ASSERT(openSuccess);
-            resolve(std::move(pLocalSocket));
-            return;
-        }
-
-        kapps::core::WinErrTracer connectError{::GetLastError()};
-        if(connectError.code() != ERROR_PIPE_BUSY)
-        {
-            qWarning() << "Failed to connect to pipe" << _path << "after"
-                << _attempts << "attempts -" << traceMsec(_totalTime.elapsed())
-                << connectError;
-            reject({HERE, Error::Code::WireguardNotResponding});
-            return;
-        }
-
-        // The pipe is busy - try again in 100ms.  This isn't expected to happen
-        // much, so trace at warning.
-        qWarning() << "Pipe" << _path << "busy after" << _attempts
-            << "attempts -" << traceMsec(_totalTime.elapsed())
-            << "wait and try again";
-        QTimer::singleShot(100, this, &WinLocalSocketTask::connect);
-    }
-
-    // Task to locate the WinTUN interface created by WireGuard
-    class WinTunInterfaceTask : public Task<std::shared_ptr<NetworkAdapter>>
+    // Task to locate the WireGuard-NT interface created by the WireGuard
+    // service
+    class WgInterfaceTask : public Task<std::shared_ptr<NetworkAdapter>>
     {
         Q_OBJECT
 
     public:
-        WinTunInterfaceTask()
+        WgInterfaceTask()
         {
             connect(&WinInterfaceMonitor::instance(), &WinInterfaceMonitor::configChanged,
-                    this, &WinTunInterfaceTask::checkInterface);
+                    this, &WgInterfaceTask::checkInterface);
             checkInterface();
         }
 
@@ -321,6 +228,10 @@ namespace
             if(pAdapter)
             {
                 qInfo() << "Found adapter" << *pAdapter;
+                qInfo() << "==================================================================";
+                qInfo() << "== WireGuard driver: WireGuard-NT (kernel)";
+                qInfo() << "== Adapter LUID:" << luid;
+                qInfo() << "==================================================================";
                 resolve(std::move(pAdapter));
             }
         }
@@ -328,14 +239,6 @@ namespace
 }
 
 bool WireguardServiceBackend::_doingInitialCleanup{false};
-
-const QString &WireguardServiceBackend::pipePath()
-{
-    static const auto _pipePath =
-        QStringLiteral(R"(\\.\pipe\ProtectedPrefix\Administrators\WireGuard\%1)")
-            .arg(interfaceName);
-    return _pipePath;
-}
 
 void WireguardServiceBackend::cleanFile(const Path &file, const QString &traceName)
 {
@@ -392,11 +295,9 @@ void WireguardServiceBackend::cleanup()
         // fails
         ->next([](const Error &err)
         {
-            // After ensuring that the service is stopped (or timing out), try
-            // to delete the wgpia0 interface if it already existed.  This can
-            // happen if we didn't cleanly shut down while connecte, such as if
-            // the OS crashes or power is lost.
-            Exec::cmd(Path::WireguardServiceExecutable, {QStringLiteral("/cleaninterface"), interfaceName});
+            // The WireGuard-NT interface is removed automatically when the
+            // service stops; the service stop requested above is all the
+            // interface cleanup needed.
 
             _doingInitialCleanup = false;
             qInfo() << "WireGuard initial cleanup finished";
@@ -415,9 +316,20 @@ WireguardServiceBackend::~WireguardServiceBackend()
 }
 
 auto WireguardServiceBackend::createInterface(wg_device &wgDev,
+                                              const std::optional<AmneziaObfuscation> &obfuscation,
                                               const QPair<QHostAddress, int> &peerIpNet)
     -> Async<std::shared_ptr<NetworkAdapter>>
 {
+    // WireGuard-NT cannot apply Amnezia obfuscation.  Refuse to create the
+    // interface rather than silently writing a vanilla config, which would
+    // only fail later as a hard-to-diagnose handshake timeout.
+    if(obfuscation.has_value())
+    {
+        qWarning() << "Obfuscation parameters were passed to the WireGuard-NT"
+                      " service backend, which cannot apply them";
+        return Async<std::shared_ptr<NetworkAdapter>>::reject({HERE, Error::Code::WireguardCreateDeviceFailed});
+    }
+
     if(_doingInitialCleanup)
     {
         qWarning() << "Cannot connect to WireGuard yet, initial cleanup is still occurring";
@@ -452,14 +364,18 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
             // Unimplemented/ignored flags:
             // - WGPEER_REMOVE_ME - does not make sense in initial config
             // - WGPEER_REPLACE_ALLOWEDIPS - no effect; initial config
-            // - WGPEER_HAS_PRESHARED_KEY - not used in PIA
             Q_ASSERT(!(pPeer->flags & WGPEER_REMOVE_ME));
-            Q_ASSERT(!(pPeer->flags & WGPEER_HAS_PRESHARED_KEY));
 
             conf << "Endpoint = " << pPeer->endpoint << endl;
 
             if(pPeer->flags & WGPEER_HAS_PUBLIC_KEY)
+            {
                 conf << "PublicKey = " << wgKeyToB64(pPeer->public_key).toStdString() << endl;
+
+                // PIA does not use preshared keys, so this writes an all-zero
+                // PSK, which WireGuard treats the same as "no preshared key".
+                conf << "PresharedKey = " << wgKeyToB64(pPeer->preshared_key).toStdString() << endl;
+            }
 
             if(pPeer->flags & WGPEER_HAS_PERSISTENT_KEEPALIVE_INTERVAL)
             {
@@ -536,23 +452,20 @@ auto WireguardServiceBackend::createInterface(wg_device &wgDev,
             // The interface doesn't show up immediately though, the service
             // signals that it has started before creating the interface to
             // avoid SCM deadlocks.
-            qInfo() << "WireGuard started, find the WinTUN interface";
-            return Async<WinTunInterfaceTask>::create();
+            qInfo() << "WireGuard started, find the WireGuard-NT interface";
+            return Async<WgInterfaceTask>::create();
         });
 }
 
 auto WireguardServiceBackend::getStatus() -> Async<WgDevPtr>
 {
-    return Async<WinLocalSocketTask>::create(pipePath())
-        ->then([](const std::shared_ptr<QLocalSocket> &pSocket)
-        {
-            Q_ASSERT(pSocket);  // Postcondition of WinLocalSocketTask (rejects otherwise)
-            return Async<WireguardDeviceStatusTask>::create(pSocket);
-        })
+    // Retrieve the status from the service executable's /getconfig command
+    // (JSON output)
+    return Async<WgServiceCliTask>::create(interfaceName)
         ->then([](const std::shared_ptr<WgDevStatus> &pDev)
         {
-            Q_ASSERT(pDev); // Postcondition of WireguardDeviceStatusTask
-            // Like WireguardGoBackend, return an aliased shared pointer
+            Q_ASSERT(pDev); // Postcondition of WgServiceCliTask
+            // Return an aliased shared pointer to the wg_device
             return WgDevPtr{pDev, &pDev->device()};
         });
 }

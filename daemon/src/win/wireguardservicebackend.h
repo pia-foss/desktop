@@ -25,14 +25,13 @@
 #include "../wireguardbackend.h"
 #include "../wireguarduapi.h"
 #include <common/src/async.h>
-#include <QLocalSocket>
 
 // WireguardServiceBackend is a Wireguard userspace implementation using the
 // Windows service backend.
 //
 // Configuration occurs by writing a config file that's specified on the
-// service's command line.  Stat updates use the Wireguard userspace IPC
-// protocol.
+// service's command line.  Status updates use CLI-based retrieval via
+// wgservice.exe /getconfig (JSON output).
 class WireguardServiceBackend : public WireguardBackend
 {
     Q_OBJECT
@@ -42,10 +41,9 @@ private:
     // If we're still actively doing initial cleanup, we can't connect yet.
     // Cleanup usually doesn't take a long time, but SCM and wgservice have been
     // known to take a while to start/stop in some cases, and we don't want the
-    // /cleaninterface cleanup step to occur while connected or connecting.
+    // cleanup step to occur while connected or connecting.
     static bool _doingInitialCleanup;
 
-    static const QString &pipePath();
     static void cleanFile(const Path &file, const QString &traceName);
 
     static Async<void> asyncCleanup();
@@ -61,6 +59,7 @@ public:
 
 public:
     virtual auto createInterface(wg_device &wgDev,
+                                 const std::optional<AmneziaObfuscation> &obfuscation,
                                  const QPair<QHostAddress, int> &peerIpNet)
         -> Async<std::shared_ptr<NetworkAdapter>> override;
 

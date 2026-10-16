@@ -48,6 +48,17 @@ Firewall::Firewall(FirewallConfig config)
     // TODO - Don't provide Firewall APIs at all on non-desktop platforms
     throw std::runtime_error{"kapps::net::Firewall not available on this platform"};
 #endif
+
+#if defined(KAPPS_CORE_OS_MACOS)
+    // Connect to the mac firewall signal
+    _pPlatformFirewall->splitTunnelActivationFailed = [this](bool failed)
+        {
+            KAPPS_CORE_INFO() << "mac firewall split tunnel activation failed:" << failed;
+
+            // This signal is captured by the posix daemon
+            macSplitTunnelActivationFailed(failed);
+        };
+#endif
 }
 
 void Firewall::applyRules(const FirewallParams &params)

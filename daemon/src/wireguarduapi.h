@@ -108,6 +108,7 @@ namespace Uapi
                        const wg_key &value);
     void appendRequest(QByteArray &message, const QLatin1String &key, int value);
     void appendRequest(QByteArray &message, const QLatin1String &key, unsigned value);
+    void appendRequest(QByteArray &message, const QLatin1String &key, uint64_t value);
     void appendRequest(QByteArray &message, const QLatin1String &key,
                        const sockaddr_in &value);
     void appendRequest(QByteArray &message, const QLatin1String &key,
@@ -165,7 +166,8 @@ class WireguardConfigDeviceTask : public Task<int>
 
 public:
     WireguardConfigDeviceTask(std::shared_ptr<QLocalSocket> pIpcSocket,
-                              const wg_device &wgDev);
+                              const wg_device &wgDev,
+                              const std::optional<AmneziaObfuscation> &obfuscation);
 
 private:
     void receiveValue(Uapi::Key key, const QLatin1String &value);

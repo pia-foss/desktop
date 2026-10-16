@@ -207,9 +207,20 @@ void MacFirewall::startSplitTunnel(const FirewallParams &params)
     // empty.
     _pSplitTunnelWorker.emplace([](core::Any){});
 
+    // This call returns almost immediately so syncInvoke is fine here, even if it blocks the
+    // calling thread until it's done
     _pSplitTunnelWorker->syncInvoke([&]
     {
         _pTransparentProxy.emplace(params, _config);
+
+        // Connect to the transparent proxy signal after emplace completes
+        _pTransparentProxy->activationFailed = [this](bool failed)
+        {
+            KAPPS_CORE_INFO() << "Transparent proxy activation failed:" << failed;
+
+            // This signal is captured by the Firewall class
+            splitTunnelActivationFailed(failed);
+        };
     });
 }
 
@@ -233,7 +244,13 @@ void MacFirewall::updateSplitTunnel(const FirewallParams &params)
     // thread, but the worker shouldn't block us for long, and we should not
     // risk proceeding with a VPN connection/disconnection (etc.) if the split
     // tunnel rules have changed (don't risk briefly leaking an app while the
-    // update is queued.)
+    // update is queued.).
+    //
+    // This might block since update() runs sync() and sync()
+    // will wait for user activation, if the sysext has not been activated successfully.
+    // The fix for this case is inside the sync() function itself since we prefer to keep calling
+    // update() using syncInvoke, to not potentially leak (in the scenario in which the sysext has
+    // already been successfully activated)
     _pSplitTunnelWorker->syncInvoke([&]()
         {
             KAPPS_CORE_INFO() << "Updating split tunnel configuration";

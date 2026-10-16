@@ -85,7 +85,7 @@ namespace
     // Resource paths for various regions-related resource (relative to the API
     // base)
     const QString shadowsocksRegionsResource{QStringLiteral("shadow_socks")};
-    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v6")};
+    const QString modernRegionsResource{QStringLiteral("vpninfo/servers/v7")};
     const QString modernRegionMetaResource{QStringLiteral("vpninfo/regions/v2")};
 
     // Resource paths for IP Address
@@ -324,8 +324,8 @@ Daemon::Daemon(QObject* parent)
     _serializationTimer.setSingleShot(true);
     connect(&_serializationTimer, &QTimer::timeout, this, &Daemon::serialize);
 
-    // Refresh account information every 5 mins.
-    _accountRefreshTimer.setInterval(msec(std::chrono::minutes(5)));
+    // Refresh account information every hour.
+    _accountRefreshTimer.setInterval(msec(std::chrono::hours(1)));
     connect(&_accountRefreshTimer, &QTimer::timeout, this, &Daemon::refreshAccountInfo);
 
     _dedicatedIpRefreshTimer.setInterval(msec(dipRefreshFastInterval));
@@ -459,6 +459,7 @@ Daemon::Daemon(QObject* parent)
     _methodRegistry->add(RPC_METHOD(logout));
     _methodRegistry->add(RPC_METHOD(downloadUpdate));
     _methodRegistry->add(RPC_METHOD(cancelDownloadUpdate));
+    _methodRegistry->add(RPC_METHOD(clearSplitTunnelActivationFailed));
     _methodRegistry->add(RPC_METHOD(submitRating));
     _methodRegistry->add(RPC_METHOD(inspectUwpApps));
     _methodRegistry->add(RPC_METHOD(checkDriverState));
@@ -521,6 +522,11 @@ Daemon::Daemon(QObject* parent)
             &Daemon::updatePortForwarder);
     updatePortForwarder();
 
+    connect(&_settings, &DaemonSettings::dipRemotePortUDPChanged, this,
+            &Daemon::updateDedicatedIpPorts);
+    connect(&_settings, &DaemonSettings::dipRemotePortTCPChanged, this,
+            &Daemon::updateDedicatedIpPorts);
+
     connect(&_environment, &Environment::overrideActive, this,
             &Daemon::setOverrideActive);
     connect(&_environment, &Environment::overrideFailed, this,
@@ -559,6 +565,14 @@ Daemon::Daemon(QObject* parent)
             _modernLatencyTracker.start();
 
         _dedicatedIpRefreshTimer.start();
+        // A DIP saved by an older version has no OpenVPN ports until it is
+        // refreshed, so refresh now instead of waiting for the timer
+        const auto &dips = _account.dedicatedIps();
+        if(std::any_of(dips.begin(), dips.end(), [](const AccountDedicatedIp &dip)
+            {return dip.openvpnUdpPorts().empty() && dip.openvpnTcpPorts().empty();}))
+        {
+            refreshDedicatedIps();
+        }
 
         _modernRegionRefresher.startOrOverride(environment().getModernRegionsListApi(),
                                                Path::ModernRegionOverride,
@@ -732,10 +746,6 @@ Daemon::Daemon(QObject* parent)
     connect(&_settings, &DaemonSettings::serviceQualityAcceptanceVersionChanged, this,
             updateEventsEnabled);
     connect(&_data, &DaemonData::flagsChanged, this, updateEventsEnabled);
-
-    // Hard-code this to 30 seconds, due to new requirements. We must fail-over and reconnect quickly now
-    // as server shutdowns and rotations are more common on Kape infrastructure.
-    _settings.wireguardPingTimeout(30);
 }
 
 Daemon::~Daemon()
@@ -861,6 +871,20 @@ void Daemon::RPC_applySettings(const QJsonObject &settings, bool reconnectIfNeed
         throw *_settings.error();
     }
 
+    // The new settings can rule out the location we're connected to, since the
+    // obfuscation setting uses one kind of WireGuard server exclusively.  Drop
+    // the connection rather than leaving it up with a reconnect pending that
+    // could never succeed - staying connected would also keep using the kind of
+    // server the user just asked not to use.  The client reports why it can't
+    // be re-established.
+    if(_state.vpnEnabled() && obfuscationMismatch())
+    {
+        qWarning() << "Disconnecting, location"
+            << _state.vpnLocations().nextLocation()->id()
+            << "has no servers matching the obfuscation setting";
+        disconnectVPN(ServiceQuality::ConnectionSource::Manual);
+    }
+
     // If the VPN is enabled, a reconnect is needed, and the caller asked to
     // reconnect, reconnect now.
     if(reconnectIfNeeded)
@@ -954,7 +978,7 @@ QString Daemon::RPC_getCountryBestRegion(const QString &country)
 
 Async<void> Daemon::RPC_addDedicatedIp(const QString &token)
 {
-    return _apiClient.postRetry(*_environment.getApiv2(), QStringLiteral("dedicated_ip"),
+    return _apiClient.postRetry(*_environment.getApiv5(), QStringLiteral("dedicated_ip"),
         QJsonDocument{QJsonObject{
             {
                 QStringLiteral("tokens"),
@@ -1627,6 +1651,11 @@ void Daemon::RPC_cancelDownloadUpdate()
     _updateDownloader.cancelDownload();
 }
 
+void Daemon::RPC_clearSplitTunnelActivationFailed()
+{
+    _settings.splitTunnelActivationFailed(false);
+}
+
 Async<void> Daemon::RPC_submitRating(int rating)
 {
     qDebug () << "Submitting Rating";
@@ -1716,28 +1745,40 @@ void Daemon::handleSleepWakeTransitions()
         {
             qInfo() << "VPN will disconnect for sleep";
             _settings.connectOnWake(true);
+            _wakeReconnectStarted = false;
             _connection->disconnectVPN();
         }
     }
     else
     {
+        // connectOnWake stays set until the VPN reconnects, so the killswitch stays engaged while
+        // reconnecting (see reapplyFirewallRules()).
         if(_settings.connectOnWake())
         {
             if(_connection->state() == VPNConnection::State::Disconnected)
             {
-                qInfo() << "Woke from sleep, will reconnect VPN";
-                _settings.connectOnWake(false);
-                _connection->connectVPN(_state.needsReconnect());
+                // Only an OpenVPN auth error ends a reconnect in Disconnected; retrying would loop.
+                if(_wakeReconnectStarted)
+                {
+                    qInfo() << "Reconnect after wake stopped before connecting";
+                    _settings.connectOnWake(false);
+                }
+                else
+                {
+                    qInfo() << "Woke from sleep, will reconnect VPN";
+                    _wakeReconnectStarted = true;
+                    _connection->connectVPN(_state.needsReconnect());
+                }
             }
-            else if(_connection->state() == VPNConnection::State::Disconnecting)
+            else if(_connection->state() == VPNConnection::State::Disconnecting &&
+                    !_wakeReconnectStarted)
             {
                 qInfo() << "Woke from sleep too quick, will reconnect once disconnected";
             }
             else if(_connection->state() == VPNConnection::State::Connected)
             {
-                // Safeguard. If this ever happens there's an issue with this function's logic or the connections.
+                qInfo() << "Reconnected after wake";
                 _settings.connectOnWake(false);
-                qWarning() << "Already connected when waking, will remove connect on wake flag. This should not happen";
             }
         }
         // Else: We are not sleeping and we did not just wake up, do nothing.
@@ -2500,13 +2541,22 @@ void Daemon::applyBuiltLocations(LocationsById newLocations,
 
     // Update the available ports
     DescendingPortSet udpPorts, tcpPorts;
-    for(const auto &locationEntry : _state.availableLocations())
-    {
-        locationEntry.second->allPortsForService(Service::OpenVpnUdp, udpPorts);
-        locationEntry.second->allPortsForService(Service::OpenVpnTcp, tcpPorts);
-    }
+    std::vector<quint16> dipUdpPorts, dipTcpPorts;
+    buildOpenVpnPortChoices(_state.availableLocations(), udpPorts, tcpPorts,
+                            dipUdpPorts, dipTcpPorts);
     _state.openvpnUdpPortChoices(udpPorts);
     _state.openvpnTcpPortChoices(tcpPorts);
+    _state.dedicatedIpOpenvpnUdpPortChoices(dipUdpPorts);
+    _state.dedicatedIpOpenvpnTcpPortChoices(dipTcpPorts);
+    updateDedicatedIpPorts();
+}
+
+void Daemon::updateDedicatedIpPorts()
+{
+    _state.dedicatedIpOpenvpnUdpPort(dedicatedIpPortToUse(_settings.dipRemotePortUDP(),
+        _state.dedicatedIpOpenvpnUdpPortChoices()));
+    _state.dedicatedIpOpenvpnTcpPort(dedicatedIpPortToUse(_settings.dipRemotePortTCP(),
+        _state.dedicatedIpOpenvpnTcpPortChoices()));
 }
 
 bool Daemon::rebuildModernLocations(const QJsonObject &regionsObj,
@@ -2804,46 +2854,6 @@ void Daemon::refreshAccountInfo()
     }
 }
 
-void Daemon::applyDedicatedIpJson(const QJsonObject &tokenData,
-                                  AccountDedicatedIp &dipInfo)
-{
-    QString oldIp = dipInfo.ip();
-    // API returns the expire time in seconds; we store timestamps in
-    // milliseconds
-    quint64 newExpire = json_cast<quint64>(tokenData["dip_expire"], HERE) * 1000;
-    if(newExpire == 0)
-    {
-        qWarning() << "Dedicated IP" << dipInfo.id()
-            << "returned invalid expiration 0";
-        // This shouldn't happen, but just in case, do not ever store an
-        // expiration timestamp of 0 - this would make the region look like a
-        // non-DIP region.
-        //
-        // We should store _something_ though since this might be a new DIP,
-        // just use 1000 instead (1 second after midnight, Jan 1, 1970 -
-        // functionally equivalent assuming no time travel)
-        newExpire = 1000;
-    }
-    if(newExpire != dipInfo.expire())
-    {
-        qInfo() << "Dedicated IP" << dipInfo.id() << "updated expiration from"
-            << dipInfo.expire() << "to" << newExpire;
-        dipInfo.expire(newExpire);
-    }
-    dipInfo.regionId(json_cast<QString>(tokenData["id"], HERE));
-    dipInfo.serviceGroups(json_cast<std::vector<QString>>(tokenData["groups"], HERE));
-    dipInfo.ip(json_cast<QString>(tokenData["ip"], HERE));
-    dipInfo.cn(json_cast<QString>(tokenData["cn"], HERE));
-    // If the dedicated IP was known and has changed, set the last change
-    // timestamp.  Don't clear this if it didn't change, the timestamps are only
-    // cleared when the user dismisses the notification.
-    if(!oldIp.isEmpty() && oldIp != dipInfo.ip())
-    {
-        qInfo() << "Dedicated IP" << dipInfo.id() << "has changed IP address";
-        dipInfo.lastIpChange(QDateTime::currentMSecsSinceEpoch());
-    }
-}
-
 void Daemon::applyRefreshedDedicatedIp(const QJsonObject &tokenData, int traceIdx,
                                        std::vector<AccountDedicatedIp> &dedicatedIps)
 {
@@ -2904,7 +2914,7 @@ void Daemon::refreshDedicatedIps()
     // for the response if the user adds/removes tokens.
     auto expectedSize = dipTokens.size();
     qInfo() << "Refresh info for" << dipTokens.size() << "dedicated IPs";
-    _apiClient.postRetry(*_environment.getApiv2(), QStringLiteral("dedicated_ip"),
+    _apiClient.postRetry(*_environment.getApiv5(), QStringLiteral("dedicated_ip"),
         QJsonDocument{QJsonObject{{QStringLiteral("tokens"), dipTokens}}},
         ApiClient::autoAuth(_account.username(), _account.password(), _account.token()))
         ->notify(this, [this, expectedSize](const Error &err,
@@ -3082,7 +3092,9 @@ void Daemon::reapplyFirewallRules()
         params.leakProtectionEnabled = false;
     else if (_settings.killswitch() == QLatin1String("on"))
         params.leakProtectionEnabled = true;
-    else if (_state.systemSleeping() && _settings.connectOnWake())
+    // From sleep until the VPN reconnects after wake.  connectOnWake persists, so vpnEnabled()
+    // ignores one left over from a daemon restart.
+    else if (_settings.connectOnWake() && _state.vpnEnabled())
     {
         params.leakProtectionEnabled = true;
     }
@@ -3512,6 +3524,42 @@ void Daemon::calculateLocationPreferences()
                                  std::move(pSsNext)});
 }
 
+bool Daemon::obfuscationMismatch() const
+{
+#if defined(Q_OS_WIN)
+    // WireGuard-NT cannot apply Amnezia obfuscation, so the setting is ignored
+    // on Windows and never rules a location out
+    return false;
+#else
+    if(_settings.method() != QStringLiteral("wireguard"))
+    {
+        return false;
+    }
+
+    const auto &pLocation = _state.vpnLocations().nextLocation();
+    // Having no location at all is a different problem, reported on its own
+    if(!pLocation)
+    {
+        return false;
+    }
+
+    if(_settings.wireguardObfuscation())
+    {
+        return !pLocation->hasObfuscatedWireGuard();
+    }
+    else
+    {
+        return !pLocation->hasPlainWireGuard();
+    }
+#endif
+}
+
+bool Daemon::dedicatedIpOpenVpnMismatch() const
+{
+    const auto &pLocation = _state.vpnLocations().nextLocation();
+    return pLocation && dedicatedIpLacksOpenVpn(_settings, *pLocation);
+}
+
 void Daemon::onUpdateRefreshed(const Update &availableUpdate,
                                bool osFailedRequirement,
                                const Update &gaUpdate, const Update &betaUpdate,
@@ -3747,6 +3795,25 @@ Error Daemon::connectVPN(ServiceQuality::ConnectionSource source)
     if(!vpnErrors.empty())
         return {HERE, Error::Code::VPNSupportError};
 
+    // The obfuscation setting uses one kind of WireGuard server exclusively, so
+    // a location without any of that kind can never connect.  Reject the
+    // request instead of starting attempts that could only fail and retry.
+    if(obfuscationMismatch())
+    {
+        qWarning() << "Location" << _state.vpnLocations().nextLocation()->id()
+            << "has no servers matching the obfuscation setting";
+        return {HERE, Error::Code::DaemonRPCObfuscationMismatch};
+    }
+
+    // OpenVPN to a dedicated IP needs the DIP ports, a connection without them
+    // could only fail and retry.
+    if(dedicatedIpOpenVpnMismatch())
+    {
+        qWarning() << "Dedicated IP" << _state.vpnLocations().nextLocation()->id()
+            << "has no ports for the OpenVPN protocol in use";
+        return {HERE, Error::Code::DaemonRPCDedicatedIpNoOpenVpnPorts};
+    }
+
     // Note that for the rest of this logic, it is possible that the VPN is
     // already enabled (_state.vpnEnabled() is already true).  We still want to
     // apply most of the remaining logic, and in particular
@@ -3792,6 +3859,8 @@ void Daemon::disconnectVPN(ServiceQuality::ConnectionSource source)
 {
     _snoozeTimer.forceStopSnooze();
     _state.vpnEnabled(false);
+    // Cancel any reconnect after wake before the state change below can restart it.
+    _settings.connectOnWake(false);
 
     _pServiceQuality->vpnDisabled(source);
 
@@ -3904,14 +3973,14 @@ void Daemon::traceMemory()
     logProcessMemoryUnix(QStringLiteral("client"), QStringLiteral(BRAND_NAME));
     logProcessMemoryUnix(QStringLiteral("daemon"), QStringLiteral(BRAND_CODE "-daemon"));
     logProcessMemoryUnix(QStringLiteral("openvpn"), QStringLiteral(BRAND_CODE "-openvpn"));
-    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-wireguard-go"));
+    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-amneziawg-go"));
 #endif
 
 #ifdef Q_OS_LINUX
     logProcessMemoryUnix(QStringLiteral("client"), QStringLiteral(BRAND_CODE "-client"));
     logProcessMemoryUnix(QStringLiteral("daemon"), QStringLiteral(BRAND_CODE "-daemon"));
     logProcessMemoryUnix(QStringLiteral("openvpn"), QStringLiteral(BRAND_CODE "-openvpn"));
-    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-wireguard-go"));
+    logProcessMemoryUnix(QStringLiteral("wireguard"), QStringLiteral(BRAND_CODE "-amneziawg-go"));
 #endif
 
 #ifdef Q_OS_WIN

@@ -42,11 +42,12 @@ class NativeHelpers : public QObject
 
 private:
     // Used internally for common "driver reinstallation" logic to identify the
-    // TAP or WFP callout driver.
+    // TAP, WinTUN or WFP callout driver.
     enum class Driver
     {
         Tap,
         WinTun,
+        Dco,
         WfpCallout,
     };
 
@@ -83,6 +84,7 @@ public:
 
     Q_PROPERTY(bool macosSplitTunnelSupported READ isMacOSSplitTunnelSupported FINAL CONSTANT)
     Q_PROPERTY(bool macosVersion15 READ isMacOSVersion15 FINAL CONSTANT)
+    Q_PROPERTY(bool macosVersion26OrNewer READ isMacOSVersion26OrNewer FINAL CONSTANT)
 
     // Whether the client is currently logging to a file.  This exposes the flag
     // from Logger, which works with or without a daemon connection.
@@ -164,6 +166,10 @@ public:
     Q_INVOKABLE void reinstallTun();
     Q_PROPERTY(QString reinstallTunStatus READ reinstallTunStatus NOTIFY reinstallTunStatusChanged FINAL)
 
+    // Reinstall the OpenVPN DCO driver (Windows only)
+    Q_INVOKABLE void reinstallDco();
+    Q_PROPERTY(QString reinstallDcoStatus READ reinstallDcoStatus NOTIFY reinstallDcoStatusChanged FINAL)
+
     // Reinstall the WFP callout driver (Windows only)
     Q_INVOKABLE void installWfpCallout();
     Q_INVOKABLE void reinstallWfpCallout();
@@ -234,6 +240,7 @@ signals:
     void logToFileChanged();
     void reinstallTapStatusChanged();
     void reinstallTunStatusChanged();
+    void reinstallDcoStatusChanged();
     void reinstallWfpCalloutStatusChanged();
     void terminalStartFailed (const QString &command);
     void dashboardOpenRequested();
@@ -246,16 +253,19 @@ private:
     QString getProductName() const;
     bool isMacOSSplitTunnelSupported() const;
     bool isMacOSVersion15() const;
+    bool isMacOSVersion26OrNewer() const;
     bool getLogToFile();
     bool getSplitTunnelSupported() const;
     void onFocusWindowChanged(QWindow *pFocusWindow);
     QString reinstallTapStatus() const { return _reinstallTapStatus; }
     QString reinstallTunStatus() const { return _reinstallTunStatus; }
+    QString reinstallDcoStatus() const { return _reinstallDcoStatus; }
     QString reinstallWfpCalloutStatus() const {return _reinstallWfpCalloutStatus;}
     bool runInTerminal(const QString &command);
 
     // Reinstall a Windows driver
     void reinstallDriver(Driver type, const wchar_t *commandParams);
+    void startDriverReinstall(Driver type, const wchar_t *commandParams);
     // Set either the TAP or WFP Callout driver reinstallation status.
     void setDriverReinstallStatus(Driver type, const QString &status);
 
@@ -276,6 +286,8 @@ private:
     QString _reinstallTapStatus;
     // Status of WinTUN adapter reinstallation
     QString _reinstallTunStatus;
+    // Status of OpenVPN DCO driver reinstallation
+    QString _reinstallDcoStatus;
     // Status of WFP callout driver reinstallation (or installation if this is
     // the first time)
     QString _reinstallWfpCalloutStatus;

@@ -31,7 +31,6 @@
 #include "win_wintun.h"
 #include <common/src/win/win_messagewnd.h>
 #include "servicemonitor.h"
-#include "win_servicestate.h"
 
 // Deadline timer (like QDeadlineTimer) that does not count time when the system
 // is suspended.  (Both clock sources for QDeadlineTimer do count suspend time.)
@@ -67,15 +66,15 @@ public:
 
     static WinDaemon* instance() { return static_cast<WinDaemon*>(Daemon::instance()); }
 
+    std::shared_ptr<NetworkAdapter> getDcoAdapter();
     std::shared_ptr<NetworkAdapter> getTapAdapter();
     std::shared_ptr<NetworkAdapter> getTunAdapter();
     std::shared_ptr<NetworkAdapter> recreateTunAdapter();
 
 private:
-    // Check if the adapter is present, and update Daemon's corresponding state
-    // (Daemon::adapterValid()).
-    void checkTapAdapter();
     void onAboutToConnect();
+    // Check whether the TAP adapter is installed and update DaemonState
+    void checkTapAdapter();
 
     virtual LRESULT proc(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
@@ -88,7 +87,7 @@ protected:
     virtual QJsonValue RPC_inspectUwpApps(const QJsonArray &familyIds) override;
     virtual void RPC_checkDriverState() override;
     virtual void writePlatformDiagnostics(DiagnosticsFile &file) override;
-    virtual void applyPlatformInstallFeatureFlags() override;
+    virtual void applyPlatformInstallFeatureFlags() override {}
 
     // Update split tunnel rules in WinAppMonitor
     void updateSplitTunnelRules();
@@ -99,15 +98,13 @@ protected:
     // split tunnel DNS
     WinDnsCacheControl _dnsCacheControl;
 
-    // When Windows suspends, the TAP adapter disappears, and it won't be back
-    // right away when we resume.  This just suppresses the "TAP adapter
-    // missing" error briefly after a system resume.
-    WinUnbiasedDeadline _resumeGracePeriod;
     ServiceMonitor _wfpCalloutMonitor;
-    std::unique_ptr<WinServiceState> _pMsiServiceState;
     kapps::net::WinAppMonitor _appMonitor;
     WintunModule _wintun;
     std::shared_ptr<WintunAdapter> _wintunAdapter = nullptr;
+    // The TAP adapter usually appears to be missing briefly following an OS
+    // resume; suppress the "missing" state during this grace period.
+    WinUnbiasedDeadline _resumeGracePeriod;
 };
 
 #undef g_daemon

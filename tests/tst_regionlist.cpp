@@ -18,6 +18,10 @@
 
 #include <kapps_regions/src/regionlist.h>
 #include <kapps_regions/src/metadata.h>
+#include <kapps_regions/regionlist.h>
+#include <kapps_regions/region.h>
+#include <kapps_regions/server.h>
+#include <cstring>
 #include <kapps_core/src/logger.h>
 #include "src/testresource.h"
 #include <QtTest>
@@ -34,6 +38,43 @@ private:
     RegionList parseJson(core::StringSlice json)
     {
         return {json, {}, {}, {}};
+    }
+
+    // Build a PIAv6 regions list with one standard region and one DIP in that
+    // region, using the given DIP OpenVPN ports.
+    RegionList buildDipRegionList(const std::vector<std::uint16_t> &dipUdpPorts,
+                                  const std::vector<std::uint16_t> &dipTcpPorts)
+    {
+        core::StringSlice json = R"(
+            {
+              "groups": {
+                "ovpnudp": [{"name": "openvpn_udp", "ports": [8080, 853]}],
+                "ovpntcp": [{"name": "openvpn_tcp", "ports": [80, 443]}],
+                "wg": [{"name": "wireguard", "ports": [1337]}]
+              },
+              "regions": [
+                {
+                  "id": "us_atlanta",
+                  "auto_region": true,
+                  "port_forward": false,
+                  "geo": false,
+                  "offline": false,
+                  "servers": {
+                    "ovpnudp": [{"ip": "10.0.0.1", "cn": "atlanta401"}],
+                    "ovpntcp": [{"ip": "10.0.0.1", "cn": "atlanta401"}],
+                    "wg": [{"ip": "10.0.0.1", "cn": "atlanta401"}]
+                  }
+                }
+              ]
+            }
+        )";
+
+        const std::vector<core::StringSlice> dipGroups{"ovpnudp", "ovpntcp", "wg"};
+        const std::vector<DedicatedIp> dips{
+            {"dip-01234567", core::Ipv4Address{191, 96, 74, 2}, "atlanta429", {},
+             dipGroups, "us_atlanta", dipUdpPorts, dipTcpPorts}
+        };
+        return {RegionList::PIAv6, json, {}, dips, {}};
     }
 
 private slots:
@@ -738,6 +779,460 @@ private slots:
         QCOMPARE(pUsChicago->name().getLanguageText({"tr"}), "Şikago");
         QCOMPARE(pUsChicago->name().getLanguageText({"zh-Hans"}), "芝加哥");
         QCOMPARE(pUsChicago->name().getLanguageText({"zh-Hant"}), "芝加哥");
+    }
+
+    // Test AWG (WireGuard Amnezia) service parsing in the v6/v7 serverlist format.
+    // The v7 endpoint returns v6-format JSON (groups + servers-by-group),
+    // parsed with the PIAv6 constructor.
+    void testPiav6WireGuardAmnezia()
+    {
+        core::StringSlice json = R"(
+            {
+              "groups": {
+                "wg": [{"name": "wireguard", "ports": [1337]}],
+                "awg": [{"name": "awg", "ports": [1338]}],
+                "ovpnudp": [{"name": "openvpn_udp", "ports": [8080]}],
+                "meta": [{"name": "meta", "ports": [443]}]
+              },
+              "regions": [
+                {
+                  "id": "us_test",
+                  "auto_region": true,
+                  "port_forward": true,
+                  "geo": false,
+                  "offline": false,
+                  "servers": {
+                    "wg": [{"ip": "10.0.0.1", "cn": "Server-WG-1"}],
+                    "awg": [{"ip": "10.0.0.2", "cn": "Server-AWG-1"}],
+                    "ovpnudp": [{"ip": "10.0.0.1", "cn": "Server-WG-1", "van": true}],
+                    "meta": [{"ip": "10.0.0.3", "cn": "Server-Meta-1"}]
+                  }
+                }
+              ]
+            }
+        )";
+
+        RegionList r{RegionList::PIAv6, json, {}, {}, {}};
+        QCOMPARE(r.regions().size(), 1u);
+
+        const auto *pRegion = r.getRegion("us_test");
+        QVERIFY(pRegion);
+        QCOMPARE(pRegion->servers().size(), 4u);
+
+        // Identify servers by CN (order depends on JSON object iteration)
+        const Server *wgServer{};
+        const Server *awgServer{};
+        const Server *ovpnServer{};
+        const Server *metaServer{};
+
+        for(const auto *pServer : pRegion->servers())
+        {
+            QVERIFY(pServer);
+            if(pServer->commonName() == "Server-WG-1" && pServer->hasOpenVpnUdp())
+                ovpnServer = pServer;
+            else if(pServer->commonName() == "Server-WG-1" && !pServer->hasOpenVpnUdp())
+                wgServer = pServer;
+            else if(pServer->commonName() == "Server-AWG-1")
+                awgServer = pServer;
+            else if(pServer->commonName() == "Server-Meta-1")
+                metaServer = pServer;
+        }
+
+        // Vanilla WG server
+        QVERIFY(wgServer);
+        QCOMPARE(wgServer->address(), (core::Ipv4Address{10, 0, 0, 1}));
+        QCOMPARE(wgServer->hasWireGuard(), true);
+        QCOMPARE(wgServer->hasWireGuardAmnezia(), false);
+        QCOMPARE(wgServer->wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+        QCOMPARE(wgServer->wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{}));
+
+        // AWG server — also reports hasWireGuard() (AWG is WG + obfuscation)
+        QVERIFY(awgServer);
+        QCOMPARE(awgServer->address(), (core::Ipv4Address{10, 0, 0, 2}));
+        QCOMPARE(awgServer->hasWireGuard(), true);
+        QCOMPARE(awgServer->hasWireGuardAmnezia(), true);
+        QCOMPARE(awgServer->wireGuardPorts(), (std::vector<std::uint16_t>{1338}));
+        QCOMPARE(awgServer->wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{1338}));
+
+        // OpenVPN server
+        QVERIFY(ovpnServer);
+        QCOMPARE(ovpnServer->hasWireGuard(), false);
+        QCOMPARE(ovpnServer->hasWireGuardAmnezia(), false);
+
+        // Service enum checks
+        QCOMPARE(awgServer->hasService(Service::WireGuardAmnezia), true);
+        QCOMPARE(wgServer->hasService(Service::WireGuardAmnezia), false);
+        QCOMPARE(awgServer->servicePorts(Service::WireGuardAmnezia),
+                 (std::vector<std::uint16_t>{1338}));
+    }
+
+    // The serverlist states an AmneziaWG server's port on the server itself and
+    // declares no "awg" service group, unlike every other service.  The port is
+    // read from the server so these are still usable, and it serves as both the
+    // AmneziaWG port and the WireGuard port.
+    void testPiav6WireGuardAmneziaPerServerPort()
+    {
+        core::StringSlice json = R"(
+            {
+              "groups": {
+                "wg": [{"name": "wireguard", "ports": [1337]}]
+              },
+              "regions": [
+                {
+                  "id": "us_seattle",
+                  "name": "US Seattle",
+                  "country": "US",
+                  "auto_region": true,
+                  "dns": "us-seattle.pvt.site",
+                  "port_forward": false,
+                  "geo": false,
+                  "offline": false,
+                  "servers": {
+                    "wg": [
+                      {"ip": "173.239.198.183", "cn": "Server-11328-2a"}
+                    ],
+                    "awg": [
+                      {"ip": "173.239.198.25", "cn": "Server-10899-2a", "port": 1338}
+                    ]
+                  }
+                }
+              ]
+            }
+        )";
+
+        RegionList r{RegionList::PIAv6, json, {}, {}, {}};
+        QCOMPARE(r.regions().size(), 1u);
+
+        const auto *pRegion = r.getRegion("us_seattle");
+        QVERIFY(pRegion);
+        QCOMPARE(pRegion->servers().size(), 2u);
+
+        const Server *wgServer{};
+        const Server *awgServer{};
+        for(const auto *pServer : pRegion->servers())
+        {
+            QVERIFY(pServer);
+            if(pServer->commonName() == "Server-11328-2a")
+                wgServer = pServer;
+            else if(pServer->commonName() == "Server-10899-2a")
+                awgServer = pServer;
+        }
+
+        // The vanilla server takes its port from the group, as always
+        QVERIFY(wgServer);
+        QCOMPARE(wgServer->hasWireGuard(), true);
+        QCOMPARE(wgServer->hasWireGuardAmnezia(), false);
+        QCOMPARE(wgServer->wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+
+        // The AmneziaWG server takes its port from the server entry, and joins
+        // the WireGuard pool on that same port
+        QVERIFY(awgServer);
+        QCOMPARE(awgServer->hasWireGuardAmnezia(), true);
+        QCOMPARE(awgServer->wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{1338}));
+        QCOMPARE(awgServer->hasWireGuard(), true);
+        QCOMPARE(awgServer->wireGuardPorts(), (std::vector<std::uint16_t>{1338}));
+        QCOMPARE(awgServer->hasService(Service::WireGuardAmnezia), true);
+        QCOMPARE(awgServer->servicePorts(Service::WireGuardAmnezia),
+                 (std::vector<std::uint16_t>{1338}));
+    }
+
+    // An AmneziaWG server with no usable port can't be connected to, so it is
+    // dropped rather than being stored with no ports.
+    void testPiav6WireGuardAmneziaInvalidPort()
+    {
+        const auto readServers = [](core::StringSlice awgServers)
+        {
+            std::string json{R"(
+                {
+                  "groups": {
+                    "wg": [{"name": "wireguard", "ports": [1337]}]
+                  },
+                  "regions": [
+                    {
+                      "id": "us_seattle",
+                      "auto_region": true,
+                      "port_forward": false,
+                      "geo": false,
+                      "offline": false,
+                      "servers": {
+                        "wg": [{"ip": "173.239.198.183", "cn": "Server-WG"}],
+                        "awg": )"};
+            json += awgServers.to_string();
+            json += R"(
+                      }
+                    }
+                  ]
+                })";
+            RegionList r{RegionList::PIAv6, json, {}, {}, {}};
+            const auto *pRegion = r.getRegion("us_seattle");
+            return pRegion ? pRegion->servers().size() : 0u;
+        };
+
+        // Only the vanilla WireGuard server survives in each case
+        QCOMPARE(readServers(R"([{"ip": "10.0.0.2", "cn": "Server-AWG"}])"), 1u);
+        QCOMPARE(readServers(R"([{"ip": "10.0.0.2", "cn": "Server-AWG", "port": 0}])"), 1u);
+        QCOMPARE(readServers(R"([{"ip": "10.0.0.2", "cn": "Server-AWG", "port": "1338"}])"), 1u);
+
+        // Sanity check: a valid port is kept
+        QCOMPARE(readServers(R"([{"ip": "10.0.0.2", "cn": "Server-AWG", "port": 1338}])"), 2u);
+    }
+
+    // DIP servers use the DIP OpenVPN ports instead of the service group ports,
+    // only for the OpenVPN services each group provides.  Other services and
+    // standard regions are unchanged.
+    void testDipOpenVpnPorts()
+    {
+        RegionList r = buildDipRegionList({1197}, {501, 502});
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QVERIFY(pDip->isDedicatedIp());
+        QCOMPARE(pDip->servers().size(), 3u);
+
+        const Server *udpServer{};
+        const Server *tcpServer{};
+        const Server *wgServer{};
+        for(const auto *pServer : pDip->servers())
+        {
+            QVERIFY(pServer);
+            if(pServer->hasOpenVpnUdp())
+                udpServer = pServer;
+            if(pServer->hasOpenVpnTcp())
+                tcpServer = pServer;
+            if(pServer->hasWireGuard())
+                wgServer = pServer;
+        }
+
+        // Each DIP server keeps only the services of its own group
+        QVERIFY(udpServer);
+        QVERIFY(tcpServer);
+        QVERIFY(wgServer);
+        QVERIFY(udpServer != tcpServer);
+        QVERIFY(udpServer != wgServer);
+        QVERIFY(tcpServer != wgServer);
+
+        QCOMPARE(udpServer->openVpnUdpPorts(), (std::vector<std::uint16_t>{1197}));
+        QCOMPARE(tcpServer->openVpnTcpPorts(), (std::vector<std::uint16_t>{501, 502}));
+        QCOMPARE(wgServer->wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+
+        // The standard region still uses the service group ports
+        const auto *pStd = r.getRegion("us_atlanta");
+        QVERIFY(pStd);
+        for(const auto *pServer : pStd->servers())
+        {
+            QVERIFY(pServer);
+            if(pServer->hasOpenVpnUdp())
+                QCOMPARE(pServer->openVpnUdpPorts(), (std::vector<std::uint16_t>{8080, 853}));
+            if(pServer->hasOpenVpnTcp())
+                QCOMPARE(pServer->openVpnTcpPorts(), (std::vector<std::uint16_t>{80, 443}));
+        }
+    }
+
+    // Without DIP OpenVPN ports the DIP does not offer OpenVPN (the service
+    // group ports would target the wrong endpoint); WireGuard is unaffected.
+    void testDipNoOpenVpnPorts()
+    {
+        RegionList r = buildDipRegionList({}, {});
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QCOMPARE(pDip->hasService(Service::OpenVpnUdp), false);
+        QCOMPARE(pDip->hasService(Service::OpenVpnTcp), false);
+        QCOMPARE(pDip->hasService(Service::WireGuard), true);
+    }
+
+    // If only one OpenVPN protocol has DIP ports, the DIP doesn't offer the
+    // other one
+    void testDipOnlyUdpPorts()
+    {
+        RegionList r = buildDipRegionList({1197}, {});
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QCOMPARE(pDip->hasService(Service::OpenVpnUdp), true);
+        QCOMPARE(pDip->hasService(Service::OpenVpnTcp), false);
+        QCOMPARE(pDip->firstServerFor(Service::OpenVpnUdp)->openVpnUdpPorts(),
+                 (std::vector<std::uint16_t>{1197}));
+    }
+
+    // DIP ports keep the API order; the first one is the default port
+    void testDipPortsOrder()
+    {
+        RegionList r = buildDipRegionList({1198, 1197, 1199}, {502, 501});
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QCOMPARE(pDip->firstServerFor(Service::OpenVpnUdp)->openVpnUdpPorts(),
+                 (std::vector<std::uint16_t>{1198, 1197, 1199}));
+        QCOMPARE(pDip->firstServerFor(Service::OpenVpnTcp)->openVpnTcpPorts(),
+                 (std::vector<std::uint16_t>{502, 501}));
+    }
+
+    // Replacing the DIP ports doesn't change the NCP flag of the service group
+    // (PIAv6 DIPs use the pia-signal-settings groups)
+    void testDipNcpUnchanged()
+    {
+        RegionList r = buildDipRegionList({1197}, {501});
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QCOMPARE(pDip->firstServerFor(Service::OpenVpnUdp)->openVpnUdpNcp(), false);
+        QCOMPARE(pDip->firstServerFor(Service::OpenVpnTcp)->openVpnTcpNcp(), false);
+    }
+
+    // Two DIPs using the same service groups each get their own ports, and
+    // the standard region keeps the group ports
+    void testTwoDipsIndependentPorts()
+    {
+        core::StringSlice json = R"(
+            {
+              "groups": {
+                "ovpnudp": [{"name": "openvpn_udp", "ports": [8080]}],
+                "ovpntcp": [{"name": "openvpn_tcp", "ports": [443]}]
+              },
+              "regions": [
+                {
+                  "id": "us_atlanta", "auto_region": true, "port_forward": false,
+                  "geo": false, "offline": false,
+                  "servers": {"ovpnudp": [{"ip": "10.0.0.1", "cn": "atlanta401"}]}
+                }
+              ]
+            }
+        )";
+        const std::vector<core::StringSlice> dipGroups{"ovpnudp", "ovpntcp"};
+        const std::vector<std::uint16_t> firstUdp{1197}, firstTcp{501};
+        const std::vector<std::uint16_t> secondUdp{2197, 2198}, secondTcp{};
+        const std::vector<DedicatedIp> dips{
+            {"dip-00000001", core::Ipv4Address{191, 96, 74, 2}, "atlanta429", {},
+             dipGroups, "us_atlanta", firstUdp, firstTcp},
+            {"dip-00000002", core::Ipv4Address{191, 96, 74, 3}, "atlanta430", {},
+             dipGroups, "us_atlanta", secondUdp, secondTcp}
+        };
+        RegionList r{RegionList::PIAv6, json, {}, dips, {}};
+
+        const auto *pFirst = r.getRegion("dip-00000001");
+        const auto *pSecond = r.getRegion("dip-00000002");
+        QVERIFY(pFirst);
+        QVERIFY(pSecond);
+        QCOMPARE(pFirst->firstServerFor(Service::OpenVpnUdp)->openVpnUdpPorts(),
+                 (std::vector<std::uint16_t>{1197}));
+        QCOMPARE(pFirst->firstServerFor(Service::OpenVpnTcp)->openVpnTcpPorts(),
+                 (std::vector<std::uint16_t>{501}));
+        QCOMPARE(pSecond->firstServerFor(Service::OpenVpnUdp)->openVpnUdpPorts(),
+                 (std::vector<std::uint16_t>{2197, 2198}));
+        QCOMPARE(pSecond->hasService(Service::OpenVpnTcp), false);
+        QCOMPARE(r.getRegion("us_atlanta")->firstServerFor(Service::OpenVpnUdp)->openVpnUdpPorts(),
+                 (std::vector<std::uint16_t>{8080}));
+    }
+
+    // With the v7 format one group can provide several services.  Only its
+    // OpenVPN ports are replaced; the NCP flags and other services are kept.
+    void testDipOpenVpnPortsCombinedGroup()
+    {
+        core::StringSlice json = R"(
+            {
+              "service_configs": [
+                {
+                  "name": "traffic1",
+                  "services": [
+                    {"service":"openvpn_udp", "ports":[8080,853], "ncp":false},
+                    {"service":"openvpn_tcp", "ports":[80,443], "ncp":true},
+                    {"service":"wireguard", "ports":[1337]},
+                    {"service":"ikev2"}
+                  ]
+                }
+              ],
+              "regions": [
+                {
+                  "id": "us_atlanta", "auto_region": true, "port_forward": false,
+                  "geo": false,
+                  "servers": [{"ip":"10.0.0.1", "cn":"atlanta401", "service_config":"traffic1"}]
+                }
+              ]
+            }
+        )";
+        const std::vector<core::StringSlice> dipGroups{"traffic1"};
+        const std::vector<std::uint16_t> udp{1197}, tcp{501};
+        const std::vector<DedicatedIp> dips{
+            {"dip-01234567", core::Ipv4Address{191, 96, 74, 2}, "atlanta429", {},
+             dipGroups, "us_atlanta", udp, tcp}
+        };
+        RegionList r{json, {}, dips, {}};
+
+        const auto *pDip = r.getRegion("dip-01234567");
+        QVERIFY(pDip);
+        QCOMPARE(pDip->servers().size(), 1u);
+        const Server &server = *pDip->servers()[0];
+        QCOMPARE(server.openVpnUdpPorts(), (std::vector<std::uint16_t>{1197}));
+        QCOMPARE(server.openVpnTcpPorts(), (std::vector<std::uint16_t>{501}));
+        QCOMPARE(server.openVpnUdpNcp(), false);
+        QCOMPARE(server.openVpnTcpNcp(), true);
+        QCOMPARE(server.wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+        QCOMPARE(server.hasIkev2(), true);
+
+        const Server &stdServer = *r.getRegion("us_atlanta")->servers()[0];
+        QCOMPARE(stdServer.openVpnUdpPorts(), (std::vector<std::uint16_t>{8080, 853}));
+        QCOMPARE(stdServer.openVpnTcpPorts(), (std::vector<std::uint16_t>{80, 443}));
+    }
+
+    // DIP ports given through the public C API reach the DIP servers
+    void testDipOpenVpnPortsCApi()
+    {
+        const std::string json{R"(
+            {
+              "groups": {
+                "ovpnudp": [{"name": "openvpn_udp", "ports": [8080]}],
+                "ovpntcp": [{"name": "openvpn_tcp", "ports": [443]}]
+              },
+              "regions": [
+                {
+                  "id": "us_atlanta", "auto_region": true, "port_forward": false,
+                  "geo": false, "offline": false,
+                  "servers": {"ovpnudp": [{"ip": "10.0.0.1", "cn": "atlanta401"}]}
+                }
+              ]
+            }
+        )"};
+        const auto slice = [](const char *str) -> KACStringSlice
+        {
+            return {str, std::strlen(str)};
+        };
+        KACStringSlice groups[]{slice("ovpnudp"), slice("ovpntcp")};
+        const std::uint16_t udpPorts[]{1198, 1197};
+        const std::uint16_t tcpPorts[]{501};
+        const KARDedicatedIP dip{slice("dip-01234567"),
+                                 (191u << 24) | (96u << 16) | (74u << 8) | 2u,
+                                 slice("atlanta429"), slice(""),
+                                 {groups, 2}, slice("us_atlanta"),
+                                 {udpPorts, 2}, {tcpPorts, 1}};
+
+        const KARRegionList *pList = KARRegionListCreatePiav6({json.data(), json.size()},
+                                                              {}, &dip, 1, nullptr, 0);
+        QVERIFY(pList);
+        const KARRegion *pDip = KARRegionListGetRegion(pList, slice("dip-01234567"));
+        QVERIFY(pDip);
+
+        std::vector<std::uint16_t> foundUdp, foundTcp;
+        const KACArraySlice servers = KARRegionServers(pDip);
+        for(std::size_t i = 0; i < servers.size; ++i)
+        {
+            const KARServer *pServer = *reinterpret_cast<const KARServer *const *>(
+                static_cast<const char *>(servers.data) + i * servers.stride);
+            if(KARServerHasOpenVpnUdp(pServer))
+            {
+                KACPortArray ports = KARServerOpenVpnUdpPorts(pServer);
+                foundUdp.assign(ports.data, ports.data + ports.size);
+            }
+            if(KARServerHasOpenVpnTcp(pServer))
+            {
+                KACPortArray ports = KARServerOpenVpnTcpPorts(pServer);
+                foundTcp.assign(ports.data, ports.data + ports.size);
+            }
+        }
+        KARRegionListDestroy(pList);
+
+        QCOMPARE(foundUdp, (std::vector<std::uint16_t>{1198, 1197}));
+        QCOMPARE(foundTcp, (std::vector<std::uint16_t>{501}));
     }
 };
 

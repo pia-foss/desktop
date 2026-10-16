@@ -58,6 +58,9 @@ public:
     bool hasWireGuard() const {return !wireGuardPorts().empty();}
     Ports wireGuardPorts() const {return _pServiceGroup->wireGuardPorts();}
 
+    bool hasWireGuardAmnezia() const {return !wireGuardAmneziaPorts().empty();}
+    Ports wireGuardAmneziaPorts() const {return _pServiceGroup->wireGuardAmneziaPorts();}
+
     bool hasIkev2() const {return _pServiceGroup->ikev2();}
 
     bool hasShadowsocks() const {return !shadowsocksPorts().empty();}

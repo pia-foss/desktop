@@ -23,9 +23,11 @@
 #define WIREGUARD_BACKEND_H
 
 #include <QHostAddress>
+#include <common/src/amneziaobfuscation.h>
 #include <common/src/async.h>
 #include "vpn.h"
 #include <deque>
+#include <optional>
 
 // wireguard.h will include Windows headers on Windows; include winapi.h first
 // to exclude things we don't want like the min()/max() macros
@@ -48,7 +50,7 @@ class WgDevStatus
 public:
     // Copy operations preserve self-referential pointers
     WgDevStatus() = default;
-    WgDevStatus(const wg_device &dev);
+    WgDevStatus(const wg_device &dev, const std::optional<AmneziaObfuscation> &obfuscation);
     WgDevStatus(const WgDevStatus &other);
     WgDevStatus(WgDevStatus &&) = default;
     ~WgDevStatus() = default;
@@ -69,18 +71,28 @@ public:
     // There must be at least one peer
     wg_allowedip &addAllowedIp(const wg_allowedip &allowedip);
 
+    void amneziaObfuscation(const std::optional<AmneziaObfuscation> &obfuscation)
+    {
+        _amneziaObfuscation = obfuscation;
+    }
+    const std::optional<AmneziaObfuscation> &amneziaObfuscation() const
+    {
+        return _amneziaObfuscation;
+    }
+
 private:
     wg_device _dev;
     // _peers and _allowedIps are just storage for the wg_peer and wg_allowedip
     // objects; they are linked into _dev.
     std::deque<wg_peer> _peers;
     std::deque<wg_allowedip> _allowedIps;
+    std::optional<AmneziaObfuscation> _amneziaObfuscation;
 };
 
 // WireguardBackend defines the interface to the various backend implementations
 // of Wireguard:
 // - The Windows service method (userspace)
-// - wireguard-go (Mac/Linux, userspace)
+// - amneziawg-go (Mac/Linux, userspace)
 // - Linux kernel module (kernel)
 //
 // Most of the Wireguard connection method is the same - authentication, the
@@ -147,6 +159,7 @@ public:
     //
     // To tear down the interface, call shutdown().
     virtual auto createInterface(wg_device &wgDev,
+                                 const std::optional<AmneziaObfuscation> &obfuscation,
                                  const QPair<QHostAddress, int> &peerIpNet)
         -> Async<std::shared_ptr<NetworkAdapter>> = 0;
 

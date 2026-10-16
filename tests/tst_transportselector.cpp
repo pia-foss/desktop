@@ -91,6 +91,22 @@ class tst_transportselector : public QObject
             {}, samples::metadataJson, {}, {}).first;
     }
 
+    // Build the locations with a DIP in "nz" that has its own OpenVPN ports
+    auto buildDipLocations(std::vector<quint16> udpPorts = {1197, 1198},
+                           std::vector<quint16> tcpPorts = {501})
+    {
+        AccountDedicatedIp dip;
+        dip.id(QStringLiteral("dip-01234567"));
+        dip.regionId(QStringLiteral("nz"));
+        dip.serviceGroups({QStringLiteral("ovpnudp"), QStringLiteral("ovpntcp")});
+        dip.ip(QStringLiteral("191.96.74.2"));
+        dip.cn(QStringLiteral("newzealand429"));
+        dip.openvpnUdpPorts(std::move(udpPorts));
+        dip.openvpnTcpPorts(std::move(tcpPorts));
+        return buildModernLocations({}, samples::locationJson,
+            {}, samples::metadataJson, {dip}, {}).first;
+    }
+
 private slots:
 
     void testPreferred()
@@ -176,6 +192,93 @@ private slots:
         // We've now exhausted all the tcp options, we start
         // again from the beginning with udp
         QVERIFY(transportSelector.lastUsed().protocol() == "udp");
+    }
+
+    // A DIP connects on the selected DIP port.  0, or a port the DIP doesn't
+    // offer (like a regular OpenVPN port), uses the DIP's first port.
+    void testDedicatedIpPorts()
+    {
+        LocationsById locs{buildDipLocations()};
+        const Location &dip = *locs.at("dip-01234567");
+        const DescendingPortSet dipUdpPorts = dip.allPortsForService(Service::OpenVpnUdp);
+        const DescendingPortSet dipTcpPorts = dip.allPortsForService(Service::OpenVpnTcp);
+        QVERIFY(dipUdpPorts == (DescendingPortSet{1197, 1198}));
+        QVERIFY(dipTcpPorts == (DescendingPortSet{501}));
+
+        TransportSelector transportSelector;
+        QHostAddress dummyAddr{0xC0000201};
+        bool delayNext;
+        const auto usedPort = [&](const QString &protocol, uint port)
+        {
+            transportSelector.reset(protocol, port, false, dipUdpPorts, dipTcpPorts);
+            transportSelector.beginAttempt(dip, dummyAddr, delayNext);
+            return transportSelector.lastUsed().port();
+        };
+
+        // Multiple UDP ports - the selected one is used
+        QCOMPARE(usedPort(QStringLiteral("udp"), 1198), 1198u);
+        QCOMPARE(usedPort(QStringLiteral("udp"), 1197), 1197u);
+        // Default or a port not offered by the DIP - first DIP port
+        QCOMPARE(usedPort(QStringLiteral("udp"), 0), 1197u);
+        QCOMPARE(usedPort(QStringLiteral("udp"), preferredUdpPort), 1197u);
+
+        // Single TCP port - always used
+        QCOMPARE(usedPort(QStringLiteral("tcp"), 501), 501u);
+        QCOMPARE(usedPort(QStringLiteral("tcp"), 0), 501u);
+        QCOMPARE(usedPort(QStringLiteral("tcp"), preferredTcpPort), 501u);
+    }
+
+    // The default DIP port is the first port in API order, not the lowest
+    // port, and it matches dedicatedIpPortToUse()
+    void testDedicatedIpDefaultPortApiOrder()
+    {
+        const std::vector<quint16> apiUdpPorts{1198, 1197};
+        LocationsById locs{buildDipLocations(apiUdpPorts, {502, 501})};
+        const Location &dip = *locs.at("dip-01234567");
+
+        TransportSelector transportSelector;
+        QHostAddress dummyAddr{0xC0000201};
+        bool delayNext;
+        transportSelector.reset(QStringLiteral("udp"), 0, false,
+                                dip.allPortsForService(Service::OpenVpnUdp),
+                                dip.allPortsForService(Service::OpenVpnTcp));
+        transportSelector.beginAttempt(dip, dummyAddr, delayNext);
+        QCOMPARE(transportSelector.lastUsed().port(), 1198u);
+        QCOMPARE(transportSelector.lastUsed().port(), uint{dedicatedIpPortToUse(0, apiUdpPorts)});
+
+        transportSelector.reset(QStringLiteral("tcp"), 0, false,
+                                dip.allPortsForService(Service::OpenVpnUdp),
+                                dip.allPortsForService(Service::OpenVpnTcp));
+        transportSelector.beginAttempt(dip, dummyAddr, delayNext);
+        QCOMPARE(transportSelector.lastUsed().port(), 502u);
+    }
+
+    // With alternate settings, a DIP only tries the DIP ports, never the
+    // regular OpenVPN ports of the corresponding region
+    void testDedicatedIpAlternates()
+    {
+        LocationsById locs{buildDipLocations()};
+        const Location &dip = *locs.at("dip-01234567");
+
+        TransportSelector transportSelector{std::chrono::seconds(0)};
+        QHostAddress dummyAddr{0xC0000201};
+        bool delayNext;
+        transportSelector.reset(QStringLiteral("udp"), 1197, true,
+                                dip.allPortsForService(Service::OpenVpnUdp),
+                                dip.allPortsForService(Service::OpenVpnTcp));
+
+        std::set<std::pair<QString, uint>> used;
+        for(int i = 0; i < 20; ++i)
+        {
+            transportSelector.beginAttempt(dip, dummyAddr, delayNext);
+            used.insert({transportSelector.lastUsed().protocol(),
+                         transportSelector.lastUsed().port()});
+        }
+
+        const std::set<std::pair<QString, uint>> expected{
+            {QStringLiteral("udp"), 1197}, {QStringLiteral("udp"), 1198},
+            {QStringLiteral("tcp"), 501}};
+        QVERIFY(used == expected);
     }
 };
 

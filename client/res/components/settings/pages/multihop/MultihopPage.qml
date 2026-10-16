@@ -31,7 +31,14 @@ import "../../../theme"
 import "../../../common/regions"
 
 Page {
-  readonly property bool multiHopAvailable: Daemon.settings.method === "openvpn" && Daemon.settings.proxyEnabled
+  // Both proxy types are applied with OpenVPN's socks-proxy option, and OpenVPN
+  // disables DCO when that option is used, so multi-hop and DCO can't share a
+  // connection.  windowsIpMethod only has an effect on Windows, so the platform
+  // check keeps this gating off the other platforms entirely.
+  readonly property bool usingDco: Qt.platform.os === 'windows' &&
+                                   Daemon.settings.windowsIpMethod === "dco"
+  readonly property bool multiHopSupported: Daemon.settings.method === "openvpn" && !usingDco
+  readonly property bool multiHopAvailable: multiHopSupported && Daemon.settings.proxyEnabled
   GridLayout {
     anchors.fill: parent
     columns: 2
@@ -44,13 +51,20 @@ Page {
       label: uiTr("Multi-hop and Obfuscation")
       desc: uiTr(
               "Add an extra layer of encryption by rerouting your VPN traffic through a proxy. By activating multi-hop, you’ll also obfuscate your connection - you will hide the fact that you're using a VPN.")
-      enabled: Daemon.settings.method === "openvpn"
+      enabled: multiHopSupported
       setting: DaemonSetting{
         name: "proxyEnabled"
       }
       warning: {
         if(Daemon.settings.method !== "openvpn") {
           return uiTr("Multi-hop requires OpenVPN")
+        }
+        else if(usingDco) {
+          //: Shown when multi-hop can't be used because the OpenVPN DCO driver
+          //: is selected.  "DCO" stands for Data Channel Offload and is the
+          //: name of the driver; it should not be translated.  "Virtual
+          //: Network Driver" is the name of the setting on the Protocol page.
+          return uiTr("Multi-hop can't be used with the DCO driver. Choose a different Virtual Network Driver in Protocol settings.")
         }
         return ""
       }

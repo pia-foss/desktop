@@ -158,6 +158,42 @@ private slots:
         QCOMPARE(g.openVpnUdpNcp(), false);
     }
 
+    // AWG ports are aliased as WireGuard ports so those servers are included in
+    // the WireGuard pool, but only when the group doesn't list wireguard itself.
+    // The result must not depend on the order the services appear in.
+    void testWireGuardAmneziaAlias()
+    {
+        // awg alone - aliased as the WireGuard ports
+        auto g = parseJson(R"({"services":[{"service":"awg", "ports":[1338]}]})");
+        QCOMPARE(g.wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{1338}));
+        QCOMPARE(g.wireGuardPorts(), (std::vector<std::uint16_t>{1338}));
+        QCOMPARE(g.hasAnyService(), true);
+
+        // Both services, wireguard first - each keeps its own ports
+        g = parseJson(R"(
+            {
+              "services":[
+                {"service":"wireguard", "ports":[1337]},
+                {"service":"awg", "ports":[1338]}
+              ]
+            })"
+        );
+        QCOMPARE(g.wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+        QCOMPARE(g.wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{1338}));
+
+        // Both services, awg first - same result, and the group is still valid
+        g = parseJson(R"(
+            {
+              "services":[
+                {"service":"awg", "ports":[1338]},
+                {"service":"wireguard", "ports":[1337]}
+              ]
+            })"
+        );
+        QCOMPARE(g.wireGuardPorts(), (std::vector<std::uint16_t>{1337}));
+        QCOMPARE(g.wireGuardAmneziaPorts(), (std::vector<std::uint16_t>{1338}));
+    }
+
     // Test handling of duplicate services
     void testDuplicateServices()
     {

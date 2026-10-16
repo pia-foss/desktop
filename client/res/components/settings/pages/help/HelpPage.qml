@@ -44,6 +44,12 @@ Page {
       case 'tap':
         reinstallTap.startReinstall()
         break
+      case 'wintun':
+        reinstallWinTun.startReinstall()
+        break
+      case 'dco':
+        reinstallDco.startReinstall()
+        break
       case 'callout':
         reinstallWfpCallout.startReinstall()
         break
@@ -438,7 +444,27 @@ Page {
 
         reinstallStatus: NativeHelpers.reinstallTunStatus
         reinstallAction: function () {
-          NativeHelper.reinstallTun()
+          NativeHelpers.reinstallTun()
+        }
+      }
+
+      Text {
+        text: "|"
+        color: Theme.login.linkColor
+        font.pixelSize: Theme.login.linkTextPx
+      }
+
+      ReinstallLink {
+        id: reinstallDco
+
+        //: "DCO" stands for Data Channel Offload and is the name of the
+        //: OpenVPN driver; it should not be translated.
+        linkText: uiTr("DCO Driver")
+        executingText: uiTr("Reinstalling DCO Driver...")
+
+        reinstallStatus: NativeHelpers.reinstallDcoStatus
+        reinstallAction: function () {
+          NativeHelpers.reinstallDco()
         }
       }
 

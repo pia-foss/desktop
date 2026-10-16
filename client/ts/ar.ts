@@ -399,6 +399,31 @@
       <translation>لم يتم تثبيت محول TAP لنفق VPN.  يمكنك إعادة تثبيته من الإعدادات.</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="165"/>
+      <source>The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+      <extracomment>&quot;WinTUN&quot; is the name of the virtual network adapter driver used on Windows and is not generally localized.</extracomment>
+      <translation>لم يتم تثبيت محول WinTUN لنفق VPN.  يمكنك إعادة تثبيته من الإعدادات.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="181"/>
+      <source>DCO DRIVER MISSING</source>
+      <comment>header-title</comment>
+      <extracomment>Header for the notification shown when the OpenVPN DCO driver is missing. &quot;DCO&quot; is the driver name and is not translated.</extracomment>
+      <translation>برنامج تشغيل DCO مفقود</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="185"/>
+      <source>The DCO driver is not installed.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated. This replaces the generic &quot;adapter is not installed&quot; message - the VPN still works without DCO.</extracomment>
+      <translation>لم يتم تثبيت برنامج تشغيل DCO.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="188"/>
+      <source>The DCO driver is not installed.  The VPN still connects using WinTUN; you can reinstall DCO from Settings.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>لم يتم تثبيت برنامج تشغيل DCO.  لا يزال VPN يتصل باستخدام WinTUN؛ يمكنك إعادة تثبيت DCO من الإعدادات.</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="163"/>
       <source>Restart to complete installation.</source>
       <translation>إعادة التشغيل لإكمال التثبيت.</translation>
@@ -430,6 +455,11 @@
       <translation>تتطلب ميزة استبعاد التطبيقات تثبيت مرشح النفق المقسم. أعد التشغيل لإكمال التثبيت.</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="256"/>
+      <source>Split tunnel was turned off because setup didn’t finish. Please try the setup again.</source>
+      <translation>تم إيقاف النفق المقسم لأن الإعداد لم يكتمل. يرجى محاولة الإعداد مرة أخرى.</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="216"/>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="45"/>
       <source>Iptables is not installed.</source>
@@ -440,6 +470,37 @@
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
       <source>Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.</source>
       <translation>Iptables مطلوب للاتصال بـ VPN. أعد تثبيت التطبيق أو ثبّت  iptablesأو حزمة iptables-nft يدويّاً ثمّ أعد تشغيل كمبيوترك.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
+      <source>This location does not support obfuscation.</source>
+      <translation>هذا الموقع لا يدعم التعتيم.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+      <source>This location only offers obfuscated servers.</source>
+      <translation>هذا الموقع يوفر فقط خوادم تدعم التعتيم.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="299"/>
+      <source>Turn off obfuscation on the Protocol page, or choose a location that offers obfuscated servers.</source>
+      <translation>أوقف التعتيم من صفحة البروتوكول، أو اختر موقعًا يوفر خوادم تدعم التعتيم.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="300"/>
+      <source>Turn on obfuscation on the Protocol page, or choose a location that offers regular servers.</source>
+      <translation>فعّل التعتيم من صفحة البروتوكول، أو اختر موقعًا يوفر خوادم عادية.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="326"/>
+      <source>OpenVPN is not available for this Dedicated IP.</source>
+      <extracomment>Shown when the selected Dedicated IP has no OpenVPN ports for the connection type in use, so it can&apos;t be connected to with OpenVPN.</extracomment>
+      <translation>OpenVPN غير متاح لعنوان IP المخصّص هذا.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="327"/>
+      <source>Switch to WireGuard on the Protocols page, or choose another location.</source>
+      <translation>انتقل إلى WireGuard من صفحة البروتوكول، أو اختر موقعًا آخر.</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="230"/>
@@ -1076,6 +1137,12 @@
       <source>Get Your Dedicated IP</source>
       <translation>احصل على عنوان IP مخصّص</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpPage.qml" line="105"/>
+      <source>OpenVPN Remote Port</source>
+      <extracomment>Label for the dropdown that selects the OpenVPN remote port used for dedicated IP connections.</extracomment>
+      <translation>المنفذ البعيد لـ OpenVPN</translation>
+    </message>
   </context>
   <context>
     <name>DedicatedIpRegion</name>
@@ -1535,6 +1602,17 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="444"/>
+      <source>DCO Driver</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>برنامج تشغيل DCO</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="445"/>
+      <source>Reinstalling DCO Driver...</source>
+      <translation>إعادة تثبيت برنامج تشغيل DCO...</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="444"/>
       <source>Reinstalling Split Tunnel Filter...</source>
       <translation>جارٍ تثبيت مرشح النفق المقسم...</translation>
     </message>
@@ -1872,6 +1950,12 @@
       <translation>يتطلب التوجيه المتعدد OpenVPN</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="49"/>
+      <source>Multi-hop can&apos;t be used with the DCO driver. Choose a different Virtual Network Driver in Protocol settings.</source>
+      <extracomment>Shown when multi-hop can&apos;t be used because the OpenVPN DCO driver is selected. &quot;DCO&quot; stands for Data Channel Offload and is the name of the driver; it should not be translated. &quot;Virtual Network Driver&quot; is the name of the setting on the Protocol page.</extracomment>
+      <translation>لا يمكن استخدام التوجيه المتعدد مع برنامج تشغيل DCO. اختر برنامج تشغيل شبكة افتراضية مختلفًا من إعدادات البروتوكول.</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="175"/>
       <source>Host</source>
       <translation>المضيف</translation>
@@ -2179,6 +2263,24 @@
       <source>Virtual Network Driver</source>
       <translation>برنامج تشغيل الشبكة الافتراضية</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="163"/>
+      <source>DCO (recommended)</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>DCO (موصى به)</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="183"/>
+      <source>DCO: Offloads the data channel to the kernel for the best performance.  WinTUN is used automatically when DCO can&apos;t be used.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and should not be translated. WinTUN is the name of the other driver and should also not be translated.</extracomment>
+      <translation>DCO: ينقل معالجة قناة البيانات إلى النواة للحصول على أفضل أداء.  يُستخدم WinTUN تلقائيًا عندما يتعذر استخدام DCO.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="200"/>
+      <source>DCO can&apos;t be used with Multi-hop. Turn off Multi-hop to select DCO.</source>
+      <extracomment>Shown when DCO can&apos;t be selected because multi-hop is enabled. &quot;DCO&quot; stands for Data Channel Offload and is the name of the driver; it should not be translated.</extracomment>
+      <translation>لا يمكن استخدام DCO مع التوجيه المتعدد. أوقف التوجيه المتعدد لتحديد DCO.</translation>
+    </message>
   </context>
   <context>
     <name>OverlayDialog</name>
@@ -2375,6 +2477,11 @@
       <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="17"/>
       <source>VPN Protection Everywhere You Need It</source>
       <translation>حماية VPN في كل مكان تحتاج إلى حمايته</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="18"/>
+      <source>Secure unlimited devices with your Private Internet Access account.</source>
+      <translation>احمِ عددًا غير محدود من الأجهزة باستخدام حساب Private Internet Access الخاص بك.</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="18"/>
@@ -3003,6 +3110,18 @@
       <source>Port forwarding is not available for this country.</source>
       <translation>إعادة توجيه المنافذ غير متوفرة في هذا البلد.</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="31"/>
+      <source>Obfuscation is not available for this location.</source>
+      <extracomment>Shown when obfuscation is turned on but this location has no servers that support it, so the location can&apos;t be used until obfuscation is turned off.</extracomment>
+      <translation>التعتيم غير متاح في هذا الموقع.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="34"/>
+      <source>This location only offers obfuscated servers.</source>
+      <extracomment>Shown when obfuscation is turned off but this location only has obfuscated servers, so the location can&apos;t be used until obfuscation is turned on.</extracomment>
+      <translation>هذا الموقع يوفر فقط خوادم تدعم التعتيم.</translation>
+    </message>
   </context>
   <context>
     <name>RegionListView</name>
@@ -3237,6 +3356,11 @@
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="74"/>
       <source>Split Tunnel is not installed. Go to System Settings -&gt; General. Click &apos;i&apos; in the Network Extensions row and enable PIA Split Tunnel. Then click &quot;Allow&quot; on the Proxy Configurations popup</source>
       <translation>لم يتم تثبيت الانقسام النفقي. ادخل إلى إعدادات النظام > إعدادات عامة. انقر على (i) في إضافات الشبكة وفعّل ميزة الانقسام النفقي. انقر بعد ذلك على "السماح" في نافذة إعدادات البروكسي.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="76"/>
+      <source>Split Tunnel is not installed. Go to System Settings -&gt; General -&gt; Login Items &amp; Extensions. Scroll down and click &apos;i&apos; on Network Extensions and enable &quot;PIA Split Tunnel&quot;. Then click &quot;Allow&quot; on the Proxy Configurations popup.</source>
+      <translation>لم يتم تثبيت الانقسام النفقي. ادخل إلى إعدادات النظام &gt; إعدادات عامة &gt; عناصر تسجيل الدخول والامتدادات. مرّر إلى الأسفل وانقر على (i) في إضافات الشبكة وفعّل &quot;PIA Split Tunnel&quot;. انقر بعد ذلك على &quot;السماح&quot; في نافذة إعدادات البروكسي.</translation>
     </message>
   </context>
   <context>
@@ -4093,6 +4217,27 @@
     <name>WireguardConnection</name>
     <message>
       <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
+      <source>Obfuscation</source>
+      <translation>التعتيم</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="26"/>
+      <source>Off</source>
+      <translation>إيقاف</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="27"/>
+      <source>On</source>
+      <translation>تشغيل</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="32"/>
+      <source>Disguises WireGuard traffic so it is harder to identify and block, which can help on networks that restrict VPNs. Only some locations offer obfuscated servers.</source>
+      <extracomment>Obfuscation disguises the VPN traffic so networks that block VPNs can&apos;t recognize it. Only some locations have servers that support it, and the connection fails in locations that don&apos;t.</extracomment>
+      <translation>يموّه حركة مرور WireGuard بحيث يصعب التعرف عليها وحظرها، مما قد يساعد على الشبكات التي تقيّد VPN. توفر بعض المواقع فقط خوادم تدعم التعتيم.</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
       <source>Connection Timeout</source>
       <translation>مهلة الاتصال</translation>
     </message>
@@ -4293,6 +4438,16 @@
       <location filename="../../../extras/installer/win/strings.rc" line="66"/>
       <source>UPDATING CALLOUT DRIVER</source>
       <translation>تحديث برنامج تشغيل الاستدعاء</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="67"/>
+      <source>Removing OpenVPN DCO Driver</source>
+      <translation>إزالة برنامج تشغيل OpenVPN DCO</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+      <source>Updating OpenVPN DCO Driver</source>
+      <translation>تحديث برنامج تشغيل OpenVPN DCO</translation>
     </message>
     <message>
       <location filename="../../../extras/installer/win/strings.rc" line="68"/>
@@ -4523,6 +4678,16 @@
       <location filename="../../../extras/installer/win/strings.rc" line="113"/>
       <source>Private Internet Access requires Windows 10 or later.</source>
       <translation>يتطلب Private Internet Access نظام Windows 10 أو أحدث.</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="116"/>
+      <source>Error uninstalling OpenVPN DCO driver.</source>
+      <translation>خطأ في إلغاء تثبيت برنامج تشغيل OpenVPN DCO.</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+      <source>OpenVPN DCO driver installation failed.</source>
+      <translation>تعذَّر تثبيت برنامج تشغيل OpenVPN DCO.</translation>
     </message>
     <message>
       <location filename="../../../extras/installer/win/strings.rc" line="115"/>

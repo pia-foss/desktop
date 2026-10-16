@@ -118,6 +118,8 @@ public:
         DaemonRPCUnknownSetting,    // RPC rejected due to unknown setting property
         DaemonRPCDedicatedIpTokenExpired, // RPC rejected due to adding a DIP token that's expired
         DaemonRPCDedicatedIpTokenInvalid, // RPC rejected due to adding a DIP token that's invalid
+        DaemonRPCObfuscationMismatch, // RPC rejected because the location has no servers matching the obfuscation setting
+        DaemonRPCDedicatedIpNoOpenVpnPorts, // RPC rejected because the dedicated IP has no ports for the OpenVPN protocol in use
 
         // Network adapter errors (can be thrown by Daemon implementations)
         NetworkAdapterNotFound = 1600,

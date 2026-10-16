@@ -328,6 +328,10 @@ protected:
     // Cancel an update download that is ongoing
     void RPC_cancelDownloadUpdate();
 
+    // Clear the split tunnel activation failed state (used when user dismisses the error
+    // notification)
+    void RPC_clearSplitTunnelActivationFailed();
+
     // Misc.
     Async<void> RPC_submitRating(int rating);
 
@@ -434,7 +438,9 @@ private:
     void onNetworksChanged(const std::vector<NetworkConnection> &networks);
 
     void refreshAccountInfo();
-    void applyDedicatedIpJson(const QJsonObject &tokenData, AccountDedicatedIp &dipInfo);
+    // Update the DIP OpenVPN ports in the state from the DIP port settings and
+    // the DIP port choices
+    void updateDedicatedIpPorts();
     void applyRefreshedDedicatedIp(const QJsonObject &tokenData, int traceIdx,
                                    std::vector<AccountDedicatedIp> &dedicatedIps);
     void refreshDedicatedIps();
@@ -456,7 +462,8 @@ private:
     void mustBeAwake();
     // Check if the system has gone to sleep or just woken up and handle it according to:
     // * just went to sleep, and VPN was connected -> disconnect.
-    // * just woke up, and VPN was connected before sleep -> connect.
+    // * just woke up, and VPN was connected before sleep -> connect, keeping connectOnWake (and the
+    //   killswitch) until connected.
     // It will only connect/disconnect if the VPN is in a stable state,
     // i.e. connected before disconnecting, and disconnected before connecting.
     // This is to make sure the action really resolves, and the VPN is not left in
@@ -470,6 +477,14 @@ private:
     // settings are changed that affect the location preferences.  (Latency and
     // region list changes result in rebuilding the entire region list.)
     void calculateLocationPreferences();
+    // Whether the location we would connect to has no servers matching the
+    // obfuscation setting - either the setting is on and the location has no
+    // AmneziaWG servers, or it is off and the location has only those.  Such a
+    // connection can never succeed, so it isn't attempted.
+    bool obfuscationMismatch() const;
+    // Whether the next location is a dedicated IP that has no ports for the
+    // OpenVPN protocol in use (see dedicatedIpLacksOpenVpn())
+    bool dedicatedIpOpenVpnMismatch() const;
     // Rebuild the chosen/best/next location selections (without rebuilding the
     // entire list).  Used when data changes that affect the location
     // selections.
@@ -518,11 +533,11 @@ protected:
     bool _started, _stopping;
 
     // Some setting defaults for new installations can be changed by feature
-    // flags (currently, the default OpenVPN driver on Windows, which we are
-    // switching to WinTUN but have a fallback to TAP in case there are issues
-    // in the field).  Daemon will apply install feature flags the first time
-    // feature flags are loaded during the first run of the daemon, and only if
-    // no connection attempts have occurred yet.
+    // flags.  Daemon will apply install feature flags the first time feature
+    // flags are loaded during the first run of the daemon, and only if no
+    // connection attempts have occurred yet.  See
+    // applyPlatformInstallFeatureFlags() for the flags applied on each
+    // platform.
     bool _checkInstallFeatureFlags;
 
     IPCServer* _server;
@@ -531,6 +546,9 @@ protected:
     RemoteNotificationInterface* _rpc;
 
     VPNConnection* _connection;
+
+    // Set once the reconnect after wake starts; a later Disconnected ends it instead of retrying.
+    bool _wakeReconnectStarted{false};
 
     // TODO - We have two representations of basically the same information
     // (the connection configuration derived from the current settings):

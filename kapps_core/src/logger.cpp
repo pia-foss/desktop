@@ -389,7 +389,7 @@ LogWriter &LogWriter::macroParams(const char *msg, ...)
         formatted.resize(bufSize+1);
         int actualSize = std::vsnprintf(&formatted[0], formatted.size(), msg, argsRender);
         formatted.resize(std::min(actualSize, bufSize));
-        *this << msg;
+        *this << formatted;
     }
 
     va_end(argsLen);

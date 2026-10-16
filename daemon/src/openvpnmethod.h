@@ -147,6 +147,9 @@ private:
 #if defined(Q_OS_WIN)
     // IPC server used to receive info from updown script on Windows
     HelperIpcServer _helperIpcServer;
+    // Whether this connection is using the DCO driver (used to detect
+    // servers that push compression framing, which DCO can't do)
+    bool _dcoInUse = false;
 #endif
     // The network adapter used for the current connection
     std::shared_ptr<NetworkAdapter> _networkAdapter;

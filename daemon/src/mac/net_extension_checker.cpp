@@ -19,10 +19,13 @@
 #include "net_extension_checker.h"
 NetExtensionChecker::NetExtensionChecker(std::string transparentProxyCliExecutable,
                                          std::chrono::milliseconds shortInterval,
-                                         std::chrono::milliseconds longInterval)
+                                         std::chrono::milliseconds longInterval,
+                                         int maxActivationAttempts)
 : _transparentProxyCliExecutable{transparentProxyCliExecutable}
 , _shortInterval{shortInterval}
 , _longInterval{longInterval}
+, _maxActivationAttempts{maxActivationAttempts}
+, _attempts{0}
 {
     // Creating the timer, but not starting it
     connect(&_timer, &QTimer::timeout, this,
@@ -35,6 +38,9 @@ void NetExtensionChecker::start(StateModel::NetExtensionState installState)
     {
         qInfo() << "Starting MacOS Network Extension Checker. ";
         _lastState = installState;
+        // Every start is a fresh activation attempt, so the user gets the full
+        // budget again rather than whatever was left over from the last one.
+        _attempts = 0;
         updateTimer(installState);
         _timer.start();
     }
@@ -51,6 +57,9 @@ void NetExtensionChecker::stop()
 
 void NetExtensionChecker::updateTimer(StateModel::NetExtensionState installState)
 {
+    if(installState == StateModel::NetExtensionState::FailedActivation)
+        return;
+
     std::chrono::milliseconds newInterval = _longInterval;
     if(installState != StateModel::NetExtensionState::Installed)
     {
@@ -74,6 +83,22 @@ StateModel::NetExtensionState NetExtensionChecker::checkInstallationState() cons
 void NetExtensionChecker::checkIfNetExtensionStateChanged()
 {
     auto currentState = checkInstallationState();
+    if(currentState == StateModel::NetExtensionState::NotInstalled)
+    {
+        _attempts++;
+        // The user failed to comply with the activation instructions, or the cat activated split
+        // tunnel
+        if(_attempts >= _maxActivationAttempts)
+        {
+            qInfo() << "Reached maximum number of attempts for system extension activation";
+            _attempts = 0;
+            emit stateChanged(StateModel::NetExtensionState::FailedActivation);
+            return;
+        }
+    }
+    // This can change from not installed to installed -> good path.
+    // Or it can change from installed to not installed -> this means the user has manually removed
+    // the proxy from the system likely using system settings.
     if(currentState != _lastState)
     {
         qInfo() << "MacOS Network Extension installation state has changed from:" <<qEnumToString(_lastState) << "to:" << qEnumToString(currentState);

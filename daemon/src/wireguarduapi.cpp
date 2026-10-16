@@ -47,6 +47,16 @@ namespace Uapi
         listenPort{"listen_port"},
         fwmark{"fwmark"},
         replacePeers{"replace_peers"},
+        // Amnezia keys
+        jc{"jc"},
+        jMin{"jmin"},
+        jMax{"jmax"},
+        s1{"s1"},
+        s2{"s2"},
+        h1{"h1"},
+        h2{"h2"},
+        h3{"h3"},
+        h4{"h4"},
         // Peer keys
         publicKey{"public_key"},
         remove{"remove"},
@@ -73,6 +83,16 @@ namespace Uapi
         ListenPort,
         Fwmark,
         ReplacePeers,   // Set only
+        // Amnezia keys
+        JunkCount,
+        JunkMin,
+        JunkMax,
+        InitSeed1,
+        InitSeed2,
+        HeaderChecksum1,
+        HeaderChecksum2,
+        HeaderChecksum3,
+        HeaderChecksum4,
         // Peer keys
         PublicKey,
         Remove,         // Set only
@@ -100,6 +120,16 @@ namespace Uapi
         {listenPort, Key::ListenPort},
         {fwmark, Key::Fwmark},
         {replacePeers, Key::ReplacePeers},
+        // Amnezia keys
+        {jc, Key::JunkCount},
+        {jMin, Key::JunkMin},
+        {jMax, Key::JunkMax},
+        {s1, Key::InitSeed1},
+        {s2, Key::InitSeed2},
+        {h1, Key::HeaderChecksum1},
+        {h2, Key::HeaderChecksum2},
+        {h3, Key::HeaderChecksum3},
+        {h4, Key::HeaderChecksum4},
         // Peer keys
         {publicKey, Key::PublicKey},
         {remove, Key::Remove},
@@ -302,6 +332,14 @@ namespace Uapi
         message += '\n';
     }
 
+    void appendRequest(QByteArray &message, const QLatin1String &key, uint64_t value)
+    {
+        message += key;
+        message += '=';
+        message += QByteArray::number(value, 10);
+        message += '\n';
+    }
+
     void appendRequest(QByteArray &message, const QLatin1String &key,
                        const sockaddr_in &value)
     {
@@ -460,7 +498,8 @@ bool WireguardIpc::writeIpcRequest(const QByteArray &message)
 
 
 WireguardConfigDeviceTask::WireguardConfigDeviceTask(std::shared_ptr<QLocalSocket> pIpcSocket,
-                                                     const wg_device &wgDev)
+                                                     const wg_device &wgDev,
+                                                     const std::optional<AmneziaObfuscation> &obfuscation)
     : _ipc{std::move(pIpcSocket)}, _errno{EBADMSG}
     // Defaults to EBADMSG if the errno= line isn't provided for some reason.
     // We shouldn't default to success, and this code is reasonable.
@@ -477,6 +516,19 @@ WireguardConfigDeviceTask::WireguardConfigDeviceTask(std::shared_ptr<QLocalSocke
     {
         request += Uapi::replacePeers;
         request += "=true\n";
+    }
+    if(obfuscation.has_value())
+    {
+        const auto &obf = obfuscation.value();
+        Uapi::appendRequest(request, Uapi::jc, obf.junkCount);
+        Uapi::appendRequest(request, Uapi::jMin, obf.junkMinSize);
+        Uapi::appendRequest(request, Uapi::jMax, obf.junkMaxSize);
+        Uapi::appendRequest(request, Uapi::s1, obf.initSeed1);
+        Uapi::appendRequest(request, Uapi::s2, obf.initSeed2);
+        Uapi::appendRequest(request, Uapi::h1, obf.headerChecksum1);
+        Uapi::appendRequest(request, Uapi::h2, obf.headerChecksum2);
+        Uapi::appendRequest(request, Uapi::h3, obf.headerChecksum3);
+        Uapi::appendRequest(request, Uapi::h4, obf.headerChecksum4);
     }
     // WGDEVICE_HAS_PUBLIC_KEY is not implemented, not in UAPI
     Q_ASSERT(!(wgDev.flags & WGDEVICE_HAS_PUBLIC_KEY));
@@ -652,6 +704,39 @@ void WireguardDeviceStatusTask::applyValue(Uapi::Key key, const QLatin1String &v
             _pDev->device().fwmark = Uapi::parseInt<uint32_t>(value);
             addFlag(_pDev->device().flags, WGDEVICE_HAS_FWMARK);
             break;
+        // Amnezia keys
+        case Uapi::Key::JunkCount:
+        case Uapi::Key::JunkMin:
+        case Uapi::Key::JunkMax:
+        case Uapi::Key::InitSeed1:
+        case Uapi::Key::InitSeed2:
+        case Uapi::Key::HeaderChecksum1:
+        case Uapi::Key::HeaderChecksum2:
+        case Uapi::Key::HeaderChecksum3:
+        case Uapi::Key::HeaderChecksum4:
+        {
+            if(!_pDev->amneziaObfuscation().has_value())
+            {
+                _pDev->amneziaObfuscation(AmneziaObfuscation{});
+            }
+            auto obf = _pDev->amneziaObfuscation().value();
+            auto v = Uapi::parseInt<uint64_t>(value);
+            switch(key)
+            {
+                case Uapi::Key::JunkCount: obf.junkCount = v; break;
+                case Uapi::Key::JunkMin: obf.junkMinSize = v; break;
+                case Uapi::Key::JunkMax: obf.junkMaxSize = v; break;
+                case Uapi::Key::InitSeed1: obf.initSeed1 = v; break;
+                case Uapi::Key::InitSeed2: obf.initSeed2 = v; break;
+                case Uapi::Key::HeaderChecksum1: obf.headerChecksum1 = v; break;
+                case Uapi::Key::HeaderChecksum2: obf.headerChecksum2 = v; break;
+                case Uapi::Key::HeaderChecksum3: obf.headerChecksum3 = v; break;
+                case Uapi::Key::HeaderChecksum4: obf.headerChecksum4 = v; break;
+                default: break;
+            }
+            _pDev->amneziaObfuscation(obf);
+            break;
+        }
         // Peer keys
         case Uapi::Key::PublicKey:
         {

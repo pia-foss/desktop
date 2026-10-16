@@ -34,9 +34,11 @@ NotificationStatus {
   // Whether this adapter is needed for the currently selected connection
   // method.  (The driver status is ignored otherwise.)
   property bool isNeeded
-  // Bind this to NativeHelpers.reinstallTapStatus
+  // Bind this to the appropriate NativeHelpers status property -
+  // NativeHelpers.reinstallTapStatus, NativeHelpers.reinstallTunStatus, etc.
   property string reinstallStatus
-  // Bind this to Daemon.state.tapAdapterMissing
+  // Bind this to the matching Daemon.state property -
+  // Daemon.state.tapAdapterMissing, Daemon.state.wintunMissing, etc.
   property bool driverMissing
   // Bind this to a functor that handles reinstalling the driver by signaling
   // the Help page

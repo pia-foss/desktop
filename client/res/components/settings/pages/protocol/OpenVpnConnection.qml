@@ -54,6 +54,11 @@ Item {
   readonly property bool usingShadowsocksProxy: Daemon.settings.proxyType === "shadowsocks" && Daemon.settings.proxyEnabled
   readonly property bool usingTcpTransport: usingShadowsocksProxy || Daemon.settings.protocol === "tcp"
 
+  // Multi-hop applies both proxy types with OpenVPN's socks-proxy option, and
+  // OpenVPN disables DCO when that option is used, so DCO can't be selected
+  // while multi-hop is enabled.
+  readonly property bool usingProxy: Daemon.settings.proxyEnabled
+
   GridLayout {
     anchors.fill: parent
     columns: 2
@@ -171,6 +176,10 @@ Item {
         }
       }
       model: [
+        //: "DCO" stands for Data Channel Offload and is the name of the
+        //: OpenVPN driver; it should not be translated.
+        { name: uiTr("DCO (recommended)"), value: "dco",
+          disabled: openVpnConnection.usingProxy },
         // 'WinTUN' is the driver name and is not translated
         { name: "WinTUN", value: "wintun" },
         //: "TAP" is the name of the OpenVPN virtual network adapter driver
@@ -186,6 +195,10 @@ Item {
       ]
       info: [
           uiTranslate("ConnectionPage", "Determines which virtual network driver is used and how it is configured."),
+          //: "DCO" stands for Data Channel Offload and should not be
+          //: translated.  WinTUN is the name of the other driver and should
+          //: also not be translated.
+          uiTr("DCO: Offloads the data channel to the kernel for the best performance.  WinTUN is used automatically when DCO can't be used."),
           //: WinTUN is the name of the driver and should not be translated.
           uiTranslate("ConnectionPage", "WinTUN: Modern driver, offers the best speeds (try this first)"),
           //: TAP is the name of the driver and should not be translated.
@@ -199,6 +212,10 @@ Item {
           //: it is configured with static addresses.
           uiTranslate("ConnectionPage", "TAP (Static): Older driver, use if TAP (DHCP) isn't working")
       ].join("\n\u2022\xA0\xA0")
+      //: Shown when DCO can't be selected because multi-hop is enabled.
+      //: "DCO" stands for Data Channel Offload and is the name of the driver;
+      //: it should not be translated.
+      warning: openVpnConnection.usingProxy ? uiTr("DCO can't be used with Multi-hop. Turn off Multi-hop to select DCO.") : ""
 
       // This ReinstallLink is used to handle TAP installation when switching
       // to TAP - it triggers the installation and shows dialogs indicating

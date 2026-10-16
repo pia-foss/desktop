@@ -38,8 +38,9 @@ namespace
                   "Brand code is too long - Wireguard interface name exceeds IFNAMESIZ");
 }
 
-WgDevStatus::WgDevStatus(const wg_device &dev)
+WgDevStatus::WgDevStatus(const wg_device &dev, const std::optional<AmneziaObfuscation> &obfuscation)
     : _dev{dev}
+    , _amneziaObfuscation{obfuscation}
 {
     // Deep-copy the peers
     _dev.first_peer = _dev.last_peer = nullptr;
@@ -50,13 +51,13 @@ WgDevStatus::WgDevStatus(const wg_device &dev)
 }
 
 WgDevStatus::WgDevStatus(const WgDevStatus &other)
-    : WgDevStatus{other.device()}
+    : WgDevStatus{other.device(), other.amneziaObfuscation()}
 {
 }
 
 WgDevStatus &WgDevStatus::operator=(const WgDevStatus &other)
 {
-    *this = {other.device()};
+    *this = {other.device(), other.amneziaObfuscation()};
     return *this;
 }
 

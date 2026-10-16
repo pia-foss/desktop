@@ -15,7 +15,7 @@
 #include <windows.h>
 #include <VersionHelpers.h>
 #include "service_inl.h"
-#include "tap_inl.h"
+#include "common_inl.h"
 #include "brand.h"
 #include "product.h"
 
@@ -206,7 +206,7 @@ const ServiceParams g_daemonServiceParams
 const ServiceParams g_wireguardServiceParams
 {
     L"" BRAND_WINDOWS_WIREGUARD_SERVICE_NAME,
-    L"" PIA_PRODUCT_NAME " WireGuard Tunnel",
+    L"" PIA_PRODUCT_NAME " WireGuard Service",
     SERVICE_DEMAND_START,
     ServiceParams::Flags::UnrestrictedSid
 };
@@ -413,14 +413,76 @@ ServiceStatus installDaemonService(LPCWSTR daemonPath)
 ServiceStatus installWireguardService(LPCWSTR wireguardPath, LPCWSTR dataDirPath)
 {
     // The startup command is:
-    // "...\pia-wgservice.exe" "...\data\wgpia0.conf"
+    // "...\wgservice.exe" "...\data\wgpia0.conf" "BRAND_NAME"
     std::wstring svcCommand;
     svcCommand += '"';
     svcCommand += wireguardPath;
     svcCommand += L"\" \"";
     svcCommand += dataDirPath;
-    svcCommand += L"\\wg" BRAND_CODE "0.conf\"";
+    svcCommand += L"\\wg" BRAND_CODE "0.conf\" \""
+                  L"" BRAND_NAME L" WireGuard\"";
     return installService(svcCommand.c_str(), g_wireguardServiceParams);
+}
+
+// Uninstall the driver INF with the specified hardware ID.  Relies on
+// getSystemRoot() and <setupapi.h> from callout.inl, which is included before
+// service.inl in both translation units that build these inline files.
+bool uninstallDriverInf(LPCWSTR hardwareId)
+{
+    // Additionally, search the C:\Windows\inf directory for the installed oem*.inf
+    std::wstring infPath = getSystemRoot();
+    if(!infPath.empty())
+    {
+        infPath += L"\\inf\\oem*.inf";
+        WIN32_FIND_DATA find;
+        HANDLE it = FindFirstFileW(infPath.c_str(), &find);
+        infPath.resize(infPath.size() - 8, 0);
+        if(it != INVALID_HANDLE_VALUE)
+        {
+            do
+            {
+                if(find.nFileSizeHigh || find.nFileSizeLow >= 100000)
+                {
+                    continue; // Skip any bizarre large files
+                }
+                HANDLE file =
+                    CreateFileW((infPath + find.cFileName).c_str(), GENERIC_READ, FILE_SHARE_READ,
+                                NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+                if(file != INVALID_HANDLE_VALUE)
+                {
+                    std::string data;
+                    data.resize(find.nFileSizeLow, 0);
+                    DWORD bytesRead = 0;
+                    if(ReadFile(file, &data[0], find.nFileSizeLow, &bytesRead, NULL) &&
+                       bytesRead == find.nFileSizeLow)
+                    {
+                        std::wstring hwidW(hardwareId);
+                        std::string hwidN(hwidW.begin(), hwidW.end());
+                        if(data.find(hwidN + ".sys") != data.npos)
+                        {
+                            g_oemInfs.insert(find.cFileName);
+                        }
+                    }
+                    CloseHandle(file);
+                }
+            } while(FindNextFile(it, &find));
+            FindClose(it);
+        }
+    }
+
+    // Uninstall any found driver packages
+    bool infFailures = false;
+    for(const auto &oemInf : g_oemInfs)
+    {
+        SERVICE_LOG("Uninstalling driver package");
+        if(!SetupUninstallOEMInfW(oemInf.c_str(), 0 /*SUOI_FORCEDELETE*/, NULL))
+        {
+            SERVICE_LOG("Unable to uninstall driver package (%d)", GetLastError());
+            infFailures = true;
+        }
+    }
+
+    return !infFailures;
 }
 
 #undef SERVICE_ENTRY_POINT

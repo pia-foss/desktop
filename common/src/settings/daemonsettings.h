@@ -71,7 +71,7 @@ public:
     // Whether to include geo-only locations.
     JsonField(bool, includeGeoOnly, true)
     // The method used to connect to the VPN
-    JsonField(QString, method, QStringLiteral("openvpn"), { "openvpn", "wireguard" })
+    JsonField(QString, method, QStringLiteral("wireguard"), { "openvpn", "wireguard" })
     JsonField(QString, protocol, QStringLiteral("udp"), { "udp", "tcp" })
     JsonField(QString, killswitch, QStringLiteral("auto"), { "on", "off", "auto" })
     // Whether to use the VPN as the default route.  This is a split tunnel
@@ -90,15 +90,26 @@ public:
     JsonField(bool, enableMACE, false) // Enable MACE Ad tracker
     JsonField(uint, remotePortUDP, 0) // 0 == auto
     JsonField(uint, remotePortTCP, 0) // 0 == auto
+    // Remote ports used for OpenVPN connections to a dedicated IP.  These are
+    // separate from remotePortUDP/TCP because DIP over OpenVPN targets
+    // DIP-specific ports.  0, or a port the DIP doesn't offer, uses the DIP's
+    // first port.
+    JsonField(uint, dipRemotePortUDP, 0)
+    JsonField(uint, dipRemotePortTCP, 0)
     JsonField(int, mtu, -1) // 0 == unspecified, large; -1 == Path MTU detection
     JsonField(QString, cipher, QStringLiteral("AES-128-GCM"), { "AES-128-GCM", "AES-256-GCM" })
     // On Windows, the driver and configuration method to use to configure the
-    // virtual network interface.  "wintun" is the default since 2.11.
+    // virtual network interface.  "wintun" is the default.
     //
     // Historically, this only controlled the IP configuration method for the
     // TAP adapter, but WinTUN was added as an alternative in 2.11 since we
-    // only have one configuration method for WinTUN.
+    // only have one configuration method for WinTUN, and DCO was added later.
+    // The name is kept for compatibility with existing settings files.
     //
+    // - dco - use the OpenVPN DCO driver, which offloads the data channel to
+    //   the kernel.  DCO only supports UDP, and it cannot do compression stub
+    //   framing; WinTUN is used automatically when DCO can't carry the
+    //   connection (see OpenVPNMethod::run()).
     // - wintun - use the WinTUN driver and OpenVPN's built-in static
     //   configuration method.
     // - dhcp - use the TAP driver and "ip-win32 dhcp", IP configuration and
@@ -112,7 +123,7 @@ public:
     //   timeouts, but netsh is prone to spurious failures ("The parameter is
     //   incorrect"), and it depends on a running DNS Client service, which
     //   users sometimes disable.
-    JsonField(QString, windowsIpMethod, QStringLiteral("wintun"), {"wintun", "dhcp", "static"})
+    JsonField(QString, windowsIpMethod, QStringLiteral("wintun"), {"dco", "wintun", "dhcp", "static"})
 
     // Proxy setting
     //  - "custom" - Use proxyCustom
@@ -163,6 +174,10 @@ public:
     // the version.
     JsonField(QString, serviceQualityAcceptanceVersion, "")
 
+    // Persists the split tunnel activation-failed banner across daemon restarts.
+    // Cleared when the user dismisses the notification or successfully re-enables split tunnel.
+    JsonField(bool, splitTunnelActivationFailed, false)
+
     // Whether split tunnel is enabled
     JsonField(bool, splitTunnelEnabled, false)
     // Whether to also split DNS traffic - set to false by default, as it can be a little
@@ -184,6 +199,11 @@ public:
     // If false, uses wireguard-go method instead, even if the kernel module is
     // available.
     JsonField(bool, wireguardUseKernel, true)
+
+    // Whether to obfuscate WireGuard with Amnezia.  When true, only servers
+    // with obfuscation are used; when false, only vanilla WireGuard servers.
+    // Not supported on Windows - always treated as false there.
+    JsonField(bool, wireguardObfuscation, false)
 
     // If no data is received for (wireguardPingTimeout/2) seconds, fire off a ping.
     // If no data is recieved for another (wireguardPingTimeout/2) seconds, assume that the connection

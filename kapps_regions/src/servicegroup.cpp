@@ -26,6 +26,7 @@ namespace kapps::regions {
 ServiceGroup::ServiceGroup(std::vector<std::uint16_t> openVpnUdpPorts, bool openVpnUdpNcp,
                            std::vector<std::uint16_t> openVpnTcpPorts, bool openVpnTcpNcp,
                            std::vector<std::uint16_t> wireGuardPorts,
+                           std::vector<std::uint16_t> wireGuardAmneziaPorts,
                            bool ikev2,
                            std::vector<std::uint16_t> shadowsocksPorts,
                            std::string shadowsocksKey, std::string shadowsocksCipher,
@@ -33,6 +34,7 @@ ServiceGroup::ServiceGroup(std::vector<std::uint16_t> openVpnUdpPorts, bool open
     : _openVpnUdpPorts{std::move(openVpnUdpPorts)}, _openVpnUdpNcp{openVpnUdpNcp},
       _openVpnTcpPorts{std::move(openVpnTcpPorts)}, _openVpnTcpNcp{openVpnTcpNcp},
       _wireGuardPorts{std::move(wireGuardPorts)},
+      _wireGuardAmneziaPorts{std::move(wireGuardAmneziaPorts)},
       _ikev2{ikev2},
       _shadowsocksPorts{std::move(shadowsocksPorts)},
       _shadowsocksKey{std::move(shadowsocksKey)},
@@ -113,8 +115,8 @@ void ServiceGroup::readJsonServiceOpenVpn(const nlohmann::json &service,
 bool ServiceGroup::hasAnyService() const
 {
     return !openVpnUdpPorts().empty() || !openVpnTcpPorts().empty() ||
-        !wireGuardPorts().empty() || ikev2() || !shadowsocksPorts().empty() ||
-        !metaPorts().empty();
+        !wireGuardPorts().empty() || !wireGuardAmneziaPorts().empty() || ikev2() ||
+        !shadowsocksPorts().empty() || !metaPorts().empty();
 }
 
 void ServiceGroup::readJsonServicesArray(const nlohmann::json &services,
@@ -145,6 +147,8 @@ void ServiceGroup::readJsonServicesArray(const nlohmann::json &services,
         }
         else if(serviceId == "wireguard")
             readJsonServicePorts(service, serviceId, _wireGuardPorts);
+        else if(serviceId == "awg")
+            readJsonServicePorts(service, serviceId, _wireGuardAmneziaPorts);
         else if(serviceId == "ikev2")
         {
             // IKEv2 has no configuration parameters; the ports cannot be
@@ -160,6 +164,19 @@ void ServiceGroup::readJsonServicesArray(const nlohmann::json &services,
             readJsonServicePorts(service, serviceId, _metaPorts);
         // Otherwise, it's an unknown service, silently ignore it (to allow for
         // addition of future services).
+    }
+
+    // AWG is WireGuard with obfuscation - alias its ports as WireGuard ports so
+    // server selection includes these servers in the WireGuard pool.  This is
+    // done once both vectors are final, since a group could list the services
+    // in either order (aliasing during the loop would either clobber the real
+    // WireGuard ports or trip the duplicate-service check below).
+    if(_wireGuardPorts.empty())
+        _wireGuardPorts = _wireGuardAmneziaPorts;
+    else if(!_wireGuardAmneziaPorts.empty())
+    {
+        KAPPS_CORE_WARNING() << "Service group lists both wireguard and awg services"
+            << "- using the wireguard ports";
     }
 
     // A service group _can_ contain no known services, such as if it only

@@ -29,7 +29,7 @@ enum FileCreateResult
     CreateNotNeeded = 2,
 };
 
-FileCreateResult createDirectory(utf16ptr path);
+FileCreateResult createDirectory(utf16ptr path, SECURITY_ATTRIBUTES *attributes = nullptr);
 bool deleteDirectory(utf16ptr path);
 bool deleteEntireDirectory(std::wstring path);
 bool deleteRollbackDirectory();
@@ -67,9 +67,20 @@ public:
     virtual void rollback() override;
     virtual double getEstimatedExecutionTime() const override { return 0.005; }
 protected:
+    void create(SECURITY_ATTRIBUTES *attributes);
+
     std::wstring _path, _backup;
     bool _skipBackup;
     bool _created = false;
+};
+
+// Creates the install directory with Program Files' owner and DACL, so a custom /PATH doesn't
+// inherit a user-writable parent's ACL. An existing directory keeps its own.
+class CreateProtectedDirectoryTask : public CreateDirectoryTask
+{
+public:
+    using CreateDirectoryTask::CreateDirectoryTask;
+    virtual void execute() override;
 };
 
 // Task to remove a file (equivalent to an empty CreateFileTask).

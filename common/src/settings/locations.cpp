@@ -59,7 +59,16 @@ kapps::regions::Ports Server::servicePorts(Service service) const
         case Service::OpenVpnUdp:
             return openVpnUdpPorts();
         case Service::WireGuard:
+#if defined(Q_OS_WIN)
+            // Windows ships vanilla WireGuard-NT, which cannot apply Amnezia
+            // obfuscation.  Keep AWG servers out of the WireGuard pool so they
+            // are never selected for a connection.
+            if(hasWireGuardAmnezia())
+                return {};
+#endif
             return wireGuardPorts();
+        case Service::WireGuardAmnezia:
+            return wireGuardAmneziaPorts();
         case Service::Shadowsocks:
             return shadowsocksPorts();
         case Service::Meta:
@@ -187,6 +196,25 @@ bool Location::hasService(Service service) const
     for(const auto &server : servers())
     {
         if(server.hasService(service))
+            return true;
+    }
+    return false;
+}
+
+bool Location::hasObfuscatedWireGuard() const
+{
+    return hasService(Service::WireGuardAmnezia);
+}
+
+bool Location::hasPlainWireGuard() const
+{
+    // AmneziaWG servers advertise their port as a WireGuard port too, so
+    // hasService(WireGuard) alone would also match them - they have to be
+    // excluded explicitly to find servers that can carry a non-obfuscated
+    // connection.
+    for(const auto &server : servers())
+    {
+        if(server.hasService(Service::WireGuard) && !server.hasWireGuardAmnezia())
             return true;
     }
     return false;

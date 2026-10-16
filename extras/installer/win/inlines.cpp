@@ -27,8 +27,8 @@
 // cannot use it at all).
 //
 // These inline implementations should generally only use WinAPI and standard
-// libraries.  Logging is implemtented by defining TAP_LOG, etc. to LOG in the
-// installer, and qInfo() in the daemon.
+// libraries.  Logging is implemtented by defining CALLOUT_LOG, etc. to LOG in
+// the installer, and qInfo() in the daemon.
 //
 // In particular, for logging:
 // - Do not use Microsoft-specific %S.  For wide-character strings; use %ls.
@@ -36,8 +36,16 @@
 //   pass the [w]string directly (this works in the installer but not in the
 //   daemon).
 
+#include "common_inl.h"
+
+#define CALLOUT_LOG LOG
+#include "callout.inl"
+
 #define TAP_LOG LOG
 #include "tap.inl"
+
+#define DCO_LOG LOG
+#include "dco.inl"
 
 #define SERVICE_LOG LOG
 #include "service.inl"

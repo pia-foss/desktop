@@ -27,6 +27,20 @@ class tst_scutilparse : public QObject
 
 private slots:
 
+    void testParserArrayWithBrokenIdentifier()
+    {
+        const QString scutilText = "<array> {\n"
+                                   "  0 : Default: FC6F7E27-969A-4E96-AEBF-A75441964325 0\n"
+                                   "}\n";
+
+        auto parseResult = scutilParse(scutilText);
+        auto array = parseResult.toArray();
+
+        QCOMPARE(array.size(), 1);
+        QCOMPARE(array[0].toString(),
+                 QStringLiteral("Default: FC6F7E27-969A-4E96-AEBF-A75441964325 0"));
+    }
+
     void testParserFlatDict()
     {
         const QString scutilText = "<dictionary> {\n  PrimaryInterface : en0\n  PrimaryService : BBCB371A-6C30-4A04-96B3-541D935CA495\n  Router : 192.168.1.1\n}\n";
@@ -65,7 +79,39 @@ private slots:
         QCOMPARE(array[2].toString(), "two");
     }
 
-   void testParserNoKeyError()
+    void testParserMultiTokenScalarValue()
+    {
+        const QString scutilText = R"(<dictionary> {
+  NetworkSignatureHash : <data> 0xf01d9930e439d7a10f5e5cb03b648e116859cde3
+  NetworkSignature : IPv4.Router=192.168.254.254;IPv4.RouterHardwareAddress=b8:9f:cc:6a:4f:d8
+}
+)";
+
+        auto parseResult = scutilParse(scutilText);
+        auto object = parseResult.toObject();
+
+        QCOMPARE(object.value("NetworkSignatureHash").toString(),
+                 QStringLiteral("<data> 0xf01d9930e439d7a10f5e5cb03b648e116859cde3"));
+        QCOMPARE(object.value("NetworkSignature").toString(),
+                 QStringLiteral(
+                     "IPv4.Router=192.168.254.254;IPv4.RouterHardwareAddress=b8:9f:cc:6a:4f:d8"));
+    }
+
+    void testParserMultiTokenScalarValueWithExtraSpaces()
+    {
+        const QString scutilText =
+            "<dictionary> {\n"
+            "  NetworkSignatureHash : <data>  0xf01d9930e439d7a10f5e5cb03b648e116859cde3  \n"
+            "}\n";
+
+        auto parseResult = scutilParse(scutilText);
+        auto object = parseResult.toObject();
+
+        QCOMPARE(object.value("NetworkSignatureHash").toString(),
+                 QStringLiteral("<data> 0xf01d9930e439d7a10f5e5cb03b648e116859cde3"));
+    }
+
+    void testParserNoKeyError()
     {
         // Scutil returns "  No such key" when it can't find
         // a key for a given dict - in this case we treat this error text

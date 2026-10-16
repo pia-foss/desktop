@@ -207,8 +207,24 @@ Item {
       implicitWidth: popupBackground.width
       implicitHeight: popupBackground.height + Theme.popup.tipArrowSize
 
-      Shape {
+      // The arrow is created and destroyed with the popup.
+      //
+      // Qt Quick detaches a Popup's items from the window when the popup
+      // closes and reattaches them when it reopens, which destroys and
+      // recreates their scene graph nodes while the items themselves stay
+      // alive.  In Qt 6.2 the software renderer for Shape keeps a pointer to
+      // the old node and only reinitializes it when that pointer changes, so a
+      // replacement node that happens to be allocated at the same address is
+      // used uninitialized and crashes on the next frame (fixed upstream in
+      // Qt 6.5, QTBUG-109200).  Destroying the Shape along with the popup
+      // keeps its renderer and its node in lockstep, so the replacement node
+      // is always initialized.
+      //
+      // popup.visible stays true for the whole exit transition, so the arrow
+      // is present for the entire fade in and fade out.
+      Loader {
         id: arrow
+        active: popup.visible
         x: {
           // Work around buggy Popup coordinate calculations
           var actualPos = Util.calculatePopupActualPos(popup, popup.Window.window,
@@ -217,12 +233,16 @@ Item {
         }
         y: infoTip.showBelow ? 0 : popupText.height
 
-        ShapePath {
-            fillColor: Theme.popup.tipBackgroundColor
-            startX: -Theme.popup.tipArrowSize
-            startY: infoTip.showBelow ? Theme.popup.tipArrowSize : 0
-            PathLine { x: 0; y: infoTip.showBelow ? 0 : Theme.popup.tipArrowSize}
-            PathLine { x: Theme.popup.tipArrowSize; y: infoTip.showBelow ? Theme.popup.tipArrowSize : 0 }
+        sourceComponent: Component {
+          Shape {
+            ShapePath {
+                fillColor: Theme.popup.tipBackgroundColor
+                startX: -Theme.popup.tipArrowSize
+                startY: infoTip.showBelow ? Theme.popup.tipArrowSize : 0
+                PathLine { x: 0; y: infoTip.showBelow ? 0 : Theme.popup.tipArrowSize}
+                PathLine { x: Theme.popup.tipArrowSize; y: infoTip.showBelow ? Theme.popup.tipArrowSize : 0 }
+            }
+          }
         }
       }
 

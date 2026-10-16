@@ -25,13 +25,21 @@
 #include <QTimer>
 
 
+// This class is responsible for checking periodically the state of the macos
+// system(network) extension.
+// It gets started when split tunnel is enabled and it is stopped when it is disabled.
+// The network extension requires 2 states of installation: extension and proxy.
+// The extension is installed in the first popup,
+// the proxy is installed/created in the "Add Proxy Configurations" popup.
+// Both need to be successful for the transparent proxy to start and intercept network traffic.
 class NetExtensionChecker : public QObject {
     Q_OBJECT
 
 public:
     NetExtensionChecker(std::string transparentProxyCliExecutable,
                         std::chrono::milliseconds shortInterval,
-                        std::chrono::milliseconds longInterval);
+                        std::chrono::milliseconds longInterval,
+                        int maxActivationAttempts);
 
     // Starting the service that will periodically check for
     // network extension installation state.
@@ -40,13 +48,16 @@ public:
     void stop();
 
     // Timer is set to long interval in every scenario, except when
-    // Split Tunnel is enabled and the extension is not yet installed.
+    // Split Tunnel is enabled and the extension is not yet fully installed.
     // In the latter, we check faster to give a quicker user feedback
     void updateTimer(StateModel::NetExtensionState installState);
 
     StateModel::NetExtensionState checkInstallationState() const;
 
 private:
+    // This is the function that will be run by the timer.
+    // We want it to check the state of the extension and emit signals
+    // if the state changes or the activation fails
     void checkIfNetExtensionStateChanged();
 
     // Check that the network extension is installed in the system.
@@ -63,6 +74,8 @@ private:
     std::chrono::milliseconds _shortInterval;
     std::chrono::milliseconds _longInterval;
     StateModel::NetExtensionState _lastState;
+    int _maxActivationAttempts;
+    int _attempts;
 
 signals:
     void stateChanged(StateModel::NetExtensionState state);

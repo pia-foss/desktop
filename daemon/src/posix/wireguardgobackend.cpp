@@ -29,7 +29,7 @@
 
 namespace
 {
-    // The restart strategy for wireguard-go doesn't really matter, since we
+    // The restart strategy for wireguard doesn't really matter, since we
     // abort if the process fails at all.
     RestartStrategy::Params wgGoRestartParams{std::chrono::milliseconds{100},
                                               std::chrono::seconds{1},
@@ -40,18 +40,18 @@ namespace
     std::chrono::seconds localSocketAttemptTimeout{1};
 }
 
-// Task to get the device name once wireguard-go is started on Mac.
+// Task to get the device name once wireguard is started on Mac.
 //
 // On Linux, the device name is fixed, but on Mac we let the kernel pick the
 // device name, so we have to get the result from a file written by
-// wireguard-go.
+// wireguard.
 //
 // The task only reject in some catastrophic cases (such as file content that's
 // unexpectedly long); a timeout should usually be applied with
 // Async::timeout().
 //
-// (If failures occur in wireguard-go that prevent it from writing an interface
-// name, we expect wireguard-go to shut down, which will abandon the attempt and
+// (If failures occur in wireguard that prevent it from writing an interface
+// name, we expect wireguard to shut down, which will abandon the attempt and
 // abort this task.)
 class MacInterfaceNameTask : public Task<QString>
 {
@@ -174,7 +174,7 @@ void MacInterfaceNameTask::checkInterfaceFile()
         return;
     }
 
-    // wireguard-go adds a line break
+    // wireguard adds a line break
     if(read > 0 && itfName[read-1] == '\n')
         --read;
 
@@ -358,10 +358,10 @@ void WireguardGoRunner::setupProcess(UidGidProcess &process)
 void WireguardGoBackend::cleanup()
 {
 #if defined(Q_OS_LINUX)
-    const QString wgSocketPath{QStringLiteral("/var/run/wireguard/") +
+    const QString wgSocketPath{QStringLiteral("/var/run/amneziawg/") +
                                WireguardBackend::interfaceName +
                                QStringLiteral(".sock")};
-    // Remove the socket file if it exists; this causes wireguard-go to shut
+    // Remove the socket file if it exists; this causes amneziawg-go to shut
     // down.
     if(::unlink(wgSocketPath.toUtf8().constData()))
     {
@@ -392,16 +392,16 @@ void WireguardGoBackend::cleanup()
     // now used by some other process.)
     //
     // The most reasonable remaining option is to just try to terminate any
-    // existing 'pia-wireguard-go' process.  This won't interact with a
-    // wireguard-go process run by some other product, and on the off chance
-    // that somebody does name a process 'pia-wireguard-go', the workaround is
+    // existing wireguard process.  This won't interact with a
+    // wireguard process run by some other product, and on the off chance
+    // that somebody does name a process wireguard, the workaround is
     // just to rename it.
     //
     // We don't expect there to be a leftover process, so if this does
     // successfully kill something, trace a warning.
-    if(0 == Exec::cmd(QStringLiteral("killall"), {QStringLiteral("-v"), Files::wireguardGoBasename}))
+    if(0 == Exec::cmd(QStringLiteral("killall"), {QStringLiteral("-v"), Files::wireguardBasename}))
     {
-        qWarning() << "Killed existing" << Files::wireguardGoBasename;
+        qWarning() << "Killed existing" << Files::wireguardBasename;
     }
 #endif
 }
@@ -446,6 +446,7 @@ WireguardGoBackend::WireguardGoBackend()
     : _wgGoPid{0}
 {
     _wgGoRunner.emplace(wgGoRestartParams);
+    _wgDriverName = QStringLiteral("amneziawg-go");
 
 #ifdef Q_OS_MACOS
     // Rate-limit logIntefaces method to max invocations of once a second
@@ -453,7 +454,7 @@ WireguardGoBackend::WireguardGoBackend()
 #endif
 
     connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
-        [](const QByteArray &line){qInfo() << "wireguard-go:" << line.data();});
+        [this](const QByteArray &line){qInfo() << _wgDriverName << ":" << line.data();});
 #ifdef Q_OS_MACOS
     connect(_wgGoRunner.ptr(), &ProcessRunner::stdoutLine, this,
         [=](const QByteArray &line) mutable {
@@ -465,7 +466,7 @@ WireguardGoBackend::WireguardGoBackend()
             &WireguardGoBackend::wgGoStarted);
     connect(_wgGoRunner.ptr(), &ProcessRunner::failed, this,
             &WireguardGoBackend::wgGoFailed);
-    _wgGoRunner->setObjectName(QStringLiteral("wireguard-go"));
+    _wgGoRunner->setObjectName(_wgDriverName);
 #ifdef Q_OS_MAC
     // If there was an old interface file hanging around, remove it
     QFile::remove(Path::WireguardInterfaceFile);
@@ -480,7 +481,7 @@ WireguardGoBackend::~WireguardGoBackend()
         _pConnectAttempt.abandon();
 
     // Tear down _wgGoRunner to be sure the process has exited before removing
-    // the interface file (in case shutdown races with wireguard-go startup)
+    // the interface file (in case shutdown races with wireguard executable startup)
     _wgGoRunner.clear();
 
 #ifdef Q_OS_MAC
@@ -493,12 +494,12 @@ void WireguardGoBackend::wgGoStarted(qint64 pid)
 {
     if(_wgGoPid)
     {
-        // Not expected, we stop the ProcessRunner if wireguard-go dies.
-        qWarning() << "Unexpected restart of wireguard-go: PID" << _wgGoPid
+        // Not expected, we stop the ProcessRunner if wireguard dies.
+        qWarning() << "Unexpected restart of " << _wgDriverName << ": PID" << _wgGoPid
             << "->" << pid;
         return;
     }
-    qInfo() << "wireguard-go PID:" << pid;
+    qInfo() << _wgDriverName << " PID:" << pid;
     _wgGoPid = pid;
 }
 
@@ -509,7 +510,7 @@ void WireguardGoBackend::wgGoFailed()
     // can't tear down the QProcess or ProcessRunner during this signal.
     if(_pShutdownTask)
     {
-        qInfo() << "wireguard-go exited during shutdown";
+        qInfo() << _wgDriverName << " exited during shutdown";
         QMetaObject::invokeMethod(this, [this]()
         {
             Q_ASSERT(_pShutdownTask);   // Class invariant, never cleared once set
@@ -518,7 +519,7 @@ void WireguardGoBackend::wgGoFailed()
     }
     else
     {
-        qWarning() << "wireguard-go exited unexpectedly";
+        qWarning() << _wgDriverName << " exited unexpectedly";
         // As above, queue the error handling since we can't tear down the
         // process or runner here
         QMetaObject::invokeMethod(this, [this]()
@@ -529,6 +530,7 @@ void WireguardGoBackend::wgGoFailed()
 }
 
 auto WireguardGoBackend::createInterface(wg_device &wgDev,
+                                         const std::optional<AmneziaObfuscation> &obfuscation,
                                          const QPair<QHostAddress, int> &)
     -> Async<std::shared_ptr<NetworkAdapter>>
 {
@@ -539,9 +541,9 @@ auto WireguardGoBackend::createInterface(wg_device &wgDev,
         throw Error{HERE, Error::Code::Unknown};
     }
 
-    // Start wireguard-go.  Use the desired interface name if possible; on Mac
+    // Start the wireguard executable.  Use the desired interface name if possible; on Mac
     // we have to use "utun" to pick a utun device.
-    _wgGoRunner->enable(Path::WireguardGoExecutable,
+    _wgGoRunner->enable(Path::WireguardExecutable,
                        {QStringLiteral("--foreground"),
 #ifdef Q_OS_MAC
                         QStringLiteral("utun")
@@ -551,7 +553,7 @@ auto WireguardGoBackend::createInterface(wg_device &wgDev,
                        });
 
     // ProcessRunner::started() is emitted synchronously the first time it is
-    // enabled - we have already received the wireguard-go PID.
+    // enabled - we have already received the wireguard executable PID.
     Q_ASSERT(_wgGoPid);
 
     // Get the interface name, then start trying to connect
@@ -563,16 +565,17 @@ auto WireguardGoBackend::createInterface(wg_device &wgDev,
         ->then(this, [this](const QString &newItfName)
         {
             _interfaceName = newItfName;
-            _wgSocketPath = QStringLiteral("/var/run/wireguard/") +
+            _wgSocketPath = QStringLiteral("/var/run/amneziawg/") +
                             _interfaceName + QStringLiteral(".sock");
             return Async<PendingLocalSocketTask>::create(_wgSocketPath);
         })
-        ->then(this, [this, devConfig = WgDevStatus{wgDev}](const std::shared_ptr<QLocalSocket> &pSocket)
+        ->then(this, [this, devConfig = WgDevStatus{wgDev, obfuscation}](const std::shared_ptr<QLocalSocket> &pSocket)
         {
             Q_ASSERT(pSocket);  // Postcondition of PendingLocalSocketTask; rejects otherwise
 
             // Configure the interface
-            return Async<WireguardConfigDeviceTask>::create(pSocket, devConfig.device());
+            return Async<WireguardConfigDeviceTask>::create(pSocket, devConfig.device(),
+                                                            devConfig.amneziaObfuscation());
         })
         ->then(this, [this](int returnedErrno)
             {
@@ -598,7 +601,7 @@ auto WireguardGoBackend::getStatus() -> Async<WgDevPtr>
         return Async<WgDevPtr>::reject({HERE, Error::Code::WireguardCreateDeviceFailed});
     }
 
-    // wireguard-go only allows one IPC request per connection (it closes the
+    // the wireguard executable only allows one IPC request per connection (it closes the
     // socket after the first request), so we have to create a new connection
     // for each stat poll.
     //
@@ -627,7 +630,7 @@ Async<void> WireguardGoBackend::shutdown()
     if(_pConnectAttempt)
         _pConnectAttempt.abandon();
 
-    // Allow wireguard-go to cleanly shut down.
+    // Allow wireguard executable to cleanly shut down.
     // Set _pShutdownTask, even if it's resolved immediately, because this
     // indicates that shutdown() was called (sanity-checked by destructor)
     _pShutdownTask = Async<void>::create();
@@ -635,11 +638,11 @@ Async<void> WireguardGoBackend::shutdown()
     Q_ASSERT(_wgGoRunner);  // Class invariant (only cleared on shutdown)
     if(_wgGoRunner->terminate())
     {
-        qInfo() << "Signaled wireguard-go to terminate";
+        qInfo() << "Signaled " << _wgDriverName << " to terminate";
     }
     else
     {
-        qInfo() << "wireguard-go process as not running, shutdown complete";
+        qInfo() << _wgDriverName << " process as not running, shutdown complete";
         _pShutdownTask->resolve();
         _wgGoRunner->disable();
     }

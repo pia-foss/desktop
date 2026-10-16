@@ -399,6 +399,31 @@
       <translation>未安装 VPN 隧道的 TAP 适配器。您可以从“设置”重新安装。</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="165"/>
+      <source>The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.</source>
+      <extracomment>&quot;WinTUN&quot; is the name of the virtual network adapter driver used on Windows and is not generally localized.</extracomment>
+      <translation>未安装 VPN 隧道的 WinTUN 适配器。您可以从“设置”重新安装。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="181"/>
+      <source>DCO DRIVER MISSING</source>
+      <comment>header-title</comment>
+      <extracomment>Header for the notification shown when the OpenVPN DCO driver is missing. &quot;DCO&quot; is the driver name and is not translated.</extracomment>
+      <translation>缺少 DCO 驱动程序</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="185"/>
+      <source>The DCO driver is not installed.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated. This replaces the generic &quot;adapter is not installed&quot; message - the VPN still works without DCO.</extracomment>
+      <translation>未安装 DCO 驱动程序。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="188"/>
+      <source>The DCO driver is not installed.  The VPN still connects using WinTUN; you can reinstall DCO from Settings.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>未安装 DCO 驱动程序。VPN 仍会使用 WinTUN 连接；您可以从“设置”重新安装 DCO。</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="163"/>
       <source>Restart to complete installation.</source>
       <translation>重新启动以完成安装。</translation>
@@ -430,6 +455,11 @@
       <translation>App 排除功能需要安装分离通道筛选器。请重新启动以完成安装。</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="256"/>
+      <source>Split tunnel was turned off because setup didn’t finish. Please try the setup again.</source>
+      <translation>由于设置未完成，分离通道已关闭。请重新尝试设置。</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="216"/>
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="45"/>
       <source>Iptables is not installed.</source>
@@ -440,6 +470,37 @@
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="217"/>
       <source>Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.</source>
       <translation>需要 iptables 才能连接 VPN。重新安装此应用程序或手动安装 iptables 或 iptables-nft 软件包，然后重启电脑。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="296"/>
+      <source>This location does not support obfuscation.</source>
+      <translation>该位置不支持混淆。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="297"/>
+      <source>This location only offers obfuscated servers.</source>
+      <translation>该位置仅提供混淆服务器。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="299"/>
+      <source>Turn off obfuscation on the Protocol page, or choose a location that offers obfuscated servers.</source>
+      <translation>请在“协议”页面上关闭混淆，或选择提供混淆服务器的位置。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="300"/>
+      <source>Turn on obfuscation on the Protocol page, or choose a location that offers regular servers.</source>
+      <translation>请在“协议”页面上开启混淆，或选择提供常规服务器的位置。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="326"/>
+      <source>OpenVPN is not available for this Dedicated IP.</source>
+      <extracomment>Shown when the selected Dedicated IP has no OpenVPN ports for the connection type in use, so it can&apos;t be connected to with OpenVPN.</extracomment>
+      <translation>此专用 IP 无法使用 OpenVPN。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/ClientNotifications.qml" line="327"/>
+      <source>Switch to WireGuard on the Protocols page, or choose another location.</source>
+      <translation>请在“协议”页面上切换到 WireGuard，或选择其他位置。</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/common/ClientNotifications.qml" line="230"/>
@@ -1076,6 +1137,12 @@
       <source>Get Your Dedicated IP</source>
       <translation>获取您的专用 IP</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/dedicated-ip/DedicatedIpPage.qml" line="105"/>
+      <source>OpenVPN Remote Port</source>
+      <extracomment>Label for the dropdown that selects the OpenVPN remote port used for dedicated IP connections.</extracomment>
+      <translation>OpenVPN 远程端口</translation>
+    </message>
   </context>
   <context>
     <name>DedicatedIpRegion</name>
@@ -1535,6 +1602,17 @@
     </message>
     <message>
       <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="444"/>
+      <source>DCO Driver</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>DCO 驱动程序</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="445"/>
+      <source>Reinstalling DCO Driver...</source>
+      <translation>正在重新安装 DCO 驱动程序...</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/help/HelpPage.qml" line="444"/>
       <source>Reinstalling Split Tunnel Filter...</source>
       <translation>正在重新安装分离通道筛选器…</translation>
     </message>
@@ -1872,6 +1950,12 @@
       <translation>多跳需要安装 OpenVPN</translation>
     </message>
     <message>
+      <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="49"/>
+      <source>Multi-hop can&apos;t be used with the DCO driver. Choose a different Virtual Network Driver in Protocol settings.</source>
+      <extracomment>Shown when multi-hop can&apos;t be used because the OpenVPN DCO driver is selected. &quot;DCO&quot; stands for Data Channel Offload and is the name of the driver; it should not be translated. &quot;Virtual Network Driver&quot; is the name of the setting on the Protocol page.</extracomment>
+      <translation>多跳无法与 DCO 驱动程序一起使用。请在协议设置中选择其他虚拟网络驱动程序。</translation>
+    </message>
+    <message>
       <location filename="../../../client/res/components/settings/pages/multihop/MultihopPage.qml" line="175"/>
       <source>Host</source>
       <translation>主机</translation>
@@ -2179,6 +2263,24 @@
       <source>Virtual Network Driver</source>
       <translation>虚拟网络驱动程序</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="163"/>
+      <source>DCO (recommended)</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and is the name of the OpenVPN driver; it should not be translated.</extracomment>
+      <translation>DCO（推荐）</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="183"/>
+      <source>DCO: Offloads the data channel to the kernel for the best performance.  WinTUN is used automatically when DCO can&apos;t be used.</source>
+      <extracomment>&quot;DCO&quot; stands for Data Channel Offload and should not be translated. WinTUN is the name of the other driver and should also not be translated.</extracomment>
+      <translation>DCO：将数据通道卸载到内核以获得最佳性能。无法使用 DCO 时会自动使用 WinTUN。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/OpenVpnConnection.qml" line="200"/>
+      <source>DCO can&apos;t be used with Multi-hop. Turn off Multi-hop to select DCO.</source>
+      <extracomment>Shown when DCO can&apos;t be selected because multi-hop is enabled. &quot;DCO&quot; stands for Data Channel Offload and is the name of the driver; it should not be translated.</extracomment>
+      <translation>DCO 无法与多跳一起使用。请关闭多跳以选择 DCO。</translation>
+    </message>
   </context>
   <context>
     <name>OverlayDialog</name>
@@ -2375,6 +2477,11 @@
       <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="17"/>
       <source>VPN Protection Everywhere You Need It</source>
       <translation>提供 VPN 保护 在您需要的任何地方</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="18"/>
+      <source>Secure unlimited devices with your Private Internet Access account.</source>
+      <translation>使用您的 Private Internet Access 账户保护无限数量的设备。</translation>
     </message>
     <message>
       <location filename="../../../client/res/components/onboarding/pages/Page4Finish.qml" line="18"/>
@@ -3003,6 +3110,18 @@
       <source>Port forwarding is not available for this country.</source>
       <translation>在该国家/地区无法使用端口转发。</translation>
     </message>
+    <message>
+      <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="31"/>
+      <source>Obfuscation is not available for this location.</source>
+      <extracomment>Shown when obfuscation is turned on but this location has no servers that support it, so the location can&apos;t be used until obfuscation is turned off.</extracomment>
+      <translation>在该位置无法使用混淆。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/common/regions/RegionRowConstants.qml" line="34"/>
+      <source>This location only offers obfuscated servers.</source>
+      <extracomment>Shown when obfuscation is turned off but this location only has obfuscated servers, so the location can&apos;t be used until obfuscation is turned on.</extracomment>
+      <translation>该位置仅提供混淆服务器。</translation>
+    </message>
   </context>
   <context>
     <name>RegionListView</name>
@@ -3237,6 +3356,11 @@
       <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="74"/>
       <source>Split Tunnel is not installed. Go to System Settings -&gt; General. Click &apos;i&apos; in the Network Extensions row and enable PIA Split Tunnel. Then click &quot;Allow&quot; on the Proxy Configurations popup</source>
       <translation>未安装拆分隧道。前往“系统设置 -&gt; 通用”。点击“网络扩展”行中的 &apos;i&apos;，并启用 PIA 拆分隧道。然后点击代理中的 &quot;允许&quot;</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/SettingsMessages.qml" line="76"/>
+      <source>Split Tunnel is not installed. Go to System Settings -&gt; General -&gt; Login Items &amp; Extensions. Scroll down and click &apos;i&apos; on Network Extensions and enable &quot;PIA Split Tunnel&quot;. Then click &quot;Allow&quot; on the Proxy Configurations popup.</source>
+      <translation>未安装拆分隧道。前往“系统设置 -&gt; 通用 -&gt; 登录项与扩展”。向下滚动，点击“网络扩展”行中的 &apos;i&apos;，并启用 &quot;PIA Split Tunnel&quot;。然后点击代理配置弹出窗口中的 &quot;允许&quot;。</translation>
     </message>
   </context>
   <context>
@@ -4093,6 +4217,27 @@
     <name>WireguardConnection</name>
     <message>
       <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
+      <source>Obfuscation</source>
+      <translation>混淆</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="26"/>
+      <source>Off</source>
+      <translation>关</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="27"/>
+      <source>On</source>
+      <translation>开</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="32"/>
+      <source>Disguises WireGuard traffic so it is harder to identify and block, which can help on networks that restrict VPNs. Only some locations offer obfuscated servers.</source>
+      <extracomment>Obfuscation disguises the VPN traffic so networks that block VPNs can&apos;t recognize it. Only some locations have servers that support it, and the connection fails in locations that don&apos;t.</extracomment>
+      <translation>伪装 WireGuard 流量，使其更难被识别和拦截，这在限制 VPN 的网络上可能会有所帮助。只有部分位置提供混淆服务器。</translation>
+    </message>
+    <message>
+      <location filename="../../../client/res/components/settings/pages/protocol/WireguardConnection.qml" line="23"/>
       <source>Connection Timeout</source>
       <translation>连接超时</translation>
     </message>
@@ -4293,6 +4438,16 @@
       <location filename="../../../extras/installer/win/strings.rc" line="66"/>
       <source>UPDATING CALLOUT DRIVER</source>
       <translation>正在更新标注驱动程序</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="67"/>
+      <source>Removing OpenVPN DCO Driver</source>
+      <translation>正在删除 OpenVPN DCO 驱动程序</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="68"/>
+      <source>Updating OpenVPN DCO Driver</source>
+      <translation>正在更新 OpenVPN DCO 驱动程序</translation>
     </message>
     <message>
       <location filename="../../../extras/installer/win/strings.rc" line="68"/>
@@ -4523,6 +4678,16 @@
       <location filename="../../../extras/installer/win/strings.rc" line="113"/>
       <source>Private Internet Access requires Windows 10 or later.</source>
       <translation>Private Internet Access 要求 Windows 10 或更新版本。</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="116"/>
+      <source>Error uninstalling OpenVPN DCO driver.</source>
+      <translation>卸载 OpenVPN DCO 驱动程序时出错。</translation>
+    </message>
+    <message>
+      <location filename="../../../extras/installer/win/strings.rc" line="117"/>
+      <source>OpenVPN DCO driver installation failed.</source>
+      <translation>OpenVPN DCO 驱动程序安装失败。</translation>
     </message>
     <message>
       <location filename="../../../extras/installer/win/strings.rc" line="115"/>

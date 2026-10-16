@@ -38,6 +38,22 @@ Item {
       spacing: 10
 
       DropdownInput {
+        label: uiTr("Obfuscation")
+        setting: DaemonSetting { name: "wireguardObfuscation" }
+        model: [
+          { name: uiTr("Off"), value: false },
+          { name: uiTr("On"),  value: true }
+        ]
+        //: Obfuscation disguises the VPN traffic so networks that block VPNs
+        //: can't recognize it.  Only some locations have servers that support
+        //: it, and the connection fails in locations that don't.
+        info: uiTr("Disguises WireGuard traffic so it is harder to identify and block, which can help on networks that restrict VPNs. Only some locations offer obfuscated servers.")
+        // Windows ships vanilla WireGuard-NT, which cannot apply Amnezia
+        // obfuscation
+        visible: Qt.platform.os !== "windows"
+      }
+
+      DropdownInput {
         label: uiTr("Connection Timeout")
         setting: DaemonSetting { name: "wireguardPingTimeout" }
         model: [

@@ -29,6 +29,8 @@
 #include "brand.h"
 #include <common/src/exec.h>
 #include "../../../extras/installer/win/tap_inl.h"
+#include "../../../extras/installer/win/callout_inl.h"
+#include "../../../extras/installer/win/dco_inl.h"
 
 #include <QCoreApplication>
 #include <QDirIterator>
@@ -60,7 +62,7 @@ static BOOL WINAPI ctrlHandler(DWORD dwCtrlType)
     }
 }
 
-static QString getInfPath()
+static QString getTapInfPath()
 {
     return QDir::toNativeSeparators(Path::TapDriverDir / (IsWindows10OrGreater() ? "win10" : "win7") / "OemVista.inf");
 }
@@ -68,6 +70,22 @@ static QString getInfPath()
 static QString getWfpCalloutInfPath()
 {
     return QDir::toNativeSeparators(Path::WfpCalloutDriverDir / (IsWindows10OrGreater() ? "win10" : "win7") / "PiaWfpCallout.inf");
+}
+
+static QString getDcoInfPath()
+{
+    // The INF filename, its service name, and the device hardware ID it declares
+    // all have to agree with the signed driver payload in deps/dco
+    // (DCO_DEVICE_NAME).  The payload is staged in win10/win11 subdirectories,
+    // like the WFP callout driver above.
+    const auto subdir = IsWindows11() ? QStringLiteral("win11") : QStringLiteral("win10");
+    return QDir::toNativeSeparators(Path::DcoDriverDir / subdir /
+                                    QString::fromWCharArray(DCO_DEVICE_NAME L".inf"));
+}
+
+static QString getTapInstallPath()
+{
+    return QDir::toNativeSeparators(Path::ExecutableDir / "tapinstall.exe");
 }
 
 WinConsole::WinConsole(QObject* parent)
@@ -79,7 +97,7 @@ WinConsole::WinConsole(QObject* parent)
 
 int WinConsole::installTapDriver(bool force)
 {
-    return ::installTapDriver(qUtf16Printable(getInfPath()), false, force, false);
+    return ::installTapDriver(qUtf16Printable(getTapInfPath()), false, force, false);
 }
 
 int WinConsole::uninstallTapDriver()
@@ -90,7 +108,7 @@ int WinConsole::uninstallTapDriver()
 int WinConsole::reinstallTapDriver()
 {
     ::uninstallTapDriver(false, false);
-    return ::installTapDriver(qUtf16Printable(getInfPath()), false, true, false);
+    return ::installTapDriver(qUtf16Printable(getTapInfPath()), false, true, false);
 }
 
 int WinConsole::uninstallWintunDriver()
@@ -125,6 +143,31 @@ int WinConsole::createWintunAdapter()
     if(rebootRequired)
         return DriverStatus::DriverInstalledReboot;
     return DriverStatus::DriverInstalled;
+}
+
+int WinConsole::installDcoDriver()
+{
+    return ::installDcoDriver(qUtf16Printable(getDcoInfPath()), DCO_DEVICE_NAME, qUtf16Printable(getTapInstallPath()));
+}
+
+int WinConsole::uninstallDcoDriver()
+{
+    return ::uninstallDcoDriver(qUtf16Printable(getDcoInfPath()), DCO_DEVICE_NAME, qUtf16Printable(getTapInstallPath()));
+}
+
+int WinConsole::reinstallDcoDriver()
+{
+    auto uninstallResult =
+        ::uninstallDcoDriver(qUtf16Printable(getDcoInfPath()), DCO_DEVICE_NAME, qUtf16Printable(getTapInstallPath()));
+    qInfo() << "Uninstall result:" << uninstallResult;
+    if(uninstallResult == DriverStatus::DriverUninstalledReboot)
+    {
+        // Uninstall requires a reboot to complete.  Don't try to install again
+        // yet, it would fail since the driver file is in use.
+        qInfo() << "Restart the computer to complete uninstallation, then install again.";
+        return uninstallResult;
+    }
+    return ::installDcoDriver(qUtf16Printable(getDcoInfPath()), DCO_DEVICE_NAME, qUtf16Printable(getTapInstallPath()));
 }
 
 int WinConsole::installCalloutDriver()
@@ -233,6 +276,21 @@ int WinConsole::run()
                 sendCheckDriverHint();
                 return result;
             }
+            else if (MATCH_ARG(1, "dco") && args.count() > 2)
+            {
+                int result = 0;
+                if (MATCH_ARG(2, "install"))
+                    result = WinConsole::installDcoDriver();
+                else if (MATCH_ARG(2, "uninstall"))
+                    result = WinConsole::uninstallDcoDriver();
+                else if (MATCH_ARG(2, "reinstall"))
+                    result = WinConsole::reinstallDcoDriver();
+                else
+                    return unrecognizedCommand();
+
+                sendCheckDriverHint();
+                return result;
+            }
             else
                 return unrecognizedCommand();
             #undef MATCH_ARG
@@ -292,9 +350,8 @@ int WinConsole::showHelp()
             << "  start          Start service" << Qt::endl
             << "  stop           Stop service" << Qt::endl
             << "  run            Run interactively" << Qt::endl
-            << "  tap install    Install TAP adapter" << Qt::endl
-            << "  tap uninstall  Uninstall TAP adapter" << Qt::endl
-            << "  tap reinstall  Reinstall TAP adapter" << Qt::endl
+            << "  tun uninstall  Uninstall WinTUN driver" << Qt::endl
+            << "  tun create     Create WinTUN adapter" << Qt::endl
             << "  callout install Install WFP Callout driver" << Qt::endl
             << "  callout uninstall Uninstall WFP Callout driver" << Qt::endl
             << "  callout reinstall (Re)install WFP Callout driver" << Qt::endl

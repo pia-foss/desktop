@@ -29,11 +29,21 @@ namespace
     // The number of seconds  to try to allow the system extension before giving up
     // This may take longer than the proxy if the user doesn't know where the
     // allow button is.
-    const std::chrono::seconds systemExtensionAllowTimeout{60*10};
+    const std::chrono::seconds systemExtensionAllowTimeout{60};
 
     // The wait interval between each attempt
     const std::chrono::seconds syncProxyAttemptInterval{1};
     const std::chrono::seconds systemExtensionAllowInterval{1};
+
+    // Timeout for proxyCliRun - prevents blocking forever on the permission popup
+    const std::chrono::seconds proxyCliRunTimeout{15};
+    // Period of time to wait after sending SIGTERM to the proxyCli process that has timed out,
+    // before sending a SIGKILL signal
+    const std::chrono::seconds proxyCliSigtermGracePeriod{1};
+
+    // Only log every Nth wait attempt, to keep the daemon log readable while
+    // we sit waiting for the user.
+    const int printEveryXAttempt{10};
 
     // Minimal wrapper class to enforce type and arg-order safety
     struct AppList
@@ -191,8 +201,22 @@ bool TransparentProxy::ensureActivateSystemExtension()
     // Keep track of our attempts
     size_t attemptCount{0};
 
+    KAPPS_CORE_INFO() << "System extension is not activated, starting the loop waiting for user activation";
+
     while(true)
     {
+        // Bail out as soon as the proxy is stopped - stop() is blocked joining
+        // this thread. Other states (e.g. Updating) are transient and mean a
+        // fresh sync is on its way, which supersedes this wait.
+        {
+            std::lock_guard<std::mutex> guard{_mutex};
+            if(getState() == State::Stopped)
+            {
+                KAPPS_CORE_INFO() << "Proxy stopped while waiting for system extension activation. Exiting.";
+                return false;
+            }
+        }
+
         if(std::chrono::steady_clock::now() >= endTime)
         {
             KAPPS_CORE_INFO() << "Timeout reached. System extension not activated!"
@@ -211,8 +235,12 @@ bool TransparentProxy::ensureActivateSystemExtension()
         }
         else if(sysextState == "bundled waiting_for_user")
         {
-            KAPPS_CORE_INFO() << "Waiting for user to allow the system extension. Attempt" << attemptCount;
-            // Nothing to do, just keep waiting for the user to allow the extension.
+            // Don't log every attempt, it just spams the log
+            if(attemptCount % printEveryXAttempt == 0)
+            {
+                KAPPS_CORE_INFO() << "Waiting for user to allow the system extension. Attempt" << attemptCount;
+                // Nothing to do, just keep waiting for the user to allow the extension.
+            }
         }
         else
         {
@@ -229,13 +257,43 @@ bool TransparentProxy::ensureActivateSystemExtension()
     }
 }
 
+bool TransparentProxy::ensureAllowedProxy(const std::vector<std::string> &syncArgs)
+{
+    std::string currentProxyConnectivity = checkProxyConnectivity();
+    if(currentProxyConnectivity != "uninstalled" && currentProxyConnectivity != "invalid")
+        return true;
+
+    KAPPS_CORE_INFO() << "The proxy state:" << currentProxyConnectivity
+        << "suggests that the activation was not fully completed by the user";
+
+    // This call needs to be run with a timeout because when the proxy state is uninstalled,
+    // calling sync will spawn the "Allow proxy" popup.
+    // As long as the popup is shown and the user has not made a choice (meaning they have not
+    // clicked either "Allow" or "Don't Allow") this call will never return.
+    // This is the only scenario in which this happens, after the proxy is allowed any other call to
+    // proxyCli will return immediately
+    int result = proxyCliRun(syncArgs, proxyCliRunTimeout);
+    KAPPS_CORE_INFO() << "proxyCliRun completed with result:" << result;
+
+    // Re-check connectivity: if still not allowed the command either timed out or failed
+    currentProxyConnectivity = checkProxyConnectivity();
+    if(currentProxyConnectivity == "uninstalled" || currentProxyConnectivity == "invalid")
+    {
+        KAPPS_CORE_WARNING() << "Proxy still not allowed after running proxy CLI"
+            << "(state:" << currentProxyConnectivity
+            << ") - proxy may not have been allowed by user";
+        return false;
+    }
+
+    return true;
+}
+
 TransparentProxy::TransparentProxy(const kapps::net::FirewallParams &params, const kapps::net::FirewallConfig &firewallConfig)
 : _config{params}
 , _transparentProxyCliExecutable{firewallConfig.transparentProxyCliExecutable}
 , _transparentProxyLogFile{firewallConfig.transparentProxyLogFile}
 , _state{State::Stopped}
 , _vpnBoundRouteExists{false}
-, _sysExtIsActivated{false}
 {
     // Activate the extension - if the extension is already
     // activated this will just no-op. It will also update the extension with
@@ -320,18 +378,72 @@ void TransparentProxy::sync(const Config &config)
     if(config.vpnHasDefaultRoute)
         syncArgs.emplace_back("--route-vpn");
 
+    // The emplace below joins any existing sync thread. That join is bounded
+    // except while the thread sits in one of the two user-approval waits, which
+    // together can last up to systemExtensionAllowTimeout + proxyCliRunTimeout -
+    // and sync() reaches us on the daemon thread via syncInvoke(), so blocking
+    // here freezes the daemon.
+    // Skip this sync instead; the in-flight wait syncs once the user approves.
+    if(_waitingForUserApproval)
+    {
+        KAPPS_CORE_INFO() << "Still waiting for the user to approve the split tunnel extension - "
+            "skipping this sync to avoid blocking the caller";
+        return;
+    }
+
     // The 'emplace' here will also call the destructor on
     // any pre-existing thread (causing it to join()).
     _pSyncThread.emplace([](core::Any){});
+
+    // Raise the flag before queueing, not inside the work item: until the sync
+    // thread picks the item up the flag would still read false, and a sync()
+    // in that window would join a thread about to park in the approval wait.
+    _waitingForUserApproval = true;
 
     // Kick off our attempts to sync the proxy in a background thread
     // it keeps trying to sync it until it succeeds or it times out.
     _pSyncThread->queueInvoke([this, syncArgs]
     {
         // Make sure the system extension is active before synchronizing
-        if(ensureActivateSystemExtension())
+        const bool activated = ensureActivateSystemExtension() && ensureAllowedProxy(syncArgs);
+        _waitingForUserApproval = false;
+
+        if(activated)
         {
             attemptSync(syncArgs);
+        }
+        else
+        {
+            // Leave Synchronizing, otherwise sync() rejects every later
+            // attempt as "already synchronizing" and split tunnel stays dead
+            // until the user toggles it off and on again.
+            //
+            // Still being Synchronizing also tells us we gave up on our own -
+            // the activation timed out or the user refused the proxy. Any other
+            // state means stop() tore the proxy down because split tunnel was
+            // turned off, and there is no failure to report in that case.
+            bool gaveUp = false;
+            {
+                std::lock_guard<std::mutex> guard{_mutex};
+                gaveUp = (getState() == State::Synchronizing);
+                if(gaveUp)
+                    setState(State::Stopped);
+            }
+
+            if(gaveUp)
+            {
+                KAPPS_CORE_INFO() << "Transparent proxy activation has failed, turning ST off and "
+                    "spawning a banner saying why";
+
+                // This is a signal!  Emitted outside the lock above - the handler
+                // disables split tunnel, which comes back through stop().
+                activationFailed(true);
+            }
+            else
+            {
+                KAPPS_CORE_INFO() << "Transparent proxy activation abandoned - the proxy was "
+                    "stopped while waiting for the user";
+            }
         }
     });
 }
@@ -353,6 +465,10 @@ void TransparentProxy::attemptSync(const std::vector<std::string> &syncArgs)
         {
             KAPPS_CORE_INFO() << "Timeout reached. Could not sync transparent proxy!"
                 << "Took" << secondsSince(startTime) << "seconds";
+            // Leave Synchronizing so a later sync() isn't rejected outright.
+            std::lock_guard<std::mutex> guard{_mutex};
+            if(getState() == State::Synchronizing)
+                setState(State::Stopped);
             break;
         }
 
@@ -416,12 +532,9 @@ void TransparentProxy::stop()
         // Protect the calls to getState and setState
         std::lock_guard<std::mutex> guard{_mutex};
 
-        if(getState() == State::Stopped)
-        {
-            KAPPS_CORE_INFO() << "stop() was called but transparent proxy is already stopped, nothing to do.";
-            return;
-        }
-
+        // No early return on Stopped: the sync thread also sets Stopped when
+        // it gives up, possibly with the extension already intercepting
+        // traffic, so always send proxy stop (it's idempotent).
         KAPPS_CORE_INFO() << "Sending stop request to transparent proxy extension";
         KAPPS_CORE_INFO() << "Shutting down sync thread (if it's running)";
 
@@ -514,12 +627,21 @@ std::string TransparentProxy::checkProxyConnectivity() const
     return core::Exec::cmdWithOutput(_transparentProxyCliExecutable, {"proxy", "status"});
 }
 
-int TransparentProxy::proxyCliRun(const std::vector<std::string> &parameters) const
+int TransparentProxy::proxyCliRun(const std::vector<std::string> &parameters,
+                                  std::chrono::milliseconds timeout) const
 {
     std::string traceCmd = _transparentProxyCliExecutable;
     for(const std::string &arg: parameters) traceCmd += (" " + arg);
     KAPPS_CORE_INFO() << traceCmd;
 
-    return core::Exec::cmd(_transparentProxyCliExecutable, parameters);
+    if(timeout.count() >= 0)
+    {
+        return core::Exec::cmdWithTimeout(_transparentProxyCliExecutable, parameters, timeout,
+            proxyCliSigtermGracePeriod);
+    }
+    else
+    {
+        return core::Exec::cmd(_transparentProxyCliExecutable, parameters);
+    }
 }
 }

@@ -150,7 +150,7 @@ Item {
     }]
   }
 
-  // TAP adapter isn't found (Windows only)
+  // TAP adapter / WinTUN driver isn't found (Windows only)
   //
   // This isn't dismissible - it's unlikely that we detect this incorrectly, and
   // it completely breaks connectivity.  If somehow we did fail to detect a
@@ -158,8 +158,8 @@ Item {
   // finds the adapter.
   //
   // This is before auth failure - it's unlikely that both of these would appear
-  // at once, but if they do, the auth failure can't be resolved until the TAP
-  // adapter is back so we can connect again.
+  // at once, but if they do, the auth failure can't be resolved until the
+  // WinTUN adapter is back so we can connect again.
   DriverNotificationStatus {
     id: tapAdapterMissing
     title: errorHeaderTitle
@@ -168,13 +168,55 @@ Item {
     tipText: uiTr("The TAP adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.")
 
     isNeeded: Daemon.settings.method === "openvpn" &&
-              Daemon.settings.windowsIpMethod !== "wintun"
+              (Daemon.settings.windowsIpMethod === "dhcp" ||
+               Daemon.settings.windowsIpMethod === "static")
     reinstallStatus: NativeHelpers.reinstallTapStatus
     driverMissing: Daemon.state.tapAdapterMissing
     reinstallAdapter: function() {reinstallTapAdapter()}
   }
 
-  // A reboot is required to complete installation of the TAP adapter.
+  DriverNotificationStatus {
+    id: wintunMissing
+    title: errorHeaderTitle
+    //: "WinTUN" is the name of the virtual network adapter driver used on
+    //: Windows and is not generally localized.
+    tipText: uiTr("The WinTUN adapter for the VPN tunnel is not installed.  You can reinstall it from Settings.")
+
+    // WinTUN is used for the "wintun" selection, and as the fallback whenever
+    // DCO can't carry the connection.
+    isNeeded: Daemon.settings.method === "openvpn" &&
+              (Daemon.settings.windowsIpMethod === "wintun" ||
+               Daemon.settings.windowsIpMethod === "dco")
+    reinstallStatus: NativeHelpers.reinstallTunStatus
+    driverMissing: Daemon.state.wintunMissing
+    reinstallAdapter: function() {reinstallWintunAdapter()}
+  }
+
+  DriverNotificationStatus {
+    id: dcoMissing
+    //: Header for the notification shown when the OpenVPN DCO driver is
+    //: missing.  "DCO" is the driver name and is not translated.
+    title: uiTr("DCO DRIVER MISSING", "header-title")
+    //: "DCO" stands for Data Channel Offload and is the name of the OpenVPN
+    //: driver; it should not be translated.  This replaces the generic
+    //: "adapter is not installed" message - the VPN still works without DCO.
+    message: uiTr("The DCO driver is not installed.")
+    //: "DCO" stands for Data Channel Offload and is the name of the OpenVPN
+    //: driver; it should not be translated.
+    tipText: uiTr("The DCO driver is not installed.  The VPN still connects using WinTUN; you can reinstall DCO from Settings.")
+
+    // Losing DCO is not fatal - OpenVPNMethod falls back to WinTUN - so this
+    // is a dismissible warning rather than an error.
+    severity: severities.warning
+    dismissible: true
+    isNeeded: Daemon.settings.method === "openvpn" &&
+              Daemon.settings.windowsIpMethod === "dco"
+    reinstallStatus: NativeHelpers.reinstallDcoStatus
+    driverMissing: Daemon.state.dcoAdapterMissing
+    reinstallAdapter: function() {reinstallDcoAdapter()}
+  }
+
+  // A reboot is required to complete installation of a network adapter driver.
   NotificationStatus {
     id: installationRestart
     title: errorHeaderTitle
@@ -183,8 +225,9 @@ Item {
     severity: severities.error
     dismissible: false
     active: Daemon.settings.method === "openvpn" &&
-            Daemon.settings.windowsIpMethod !== "wintun" &&
-            NativeHelpers.reinstallTapStatus === 'reboot'
+            (NativeHelpers.reinstallTapStatus === 'reboot' ||
+             NativeHelpers.reinstallTunStatus === 'reboot' ||
+             NativeHelpers.reinstallDcoStatus === 'reboot')
   }
 
   // Warn if the split tunnel feature is enabled, but the driver is missing.
@@ -225,6 +268,20 @@ Item {
       NativeHelpers.reinstallWfpCalloutStatus === "reboot"
   }
 
+  // Split tunnel activation failed (macOS system extension)
+  NotificationStatus {
+    id: splitTunnelActivationFailed
+    message: uiTr("Split tunnel was turned off because setup didn’t finish. Please try the setup again.")
+    // Only split tunnel is affected, the VPN still connects - so this is a
+    // dismissible warning rather than an error.
+    severity: severities.warning
+    dismissible: true
+    function dismiss() {
+      Daemon.clearSplitTunnelActivationFailed()
+    }
+    active: Daemon.settings.splitTunnelActivationFailed
+  }
+
   // Notification for the "missing iptables" error.
   // If more errors are added to the vpnSupportErrors array consider
   // turning it into a map and checking the content of it.
@@ -235,6 +292,74 @@ Item {
     tipText: uiTr("Iptables is required to connect to the VPN. Reinstall the application or manually install the iptables or iptables-nft package, then restart your computer.")
     severity: severities.error
     active: Daemon.state.vpnSupportErrors.length > 0
+  }
+
+  // The obfuscation setting uses one kind of WireGuard server exclusively, so
+  // the selected location can't be connected to when it has none of that kind.
+  // Not dismissible - the user has to change the setting or the location, the
+  // connection can't be established either way.
+  NotificationStatus {
+    id: obfuscationMismatch
+    title: errorHeaderTitle
+
+    // Whether the setting applies at all.  Windows ships vanilla WireGuard-NT,
+    // which never uses AmneziaWG.
+    readonly property bool obfuscationApplies: Qt.platform.os !== "windows" &&
+      Daemon.settings.method === "wireguard"
+    // The location that would be used, which is what the setting is checked
+    // against - null if no locations are known yet.
+    readonly property var nextLocation: Daemon.state.vpnLocations.nextLocation
+
+    message: Daemon.settings.wireguardObfuscation ?
+      uiTr("This location does not support obfuscation.") :
+      uiTr("This location only offers obfuscated servers.")
+    tipText: Daemon.settings.wireguardObfuscation ?
+      uiTr("Turn off obfuscation on the Protocol page, or choose a location that offers obfuscated servers.") :
+      uiTr("Turn on obfuscation on the Protocol page, or choose a location that offers regular servers.")
+    severity: severities.error
+    dismissible: false
+    // Only shown while disconnected.  A live connection was established with a
+    // matching server, so reporting that the location can't be used would
+    // contradict it - the automatic location can drift to one without matching
+    // servers, and a region list refresh can change what a location offers,
+    // neither of which affects the connection that is already up.
+    active: {
+      if(!obfuscationApplies || !nextLocation ||
+         Daemon.state.connectionState !== "Disconnected")
+        return false
+      return Daemon.settings.wireguardObfuscation ?
+        !nextLocation.hasObfuscatedWireGuard : !nextLocation.hasPlainWireGuard
+    }
+  }
+
+  // OpenVPN to a dedicated IP needs the DIP ports, so the selected DIP can't be
+  // connected to when it has none for the OpenVPN protocol in use.  Not
+  // dismissible, like obfuscationMismatch - the connection can't be
+  // established until the user changes the protocol or the location.
+  NotificationStatus {
+    id: dedicatedIpNoOpenVpn
+    title: errorHeaderTitle
+    //: Shown when the selected Dedicated IP has no OpenVPN ports for the
+    //: connection type in use, so it can't be connected to with OpenVPN.
+    message: uiTr("OpenVPN is not available for this Dedicated IP.")
+    tipText: uiTr("Switch to WireGuard on the Protocols page, or choose another location.")
+    severity: severities.error
+    dismissible: false
+    // Only shown while disconnected, like obfuscationMismatch.  The DIP port is
+    // 0 when the DIP has no ports for that protocol (only one DIP can be added,
+    // so the DIP port state is the selected DIP's).  The Shadowsocks proxy
+    // forces TCP.
+    active: {
+      let nextLocation = Daemon.state.vpnLocations.nextLocation
+      if(!nextLocation || !nextLocation.dedicatedIp ||
+         Daemon.settings.method !== "openvpn" ||
+         Daemon.state.connectionState !== "Disconnected")
+        return false
+      let useTcp = Daemon.settings.protocol === "tcp" ||
+        (Daemon.settings.proxyEnabled && Daemon.settings.proxyType === "shadowsocks")
+      return (useTcp ? Daemon.state.dedicatedIpOpenvpnTcpPort :
+                       Daemon.state.dedicatedIpOpenvpnUdpPort) === 0
+    }
   }
 
   // Notification for the OpenVPN "authorization failure" error.
@@ -637,15 +762,20 @@ Item {
     // Showstopping errors - prevent all connections or seriously impact
     // functionality
     tapAdapterMissing,
+    wintunMissing,
     installationRestart,
     splitTunnelUninstalled,
     splitTunnelReboot,
     vpnMissingIptables,
+    obfuscationMismatch,
+    dedicatedIpNoOpenVpn,
     authFailure,
     dnsConfigFailed,
     hnsdFailing,
     // Possibly unexpected conditions
     winIsElevated, // May cause other issues, list first
+    dcoMissing,
+    splitTunnelActivationFailed,
     killswitchEnabled,
     connectionLost,
     proxyUnreachable,
@@ -708,6 +838,11 @@ Item {
   signal showChangelog()
   // Show help page & trigger TAP reinstall (for the TAP adapter notification)
   signal reinstallTapAdapter()
+  // Show help page & trigger WinTUN reinstall (for the WinTUN notification)
+  signal reinstallWintunAdapter()
+
+  // Reinstall the OpenVPN DCO driver
+  signal reinstallDcoAdapter()
   // Show help page & trigger split tunnel filter reinstall
   signal reinstallSplitTunnel()
   // Emitted when a notification needs to show an alert on the Settings Help

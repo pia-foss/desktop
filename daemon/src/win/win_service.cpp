@@ -24,7 +24,6 @@
 #include "win.h"
 #include "brand.h"
 #include "../../../extras/installer/win/service_inl.h"
-#include "../../../extras/installer/win/tun_inl.h"
 
 #include <QString>
 #include <QStringList>

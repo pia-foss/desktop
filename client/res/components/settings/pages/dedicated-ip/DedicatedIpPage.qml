@@ -39,6 +39,13 @@ Page {
 
   readonly property bool dedicatedIpExists: Array.isArray(Daemon.state.dedicatedIpLocations) && Daemon.state.dedicatedIpLocations.length > 0
 
+  // The OpenVPN port for a dedicated IP has its own settings, separate from
+  // the Remote Port setting on the Protocols page.  The TCP ports are listed
+  // when the protocol is TCP, or when the Shadowsocks proxy is enabled, since
+  // OpenVPN always connects over TCP through that proxy.
+  readonly property bool usingTcpTransport: (Daemon.settings.proxyType === "shadowsocks" && Daemon.settings.proxyEnabled) || Daemon.settings.protocol === "tcp"
+  readonly property var dipPortChoices: usingTcpTransport ? Daemon.state.dedicatedIpOpenvpnTcpPortChoices : Daemon.state.dedicatedIpOpenvpnUdpPortChoices
+
   GridLayout {
     anchors.fill: parent
     columns: 2
@@ -105,7 +112,41 @@ Page {
       visible: dedicatedIpExists
       Layout.columnSpan: 2
       Layout.fillWidth: true
-      Layout.fillHeight: true
+      // Sized to its rows so the port dropdown below sits right under the IP
+      Layout.preferredHeight: contentHeight
+    }
+
+    DropdownInput {
+      Layout.columnSpan: 2
+      //: Label for the dropdown that selects the OpenVPN remote port used for
+      //: dedicated IP connections.
+      label: uiTr("OpenVPN Remote Port")
+      visible: dedicatedIpExists && Daemon.settings.method === "openvpn" &&
+        dedicatedIpPage.dipPortChoices.length > 0
+      // With a single port there is nothing to choose
+      enabled: dedicatedIpPage.dipPortChoices.length > 1
+      // There is no "Default" choice.  The selected port is the one the
+      // daemon uses for the connection, which can differ from the setting (see
+      // DaemonState::dedicatedIpOpenvpnUdpPort).  The setting is only written
+      // when the user picks a port.
+      setting: Setting {
+        readonly property string name: dedicatedIpPage.usingTcpTransport ? "dipRemotePortTCP" : "dipRemotePortUDP"
+        sourceValue: dedicatedIpPage.usingTcpTransport ?
+          Daemon.state.dedicatedIpOpenvpnTcpPort : Daemon.state.dedicatedIpOpenvpnUdpPort
+        onCurrentValueChanged: {
+          if(currentValue !== undefined && currentValue !== sourceValue) {
+            var param = {}
+            param[name] = currentValue
+            Daemon.applySettings(param, function(error) {
+              if(error) {
+                console.error("Error applying setting " + name + ":", error)
+                currentValue = sourceValue
+              }
+            })
+          }
+        }
+      }
+      model: dedicatedIpPage.dipPortChoices.map(function(x) { return { name: x.toString(), value: x } })
     }
 
     Rectangle {

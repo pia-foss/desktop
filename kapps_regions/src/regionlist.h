@@ -43,13 +43,19 @@ struct DedicatedIp
     core::StringSlice fqdn;
     // The service group(s) from the general regions list to apply to this
     // region - indicates the available protocols, ports, etc.  Represents the
-    // deployment configuration applied by Ops.
+    // deployment configuration applied by Ops.  OpenVPN ports are replaced by
+    // openVpnUdpPorts/openVpnTcpPorts.
     core::ArraySlice<const core::StringSlice> serviceGroups;
     // The region ID for the corresponding region - required for DIP regions.
     // Metadata information such as country name, region name, geo flag, etc.
     // are taken from this region, and auxiliary services such as
     // meta/Shadowsocks are used from this region when needed.
     core::StringSlice correspondingRegionId;
+    // OpenVPN UDP/TCP ports for this dedicated IP.  DIP over OpenVPN targets
+    // DIP-specific ports, so these replace the OpenVPN ports of any service
+    // group that provides that OpenVPN service.
+    core::ArraySlice<const std::uint16_t> openVpnUdpPorts;
+    core::ArraySlice<const std::uint16_t> openVpnTcpPorts;
 };
 
 // Manual region structure used to indicate manual regions to RegionList.  This
@@ -183,6 +189,12 @@ private:
                                     const ServiceGroups &ncpGroups,
                                     const ServiceGroups &pssGroups)
         -> std::vector<std::shared_ptr<const Server>>;
+    // Build a service group for an AmneziaWG server, which carries its own port
+    // instead of referring to a service group.  Returns nullptr if this isn't
+    // an AmneziaWG server or it has no usable port.
+    auto readPiav6JsonAwgServerGroup(core::StringSlice groupName,
+                                     const nlohmann::json &jsonServer)
+        -> std::shared_ptr<ServiceGroup>;
 
     // Build dedicated IP regions from the information given to the constructor
     void buildDipRegions(const core::ArraySlice<const DedicatedIp> &dips,

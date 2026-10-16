@@ -231,14 +231,17 @@ class PiaVersion
         brandh.defineString('BRAND_WINDOWS_WFP_PROVIDER_GUID', Build::BrandInfo['windowsWfpProviderGuid'])
         brandh.defineLiteral('BRAND_WINDOWS_WFP_SUBLAYER', Build::BrandInfo['windowsWfpSublayer'])
         brandh.defineString('BRAND_WINDOWS_WFP_SUBLAYER_GUID', Build::BrandInfo['windowsWfpSublayerGuid'])
+        # Product name and per-architecture product IDs of the legacy WinTUN MSI
+        # package, used to find and uninstall it when upgrading.  The name is
+        # empty for brands that never shipped it.
+        brandh.defineString('BRAND_WINTUN_PRODUCT_NAME', strOrEmpty(Build::BrandInfo['wintunProductName']))
+        brandh.defineString('BRAND_WINTUN_AMD64_PRODUCT', Build::BrandInfo['wintunAmd64Product'])
+        brandh.defineString('BRAND_WINTUN_ARM64_PRODUCT', Build::BrandInfo['wintunArm64Product'])
         brandh.defineString('BRAND_UPDATE_JSON_KEY_NAME', Build::BrandInfo['updateJsonKeyName'])
         brandh.defineString('BRAND_LINUX_APP_NAME', Build::BrandInfo['linuxAppName'])
         brandh.defineLiteral('BRAND_LINUX_FWMARK_BASE', Build::BrandInfo['linuxFwmarkBase'].to_s)
         brandh.defineLiteral('BRAND_LINUX_CGROUP_BASE', Build::BrandInfo['linuxCgroupBase'].to_s)
         brandh.defineRawString('BRAND_PARAMS', JSON.generate(Build::BrandInfo))
-        brandh.defineString('BRAND_WINTUN_PRODUCT_NAME', strOrEmpty(Build::BrandInfo['wintunProductName']))
-        brandh.defineString('BRAND_WINTUN_AMD64_PRODUCT', Build::BrandInfo['wintunAmd64Product'])
-        brandh.defineString('BRAND_WINTUN_ARM64_PRODUCT', Build::BrandInfo['wintunArm64Product'])
         updateApis = Build::BrandInfo['brandReleaseUpdateUris']
         # This was added to the brand kit, default to the old defaults
         if(updateApis == nil)

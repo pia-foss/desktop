@@ -29,6 +29,7 @@
 #include <vector>
 #include <atomic>
 #include <array>
+#include <chrono>
 #include <exception>
 #include <poll.h>
 #include <thread>
@@ -254,6 +255,17 @@ public:
     // to the calling environment.
     void run(ReadyReadFunc stdoutReadyRead, ReadyReadFunc stderrReadyRead);
 
+    // Like run(), but with a deadline.  If the process has not exited when the
+    // timeout elapses, it is terminated (SIGTERM, then SIGKILL after
+    // gracePeriod) and reaped, so the call always returns within
+    // timeout + gracePeriod.
+    //
+    // Returns true  - process exited before the timeout.
+    // Returns false - process was terminated because the timeout elapsed.
+    bool runWithTimeout(ReadyReadFunc stdoutReadyRead, ReadyReadFunc stderrReadyRead,
+                        std::chrono::milliseconds timeout,
+                        std::chrono::milliseconds gracePeriod = std::chrono::milliseconds{5000});
+
     // Start and run the process asynchronously.
     // - If a child process is already running, this throws.
     // - The Process can be started again once the process terminates.
@@ -325,6 +337,13 @@ public:
     // asynchronously, including from ready-read functors.  Throws if not
     // running.
     void kill() {signal(SIGKILL);}
+
+    // Send a SIGTERM, then send a SIGKILL if the process is still running after
+    // gracePeriod has passed.  Always reaps the child before returning, so the
+    // caller must not call waitPidExit() afterwards.
+    // Returns true if the process exited after SIGTERM (within gracePeriod),
+    // false if SIGKILL was required.
+    bool terminateThenKill(std::chrono::milliseconds gracePeriod);
 
 public:
     // Signal emitted to set up the child process.  This is emitted between

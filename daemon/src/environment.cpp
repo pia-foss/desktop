@@ -251,6 +251,13 @@ void Environment::loadApiBases()
                     QStringLiteral("https://apiv2.privateinternetaccess.com/api/client/v2/"),
                     QStringLiteral("https://apiv2.piaproxy.net/api/client/v2/")
                 });
+    // Meta servers proxy API v5 at /api/client/v5/; unlike v2 (/apiv2/), there
+    // is no /apiv5/ route.
+    loadDynamicApiBase(overridePresent, apiOverride, _pApiv5, QStringLiteral("apiv5"),
+                QStringLiteral("API v5"), QStringLiteral("/api/client/v5/"), {
+                    QStringLiteral("https://apiv5.privateinternetaccess.com/api/client/v5/"),
+                    QStringLiteral("https://apiv5.piaproxy.net/api/client/v5/")
+                });
 
     loadDynamicApiBase(overridePresent, apiOverride, _pModernRegionsListApi,
                 QStringLiteral("modern_regions_list_api"),

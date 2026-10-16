@@ -343,6 +343,94 @@ void Process::run(ReadyReadFunc stdoutReadyRead, ReadyReadFunc stderrReadyRead)
     wait(std::move(stdoutReadyRead), std::move(stderrReadyRead));
 }
 
+bool Process::terminateThenKill(std::chrono::milliseconds gracePeriod)
+{
+    terminate();
+
+    const auto deadline = std::chrono::steady_clock::now() + gracePeriod;
+    while(std::chrono::steady_clock::now() < deadline)
+    {
+        int status{-1};
+        int ret{-1};
+        NO_EINTR(ret = ::waitpid(_childPid, &status, WNOHANG));
+
+        if(ret == _childPid)
+        {
+            _exitStatus = status;
+            _childPid = 0;
+            return true;
+        }
+        if(ret == -1)
+        {
+            KAPPS_CORE_WARNING() << "::waitpid(WNOHANG) failed with" << ErrnoTracer{};
+            _exitStatus = 1;
+            _childPid = 0;
+            return false;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds{20});
+    }
+
+    if(running())
+    {
+        kill();
+        waitPidExit();
+    }
+
+    return false;
+}
+
+bool Process::runWithTimeout(ReadyReadFunc stdoutReadyRead, ReadyReadFunc stderrReadyRead,
+                             std::chrono::milliseconds timeout,
+                             std::chrono::milliseconds gracePeriod)
+{
+    throwIfRunning();
+    startChild();
+
+    bool timedOut = false;
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+
+    while(true)
+    {
+        const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+            deadline - std::chrono::steady_clock::now());
+
+        if(remaining.count() <= 0)
+        {
+            timedOut = true;
+            // terminateThenKill() reaps the child internally, so we must NOT
+            // call waitPidExit() again after this.
+            const bool exitedAfterSigterm = terminateThenKill(gracePeriod);
+            if(!exitedAfterSigterm)
+            {
+                KAPPS_CORE_WARNING()
+                    << "Process did not exit after SIGTERM, sent SIGKILL:" << _pathName;
+            }
+            // Drain any output the process wrote before dying.  The write ends
+            // of the pipes are now closed (process is dead), so receive() will
+            // detect POLLHUP and return false after reading any remaining data.
+            while(receive(stdoutReadyRead, stderrReadyRead, std::chrono::milliseconds{-1}))
+                ;
+            break;
+        }
+
+        // This is a blocking call so no sleep is needed at the end of the loop
+        if(!receive(stdoutReadyRead, stderrReadyRead, remaining))
+        {
+            break; // Both pipes hung up - process exited naturally
+        }
+    }
+
+    // Only reap the process here on the natural-exit path.  The timed-out path
+    // already reaped the child inside terminateThenKill().
+    if(!timedOut)
+    {
+        waitPidExit();
+    }
+
+    return !timedOut;
+}
+
 void Process::start(std::function<void()> exitFunc, ReadyReadFunc stdoutReadyRead,
                     ReadyReadFunc stderrReadyRead)
 {

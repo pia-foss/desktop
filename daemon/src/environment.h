@@ -104,6 +104,9 @@ public:
     // Base URIs for authv2.  This has the same defaults as the PIA API, but it
     // also can leverage meta services in next-gen.
     const std::shared_ptr<ApiBase> &getApiv2() {Q_ASSERT(_pApiv2); return _pApiv2;}
+    // Base URIs for API v5, only used for dedicated IPs (the v5 response has
+    // the DIP OpenVPN ports).  Like authv2, this can leverage meta services.
+    const std::shared_ptr<ApiBase> &getApiv5() {Q_ASSERT(_pApiv5); return _pApiv5;}
     // Base URIs for the modern regions list.
     const std::shared_ptr<ApiBase> &getModernRegionsListApi() {Q_ASSERT(_pModernRegionsListApi); return _pModernRegionsListApi;}
     // Base URI for API requests that fetch the user's IP address.
@@ -132,7 +135,7 @@ private:
     QByteArray _regionsListPublicKey;
     // API bases - these are always valid.  They're in shared_ptrs so callers
     // using them can keep the object alive even if we replace them.
-    std::shared_ptr<ApiBase> _pApiv1, _pApiv2, _pModernRegionsListApi,
+    std::shared_ptr<ApiBase> _pApiv1, _pApiv2, _pApiv5, _pModernRegionsListApi,
         _pIpAddrApi, _pIpProxyApi, _pUpdateApi;
 };
 

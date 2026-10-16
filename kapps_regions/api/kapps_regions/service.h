@@ -40,6 +40,7 @@ typedef enum KARService
     // Other services
     KARServiceShadowsocks,  // Shadowsocks obfuscated proxy; TCP
     KARServiceMeta, // "Meta" API proxies
+    KARServiceWireGuardAmnezia,    // WireGuard with Amnezia obfuscation
 } KARService;
 
 #ifdef __cplusplus

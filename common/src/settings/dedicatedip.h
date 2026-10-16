@@ -40,6 +40,8 @@ public:
         serviceGroups(other.serviceGroups());
         ip(other.ip());
         cn(other.cn());
+        openvpnUdpPorts(other.openvpnUdpPorts());
+        openvpnTcpPorts(other.openvpnTcpPorts());
         lastIpChange(other.lastIpChange());
         return *this;
     }
@@ -53,6 +55,8 @@ public:
             serviceGroups() == other.serviceGroups() &&
             ip() == other.ip() &&
             cn() == other.cn() &&
+            openvpnUdpPorts() == other.openvpnUdpPorts() &&
+            openvpnTcpPorts() == other.openvpnTcpPorts() &&
             lastIpChange() == other.lastIpChange();
     }
     bool operator!=(const AccountDedicatedIp &other) const {return !(*this == other);}
@@ -92,7 +96,8 @@ public:
     // server.  Note that like the server list, the client does not attribute
     // any significance to the group names themselves, which can be freely
     // changed by Ops.  This is just used to find the service and port
-    // information from the servers list.
+    // information from the servers list (except OpenVPN ports, see
+    // openvpnUdpPorts/openvpnTcpPorts).
     JsonField(std::vector<QString>, serviceGroups, {})
 
     // The dedicated IP itself.  This is both the VPN endpoint and the VPN IP.
@@ -102,6 +107,14 @@ public:
     // The common name for certificates corresponding to this server.
     JsonField(QString, cn, {})
 
+    // OpenVPN UDP/TCP ports provided by the DIP API ("ports" field).  DIP over
+    // OpenVPN must target DIP-specific ports on the server, so these replace
+    // the OpenVPN ports from the service groups for this server.  An empty
+    // list means the DIP doesn't offer that OpenVPN protocol; a missing entry
+    // in the API response is treated as empty.
+    JsonField(std::vector<quint16>, openvpnUdpPorts, {})
+    JsonField(std::vector<quint16>, openvpnTcpPorts, {})
+
     // If the daemon observes a change in the dedicated IP's IP address, this
     // field is set to the most recent change timestamp.  This triggers a
     // notification in the client.  It's important to keep track of this
@@ -109,6 +122,12 @@ public:
     // cleared if the changed dedicated IP is removed.
     JsonField(quint64, lastIpChange, 0)
 };
+
+// Apply the information for one token from the DIP API to an
+// AccountDedicatedIp.  Used both when adding a DIP and when refreshing it.
+// Throws if the response is malformed; dipInfo is not changed in that case.
+COMMON_EXPORT void applyDedicatedIpJson(const QJsonObject &tokenData,
+                                        AccountDedicatedIp &dipInfo);
 
 
 #endif

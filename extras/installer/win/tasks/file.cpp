@@ -17,15 +17,29 @@
 // <https://www.gnu.org/licenses/>.
 
 #include "file.h"
+#include <memory>
+#include <sddl.h>
 #include <shlobj_core.h>
+#pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "shell32.lib")
 
 static std::wstring g_rollbackPath;
 
+// Program Files' permissions, with no entries inherited from the parent, so a custom /PATH under a
+// user-writable root (C:\, data drives) doesn't let users modify the service binaries.
+static const wchar_t protectedDirectorySddl[] =
+    L"O:BA"                        // owner: Administrators
+    L"D:PAI"                       // DACL, protected from inheritance
+    L"(A;OICI;FA;;;SY)"            // SYSTEM: full control
+    L"(A;OICI;FA;;;BA)"            // Administrators: full control
+    L"(A;OICI;FRFX;;;BU)"          // Users: read + execute
+    L"(A;OICI;FRFX;;;AC)"          // all AppContainer packages (e.g. toast icons): read + execute
+    L"(A;OICI;FRFX;;;S-1-15-2-2)"; // all restricted AppContainer packages: read + execute
+
 // Create a directory (deletes any file that may be in the way)
-FileCreateResult createDirectory(utf16ptr path)
+FileCreateResult createDirectory(utf16ptr path, SECURITY_ATTRIBUTES *attributes)
 {
-    if (CreateDirectory(path, NULL))
+    if (CreateDirectory(path, attributes))
         return CreateSuccessful;
     switch (GetLastError())
     {
@@ -37,7 +51,7 @@ FileCreateResult createDirectory(utf16ptr path)
             LOG("Unable to delete file in the way of directory %ls (%d)", path, GetLastError());
             return CreateFailed;
         }
-        if (CreateDirectory(path, NULL))
+        if (CreateDirectory(path, attributes))
             return CreateSuccessful;
         // fallthrough
     default:
@@ -194,9 +208,14 @@ CreateDirectoryTask::CreateDirectoryTask(std::wstring path, bool skipBackup)
 
 void CreateDirectoryTask::execute()
 {
+    create(nullptr);
+}
+
+void CreateDirectoryTask::create(SECURITY_ATTRIBUTES *attributes)
+{
     if (!_skipBackup)
         _backup = backupFileOrDirectory(_path, true);
-    if (CreateSuccessful == retryLoop(createDirectory(_path), UIString(IDS_MB_UNABLETOCREATEDIRECTORY, _path)))
+    if (CreateSuccessful == retryLoop(createDirectory(_path, attributes), UIString(IDS_MB_UNABLETOCREATEDIRECTORY, _path)))
         _created = true;
 }
 
@@ -210,6 +229,21 @@ void CreateDirectoryTask::rollback()
         LOG("Rollback delete %ls failed (%d)", _path, GetLastError());
     if (!_backup.empty() && !restoreBackup(_path, _backup))
         LOG("Rollback restore %ls failed (%d)", _path, GetLastError());
+}
+
+void CreateProtectedDirectoryTask::execute()
+{
+    PSECURITY_DESCRIPTOR descriptor = nullptr;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(protectedDirectorySddl, SDDL_REVISION_1, &descriptor, nullptr))
+    {
+        LOG("Unable to build security descriptor (%d)", GetLastError());
+        InstallerError::abort(UIString(IDS_MB_UNABLETOCREATEDIRECTORY, _path));
+    }
+    std::unique_ptr<void, decltype(&LocalFree)> descriptorOwner{descriptor, &LocalFree};
+
+    // Set at creation; locking it afterwards would leave a window to plant files or hold a handle
+    SECURITY_ATTRIBUTES attributes{sizeof(attributes), descriptor, FALSE};
+    create(&attributes);
 }
 
 RemoveDirectoryTask::RemoveDirectoryTask(std::wstring path, bool recursive)

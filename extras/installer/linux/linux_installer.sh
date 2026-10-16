@@ -691,11 +691,3 @@ esac
 
 # Restore the original umask
 umask "$ORIG_UMASK"
-
-# Changing the owner from root to installing user.
-# This is done in order to prevent other users from executing the clients binaries
-sudo chown $installingUser $clientExecutablePath
-sudo chown $installingUser $ctlExecutablePath
-# Only the owner, which is the installing user, is able to run the clients
-sudo chmod 754 $clientExecutablePath
-sudo chmod 754 $ctlExecutablePath

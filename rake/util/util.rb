@@ -63,10 +63,12 @@ module Util
 
     def self.hostArchitecture
         if(hostPlatform == :windows)
-            archProbe = `wmic os get OSArchitecture /value`.strip
-            if(archProbe.match?(/^OSArchitecture=64-bit$/i))
+            # Use PowerShell instead of deprecated wmic (removed in recent
+            # Windows 11 / Server 2025 builds - wmic no longer exists there)
+            archProbe = `powershell -Command "(Get-CimInstance Win32_OperatingSystem).OSArchitecture"`.strip
+            if(archProbe.match?(/64[\s-]?bits?/i))
                 :x86_64
-            elsif(archProbe.match(/^OSArchitecture=32-bit$/))
+            elsif(archProbe.match?(/32[\s-]?bits?/i))
                 :x86
             else
                 puts "Architecture not known: #{archProbe.dump}"

@@ -115,7 +115,8 @@ RegionList::RegionList(PIAv6_t, core::StringSlice regionsJson,
                 std::make_shared<ServiceGroup>(
                     newGroup.openVpnUdpPorts().to_vector(), false,
                     newGroup.openVpnTcpPorts().to_vector(), false,
-                    newGroup.wireGuardPorts().to_vector(), newGroup.ikev2(),
+                    newGroup.wireGuardPorts().to_vector(),
+                    newGroup.wireGuardAmneziaPorts().to_vector(), newGroup.ikev2(),
                     newGroup.shadowsocksPorts().to_vector(),
                     newGroup.shadowsocksKey().to_string(),
                     newGroup.shadowsocksCipher().to_string(),
@@ -317,6 +318,7 @@ auto RegionList::readShadowsocksServers(const nlohmann::json &json) const
             auto pServiceGroup = std::make_shared<ServiceGroup>(
                 std::vector<std::uint16_t>{}, false,
                 std::vector<std::uint16_t>{}, false,
+                std::vector<std::uint16_t>{},
                 std::vector<std::uint16_t>{}, false,
                 std::vector<std::uint16_t>{ssRegion.at("port").get<std::uint16_t>()},
                 ssRegion.at("key").get<std::string>(),
@@ -397,6 +399,41 @@ void RegionList::readPiav6JsonRegions(const nlohmann::json &jsonRegions,
     }
 }
 
+auto RegionList::readPiav6JsonAwgServerGroup(core::StringSlice groupName,
+    const nlohmann::json &jsonServer) -> std::shared_ptr<ServiceGroup>
+{
+    if(groupName != "awg")
+        return {};
+
+    // Unlike every other service, AmneziaWG servers state their port on the
+    // server itself, so there is no service group in the serverlist to refer
+    // to.  Build one for this server alone.
+    auto itPort = jsonServer.find("port");
+    if(itPort == jsonServer.end() || !itPort->is_number_unsigned())
+    {
+        KAPPS_CORE_WARNING() << "AmneziaWG server has no usable port";
+        return {};
+    }
+
+    auto portValue = itPort->get<std::uint64_t>();
+    if(portValue < 1 || portValue > std::numeric_limits<std::uint16_t>::max())
+    {
+        KAPPS_CORE_WARNING() << "AmneziaWG server has invalid port" << portValue;
+        return {};
+    }
+
+    // The port is set as both the AmneziaWG and the WireGuard port, matching
+    // the alias ServiceGroup applies when a group does declare "awg" - AWG
+    // servers belong to the WireGuard pool for server selection.
+    std::vector<std::uint16_t> ports{static_cast<std::uint16_t>(portValue)};
+    return std::make_shared<ServiceGroup>(std::vector<std::uint16_t>{}, true,
+                                          std::vector<std::uint16_t>{}, true,
+                                          ports, ports, false,
+                                          std::vector<std::uint16_t>{},
+                                          std::string{}, std::string{},
+                                          std::vector<std::uint16_t>{});
+}
+
 auto RegionList::readPiav6JsonRegionServers(const nlohmann::json &jsonRegion,
     core::StringSlice id,
     const ServiceGroups &ncpGroups, const ServiceGroups &pssGroups)
@@ -440,8 +477,23 @@ auto RegionList::readPiav6JsonRegionServers(const nlohmann::json &jsonRegion,
                 auto itGroup = groups.find(groupName);
                 if(itGroup == groups.end())
                 {
-                    KAPPS_CORE_WARNING() << "Unable to find group" << groupName
-                        << "for server" << serverIdx << "in region" << id;
+                    // AmneziaWG servers are listed with their own port and
+                    // without an "awg" service group, so there is no group to
+                    // look up.  Build one from that port; the port is also
+                    // used as the WireGuard port, since AWG servers are part
+                    // of the WireGuard pool.
+                    auto pAwgGroup = readPiav6JsonAwgServerGroup(groupName,
+                                                                 jsonServer);
+                    if(pAwgGroup)
+                    {
+                        servers.push_back(std::make_shared<Server>(ip,
+                            std::move(cn), std::string{}, std::move(pAwgGroup)));
+                    }
+                    else
+                    {
+                        KAPPS_CORE_WARNING() << "Unable to find group" << groupName
+                            << "for server" << serverIdx << "in region" << id;
+                    }
                 }
                 // Otherwise, it existed - if it had at least one service,
                 // store this server.  (If it had no known services, ignore
@@ -506,9 +558,26 @@ void RegionList::buildDipRegions(const core::ArraySlice<const DedicatedIp> &dips
             }
             else
             {
+                // Replace the OpenVPN ports with the DIP ports, only for the
+                // OpenVPN services this group already provides
+                const auto &existing = *itServiceGroup->second;
+                std::vector<std::uint16_t> openVpnUdpPorts, openVpnTcpPorts;
+                if(!existing.openVpnUdpPorts().empty())
+                    openVpnUdpPorts = dip.openVpnUdpPorts.to_vector();
+                if(!existing.openVpnTcpPorts().empty())
+                    openVpnTcpPorts = dip.openVpnTcpPorts.to_vector();
+                auto pDipGroup = std::make_shared<ServiceGroup>(
+                    std::move(openVpnUdpPorts), existing.openVpnUdpNcp(),
+                    std::move(openVpnTcpPorts), existing.openVpnTcpNcp(),
+                    existing.wireGuardPorts().to_vector(),
+                    existing.wireGuardAmneziaPorts().to_vector(),
+                    existing.ikev2(),
+                    existing.shadowsocksPorts().to_vector(), existing.shadowsocksKey().to_string(),
+                    existing.shadowsocksCipher().to_string(),
+                    existing.metaPorts().to_vector());
                 servers.push_back(std::make_shared<Server>(dip.address,
                     dip.commonName.to_string(), dip.fqdn.to_string(),
-                    itServiceGroup->second));
+                    std::move(pDipGroup)));
             }
         }
 
@@ -570,6 +639,7 @@ void RegionList::buildManualRegions(const core::ArraySlice<const ManualRegion> &
                     std::move(openVpnUdpPorts), openVpnUdpNcp,
                     std::move(openVpnTcpPorts), openVpnTcpNcp,
                     existing.wireGuardPorts().to_vector(),
+                    existing.wireGuardAmneziaPorts().to_vector(),
                     existing.ikev2(),
                     existing.shadowsocksPorts().to_vector(), existing.shadowsocksKey().to_string(),
                     existing.shadowsocksCipher().to_string(),
@@ -617,6 +687,7 @@ void RegionList::buildManualRegions(const core::ArraySlice<const ManualRegion> &
                     auto pMetaGroup = std::make_shared<ServiceGroup>(
                         std::vector<std::uint16_t>{}, true,
                         std::vector<std::uint16_t>{}, true,
+                        std::vector<std::uint16_t>{},
                         std::vector<std::uint16_t>{}, false,
                         std::vector<std::uint16_t>{},
                         std::string{}, std::string{},

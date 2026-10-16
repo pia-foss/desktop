@@ -363,8 +363,8 @@ void WinFirewall::applyRules(const FirewallParams &params)
     logFilter("blockAll(IPv6)", _filters.blockAll[1], params.blockAll || params.blockIPv6);
     updateBooleanFilter(blockAll[1], params.blockAll || params.blockIPv6, EverythingFilter<FWP_ACTION_BLOCK, FWP_DIRECTION_OUTBOUND, FWP_IP_VERSION_V6>(params.blockIPv6 ? 4 : 0));
 
-    // Exempt traffic going over the VPN adapter.  This is the TAP adapter for
-    // OpenVPN, or the WinTUN adapter for Wireguard.
+    // Exempt traffic going over the VPN adapter.  This is the DCO or WinTUN
+    // adapter for OpenVPN, or the WinTUN adapter for Wireguard.
 
     UINT64 luid{};
     if(!params.tunnelDeviceName.empty())

@@ -37,6 +37,8 @@ RegionRowConstants {
   property alias canFavorite: labels.canFavorite
   property alias lacksPortForwarding: labels.lacksPortForwarding
   property alias pfWarningTipText: labels.pfWarningTipText
+  property alias obfuscationMismatch: labels.obfuscationMismatch
+  property alias obfuscationWarningTipText: labels.obfuscationWarningTipText
   property alias geoLocation: labels.geoLocation
   property alias offline: labels.offline
 

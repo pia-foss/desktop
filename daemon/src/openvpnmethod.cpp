@@ -26,9 +26,10 @@
 #include <kapps_core/src/ipaddress.h>
 #include <QStandardPaths>
 #include <QRegularExpression>
+#include <QSet>
 
 #if defined(Q_OS_WIN)
-    #include "win/win_daemon.h" // For WinDaemon::getTapAdapter() / WinDaemon::getTunAdapter()
+    #include "win/win_daemon.h" // For WinDaemon::getDcoAdapter() / WinDaemon::getTunAdapter()
     #include "win/win_interfacemonitor.h"
     #include <common/src/win/win_util.h>
 #endif
@@ -36,6 +37,10 @@
 #if defined(Q_OS_UNIX)
     #include "posix/posix_mtu.h"
 #endif
+
+// DCO's default TLS handshake timeout is 60 seconds; we pass --hand-window to
+// align it with our connection timeout instead.
+#define OVPN_TIMEOUT 28
 
 HelperIpcConnection::HelperIpcConnection(QLocalSocket *pConnection)
     : _pConnection{pConnection}
@@ -121,6 +126,24 @@ bool HelperIpcServer::listen()
 
 Executor OpenVPNMethod::_executor{CURRENT_CATEGORY};
 
+#if defined(Q_OS_WIN)
+namespace
+{
+    // Locations where a server pushed compression settings while connected
+    // with DCO.  DCO can't do compression stub framing, so that tunnel would
+    // not pass traffic - the attempt is aborted and later attempts to the same
+    // location use WinTUN for the lifetime of this daemon process.  Other
+    // locations still get DCO; the fleet is mixed.  Keyed by location, not
+    // server, because retries rotate through a location's servers.
+    QSet<QString> g_compressionFramingLocations;
+
+    QString locationIdOf(const ConnectionConfig &config)
+    {
+        return config.vpnLocation() ? config.vpnLocation()->id() : QString{};
+    }
+}
+#endif
+
 OpenVPNMethod::OpenVPNMethod(QObject *pParent, const OriginalNetworkScan &netScan)
     : VPNMethod{pParent, netScan}, _openvpn{}
 {
@@ -163,25 +186,122 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         arguments += QStringLiteral("4");
 
 #if defined(Q_OS_WIN)
-        // Postcondition of WinDaemon::getNetworkAdapter()
-        if(_connectingConfig.openvpnUseWintun())
+        // Whether to use TAP's netsh IP configuration method instead of DHCP.
+        // Referenced again below when building the updown command line.
+        const bool useStaticTapConfig =
+            _connectingConfig.openvpnWindowsDriver() ==
+                ConnectionConfig::WindowsDriver::TapStatic;
+
+        // Select the virtual network driver.  The user's choice is honored
+        // except for DCO, which can't carry every connection: DCO only works
+        // over UDP, and it can't do compression stub framing - against servers
+        // that apply it (pushed "comp-lzo no"), a DCO tunnel connects but
+        // doesn't pass traffic.  In those cases we fall back to WinTUN, which
+        // accepts the framing (see --allow-compression below).
+        const auto selectedDriver = _connectingConfig.openvpnWindowsDriver();
+        bool isDco = false;
+        bool isTap = false;
+        QString driverReason;
+        switch(selectedDriver)
+        {
+            case ConnectionConfig::WindowsDriver::TapDhcp:
+            case ConnectionConfig::WindowsDriver::TapStatic:
+                isTap = true;
+                driverReason = QStringLiteral("TAP selected in settings (%1 IP configuration)")
+                    .arg(selectedDriver == ConnectionConfig::WindowsDriver::TapStatic ?
+                         QStringLiteral("static") : QStringLiteral("DHCP"));
+                break;
+            case ConnectionConfig::WindowsDriver::WinTun:
+                driverReason = QStringLiteral("WinTUN selected in settings");
+                break;
+            default:
+            case ConnectionConfig::WindowsDriver::Dco:
+                if(g_compressionFramingLocations.contains(locationIdOf(_connectingConfig)))
+                {
+                    driverReason = QStringLiteral("this location pushed compression framing on an earlier attempt, DCO can't pass traffic");
+                }
+                else
+                {
+                    _networkAdapter = g_daemon->getDcoAdapter();
+                    if(_networkAdapter)
+                    {
+                        isDco = true;
+                        driverReason = QStringLiteral("DCO adapter found");
+                    }
+                    else
+                    {
+                        driverReason = QStringLiteral("DCO adapter not found, falling back to WinTUN");
+                    }
+                }
+                break;
+        }
+
+        if(isTap)
+        {
+            _networkAdapter = g_daemon->getTapAdapter();
+        }
+        else if(!isDco)
         {
             _networkAdapter = g_daemon->getTunAdapter();
             // If the WinTUN adapter wasn't found, we can create it (or try to
-            // recreate it).  This is created on first use, unlike TAP which we
-            // create during install
+            // recreate it).  This is created on first use
             if(!_networkAdapter)
             {
                 qInfo() << "Didn't find existing WinTUN adapter for OpenVPN, create it now";
                 _networkAdapter = g_daemon->recreateTunAdapter();
                 // If that also fails, we'll detect it below and bail
             }
+        }
+
+        // TAP is selected by --dev-node alone; the other drivers need
+        // --windows-driver.  These tokens are part of our OpenVPN build's option
+        // parser, so they are independent of the filenames and service names of
+        // the drivers they select - keep them in sync with the accepted values
+        // in the OpenVPN build, not with the driver payloads in deps.
+        QString driverType;
+        if(isDco)
+            driverType = QStringLiteral("pia-ovpn-dco");
+        else if(!isTap)
+            driverType = QStringLiteral("pia-wintun");
+        if(!driverType.isEmpty())
+        {
             arguments += QStringLiteral("--windows-driver");
-            arguments += QStringLiteral("wintun");
+            arguments += driverType;
+        }
+
+        qInfo() << "==================================================================";
+        qInfo() << "== OpenVPN driver:" << (isDco ? "DCO" : (isTap ? "TAP" : "WINTUN"))
+                << "(" << (driverType.isEmpty() ? QStringLiteral("tap-windows6") : driverType) << ")";
+        qInfo() << "== Reason:" << driverReason;
+        qInfo() << "== Adapter:" << (_networkAdapter ? _networkAdapter->devNode() : QStringLiteral("<none>"));
+        qInfo() << "==================================================================";
+        _dcoInUse = isDco;
+
+        // The servers push "comp-lzo no", i.e. compression stub framing with
+        // no actual compression, which OpenVPN 2.5 accepted (2.6 rejects
+        // pushed compression settings by default).
+        if(isDco)
+        {
+            // DCO can't do compression framing at all - a pushed compression
+            // setting would abort the connection with "OPTIONS ERROR: server
+            // pushed compression settings that are not allowed", so drop the
+            // pushed option.  NOTE: if the server actually applies stub
+            // framing to the data channel, the tunnel will not pass traffic -
+            // DCO can only work against servers that don't use framing.
+            arguments += QStringLiteral("--pull-filter");
+            arguments += QStringLiteral("ignore");
+            arguments += QStringLiteral("comp-lzo");
+            arguments += QStringLiteral("--pull-filter");
+            arguments += QStringLiteral("ignore");
+            arguments += QStringLiteral("compress");
         }
         else
         {
-            _networkAdapter = g_daemon->getTapAdapter();
+            // Accept the pushed stub framing, matching OpenVPN 2.5 behavior.
+            // ("asym" permits pushed stubs/decompression but never compresses
+            // outgoing data.)
+            arguments += QStringLiteral("--allow-compression");
+            arguments += QStringLiteral("asym");
         }
 
         // Failure to find a suitable virtual network adapter is fatal on
@@ -255,9 +375,11 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
             updownCmd += escapeArg(Path::UpdownLogFile);
         }
 
-        // Pass the configuration method on Windows
+        // Pass the configuration method on Windows.  Only TAP with the static
+        // method uses netsh; DCO, WinTUN, and TAP with DHCP all use the DHCP
+        // method (for WinTUN and DCO the updown script applies DNS itself).
         updownCmd += " --method ";
-        updownCmd += _connectingConfig.openvpnUseStaticTapConfig() ? "static" : "dhcp";
+        updownCmd += useStaticTapConfig ? "static" : "dhcp";
 
         // Pass the IPC pipe/socket path to receive tunnel configuration
         updownCmd += " --ipc ";
@@ -282,7 +404,7 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
         qInfo() << "updownCmd is: " << updownCmd;
 
 #ifdef Q_OS_WIN
-        if(_connectingConfig.openvpnUseStaticTapConfig())
+        if(useStaticTapConfig)
         {
             // Static configuration on Windows - use OpenVPN's netsh method,
             // updown script will apply DNS with netsh
@@ -299,6 +421,14 @@ void OpenVPNMethod::run(const ConnectionConfig &connectingConfig,
                 arguments += "DNS";
                 arguments += dnsServer;
             }
+        }
+
+        if(isDco)
+        {
+            // DCO's default TLS handshake timeout is 60 seconds,
+            // so we set OVPN_TIMEOUT here to be aligned with openvpn timeout
+            arguments += "--hand-window";
+            arguments += QString::number(OVPN_TIMEOUT);
         }
 #endif
 
@@ -613,28 +743,18 @@ bool OpenVPNMethod::writeOpenVPNConfig(QFile& outFile,
 
     out << "cipher " << sanitize(_connectingConfig.openvpnCipher()) << endl;
 
-    // We support both NCP cipher negotiation and pia-signal-settings right now
-    // as we transition from pia-signal-settings to unpatched vanilla OpenVPN.
-    // Use whatever method was indicated for this server.
-    bool supportsNcp = (transport.protocol() == QStringLiteral("tcp")) ?
-        vpnServer.openVpnTcpNcp() : vpnServer.openVpnUdpNcp();
-    if(supportsNcp)
-    {
-        // NCP mode.  Permit only the configured cipher.
-        out << "ncp-ciphers " << sanitize(_connectingConfig.openvpnCipher()) << endl;
-        // "cipher" was still set above.  This isn't strictly necessary but is
-        // good for robustness, OpenVPN's settings have been somewhat fragile in
-        // the past, and this ensures we won't fall back to BF-CBC if (say)
-        // NCP stops working on the server, etc.
-    }
-    else
-    {
-        out << "pia-signal-settings" << endl;
-        // Explicitly disable NCP.  The OpenVPN NCP logic still otherwise thinks
-        // the server is using BF-CBC (it's not really fully aware of
-        // pia-signal-settings) and fails the connection.
-        out << "ncp-disable" << endl;
-    }
+    // Always use NCP cipher negotiation.  The alternative, pia-signal-settings,
+    // is a PIA-specific option that only the old patched OpenVPN build
+    // understood; this build is stock OpenVPN and rejects it outright (the
+    // connection dies with "Unrecognized option ... pia-signal-settings" before
+    // any network I/O).  Every current server supports NCP, so emit ncp-ciphers
+    // unconditionally regardless of the server's advertised ncp flag.
+    //
+    // Permit only the configured cipher.  "cipher" was still set above; this
+    // isn't strictly necessary but is good for robustness, OpenVPN's settings
+    // have been somewhat fragile in the past, and this ensures we won't fall
+    // back to BF-CBC if (say) NCP stops working on the server, etc.
+    out << "ncp-ciphers " << sanitize(_connectingConfig.openvpnCipher()) << endl;
 
     if(_connectingConfig.proxyType() != ConnectionConfig::ProxyType::None)
     {
@@ -738,6 +858,29 @@ void OpenVPNMethod::openvpnStdoutLine(const QString& line)
 void OpenVPNMethod::checkStdoutErrors(const QString &line)
 {
     // Check for specific errors that we can detect from OpenVPN's output.
+
+#if defined(Q_OS_WIN)
+    // If the server pushes compression settings while we're on DCO, the data
+    // channel will not pass traffic - DCO can't do compression stub framing.
+    // (We filter the pushed option to avoid a hard OPTIONS ERROR; this line is
+    // OpenVPN reporting the filtered option.)  Abort this attempt; the
+    // automatic reconnect will select WinTUN for this location, which accepts
+    // the framing.
+    if(_dcoInUse &&
+       line.contains(QLatin1String("Pushed option removed by filter: 'comp")))
+    {
+        const QString locationId = locationIdOf(_connectingConfig);
+        qWarning() << "==================================================================";
+        qWarning() << "== Server" << _vpnHost << "in location" << locationId
+                   << "pushed compression framing - DCO cannot pass traffic.";
+        qWarning() << "== Aborting this attempt; further attempts to this location will use WinTUN.";
+        qWarning() << "==================================================================";
+        if(!locationId.isEmpty())
+            g_compressionFramingLocations.insert(locationId);
+        raiseError({HERE, Error::Code::OpenVPNError});
+        return;
+    }
+#endif
 
     if(line.contains("socks_username_password_auth: server refused the authentication"))
     {

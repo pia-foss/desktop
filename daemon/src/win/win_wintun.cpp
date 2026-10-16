@@ -24,12 +24,12 @@ namespace WintunData
 
 namespace WintunPools
 {
-    // WinTUN pool names used for WireGuard and OpenVPN connections.  Note that
-    // PIA ships its own build of the WinTUN driver with PIA-specific IDs, so
-    // these don't collide with other applications using WinTUN.
+    // WinTUN pool names used for OpenVPN connections.  Note that PIA ships
+    // its own build of the WinTUN driver with PIA-specific IDs, so these
+    // don't collide with other applications using WinTUN.
     //
-    // The pool name "WireGuard" also appears in pia-wgservice, both in PIA's
-    // customized main() and in tun_windows.go (from wireguard-go)
+    // (WireGuard does not use WinTUN - it uses the WireGuard-NT kernel
+    // driver - so the "WireGuard" pool is unused.)
     const wchar_t *pWireGuardPool{L"WireGuard"};
     const wchar_t *pOpenVPNPool{L"OpenVPN"};
 }

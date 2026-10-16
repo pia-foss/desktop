@@ -90,4 +90,6 @@ QtObject {
   readonly property string stMacOSNotInstalledMessage: uiTr("Split Tunnel is not installed. Go to System Settings -> Privacy & Security, scroll down to Security section and \"Allow\" PIA. Then click \"Allow\" on the Proxy Configurations popup")
 
     readonly property string stMacOS15NotInstalledMessage: uiTr("Split Tunnel is not installed. Go to System Settings -> General. Click 'i' in the Network Extensions row and enable PIA Split Tunnel. Then click \"Allow\" on the Proxy Configurations popup")
+
+  readonly property string stMacOS26NotInstalledMessage: uiTr("Split Tunnel is not installed. Go to System Settings -> General -> Login Items & Extensions. Scroll down and click 'i' on Network Extensions and enable \"PIA Split Tunnel\". Then click \"Allow\" on the Proxy Configurations popup.")
 }

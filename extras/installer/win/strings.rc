@@ -64,6 +64,8 @@ IDS_CAPTION_REMOVINGPREVIOUSVERSION QT_TRANSLATE_NOOP("winstaller", "REMOVING PR
 IDS_CAPTION_REMOVINGFILES           QT_TRANSLATE_NOOP("winstaller", "REMOVING FILES")
 IDS_CAPTION_REMOVINGCALLOUT         QT_TRANSLATE_NOOP("winstaller", "REMOVING CALLOUT DRIVER")
 IDS_CAPTION_UPDATINGCALLOUT         QT_TRANSLATE_NOOP("winstaller", "UPDATING CALLOUT DRIVER")
+IDS_CAPTION_REMOVINGDCO             QT_TRANSLATE_NOOP("winstaller", "Removing OpenVPN DCO Driver")
+IDS_CAPTION_UPDATINGDCO             QT_TRANSLATE_NOOP("winstaller", "Updating OpenVPN DCO Driver")
 
 IDS_MB_CORRUPTINSTALLATION          QT_TRANSLATE_NOOP("winstaller", "Unable to recognize the existing installation. Would you like to delete the entire directory?")
 IDS_MB_CAP_CORRUPTINSTALLATION      QT_TRANSLATE_NOOP("winstaller", "Corrupt installation detected")
@@ -111,6 +113,8 @@ IDS_MB_REQUIRESNETWORKING           QT_TRANSLATE_NOOP("winstaller", "Use Safe Mo
 IDS_MB_CAP_INSTALLCOMPLETE          QT_TRANSLATE_NOOP("winstaller", "Installation complete")
 IDS_MB_RESTARTTOUSE                 QT_TRANSLATE_NOOP("winstaller", "Restart your computer to use Private Internet Access.")
 IDS_MB_REQUIRESWIN10                QT_TRANSLATE_NOOP("winstaller", "Private Internet Access requires Windows 10 or later.")
+IDS_MB_ERRORUNINSTALLINGDCO         QT_TRANSLATE_NOOP("winstaller", "Error uninstalling OpenVPN DCO driver.")
+IDS_MB_DCODRIVERFAILED              QT_TRANSLATE_NOOP("winstaller", "OpenVPN DCO driver installation failed.")
 
 IDS_MB_SUFFIX_INSTALL_ABORT         QT_TRANSLATE_NOOP("winstaller", "The installation will now abort.")
 IDS_MB_SUFFIX_INSTALL_RETRY         QT_TRANSLATE_NOOP("winstaller", "This is preventing the installation from proceeding.")

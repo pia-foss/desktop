@@ -23,6 +23,7 @@
 #include "settings/connection.h"
 #include "settings/locations.h"
 #include "settings/dedicatedip.h"
+#include "settings/daemonsettings.h"
 #include <kapps_regions/src/metadata.h>
 
 
@@ -42,6 +43,33 @@ COMMON_EXPORT void buildGroupedLocations(const LocationsById &locations,
                                          const kapps::regions::Metadata &metadata,
                                          std::vector<CountryLocations> &groupedLocations,
                                          std::vector<QSharedPointer<const Location>> &dedicatedIpLocations);
+
+// Build the OpenVPN UDP/TCP port choices from the flat locations.  Dedicated
+// IP ports are kept separate from the regular ports, DIP over OpenVPN targets
+// DIP-specific ports that are selected with separate settings.
+//
+// The DIP ports keep the order from the DIP API (without duplicates), since
+// the first port is used when the DIP port setting is 0 or is a port the DIP
+// doesn't offer.
+COMMON_EXPORT void buildOpenVpnPortChoices(const LocationsById &locations,
+                                           DescendingPortSet &udpPorts,
+                                           DescendingPortSet &tcpPorts,
+                                           std::vector<quint16> &dipUdpPorts,
+                                           std::vector<quint16> &dipTcpPorts);
+
+// Get the OpenVPN port used for a dedicated IP connection: the selected DIP
+// port if the DIP offers it, otherwise the first DIP port, or 0 if the DIP has
+// no ports.  TransportSelector picks the same port when connecting.
+COMMON_EXPORT quint16 dedicatedIpPortToUse(uint selectedPort,
+                                           const std::vector<quint16> &dipPorts);
+
+// Check whether a dedicated IP can't be connected to with the current settings:
+// OpenVPN is the method and the DIP has no DIP ports for the OpenVPN protocol
+// that would be used (TCP if selected or forced by the Shadowsocks proxy, as in
+// ConnectionConfig).  OpenVPN to a DIP needs the DIP-specific ports, so the
+// connection is blocked instead of retrying.  Always false for other regions.
+COMMON_EXPORT bool dedicatedIpLacksOpenVpn(const DaemonSettings &settings,
+                                           const Location &location);
 
 class COMMON_EXPORT NearestLocations
 {

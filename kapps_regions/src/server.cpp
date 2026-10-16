@@ -29,6 +29,8 @@ bool Server::hasService(Service service) const
             return hasOpenVpnUdp();
         case Service::WireGuard:
             return hasWireGuard();
+        case Service::WireGuardAmnezia:
+            return hasWireGuardAmnezia();
         case Service::Ikev2:
             return hasIkev2();
         case Service::Shadowsocks:
@@ -50,6 +52,8 @@ Ports Server::servicePorts(Service service) const
             return openVpnUdpPorts();
         case Service::WireGuard:
             return wireGuardPorts();
+        case Service::WireGuardAmnezia:
+            return wireGuardAmneziaPorts();
         case Service::Ikev2:
             return {};  // No ports for IKEv2
         case Service::Shadowsocks:

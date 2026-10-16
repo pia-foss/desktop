@@ -11,6 +11,8 @@ module PiaUnitTest
         'check',
         'connectionconfig',
         'core_util',
+        'daemonsettings',
+        'dedicatedip',
         'exec',
         'ipaddress',
         'json',
@@ -45,10 +47,12 @@ module PiaUnitTest
     ].tap do |t|
         if Build.windows?
             t << 'wfp_filters'
+            t << 'wgservicejson'
         elsif Build.linux?
             t << 'core_fs'
             t << 'splitdnsinfo'
             t << 'rt_tables_initializer'
+            t << 'wireguardkernelbackend'
         elsif Build.macos?
            t << 'core_fs'
            t << 'constrainedhash'
@@ -150,8 +154,13 @@ module PiaUnitTest
                 .forceLinkSymbol('forceLinkTestlogCpp') # See testlog.cpp, for static initializer
                 .coverage(true)
             if(Build.windows?)
+                # wg_service_json.cpp uses inet_pton()/htons(); link
+                # ws2_32 explicitly, since the object carrying its
+                # #pragma comment(lib) (wireguardservicebackend.cpp)
+                # isn't pulled into the test links.
                 testExec
                     .useQt('Xml')
+                    .lib('Ws2_32')
                     .linkArgs(['/IGNORE:4099'])
             elsif(Build.macos?)
                 testExec

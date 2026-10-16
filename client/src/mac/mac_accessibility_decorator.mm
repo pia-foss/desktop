@@ -61,7 +61,12 @@ void addMethod(Class subclass, Class baseClass, SEL selector,
                FuncT implFunc, const char *funcTypes)
 {
     Method baseMethod = class_getInstanceMethod(baseClass, selector);
-    Q_ASSERT(!baseMethod);   // Class must _not_ have this method
+    if(baseMethod)
+    {
+        qWarning() << "Base class already implements" << sel_getName(selector)
+                   << "- skipping override";
+        return;
+    }
     class_addMethod(subclass, selector, reinterpret_cast<IMP>(implFunc),
                     funcTypes);
 }

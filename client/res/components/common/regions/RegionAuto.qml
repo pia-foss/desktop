@@ -99,6 +99,11 @@ RegionRowConstants {
     // automatically when PF is enabled)
     lacksPortForwarding: false
     pfWarningTipText: ""
+    // Auto selection doesn't take obfuscation into account, so its pick can
+    // turn out to be unsupported - that's reported by the connection error
+    // rather than on this row, which has no location of its own to indicate
+    obfuscationMismatch: false
+    obfuscationWarningTipText: ""
     // N/A, auto regions never show this (only non-geo regions are chosen automatically)
     geoLocation: false
     // N/A, auto can't be favorited

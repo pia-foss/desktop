@@ -10,7 +10,7 @@ class DNSLeakChecker
     # querying the API by the same id.
     # The id is a random number and could potentially clash with another user of the API.
     def self.dns_leaks?
-        session_id = SecureRandom.hex(20)
+        session_id = SecureRandom.hex(8) # bash.ws rejects ids longer than 16 chars
         begin
             leak_detected_bash_ws?(session_id)
         rescue
@@ -36,8 +36,8 @@ class DNSLeakChecker
         # Get information about the current IP address
         out = Retriable.run(attempts: 2, delay: 2) {
             o, e, s = Open3.capture3("curl https://dnsleaktest.org/api/ip --connect-timeout 10")
-            raise if s != 0
-	        out
+            raise "Could not reach DNS leaks API #{e}" unless s.success?
+            o
         }
         ip_info = JSON.parse(out).slice("cc", "asnOrg", "isp", "cityName")
 
@@ -56,7 +56,7 @@ class DNSLeakChecker
             raise if ((o.include? '"retcode":-100') || (o.include? 'error'))
             [o, e, s]
         }
-        raise "Could not reach DNS leaks API #{err_out}" if status != 0
+        raise "Could not reach DNS leaks API #{err_out}" unless status.success?
         output
     end
 end

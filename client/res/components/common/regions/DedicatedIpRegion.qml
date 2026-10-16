@@ -33,6 +33,7 @@ RegionRowConstants {
   property var serviceLocations
   property bool canFavorite
   property bool portForwardEnabled
+  property string obfuscationMode
 
   implicitHeight: 55
 
@@ -117,6 +118,10 @@ RegionRowConstants {
     selected: !!(serviceLocations.chosenLocation && region.id === serviceLocations.chosenLocation.id)
     canFavorite: dedicatedIpRegion.canFavorite
     lacksPortForwarding: portForwardEnabled && !region.portForward
+    obfuscationMismatch: !!obfuscationMode &&
+      !locationMatchesObfuscation(region, obfuscationMode)
+    obfuscationWarningTipText: obfuscationMode === "off" ?
+      singleRegionNoPlainWarning : singleRegionObfuscationWarning
     pfWarningTipText: singleRegionPfWarning
     geoLocation: region.geoLocated
 

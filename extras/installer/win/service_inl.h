@@ -20,6 +20,7 @@
 #define SERVICE_INL_H
 
 #include <utility>
+#include <set>
 #include <string>
 #include <Windows.h>
 
@@ -115,5 +116,11 @@ ServiceStatus installDaemonService(LPCWSTR daemonPath);
 // Install the Wireguard service (uses the wireguard executable path, data
 // directory path (for the config file), and wireguard service params)
 ServiceStatus installWireguardService(LPCWSTR wireguardPath, LPCWSTR dataDirPath);
+
+// Driver package INFs accumulated for removal, shared by the driver
+// uninstall code.
+static std::set<std::wstring> g_oemInfs;
+// Uninstall the driver INF with the specified hardware ID
+bool uninstallDriverInf(LPCWSTR hardwareId);
 
 #endif

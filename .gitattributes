@@ -26,6 +26,10 @@ deps/built/linux/arm64/libcrypto.3.so filter=lfs diff=lfs merge=lfs -text
 
 # Missing lfs files after migration
 deps/zip/zip.exe filter=lfs diff=lfs merge=lfs -text
+deps/wireguard-nt/**/*.dll filter=lfs diff=lfs merge=lfs -text
+deps/tapinstall/**/*.exe filter=lfs diff=lfs merge=lfs -text
+# DCO driver INF files are signed; do not renormalize line endings
+*.inf -text
 tools/crash_test_dll/crashtest.dll filter=lfs diff=lfs merge=lfs -text
 # dump_syms binaries - similar to deps/built, contains
 # extensionless macOS binary

@@ -1,0 +1,90 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=Net
+ClassGuid={4d36e972-e325-11ce-bfc1-08002be10318}
+Provider=%pia-ovpn-dco.CompanyName%
+CatalogFile=pia-ovpn-dco.cat
+PnpLockdown=1
+DriverVer = 07/27/2026,2.8.3.0
+
+[DestinationDirs]
+DefaultDestDir = 12
+pia-ovpn-dco_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[SourceDisksNames]
+1 = %pia-ovpn-dco.DiskName%,,,""
+
+[SourceDisksFiles]
+pia-ovpn-dco.sys  = 1,,
+;
+
+
+[Manufacturer]
+%pia-ovpn-dco.CompanyName%=%pia-ovpn-dco.Name%,NTamd64
+
+[pia-ovpn-dco.NTamd64]
+%pia-ovpn-dco.DeviceDesc%=pia-ovpn-dco_Device, pia-ovpn-dco
+
+[pia-ovpn-dco_Device.NT]
+CopyFiles=Drivers_Dir
+AddReg=pia-ovpn-dco_AddReg
+
+Characteristics     = 1  ; NCF_VIRTUAL
+
+*IfType             = 53 ; IF_TYPE_PROP_VIRTUAL
+*MediaType          = 19 ; NdisMediumIP
+*PhysicalMediaType  = 0 ; NdisPhysicalMediumUnspecified
+
+*IfConnectorPresent = 0
+*ConnectionType     = 1 ; NET_IF_CONNECTION_PASSIVE
+*DirectionType      = 0 ; NET_IF_DIRECTION_SENDRECEIVE
+*AccessType         = 2 ; NET_IF_ACCESS_POINT_TO_POINT
+*HardwareLoopback   = 0
+
+EnableDhcp = 0 ; Disable DHCP
+
+[pia-ovpn-dco_AddReg]
+HKR, Ndi\Interfaces,    UpperRange, 0, "ndis5"
+HKR, Ndi\Interfaces,    LowerRange, 0, "nolower"
+HKR, Ndi,               Service,    0, %pia-ovpn-dco.Name%
+
+[Drivers_Dir]
+pia-ovpn-dco.sys
+
+[pia-ovpn-dco_Device.NT.Services]
+AddService = pia-ovpn-dco,%SPSVCINST_ASSOCSERVICE%, pia-ovpn-dco_Service_Inst
+
+[pia-ovpn-dco_Service_Inst]
+DisplayName    = %pia-ovpn-dco.Name%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\pia-ovpn-dco.sys
+
+[pia-ovpn-dco_Device.NT.CoInstallers]
+AddReg=pia-ovpn-dco_Device_CoInstaller_AddReg
+CopyFiles=pia-ovpn-dco_Device_CoInstaller_CopyFiles
+
+[pia-ovpn-dco_Device_CoInstaller_AddReg]
+;
+
+
+[pia-ovpn-dco_Device_CoInstaller_CopyFiles]
+;
+
+
+[pia-ovpn-dco_Device.NT.Wdf]
+KmdfService = pia-ovpn-dco, pia-ovpn-dco_wdfsect
+
+[pia-ovpn-dco_wdfsect]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+pia-ovpn-dco.Name = "pia-ovpn-dco"
+pia-ovpn-dco.DiskName = "OpenVPN Data Channel Offload Install Disk for Private Internet Access"
+pia-ovpn-dco.DeviceDesc = "OpenVPN Data Channel Offload for Private Internet Access"
+pia-ovpn-dco.SVCDESC = %pia-ovpn-dco.DeviceDesc%
+pia-ovpn-dco.CompanyName = "Private Internet Access"

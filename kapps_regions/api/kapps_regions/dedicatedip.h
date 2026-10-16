@@ -49,7 +49,8 @@ typedef struct KARDedicatedIP
 
     // The service group(s) from the general regions list to apply to this
     // region - indicates the available protocols, ports, etc.  Represents the
-    // deployment configuration applied by Ops.
+    // deployment configuration applied by Ops.  OpenVPN ports are replaced by
+    // openVpnUdpPorts/openVpnTcpPorts.
     //
     // At least one service group should be specified, or the region will be
     // "offline".  The API should provide this.
@@ -59,6 +60,12 @@ typedef struct KARDedicatedIP
     // are taken from this region, and auxiliary services such as
     // meta/Shadowsocks are used from this region when needed.
     KACStringSlice correspondingRegionId;
+
+    // OpenVPN UDP/TCP ports for this dedicated IP.  DIP over OpenVPN targets
+    // DIP-specific ports, so these replace the OpenVPN ports of any service
+    // group that provides that OpenVPN service.
+    KACPortArray openVpnUdpPorts;
+    KACPortArray openVpnTcpPorts;
 } KARDedicatedIP;
 
 #ifdef __cplusplus

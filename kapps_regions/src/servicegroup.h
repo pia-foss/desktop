@@ -34,6 +34,7 @@ enum class Service
     OpenVpnTcp = KARServiceOpenVpnTcp,
     OpenVpnUdp = KARServiceOpenVpnUdp,
     WireGuard = KARServiceWireGuard,
+    WireGuardAmnezia = KARServiceWireGuardAmnezia,
     Ikev2 = KARServiceIkev2,
     Shadowsocks = KARServiceShadowsocks,
     Meta = KARServiceMeta
@@ -55,6 +56,7 @@ public:
     ServiceGroup(std::vector<std::uint16_t> openVpnUdpPorts, bool openVpnUdpNcp,
                  std::vector<std::uint16_t> openVpnTcpPorts, bool openVpnTcpNcp,
                  std::vector<std::uint16_t> wireGuardPorts,
+                 std::vector<std::uint16_t> wireGuardAmneziaPorts,
                  bool ikev2,
                  std::vector<std::uint16_t> shadowsocksPorts,
                  std::string shadowsocksKey, std::string shadowsocksCipher,
@@ -89,6 +91,8 @@ public:
 
     Ports wireGuardPorts() const {return _wireGuardPorts;}
 
+    Ports wireGuardAmneziaPorts() const {return _wireGuardAmneziaPorts;}
+
     bool ikev2() const {return _ikev2;}
 
     Ports shadowsocksPorts() const {return _shadowsocksPorts;}
@@ -111,6 +115,7 @@ private:
     std::vector<std::uint16_t> _openVpnTcpPorts;
     bool _openVpnTcpNcp;
     std::vector<std::uint16_t> _wireGuardPorts;
+    std::vector<std::uint16_t> _wireGuardAmneziaPorts;
     bool _ikev2;
     std::vector<std::uint16_t> _shadowsocksPorts;
     std::string _shadowsocksKey;
