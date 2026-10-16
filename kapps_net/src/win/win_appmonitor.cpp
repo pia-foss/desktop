@@ -830,35 +830,8 @@ void WinAppMonitor::WbemEventSink::disconnect()
 
 void WinAppMonitor::WbemEventSink::handleEventObject(IWbemClassObject *pObj)
 {
-    // Get the TargetInstance property - the process that was created
-    WinComVariant targetVar;
-    HRESULT targetErr = pObj->Get(L"TargetInstance", 0, targetVar.receive(),
-                                  nullptr, nullptr);
-    if(FAILED(targetErr))
-    {
-        KAPPS_CORE_WARNING() << "Failed to read target from event -" << targetErr;
-        return;
-    }
-
-    HRESULT convErr = ::VariantChangeType(&targetVar.get(), &targetVar.get(), 0,
-                                          VT_UNKNOWN);
-    if(FAILED(convErr) || !targetVar.get().punkVal)
-    {
-        KAPPS_CORE_WARNING() << "Failed to convert target to IUnknown -" << convErr;
-        return;
-    }
-
-    WinComPtr<IUnknown> pTgtUnk{targetVar.get().punkVal};
-    pTgtUnk->AddRef();
-
-    auto pTgtObj = pTgtUnk.queryInterface<IWbemClassObject>(IID_IWbemClassObject);
-    if(!pTgtObj)
-    {
-        KAPPS_CORE_WARNING() << "Failed to get object interface from target";
-        return;
-    }
-
-    readNewProcess(*pTgtObj);
+    // Win32_ProcessStartTrace events carry the process properties directly
+    readNewProcess(*pObj);
 }
 
 DWORD WinAppMonitor::WbemEventSink::readPidProp(IWbemClassObject &obj,
@@ -888,67 +861,40 @@ DWORD WinAppMonitor::WbemEventSink::readPidProp(IWbemClassObject &obj,
 
 void WinAppMonitor::WbemEventSink::readNewProcess(IWbemClassObject &obj)
 {
-    assert(_pWbemDateTime);   // Class invariant
-
     // Get the process ID and parent process ID
-    DWORD pid = readPidProp(obj, L"ProcessId");
-    DWORD ppid = readPidProp(obj, L"ParentProcessId");
+    DWORD pid = readPidProp(obj, L"ProcessID");
+    DWORD ppid = readPidProp(obj, L"ParentProcessID");
 
     if(!pid || !ppid)
         return; // Traced by readPidProp()
 
     KAPPS_CORE_INFO() << "Parent" << ppid << "->" << pid;
 
-    // Get the creation time
-    WinComVariant createVar;
-    HRESULT createErr = obj.Get(L"CreationDate", 0, createVar.receive(),
-                                nullptr, nullptr);
-    if(FAILED(createErr))
+    // Get the event time (a FILETIME, but uint64 properties are delivered as
+    // strings).  The process must have been created before this.
+    WinComVariant eventTimeVar;
+    HRESULT eventTimeErr = obj.Get(L"TIME_CREATED", 0, eventTimeVar.receive(),
+                                   nullptr, nullptr);
+    if(FAILED(eventTimeErr))
     {
-        KAPPS_CORE_WARNING() << "Failed to read creation date from process" << pid
-            << "-" << createErr;
+        KAPPS_CORE_WARNING() << "Failed to read event time for process" << pid
+            << "-" << eventTimeErr;
         return;
     }
-    HRESULT createConvErr = ::VariantChangeType(&createVar.get(), &createVar.get(),
-                                                0, VT_BSTR);
-    if(FAILED(createConvErr))
+    HRESULT eventTimeConvErr = ::VariantChangeType(&eventTimeVar.get(),
+                                                   &eventTimeVar.get(), 0, VT_UI8);
+    if(FAILED(eventTimeConvErr))
     {
-        KAPPS_CORE_WARNING() << "Failed to convert creation date of process" << pid
-            << "to VT_BSTR -" << createConvErr << "- type is"
-            << V_VT(&createVar.get());
+        KAPPS_CORE_WARNING() << "Failed to convert event time for process" << pid
+            << "to VT_UI8 -" << eventTimeConvErr << "- type is"
+            << V_VT(&eventTimeVar.get());
         return;
     }
-    // Creation times are (bizarrely) encoded as strings
-    HRESULT setTimeErr = _pWbemDateTime->put_Value(V_BSTR(&createVar.get()));
-    if(FAILED(setTimeErr))
-    {
-        KAPPS_CORE_WARNING() << "Failed to parse creation date of process" << pid
-            << "-" << setTimeErr << "- value is"
-            << core::WStringSlice{V_BSTR(&createVar.get())};
-        return;
-    }
-    BSTR createFileTimeBstrPtr{nullptr};
-    HRESULT getTimeErr = _pWbemDateTime->GetFileTime(false, &createFileTimeBstrPtr);
-    // Own the BSTR
-    _bstr_t createFileTimeBstr{createFileTimeBstrPtr, false};
-    createFileTimeBstrPtr = nullptr;
-    if(FAILED(getTimeErr))
-    {
-        KAPPS_CORE_WARNING() << "Failed to get creation date of process" << pid
-            << "-" << getTimeErr << "- value is"
-            << core::WStringSlice{V_BSTR(&createVar.get())};
-        return;
-    }
-
-    // Parse the new string, which is now a stringified FILETIME
     ULARGE_INTEGER timeLi;
-    timeLi.QuadPart = static_cast<std::uint64_t>(_wtoi64(createFileTimeBstr));
-    // This time typically only has millisecond precision, drop the
-    // 100-nanosecond part anyway to be sure it's consistent with the test below
-    timeLi.QuadPart -= (timeLi.QuadPart % 10);
-    FILETIME createFileTime;
-    createFileTime.dwLowDateTime = timeLi.LowPart;
-    createFileTime.dwHighDateTime = timeLi.HighPart;
+    timeLi.QuadPart = V_UI8(&eventTimeVar.get());
+    FILETIME eventFileTime;
+    eventFileTime.dwLowDateTime = timeLi.LowPart;
+    eventFileTime.dwHighDateTime = timeLi.HighPart;
 
     // Open the process
     WinHandle procHandle{::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, FALSE, pid)};
@@ -967,22 +913,14 @@ void WinAppMonitor::WbemEventSink::readNewProcess(IWbemClassObject &obj)
         return;
     }
 
-    // Drop the 100-nanosecond precision down to millisecond precision for
-    // consistency with the WMI time
-    timeLi.HighPart = actualCreateTime.dwHighDateTime;
-    timeLi.LowPart = actualCreateTime.dwLowDateTime;
-    timeLi.QuadPart -= (timeLi.QuadPart % 10);
-    FILETIME approxCreateTime;
-    approxCreateTime.dwHighDateTime = timeLi.HighPart;
-    approxCreateTime.dwLowDateTime = timeLi.LowPart;
-
-    if(approxCreateTime.dwLowDateTime != createFileTime.dwLowDateTime ||
-        approxCreateTime.dwHighDateTime != createFileTime.dwHighDateTime)
+    // A process created after the event means the PID was reused
+    if(::CompareFileTime(&actualCreateTime, &eventFileTime) > 0)
     {
         KAPPS_CORE_WARNING() << "Ignoring PID" << pid
-            << "- PID was reused.  Expected creation time"
-            << FileTimeTracer{createFileTime} << "- got"
-            << FileTimeTracer{approxCreateTime};
+            << "- PID was reused.  Event time"
+            << FileTimeTracer{eventFileTime} << "- process created"
+            << FileTimeTracer{actualCreateTime};
+        return;
     }
 
     // Open the parent process
@@ -1119,30 +1057,14 @@ void WinAppMonitor::activate()
         return;
     }
 
-    // 'WITHIN 0.1' specifies the aggregation interval for these events.
-    //
-    // Although the doc discourages using intervals smaller than a few seconds,
-    // a small interval is needed to correctly detect applications with
-    // "launchers" like Opera.
-    //
-    // Opera's start menu shortcut points to 'launcher.exe', which starts up
-    // 'opera.exe' (and probably checks for updates and such).  We have to
-    // observe 'opera.exe' as a child of 'launcher.exe' for this to work.
-    //
-    // 'launcher.exe' is very short-lived though - some repeated measurements on
-    // a Ryzen 7 VM show that it runs for ~0.5 seconds at the least, and
-    // 'WITHIN 1' fails to observe it in time.  (We see the PPID, but the
-    // process object is gone, so we can't figure out who the parent was.)
-    // 'WITHIN 0.1' reliably detects it.
-    //
-    // We could add specific rules for Opera, but it's unlikely to be the only
-    // app doing this.  If WITHIN 0.1 is not sufficient to detect some app, we
-    // probably need to move this into kernel mode using
-    // PsSetCreateProcessNotifyRoutineEx() in a driver.
+    // Win32_ProcessStartTrace is an extrinsic event raised from the kernel's
+    // process trace, so WMI does not have to poll Win32_Process.  (The old
+    // '__InstanceCreationEvent WITHIN 0.1' query made WmiPrvSE enumerate all
+    // processes ~10 times per second, costing a lot of CPU.)  Events arrive
+    // immediately, so short-lived launchers like Opera's are still observed.
     HRESULT queryErr = _pSvcs->ExecNotificationQueryAsync(
         _bstr_t{L"WQL"},
-        _bstr_t{L"SELECT * FROM __InstanceCreationEvent WITHIN 0.1 WHERE "
-                "TargetInstance ISA 'Win32_Process'"},
+        _bstr_t{L"SELECT * FROM Win32_ProcessStartTrace"},
         WBEM_FLAG_SEND_STATUS,
         nullptr,
         pNewSinkStubSink);
