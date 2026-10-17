@@ -176,6 +176,10 @@ void MacFirewall::applyRules(const FirewallParams &params)
     }
 
     _pFilter->setFilterEnabled("400.allowPIA", params.allowPIA);
+    _pFilter->setAnchorTable("400.allowPIA", params.allowPIA, "tunnelsrc",
+        params.tunnelDeviceLocalAddress.empty()
+            ? std::vector<std::string>{}
+            : std::vector{params.tunnelDeviceLocalAddress});
     _pFilter->setFilterEnabled("500.blockDNS", dnsLeakProtection.macBlockDNS, { {"interface", params.tunnelDeviceName} });
     _pFilter->setAnchorTable("500.blockDNS", dnsLeakProtection.macBlockDNS, "localdns", dnsLeakProtection.localDnsServers);
     _pFilter->setAnchorTable("500.blockDNS", dnsLeakProtection.macBlockDNS, "tunneldns", dnsLeakProtection.tunnelDnsServers);
