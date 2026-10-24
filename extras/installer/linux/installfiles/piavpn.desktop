@@ -9,3 +9,4 @@ Terminal=false
 Categories=Network
 StartupWMClass={{BRAND_CODE}}-client
 MimeType=x-scheme-handler/{{BRAND_CODE}}vpn
+Keywords=VPN;PIA;
