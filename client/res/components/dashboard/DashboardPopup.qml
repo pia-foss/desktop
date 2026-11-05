@@ -56,9 +56,9 @@ PiaWindow {
     //
     // The window mask is the only possible way to shape the window.  It relies
     // on the XSHAPE extension (which is ubiquitous; that's how xeyes/xclock
-    // shape their windows).  On the off chance this does not work, the
-    // dashboard is still pretty usable, it just has a gray bound that extends
-    // to the top of the work area.
+    // shape their windows).  Without the mask, the entire outer window -
+    // including the area reserved for the maximum dashboard height and drop
+    // shadow padding - would be visible as a solid gray rectangle.
     if(Qt.platform.os === 'linux')
       return true
 

@@ -20,9 +20,6 @@
 #line SOURCE_FILE("windowclipper.cpp")
 
 #include "windowclipper.h"
-#ifdef Q_OS_LINUX
-#include "linux/linux_env.h"
-#endif
 
 bool WindowClipper::updateEffectiveClipRect()
 {
@@ -85,13 +82,6 @@ QRegion WindowClipper::generateClipMask()
 
 void WindowClipper::applyClipMask()
 {
-#ifdef Q_OS_LINUX
-    // Cinnamon's compositor does not properly handle changes in window mask
-    // while the window is shown.  Don't apply the mask on Cinnamon.
-    if(LinuxEnv::getDesktop() == LinuxEnv::Desktop::Cinnamon)
-        return;
-#endif
-
     if(_pTargetWindow)
         _pTargetWindow->setMask(generateClipMask());
 }
